@@ -1,0 +1,92 @@
+/* ============================================================
+   SITE HEADER & NAV
+   ============================================================ */
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background-color: var(--color-bg);
+  padding-block: var(--space-sm);
+  transition: background-color 0.35s ease;
+}
+
+/* Over the blue Contact panel the bar inverts to blue with white text.
+   Colors transition (see .site-name / nav link rules) for a smooth fade. */
+.site-header.is-over-dark {
+  background-color: var(--color-accent);
+}
+
+.site-header.is-over-dark .site-name,
+.site-header.is-over-dark .site-nav-bar a {
+  color: #fff;
+}
+
+.site-header-row {
+  display: flex;
+  align-items: center;
+  gap: 120px;
+}
+
+.site-name {
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--color-text-70);
+  text-decoration: none;
+  flex: 1;
+  min-width: 0;
+  transition: color 0.35s ease;
+}
+
+.site-name:hover {
+  color: var(--color-text);
+}
+
+.site-nav-bar {
+  flex: 0 0 542px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 85px;
+}
+
+.site-nav-group {
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+}
+
+.site-nav-center {
+  justify-content: center;
+}
+
+.site-nav-right {
+  justify-content: flex-end;
+}
+
+.site-nav-bar a {
+  font-family: var(--font-ui);
+  font-size: 1rem;
+  font-weight: 400;
+  font-variation-settings: 'wght' 400;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  color: var(--color-text);
+  transition: font-variation-settings 0.35s ease, color 0.35s ease, opacity 0.35s ease;
+}
+
+.site-nav-bar a:hover {
+  color: var(--color-text-70);
+}
+
+/* Over the blue Contact panel the white nav items fade to 70% on hover */
+.site-header.is-over-dark .site-nav-bar a:hover {
+  opacity: 0.7;
+}
+
+.site-nav-bar a.is-active {
+  font-variation-settings: 'wght' 500;
+}
+

@@ -1,0 +1,141 @@
+/* ============================================================
+   RESPONSIVE — all width breakpoints for the site
+   ------------------------------------------------------------
+   ALWAYS imported LAST in style.css so these override the
+   desktop (>=1440px) base styles.
+
+   Ordered largest -> smallest max-width so that when several
+   queries match at once, the narrower one wins (equal specificity,
+   later in source order).
+
+   The site is designed desktop-first at 1440px; these are the
+   fallbacks below that. Motion preferences (prefers-reduced-motion)
+   are NOT here — they live beside their animations in the
+   component files.
+   ============================================================ */
+
+/* ==========================================================================
+   1. LAPTOPS & SMALL DESKTOPS (max-width: 1440px)
+   Reserved entry point for 13" laptop tweaks. The 1440px design still
+   holds down to the tablet breakpoint, so nothing is needed here yet.
+   ========================================================================== */
+@media (max-width: 1440px) {
+  /* Nav item spacing steps down from the 85px desktop base */
+  .site-nav-bar {
+    gap: 60px;
+  }
+}
+
+/* ==========================================================================
+   2. LANDSCAPE TABLETS / IPADS (max-width: 1024px)
+   The 542px side-by-side columns no longer fit, so the nav reflows and
+   Work / Footprints / About stack into a single full-width column.
+   ========================================================================== */
+@media (max-width: 1024px) {
+  .site-header-row {
+    gap: 2rem;
+  }
+
+  .site-nav-bar {
+    flex: 1 1 auto;
+    gap: 40px;
+  }
+
+  .work-card-body {
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+
+  .work-card-left,
+  .work-card-right {
+    flex: 0 0 auto;
+    width: 100%;
+  }
+
+  .footprints-layout {
+    flex-direction: column;
+    gap: var(--space-lg);
+  }
+
+  .footprints-left,
+  .footprints-right {
+    flex: 0 0 auto;
+    width: 100%;
+  }
+
+  .about-layout {
+    flex-direction: column;
+    gap: var(--space-lg);
+  }
+
+  .about-left,
+  .about-right {
+    flex: 0 0 auto;
+    width: 100%;
+  }
+
+  /* Contact: stack the Connect / On My Mind blocks and drop the fixed 542px
+     column so the panel no longer overflows horizontally */
+  .contact-meta {
+    flex-direction: column;
+    gap: var(--space-lg);
+  }
+
+  .contact-meta-connect,
+  .contact-mind {
+    flex: 0 0 auto;
+    width: 100%;
+  }
+}
+
+/* ==========================================================================
+   3. PORTRAIT TABLETS (max-width: 768px)
+   Work imagery shrinks; the hero headline and intro paragraph go full width.
+   ========================================================================== */
+@media (max-width: 768px) {
+  .site-nav-bar {
+    gap: 24px;
+  }
+
+  .work-card-image-link,
+  .work-card-image {
+    border-radius: 24px;
+  }
+
+  .work-card-image {
+    height: 220px;
+  }
+
+  .intro-headline {
+    max-width: 100%;
+  }
+
+  .intro-body {
+    align-self: stretch;
+    width: 100%;
+  }
+}
+
+/* ==========================================================================
+   4. LARGE SMARTPHONES (max-width: 480px)
+   Tightest layout: nav gap collapses, grids become one column,
+   the footer copyright row stacks.
+   ========================================================================== */
+@media (max-width: 480px) {
+  /* TODO(mobile menu): the 3 inline nav links are a stopgap here. Replace this
+     tier's nav with a proper mobile menu (hamburger/toggle) — pending. */
+  .site-nav-bar {
+    gap: var(--space-sm);
+  }
+
+  /* Let the email / LinkedIn / Resume row wrap instead of overflowing */
+  .contact-connect-links {
+    flex-wrap: wrap;
+    gap: 0.5rem 1.5rem;
+  }
+
+  .site-footer .site-container {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

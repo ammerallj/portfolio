@@ -1,0 +1,149 @@
+/* ============================================================
+   INTRO SECTION
+   ============================================================ */
+
+.intro {
+  min-height: calc(100dvh - 80px);
+  display: flex;
+  flex-direction: column;
+}
+
+.intro-inner {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  /* Figma places the headline 270px from the top of the frame, which includes
+     the ~66px sticky header. Subtract it so the headline lands at a true 270px
+     from the page top (204 + 66px header = 270). */
+  padding-top: 204px;
+}
+
+.intro-headline {
+  font-family: var(--font-heading);
+  font-size: clamp(2.5rem, 7vw, 6rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  color: var(--color-text-70);
+  max-width: 66rem;
+  margin-bottom: 60px;
+  will-change: opacity;
+}
+
+.intro-headline em {
+  font-style: italic;
+  font-weight: 700;
+  color: var(--color-accent);
+}
+
+.intro-body {
+  /* Right-aligned in the shared 542px column (5 grid cols), so its left edge
+     lines up with the "Work" nav item at the 1440px max width */
+  align-self: flex-end;
+  width: 542px;
+  max-width: 100%;
+}
+
+.intro-body p {
+  width: 100%;
+}
+
+.intro-divider {
+  /* Anchored to the bottom of the intro so the scribble + scroll indicator
+     stay pinned near the viewport bottom (matches Figma) */
+  margin-top: auto;
+  /* Full-bleed: breaks out of the .intro-inner 56px padding to span the
+     entire viewport width, edge to edge */
+  width: calc(100% + 112px);
+  margin-inline: -56px;
+  height: 3rem;
+  overflow: visible;
+}
+
+/* On narrower viewports, let the paragraph span the full width */
+/* The fixed 572px nav + 120px gap only fits on wide screens; below that
+   let the header reflow with a smaller gap and a flexible nav */
+/* Width breakpoints for this section live in css/components/responsive.css */
+
+.scribble-path {
+  fill: none;
+  animation: scribble-draw 1.5s ease-out 1 forwards;
+}
+
+@keyframes scribble-draw {
+  from { stroke-dasharray: 0 1; }
+  to { stroke-dasharray: 1 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scribble-path {
+    animation: none;
+  }
+}
+
+/* ============================================================
+   SITE LOAD REVEAL
+   The scribble draws itself in place; the paragraph fades in
+   right after, then the rest of the site follows
+   ============================================================ */
+
+html.is-loading .site-header,
+html.is-loading .intro-headline,
+html.is-loading .intro-body p,
+html.is-loading .scroll-indicator,
+html.is-loading .page-section,
+html.is-loading .site-footer {
+  opacity: 0;
+}
+
+html.is-loading.is-text-revealed .intro-body p {
+  opacity: 1;
+  transition: opacity 0.5s ease;
+}
+
+html.is-revealing .site-header,
+html.is-revealing .intro-headline,
+html.is-revealing .scroll-indicator,
+html.is-revealing .page-section,
+html.is-revealing .site-footer {
+  transition: opacity 0.6s ease;
+}
+
+.intro-body p {
+  flex: 1;
+  min-width: 0;
+  transition: color 0.4s ease;
+}
+
+.scroll-indicator {
+  width: 28px;
+  height: 48px;
+  border: 1px solid var(--color-text);
+  border-radius: 100px;
+  position: relative;
+  margin-inline: auto;
+  margin-top: 50px;
+  margin-bottom: var(--space-sm);
+}
+
+.scroll-indicator-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--color-text);
+  border-radius: 50%;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 8px;
+  animation: scroll-dot 2s cubic-bezier(0.42, 0, 0.58, 1) infinite;
+}
+
+@keyframes scroll-dot {
+  0%   { top: 8px; opacity: 1; }
+  20%  { top: 8px; opacity: 1; }
+  65%  { top: calc(100% - 14px); opacity: 1; }
+  80%  { top: calc(100% - 14px); opacity: 0; }
+  81%  { top: 8px; opacity: 0; }
+  100% { top: 8px; opacity: 0; }
+}
+

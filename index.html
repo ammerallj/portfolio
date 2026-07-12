@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Jenna Ammerall is a product designer with over 9 years of experience at Microsoft and Meta, focused on systems, accessibility, and evolving product experiences." />
+  <title>Jenna Ammerall — Product Designer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@700&family=Inter:wght@400..700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css?v=150" />
+  <!-- Pre-paint flags, set only when JS runs:
+       • is-motion — hides reveal targets so they can fade in without a flash
+         (skipped for reduced-motion visitors, who see everything).
+       • is-loading — hides content for the intro load-reveal. Kept OUT of the
+         static <html> tag on purpose: if JS is disabled the class is never
+         added, so the page is fully visible instead of a blank screen. The
+         failsafe timeout also reveals everything if main.js never runs. -->
+  <script>
+    (function () {
+      var root = document.documentElement;
+      try {
+        if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          root.classList.add('is-motion');
+        }
+      } catch (e) {}
+      root.classList.add('is-loading');
+      setTimeout(function () { root.classList.remove('is-loading'); }, 4000);
+    })();
+  </script>
+</head>
+<body>
+
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  <!-- ============================================================
+       SITE HEADER
+       ============================================================ -->
+  <header class="site-header" role="banner">
+    <div class="site-header-row">
+      <a class="site-name" href="#" id="site-name">Jenna Ammerall</a>
+      <nav class="site-nav-bar" aria-label="Primary navigation">
+        <div class="site-nav-group site-nav-left">
+          <a href="#work-section" id="nav-work">Work</a>
+        </div>
+        <div class="site-nav-group site-nav-center">
+          <a href="#about">About</a>
+        </div>
+        <div class="site-nav-group site-nav-right">
+          <a href="#contact">Contact</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ============================================================
+       MAIN CONTENT
+       ============================================================ -->
+  <main id="main-content">
+
+    <!-- INTRO -->
+    <section class="intro" aria-labelledby="intro-heading">
+      <div class="intro-inner">
+        <h1 class="intro-headline" id="intro-heading">Shaping how products evolve through <em>systems.</em></h1>
+        <div class="intro-body">
+          <p>I'm drawn to the invisible layers of product&mdash;the foundations that help experiences evolve.</p>
+        </div>
+        <svg class="intro-divider" viewBox="0 0 1332 67" preserveAspectRatio="none" aria-hidden="true">
+          <path class="scribble-path" pathLength="1" d="M0.75 38.3863C0.75 38.5973 0.75 38.8084 57.5691 37.9239C114.388 37.0395 228.026 35.0531 294.933 33.1034C378.698 30.6623 406.47 24.6946 425.145 19.1182C433.482 16.6287 438.197 13.2595 439.055 10.7143C439.912 8.16916 436.436 6.14866 428.623 4.68103C409.276 1.04629 376.495 1.68846 337.083 3.12707C298.576 4.5326 266.463 13.9945 242.324 24.3524C221.33 33.3603 211.88 45.018 208.369 53.3955C206.811 57.1107 210.391 60.2148 216.407 62.1844C250.722 73.4188 303.78 55.9538 335.265 39.6522C342.368 35.9747 344.775 30.2943 345.771 25.7089C346.767 21.1236 344.769 16.8871 338.893 13.7161C325.55 6.51534 297.936 6.42554 266.932 7.4373C235.542 8.46164 209.36 18.4984 190.443 28.8378C174.76 37.4095 171.21 48.0552 171.327 55.2883C171.381 58.5946 175.287 60.9136 181.487 61.8948C218.624 67.7724 263.381 36.8626 288.176 16.0438C293.111 11.9002 294.921 7.81694 294.574 5.08319C294.228 2.34945 290.841 0.74484 286.873 0.750012C278.048 0.761516 270.96 7.38233 266.039 13.9509C263.633 17.1626 263.038 20.5598 264.259 23.2804C269.565 35.1003 307.465 33.1474 330.966 30.387C335.901 29.8073 338.7 27.3794 337.615 25.2708C336.531 23.1621 331.115 20.7195 325.63 19.621C315.202 17.5326 305.249 20.0592 297.778 22.3291C294.042 23.4644 291.292 25.561 292.52 27.324C293.749 29.087 299.263 30.7072 471.362 32.5117C643.46 34.3162 981.976 36.256 1330.75 38.2546" stroke="black" stroke-width="1.5" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
+        </svg>
+      </div>
+      <div class="scroll-indicator" aria-hidden="true">
+        <div class="scroll-indicator-dot"></div>
+      </div>
+    </section>
+
+    <!-- SELECTED WORK -->
+    <section class="page-section" aria-labelledby="work-heading" id="work-section">
+      <div class="site-container">
+        <ul class="work-list" role="list">
+
+          <li class="work-card" data-reveal-group>
+            <div class="work-card-body">
+              <div class="work-card-left">
+                <h2 class="work-card-title" id="work-heading" data-reveal>Scaling Accessibility Across Meta</h2>
+              </div>
+              <div class="work-card-right" data-reveal>
+                <p class="work-card-meta">Meta &middot; Risk Areas, Accessibility &middot; 2024&ndash;2026</p>
+                <p class="work-card-description">Transformed accessibility knowledge into scalable guidance and experiences that enabled product teams to build more accessible products.</p>
+              </div>
+            </div>
+            <a class="work-card-image-link" href="mailto:ammerallj@gmail.com" data-reveal>
+              <img class="work-card-image" src="images/work-accessibility.jpg?v=3" alt="Preview of accessibility guidance, product features, and a knowledge base built at Meta" loading="lazy" />
+              <span class="visually-hidden"> (email Jenna Ammerall)</span>
+            </a>
+          </li>
+
+          <li class="work-card" data-reveal-group>
+            <div class="work-card-body">
+              <div class="work-card-left">
+                <h2 class="work-card-title" data-reveal>Creating Continuity Across Messaging</h2>
+              </div>
+              <div class="work-card-right" data-reveal>
+                <p class="work-card-meta">Meta &middot; Facebook Messaging &middot; 2023&ndash;2024</p>
+                <p class="work-card-description">Improved conversational continuity across in-app messaging by defining shared interaction patterns between entry points and conversation surfaces.</p>
+              </div>
+            </div>
+            <a class="work-card-image-link" href="mailto:ammerallj@gmail.com" data-reveal>
+              <img class="work-card-image" src="images/work-messaging.jpg?v=3" alt="Preview of continuity work across Facebook Messaging surfaces" loading="lazy" />
+              <span class="visually-hidden"> (email Jenna Ammerall)</span>
+            </a>
+          </li>
+
+          <li class="work-card" data-reveal-group>
+            <div class="work-card-body">
+              <div class="work-card-left">
+                <h2 class="work-card-title" data-reveal>Building Collaborative Workspaces</h2>
+              </div>
+              <div class="work-card-right" data-reveal>
+                <p class="work-card-meta">Microsoft &middot; Loop &middot; 2020&ndash;2022</p>
+                <p class="work-card-description">Shaped the early product foundations, cross-app experiences and visual identity for Microsoft's collaborative workspace as part of the founding design team.</p>
+              </div>
+            </div>
+            <a class="work-card-image-link" href="mailto:ammerallj@gmail.com" data-reveal>
+              <img class="work-card-image" src="images/work-loop.jpg?v=3" alt="Preview of Microsoft Loop collaborative workspace components" loading="lazy" />
+              <span class="visually-hidden"> (email Jenna Ammerall)</span>
+            </a>
+          </li>
+
+          <li class="work-card" data-reveal-group>
+            <div class="work-card-body">
+              <div class="work-card-left">
+                <h2 class="work-card-title" data-reveal>Helping People Navigate Communities</h2>
+              </div>
+              <div class="work-card-right" data-reveal>
+                <p class="work-card-meta">Meta &middot; Facebook Groups &middot; 2022&ndash;2023</p>
+                <p class="work-card-description">Strengthened the foundational experiences that shaped how people discovered, understood, and participated in communities.</p>
+              </div>
+            </div>
+            <a class="work-card-image-link" href="mailto:ammerallj@gmail.com" data-reveal>
+              <img class="work-card-image" src="images/work-communities.jpg?v=3" alt="Preview of community navigation work across Facebook Groups" loading="lazy" />
+              <span class="visually-hidden"> (email Jenna Ammerall)</span>
+            </a>
+          </li>
+
+        </ul>
+      </div>
+    </section>
+
+    <!-- PUBLIC FOOTPRINTS -->
+    <section class="page-section" aria-labelledby="footprints-heading">
+      <div class="site-container">
+        <div class="footprints-layout" data-reveal-group>
+
+          <div class="footprints-left">
+            <h2 class="footprints-heading" id="footprints-heading" data-reveal>Public Footprints</h2>
+          </div>
+
+          <div class="footprints-right">
+
+            <div class="footprint-group" data-reveal>
+              <h3 class="footprint-group-title">Microsoft</h3>
+              <ul class="footprint-list" role="list">
+                <li><a href="https://medium.com/microsoft-design/m365future-815cf30a8be" target="_blank" rel="noopener noreferrer">The Future of Microsoft 365<span class="visually-hidden"> (opens in new tab)</span></a></li>
+                <li><a href="https://www.sitepoint.com/introducing-microsofts-fluent-design-system/" target="_blank" rel="noopener noreferrer">Introducing Fluent Design System<span class="visually-hidden"> (opens in new tab)</span></a></li>
+                <li><a href="https://www.inc.com/john-brandon/the-new-ribbon-in-microsoft-office-might-scare-everyone-in-office-but-theres-hope.html" target="_blank" rel="noopener noreferrer">The Simplified Ribbon in Microsoft Office<span class="visually-hidden"> (opens in new tab)</span></a></li>
+                <li><a href="https://medium.com/microsoft-design/designing-for-power-simplicity-9cddec615567" target="_blank" rel="noopener noreferrer">Evolving Office 365 with Fluent Design<span class="visually-hidden"> (opens in new tab)</span></a></li>
+                <li><a href="https://www.theverge.com/2023/11/15/23959801/microsoft-loop-launch-notion-competitor" target="_blank" rel="noopener noreferrer">Microsoft Loop Launch — The Verge<span class="visually-hidden"> (opens in new tab)</span></a></li>
+                <li><a href="https://www.patentworth.ai/details/12277305" target="_blank" rel="noopener noreferrer">Patent: Shared Dynamic Objects (Loop)<span class="visually-hidden"> (opens in new tab)</span></a></li>
+              </ul>
+            </div>
+
+            <div class="footprint-group" data-reveal>
+              <h3 class="footprint-group-title">Meta</h3>
+              <ul class="footprint-list" role="list">
+                <li><a href="https://about.fb.com/news/2022/09/community-chats-on-messenger-and-facebook/" target="_blank" rel="noopener noreferrer">Community Chats on Messenger and Facebook<span class="visually-hidden"> (opens in new tab)</span></a></li>
+                <li><a href="https://about.fb.com/news/2023/03/facebook-today-and-tomorrow/" target="_blank" rel="noopener noreferrer">Facebook: Today and Tomorrow<span class="visually-hidden"> (opens in new tab)</span></a></li>
+                <li><a href="https://about.fb.com/news/2022/10/facebook-communities-summit-2022/" target="_blank" rel="noopener noreferrer">Facebook Communities Summit 2022<span class="visually-hidden"> (opens in new tab)</span></a></li>
+                <li><a href="https://about.fb.com/news/2025/05/advancing-accessibility-meta/" target="_blank" rel="noopener noreferrer">Advancing Accessibility at Meta<span class="visually-hidden"> (opens in new tab)</span></a></li>
+                <li><a href="https://www.meta.com/accessibility/" target="_blank" rel="noopener noreferrer">Accessibility at Meta<span class="visually-hidden"> (opens in new tab)</span></a></li>
+              </ul>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ABOUT -->
+    <section class="page-section" aria-labelledby="about-heading" id="about">
+      <div class="site-container">
+        <h2 class="about-name" id="about-heading" data-reveal-group data-reveal>Seattle-based. Systems thinker. <span class="about-name-accent">Product designer.</span></h2>
+      </div>
+      <div class="about-layout site-container" data-reveal-group>
+
+        <!-- LEFT COLUMN -->
+        <div class="about-left" data-reveal data-reveal-order="1">
+          <div class="about-photo">
+            <img src="photo.jpg?v=2" alt="Jenna Ammerall holding Maeve, her dachshund, outdoors in Seattle" onerror="this.style.display='none'" />
+            <div class="about-photo-placeholder" aria-hidden="true"></div>
+          </div>
+        </div>
+
+        <!-- RIGHT COLUMN -->
+        <div class="about-right" data-reveal data-reveal-order="0">
+
+          <section aria-labelledby="career-heading">
+            <h3 class="section-label" id="career-heading">Career Story</h3>
+            <div class="about-body">
+              <p>Over the past nine years at <span class="ms-label">Microsoft</span> and <span class="meta-label">Meta</span>, I've helped products evolve alongside changing technologies, teams, and user needs.</p>
+              <p>Looking back, I've always been drawn to the work beneath the interface&mdash;creating the foundations that help products stay coherent as they evolve.</p>
+            </div>
+          </section>
+
+          <section aria-labelledby="personal-heading">
+            <h3 class="section-label" id="personal-heading">Outside of Work</h3>
+            <div class="about-body">
+              <p>I spend my time chasing after my dachshund, Maeve, and serving on the board of my condominium association, where I enjoy solving the long-term challenges of a small community.</p>
+              <p>Much of my creative energy comes from discovering new music and exploring art exhibitions. I love collecting ideas, moods, and perspectives that often become the backdrop for whatever season of life I'm in.</p>
+            </div>
+          </section>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTACT -->
+    <section class="page-section contact-section" aria-labelledby="contact-heading" id="contact">
+      <div class="site-container contact-inner">
+        <div class="contact-hero">
+          <p class="contact-email" id="contact-heading">If something here resonated, let's connect.</p>
+        </div>
+        <div class="contact-meta">
+          <div class="contact-meta-group contact-meta-connect">
+            <p class="section-label">Connect</p>
+            <div class="contact-connect-links">
+              <a href="mailto:ammerallj@gmail.com">ammerallj@gmail.com<span class="visually-hidden"> (email)</span></a>
+              <a href="https://www.linkedin.com/in/jennaammerall" target="_blank" rel="noopener noreferrer">LinkedIn<span class="visually-hidden"> (opens in new tab)</span></a>
+              <a href="resume.pdf" target="_blank" rel="noopener noreferrer">Resume<span class="visually-hidden"> (PDF, opens in new tab)</span></a>
+            </div>
+          </div>
+          <div class="contact-mind">
+            <p class="section-label">On My Mind</p>
+            <div class="about-body">
+              <p>Lately, I've been thinking about the interaction between people and increasingly autonomous products.</p>
+              <p>As products begin acting on our behalf, I'm interested in the foundations that help people stay oriented, maintain agency, and collaborate with confidence.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ============================================================
+       SITE FOOTER
+       ============================================================ -->
+  <footer class="site-footer" role="contentinfo">
+    <div class="site-container">
+      <p>&copy; 2026 Jenna Ammerall &middot; Human directed. AI built.</p>
+    </div>
+  </footer>
+
+  <div class="custom-cursor" id="custom-cursor" aria-hidden="true">Interested in learning more?</div>
+  <div class="meta-cursor" id="meta-cursor" aria-hidden="true">
+    <img src="meta-logo.svg" alt="" />
+  </div>
+  <div class="ms-cursor" id="ms-cursor" aria-hidden="true">
+    <img src="microsoft-logo.svg" alt="" />
+  </div>
+  <div class="wave-cursor" id="wave-cursor" aria-hidden="true">👋</div>
+
+  <script src="js/main.js?v=150" defer></script>
+</body>
+</html>
