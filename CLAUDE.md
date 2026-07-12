@@ -74,8 +74,11 @@ depends on JS succeeding.
 put `data-reveal` on each item that should fade in (typography first by DOM order).
 Add `data-reveal-order="N"` to override sequence when DOM order ≠ visual order
 (e.g. About: text is `order="0"`, photo `order="1"` though photo is first in DOM).
-**Contact is intentionally NOT in the reveal system** — it has its own scroll-linked
-fade in `updateScrollEffects`; don't add `data-reveal` there (the two would fight over opacity).
+**Contact uses the reveal system** (`.contact-inner` is a `data-reveal-group`; the
+heading then the two meta columns fade in). It has no scroll-linked opacity of its
+own — don't reintroduce one in `updateScrollEffects` (the two would fight over opacity).
+**The footer is intentionally NOT in the reveal system** — it stays always visible,
+no motion; don't add `data-reveal` to it.
 
 **Reveals replay bidirectionally:** a group resets to hidden once fully off-screen and
 fades in again on every re-entry (scrolling up or down). Keep the reset off-screen only.

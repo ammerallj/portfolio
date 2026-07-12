@@ -21,7 +21,6 @@ const navSections = [
 ];
 const siteHeader = document.querySelector('.site-header');
 const contactSection = document.getElementById('contact');
-const contactInner = document.querySelector('.contact-inner');
 const intro = document.querySelector('.intro');
 const introHeadline = document.querySelector('.intro-headline');
 const introBody = document.querySelector('.intro-body');
@@ -98,7 +97,6 @@ function updateScrollEffects() {
     introHeadline.style.opacity = '';
     introBody.style.opacity = '';
     scrollIndicator.style.opacity = '';
-    contactInner.style.opacity = '';
     return;
   }
 
@@ -113,18 +111,8 @@ function updateScrollEffects() {
   // out quickly right away, no delay.
   scrollIndicator.style.opacity = 1 - Math.min(window.scrollY / scrollIndicatorFadeRange, 1);
 
-  // Contact is the last section, so its content sits at the page bottom. Tie the
-  // fade to how close the reader is to the bottom (not the section's top, which
-  // scrolls off well before the Connect / On My Mind row comes into view).
-  // A "hold zone" keeps it fully readable within ~0.75 viewport of the bottom so
-  // small scroll-ups don't dim it; past that it fades out over ~0.6 viewport.
-  // Scroll-linked and reversible, the same feel as the hero.
-  const maxScroll = html.scrollHeight - window.innerHeight;
-  const distanceFromBottom = Math.max(0, maxScroll - window.scrollY);
-  const contactHoldZone = window.innerHeight * 0.75;
-  const contactFadeRange = window.innerHeight * 0.6;
-  const contactFadeDistance = Math.max(0, distanceFromBottom - contactHoldZone);
-  contactInner.style.opacity = 1 - Math.min(contactFadeDistance / contactFadeRange, 1);
+  // Contact fades in via the shared viewport-reveal system (data-reveal in the
+  // markup), so there's no scroll-linked opacity for it here anymore.
 }
 
 // Batch all scroll-linked style writes into a single rAF pass per frame
