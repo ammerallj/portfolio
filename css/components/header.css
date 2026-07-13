@@ -6,7 +6,12 @@
   position: sticky;
   top: 0;
   z-index: 100;
-  background-color: var(--color-bg);
+  /* Frosted glass (Figma node 181:1210): a translucent tint of the site bg
+     (--color-bg #FBFCF8) with a 4px backdrop blur, so it stays seamless with the
+     page at the top and softens content scrolling under the sticky bar. */
+  background-color: rgba(251, 252, 248, 0.9);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
   padding-block: var(--space-sm);
   transition: background-color 0.35s ease;
 }
@@ -17,8 +22,7 @@
   background-color: var(--color-accent);
 }
 
-.site-header.is-over-dark .site-name,
-.site-header.is-over-dark .site-nav-bar a {
+.site-header.is-over-dark .site-name {
   color: #fff;
 }
 
@@ -66,27 +70,86 @@
   justify-content: flex-end;
 }
 
+/* Nav item states (per Figma node 181:1210). Selection is text-only — no ring;
+   the chip is purely a HOVER affordance. Text brightens and, on hover, a white
+   pill fades in around it. The chip is drawn with ::before (z-index below the
+   text) so it never shifts the 542px nav alignment.
+     Rest      — regular  · black 70% · no chip
+     Selected  — semibold · black 75% · no chip
+     Hover     — regular  · black 90% · white 75% fill, border 75%
+     Sel-hover — semibold · black 90% · white 75% fill, border 90% (darker)
+   Over the blue Contact panel it inverts to white (Figma didn't spec this
+   state; sensible inversion — tweak freely). */
 .site-nav-bar a {
+  position: relative;
   font-family: var(--font-ui);
   font-size: 1rem;
   font-weight: 400;
   font-variation-settings: 'wght' 400;
   letter-spacing: -0.01em;
   text-decoration: none;
-  color: var(--color-text);
-  transition: font-variation-settings 0.35s ease, color 0.35s ease, opacity 0.35s ease;
+  color: var(--color-text-70); /* rest: black 70% */
+  transition: font-variation-settings 0.35s ease, color 0.35s ease;
 }
 
+/* The chip — behind the text, transparent until hover lights it up */
+.site-nav-bar a::before {
+  content: '';
+  position: absolute;
+  inset: -7px -15px;
+  z-index: -1;
+  border: 1px solid transparent;
+  border-radius: 100px;
+  transition: background-color 0.35s ease, border-color 0.35s ease;
+  pointer-events: none;
+}
+
+/* Hover — illuminate the text + white chip */
 .site-nav-bar a:hover {
-  color: var(--color-text-70);
+  color: rgba(0, 0, 0, 0.9);
 }
 
-/* Over the blue Contact panel the white nav items fade to 70% on hover */
-.site-header.is-over-dark .site-nav-bar a:hover {
-  opacity: 0.7;
+.site-nav-bar a:hover::before {
+  border-color: rgba(0, 0, 0, 0.75);
 }
 
+/* Selected (scroll-spy active) — semibold, a touch brighter, NO chip */
 .site-nav-bar a.is-active {
-  font-variation-settings: 'wght' 500;
+  font-variation-settings: 'wght' 600;
+  color: rgba(0, 0, 0, 0.75);
+}
+
+/* Selected + hover — chip appears, border darkens */
+.site-nav-bar a.is-active:hover {
+  color: rgba(0, 0, 0, 0.9);
+}
+
+.site-nav-bar a.is-active:hover::before {
+  background: rgba(255, 255, 255, 0.75);
+  border-color: rgba(0, 0, 0, 0.9);
+}
+
+/* --- Over the blue Contact panel: white text + white chips --- */
+.site-header.is-over-dark .site-nav-bar a {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.site-header.is-over-dark .site-nav-bar a:hover,
+.site-header.is-over-dark .site-nav-bar a.is-active:hover {
+  color: #fff;
+}
+
+.site-header.is-over-dark .site-nav-bar a.is-active {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.site-header.is-over-dark .site-nav-bar a:hover::before,
+.site-header.is-over-dark .site-nav-bar a.is-active:hover::before {
+  border-color: rgba(255, 255, 255, 0.7);
+}
+
+.site-header.is-over-dark .site-nav-bar a.is-active:hover::before {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.9);
 }
 
