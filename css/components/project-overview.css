@@ -1,0 +1,431 @@
+/* ============================================================
+   PROJECT OVERVIEW — shared template for every project page
+   (work/microsoft-loop.html, work/facebook-groups.html,
+    work/accessibility.html, work/messaging.html)
+
+   The editorial executive summary that precedes the deeper content.
+   Every project page uses this same structure; only the content changes.
+
+   Nothing here invents new design language: all type, color and spacing
+   resolve to the :root tokens in global.css, and the two-column
+   heading-left / 542px-column-right rhythm is the same idiom as
+   .footprints-layout in sections.css.
+
+   ORDER: imported after sections.css (so it can lean on .section-label,
+   .about-body, .contact-* ) and before responsive.css (which still owns
+   every width breakpoint, including this file's — see responsive.css).
+   ============================================================ */
+
+
+/* ------------------------------------------------------------
+   1. HERO VISUAL
+   Full-bleed project image. Sits directly beneath the sticky header,
+   so it has no top padding of its own.
+   ------------------------------------------------------------ */
+
+.project-hero {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.project-hero-figure {
+  /* 16:9 keeps the placeholder honest before a real image is dropped in,
+     and stops layout shift once one is. */
+  aspect-ratio: 16 / 9;
+  width: 100%;
+  /* On a laptop, a full-width 16:9 image is ~the whole viewport, which would
+     push the title and metadata entirely below the fold — the opposite of a
+     page meant to land in under a minute. Cap it so the title is already
+     surfacing when the page opens; object-fit crops rather than letterboxes. */
+  max-height: 62vh;
+  overflow: hidden;
+  background-color: #d9d9d9; /* same neutral as .about-photo's placeholder */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.project-hero-figure img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Visible only until a real <img> replaces it. Reuses the eyebrow type so a
+   placeholder page still reads as part of the site. */
+.project-placeholder {
+  font-family: var(--font-ui);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-text-70);
+}
+
+
+/* ------------------------------------------------------------
+   2 + 3. MASTHEAD — case study title and metadata
+   Title left, metadata in the shared 542px right column, matching
+   .footprints-layout so the page's right edge lines up with the nav
+   and the Work cards on the homepage.
+   ------------------------------------------------------------ */
+
+.project-masthead {
+  display: flex;
+  gap: 11.625rem; /* 186px — same as .footprints-layout */
+  align-items: flex-start;
+}
+
+.project-masthead-left {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.project-masthead-right {
+  flex: 0 0 542px;
+  min-width: 0;
+}
+
+.project-title {
+  font-family: var(--font-heading);
+  font-size: clamp(2.5rem, 7vw, 6rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  color: var(--color-text);
+}
+
+/* Dek — the one-line description under the title. Not a heading and not a
+   section: a standfirst that says what the project was before any block does.
+
+   40px at regular weight — display scale, but in the BODY face (Inter), not the
+   heading face. That's the whole idea: it reads big without competing with the
+   Hanken title above it. Note Hanken is only loaded at 200 and 700 (see the
+   font <link>), so "regular" is Inter's 400 by necessity as well as by design.
+   Phone step-down lives in responsive.css — at 480 the title drops to 2rem, so
+   the dek has to drop below it or it would outsize the title. */
+.project-dek {
+  margin-top: 1.5rem;
+  font-size: 2.5rem;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  color: var(--color-text);
+}
+
+/* Metadata: a definition list, so Timeline / Role / Area / Scope are
+   machine-readable pairs rather than styled <p>s.
+   OMIT any row you don't have — never leave an empty or invented field. */
+.project-meta-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin: 0;
+}
+
+.project-meta-row {
+  display: flex;
+  gap: 1.5rem;
+  align-items: baseline;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.project-meta-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.project-meta-row dt {
+  /* .section-label's type, but no bottom margin (it's inline here) */
+  flex: 0 0 6.5rem;
+  font-family: var(--font-ui);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-text-70);
+}
+
+.project-meta-row dd {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  font-size: 1.25rem;
+  letter-spacing: -0.02em;
+  line-height: 1.4;
+  color: var(--color-text);
+}
+
+
+/* ------------------------------------------------------------
+   4 + 5 + 6. BODY BLOCKS — Description, Impact, Role & Contribution,
+   and any further detail block. One shared layout: eyebrow left,
+   content in the 542px right column.
+   ------------------------------------------------------------ */
+
+.project-block {
+  display: flex;
+  gap: 11.625rem;
+  align-items: flex-start;
+}
+
+.project-block + .project-block {
+  margin-top: 5rem; /* 80px between blocks inside one .page-section */
+}
+
+.project-block-left {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* Block headings (Overview, Why This Mattered, Contribution, Impact, and any
+   further detail block) sit at the site's Tier 2 headline scale — the same
+   2.5rem/700/-0.02em as .work-card-title and .footprints-heading — NOT the 13px
+   eyebrow. Deliberately its own class: .section-label is shared with the
+   homepage (Career Story, Connect, On My Mind), which must stay an eyebrow.
+   Phone step-down to 2rem lives with the rest of Tier 2 in responsive.css. */
+.project-block-title {
+  font-family: var(--font-heading);
+  font-size: 2.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  color: var(--color-text);
+  margin-bottom: 0;
+}
+
+.project-block-right {
+  flex: 0 0 542px;
+  min-width: 0;
+}
+
+/* The description is the one lead paragraph — a step up from .about-body so it
+   reads as the project's opening statement, not body copy. Keep it concise. */
+.project-lead {
+  font-size: 1.5rem;
+  letter-spacing: -0.02em;
+  line-height: 1.45;
+  color: var(--color-text);
+}
+
+/* Impact bullets. Rules between items rather than dots — matches the
+   restraint of .footprint-list. */
+.project-impact-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.project-impact-list li {
+  font-size: 1.25rem;
+  letter-spacing: -0.02em;
+  line-height: 1.4;
+  color: var(--color-text);
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.project-impact-list li:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+
+/* ------------------------------------------------------------
+   ⚠️ DEAD CODE — SAFE TO DELETE. No page renders `.project-continue` any more.
+   Loop and Groups both drop their Continue step and end on Impact (Jenna is
+   building high-level case-study content to live inline below Impact instead of
+   a hand-off link). Kept for now only in case the hand-off returns; delete the
+   whole 7a block together — it's one component. The 480-tier `.project-continue`
+   selectors in responsive.css and the `.project-continue` note in CLAUDE.md go
+   with it.
+
+   7a. CONTINUE — the hand-off into a public case study.
+   Was used by Microsoft Loop and Facebook Groups.
+
+   .is-placeholder is the parked state: no href yet, so it renders as
+   inert text rather than a link that goes nowhere. Remove the class and
+   swap the <span> for an <a href="..."> once the case study exists.
+   ------------------------------------------------------------ */
+
+.project-continue {
+  display: flex;
+  align-items: baseline;
+  gap: 1.5rem;
+}
+
+.project-continue-link {
+  font-family: var(--font-heading);
+  font-size: 2.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  color: var(--color-text);
+  text-decoration: underline;
+  transition: opacity 0.15s ease;
+}
+
+.project-continue-link:hover {
+  opacity: 0.6;
+}
+
+.project-continue-link::after {
+  content: '→';
+  display: inline-block;
+  margin-left: 0.3em;
+  text-decoration: none;
+}
+
+.project-continue-link.is-placeholder {
+  color: var(--color-text-70);
+  text-decoration: none;
+  cursor: default;
+}
+
+.project-continue-link.is-placeholder:hover {
+  opacity: 1;
+}
+
+
+/* ------------------------------------------------------------
+   ⚠️ DEAD CODE — SAFE TO DELETE. Nothing below matches any element.
+
+   As of the Accessibility content pass, NO page uses the Conversation
+   Invitation. Its note + locked-case-study button moved up into the
+   masthead lockup (before Overview, where the primary action belongs),
+   which left this panel holding only an orphaned heading and the Connect
+   links — so it was removed from both pages that had it. Kept for now
+   only in case the panel comes back; delete the whole 7b block, the
+   `.conversation-invite-*` selectors in responsive.css (1024 + 480 tiers),
+   and the `.conversation-invite` fallback in js/main.js's `darkPanel`
+   together — they're one component.
+
+   7b. CONVERSATION INVITATION — reusable, identical on Accessibility
+   and Messaging. For work that can't be shown publicly: says so, and
+   invites a hiring team to get in touch.
+
+   Deliberately NOT a gate: no password field, no form, no AI. It is a
+   statement plus the site's existing connect links.
+
+   It reuses the Contact panel's blue treatment so it reads as the same
+   invitation the homepage already makes, and so the sticky header's
+   is-over-dark inversion carries straight through into the footer.
+   ------------------------------------------------------------ */
+
+.conversation-invite {
+  background-color: var(--color-accent);
+  color: #fff;
+  padding-top: 120px; /* matches .contact-section */
+}
+
+.conversation-invite .section-label {
+  color: #fff;
+  margin-bottom: 0;
+}
+
+.conversation-invite-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 3.75rem; /* 60px — matches .contact-inner */
+}
+
+.conversation-invite-heading {
+  font-family: var(--font-heading);
+  font-size: clamp(2.5rem, 7vw, 6rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  color: #fff;
+}
+
+.conversation-invite-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 3.75rem;
+}
+
+.conversation-invite-group {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* Left: the note about why this work isn't public. Shares the 542px column. */
+.conversation-invite-note {
+  flex: 0 1 542px;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.conversation-invite-note .about-body p {
+  color: #fff;
+}
+
+/* ---- Masthead lockup + locked case study button ----------------------------
+   The note and the button sit under the title, before Overview — the case study
+   is the page's primary action, so it can't wait until the panel at the bottom
+   that reads as a footer.
+
+   ONE button. The way to ask for the password is a mailto woven into the copy
+   above ("share the password"), not a second pill — the promise is the path.
+
+   It's an <a>, never a <button>: it navigates (see the note in the markup). The
+   lock is Figma's, server-side; no secret lives in this page.
+
+   Black fill / white text inverts the body copy above it. It was white-on-blue
+   while it lived on the invitation panel; on the cream masthead a white fill
+   would be invisible. The 100px radius is the site's own pill, borrowed from the
+   nav chip (.site-nav-bar a::before in header.css). Accent blue stays reserved
+   for the panel. */
+.project-lockup {
+  margin-top: 2rem;
+}
+
+.invite-unlock {
+  margin-top: 2rem;
+}
+
+.invite-button {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-ui);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: #fff;
+  background-color: var(--color-text);
+  border-radius: 100px; /* same pill as the nav chip */
+  padding: 14px 28px;
+  gap: 0.5rem;
+  text-decoration: none;
+  transition: opacity 0.15s ease;
+}
+
+.invite-button:hover {
+  opacity: 0.85;
+}
+
+/* Iconex Light / Lock, inlined. Sized in em so it tracks the label, and stroked
+   with currentColor so it follows the button's text colour rather than being
+   hardcoded white. */
+.invite-button-icon {
+  width: 1.25em;
+  height: 1.25em;
+  flex: none;
+}
+
+/* No focus override needed here: the global ring is var(--color-focus), which
+   reads fine against the cream masthead. (It did not on the blue panel.) */
+
+/* Right: the existing connect links, reused wholesale (.contact-connect-links
+   from sections.css carries the type, underline and ↗). */
+.conversation-invite-connect {
+  flex: 0 0 auto;
+  min-width: 0;
+}
+
+/* Project-overview breakpoints live in responsive.css with every other
+   width media query — see the 1024 / 768 / 480 tiers there. */

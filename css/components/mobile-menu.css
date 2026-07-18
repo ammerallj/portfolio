@@ -1,0 +1,158 @@
+/* ============================================================
+   MOBILE MENU (Figma nodes 123:3733 / 123:3743)
+   A full-screen blue overlay triggered by the "Menu" button on
+   phones. These are the component's LOOK styles; the show/hide
+   toggling by width lives in responsive.css (at <=480px):
+     - the "Menu" trigger and this overlay are display:none here
+       (desktop) and revealed only in the 480px tier
+     - .is-open (added by initMobileMenu in js/main.js) flips the
+       overlay to display:flex, but only inside that media query,
+       so it can never linger over the desktop layout.
+   ============================================================ */
+
+/* --- "Menu" trigger in the header (Inter 16px, per Figma 123:3800) --- */
+.mobile-menu-toggle {
+  display: none; /* shown at <=480px in responsive.css */
+  margin-left: auto; /* push to the right edge next to the flex:1 site-name */
+  padding: 0;
+  border: 0;
+  background: none;
+  font-family: var(--font-ui);
+  font-size: 1rem;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+/* Over the blue Contact panel the header inverts — keep the trigger legible */
+.site-header.is-over-dark .mobile-menu-toggle {
+  color: #fff;
+}
+
+/* --- The overlay panel --- */
+.mobile-menu {
+  display: none; /* set to flex at <=480px when .is-open (responsive.css) */
+  position: fixed;
+  inset: 0;
+  z-index: 200; /* above the sticky header (z-index 100) */
+  flex-direction: column;
+  /* Scroll vertically if content exceeds the viewport; clip horizontally so
+     the off-edge glow below is "cut off" without adding a horizontal scrollbar. */
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  background: var(--color-accent);
+  color: #fff;
+}
+
+/* Background glow — Figma "Ellipse 2" (node 123:3808): the exact exported
+   asset (818x818 radial, white 0.8 -> 0.5 -> transparent at 0.6 opacity, with
+   a fractal-noise grain). Pinned off the top-left (left:-19px) per the Figma
+   coordinates so it bleeds past the panel and is cut off by the overflow clip.
+   Painted above the blue fill (z-index:-1) but beneath the menu content. */
+.mobile-menu::before {
+  content: '';
+  position: absolute;
+  left: -19px;
+  top: calc(50% - 187px);
+  transform: translateY(-50%);
+  width: 818px;
+  height: 818px;
+  background: url('../../images/menu-glow.svg') center / 100% 100% no-repeat;
+  opacity: 0.8; /* dialed down a touch from the Figma default */
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* "Jenna Ammerall." — matches the header logo but white (Figma 123:3770) */
+.mobile-menu-name {
+  padding: 32px 16px 0;
+  font-family: var(--font-heading);
+  font-size: 1.25rem; /* 20px */
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+/* --- Large nav links (Figma 60px; thin em-dash + bold word) --- */
+.mobile-menu-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  margin-top: 72px; /* drops the block to ~y154 as in the Figma frame */
+  padding: 0 16px;
+}
+
+.mobile-menu-nav a {
+  font-family: var(--font-heading);
+  font-size: 3.75rem; /* 60px */
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  color: #fff;
+  text-decoration: none;
+}
+
+.mobile-menu-dash {
+  font-weight: 200; /* Hanken ExtraLight — the light dash from the design */
+  margin-right: 0.15em;
+}
+
+/* --- Connect block, anchored to the bottom with a hairline top border --- */
+.mobile-menu-connect {
+  margin-top: auto; /* push to the bottom of the panel */
+  display: flex;
+  flex-direction: column;
+  gap: 50px;
+  padding: 60px 16px 90px;
+  border-top: 1px solid #fff;
+}
+
+.mobile-menu-connect-heading {
+  font-family: var(--font-heading);
+  font-size: 2rem; /* 32px */
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.mobile-menu-connect-links {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.mobile-menu-connect-links a {
+  font-family: var(--font-body);
+  font-size: 1.25rem; /* 20px */
+  letter-spacing: -0.02em;
+  color: #fff;
+  text-decoration: underline;
+}
+
+/* --- Circular close (X) button, bottom-right (Figma 123:3755) --- */
+.mobile-menu-close {
+  /* Fixed so it stays pinned to the viewport corner even if the overlay
+     scrolls — never scrolled away or clipped. */
+  position: fixed;
+  right: 32px;
+  bottom: 32px;
+  width: 56px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #fff;
+  border-radius: 50%;
+  background: rgba(74, 69, 255, 0.9);
+  color: #fff;
+  cursor: pointer;
+}
+
+.mobile-menu-close svg {
+  width: 20px;
+  height: 20px;
+  stroke: #fff;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+}

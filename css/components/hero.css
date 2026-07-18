@@ -3,44 +3,80 @@
    ============================================================ */
 
 .intro {
-  min-height: calc(100dvh - 80px);
-  display: flex;
-  flex-direction: column;
+  position: relative;
+  /* Tall enough for the full blob + the art-directed absolute layout, but
+     grows to fill the viewport (the fold) on taller screens. Subtract the 66px
+     sticky header so the hero's bottom edge lands exactly on the fold bottom —
+     which the centered scroll cue then sits 8px above. */
+  min-height: max(760px, calc(100dvh - 66px));
+  overflow: hidden;
+}
+
+/* Organic blue blob behind the headline (Figma node 198:787). Left-anchored at
+   its native 1440-wide size; the section clips whatever overflows. This left
+   anchor holds for the side-by-side tiers (1440/1280); at 1024 and below the
+   hero becomes a centered stack and responsive.css re-centers the blob. */
+.intro-blob {
+  position: absolute;
+  left: 0;
+  /* Pull up so the blob's top aligns with the true page top (the .intro box
+     starts ~66px down, below the sticky header) */
+  top: -66px;
+  width: 1440px;
+  max-width: none;
+  height: 760px;
+  z-index: 0;
+  pointer-events: none;
+  color: var(--color-accent);
+  /* Promote to its own compositor layer so the per-frame path re-raster stays
+     isolated from the rest of the page (no sibling repaints). */
+  transform: translateZ(0);
+}
+
+.intro-blob-path {
+  fill: currentColor;
 }
 
 .intro-inner {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  /* Figma places the headline 270px from the top of the frame, which includes
-     the ~66px sticky header. Subtract it so the headline lands at a true 270px
-     from the page top (204 + 66px header = 270). */
-  padding-top: 204px;
+  position: relative;
+  z-index: 1;
+  height: 100%;
 }
 
 .intro-headline {
+  position: absolute;
+  /* Block origin from Figma (198:738): left edge ~148px, top ~136px into the
+     .intro box. Lines then step right via their own --indent. */
+  top: 136px;
+  left: 148px;
   font-family: var(--font-heading);
-  font-size: clamp(2.5rem, 7vw, 6rem);
+  font-size: 96px;
   font-weight: 700;
   letter-spacing: -0.02em;
   line-height: 1;
-  color: var(--color-text-70);
-  max-width: 66rem;
-  margin-bottom: 60px;
-  will-change: opacity;
+  color: #fff;
+  margin: 0;
 }
 
-.intro-headline em {
-  font-style: italic;
-  font-weight: 700;
-  color: var(--color-accent);
+.intro-line {
+  display: block;
+  margin-left: var(--indent, 0);
+  white-space: nowrap;
+  /* initHero() drifts each line a few px on its own slow X/Y path — transform
+     only, so the words float without ever affecting layout. */
+  will-change: transform;
 }
 
 .intro-body {
-  /* Right-aligned in the shared 542px column (5 grid cols), so its left edge
-     lines up with the "Work" nav item at the 1440px max width */
-  align-self: flex-end;
-  width: 542px;
+  /* Offset right column (Figma node 198:793): starts at grid column 9 (66.67%)
+     and spans 4 of the 12 columns. On the 1440 grid (56px margins, 20px
+     gutters) a column is 92.33px, so 4 cols = 429px, landing its right edge on
+     the content edge (col 12). Vertically its bottom aligns with the blob's
+     resting bottom edge (~605px in .intro): 605 − ~104px copy height ≈ 501px. */
+  position: absolute;
+  top: 501px;
+  left: calc(66.67% - 5px);
+  width: 429px;
   max-width: 100%;
 }
 
@@ -48,47 +84,32 @@
   width: 100%;
 }
 
-.intro-divider {
-  /* Anchored to the bottom of the intro so the scribble + scroll indicator
-     stay pinned near the viewport bottom (matches Figma) */
-  margin-top: auto;
-  /* Full-bleed: breaks out of the .intro-inner 56px padding to span the
-     entire viewport width, edge to edge */
-  width: calc(100% + 112px);
-  margin-inline: -56px;
-  height: 3rem;
-  overflow: visible;
-}
-
-/* On narrower viewports, let the paragraph span the full width */
-/* The fixed 572px nav + 120px gap only fits on wide screens; below that
-   let the header reflow with a smaller gap and a flexible nav */
 /* Width breakpoints for this section live in css/components/responsive.css */
-
-.scribble-path {
-  fill: none;
-  animation: scribble-draw 1.5s ease-out 1 forwards;
-}
-
-@keyframes scribble-draw {
-  from { stroke-dasharray: 0 1; }
-  to { stroke-dasharray: 1 1; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .scribble-path {
-    animation: none;
-  }
-}
 
 /* ============================================================
    SITE LOAD REVEAL
-   The scribble draws itself in place; the paragraph fades in
-   right after, then the rest of the site follows
+   The blob is already breathing; the headline settles into focus
+   (blur -> sharp), then the rest of the site fades in.
    ============================================================ */
 
+/* Headline starts hidden + blurred ONLY when the motion path runs (is-motion is
+   set pre-paint whenever JS runs and motion is allowed). No-JS / reduced-motion
+   visitors never get is-motion, so the headline is simply visible. */
+html.is-motion.is-loading .intro-headline {
+  opacity: 0;
+  filter: blur(14px);
+}
+
+/* Emerge: sharpen + fade in, so the words resolve out of the scribble rather
+   than plainly fading. Placed AFTER the hidden rule (equal specificity) so it
+   wins once JS adds is-headline-in. */
+html.is-motion.is-headline-in .intro-headline {
+  opacity: 1;
+  filter: blur(0);
+  transition: opacity 0.6s ease, filter 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
 html.is-loading .site-header,
-html.is-loading .intro-headline,
 html.is-loading .intro-body p,
 html.is-loading .scroll-indicator,
 html.is-loading .page-section,
@@ -102,7 +123,6 @@ html.is-loading.is-text-revealed .intro-body p {
 }
 
 html.is-revealing .site-header,
-html.is-revealing .intro-headline,
 html.is-revealing .scroll-indicator,
 html.is-revealing .page-section,
 html.is-revealing .site-footer {
@@ -120,10 +140,13 @@ html.is-revealing .site-footer {
   height: 48px;
   border: 1px solid var(--color-text);
   border-radius: 100px;
-  position: relative;
-  margin-inline: auto;
-  margin-top: 50px;
-  margin-bottom: var(--space-sm);
+  /* Centered at the bottom of the fold, 8px up. .intro fills the fold (its
+     min-height is 100dvh minus the sticky header), so its bottom edge is the
+     fold bottom. Centered via `50% - half width` so no transform is needed. */
+  position: absolute;
+  z-index: 1;
+  bottom: 8px;
+  left: calc(50% - 14px);
 }
 
 .scroll-indicator-dot {

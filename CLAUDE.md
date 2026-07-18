@@ -1,9 +1,14 @@
-# Project: Single-Page Portfolio Site Architecture
+# Project: Portfolio Site Architecture
 
 Static site — plain HTML, modular CSS, and one vanilla-JS file. No build step,
 no framework, no dependencies. Served as static files.
 
+The homepage is one page; each project also has a **Project Overview page** in
+`work/` (see **Project Overview Pages** below). `js/main.js` and `style.css` are
+shared by all of them.
+
 ## File Map
+- **Project overview pages:** `work/*.html` (4) — see **Project Overview Pages** below.
 - **Main HTML:** `index.html` (~260 lines) — structure/content only. A tiny inline `<script>` in `<head>` sets `is-motion` + `is-loading` pre-paint (both only when JS runs, so no-JS visitors aren't left on a blank page); ends with a single `<script src="js/main.js" defer>`.
 - **JavaScript:** `js/main.js` (~340 lines) — all interactions: nav scroll-spy, site load reveal (scribble draw + fades), hero scroll effects, header-over-Contact color inversion, custom cursors, **plus the motion system** (Lenis smooth scroll + Motion.dev viewport reveals). See **Motion & Scrolling** below for the exact knobs — don't re-read the whole file.
 - **CSS entry:** `style.css` (~6 lines) — **@import list only, no rules.** Do not add styles here.
@@ -13,6 +18,7 @@ no framework, no dependencies. Served as static files.
   - `hero.css` (~214) — `.intro` section, headline/body, `.intro-divider` scribble, site-load-reveal keyframes/states
   - `sections.css` (~390) — `.page-section` content: Selected Work, Public Footprints, Contact, About, case-study placeholder
   - `footer.css` (~28) — `.site-footer`
+  - `project-overview.css` (~290) — the shared Project Overview template: `.project-hero`, `.project-masthead` (title + metadata `<dl>`), `.project-block` (description / impact / role), `.project-continue`, and the reusable `.conversation-invite`. Imported after `sections.css` (it leans on `.section-label`, `.about-body`, `.contact-connect-links`) and before `responsive.css`.
   - `responsive.css` (~110) — **ALL width breakpoints, site-wide.** Organized by screen size (1000 → 768 → 700 → 600px). Imported last so it overrides desktop styles.
 
 ## Where each page area lives
@@ -28,6 +34,94 @@ no framework, no dependencies. Served as static files.
 | Any interaction/animation | `js/main.js` | — |
 | Colors, spacing, fonts (tokens) | `global.css` (`:root`) | — |
 | Anything mobile/tablet (any breakpoint) | `responsive.css` | — |
+| Project Overview pages | `project-overview.css` | `work/*.html` |
+
+## Project Overview Pages
+The standard entry point for every project: an editorial executive summary a
+recruiter can read in under a minute, sitting between a homepage Work card and
+any deeper case study. **Four static pages, one shared structure** — the
+homepage Work-card images link straight to them.
+
+| Page | Ends with |
+|---|---|
+| `work/microsoft-loop.html` | Impact — **no closing section** (content pending) |
+| `work/facebook-groups.html` | Impact — **no closing section, by design** |
+| `work/accessibility.html` | Impact — **no closing section, by design** |
+| `work/messaging.html` | Impact — **no closing section, by design** |
+
+**All four pages end on Impact.** The `.project-continue` hand-off is gone from
+Loop and Groups — Jenna is writing high-level case-study content to sit inline
+below Impact rather than link out. `.project-continue*` (project-overview.css 7a
++ responsive.css 480 tier) is **dead code, marked for deletion** — remove it as
+one unit, same as the earlier `.conversation-invite` removal.
+
+**The Conversation Invitation is gone and is not coming back by accident.** Its
+note + locked-case-study button moved up into the masthead lockup (before
+Overview — the primary action can't wait for a panel that reads as a footer),
+which left the panel holding an orphaned heading and the Connect links. Both
+pages now end on Impact with **no closing step** — deliberate, not an omission.
+The `.conversation-invite-*` CSS (project-overview.css 7b + responsive.css 1024
+/ 480 tiers) and the `.conversation-invite` fallback in `darkPanel` (js/main.js)
+are **dead code, marked for deletion** — remove them together, they're one
+component.
+
+**Shared structure (identical in all four):** hero visual → title + metadata →
+Overview (description) → **Contribution** → Impact → *then* either the project-
+details/Continue tail or the Conversation Invitation.
+`work/microsoft-loop.html` is the canonical skeleton — copy it when adding a project.
+
+Contribution sits **between Overview and Impact**, in the same `.page-section` as
+both. There is no separate "Role & Contribution" section (it was removed); the
+masthead metadata still carries the short `Role` row.
+
+**Contribution is optional — drop it when it only abstracts Impact.**
+Accessibility has no Contribution block for exactly that reason: its three
+clauses were a table of contents for three Impact bullets, which say the same
+thing with numbers. Blocks are per-page, not mandatory; the structure is shared,
+the presence of any one block is an editorial call. A summary page should also
+not spend the framing that the full case study is there to reveal.
+
+**Rules:**
+- **Content is Jenna's, not the model's.** Every content slot ships as a labeled
+  `[Placeholder]`. Never write, expand, summarize, or invent project copy —
+  including "reasonable" filler for a missing timeline or team.
+- **Omit, don't fabricate.** If a metadata row (Timeline / Role / Area / Scope)
+  or a detail block has no information, delete it. Never leave it blank or guess.
+- **The Conversation Invitation states that the work can't be shown publicly and
+  offers the existing connect links.** No AI conversation. Keep the two copies
+  (Accessibility / Messaging) in sync.
+- **`.invite-unlock` is the locked-case-study link.** An `<a>`, never a
+  `<button>` — it navigates, so Cmd-click / open-in-new-tab must work and a
+  screen reader must hear "link". `href` is `[Locked Case Study URL]` until the
+  Figma share link is pasted in.
+- **The lock lives on the DESTINATION, never in this page.** Set the Figma file's
+  share access to **"Anyone with password"** — *not* "Anyone with the link",
+  which has no lock at all and would make the "locked" label a lie while
+  broadcasting a confidential URL. Figma checks the password server-side; the
+  password is shared by email. **Never put a password (or any secret) in these
+  pages** — the site is static, so anything checked here runs in the browser and
+  is readable in View Source. A client-side check is not a gate. Only the URL
+  belongs here, and only once the password is on.
+- **Messaging scope guardrail:** ownership was localized to Jenna's org and
+  leadership, NOT Meta's messaging ecosystem. Don't let titles or Role copy
+  widen into ecosystem-level claims.
+- These pages set **`is-motion` only** in their inline `<head>` script — never
+  `is-loading`. The scribble load-reveal is the homepage's alone.
+- Pages live one directory down, so assets are `../style.css`, `../js/main.js`,
+  `../images/…`, and nav links are `../index.html#work-section`. (The `@import`
+  URLs in `style.css` resolve relative to `style.css`, so they work as-is.)
+
+**`js/main.js` is shared by every page and is guarded accordingly.** Project
+pages have no hero, no `#work-section`/`#about`/`#contact`, and no work cards.
+`navSections` filters itself to the links that exist; `initHero()` returns early
+without `.intro`; the cursor and scroll-effect code null-checks. **This matters:
+`is-motion` hides every `[data-reveal]` pre-paint, so one TypeError in main.js
+would leave a project page permanently blank.** Keep new page-specific code
+behind a null check.
+- `darkPanel` is the blue panel the header inverts over (`is-over-dark`) and the
+  👋 cursor shows on: `#contact` on the homepage, `.conversation-invite` on the
+  Accessibility / Messaging pages. Loop and Facebook Groups have neither, so it's
+  null there and both features stay off.
 
 ## Token / Lookup Rules
 - **NEVER read `style.css` to find styles** — it only contains `@import` lines. Open the specific file in `css/components/` from the table above.

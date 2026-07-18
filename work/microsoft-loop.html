@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- [Meta Description] -->
+  <meta name="description" content="" />
+  <!-- [Case Study Title] — mirror the <h1> below -->
+  <title>Building Collaborative Workspaces — Jenna Ammerall</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@200;700&family=Inter:wght@400..700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../style.css?v=212" />
+  <!-- Pre-paint flag, set only when JS runs:
+       • is-motion — hides reveal targets so they can fade in without a flash
+         (skipped for reduced-motion visitors, who see everything).
+       Unlike index.html this page sets NO is-loading: the scribble load-reveal
+       is the homepage's alone, and there's no hero here to reveal. -->
+  <script>
+    (function () {
+      try {
+        if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          document.documentElement.classList.add('is-motion');
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body>
+
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  <!-- ============================================================
+       SITE HEADER — identical to index.html, except the nav links point
+       back to the homepage's sections rather than to in-page anchors.
+       ============================================================ -->
+  <header class="site-header" role="banner">
+    <div class="site-header-row">
+      <a class="site-name" href="../index.html" id="site-name">Jenna Ammerall.</a>
+      <nav class="site-nav-bar" aria-label="Primary navigation">
+        <div class="site-nav-group site-nav-left">
+          <a href="../index.html#work-section" id="nav-work">Work</a>
+        </div>
+        <div class="site-nav-group site-nav-center">
+          <a href="../index.html#about">About</a>
+        </div>
+        <div class="site-nav-group site-nav-right">
+          <a href="../index.html#contact">Contact</a>
+        </div>
+      </nav>
+      <button class="mobile-menu-toggle" type="button" aria-expanded="false" aria-controls="mobile-menu">Menu</button>
+    </div>
+  </header>
+
+  <!-- ============================================================
+       MOBILE MENU OVERLAY — same overlay as the homepage, links resolved
+       back to index.html. (Contact is intentionally omitted: the connect
+       block below IS the mobile contact.)
+       ============================================================ -->
+  <div class="mobile-menu" id="mobile-menu" role="dialog" aria-modal="true" aria-label="Site menu" aria-hidden="true">
+    <p class="mobile-menu-name">Jenna Ammerall.</p>
+    <nav class="mobile-menu-nav" aria-label="Mobile navigation">
+      <a href="../index.html#work-section"><span class="mobile-menu-dash">&mdash;</span> Work</a>
+      <a href="../index.html#about"><span class="mobile-menu-dash">&mdash;</span> About</a>
+    </nav>
+    <div class="mobile-menu-connect">
+      <p class="mobile-menu-connect-heading">If something here resonated, let's connect.</p>
+      <div class="mobile-menu-connect-links">
+        <a href="mailto:ammerallj@gmail.com">ammerallj@gmail.com<span class="visually-hidden"> (email)</span></a>
+        <a href="https://www.linkedin.com/in/jennaammerall" target="_blank" rel="noopener noreferrer">LinkedIn<span class="visually-hidden"> (opens in new tab)</span></a>
+        <a href="../resume.pdf" target="_blank" rel="noopener noreferrer">Resume<span class="visually-hidden"> (PDF, opens in new tab)</span></a>
+      </div>
+    </div>
+    <button class="mobile-menu-close" type="button" aria-label="Close menu">
+      <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+        <line x1="4" y1="4" x2="16" y2="16" />
+        <line x1="16" y1="4" x2="4" y2="16" />
+      </svg>
+    </button>
+  </div>
+
+  <main id="main-content">
+
+    <!-- ========================================================
+         1. HERO VISUAL
+         Swap the placeholder <div> for:
+         <img src="../images/[file].jpg" alt="[Hero Image alt text]" />
+         ======================================================== -->
+    <section class="project-hero" aria-label="Project hero image">
+      <figure class="project-hero-figure">
+        <span class="project-placeholder">[Hero Image]</span>
+      </figure>
+    </section>
+
+    <!-- ========================================================
+         2 + 3. CASE STUDY TITLE + METADATA
+         DELETE any metadata row you don't have. Do not leave it blank.
+         ======================================================== -->
+    <section class="page-section" aria-labelledby="project-title">
+      <div class="site-container project-masthead" data-reveal-group>
+
+        <div class="project-masthead-left">
+          <h1 class="project-title" id="project-title" data-reveal data-reveal-order="0">Building Collaborative Workspaces</h1>
+          <!-- Dek — the one-line description. Deliberately NOT a heading: it sits
+               under the title as a standfirst. -->
+          <p class="project-dek" data-reveal data-reveal-order="1">A live object people recognize on sight, wherever it lands.</p>
+        </div>
+
+        <div class="project-masthead-right" data-reveal data-reveal-order="1">
+          <dl class="project-meta-list">
+            <div class="project-meta-row">
+              <dt>Timeline</dt>
+              <dd>2020&ndash;2022</dd>
+            </div>
+            <div class="project-meta-row">
+              <dt>Role</dt>
+              <dd>UX Designer &middot; Interaction Design &middot; Platform Design &middot; Visual Design</dd>
+            </div>
+            <div class="project-meta-row">
+              <dt>Team</dt>
+              <dd>Design &middot; Product Management &middot; Engineering &middot; Research</dd>
+            </div>
+          </dl>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ========================================================
+         4 + 5. OVERVIEW → IMPACT  (no Contribution: Overview's second
+         paragraph already carries it)
+         ======================================================== -->
+    <section class="page-section" aria-labelledby="overview-heading">
+      <div class="site-container">
+
+        <div class="project-block" data-reveal-group>
+          <div class="project-block-left">
+            <h2 class="project-block-title" id="overview-heading" data-reveal data-reveal-order="0">Overview</h2>
+          </div>
+          <div class="project-block-right" data-reveal data-reveal-order="1">
+            <div class="about-body">
+              <p>As part of Microsoft Loop's founding design team, I defined the interaction foundations that made live collaborative components recognizable and usable across Microsoft 365.</p>
+              <p>I shaped the persistent controls for identity, sharing, and collaboration; the visual cues for presence and live editing; and the product's early visual identity, while helping ship the first Loop components into Teams.</p>
+              <p>See where Loop landed &rarr; <a href="https://www.microsoft.com/en-us/microsoft-loop" target="_blank" rel="noopener noreferrer">Explore Microsoft Loop<span class="visually-hidden"> (opens in new tab)</span></a></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="project-block" data-reveal-group>
+          <div class="project-block-left">
+            <h2 class="project-block-title" data-reveal data-reveal-order="0">Impact</h2>
+          </div>
+          <div class="project-block-right" data-reveal data-reveal-order="1">
+            <ul class="project-impact-list" role="list">
+              <li>Unified how every Loop component behaves across Microsoft 365 by designing the Loop control&mdash;the persistent interaction model for identity, sharing, and collaboration&mdash;later documented as the standard component structure for developers and patented as Interactive user interface controls for shared dynamic objects (<a href="https://www.patentworth.ai/details/12277305" target="_blank" rel="noopener noreferrer">US 12,277,305<span class="visually-hidden"> (opens in new tab)</span></a>).</li>
+              <li>Shipped Microsoft's first Loop components into Teams, enabling live collaborative tables, lists, agendas, and action items that stayed synchronized wherever they were shared&mdash;the <a href="https://fluidframework.com/" target="_blank" rel="noopener noreferrer">Fluid<span class="visually-hidden"> (opens in new tab)</span></a> work that later became Microsoft Loop and debuted at <a href="https://www.plainconcepts.com/recap-microsoft-ignite-2021/" target="_blank" rel="noopener noreferrer">Ignite 2021<span class="visually-hidden"> (opens in new tab)</span></a>.</li>
+              <li>Defined the component structure other developers now build to: Microsoft's public <a href="https://learn.microsoft.com/en-us/microsoftteams/platform/m365-apps/design-loop-components" target="_blank" rel="noopener noreferrer">developer documentation<span class="visually-hidden"> (opens in new tab)</span></a> specifies the header and border that mark a Loop component as live and portable.</li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer" role="contentinfo">
+    <div class="site-container">
+      <p>&copy; 2026 Jenna Ammerall &middot; Human directed. AI built.</p>
+    </div>
+  </footer>
+
+  <!-- Shared custom cursors. Kept so a <span class="ms-label">Microsoft</span>
+       or <span class="meta-label">Meta</span> in pasted copy behaves exactly as
+       it does on the homepage. -->
+  <div class="custom-cursor" id="custom-cursor" aria-hidden="true">Interested in learning more?</div>
+  <div class="meta-cursor" id="meta-cursor" aria-hidden="true">
+    <img src="../meta-logo.svg" alt="" />
+  </div>
+  <div class="ms-cursor" id="ms-cursor" aria-hidden="true">
+    <img src="../microsoft-logo.svg" alt="" />
+  </div>
+  <div class="wave-cursor" id="wave-cursor" aria-hidden="true">👋</div>
+
+  <script src="../js/main.js?v=161" defer></script>
+</body>
+</html>

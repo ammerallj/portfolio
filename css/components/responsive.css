@@ -27,11 +27,123 @@
 }
 
 /* ==========================================================================
+   1b. HERO @ 1280 (max-width: 1280px) — Figma frame 215:520
+   Scaled side-by-side: blob (1280 frame) left, 96px headline over it, copy at
+   the blob's bottom-right. The blob element is sized to the frame; js/main.js
+   swaps the blob PATH + SVG viewBox per tier, so the shape matches the frame.
+   ========================================================================== */
+@media (max-width: 1280px) {
+  .intro {
+    min-height: calc(100dvh - 66px);
+  }
+
+  .intro-blob {
+    top: -66px;
+    left: 0;
+    width: 1280px;
+    height: 775px;
+    transform: translateZ(0);
+  }
+
+  .intro-headline {
+    /* Figma "Laptop" 217:6003: 80px, block left 110px, top 215 frame (−66) */
+    position: absolute;
+    top: 149px;
+    left: 110px;
+    width: 542px;
+    font-size: 80px;
+    margin-bottom: 0;
+  }
+
+  .intro-line:nth-child(1) { margin-left: 0; }
+  .intro-line:nth-child(2) { margin-left: 166px; }
+  .intro-line:nth-child(3) { margin-left: 98px; }
+  .intro-line:nth-child(4) { margin-left: 271px; }
+
+  .intro-body {
+    /* Figma 217:6008: 4-col right column pinned between 66.67% and the content
+       edge, so it scales 376px→~291px across 1280→1025 and always clears the
+       (fixed) blob — no fluid blob/type scaling needed. */
+    position: absolute;
+    top: 371px;
+    left: calc(66.67% - 5.33px);
+    right: 56px;
+    width: auto;
+    max-width: none;
+  }
+}
+
+/* ==========================================================================
    2. LANDSCAPE TABLETS / IPADS (max-width: 1024px)
    The 542px side-by-side columns no longer fit, so the nav reflows and
    Work / Footprints / About stack into a single full-width column.
    ========================================================================== */
 @media (max-width: 1024px) {
+  /* Outer page gutter steps down from the 56px desktop base */
+  .site-container,
+  .site-header-row,
+  .intro-inner {
+    padding-inline: 32px;
+  }
+
+  /* Hero becomes a CENTERED STACK at 1024 (Figma 206:5442): blob centered, 64px
+     headline centered over it, copy centered below — the switch from the
+     side-by-side ≥1280 layout happens here, not at 768. Blob ELEMENT is
+     1044×775 rendering 1:1; js/main.js swaps in the matching 1024 path. */
+  .intro-inner {
+    position: relative;
+    height: 100%;
+    padding-top: 0;
+  }
+
+  .intro-blob {
+    /* 1024 frame (Subtract 206:5450); js/main.js supplies the matching path.
+       Centered: that path's silhouette center sits ~498px into the 1044
+       element, so offset left by that to land the shape on the viewport center. */
+    top: -66px;
+    left: calc(50% - 498px);
+    width: 1044px;
+    height: 775px;
+    transform: translateZ(0);
+  }
+
+  .intro-headline {
+    /* Figma 206:5501: centered block (frame x297,w429 → dead-center), top 215
+       frame (−66px header). */
+    position: absolute;
+    top: 149px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 429px;
+    font-size: 64px;
+    margin-bottom: 0;
+  }
+
+  /* Per-line stagger at 1024 (Figma 206:5501), re-set from the desktop indents */
+  .intro-line:nth-child(1) { margin-left: 0; }
+  .intro-line:nth-child(2) { margin-left: 114px; }
+  .intro-line:nth-child(3) { margin-left: 78px; }
+  .intro-line:nth-child(4) { margin-left: 232px; }
+
+  .intro-body {
+    /* Figma 206:5442: centered below the blob (w477), matching the centered
+       stack — was right-pinned when this tier was (wrongly) side-by-side. */
+    position: absolute;
+    top: 545px;
+    left: calc(50% - 238px);
+    right: auto;
+    width: 477px;
+    max-width: none;
+  }
+
+  .scroll-indicator {
+    position: absolute;
+    top: auto;
+    bottom: 8px;
+    left: calc(50% - 14px);
+    margin: 0;
+  }
+
   .site-header-row {
     gap: 2rem;
   }
@@ -41,16 +153,26 @@
     gap: 40px;
   }
 
-  .work-card-body {
-    flex-direction: column;
+  /* Tablet + phone work cards run Image -> Meta -> Title -> Description in a
+     single column. The desktop DOM nests title in .work-card-body/.work-card-left
+     and meta+description in .work-card-right, with the image a sibling AFTER
+     both — so display:contents dissolves all three wrappers and promotes the
+     four leaves to direct flex children of .work-card, which is what makes
+     interleaving meta between the image and the title possible at all. */
+  .work-card-body,
+  .work-card-left,
+  .work-card-right {
+    display: contents;
+  }
+
+  .work-card {
     gap: var(--space-md);
   }
 
-  .work-card-left,
-  .work-card-right {
-    flex: 0 0 auto;
-    width: 100%;
-  }
+  .work-card-image-link { order: 0; }
+  .work-card-meta { order: 1; }
+  .work-card-title { order: 2; }
+  .work-card-description { order: 3; }
 
   .footprints-layout {
     flex-direction: column;
@@ -86,6 +208,39 @@
     flex: 0 0 auto;
     width: 100%;
   }
+
+  /* The dek is 2.5rem on desktop, where the title is 72px+ and clearly outranks
+     it. Below here the title's clamp is shrinking toward its 2.5rem floor, so a
+     fixed 2.5rem dek would draw level with it — step the dek down first to keep
+     the title on top all the way to the phone tier. */
+  .project-dek {
+    font-size: 2rem;
+  }
+
+  /* Project overview pages: every two-column block collapses at the same tier
+     as Footprints / About / Contact above, and drops the fixed 542px column so
+     nothing overflows. Same idiom, so the project pages reflow in step with the
+     rest of the site.
+
+     ⚠️ The .conversation-invite-* selectors here are DEAD — no page renders that
+     component any more. See the DEAD CODE note in project-overview.css; delete
+     them with the rest of it, not on their own. */
+  .project-masthead,
+  .project-block,
+  .conversation-invite-meta {
+    flex-direction: column;
+    gap: var(--space-lg);
+  }
+
+  .project-masthead-left,
+  .project-masthead-right,
+  .project-block-left,
+  .project-block-right,
+  .conversation-invite-note,
+  .conversation-invite-connect {
+    flex: 0 0 auto;
+    width: 100%;
+  }
 }
 
 /* ==========================================================================
@@ -93,8 +248,49 @@
    Work imagery shrinks; the hero headline and intro paragraph go full width.
    ========================================================================== */
 @media (max-width: 768px) {
+  /* Outer page gutter steps down again */
+  .site-container,
+  .site-header-row,
+  .intro-inner {
+    padding-inline: 24px;
+  }
+
   .site-nav-bar {
     gap: 24px;
+  }
+
+  /* Tablet + phone: the scroll cue goes away — instead the hero ends short of
+     the fold so the first Work card reveals ~281px above it (Figma 217:6022 +
+     the 480 frame's card-at-563 geometry). 100dvh − 66 header − 64 section
+     padding − 281 peek = 100dvh − 411. Floor keeps the hero content (copy ends
+     ~635 here) from being clipped on short screens. */
+  .scroll-indicator {
+    display: none;
+  }
+
+  .intro {
+    min-height: max(640px, calc(100dvh - 411px));
+  }
+
+  /* Hero centers at 768 (Figma 217:6213): centered headline over the blob,
+     centered copy below. Blob keeps the 1044 ELEMENT from the 1024 tier; the 768
+     BLOBS entry is the SAME silhouette shifted 116px left in that canvas
+     (center ~382px in), so re-center it here rather than inherit 1024's offset. */
+  .intro-blob {
+    left: calc(50% - 382px);
+  }
+
+  .intro-headline {
+    left: 50%;
+    top: 152px;
+    transform: translateX(-50%);
+  }
+
+  .intro-body {
+    left: calc(50% - 237px);
+    right: auto;
+    top: 555px;
+    width: 474px;
   }
 
   .work-card-image-link,
@@ -105,15 +301,6 @@
   .work-card-image {
     height: 220px;
   }
-
-  .intro-headline {
-    max-width: 100%;
-  }
-
-  .intro-body {
-    align-self: stretch;
-    width: 100%;
-  }
 }
 
 /* ==========================================================================
@@ -122,10 +309,129 @@
    the footer copyright row stacks.
    ========================================================================== */
 @media (max-width: 480px) {
-  /* TODO(mobile menu): the 3 inline nav links are a stopgap here. Replace this
-     tier's nav with a proper mobile menu (hamburger/toggle) — pending. */
-  .site-nav-bar {
+  /* Page gutter steps down to its tightest (56 → 32 → 24 → 16px) so content
+     gets more room on a phone (applies to the whole page column + hero). */
+  .site-container,
+  .site-header-row,
+  .intro-inner {
+    padding-inline: 16px;
+  }
+
+  /* Phone hero content is shorter, so the card-reveal floor steps down from the
+     tablet tier's. 440 = the copy's own bottom (439) — the tightest the hero can
+     get before .intro's overflow:hidden would clip it. */
+  .intro {
+    min-height: max(440px, calc(100dvh - 411px));
+  }
+
+  /* Hero on phones (Figma 206:5502): centered 48px headline over the 390-frame
+     blob, centered copy below. */
+  .intro-headline {
+    font-size: 48px;
+    left: 50%;
+    top: 94px;
+    width: 281px;
+    transform: translateX(-50%);
+  }
+
+  .intro-line:nth-child(2) { margin-left: 67px; }
+  .intro-line:nth-child(3) { margin-left: 34px; }
+  .intro-line:nth-child(4) { margin-left: 133px; }
+
+  .intro-blob {
+    /* 390 element; its silhouette center sits ~194px in, so center it the same
+       way as the wider tiers (was left:0 — only centered at exactly 390px). */
+    top: -66px;
+    left: calc(50% - 194px);
+    width: 390px;
+    height: 844px;
+  }
+
+  .intro-body {
+    /* Centered (w350) — symmetric across 390→480 instead of pinned at left:20. */
+    left: calc(50% - 175px);
+    right: auto;
+    top: 351px;
+    width: 350px;
+  }
+
+  .intro-body p {
+    font-size: 17px;
+  }
+
+  /* Headlines step down to 32px on phones (from their 40px floor / clamp).
+     Covers Work card titles, the Public Footprints section title, and the
+     About + Contact headings (the last two otherwise bottom out at 2.5rem). */
+  .work-card-title,
+  .footprints-heading,
+  .about-name,
+  .contact-email,
+  .project-title,
+  .conversation-invite-heading,
+  .project-continue-link,
+  .project-block-title {
+    font-size: 2rem;
+  }
+
+  /* The dek is 2.5rem on desktop — bigger than the 2rem the title drops to
+     here, which would invert the hierarchy. Step it under the title. */
+  .project-dek {
+    font-size: 1.5rem;
+  }
+
+  /* Project overview: the metadata pairs stack (a 6.5rem <dt> column leaves too
+     little for the value on a phone), and Continue stacks under its eyebrow. */
+  .project-meta-row {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .project-meta-row dt {
+    flex: 0 0 auto;
+  }
+
+  .project-continue {
+    flex-direction: column;
     gap: var(--space-sm);
+  }
+
+  /* The lead paragraph steps down in step with the body copy above */
+  .project-lead {
+    font-size: 1.25rem;
+  }
+
+  /* Mobile menu: the inline Work/About/Contact links give way to a "Menu"
+     trigger that opens the full-screen .mobile-menu overlay (see
+     mobile-menu.css for its look, initMobileMenu() in main.js for behavior).
+     Showing .is-open is gated to this tier so the overlay can never linger
+     over the desktop layout if the viewport grows. */
+  .site-header-row {
+    gap: 1rem; /* let "Jenna Ammerall" sit on one line beside the trigger */
+  }
+  .site-nav-bar {
+    display: none;
+  }
+  .mobile-menu-toggle {
+    display: block;
+  }
+  .mobile-menu.is-open {
+    display: flex;
+  }
+
+  /* Phone work cards inherit the Image -> Meta -> Title -> Description order and
+     the flattened wrappers from the 1024 tier; only the 20px rhythm and the
+     Figma type sizes are specific to this breakpoint. */
+  .work-card {
+    gap: 20px;
+  }
+  .work-card-image {
+    height: 201px; /* Figma (radius stays 24px from the 768 tier) */
+  }
+  .work-card-meta {
+    font-size: 12px; /* Figma (down from the 13px shared eyebrow) */
+  }
+  .work-card-description {
+    font-size: 17px; /* Figma */
   }
 
   /* Let the email / LinkedIn / Resume row wrap instead of overflowing */

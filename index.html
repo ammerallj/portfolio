@@ -7,8 +7,8 @@
   <title>Jenna Ammerall — Product Designer</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@700&family=Inter:wght@400..700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=159" />
+  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@200;700&family=Inter:wght@400..700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css?v=214" />
   <!-- Pre-paint flags, set only when JS runs:
        • is-motion — hides reveal targets so they can fade in without a flash
          (skipped for reduced-motion visitors, who see everything).
@@ -38,7 +38,7 @@
        ============================================================ -->
   <header class="site-header" role="banner">
     <div class="site-header-row">
-      <a class="site-name" href="#" id="site-name">Jenna Ammerall</a>
+      <a class="site-name" href="#" id="site-name">Jenna Ammerall.</a>
       <nav class="site-nav-bar" aria-label="Primary navigation">
         <div class="site-nav-group site-nav-left">
           <a href="#work-section" id="nav-work">Work</a>
@@ -50,8 +50,39 @@
           <a href="#contact">Contact</a>
         </div>
       </nav>
+      <!-- Mobile-only trigger; the inline nav above is hidden at <=480px
+           (see responsive.css). Opens the full-screen .mobile-menu overlay. -->
+      <button class="mobile-menu-toggle" type="button" aria-expanded="false" aria-controls="mobile-menu">Menu</button>
     </div>
   </header>
+
+  <!-- ============================================================
+       MOBILE MENU OVERLAY (Figma nodes 123:3733 / 123:3743)
+       Full-screen blue panel: large Work / About links + a connect
+       block. Hidden by default; shown only at <=480px when .is-open
+       is set by initMobileMenu() in js/main.js.
+       ============================================================ -->
+  <div class="mobile-menu" id="mobile-menu" role="dialog" aria-modal="true" aria-label="Site menu" aria-hidden="true">
+    <p class="mobile-menu-name">Jenna Ammerall.</p>
+    <nav class="mobile-menu-nav" aria-label="Mobile navigation">
+      <a href="#work-section"><span class="mobile-menu-dash">&mdash;</span> Work</a>
+      <a href="#about"><span class="mobile-menu-dash">&mdash;</span> About</a>
+    </nav>
+    <div class="mobile-menu-connect">
+      <p class="mobile-menu-connect-heading">If something here resonated, let's connect.</p>
+      <div class="mobile-menu-connect-links">
+        <a href="mailto:ammerallj@gmail.com">ammerallj@gmail.com<span class="visually-hidden"> (email)</span></a>
+        <a href="https://www.linkedin.com/in/jennaammerall" target="_blank" rel="noopener noreferrer">LinkedIn<span class="visually-hidden"> (opens in new tab)</span></a>
+        <a href="resume.pdf" target="_blank" rel="noopener noreferrer">Resume<span class="visually-hidden"> (PDF, opens in new tab)</span></a>
+      </div>
+    </div>
+    <button class="mobile-menu-close" type="button" aria-label="Close menu">
+      <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+        <line x1="4" y1="4" x2="16" y2="16" />
+        <line x1="16" y1="4" x2="4" y2="16" />
+      </svg>
+    </button>
+  </div>
 
   <!-- ============================================================
        MAIN CONTENT
@@ -60,14 +91,27 @@
 
     <!-- INTRO -->
     <section class="intro" aria-labelledby="intro-heading">
+      <!-- Living blue blob. The base path below is the resting silhouette;
+           initHero() in js/main.js keeps this exact shape but lets each anchor
+           (and its bézier handles) drift by a tiny, slow, non-repeating amount,
+           so the edges flow like a fluid without the blob losing its identity.
+           Static for prefers-reduced-motion. -->
+      <svg class="intro-blob" viewBox="0 0 1440 760" preserveAspectRatio="xMinYMin meet" aria-hidden="true">
+        <path class="intro-blob-path" d="M319.313 133.184C128.375 105.018 55.7667 293.86 124.461 419.57C244.628 639.475 667.619 709.48 743.295 669.927C818.97 630.373 851.839 576.898 821.107 463.831C790.376 350.764 685.651 187.224 319.313 133.184Z"/>
+      </svg>
       <div class="intro-inner">
-        <h1 class="intro-headline" id="intro-heading">Shaping how products evolve through <em>systems.</em></h1>
+        <!-- The four words live inside the blob: initHero() drifts each line by
+             a few px along its own slow X/Y path, so the composition floats
+             gently. Transform only — no reflow, no layout shift. -->
+        <h1 class="intro-headline" id="intro-heading">
+          <span class="intro-line" style="--indent: 0.167em;">helping</span>
+          <span class="intro-line" style="--indent: 1.844em;">complex</span>
+          <span class="intro-line" style="--indent: 0.979em;">products</span>
+          <span class="intro-line" style="--indent: 3.344em;">evolve.</span>
+        </h1>
         <div class="intro-body">
-          <p>I'm drawn to the invisible layers of product&mdash;the foundations that help experiences evolve.</p>
+          <p>Senior product designer with 9+ years at Microsoft and Meta. I've helped products evolve alongside changing technologies, teams, and user needs.</p>
         </div>
-        <svg class="intro-divider" viewBox="0 0 1332 67" preserveAspectRatio="none" aria-hidden="true">
-          <path class="scribble-path" pathLength="1" d="M0.75 38.3863C0.75 38.5973 0.75 38.8084 57.5691 37.9239C114.388 37.0395 228.026 35.0531 294.933 33.1034C378.698 30.6623 406.47 24.6946 425.145 19.1182C433.482 16.6287 438.197 13.2595 439.055 10.7143C439.912 8.16916 436.436 6.14866 428.623 4.68103C409.276 1.04629 376.495 1.68846 337.083 3.12707C298.576 4.5326 266.463 13.9945 242.324 24.3524C221.33 33.3603 211.88 45.018 208.369 53.3955C206.811 57.1107 210.391 60.2148 216.407 62.1844C250.722 73.4188 303.78 55.9538 335.265 39.6522C342.368 35.9747 344.775 30.2943 345.771 25.7089C346.767 21.1236 344.769 16.8871 338.893 13.7161C325.55 6.51534 297.936 6.42554 266.932 7.4373C235.542 8.46164 209.36 18.4984 190.443 28.8378C174.76 37.4095 171.21 48.0552 171.327 55.2883C171.381 58.5946 175.287 60.9136 181.487 61.8948C218.624 67.7724 263.381 36.8626 288.176 16.0438C293.111 11.9002 294.921 7.81694 294.574 5.08319C294.228 2.34945 290.841 0.74484 286.873 0.750012C278.048 0.761516 270.96 7.38233 266.039 13.9509C263.633 17.1626 263.038 20.5598 264.259 23.2804C269.565 35.1003 307.465 33.1474 330.966 30.387C335.901 29.8073 338.7 27.3794 337.615 25.2708C336.531 23.1621 331.115 20.7195 325.63 19.621C315.202 17.5326 305.249 20.0592 297.778 22.3291C294.042 23.4644 291.292 25.561 292.52 27.324C293.749 29.087 299.263 30.7072 471.362 32.5117C643.46 34.3162 981.976 36.256 1330.75 38.2546" stroke="black" stroke-width="1.5" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
-        </svg>
       </div>
       <div class="scroll-indicator" aria-hidden="true">
         <div class="scroll-indicator-dot"></div>
@@ -82,64 +126,64 @@
           <li class="work-card" data-reveal-group>
             <div class="work-card-body">
               <div class="work-card-left">
-                <h2 class="work-card-title" id="work-heading" data-reveal>Scaling Accessibility Across Meta</h2>
+                <h2 class="work-card-title" id="work-heading" data-reveal data-reveal-order="0">Scaling Accessibility Across Meta</h2>
               </div>
-              <div class="work-card-right" data-reveal>
-                <p class="work-card-meta">Meta &middot; Risk Areas, Accessibility &middot; 2024&ndash;2026</p>
-                <p class="work-card-description">Transformed accessibility knowledge into scalable guidance and experiences that enabled product teams to build more accessible products.</p>
+              <div class="work-card-right">
+                <p class="work-card-meta" data-reveal data-reveal-order="1">Meta &middot; Risk Areas, Accessibility &middot; 2024&ndash;2026</p>
+                <p class="work-card-description" data-reveal data-reveal-order="1">Everyone agreed accessibility mattered. Nobody agreed what it meant in practice.</p>
               </div>
             </div>
-            <a class="work-card-image-link" href="mailto:ammerallj@gmail.com" data-reveal>
+            <a class="work-card-image-link" href="work/accessibility.html" data-reveal data-reveal-order="2">
               <img class="work-card-image" src="images/work-accessibility.jpg?v=3" alt="Preview of accessibility guidance, product features, and a knowledge base built at Meta" loading="lazy" />
-              <span class="visually-hidden"> (email Jenna Ammerall)</span>
+              <span class="visually-hidden">Scaling Accessibility Across Meta — project overview</span>
             </a>
           </li>
 
           <li class="work-card" data-reveal-group>
             <div class="work-card-body">
               <div class="work-card-left">
-                <h2 class="work-card-title" data-reveal>Creating Continuity Across Messaging</h2>
+                <h2 class="work-card-title" data-reveal data-reveal-order="0">Creating Continuity Across Messaging</h2>
               </div>
-              <div class="work-card-right" data-reveal>
-                <p class="work-card-meta">Meta &middot; Facebook Messaging &middot; 2023&ndash;2024</p>
-                <p class="work-card-description">Improved conversational continuity across in-app messaging by defining shared interaction patterns between entry points and conversation surfaces.</p>
+              <div class="work-card-right">
+                <p class="work-card-meta" data-reveal data-reveal-order="1">Meta &middot; Facebook Messaging &middot; 2023&ndash;2024</p>
+                <p class="work-card-description" data-reveal data-reveal-order="1">Sharing something privately meant leaving Facebook to reply. The conversation started in one place and finished in another.</p>
               </div>
             </div>
-            <a class="work-card-image-link" href="mailto:ammerallj@gmail.com" data-reveal>
+            <a class="work-card-image-link" href="work/messaging.html" data-reveal data-reveal-order="2">
               <img class="work-card-image" src="images/work-messaging.jpg?v=3" alt="Preview of continuity work across Facebook Messaging surfaces" loading="lazy" />
-              <span class="visually-hidden"> (email Jenna Ammerall)</span>
+              <span class="visually-hidden">Creating Continuity Across Messaging — project overview</span>
             </a>
           </li>
 
           <li class="work-card" data-reveal-group>
             <div class="work-card-body">
               <div class="work-card-left">
-                <h2 class="work-card-title" data-reveal>Building Collaborative Workspaces</h2>
+                <h2 class="work-card-title" data-reveal data-reveal-order="0">Building Live Collaborative Components</h2>
               </div>
-              <div class="work-card-right" data-reveal>
-                <p class="work-card-meta">Microsoft &middot; Loop &middot; 2020&ndash;2022</p>
-                <p class="work-card-description">Shaped the early product foundations, cross-app experiences and visual identity for Microsoft's collaborative workspace as part of the founding design team.</p>
+              <div class="work-card-right">
+                <p class="work-card-meta" data-reveal data-reveal-order="1">Microsoft &middot; Loop &middot; 2020&ndash;2022</p>
+                <p class="work-card-description" data-reveal data-reveal-order="1">Every object in Microsoft 365 belonged to the app it lived in. This one had to belong to itself.</p>
               </div>
             </div>
-            <a class="work-card-image-link" href="mailto:ammerallj@gmail.com" data-reveal>
+            <a class="work-card-image-link" href="work/microsoft-loop.html" data-reveal data-reveal-order="2">
               <img class="work-card-image" src="images/work-loop.jpg?v=3" alt="Preview of Microsoft Loop collaborative workspace components" loading="lazy" />
-              <span class="visually-hidden"> (email Jenna Ammerall)</span>
+              <span class="visually-hidden">Building Live Collaborative Components — project overview</span>
             </a>
           </li>
 
           <li class="work-card" data-reveal-group>
             <div class="work-card-body">
               <div class="work-card-left">
-                <h2 class="work-card-title" data-reveal>Helping People Navigate Communities</h2>
+                <h2 class="work-card-title" data-reveal data-reveal-order="0">Helping People Navigate Communities</h2>
               </div>
-              <div class="work-card-right" data-reveal>
-                <p class="work-card-meta">Meta &middot; Facebook Groups &middot; 2022&ndash;2023</p>
-                <p class="work-card-description">Strengthened the foundational experiences that shaped how people discovered, understood, and participated in communities.</p>
+              <div class="work-card-right">
+                <p class="work-card-meta" data-reveal data-reveal-order="1">Meta &middot; Facebook Groups &middot; 2022&ndash;2023</p>
+                <p class="work-card-description" data-reveal data-reveal-order="1">Groups had been built across different teams at different moments. It showed in the navigation, the panels, the transitions, the states.</p>
               </div>
             </div>
-            <a class="work-card-image-link" href="mailto:ammerallj@gmail.com" data-reveal>
+            <a class="work-card-image-link" href="work/facebook-groups.html" data-reveal data-reveal-order="2">
               <img class="work-card-image" src="images/work-communities.jpg?v=3" alt="Preview of community navigation work across Facebook Groups" loading="lazy" />
-              <span class="visually-hidden"> (email Jenna Ammerall)</span>
+              <span class="visually-hidden">Helping People Navigate Communities — project overview</span>
             </a>
           </li>
 
@@ -167,6 +211,8 @@
                 <li><a href="https://medium.com/microsoft-design/designing-for-power-simplicity-9cddec615567" target="_blank" rel="noopener noreferrer">Evolving Office 365 with Fluent Design<span class="visually-hidden"> (opens in new tab)</span></a></li>
                 <li><a href="https://www.theverge.com/2023/11/15/23959801/microsoft-loop-launch-notion-competitor" target="_blank" rel="noopener noreferrer">Microsoft Loop Launch — The Verge<span class="visually-hidden"> (opens in new tab)</span></a></li>
                 <li><a href="https://www.patentworth.ai/details/12277305" target="_blank" rel="noopener noreferrer">Patent: Shared Dynamic Objects (Loop)<span class="visually-hidden"> (opens in new tab)</span></a></li>
+                <li><a href="https://techcommunity.microsoft.com/blog/microsoft_365blog/microsoft-loop-at-ignite-2022/3643382/replies/3660250" target="_blank" rel="noopener noreferrer">Ignite 2022<span class="visually-hidden"> (opens in new tab)</span></a></li>
+                <li><a href="https://www.youtube.com/watch?v=BkhaV46HM2E" target="_blank" rel="noopener noreferrer">Introducing Microsoft Loop<span class="visually-hidden"> (opens in new tab)</span></a></li>
               </ul>
             </div>
 
@@ -270,6 +316,6 @@
   </div>
   <div class="wave-cursor" id="wave-cursor" aria-hidden="true">👋</div>
 
-  <script src="js/main.js?v=151" defer></script>
+  <script src="js/main.js?v=163" defer></script>
 </body>
 </html>
