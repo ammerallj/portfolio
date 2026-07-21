@@ -301,6 +301,30 @@
   margin-top: var(--gap-group);
 }
 
+/* Run the split masthead tighter to the nav than a normal section: the title
+   sitting a little closer to the header is a deliberate trade that gives the tall
+   portrait image more vertical room, so the masthead reads taller and the image
+   is cropped less (or not at all on a standard laptop). Scoped with :has() to
+   this one section — the other pages' #overview keeps the full --gap-section top
+   padding. (The 480 tier restores breathing room on phones, see responsive.css.) */
+.page-section:has(.project-masthead--split) {
+  padding-top: 48px;
+}
+
+/* Keep the metadata + description within the desktop fold while letting the image
+   grow as tall as the space allows. The portrait image (aspect 1100/1400) is the
+   tallest thing in the row and drives its height; cap it so the description (flush
+   with the image bottom) clears the floating section-pills. The subtracted 198px
+   is the chrome above the description that isn't the image — 66px header + 48px
+   reduced section padding-top + ~84px pills reserve at the bottom — with a little
+   slack. On a standard-height laptop the image shows at full height (no crop);
+   shorter viewports crop the portrait top/bottom via object-fit: cover. Scoped to
+   the split so other pages' carousels are untouched; reset at the ≤1024 stack in
+   responsive.css (there the image is full-width above the text, not a fold row). */
+.project-masthead--split .project-figure {
+  max-height: calc(100dvh - 205px);
+}
+
 /* The project image. Portrait, to sit beside a tall left column; rounded on the
    same 60px as the Work card and the hero it replaces (→24px at the 768 tier,
    with .work-card-image in responsive.css). The neutral fill shows through at
@@ -622,19 +646,28 @@
 .section-pills a {
   font-family: var(--font-ui);
   font-size: 0.9375rem;
-  font-weight: 500;
+  /* Regular weight, matching the unselected header nav items (both are also
+     --color-text-70). The active pill steps up to 600 below. */
+  font-weight: 400;
   letter-spacing: -0.01em;
   color: var(--color-text-70);
   text-decoration: none;
   padding: 8px 18px;
+  /* Transparent hairline at rest so the hover outline can fade in with no layout
+     shift — the same chip the header nav shows on hover (header.css). */
+  border: 1px solid transparent;
   border-radius: 100px;
   white-space: nowrap;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
+/* Hover — same as the nav item: text brightens to 90% black and a 75%-black pill
+   outline fades in. Only on the unselected pills; the active pill keeps its solid
+   fill (a filled pill needs no outline). */
 @media (hover: hover) {
-  .section-pills a:hover {
-    color: var(--color-text);
+  .section-pills a:not(.is-active):hover {
+    color: rgba(0, 0, 0, 0.9);
+    border-color: rgba(0, 0, 0, 0.75);
   }
 }
 
@@ -654,10 +687,11 @@
 
 /* Locked variant — a "there's more, but it's gated" chip. Used where the Process
    content is confidential (Accessibility / Messaging): it completes the
-   Overview → Process → Impact story while staying honestly locked. Muted, carries
-   a lock glyph, and is EXCLUDED from the scroll-spy in main.js so it never takes
-   the solid active fill. It still links — to the locked access panel at the foot
-   of the page (#process-locked), where the reader can request the password. */
+   Overview → Process → Impact story while staying honestly locked. Muted at rest
+   and carrying a lock glyph, but it maps to a real section (#process-locked, the
+   access panel), so it IS in the scroll-spy — its active state has to work like
+   any other pill. It still links there, where the reader can request the
+   password. */
 .section-pills a.section-pill-locked {
   display: inline-flex;
   align-items: center;
@@ -673,12 +707,15 @@
   }
 }
 
-/* Defensive: even if the spy ever tags it, the locked chip keeps its muted look
-   rather than flipping to the solid active pill. */
+/* Selected — the locked chip takes the same solid fill as any active pill, at
+   full opacity. The lock glyph stays (currentColor turns it cream on the fill),
+   so it still reads as gated while clearly showing as the current section. The
+   extra class beats the muted base rule above it. */
 .section-pills a.section-pill-locked.is-active {
-  background-color: transparent;
-  color: var(--color-text-70);
-  font-weight: 500;
+  color: var(--color-bg);
+  background-color: var(--color-text);
+  font-weight: 600;
+  opacity: 1;
 }
 
 .section-pill-lock {
@@ -745,6 +782,13 @@
   letter-spacing: -0.02em;
   line-height: 1.1;
   color: var(--color-text);
+  /* Underline is always present but transparent, so hover fades its COLOUR in
+     rather than snapping the line on (text-decoration itself can't animate).
+     Matches the arrow's 0.3s nudge so the whole hover eases together. */
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 4px;
+  transition: text-decoration-color 0.3s ease;
 }
 
 .next-case-description {
@@ -770,7 +814,6 @@
     transform: translateX(10px);
   }
   .next-case:hover .next-case-title {
-    text-decoration: underline;
-    text-underline-offset: 4px;
+    text-decoration-color: currentColor;
   }
 }

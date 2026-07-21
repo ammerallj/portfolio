@@ -62,16 +62,21 @@
   background-color: #d9d9d9;
   flex-shrink: 0;
   transform: scale(1);
-  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  /* filter joins the transition so the hover blur eases in/out with the zoom. */
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), filter 0.4s ease;
 }
 
 .work-card-image-link:focus-visible .work-card-image {
   transform: scale(1.04);
+  filter: blur(1px);
 }
 
 @media (hover: hover) {
   .work-card-image-link:hover .work-card-image {
     transform: scale(1.04);
+    /* A slight blur behind the → badge. The simultaneous scale(1.04) overfills
+       the frame, so the softened edges stay covered by the rounded clip. */
+    filter: blur(1px);
   }
 }
 

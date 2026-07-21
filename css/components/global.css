@@ -292,19 +292,25 @@ a {
    CUSTOM CURSOR
    ============================================================ */
 
+/* A round black badge holding a single "→" glyph — the "go to this case study"
+   affordance that follows the pointer over a Work-card image. (Was a pill with
+   the label "Interested in learning more?"; now just the arrow, so it's sized as
+   a circle rather than a text pill.) */
 .custom-cursor {
   position: fixed;
   pointer-events: none;
   z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
   background: var(--color-text);
   color: var(--color-bg);
   font-family: var(--font-ui);
-  font-size: 0.875rem;
-  font-weight: 400;
-  letter-spacing: -0.01em;
-  padding: 0.5rem 0.875rem;
-  border-radius: 100px;
-  white-space: nowrap;
+  font-size: 1.5rem;
+  line-height: 1;
+  border-radius: 50%;
   opacity: 0;
   transform: translate(-50%, -50%) scale(0.85);
   transition: opacity 0.2s ease, transform 0.2s ease;

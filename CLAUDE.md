@@ -54,10 +54,12 @@ its pill is a **locked chip** (`.section-pill-locked`): a muted lock-glyph
 request the password. On those two pages that panel is the **Process step**: it
 sits between Overview and Impact (DOM order `#overview → #process-locked →
 #impact`) so the page order matches the pills and closes on Impact — it is no
-longer the after-Impact tail it started as. The locked chip is **excluded from the scroll-spy** (built
-with `a:not(.section-pill-locked)`) so it never takes the solid active fill;
-navigation still works via the shared Lenis anchor handler. Never link a normal
-pill to a section that isn't there — use the locked variant when the content is
+longer the after-Impact tail it started as. Because it maps to a real section,
+the locked chip **is in the scroll-spy** like every pill (built with plain `a`),
+so selecting it works — its active state takes the same solid fill as the others,
+just keeping the lock glyph (muted-but-filled; see `.section-pill-locked.is-active`
+in project-overview.css §8). Never link a normal pill to a section that isn't
+there — use the locked variant when the content is
 gated. The markup is static `<a>` links (works with no JS); the `sectionPills` array +
 the spy block in `updateScrollEffects` (js/main.js) add the active state,
 `aria-current`, and tuck the bar away once the footer is in view. Homepage has no `.section-pills`,

@@ -18,10 +18,18 @@
 }
 
 .site-footer p {
-  font-family: var(--font-body);
-  font-size: 1rem;
+  /* Metadata treatment — the same 13px uppercase label style as .section-label /
+     the project metadata dt (--font-ui, 500, 0.05em, uppercase), at 70% so the
+     copyright recedes as fine print. opacity (not a 70% colour) so it reads as
+     70% against BOTH footer variants: white on the blue homepage footer, and
+     --color-text on the cream project footer below. */
+  font-family: var(--font-ui);
+  font-size: 0.8125rem; /* 13px */
+  font-weight: 500;
   letter-spacing: 0.05em;
+  text-transform: uppercase;
   color: #fff;
+  opacity: 0.7;
 }
 
 /* Footer mobile stacking lives in css/components/responsive.css */

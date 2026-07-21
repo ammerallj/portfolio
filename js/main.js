@@ -45,11 +45,13 @@ const siteHeader = document.querySelector('.site-header');
 // #process / #impact); the anchor clicks glide via the shared Lenis handler in
 // setupLenis(). The spy + footer tuck-away live in updateScrollEffects().
 const sectionPillBar = document.querySelector('.section-pills');
-// `:not(.section-pill-locked)` keeps the locked "Process" chip (Accessibility /
-// Messaging) out of the active-state rotation — it stays muted rather than ever
-// taking the solid fill. Its href still navigates via the shared Lenis handler.
+// Every pill — including the locked "Process" chip (Accessibility / Messaging) —
+// maps to a real in-page section, so all of them take part in the scroll-spy.
+// The pills are in DOM/scroll order (overview → process → impact), which the spy
+// below relies on to pick the last section above the marker. The locked chip's
+// selected look is styled muted-but-filled in project-overview.css.
 const sectionPills = sectionPillBar
-  ? Array.from(sectionPillBar.querySelectorAll('a:not(.section-pill-locked)'))
+  ? Array.from(sectionPillBar.querySelectorAll('a'))
       .map(link => ({ link, el: document.querySelector(link.getAttribute('href')) }))
       .filter(s => s.el)
   : [];
@@ -237,13 +239,66 @@ function initHero() {
     return IDLE_FRAC;
   }
 
+  // ---- Hover morph — the egg yields under the cursor (fine pointers only) --
+  // A gaussian push composed with the idle drift: anchors near the pointer ease
+  // away from it, so the edge under the cursor flexes while the far side holds.
+  // hoverK eases the whole effect in/out (enter/leave never snaps) and each
+  // anchor's offset is lerped per-frame, so quick mouse sweeps read as the egg
+  // lagging softly behind the cursor rather than twitching.
+  const finePointer = window.matchMedia('(pointer: fine)');
+  const HOVER_PUSH_FRAC = 16 / 1440;   // max push ≈ 1.1% of the blob's width
+  const HOVER_SIGMA_FRAC = 0.24;       // falloff radius vs the blob's width
+  const hover = { x: 0, y: 0, over: false };
+  let hoverK = 0;
+  const hoverOff = [[0, 0], [0, 0], [0, 0], [0, 0]];
+
+  function updateHover(e) {
+    const r = blobSvg.getBoundingClientRect();
+    if (!r.width) return;
+    // Pointer position in the blob's viewBox space (the element renders 1:1 or
+    // uniformly scaled, so one scale factor maps both axes).
+    const scale = blob.vw / r.width;
+    hover.x = (e.clientX - r.left) * scale;
+    hover.y = (e.clientY - r.top) * scale;
+    try {
+      hover.over = blobPath.isPointInFill(new DOMPoint(hover.x, hover.y));
+    } catch (err) {
+      // No isPointInFill (old engines): fall back to "anywhere over the hero".
+      hover.over = true;
+    }
+  }
+  if (finePointer.matches && blobSvg) {
+    intro.addEventListener('pointermove', updateHover);
+    intro.addEventListener('pointerleave', () => { hover.over = false; });
+  }
+
   function frame(now) {
     if (!running) return;
     rafId = requestAnimationFrame(frame);
     const t = (now - startT) / 1000;
     const k = envelope(t);
     const amp = k * blob.vw * AMP_FRAC;
-    blobPath.setAttribute('d', blobPathD(blob, [drift(0, t, amp), drift(1, t, amp), drift(2, t, amp), drift(3, t, amp)]));
+
+    // Ease the hover presence, then each anchor's push toward its target.
+    hoverK += ((hover.over ? 1 : 0) - hoverK) * 0.08;
+    const push = blob.vw * HOVER_PUSH_FRAC;
+    const sigma = blob.vw * HOVER_SIGMA_FRAC;
+    const o = [];
+    for (let i = 0; i < 4; i++) {
+      let tx = 0, ty = 0;
+      if (hoverK > 0.001) {
+        const vx = blob.A[i][0] - hover.x, vy = blob.A[i][1] - hover.y;
+        const dist = Math.hypot(vx, vy) || 1;
+        const mag = hoverK * push * Math.exp(-(dist * dist) / (2 * sigma * sigma));
+        tx = (vx / dist) * mag;
+        ty = (vy / dist) * mag;
+      }
+      hoverOff[i][0] += (tx - hoverOff[i][0]) * 0.12;
+      hoverOff[i][1] += (ty - hoverOff[i][1]) * 0.12;
+      const dr = drift(i, t, amp);
+      o.push([dr[0] + hoverOff[i][0], dr[1] + hoverOff[i][1]]);
+    }
+    blobPath.setAttribute('d', blobPathD(blob, o));
   }
   function play() { if (!running) { running = true; rafId = requestAnimationFrame(frame); } }
   function pause() { running = false; if (rafId) cancelAnimationFrame(rafId); }

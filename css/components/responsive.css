@@ -278,6 +278,14 @@
     flex: 0 0 auto;
     width: 100%;
   }
+
+  /* Once the split masthead stacks (image full-width above the text), drop the
+     desktop fold-fit cap on the figure — there's no row to keep within the fold,
+     and cropping a full-width image would just lose detail. (Base cap lives in
+     project-overview.css, scoped to .project-masthead--split.) */
+  .project-masthead--split .project-figure {
+    max-height: none;
+  }
 }
 
 /* ==========================================================================
