@@ -34,10 +34,63 @@
   --space-lg: 4rem;
   --space-xl: 6rem;
 
+  /* ----------------------------------------------------------------
+     SPACING SCALE — three roles, one value each per breakpoint.
+     Every vertical gap on the site is one of these three; picking a
+     raw px value instead is how the tiers drifted apart before.
+
+       --gap-content  within one thing: paragraphs in a block, an
+                      eyebrow and its content, items in a stacked card
+       --gap-group    between things in a section: block → block,
+                      a stacked layout's columns
+       --gap-section  between peer sections: card → card
+       --gap-heading  under a BIG section title (About, Contact),
+                      before its content. Sized as a RATIO of the
+                      title's type, not the screen: 144 under 96px
+                      display type is 1.5×, the upper end of the
+                      1.25–1.5× a line that large wants beneath it.
+                      Ceiling, not preference: the heading also sits
+                      ~193px from the previous section's content, and
+                      once the two distances converge it stops
+                      reading as introducing what follows.
+
+     The values below are the DESKTOP (≥1025) end. The scale is
+     authored mobile-first and documented in full at the top of
+     responsive.css — read that for the reasoning; the per-tier
+     overrides live there too, in each tier's `:root`.
+
+     NOT part of the scale (deliberate, documented at their rules):
+     `.page-section` padding-block, which is a flat 64 at EVERY tier
+     so both sides of every divider match; the hero's blob-relative
+     spacing; and the desktop column gaps on .about-layout /
+     .footprints-layout, which are grid math, not spacing. */
+  --gap-content: 20px;
+  --gap-group: 60px;
+  --gap-section: 96px;
+  --gap-heading: 144px;
+
+  /* Outer page gutter (.site-container / .site-header-row) */
+  --page-gutter: 56px;
+
   --measure: 65ch;
 
   --line-height-body: 1.7;
   --line-height-heading: 1.15;
+
+  /* Hero description (the intro right-column copy). Fluid 24px→28px across
+     the 1025→1440 band (Figma 217:5910 → 198:725), frozen at 28px above;
+     responsive.css re-values these per tier (20px/1.3 ≤1024, 17px ≤480)
+     instead of re-declaring rules. */
+  --size-hero-description: clamp(24px, 14.12px + 0.9639vw, 28px);
+  --line-height-hero-description: 1.05;
+
+  /* The site's shared right column (nav block, hero description, Work card
+     descriptions, Footprints/About/Contact right blocks): ALWAYS 5 columns
+     of the fluid 12-col grid (56px margins, 20px gutters) — 5·(100vw−332px)/12
+     + 4 gutters = 41.667vw − 58.33px. 542px at 1440, 475 at 1280, 369 at the
+     1025 band floor; frozen at 542 above 1440. Kept flush right via each
+     consumer's own right:56px / flex row. */
+  --width-right-column: clamp(368.75px, 41.667vw - 58.33px, 541.67px);
 }
 
 /* ============================================================
@@ -154,10 +207,12 @@ body {
    LAYOUT
    ============================================================ */
 
+/* .intro-inner is deliberately NOT here: the hero lockup is a centered fixed
+   block, not a gutter container — hero.css zeroes its padding and holds its
+   width with auto margins, so the page gutter must not touch it. */
 .site-container,
-.site-header-row,
-.intro-inner {
-  padding-inline: 56px;
+.site-header-row {
+  padding-inline: var(--page-gutter);
   width: 100%;
 }
 
@@ -166,9 +221,13 @@ body {
    ============================================================ */
 
 .page-section {
-  /* 64px top/bottom for all content sections (sides are the shared
-     56px from .site-container) */
-  padding-block: 64px;
+  /* Equal on BOTH sides, so a section closes and the next one opens on the same
+     measure across every divider (the hairlines and the blue Contact edge).
+     That symmetry is the rule — it reads instantly when it's wrong — and using
+     one token for both sides is what guarantees it. The value scales with the
+     tier: 96 above the phone tier, 64 at ≤480.
+     Sides come from .site-container's --page-gutter. */
+  padding-block: var(--gap-section);
   border-bottom: 1px solid var(--color-border);
 }
 
@@ -222,8 +281,11 @@ a {
   color: var(--color-text);
 }
 
-a:hover {
-  text-decoration-thickness: 2px;
+/* True-hover devices only — on touch, tapped :hover sticks (see header.css) */
+@media (hover: hover) {
+  a:hover {
+    text-decoration-thickness: 2px;
+  }
 }
 
 /* ============================================================
@@ -255,8 +317,10 @@ a:hover {
   transform: translate(-50%, -50%) scale(1);
 }
 
-.work-card-image:hover {
-  cursor: none;
+@media (hover: hover) {
+  .work-card-image:hover {
+    cursor: none;
+  }
 }
 
 .meta-label,
@@ -266,9 +330,13 @@ a:hover {
   transition: color 0.3s ease;
 }
 
-.meta-label:hover,
-.ms-label:hover {
-  color: transparent;
+/* Guarded: the text goes transparent trusting the JS cursor to replace it —
+   on touch there is no mousemove, so a stuck tap-:hover would blank the word */
+@media (hover: hover) {
+  .meta-label:hover,
+  .ms-label:hover {
+    color: transparent;
+  }
 }
 
 .meta-cursor,

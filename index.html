@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@200;700&family=Inter:wght@400..700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=214" />
+  <link rel="stylesheet" href="style.css?v=319" />
   <!-- Pre-paint flags, set only when JS runs:
        • is-motion — hides reveal targets so they can fade in without a flash
          (skipped for reduced-motion visitors, who see everything).
@@ -91,30 +91,25 @@
 
     <!-- INTRO -->
     <section class="intro" aria-labelledby="intro-heading">
-      <!-- Living blue blob. The base path below is the resting silhouette;
-           initHero() in js/main.js keeps this exact shape but lets each anchor
-           (and its bézier handles) drift by a tiny, slow, non-repeating amount,
-           so the edges flow like a fluid without the blob losing its identity.
-           Static for prefers-reduced-motion. -->
-      <svg class="intro-blob" viewBox="0 0 1440 760" preserveAspectRatio="xMinYMin meet" aria-hidden="true">
-        <path class="intro-blob-path" d="M319.313 133.184C128.375 105.018 55.7667 293.86 124.461 419.57C244.628 639.475 667.619 709.48 743.295 669.927C818.97 630.373 851.839 576.898 821.107 463.831C790.376 350.764 685.651 187.224 319.313 133.184Z"/>
+      <!-- Living blue blob (Figma 258:479, desktop). The base path below is the
+           resting silhouette; initHero() in js/main.js keeps this exact shape but
+           lets each anchor (and its bézier handles) drift by a tiny, slow amount
+           as the page loads, then settles it to rest. Full-bleed and centered —
+           the copy sits inside it. Static for prefers-reduced-motion / no-JS. -->
+      <svg class="intro-blob" viewBox="0 0 1440 760" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+        <path class="intro-blob-path" d="M1159.15 272.474C1101 184 643.129 -9.69 373.882 169.788C219.966 272.39 163.354 538.495 372.189 627.318C772.866 797.738 988.356 674.041 1095.95 561.979C1203.54 449.916 1217.31 360.947 1159.15 272.474Z"/>
       </svg>
       <div class="intro-inner">
-        <!-- The four words live inside the blob: initHero() drifts each line by
-             a few px along its own slow X/Y path, so the composition floats
-             gently. Transform only — no reflow, no layout shift. -->
-        <h1 class="intro-headline" id="intro-heading">
-          <span class="intro-line" style="--indent: 0.167em;">helping</span>
-          <span class="intro-line" style="--indent: 1.844em;">complex</span>
-          <span class="intro-line" style="--indent: 0.979em;">products</span>
-          <span class="intro-line" style="--indent: 3.344em;">evolve.</span>
-        </h1>
-        <div class="intro-body">
-          <p>Senior product designer with 9+ years at Microsoft and Meta. I've helped products evolve alongside changing technologies, teams, and user needs.</p>
+        <!-- Centered lockup inside the blob (Figma 258:497): the italic
+             positioning claim LEADS, the roman credential follows (48px below),
+             then the CTA 80px under. Copy is left-aligned (ragged) within a
+             750px block that centers on the page. The h1 stays on the
+             credential — it's the better document title — but reads second. -->
+        <div class="intro-copy">
+          <p class="intro-claim">I design for products in transition &mdash; shaping how they change without losing what makes them work.</p>
+          <h1 class="intro-headline" id="intro-heading">Senior product designer with over nine years designing at Microsoft and Meta.</h1>
         </div>
-      </div>
-      <div class="scroll-indicator" aria-hidden="true">
-        <div class="scroll-indicator-dot"></div>
+        <a class="intro-cta" href="#work-section"><span class="intro-cta-label">See selected work</span> <span aria-hidden="true">&darr;</span></a>
       </div>
     </section>
 
@@ -134,7 +129,7 @@
               </div>
             </div>
             <a class="work-card-image-link" href="work/accessibility.html" data-reveal data-reveal-order="2">
-              <img class="work-card-image" src="images/work-accessibility.jpg?v=3" alt="Preview of accessibility guidance, product features, and a knowledge base built at Meta" loading="lazy" />
+              <img class="work-card-image" src="images/work-accessibility.jpg?v=4" alt="Preview of accessibility guidance, product features, and a knowledge base built at Meta" loading="eager" fetchpriority="high" />
               <span class="visually-hidden">Scaling Accessibility Across Meta — project overview</span>
             </a>
           </li>
@@ -146,7 +141,7 @@
               </div>
               <div class="work-card-right">
                 <p class="work-card-meta" data-reveal data-reveal-order="1">Meta &middot; Facebook Messaging &middot; 2023&ndash;2024</p>
-                <p class="work-card-description" data-reveal data-reveal-order="1">Sharing something privately meant leaving Facebook to reply. The conversation started in one place and finished in another.</p>
+                <p class="work-card-description" data-reveal data-reveal-order="1">Sharing something privately meant leaving Facebook to reply. It started in one place and finished in another.</p>
               </div>
             </div>
             <a class="work-card-image-link" href="work/messaging.html" data-reveal data-reveal-order="2">
@@ -178,7 +173,7 @@
               </div>
               <div class="work-card-right">
                 <p class="work-card-meta" data-reveal data-reveal-order="1">Meta &middot; Facebook Groups &middot; 2022&ndash;2023</p>
-                <p class="work-card-description" data-reveal data-reveal-order="1">Groups had been built across different teams at different moments. It showed in the navigation, the panels, the transitions, the states.</p>
+                <p class="work-card-description" data-reveal data-reveal-order="1">Each community had a sense of place. Moving between them didn't.</p>
               </div>
             </div>
             <a class="work-card-image-link" href="work/facebook-groups.html" data-reveal data-reveal-order="2">
@@ -274,7 +269,12 @@
     <section class="page-section contact-section" aria-labelledby="contact-heading" id="contact">
       <div class="site-container contact-inner" data-reveal-group>
         <div class="contact-hero" data-reveal>
-          <p class="contact-email" id="contact-heading">If something here resonated, let's connect.</p>
+          <!-- The <br> is a deliberate editorial break: the line lands after
+               "here" at every width. Left to wrap on its own the wider tiers
+               break after "resonated," instead, which splits the clause. The
+               space before it collapses at the line end, so the text still
+               reads as one sentence to a screen reader. -->
+          <p class="contact-email" id="contact-heading">If something here <br>resonated, let's connect.</p>
         </div>
         <div class="contact-meta">
           <div class="contact-meta-group contact-meta-connect" data-reveal>
@@ -316,6 +316,6 @@
   </div>
   <div class="wave-cursor" id="wave-cursor" aria-hidden="true">👋</div>
 
-  <script src="js/main.js?v=163" defer></script>
+  <script src="js/main.js?v=188" defer></script>
 </body>
 </html>

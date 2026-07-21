@@ -18,7 +18,7 @@ shared by all of them.
   - `hero.css` (~214) — `.intro` section, headline/body, `.intro-divider` scribble, site-load-reveal keyframes/states
   - `sections.css` (~390) — `.page-section` content: Selected Work, Public Footprints, Contact, About, case-study placeholder
   - `footer.css` (~28) — `.site-footer`
-  - `project-overview.css` (~290) — the shared Project Overview template: `.project-hero`, `.project-masthead` (title + metadata `<dl>`), `.project-block` (description / impact / role), `.project-continue`, and the reusable `.conversation-invite`. Imported after `sections.css` (it leans on `.section-label`, `.about-body`, `.contact-connect-links`) and before `responsive.css`.
+  - `project-overview.css` (~275) — the shared Project Overview template: `.project-hero`, `.project-masthead` (title + metadata `<dl>`), `.project-block` (description / impact / role), `.project-locked` + `.invite-button` (locked case study), the `.project-carousel` masthead crossfade, and `.section-pills`. Imported after `sections.css` (it leans on `.section-label`, `.about-body`, `.contact-connect-links`) and before `responsive.css`.
   - `responsive.css` (~110) — **ALL width breakpoints, site-wide.** Organized by screen size (1000 → 768 → 700 → 600px). Imported last so it overrides desktop styles.
 
 ## Where each page area lives
@@ -42,32 +42,68 @@ recruiter can read in under a minute, sitting between a homepage Work card and
 any deeper case study. **Four static pages, one shared structure** — the
 homepage Work-card images link straight to them.
 
-| Page | Ends with |
-|---|---|
-| `work/microsoft-loop.html` | Impact — **no closing section** (content pending) |
-| `work/facebook-groups.html` | Impact — **no closing section, by design** |
-| `work/accessibility.html` | Impact — **no closing section, by design** |
-| `work/messaging.html` | Impact — **no closing section, by design** |
+**Floating section pills (`.section-pills`).** Each project page carries a
+frosted "floatie" pill bar fixed at the bottom centre that jumps between its own
+sections. The target sections have ids: `#overview` (masthead), `#process` (the
+"What I Shaped" section — Loop/Groups only), `#impact`. All four pages show a
+3-pill bar (Overview/Process/Impact). On Loop/Groups the Process pill links to
+`#process`. On Accessibility/Messaging the Process content is confidential, so
+its pill is a **locked chip** (`.section-pill-locked`): a muted lock-glyph
+`Process` that keeps the three-part story whole but links to the access panel
+(`#process-locked`, the "Full case study access" section) where the reader can
+request the password. On those two pages that panel is the **Process step**: it
+sits between Overview and Impact (DOM order `#overview → #process-locked →
+#impact`) so the page order matches the pills and closes on Impact — it is no
+longer the after-Impact tail it started as. The locked chip is **excluded from the scroll-spy** (built
+with `a:not(.section-pill-locked)`) so it never takes the solid active fill;
+navigation still works via the shared Lenis anchor handler. Never link a normal
+pill to a section that isn't there — use the locked variant when the content is
+gated. The markup is static `<a>` links (works with no JS); the `sectionPills` array +
+the spy block in `updateScrollEffects` (js/main.js) add the active state,
+`aria-current`, and tuck the bar away once the footer is in view. Homepage has no `.section-pills`,
+so the JS is a guarded no-op there. Styles live in project-overview.css §8;
+phone tuning in responsive.css 480 tier. The bar is **always visible (no
+`data-reveal`)**, like the footer.
 
-**All four pages end on Impact.** The `.project-continue` hand-off is gone from
-Loop and Groups — Jenna is writing high-level case-study content to sit inline
-below Impact rather than link out. `.project-continue*` (project-overview.css 7a
-+ responsive.css 480 tier) is **dead code, marked for deletion** — remove it as
-one unit, same as the earlier `.conversation-invite` removal.
+| Page | Closes with |
+|---|---|
+| `work/microsoft-loop.html` | Impact → "The Way In" (explore live product) → **Next Case Study pager** |
+| `work/facebook-groups.html` | Impact → **Next Case Study pager** |
+| `work/accessibility.html` | Process (locked) → Impact → **Next Case Study pager** |
+| `work/messaging.html` | Process (locked) → Impact → **Next Case Study pager** |
+
+**Every page closes with a Next Case Study pager** (`.next-case`,
+project-overview.css §9): a full-width link — the next project's homepage card
+title + description, no image, a right arrow (`&rarr;`) — that follows the
+homepage Work order and **wraps** (Groups → back to Accessibility) so every page
+has a next. The title/description are the same teaser as the matching
+`.work-card` on `index.html`; **keep them in sync** if the card copy changes.
+It's a normal page link (not a `#` anchor), so no JS is involved; it reveals like
+a section (`data-reveal`) and sits inside `<main>` as the last section, above the
+always-visible footer. Built from `<span>`s (not `<p>`/`<h2>`) so the whole block
+is one valid `<a>`.
+
+The `.project-continue` hand-off is gone from Loop and Groups — Jenna is writing
+high-level case-study content to sit inline below Impact rather than link out.
+The `.project-continue*` CSS has been **deleted** (project-overview.css + the
+responsive.css 480 tier); don't reintroduce it.
 
 **The Conversation Invitation is gone and is not coming back by accident.** Its
 note + locked-case-study button moved up into the masthead lockup (before
-Overview — the primary action can't wait for a panel that reads as a footer),
-which left the panel holding an orphaned heading and the Connect links. Both
-pages now end on Impact with **no closing step** — deliberate, not an omission.
-The `.conversation-invite-*` CSS (project-overview.css 7b + responsive.css 1024
-/ 480 tiers) and the `.conversation-invite` fallback in `darkPanel` (js/main.js)
-are **dead code, marked for deletion** — remove them together, they're one
-component.
+Overview — the primary action can't wait for a panel that reads as a footer).
+Both pages now run Overview → Process (locked) → Impact, then the shared Next
+Case Study pager — the Conversation Invitation is not part of that. All of its
+code has been **deleted**: the `.conversation-invite-*` CSS (project-overview.css
++ responsive.css 1024 / 480 tiers) and the `.conversation-invite` fallback in
+`darkPanel` (js/main.js). `darkPanel` is now just `getElementById('contact')`.
+The locked-case-study button that survived the removal is `.invite-button` (with
+`.invite-button-icon` for the lock), living in `.project-locked-action` — see
+below.
 
 **Shared structure (identical in all four):** hero visual → title + metadata →
-Overview (description) → **Contribution** → Impact → *then* either the project-
-details/Continue tail or the Conversation Invitation.
+Overview (description) → **Contribution/Process** → Impact → *then* the **Next
+Case Study pager** (`.next-case`). (Loop also keeps a "The Way In" explore-product
+step between Impact and the pager.)
 `work/microsoft-loop.html` is the canonical skeleton — copy it when adding a project.
 
 Contribution sits **between Overview and Impact**, in the same `.page-section` as
@@ -87,13 +123,14 @@ not spend the framing that the full case study is there to reveal.
   including "reasonable" filler for a missing timeline or team.
 - **Omit, don't fabricate.** If a metadata row (Timeline / Role / Area / Scope)
   or a detail block has no information, delete it. Never leave it blank or guess.
-- **The Conversation Invitation states that the work can't be shown publicly and
-  offers the existing connect links.** No AI conversation. Keep the two copies
-  (Accessibility / Messaging) in sync.
-- **`.invite-unlock` is the locked-case-study link.** An `<a>`, never a
-  `<button>` — it navigates, so Cmd-click / open-in-new-tab must work and a
-  screen reader must hear "link". `href` is `[Locked Case Study URL]` until the
-  Figma share link is pasted in.
+- **The locked panel (`.project-locked` on Accessibility / Messaging) states that
+  the work can't be shown publicly and points to the locked case study.** No AI
+  conversation. Keep the two copies in sync.
+- **`.invite-button` is the locked-case-study link** (`.invite-button-icon` is its
+  inline lock; Loop reuses the same pill without the icon for its live-product
+  link). An `<a>`, never a `<button>` — it navigates, so Cmd-click / open-in-new-tab
+  must work and a screen reader must hear "link". `href` is `[Locked Case Study URL]`
+  until the Figma share link is pasted in.
 - **The lock lives on the DESTINATION, never in this page.** Set the Figma file's
   share access to **"Anyone with password"** — *not* "Anyone with the link",
   which has no lock at all and would make the "locked" label a lie while
@@ -119,9 +156,8 @@ without `.intro`; the cursor and scroll-effect code null-checks. **This matters:
 would leave a project page permanently blank.** Keep new page-specific code
 behind a null check.
 - `darkPanel` is the blue panel the header inverts over (`is-over-dark`) and the
-  👋 cursor shows on: `#contact` on the homepage, `.conversation-invite` on the
-  Accessibility / Messaging pages. Loop and Facebook Groups have neither, so it's
-  null there and both features stay off.
+  👋 cursor shows on: `#contact` on the homepage only. The project pages end on
+  cream, so `darkPanel` is null there and both features simply stay off.
 
 ## Token / Lookup Rules
 - **NEVER read `style.css` to find styles** — it only contains `@import` lines. Open the specific file in `css/components/` from the table above.
@@ -193,3 +229,25 @@ own version, separate from the `style.css?v=` / `@import` CSS bump below).
 - After changing **`js/main.js`**, bump `main.js?v=NNN` on its `<script>` in `index.html`. This is a **separate** version from the CSS one — a JS edit needs only the JS bump, a CSS edit only the CSS bump.
 - The shared right column across sections is **542px** (the site's "5 grid columns"); the layout uses **56px** horizontal page padding (`.site-container`). Reuse these, don't invent new values.
 - Accent blue is the `--color-accent` token (`#4A45FF`).
+
+## Image compression (pass done — recipe for new images)
+The site-wide compression pass is **done**. All 13 project-overview carousel
+images and the 4 homepage Work-card images are compressed JPEGs; there are no
+PNGs left in `images/`. Total image payload is ~6 MB (was ~18 MB). The overview
+images land 312–448 KB each; the Work cards 296–568 KB each.
+
+**Recipe (use for any NEW image before committing it):**
+- `sips -s format jpeg -s formatOptions 82 SRC.png --out images/name.jpg` — q82
+  is the setting used for the whole set (overview screenshots and the gradient-
+  heavy brand slides both hold up with no visible artifacts). `sips` ships with
+  macOS, no extra tooling. Drop to ~70 for the wide 2660×830 Work cards, where
+  q82 overshoots the ~400 KB sibling band.
+- **PNG screenshots/collages → JPEG.** Don't ship PNGs; the one PNG that existed
+  (`ax-overview1.png`) is gone — a q82 JPEG replaced it and the lossless source
+  was removed too, so re-export from the design tool if the asset changes.
+- Keep `width`/`height` attributes on every `<img>` — they reserve the box and
+  stop layout shift while the image loads.
+- Above-the-fold images must NOT get `loading="lazy"`; below-the-fold ones should.
+  In each carousel, slide 1 is above the fold (no `lazy`); slides 2–3 are `lazy`.
+- Bump the `?v=` cache-buster on an `<img src>` when you overwrite an existing
+  file in place (e.g. the Work cards use `?v=N`), so browsers refetch it.

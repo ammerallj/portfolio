@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@200;700&family=Inter:wght@400..700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../style.css?v=212" />
+  <link rel="stylesheet" href="../style.css?v=319" />
   <!-- Pre-paint flag, set only when JS runs:
        • is-motion — hides reveal targets so they can fade in without a flash
          (skipped for reduced-motion visitors, who see everything).
@@ -39,7 +39,7 @@
       <a class="site-name" href="../index.html" id="site-name">Jenna Ammerall.</a>
       <nav class="site-nav-bar" aria-label="Primary navigation">
         <div class="site-nav-group site-nav-left">
-          <a href="../index.html#work-section" id="nav-work">Work</a>
+          <a href="../index.html#work-section" id="nav-work" class="is-active" aria-current="true">Work</a>
         </div>
         <div class="site-nav-group site-nav-center">
           <a href="../index.html#about">About</a>
@@ -79,82 +79,117 @@
     </button>
   </div>
 
-  <main id="main-content">
+  <!-- Floating section nav — jumps between this page's sections. Static links so
+       it works with no JS; main.js adds the scroll-spy active state and tucks it
+       away over the footer. Always visible (no data-reveal), like the footer. -->
+  <nav class="section-pills" aria-label="On this page">
+    <a href="#overview" class="is-active" aria-current="true">Overview</a>
+    <a href="#process">Process</a>
+    <a href="#impact">Impact</a>
+  </nav>
 
-    <!-- ========================================================
-         1. HERO VISUAL
-         Swap the placeholder <div> for:
-         <img src="../images/[file].jpg" alt="[Hero Image alt text]" />
-         ======================================================== -->
-    <section class="project-hero" aria-label="Project hero image">
-      <figure class="project-hero-figure">
-        <span class="project-placeholder">[Hero Image]</span>
-      </figure>
-    </section>
+  <main id="main-content">
 
     <!-- ========================================================
          2 + 3. CASE STUDY TITLE + METADATA
          DELETE any metadata row you don't have. Do not leave it blank.
          ======================================================== -->
-    <section class="page-section" aria-labelledby="project-title">
-      <div class="site-container project-masthead" data-reveal-group>
+    <!-- ========================================================
+         MASTHEAD — SPLIT LAYOUT.
+         Row 1: the narrative column and the image. The left column stretches to
+         the IMAGE's height, so its lower group lands flush with the image's
+         bottom edge. Left: title → dek → metadata → description.
+         There is no full-width hero above; this image replaces it.
+         ======================================================== -->
+    <section class="page-section" id="overview" aria-labelledby="project-title">
+      <div class="site-container project-masthead project-masthead--split" data-reveal-group>
 
-        <div class="project-masthead-left">
-          <h1 class="project-title" id="project-title" data-reveal data-reveal-order="0">Building Collaborative Workspaces</h1>
-          <!-- Dek — the one-line description. Deliberately NOT a heading: it sits
-               under the title as a standfirst. -->
-          <p class="project-dek" data-reveal data-reveal-order="1">A live object people recognize on sight, wherever it lands.</p>
-        </div>
+        <div class="project-masthead-top">
 
-        <div class="project-masthead-right" data-reveal data-reveal-order="1">
-          <dl class="project-meta-list">
-            <div class="project-meta-row">
+          <div class="project-masthead-left">
+
+            <!-- Title + dek are ONE group. They must stay wrapped: the column uses
+                 space-between, which distributes slack between every child — with
+                 the dek as its own child a gap opens above it too and it drifts
+                 away from the title. -->
+            <div class="project-masthead-head">
+              <h1 class="project-title" id="project-title" data-reveal data-reveal-order="0">Building Collaborative Workspaces</h1>
+
+              <!-- Dek — the one-line description. Deliberately NOT a heading: it
+                   sits under the title as a standfirst. -->
+              <p class="project-dek" data-reveal data-reveal-order="1">A live object people recognize on sight, wherever it lands.</p>
+            </div>
+
+            <!-- Pushed to the bottom of the row by .project-masthead-left's
+                 space-between; the whitespace above it is deliberate. -->
+            <div class="project-masthead-foot">
+              <dl class="project-meta-list">
+              <div class="project-meta-row">
               <dt>Timeline</dt>
               <dd>2020&ndash;2022</dd>
-            </div>
-            <div class="project-meta-row">
+              </div>
+              <div class="project-meta-row">
               <dt>Role</dt>
               <dd>UX Designer &middot; Interaction Design &middot; Platform Design &middot; Visual Design</dd>
-            </div>
-            <div class="project-meta-row">
+              </div>
+              <div class="project-meta-row">
               <dt>Team</dt>
               <dd>Design &middot; Product Management &middot; Engineering &middot; Research</dd>
+              </div>
+              </dl>
+
+              <!-- The Overview prose lives here now, under the metadata — this page
+                   has no separate Overview section any more. -->
+              <div class="project-overview-text about-body" data-reveal data-reveal-order="3">
+                <p>Microsoft Loop introduced live components that could move across Microsoft 365. The hard part was making one read as the same live thing in every app it landed in, when every app had its own rules.</p>
+              </div>
             </div>
-          </dl>
+          </div>
+
+          <div class="project-masthead-right" data-reveal data-reveal-order="1">
+            <!-- 3-slide crossfade carousel, identical structure to accessibility.html.
+                 Auto-advances (initCarousel in main.js); clicking a dot jumps to that
+                 image and stops the auto-advance. No-JS / reduced-motion: the first
+                 slide (is-active in the markup) shows and the dots still switch
+                 manually. All three assets are 1100x1400, matching .project-figure. -->
+            <div class="project-figure project-carousel" data-carousel>
+              <img class="project-carousel-slide is-active" src="../images/loop-overview1.jpg" width="1100" height="1400" alt="A Loop component's standard anatomy — header, live presence cursor, and activity footer" />
+              <img class="project-carousel-slide" src="../images/loop-overview2.jpg" width="1100" height="1400" alt="Loop's early visual identity — the brand mark and color palette" loading="lazy" />
+              <img class="project-carousel-slide" src="../images/loop-overview3.jpg" width="1100" height="1400" alt="A Loop component synced across Microsoft 365, showing everywhere it appears" loading="lazy" />
+              <div class="project-carousel-dots" role="group" aria-label="Choose masthead image">
+                <button type="button" class="project-carousel-dot is-active" aria-current="true" aria-label="Show image 1 of 3"></button>
+                <button type="button" class="project-carousel-dot" aria-label="Show image 2 of 3"></button>
+                <button type="button" class="project-carousel-dot" aria-label="Show image 3 of 3"></button>
+              </div>
+            </div>
+          </div>
+
         </div>
 
       </div>
     </section>
 
     <!-- ========================================================
-         4 + 5. OVERVIEW → IMPACT  (no Contribution: Overview's second
+         IMPACT  (Overview now lives in the masthead)  (no Contribution: Overview's second
          paragraph already carries it)
          ======================================================== -->
-    <section class="page-section" aria-labelledby="overview-heading">
+    <!-- ========================================================
+         WHAT I SHAPED — contribution section before Impact, same heading and
+         .project-block idiom as facebook-groups.html so the two pages match:
+         what I did, then what it moved.
+         ======================================================== -->
+    <section class="page-section" id="process" aria-labelledby="shaped-heading">
       <div class="site-container">
 
         <div class="project-block" data-reveal-group>
           <div class="project-block-left">
-            <h2 class="project-block-title" id="overview-heading" data-reveal data-reveal-order="0">Overview</h2>
-          </div>
-          <div class="project-block-right" data-reveal data-reveal-order="1">
-            <div class="about-body">
-              <p>As part of Microsoft Loop's founding design team, I defined the interaction foundations that made live collaborative components recognizable and usable across Microsoft 365.</p>
-              <p>I shaped the persistent controls for identity, sharing, and collaboration; the visual cues for presence and live editing; and the product's early visual identity, while helping ship the first Loop components into Teams.</p>
-              <p>See where Loop landed &rarr; <a href="https://www.microsoft.com/en-us/microsoft-loop" target="_blank" rel="noopener noreferrer">Explore Microsoft Loop<span class="visually-hidden"> (opens in new tab)</span></a></p>
-            </div>
-          </div>
-        </div>
-
-        <div class="project-block" data-reveal-group>
-          <div class="project-block-left">
-            <h2 class="project-block-title" data-reveal data-reveal-order="0">Impact</h2>
+            <h2 class="project-block-title" id="shaped-heading" data-reveal data-reveal-order="0">What I Shaped</h2>
           </div>
           <div class="project-block-right" data-reveal data-reveal-order="1">
             <ul class="project-impact-list" role="list">
-              <li>Unified how every Loop component behaves across Microsoft 365 by designing the Loop control&mdash;the persistent interaction model for identity, sharing, and collaboration&mdash;later documented as the standard component structure for developers and patented as Interactive user interface controls for shared dynamic objects (<a href="https://www.patentworth.ai/details/12277305" target="_blank" rel="noopener noreferrer">US 12,277,305<span class="visually-hidden"> (opens in new tab)</span></a>).</li>
-              <li>Shipped Microsoft's first Loop components into Teams, enabling live collaborative tables, lists, agendas, and action items that stayed synchronized wherever they were shared&mdash;the <a href="https://fluidframework.com/" target="_blank" rel="noopener noreferrer">Fluid<span class="visually-hidden"> (opens in new tab)</span></a> work that later became Microsoft Loop and debuted at <a href="https://www.plainconcepts.com/recap-microsoft-ignite-2021/" target="_blank" rel="noopener noreferrer">Ignite 2021<span class="visually-hidden"> (opens in new tab)</span></a>.</li>
-              <li>Defined the component structure other developers now build to: Microsoft's public <a href="https://learn.microsoft.com/en-us/microsoftteams/platform/m365-apps/design-loop-components" target="_blank" rel="noopener noreferrer">developer documentation<span class="visually-hidden"> (opens in new tab)</span></a> specifies the header and border that mark a Loop component as live and portable.</li>
+              <li><strong>Anchored identity in one control.</strong> Put every component's identity, sharing, and connections in a single persistent element, so it read as one object regardless of which app it lived in.</li>
+              <li><strong>Designed for portability.</strong> Structured the component to stay recognizable and live as it moved between Teams, Outlook, and Word, each with its own design language to reconcile.</li>
+              <li><strong>Explored native vs. third-party behavior.</strong> Partnered with motion design on how a component loaded and responded to hover when it lived in Loop versus embedded in a third-party app.</li>
             </ul>
           </div>
         </div>
@@ -162,9 +197,72 @@
       </div>
     </section>
 
+    <section class="page-section" id="impact" aria-labelledby="impact-heading">
+      <div class="site-container">
+
+        <div class="project-block" data-reveal-group>
+          <div class="project-block-left">
+            <h2 class="project-block-title" id="impact-heading" data-reveal data-reveal-order="0">Impact</h2>
+          </div>
+          <div class="project-block-right" data-reveal data-reveal-order="1">
+            <ul class="project-impact-list" role="list">
+              <li><strong>Unified how every Loop component behaves across Microsoft 365</strong> by designing the Loop control&mdash;the persistent interaction model for identity, sharing, and collaboration&mdash;patented as Interactive user interface controls for shared dynamic objects (<a href="https://www.patentworth.ai/details/12277305" target="_blank" rel="noopener noreferrer">US 12,277,305<span class="visually-hidden"> (opens in new tab)</span></a>).</li>
+              <li><strong>Shipped Microsoft's first Loop components into Teams</strong>, enabling live collaborative tables, lists, agendas, and action items that stayed synchronized wherever they were shared&mdash;the <a href="https://fluidframework.com/" target="_blank" rel="noopener noreferrer">Fluid<span class="visually-hidden"> (opens in new tab)</span></a> work that later became Microsoft Loop and debuted at <a href="https://www.plainconcepts.com/recap-microsoft-ignite-2021/" target="_blank" rel="noopener noreferrer">Ignite 2021<span class="visually-hidden"> (opens in new tab)</span></a>.</li>
+              <li><strong>Defined the component structure other developers now build to:</strong> Microsoft's public <a href="https://learn.microsoft.com/en-us/microsoftteams/platform/m365-apps/design-loop-components" target="_blank" rel="noopener noreferrer">developer documentation<span class="visually-hidden"> (opens in new tab)</span></a> specifies the header and border that mark a Loop component as live and portable.</li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ========================================================
+         THE WAY IN — its own section after Impact, the same slot the locked card
+         occupies on the confidential pages. This work is PUBLIC, so it's an open
+         link to the shipped product rather than a password request: same card
+         shell, no lock, no gate.
+         ======================================================== -->
+    <section class="page-section" aria-label="Explore the live product">
+      <div class="site-container">
+
+        <div class="project-locked" data-reveal-group data-reveal>
+          <div class="project-locked-head">
+            <div class="about-body">
+              <p>The first components shipped into Teams in 2021. Loop is now its own Microsoft 365 app.</p>
+            </div>
+          </div>
+          <div class="project-locked-action">
+            <a class="invite-button" href="https://www.microsoft.com/en-us/microsoft-loop" target="_blank" rel="noopener noreferrer">Explore Microsoft Loop<span aria-hidden="true"> &#8599;</span><span class="visually-hidden"> (opens in new tab)</span></a>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ========================================================
+         NEXT CASE STUDY — hand-off pager to the next project (homepage Work
+         order, wrapping last → first). Title + description mirror the matching
+         .work-card on index.html; no image, just a right arrow. Keep the two in
+         sync if the card copy changes.
+         ======================================================== -->
+    <section class="page-section next-case-section" aria-label="Next case study">
+      <div class="site-container">
+        <a class="next-case" href="facebook-groups.html" data-reveal-group data-reveal>
+          <span class="next-case-label">Next case study</span>
+          <span class="next-case-body">
+            <span class="next-case-text">
+              <span class="next-case-title">Helping People Navigate Communities</span>
+              <span class="next-case-description">Each community had a sense of place. Moving between them didn't.</span>
+            </span>
+            <span class="next-case-arrow" aria-hidden="true">&rarr;</span>
+          </span>
+        </a>
+      </div>
+    </section>
+
   </main>
 
-  <footer class="site-footer" role="contentinfo">
+  <footer class="site-footer site-footer--plain" role="contentinfo">
     <div class="site-container">
       <p>&copy; 2026 Jenna Ammerall &middot; Human directed. AI built.</p>
     </div>
@@ -182,6 +280,6 @@
   </div>
   <div class="wave-cursor" id="wave-cursor" aria-hidden="true">👋</div>
 
-  <script src="../js/main.js?v=161" defer></script>
+  <script src="../js/main.js?v=188" defer></script>
 </body>
 </html>

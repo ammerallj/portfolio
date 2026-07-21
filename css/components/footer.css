@@ -26,3 +26,20 @@
 
 /* Footer mobile stacking lives in css/components/responsive.css */
 
+/* ---- PLAIN VARIANT (project overview pages) --------------------------------
+   The accent fill above exists to CONTINUE the homepage's blue Contact panel —
+   the footer is the bottom of that panel, and the white rule divides the
+   copyright from it. The project pages have no Contact panel: they end on cream,
+   so the blue read as a lone bar bolted to the bottom of the page.
+
+   Here it's the page's own background with black text, and there's no divider
+   at all — the white rule was invisible on cream, and a cream-on-cream hairline
+   just drew a line under content that already ends cleanly. */
+.site-footer--plain {
+  background-color: transparent;
+  border-top: none;
+}
+
+.site-footer--plain p {
+  color: var(--color-text);
+}

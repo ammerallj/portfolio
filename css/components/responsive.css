@@ -12,6 +12,80 @@
    fallbacks below that. Motion preferences (prefers-reduced-motion)
    are NOT here — they live beside their animations in the
    component files.
+   ============================================================
+
+   THE SPACING SCALE — read this before changing any gap
+   ------------------------------------------------------------
+   Four roles cover every vertical gap on the site. Tokens are
+   declared in global.css :root (desktop values) and re-declared in
+   each tier's `:root` below, so a gap is set ONCE per breakpoint
+   instead of per component:
+
+     --gap-content   within one thing — paragraphs in a block, an
+                     eyebrow and its content, items in a stacked card
+     --gap-group     between things in a section — block → block,
+                     a stacked layout's two columns
+     --gap-section   between peer sections — card → card
+     --gap-heading   under a BIG section title (About, Contact)
+                     before its content
+
+   Documented MOBILE-FIRST, because that is where the scale was
+   derived and where it is tightest — the wider tiers are this scale
+   opened up, not a separate system:
+
+     role          ≤480    ≤768    ≤1024   ≥1025
+     content        20      20      20      20
+     group          40      48      48      60
+     section        64      96      96      96
+     heading        40      96      96     144
+     page gutter    16      24      24      56
+
+   Content holds at 20 everywhere: it spaces type against type, and
+   the type barely scales. Group and section open up as the screen
+   gets wider, because a big canvas needs a bigger cue to say "this
+   is a different thing" — that difference is the whole system.
+
+   Heading tracks the TITLE's size, not the screen's, so it is the
+   one row that does NOT simply open up with the canvas. Display type
+   wants roughly 1.25–1.5× its own size beneath it or the content
+   reads as crowded; each tier's value is that ratio against that
+   tier's title:
+
+     tier    title    gap    ratio
+     ≥1025    96px    144    1.5×   (the About title sets on TWO
+                                     lines here — 192px of mass)
+     ≤1024    72px     96    1.3×
+     ≤768     54px     96    1.8×
+     ≤480     32px     40    1.25×
+
+   1.5× is a CEILING, not a preference. The heading also sits ~193px
+   from the previous section's content (96 + 96 across the divider);
+   push the gap much past 144 and those two distances converge, and
+   the heading stops reading as introducing what follows and starts
+   floating between two sections. (About tightens one more step at
+   ≤480 — see the note in that tier; a photo follows it, not text.)
+
+   `--gap-section` does double duty: it is both card → card AND
+   `.page-section`'s padding-block (global.css), which is what puts an
+   EQUAL measure either side of every divider — a section closes and
+   the next opens on the same number. Both sides read from the one
+   token, so that symmetry can't drift. Content-to-content across a
+   hairline is therefore 2× the token: 192 on desktop, 128 on a phone.
+
+   CONSTANT, not on the scale (deliberate — don't "fix" these):
+     • `.intro-inner` takes no page gutter at all (hero.css zeroes
+       it) — the hero lockup is a centered fixed-width block that
+       holds its width with auto margins instead.
+     • Desktop `.about-layout` / `.footprints-layout` column gaps
+       (242px / 186px) are grid math that pins the shared right
+       column, not spacing. They only become vertical gaps once the
+       layouts stack at ≤1024, which is where the token takes over.
+
+   TO CHANGE SPACING: retune the token in the relevant tier's :root
+   below. Reach for a raw px value only for a genuine one-off (the
+   hero's blob-relative spacing, the card-peek inset), and say why
+   in a comment — unexplained raw values are how the tiers drifted
+   apart in the first place.
    ============================================================ */
 
 /* ==========================================================================
@@ -24,54 +98,15 @@
   .site-nav-bar {
     gap: 60px;
   }
+
 }
 
 /* ==========================================================================
-   1b. HERO @ 1280 (max-width: 1280px) — Figma frame 215:520
-   Scaled side-by-side: blob (1280 frame) left, 96px headline over it, copy at
-   the blob's bottom-right. The blob element is sized to the frame; js/main.js
-   swaps the blob PATH + SVG viewBox per tier, so the shape matches the frame.
+   (There is no 1280 hero tier any more: from 1440 down to 1025 the hero is
+   one FLUID system — the blob scales, type and copy interpolate between the
+   1440 (198:725) and 1025 (217:5910) frames — implemented with clamp()s in
+   hero.css. The centered-stack takeover below starts at 1024.)
    ========================================================================== */
-@media (max-width: 1280px) {
-  .intro {
-    min-height: calc(100dvh - 66px);
-  }
-
-  .intro-blob {
-    top: -66px;
-    left: 0;
-    width: 1280px;
-    height: 775px;
-    transform: translateZ(0);
-  }
-
-  .intro-headline {
-    /* Figma "Laptop" 217:6003: 80px, block left 110px, top 215 frame (−66) */
-    position: absolute;
-    top: 149px;
-    left: 110px;
-    width: 542px;
-    font-size: 80px;
-    margin-bottom: 0;
-  }
-
-  .intro-line:nth-child(1) { margin-left: 0; }
-  .intro-line:nth-child(2) { margin-left: 166px; }
-  .intro-line:nth-child(3) { margin-left: 98px; }
-  .intro-line:nth-child(4) { margin-left: 271px; }
-
-  .intro-body {
-    /* Figma 217:6008: 4-col right column pinned between 66.67% and the content
-       edge, so it scales 376px→~291px across 1280→1025 and always clears the
-       (fixed) blob — no fluid blob/type scaling needed. */
-    position: absolute;
-    top: 371px;
-    left: calc(66.67% - 5.33px);
-    right: 56px;
-    width: auto;
-    max-width: none;
-  }
-}
 
 /* ==========================================================================
    2. LANDSCAPE TABLETS / IPADS (max-width: 1024px)
@@ -79,69 +114,74 @@
    Work / Footprints / About stack into a single full-width column.
    ========================================================================== */
 @media (max-width: 1024px) {
-  /* Outer page gutter steps down from the 56px desktop base */
-  .site-container,
-  .site-header-row,
-  .intro-inner {
-    padding-inline: 32px;
+  /* The fluid 24–28px copy stops here: re-value the hero-description tokens
+     (global.css) to this tier's 20px caption. The CTA stays on at every
+     breakpoint and inherits the token, so it steps down with the copy. */
+  :root {
+    --size-hero-description: 1.25rem;        /* 20px */
+    --line-height-hero-description: 1.3;
+
+    /* SPACING SCALE, tablet step (see the block at the top of this file).
+       Group closes from the desktop 60 as the columns stack — side by side a
+       60px column gap reads as one break, but stacked it becomes vertical
+       space between blocks that are already separated by falling below each
+       other, so it needs less. Content and section are unchanged from desktop.
+       Gutter: the 1024 frame (265:501) runs 24px, same as the portrait tiers
+       below. (.intro-inner takes no gutter — see the note up top.)
+       Heading holds at 96 rather than following the desktop 144: it is a RATIO
+       of the title, and the title is only ~72px here (54px at 768), so 96 is
+       already the same 1.3–1.8× that 144 buys at 96px type. Inheriting 144
+       would overshoot on a smaller line. */
+    --gap-group: 48px;
+    --gap-heading: 96px;
+    --page-gutter: 24px;
   }
 
-  /* Hero becomes a CENTERED STACK at 1024 (Figma 206:5442): blob centered, 64px
-     headline centered over it, copy centered below — the switch from the
-     side-by-side ≥1280 layout happens here, not at 768. Blob ELEMENT is
-     1044×775 rendering 1:1; js/main.js swaps in the matching 1024 path. */
-  .intro-inner {
-    position: relative;
-    height: 100%;
-    padding-top: 0;
+  /* TABLET hero (Figma 265:501, 1024×1366 portrait canvas): an art-directed
+     layout, not the desktop centered one — the egg sits in the UPPER area
+     (painted y ≈ 110–700 of the canvas, js/main.js swaps in the 1024×1366
+     silhouette), the 32px lockup sits on the egg with the CREDENTIAL first
+     (the frame flips the desktop claim-first order), and the hero ends at
+     719px so the first Work card's content lands at y ≈ 783 (719 + the
+     section's 64px top padding) — fully in view at load on a portrait
+     tablet; it's also exempt from the reveal system there (js/main.js). */
+  .intro {
+    min-height: 719px;
   }
 
   .intro-blob {
-    /* 1024 frame (Subtract 206:5450); js/main.js supplies the matching path.
-       Centered: that path's silhouette center sits ~498px into the 1044
-       element, so offset left by that to land the shape on the viewport center. */
-    top: -66px;
-    left: calc(50% - 498px);
-    width: 1044px;
-    height: 775px;
-    transform: translateZ(0);
+    /* Top-anchored (not page-centered): the 1024×1366 canvas already places
+       the egg in the upper area, so map the canvas top to the hero's top and
+       render it 1:1. The canvas outruns the 719px hero; overflow clips it. */
+    top: 0;
+    transform: translate(-50%, 0) translateZ(0);
+    width: 1024px;
   }
 
-  .intro-headline {
-    /* Figma 206:5501: centered block (frame x297,w429 → dead-center), top 215
-       frame (−66px header). */
-    position: absolute;
-    top: 149px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 429px;
-    font-size: 64px;
-    margin-bottom: 0;
+  .intro-headline,
+  .intro-claim {
+    font-size: 32px;
   }
 
-  /* Per-line stagger at 1024 (Figma 206:5501), re-set from the desktop indents */
-  .intro-line:nth-child(1) { margin-left: 0; }
-  .intro-line:nth-child(2) { margin-left: 114px; }
-  .intro-line:nth-child(3) { margin-left: 78px; }
-  .intro-line:nth-child(4) { margin-left: 232px; }
-
-  .intro-body {
-    /* Figma 206:5442: centered below the blob (w477), matching the centered
-       stack — was right-pinned when this tier was (wrongly) side-by-side. */
-    position: absolute;
-    top: 545px;
-    left: calc(50% - 238px);
-    right: auto;
-    width: 477px;
-    max-width: none;
+  /* Credential leads on this canvas (frame 265:501); the DOM stays claim-first
+     for the desktop composition, so flex order flips it here. */
+  .intro-claim {
+    order: 1;
   }
 
-  .scroll-indicator {
-    position: absolute;
-    top: auto;
-    bottom: 8px;
-    left: calc(50% - 14px);
-    margin: 0;
+  .intro-inner {
+    width: 600px;
+    /* Sit on the lockup's center in the frame (y 292 + 297/2 ≈ 440). */
+    top: 440px;
+    transform: translate(-50%, -50%);
+    /* This tier's frame keeps the original 60px copy→CTA gap — pin it
+       so the desktop base's claim-first 80px doesn't cascade down. */
+    gap: 60px;
+  }
+
+  .intro-copy {
+    /* Likewise the frame's 28px between the paragraphs (vs 48px desktop). */
+    gap: 28px;
   }
 
   .site-header-row {
@@ -149,16 +189,19 @@
   }
 
   .site-nav-bar {
-    flex: 1 1 auto;
-    gap: 40px;
+    /* The frame keeps the full 542px right column (the shared token has
+       narrowed to ~369px by this width, which would bunch the nav). Shrinkable
+       so it can never push the name out on narrow edge cases. */
+    flex: 0 1 542px;
   }
 
-  /* Tablet + phone work cards run Image -> Meta -> Title -> Description in a
-     single column. The desktop DOM nests title in .work-card-body/.work-card-left
-     and meta+description in .work-card-right, with the image a sibling AFTER
-     both — so display:contents dissolves all three wrappers and promotes the
-     four leaves to direct flex children of .work-card, which is what makes
-     interleaving meta between the image and the title possible at all. */
+  /* Landscape-tablet work cards stack in ONE column in the frame's order:
+     Title -> Meta -> Description -> Image (280:5182) — the same order the DOM
+     already reads in. The desktop DOM nests title in .work-card-body/
+     .work-card-left and meta+description in .work-card-right, with the image a
+     sibling AFTER both — so display:contents dissolves all three wrappers and
+     promotes the four leaves to direct flex children of .work-card. (The ≤768
+     tier re-orders these to image-first for the portrait frames.) */
   .work-card-body,
   .work-card-left,
   .work-card-right {
@@ -166,17 +209,27 @@
   }
 
   .work-card {
-    gap: var(--space-md);
+    /* Stacked, so the card's parts are siblings in one rhythm rather than a
+       text lockup set against an image — content, not group. */
+    gap: var(--gap-content);
   }
 
-  .work-card-image-link { order: 0; }
-  .work-card-meta { order: 1; }
-  .work-card-title { order: 2; }
-  .work-card-description { order: 3; }
+  .work-card-image-link {
+    margin-top: 16px; /* description→image reads 40px in the frame (24 + 16) */
+  }
 
+  .work-card-image {
+    /* The frame's image is proportional (976×305 = 1328:415, same crop as the
+       1440 design), not the desktop's fixed 415px strip. */
+    height: auto;
+    aspect-ratio: 1328 / 415;
+  }
+
+  /* Once stacked, these column gaps stop being grid math and become real
+     vertical spacing — so they join the scale here. */
   .footprints-layout {
     flex-direction: column;
-    gap: var(--space-lg);
+    gap: var(--gap-group);
   }
 
   .footprints-left,
@@ -187,7 +240,7 @@
 
   .about-layout {
     flex-direction: column;
-    gap: var(--space-lg);
+    gap: var(--gap-group);
   }
 
   .about-left,
@@ -200,7 +253,7 @@
      column so the panel no longer overflows horizontally */
   .contact-meta {
     flex-direction: column;
-    gap: var(--space-lg);
+    gap: var(--gap-group);
   }
 
   .contact-meta-connect,
@@ -209,35 +262,21 @@
     width: 100%;
   }
 
-  /* The dek is 2.5rem on desktop, where the title is 72px+ and clearly outranks
-     it. Below here the title's clamp is shrinking toward its 2.5rem floor, so a
-     fixed 2.5rem dek would draw level with it — step the dek down first to keep
-     the title on top all the way to the phone tier. */
-  .project-dek {
-    font-size: 2rem;
-  }
-
   /* Project overview pages: every two-column block collapses at the same tier
      as Footprints / About / Contact above, and drops the fixed 542px column so
      nothing overflows. Same idiom, so the project pages reflow in step with the
-     rest of the site.
-
-     ⚠️ The .conversation-invite-* selectors here are DEAD — no page renders that
-     component any more. See the DEAD CODE note in project-overview.css; delete
-     them with the rest of it, not on their own. */
-  .project-masthead,
-  .project-block,
-  .conversation-invite-meta {
+     rest of the site. */
+  .project-masthead-cols,
+  .project-masthead-top,
+  .project-block {
     flex-direction: column;
-    gap: var(--space-lg);
+    gap: var(--gap-group); /* same stacked-columns idiom as the homepage */
   }
 
   .project-masthead-left,
   .project-masthead-right,
   .project-block-left,
-  .project-block-right,
-  .conversation-invite-note,
-  .conversation-invite-connect {
+  .project-block-right {
     flex: 0 0 auto;
     width: 100%;
   }
@@ -248,58 +287,98 @@
    Work imagery shrinks; the hero headline and intro paragraph go full width.
    ========================================================================== */
 @media (max-width: 768px) {
-  /* Outer page gutter steps down again */
-  .site-container,
-  .site-header-row,
-  .intro-inner {
-    padding-inline: 24px;
-  }
+  /* SPACING SCALE, portrait-tablet step: identical to the 1024 tier (gutter 24,
+     group 48), so nothing is re-declared here — the tokens above cascade down.
+     This tier only carries what genuinely differs at portrait width. */
 
   .site-nav-bar {
+    /* Back to filling the row — the 1024 tier's fixed 542px column would
+       squeeze the name out at portrait widths. */
+    flex: 1 1 auto;
     gap: 24px;
   }
 
-  /* Tablet + phone: the scroll cue goes away — instead the hero ends short of
-     the fold so the first Work card reveals ~281px above it (Figma 217:6022 +
-     the 480 frame's card-at-563 geometry). 100dvh − 66 header − 64 section
-     padding − 281 peek = 100dvh − 411. Floor keeps the hero content (copy ends
-     ~635 here) from being clipped on short screens. */
-  .scroll-indicator {
-    display: none;
-  }
-
+  /* PORTRAIT-TABLET hero (Figma 277:5121, 768×760): the egg renders its 768
+     canvas 1:1, top-anchored (painted silhouette y ≈ 158–593), with the CYCLING
+     copy — one 32px slide at a time (js/main.js initHeroCycle covers ≤768) — in
+     a 584px slot centered on the egg. NO CTA; the hero ends at 596px so the
+     first Work card arrives at ~660 (596 + 64 section padding). */
   .intro {
-    min-height: max(640px, calc(100dvh - 411px));
+    min-height: 596px;
   }
-
-  /* Hero centers at 768 (Figma 217:6213): centered headline over the blob,
-     centered copy below. Blob keeps the 1044 ELEMENT from the 1024 tier; the 768
-     BLOBS entry is the SAME silhouette shifted 116px left in that canvas
-     (center ~382px in), so re-center it here rather than inherit 1024's offset. */
   .intro-blob {
-    left: calc(50% - 382px);
+    top: 0;
+    transform: translate(-50%, 0) translateZ(0);
+    width: 768px;
+  }
+  .intro-inner {
+    /* The copy slot's center in the frame (y 312 + 111/2 ≈ 368). */
+    top: 368px;
+    transform: translate(-50%, -50%);
+    width: 584px;
+  }
+  .intro-cta {
+    display: none; /* the arriving Work card is the scroll cue from here down */
   }
 
-  .intro-headline {
-    left: 50%;
-    top: 152px;
-    transform: translateX(-50%);
+  /* Paragraph cycling (≤768, JS-gated — js/main.js adds is-hero-cycling and
+     rotates is-cycle-active / is-cycle-exit). Grid stacks both slides in one
+     cell so the container holds the taller slide's height and each slide
+     centers in it. The hand-off is SEQUENTIAL, echoing the site's data-reveal
+     rise: the outgoing line lifts away and fades, then the incoming one rises
+     in from below (its transition-delay covers the exit). The idle base state
+     has no transition, so a slide that just exited snaps back below the slot
+     while invisible, ready for its next entrance. Without JS / with reduced
+     motion no class ever appears and the paragraphs simply stack. */
+  html.is-hero-cycling .intro-copy {
+    display: grid;
+    align-items: center;
+  }
+  html.is-hero-cycling .intro-headline,
+  html.is-hero-cycling .intro-claim {
+    grid-area: 1 / 1;
+    opacity: 0;
+    transform: translateY(14px);
+    transition: none;
+  }
+  html.is-hero-cycling .is-cycle-active {
+    opacity: 1;
+    transform: translateY(0);
+    transition:
+      opacity 0.5s ease 0.45s,
+      transform 0.55s cubic-bezier(0.22, 0.61, 0.36, 1) 0.45s;
+  }
+  html.is-hero-cycling .is-cycle-exit {
+    opacity: 0;
+    transform: translateY(-14px);
+    transition:
+      opacity 0.45s ease,
+      transform 0.5s cubic-bezier(0.55, 0.06, 0.68, 0.19);
   }
 
-  .intro-body {
-    left: calc(50% - 237px);
-    right: auto;
-    top: 555px;
-    width: 474px;
-  }
+  /* Portrait tablet + phone work cards run Image -> Meta -> Title ->
+     Description (their frames lead with the image; the wrappers are already
+     flattened by the 1024 tier's display:contents, which is what makes this
+     interleaving possible). The 1024 tier's title-first rhythm resets too. */
+  .work-card-image-link { order: 0; margin-top: 0; }
+  .work-card-meta { order: 1; }
+  .work-card-title { order: 2; }
+  .work-card-description { order: 3; }
+
+  /* (.work-card's stacked gap is --gap-content, set in the 1024 tier and
+     inherited here — the card reflows the same way at both portrait sizes.) */
 
   .work-card-image-link,
-  .work-card-image {
+  .work-card-image,
+  .project-hero-figure,
+  .project-figure {
+    /* The project hero is the same image as the Work card, so it steps to the
+       same radius here. Keep these together. */
     border-radius: 24px;
   }
 
   .work-card-image {
-    height: 220px;
+    height: 220px; /* fixed strip again — overrides the 1024 tier's ratio */
   }
 }
 
@@ -309,55 +388,70 @@
    the footer copyright row stacks.
    ========================================================================== */
 @media (max-width: 480px) {
-  /* Page gutter steps down to its tightest (56 → 32 → 24 → 16px) so content
-     gets more room on a phone (applies to the whole page column + hero). */
-  .site-container,
-  .site-header-row,
-  .intro-inner {
-    padding-inline: 16px;
+  :root {
+    --size-hero-description: 17px; /* Figma phone frame (other components) */
+
+    /* SPACING SCALE, phone step — the tightest, and where the scale was
+       derived (see the block at the top of this file). Group and section both
+       close up: on a 375-wide screen a 96px break between cards costs a
+       quarter of the viewport and reads as the page having ended. Content
+       stays 20 — it is type against type, and the type is still ~17–20px.
+       Gutter is the tightest of the four so the copy gets the room back.
+       Heading closes hardest of all: the "big title" is only 32px here, so it
+       doesn't need the 96 that a 96px display line does — 96 under a 32px
+       title on a 375-wide screen reads as a broken section, not as air. */
+    --gap-group: 40px;
+    --gap-section: 64px;
+    --gap-heading: 40px;
+    --page-gutter: 16px;
   }
 
-  /* Phone hero content is shorter, so the card-reveal floor steps down from the
-     tablet tier's. 440 = the copy's own bottom (439) — the tightest the hero can
-     get before .intro's overflow:hidden would clip it. */
+  /* MOBILE hero (Figma 272:432, 375): a compact egg top-anchored in the upper
+     area (js/main.js swaps in the 375 silhouette — painted y ≈ 87–316, center
+     201), 17px copy inside it, NO CTA, and the hero ends at 336px (20px below
+     the egg) so the first Work card sits at ~352 (336 + the section's reduced
+     16px top padding, below) — image AND title in the first view; the card is
+     the scroll affordance.
+     The two paragraphs CYCLE to save space: js/main.js (initHeroCycle) adds
+     is-hero-cycling + rotates is-cycle-active, and the rules below overlay the
+     two slides and crossfade them. Without JS / with reduced motion the class
+     never appears and both paragraphs simply stack (they still fit the egg). */
   .intro {
-    min-height: max(440px, calc(100dvh - 411px));
+    min-height: 336px;
   }
 
-  /* Hero on phones (Figma 206:5502): centered 48px headline over the 390-frame
-     blob, centered copy below. */
-  .intro-headline {
-    font-size: 48px;
-    left: 50%;
-    top: 94px;
-    width: 281px;
-    transform: translateX(-50%);
+  /* Pull Selected Work up under the egg so the first card's TITLE (not just
+     its image) lands in the initial viewport (~613–677 on the 375 frame).
+     Top padding only — bottom keeps the 64px section rhythm. */
+  #work-section {
+    padding-top: 16px;
   }
-
-  .intro-line:nth-child(2) { margin-left: 67px; }
-  .intro-line:nth-child(3) { margin-left: 34px; }
-  .intro-line:nth-child(4) { margin-left: 133px; }
-
   .intro-blob {
-    /* 390 element; its silhouette center sits ~194px in, so center it the same
-       way as the wider tiers (was left:0 — only centered at exactly 390px). */
-    top: -66px;
-    left: calc(50% - 194px);
-    width: 390px;
-    height: 844px;
+    /* Top-anchored (not page-centered): the 375×844 canvas already places the
+       egg in the upper area, so map the blob's top to the hero's top. Width
+       renders the frame 1:1. */
+    top: 0;
+    transform: translate(-50%, 0) translateZ(0);
+    width: 375px;
   }
-
-  .intro-body {
-    /* Centered (w350) — symmetric across 390→480 instead of pinned at left:20. */
-    left: calc(50% - 175px);
-    right: auto;
-    top: 351px;
-    width: 350px;
+  .intro-inner {
+    /* Sit on the egg's painted center (y 201 of the fixed-size blob). */
+    top: 201px;
+    transform: translate(-50%, -50%);
+    width: 311px;
   }
-
-  .intro-body p {
+  .intro-copy {
+    gap: 12px;
+  }
+  .intro-cta {
+    display: none; /* the visible first Work card is the scroll cue here */
+  }
+  .intro-headline,
+  .intro-claim {
     font-size: 17px;
   }
+
+  /* (Paragraph-cycling rules live in the 768 tier above and cascade down.) */
 
   /* Headlines step down to 32px on phones (from their 40px floor / clamp).
      Covers Work card titles, the Public Footprints section title, and the
@@ -367,20 +461,19 @@
   .about-name,
   .contact-email,
   .project-title,
-  .conversation-invite-heading,
-  .project-continue-link,
-  .project-block-title {
+  .project-block-title,
+  .next-case-title {
     font-size: 2rem;
   }
 
-  /* The dek is 2.5rem on desktop — bigger than the 2rem the title drops to
-     here, which would invert the hierarchy. Step it under the title. */
-  .project-dek {
-    font-size: 1.5rem;
+  /* Next-case pager: shrink the arrow in step with the title so the row stays
+     balanced on a narrow screen. */
+  .next-case-arrow {
+    font-size: 2.25rem;
   }
 
   /* Project overview: the metadata pairs stack (a 6.5rem <dt> column leaves too
-     little for the value on a phone), and Continue stacks under its eyebrow. */
+     little for the value on a phone). */
   .project-meta-row {
     flex-direction: column;
     gap: 0.25rem;
@@ -390,14 +483,20 @@
     flex: 0 0 auto;
   }
 
-  .project-continue {
-    flex-direction: column;
-    gap: var(--space-sm);
-  }
-
   /* The lead paragraph steps down in step with the body copy above */
   .project-lead {
     font-size: 1.25rem;
+  }
+
+  /* Floating section pills: tighten so a 2–3 item bar clears the 375 gutter and
+     sits a little higher above the smaller footer. */
+  .section-pills {
+    bottom: 16px;
+    max-width: calc(100% - 32px);
+  }
+  .section-pills a {
+    font-size: 0.875rem;
+    padding: 8px 14px;
   }
 
   /* Mobile menu: the inline Work/About/Contact links give way to a "Menu"
@@ -414,8 +513,9 @@
   .mobile-menu-toggle {
     display: block;
   }
-  .mobile-menu.is-open {
-    display: flex;
+  .mobile-menu.is-open,
+  .mobile-menu.is-closing {
+    display: flex; /* .is-closing keeps it visible while the exit slide plays */
   }
 
   /* Phone work cards inherit the Image -> Meta -> Title -> Description order and
@@ -432,6 +532,45 @@
   }
   .work-card-description {
     font-size: 17px; /* Figma */
+  }
+
+  /* About tightens BELOW --gap-heading (40) to 20: what follows the heading
+     here is the photo, not text, and an image edge needs less separation from
+     a title than a text block does — 40 left it floating. Contact keeps the
+     full 40 because text follows it. */
+  .about-name {
+    margin-bottom: var(--gap-content);
+  }
+
+  /* ------------------------------------------------------------------
+     Everything below is a documented EXCEPTION to the scale. The gaps
+     themselves come from the tokens in this tier's :root above — there
+     are no per-component gap rules here any more, and adding one back
+     should feel wrong.
+     ------------------------------------------------------------------ */
+
+  .footprint-list {
+    /* OPTICAL trim, not a spacing value: .footprint-group's box gap is already
+       a correct 20, but each link's 30px line box wraps ~25px of text, so 2.5px
+       of half-leading sits above the first link and the gap READS as 23.
+       Pulling the list up by that half-leading makes it look like the scale's
+       20. Recompute if the link font-size or line-height changes. */
+    margin-top: -3px;
+  }
+
+  .footprints-heading {
+    /* The heading's margin clears a .footprints-desc paragraph that this
+       section doesn't have, so it stacked with the group gap above it and made
+       heading → eyebrow 60. The group gap alone does the job. */
+    margin-bottom: 0;
+  }
+
+  /* Section paddings need almost no overriding: the global .page-section
+     64px top/bottom already puts a full 64 on each side of every divider.
+     The only two exceptions are the 16px card-peek top on #work-section
+     (rule above) and the blue panel's inner top: */
+  .contact-section {
+    padding-top: 64px; /* was the desktop 120 */
   }
 
   /* Let the email / LinkedIn / Resume row wrap instead of overflowing */

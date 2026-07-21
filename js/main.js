@@ -28,7 +28,9 @@ if (siteName && siteName.getAttribute('href') === '#') {
 
 // Scroll-spy: each nav link and the section it points to. Only the homepage has
 // these sections in-page; on project pages the nav links point back to
-// index.html, so the list filters down to empty and the spy is a no-op.
+// index.html, so the list filters down to empty and the spy is a no-op. That's
+// why those pages can hard-code `class="is-active"` on the Work link — nothing
+// here ever runs to clear it.
 const navSections = [
   { link: navWork, el: document.getElementById('work-section') },
   { link: document.querySelector('.site-nav-bar a[href="#about"]'), el: document.getElementById('about') },
@@ -37,20 +39,29 @@ const navSections = [
 
 const siteHeader = document.querySelector('.site-header');
 
+// Floating in-page section nav — only the project overview pages render
+// `.section-pills`, so `sectionPills` is empty (and every loop over it a no-op)
+// on the homepage. Each pill links to a section on its own page (#overview /
+// #process / #impact); the anchor clicks glide via the shared Lenis handler in
+// setupLenis(). The spy + footer tuck-away live in updateScrollEffects().
+const sectionPillBar = document.querySelector('.section-pills');
+// `:not(.section-pill-locked)` keeps the locked "Process" chip (Accessibility /
+// Messaging) out of the active-state rotation — it stays muted rather than ever
+// taking the solid fill. Its href still navigates via the shared Lenis handler.
+const sectionPills = sectionPillBar
+  ? Array.from(sectionPillBar.querySelectorAll('a:not(.section-pill-locked)'))
+      .map(link => ({ link, el: document.querySelector(link.getAttribute('href')) }))
+      .filter(s => s.el)
+  : [];
+const siteFooter = document.querySelector('.site-footer');
+
 // The full-bleed blue panel that the sticky header inverts over (and that the
 // 👋 cursor appears on). Only the homepage has one (#contact) — the project
 // pages end on cream, so this is null there and both features simply stay off.
-//
-// ⚠️ The `.conversation-invite` fallback is DEAD: no page renders that component
-// any more (see the DEAD CODE note in project-overview.css). Harmless — the
-// querySelector just returns null — but delete it together with the CSS, not on
-// its own.
-const darkPanel = document.getElementById('contact') || document.querySelector('.conversation-invite');
+const darkPanel = document.getElementById('contact');
 const contactSection = darkPanel;
 const intro = document.querySelector('.intro');
-const introHeadline = document.querySelector('.intro-headline');
-const introBody = document.querySelector('.intro-body');
-const scrollIndicator = document.querySelector('.scroll-indicator');
+const introInner = document.querySelector('.intro-inner');
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
 // The rest of the site stays hidden through the one-time hero reveal (scribble
@@ -87,31 +98,45 @@ function revealSite() {
 // tiers), so every tier gets its own correctly-shaped/sized blob rather than a
 // scaled desktop one. The CSS sizes the element to vw×vh so it renders 1:1.
 const BLOBS = [
-  { max: 480, vw: 390, vh: 844,
-    A:[[125.231,116.573],[31.5723,259.956],[325.056,382.599],[362.771,279.628]],
-    C1:[[34.5106,103.191],[87.9757,369.131],[361.185,362.629],[348.541,223.388]],
-    C2:[[-0.671066,197.546],[288.926,402.568],[377.001,335.868],[299.289,142.249]] },
-  // The 768 and 1024 tiers share ONE silhouette in Figma — the 768 frame's
-  // Subtract (217:6214) is the 1024 frame's (206:5450) shifted 116px left in
-  // the same 1044×775 canvas. Coordinates below are exact from those assets,
-  // so the shape (and its smooth anchors) is identical across the boundary —
-  // no size/shape jump when the tier switches.
-  { max: 768, vw: 1044, vh: 775,
-    A:[[282.113,147.42],[146.164,356.165],[571.737,534.434],[626.517,384.547]],
-    C1:[[150.543,128.012],[227.889,515.011],[624.154,505.343],[605.92,302.708]],
-    C2:[[99.4456,265.36],[519.321,563.524],[647.113,466.385],[534.547,184.657]] },
-  { max: 1024, vw: 1044, vh: 775,
-    A:[[398.113,147.42],[262.164,356.165],[687.736,534.434],[742.517,384.547]],
-    C1:[[266.543,128.012],[343.889,515.011],[740.153,505.343],[721.92,302.708]],
-    C2:[[215.446,265.36],[635.319,563.524],[763.113,466.385],[650.547,184.657]] },
-  { max: 1280, vw: 1280, vh: 775,   // Figma "Laptop" 217:5984 — narrower blob so copy clears down to 1025
-    A:[[241.271,116.193],[75.2881,390.039],[581.716,615.334],[649.639,419.378]],
-    C1:[[84.139,93.0141],[170.568,595.494],[644.899,576.642],[626.287,313.186]],
-    C2:[[20.8208,272.589],[518.532,654.026],[672.99,525.57],[542.749,160.666]] },
+  // Mobile (Figma 272:433, 375×844): a compact egg in the UPPER area — the
+  // cycling copy sits in it, the first Work card is fully in view below.
+  // Silhouette bbox x ~14–359, y ~87–316 (painted center ~201 — the CSS pins
+  // .intro-inner there).
+  { max: 480, vw: 375, vh: 844,
+    A:[[346.353,161.649],[69.154,109.489],[60.601,278.447],[326.125,266.869]],
+    C1:[[328.97,126.764],[10.521,144.715],[205.654,348.342],[367.811,227.346]],
+    C2:[[171.722,47.87],[-15.002,242.018],[284.439,306.392],[363.734,196.535]] },
+  // Portrait tablet (Figma 277:5122, 768×760): a mid-size egg, top-anchored —
+  // the cycling 32px copy sits on its center (painted y ≈ 158–593), no CTA.
+  { max: 768, vw: 768, vh: 760,
+    A:[[688.061,300.266],[161.719,201.226],[145.478,522.039],[649.652,500.057]],
+    C1:[[655.055,234.025],[50.387,268.111],[420.903,654.754],[728.805,425.011]],
+    C2:[[356.472,84.223],[1.924,452.867],[570.499,575.103],[721.065,366.506]] },
+  // Landscape tablet (Figma 265:502, 1024×1366 portrait canvas): the egg sits
+  // in the UPPER area (painted y ≈ 110–700), copy inside it, and the first
+  // Work card is fully in view below (card content at y 783 in the frame).
+  // Covers the 769–1024 band; the CSS top-anchors this canvas at 1:1.
+  { max: 1024, vw: 1024, vh: 1366,
+    A:[[892.259,320.768],[238.565,197.763],[218.396,596.2],[844.558,568.898]],
+    C1:[[851.269,238.499],[100.296,280.832],[560.461,761.026],[942.862,475.695]],
+    C2:[[480.441,52.45],[40.108,510.292],[746.253,662.102],[933.249,403.036]] },
+  // Laptop (Figma 265:483 @1280 / 265:521 @1025 — those two frames share ONE
+  // path, identical coordinates ±112px of x): the frames keep this silhouette
+  // ~viewport-centered at a constant size, so the coordinates below are the
+  // exact 1280-canvas path translated +91.65px in x to put the silhouette's
+  // center on the 1440 canvas center — the centered element then lands it
+  // frame-true at every width in the band. Fixed size; sides crop as the
+  // viewport narrows.
+  { max: 1439, vw: 1440, vh: 760,
+    A:[[1152.99,295.5],[403.368,154.455],[380.223,611.402],[1098.28,580.07]],
+    C1:[[1105.99,201.152],[244.803,249.727],[772.485,800.421],[1211.02,473.176]],
+    C2:[[680.745,-12.204],[175.773,512.884],[985.546,686.964],[1199.99,389.848]] },
+  // Desktop (Figma 258:479, 1440×760): the big centred egg (drawn very slightly
+  // wider/shorter than the laptop one — ≤1.5%, invisible at the swap).
   { max: Infinity, vw: 1440, vh: 760,
-    A:[[319.313,133.184],[124.461,419.57],[743.295,669.927],[821.107,463.831]],
-    C1:[[128.375,105.018],[244.628,639.475],[818.97,630.373],[790.376,350.764]],
-    C2:[[55.7667,293.86],[667.619,709.48],[851.839,576.898],[685.651,187.224]] },
+    A:[[1159.15,272.474],[373.882,169.788],[372.189,627.318],[1095.95,561.979]],
+    C1:[[1101,184],[219.966,272.39],[772.866,797.738],[1203.54,449.916]],
+    C2:[[643.129,-9.69],[163.354,538.495],[988.356,674.041],[1217.31,360.947]] },
 ];
 function blobForWidth(w) {
   for (const b of BLOBS) if (w <= b.max) return b;
@@ -138,32 +163,62 @@ function initHero() {
 
   const blobSvg = document.querySelector('.intro-blob');
   const blobPath = document.querySelector('.intro-blob-path');
-  const lines = Array.from(document.querySelectorAll('.intro-line'));
+
+  // Centre the VISIBLE silhouette, not the canvas. The path's bbox is not
+  // centred inside its own viewBox (the shape is bottom-heavy), so centring the
+  // <svg> box leaves the blob looking low/off. Measure the gap between the
+  // element's centre and the path's centre and publish it as CSS vars for
+  // hero.css to correct. Measured from the RESTING path (called right after it's
+  // set) so the settle animation never shifts it, and it's idempotent — moving
+  // the element moves both rects together, so the delta is invariant.
+  function centerSilhouette() {
+    if (!blobSvg || !blobPath) return;
+    try {
+      const s = blobSvg.getBoundingClientRect();
+      const p = blobPath.getBoundingClientRect();
+      if (!s.width || !p.width) return;
+      blobSvg.style.setProperty('--blob-dx', `${round2((s.left + s.width / 2) - (p.left + p.width / 2))}px`);
+      blobSvg.style.setProperty('--blob-dy', `${round2((s.top + s.height / 2) - (p.top + p.height / 2))}px`);
+    } catch (e) { /* not laid out yet — the 0px fallbacks in hero.css apply */ }
+  }
 
   // Active tier's blob; set its viewBox + resting shape up front so reduced-
   // motion (and the first paint) get the right blob for the current breakpoint.
   let blob = blobForWidth(window.innerWidth);
   if (blobSvg) blobSvg.setAttribute('viewBox', `0 0 ${blob.vw} ${blob.vh}`);
   if (blobPath) blobPath.setAttribute('d', blobPathD(blob));
+  centerSilhouette();
   window.addEventListener('resize', () => {
     const b = blobForWidth(window.innerWidth);
     if (b === blob) return;
     blob = b;
     if (blobSvg) blobSvg.setAttribute('viewBox', `0 0 ${b.vw} ${b.vh}`);
-    if (reducedMotion.matches && blobPath) blobPath.setAttribute('d', blobPathD(b));
+    // Repaint the new tier's resting shape. During the brief settle window the
+    // morph loop overwrites this next frame (seamless); once settled — or under
+    // reduced motion — this IS what keeps the blob correct across breakpoints.
+    if (blobPath) blobPath.setAttribute('d', blobPathD(b));
+    centerSilhouette();   // each tier's path has its own bbox offset
   });
 
   startReveal();
   if (reducedMotion.matches || !blobPath) return;
 
-  // ---- Blob morph (fluid, shape-preserving) ----------------------------
-  // Each anchor drifts on its own slow, non-repeating 2D path, carrying its two
-  // handles — so the tangent is preserved (no kinks) and only the spans between
-  // corners flex, reading as a fluid edge. Amplitude is ~1% of the ACTIVE blob's
-  // width so the drift looks the same at every breakpoint. Eased in from zero.
-  const AMP_FRAC = 14 / 1440;         // ~1% of width
+  // ---- Blob morph — a lively entrance easing into a PERPETUAL subtle idle --
+  // The blob breathes noticeably as the page loads, then eases down to a very
+  // subtle continuous drift and keeps living — never freezing. Each anchor
+  // drifts on its own slow 2D path carrying its two handles (tangent preserved,
+  // no kinks); amplitude is a fraction of the ACTIVE blob's width so it looks
+  // the same per tier. The two sine frequencies are incommensurate, so the
+  // motion never visibly repeats. Paused off-screen / hidden-tab below.
+  const AMP_FRAC = 14 / 1440;         // entrance amplitude, ~1% of width
+  const IDLE_FRAC = 0.3;              // idle floor: 30% of entrance (~4px @1440)
   const w1 = (2 * Math.PI) / 26, w2 = (2 * Math.PI) / 34;
-  const LINE_X = 5, LINE_Y = 4, wx = (2 * Math.PI) / 23, wy = (2 * Math.PI) / 29;
+  // Envelope (seconds): ease amplitude 0->1, hold lively, ease down to the idle
+  // floor — then hold that floor forever. Tune these to change how long the
+  // hero's entrance "lives" before quieting down.
+  const RAMP_IN = 1.5, HOLD = 2.0, RAMP_OUT = 2.5;
+  const SETTLE_END = RAMP_IN + HOLD + RAMP_OUT;
+  const smoothstep = (r) => r * r * (3 - 2 * r);
   const startT = performance.now();
   let rafId = 0, running = false;
 
@@ -174,26 +229,28 @@ function initHero() {
     ];
   }
 
+  // Amplitude over time: rise, hold at full, ease down to the idle floor, stay.
+  function envelope(t) {
+    if (t <= RAMP_IN) return smoothstep(t / RAMP_IN);
+    if (t <= RAMP_IN + HOLD) return 1;
+    if (t < SETTLE_END) return 1 - (1 - IDLE_FRAC) * smoothstep((t - RAMP_IN - HOLD) / RAMP_OUT);
+    return IDLE_FRAC;
+  }
+
   function frame(now) {
     if (!running) return;
     rafId = requestAnimationFrame(frame);
     const t = (now - startT) / 1000;
-    const r = Math.min(t / 1.5, 1);
-    const k = r * r * (3 - 2 * r);            // smoothstep amplitude ramp
+    const k = envelope(t);
     const amp = k * blob.vw * AMP_FRAC;
     blobPath.setAttribute('d', blobPathD(blob, [drift(0, t, amp), drift(1, t, amp), drift(2, t, amp), drift(3, t, amp)]));
-
-    // Float each word on its own slow X/Y oval (distinct phase per line).
-    for (let i = 0; i < lines.length; i++) {
-      const tx = k * LINE_X * Math.sin(wx * t + i * 1.1);
-      const ty = k * LINE_Y * Math.sin(wy * t + i * 1.7 + 0.6);
-      lines[i].style.transform = `translate(${round2(tx)}px, ${round2(ty)}px)`;
-    }
   }
   function play() { if (!running) { running = true; rafId = requestAnimationFrame(frame); } }
   function pause() { running = false; if (rafId) cancelAnimationFrame(rafId); }
 
-  // Only animate while the hero is on screen and the tab is visible.
+  // Only animate while the hero is on screen and the tab is visible — the idle
+  // loop costs nothing when the blob can't be seen, and the drift picks up
+  // exactly where its clock left off (t keeps advancing, phase stays smooth).
   const hero = document.querySelector('.intro');
   if (hero && 'IntersectionObserver' in window) {
     new IntersectionObserver((entries) => {
@@ -205,15 +262,14 @@ function initHero() {
   document.addEventListener('visibilitychange', () => (document.hidden ? pause() : play()));
 }
 
-// Reveal sequence. Reduced motion: just show everything. Motion: the headline
-// settles into focus (blur -> sharp), then the rest of the site fades in.
+// Reveal sequence. Reduced motion: just show everything. Motion: the blob plays
+// its entrance settle while the copy lockup fades in, then the rest of the site.
 function startReveal() {
   if (reducedMotion.matches) {
     html.classList.add('is-text-revealed');
     revealRestOfSite();
     return;
   }
-  html.classList.add('is-headline-in');
   setTimeout(revealSite, 200);
 }
 
@@ -221,9 +277,128 @@ function round2(x) { return Math.round(x * 100) / 100; }
 
 initHero();
 
+// ============================================================
+// HERO CYCLE — at ≤768px the two hero paragraphs share one slot and crossfade
+// every few seconds to keep the compact egg compact (Figma 277:5121 / 272:432).
+// Progressive enhancement: without JS or with reduced motion the class is never
+// added and the paragraphs simply stack (responsive.css). Guarded for project
+// pages (no .intro-copy there).
+// ============================================================
+function initHeroCycle() {
+  // Claim first: a fast-scrolling visitor should meet the point of view, not
+  // the résumé line — the credential follows on the next beat.
+  const slides = [
+    document.querySelector('.intro-claim'),
+    document.querySelector('.intro-headline'),
+  ].filter(Boolean);
+  if (slides.length < 2 || reducedMotion.matches) return;
+
+  const mq = window.matchMedia('(max-width: 768px)');
+  const HOLD_MS = 5000;
+  const EXIT_MS = 600; // covers the exit transition before the base-state snap
+  let timer = 0;
+  let resetTimer = 0;
+  let active = 0;
+
+  // Sequential hand-off (see the cycling CSS in responsive.css): the current
+  // slide gets is-cycle-exit (lifts away), the next gets is-cycle-active (its
+  // delayed transition rises it in after the exit). Once the exit has played,
+  // strip the class so the slide snaps back below the slot while invisible.
+  function show(i) {
+    slides.forEach((el, k) => {
+      if (k === i) {
+        el.classList.remove('is-cycle-exit');
+        el.classList.add('is-cycle-active');
+      } else if (el.classList.contains('is-cycle-active')) {
+        el.classList.remove('is-cycle-active');
+        el.classList.add('is-cycle-exit');
+      }
+    });
+    clearTimeout(resetTimer);
+    resetTimer = setTimeout(() => {
+      slides.forEach((el) => el.classList.remove('is-cycle-exit'));
+    }, EXIT_MS);
+  }
+  function start() {
+    if (timer) return;
+    html.classList.add('is-hero-cycling');
+    show(active);
+    timer = setInterval(() => {
+      // Skip beats in a hidden tab so a return visit isn't mid-transition.
+      if (document.hidden) return;
+      active = (active + 1) % slides.length;
+      show(active);
+    }, HOLD_MS);
+  }
+  function stop() {
+    if (!timer) return;
+    clearInterval(timer);
+    timer = 0;
+    clearTimeout(resetTimer);
+    html.classList.remove('is-hero-cycling');
+    slides.forEach((el) => el.classList.remove('is-cycle-active', 'is-cycle-exit'));
+  }
+
+  const update = () => (mq.matches ? start() : stop());
+  mq.addEventListener('change', update);
+  update();
+}
+initHeroCycle();
+
+// ============================================================
+// MASTHEAD CAROUSEL — the Accessibility overview image is a 3-slide crossfade.
+// Auto-advances; clicking a dot jumps to that slide and STOPS the auto-advance
+// (the visitor has taken control). Guarded: only that page has [data-carousel],
+// so this is a no-op everywhere else. Reduced motion / no JS: the first slide
+// stays and the dots still switch manually — auto-advance just never starts.
+// ============================================================
+function initCarousel() {
+  const root = document.querySelector('[data-carousel]');
+  if (!root) return;
+  const slides = Array.from(root.querySelectorAll('.project-carousel-slide'));
+  const dots = Array.from(root.querySelectorAll('.project-carousel-dot'));
+  if (slides.length < 2) return;
+
+  const HOLD_MS = 5000;
+  let active = 0;
+  let timer = 0;
+
+  function show(i) {
+    active = i;
+    slides.forEach((el, k) => el.classList.toggle('is-active', k === i));
+    dots.forEach((el, k) => {
+      const on = k === i;
+      el.classList.toggle('is-active', on);
+      if (on) el.setAttribute('aria-current', 'true');
+      else el.removeAttribute('aria-current');
+    });
+  }
+  function stop() {
+    if (!timer) return;
+    clearInterval(timer);
+    timer = 0;
+  }
+  function start() {
+    if (timer || reducedMotion.matches) return;
+    timer = setInterval(() => {
+      if (document.hidden) return; // don't burn beats in a hidden tab
+      show((active + 1) % slides.length);
+    }, HOLD_MS);
+  }
+
+  dots.forEach((dot, i) => {
+    dot.addEventListener('click', () => {
+      stop(); // visitor picked a slide — hand them control
+      show(i);
+    });
+  });
+
+  start();
+}
+initCarousel();
+
 const heroFadeScrollRange = 320;
 const scrollEffectDelay = 40;
-const scrollIndicatorFadeRange = 50;
 
 function scrollEffectRatio(range, delay = scrollEffectDelay) {
   return Math.max((window.scrollY - delay) / range, 0);
@@ -248,6 +423,28 @@ function updateScrollEffects() {
   }
   navSections.forEach(s => s.link.classList.toggle('is-active', s.link === activeLink));
 
+  // Floating section pills (project pages): same spy as the nav above, but it
+  // defaults to the first pill so Overview reads active at the top of the page.
+  // Once the footer is in view there's nowhere further to jump, so tuck the bar
+  // away. Guarded by length, so this is inert on the homepage.
+  if (sectionPills.length) {
+    const pillMarker = window.innerHeight * 0.35;
+    let activePill = sectionPills[0].link;
+    for (const s of sectionPills) {
+      if (s.el.getBoundingClientRect().top <= pillMarker) activePill = s.link;
+    }
+    sectionPills.forEach(s => {
+      const on = s.link === activePill;
+      s.link.classList.toggle('is-active', on);
+      if (on) s.link.setAttribute('aria-current', 'true');
+      else s.link.removeAttribute('aria-current');
+    });
+    if (sectionPillBar && siteFooter) {
+      const footerIn = siteFooter.getBoundingClientRect().top < window.innerHeight;
+      sectionPillBar.classList.toggle('is-tucked', footerIn);
+    }
+  }
+
   // Invert the sticky bar to blue/white once the Contact panel slides
   // beneath it; stays inverted through the (also-blue) footer to page end
   // Invert once Contact reaches the scroll-anchor line (CSS scroll-padding-top,
@@ -263,25 +460,17 @@ function updateScrollEffects() {
 
   // Everything below is the hero's own scroll accent — project pages have no
   // hero, so there's nothing left to do there.
-  if (!introHeadline || !introBody || !scrollIndicator) return;
+  if (!introInner) return;
 
   if (reducedMotion.matches) {
-    introHeadline.style.opacity = '';
-    introBody.style.opacity = '';
-    scrollIndicator.style.opacity = '';
+    introInner.style.opacity = '';
     return;
   }
 
-  // The one hero scroll accent: the headline and paragraph fade out
-  // together as the reader scrolls down. Clamped to 1 so it settles.
+  // The one hero scroll accent: the copy lockup fades out as the reader scrolls
+  // down. Clamped to 1 so it settles.
   const fade = easeIn(Math.min(scrollEffectRatio(heroFadeScrollRange), 1));
-  const opacity = 1 - fade;
-  introHeadline.style.opacity = opacity;
-  introBody.style.opacity = opacity;
-
-  // Scroll indicator has done its job the moment you scroll — fade it
-  // out quickly right away, no delay.
-  scrollIndicator.style.opacity = 1 - Math.min(window.scrollY / scrollIndicatorFadeRange, 1);
+  introInner.style.opacity = 1 - fade;
 
   // Contact fades in via the shared viewport-reveal system (data-reveal in the
   // markup), so there's no scroll-linked opacity for it here anymore.
@@ -358,6 +547,9 @@ function setupLenis(Lenis) {
   // Route in-page anchor clicks through Lenis so they glide instead of jumping
   // (native smooth is disabled while Lenis is active). Offset matches the
   // sticky header / scroll-padding-top so a section rests flush beneath it.
+  // EXCEPTION: links inside the mobile-menu overlay land IMMEDIATELY — the
+  // overlay covers the page while it closes, so animated travel underneath is
+  // just distracting motion; the user should simply arrive in the section.
   const headerOffset = parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0;
   document.querySelectorAll('a[href^="#"]').forEach((link) => {
     link.addEventListener('click', (e) => {
@@ -366,7 +558,8 @@ function setupLenis(Lenis) {
       const target = document.querySelector(href);
       if (!target) return;
       e.preventDefault();
-      lenis.scrollTo(target, { offset: -headerOffset });
+      const fromMenu = !!link.closest('.mobile-menu');
+      lenis.scrollTo(target, { offset: -headerOffset, immediate: fromMenu });
     });
   });
 }
@@ -416,6 +609,14 @@ function setupReveals(motion) {
     });
   }
 
+  // FIRST PASS is permissive: anything already touching the viewport at load is
+  // shown, even if it only peeks. Otherwise a group that pokes above the fold
+  // renders as a blank gap until the reader scrolls — and how much peeks is
+  // device-dependent, so it can't be handled by exempting specific elements
+  // (work card 2 peeks 6px at 812 tall, 38px at 844, 126px at 932; none of
+  // those clear the 85% line). After this pass the thresholds below govern.
+  let firstPass = true;
+
   function update() {
     const vh = window.innerHeight || document.documentElement.clientHeight;
     groups.forEach((group) => {
@@ -426,13 +627,14 @@ function setupReveals(motion) {
         // section is never yanked to invisible mid-view. That harsh cut-out was
         // what you saw scrolling up, as a group left through the bottom edge.
         setVisible(group, false);
-      } else if (r.top < vh * 0.85 && r.bottom > vh * 0.15) {
+      } else if (firstPass || (r.top < vh * 0.85 && r.bottom > vh * 0.15)) {
         // Meaningfully in view → fade in (typography first). Wide gap from the
         // reset condition gives hysteresis, so there's no flicker at the edges.
         setVisible(group, true);
       }
       // Partially on screen but not past the reveal line yet: hold current state.
     });
+    firstPass = false;
   }
 
   window.addEventListener('scroll', update, { passive: true });
@@ -441,13 +643,15 @@ function setupReveals(motion) {
   update();
 }
 
-// Tablet + phone: the hero deliberately stops short of the fold so the FIRST
-// Work card already peeks above it (see the 768 tier in responsive.css). It's
-// on screen at load, so fading it in is wrong — drop it out of the reveal
-// system entirely and let it simply be there. Cards 2-4 still reveal.
-// Removing the attributes also clears the `html.is-motion [data-reveal]`
-// opacity:0 initial state, so nothing is left hidden.
-if (window.innerWidth <= 768) {
+// ≤1024 (tablet + mobile): the FIRST Work card should simply be there at load —
+// on mobile it already peeks below the short hero (480 tier in responsive.css),
+// and on tablet the first card is the landing beat right after the hero — so
+// drop it out of the reveal system entirely rather than fading it in. Cards 2-4
+// still reveal on scroll. Removing the attributes also clears the
+// `html.is-motion [data-reveal]` opacity:0 initial state, so nothing is left
+// hidden. (Desktop is full-viewport centered, so its first card is below the
+// fold and reveals normally.)
+if (window.innerWidth <= 1024) {
   const firstCard = document.querySelector('.work-card');
   if (firstCard) {
     firstCard.removeAttribute('data-reveal-group');
@@ -535,9 +739,12 @@ metaLabels.forEach(label => {
   if (!toggle || !menu) return;
   const closeBtn = menu.querySelector('.mobile-menu-close');
   let lastFocus = null;
+  let finishClose = null; // pending .is-closing cleanup; non-null only mid-exit
 
   function open() {
     lastFocus = document.activeElement;
+    // Re-opening mid-exit: clear the closing state so the entrance plays clean.
+    if (finishClose) finishClose();
     menu.classList.add('is-open');
     menu.setAttribute('aria-hidden', 'false');
     toggle.setAttribute('aria-expanded', 'true');
@@ -554,7 +761,25 @@ metaLabels.forEach(label => {
   }
 
   function close() {
+    if (!menu.classList.contains('is-open')) return;
     menu.classList.remove('is-open');
+    // Reverse of the entrance: .is-closing plays menu-slide-out and keeps the
+    // panel display:flex until it lands (responsive.css); removing the class is
+    // what actually hides it. animationend does that removal; the timeout is a
+    // failsafe for when the animation never runs (viewport grown past the 480
+    // tier mid-close, so the panel is already display:none) — without it the
+    // class would linger and the next open would replay the exit.
+    menu.classList.add('is-closing');
+    const done = (e) => {
+      if (e && e.target !== menu) return;
+      menu.classList.remove('is-closing');
+      menu.removeEventListener('animationend', done);
+      clearTimeout(failsafe);
+      finishClose = null;
+    };
+    const failsafe = setTimeout(done, 400);
+    menu.addEventListener('animationend', done);
+    finishClose = done;
     menu.setAttribute('aria-hidden', 'true');
     toggle.setAttribute('aria-expanded', 'false');
     if (window.__lenis) {

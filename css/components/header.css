@@ -44,12 +44,16 @@
   transition: color 0.35s ease;
 }
 
-.site-name:hover {
-  color: var(--color-text);
+@media (hover: hover) {
+  .site-name:hover {
+    color: var(--color-text);
+  }
 }
 
 .site-nav-bar {
-  flex: 0 0 542px;
+  /* Shared right column — fluid 291→542 across the 1025–1440 band, so the
+     nav scales in step with the hero description and card descriptions. */
+  flex: 0 0 var(--width-right-column);
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -104,13 +108,17 @@
   pointer-events: none;
 }
 
-/* Hover — illuminate the text + white chip */
-.site-nav-bar a:hover {
-  color: rgba(0, 0, 0, 0.9);
-}
+/* Hover — illuminate the text + white chip. Guarded to true-hover devices:
+   on touch, a tap would otherwise light the chip and leave it stuck until the
+   next tap elsewhere (sticky :hover). */
+@media (hover: hover) {
+  .site-nav-bar a:hover {
+    color: rgba(0, 0, 0, 0.9);
+  }
 
-.site-nav-bar a:hover::before {
-  border-color: rgba(0, 0, 0, 0.75);
+  .site-nav-bar a:hover::before {
+    border-color: rgba(0, 0, 0, 0.75);
+  }
 }
 
 /* Selected (scroll-spy active) — semibold, a touch brighter, NO chip */
@@ -120,13 +128,15 @@
 }
 
 /* Selected + hover — chip appears, border darkens */
-.site-nav-bar a.is-active:hover {
-  color: rgba(0, 0, 0, 0.9);
-}
+@media (hover: hover) {
+  .site-nav-bar a.is-active:hover {
+    color: rgba(0, 0, 0, 0.9);
+  }
 
-.site-nav-bar a.is-active:hover::before {
-  background: rgba(255, 255, 255, 0.75);
-  border-color: rgba(0, 0, 0, 0.9);
+  .site-nav-bar a.is-active:hover::before {
+    background: rgba(255, 255, 255, 0.75);
+    border-color: rgba(0, 0, 0, 0.9);
+  }
 }
 
 /* --- Over the blue Contact panel: white text + white chips --- */
@@ -134,22 +144,24 @@
   color: rgba(255, 255, 255, 0.75);
 }
 
-.site-header.is-over-dark .site-nav-bar a:hover,
-.site-header.is-over-dark .site-nav-bar a.is-active:hover {
-  color: #fff;
-}
-
 .site-header.is-over-dark .site-nav-bar a.is-active {
   color: rgba(255, 255, 255, 0.9);
 }
 
-.site-header.is-over-dark .site-nav-bar a:hover::before,
-.site-header.is-over-dark .site-nav-bar a.is-active:hover::before {
-  border-color: rgba(255, 255, 255, 0.7);
-}
+@media (hover: hover) {
+  .site-header.is-over-dark .site-nav-bar a:hover,
+  .site-header.is-over-dark .site-nav-bar a.is-active:hover {
+    color: #fff;
+  }
 
-.site-header.is-over-dark .site-nav-bar a.is-active:hover::before {
-  background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(255, 255, 255, 0.9);
+  .site-header.is-over-dark .site-nav-bar a:hover::before,
+  .site-header.is-over-dark .site-nav-bar a.is-active:hover::before {
+    border-color: rgba(255, 255, 255, 0.7);
+  }
+
+  .site-header.is-over-dark .site-nav-bar a.is-active:hover::before {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.9);
+  }
 }
 

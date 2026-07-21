@@ -6,13 +6,16 @@
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: var(--space-xl);
+  gap: var(--gap-section); /* card → card */
 }
 
 .work-card {
   display: flex;
   flex-direction: column;
-  gap: 3.75rem; /* 60px between the title/meta row and the image (Figma) */
+  /* Text lockup → image (Figma 60px). Stacked below 1025 the card's parts are
+     siblings rather than two blocks, so the 1024 tier drops this to
+     --gap-content. */
+  gap: var(--gap-group);
   /* Reveal is handled by the shared [data-reveal] motion system (Motion.dev);
      the card's title, description, and image fade + rise in sequence. */
 }
@@ -39,9 +42,15 @@
   pointer-events: none;
 }
 
-.work-card-image-link:hover::after,
 .work-card-image-link:focus-visible::after {
   opacity: 0.4;
+}
+
+/* True-hover devices only — on touch, tapped :hover sticks (see header.css) */
+@media (hover: hover) {
+  .work-card-image-link:hover::after {
+    opacity: 0.4;
+  }
 }
 
 .work-card-image {
@@ -56,9 +65,14 @@
   transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.work-card-image-link:hover .work-card-image,
 .work-card-image-link:focus-visible .work-card-image {
   transform: scale(1.04);
+}
+
+@media (hover: hover) {
+  .work-card-image-link:hover .work-card-image {
+    transform: scale(1.04);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -97,18 +111,20 @@
 }
 
 .work-card-right {
-  /* 542px block flush to the container's right edge — anchored the same way
-     as the 542px nav, so its left edge (and the description) stays aligned
-     with the "Work" nav item across the whole desktop range, not just 1440 */
-  flex: 0 0 542px;
+  /* Shared right column flush to the container's right edge — anchored the
+     same way as the nav, so its left edge (and the description) stays aligned
+     with the "Work" nav item across the whole desktop range, not just 1440.
+     Fluid 291→542 across the 1025–1440 band via the shared token. */
+  flex: 0 0 var(--width-right-column);
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 1.3125rem;
+  gap: var(--gap-content); /* meta → description */
 }
 
-.work-card-description,
-.intro-body p {
+/* (.intro-body p used to share this rule; the Jul 2026 hero revision gave the
+   intro copy its own 28px desktop type, owned by hero.css.) */
+.work-card-description {
   font-family: var(--font-body);
   font-size: var(--size-lg);
   font-weight: 400;
@@ -141,7 +157,9 @@
   font-weight: 700;
   letter-spacing: -0.02em;
   line-height: 1.1;
-  margin-bottom: 1.25rem;
+  /* Clears the .footprints-desc paragraph below. There is no desc on the
+     homepage, so the 480 tier zeroes this — see the note there. */
+  margin-bottom: var(--gap-content);
 }
 
 .footprints-desc {
@@ -152,19 +170,20 @@
 }
 
 .footprints-right {
-  /* 542px block flush to the container's right edge — matches the nav and the
-     Work-card description column so all right-hand content shares one edge */
-  flex: 0 0 542px;
+  /* Shared right column flush to the container's right edge — matches the nav
+     and the Work-card description column so all right-hand content shares one
+     edge (fluid 291→542 across the 1025–1440 band). */
+  flex: 0 0 var(--width-right-column);
   display: flex;
   flex-direction: column;
-  gap: 3.125rem;
+  gap: var(--gap-group); /* link group → link group */
 }
 
 
 .footprint-group {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: var(--gap-content); /* eyebrow → its links */
 }
 
 .footprint-group-title {
@@ -189,8 +208,10 @@
   transition: opacity 0.15s ease;
 }
 
-.footprint-list a:hover {
-  opacity: 0.5;
+@media (hover: hover) {
+  .footprint-list a:hover {
+    opacity: 0.5;
+  }
 }
 
 /* ============================================================
@@ -198,11 +219,17 @@
    ============================================================ */
 
 .contact-section {
-  /* Full-bleed blue panel with white text (Figma). Bottom padding (60px) comes
-     from .page-section; top is 120px. */
+  /* Full-bleed blue panel with white text (Figma). Top is 120px (the 480 tier
+     closes it to 64). */
   background-color: var(--color-accent);
   color: #fff;
   padding-top: 120px;
+  /* Pinned to 96 at EVERY tier, so it does not follow .page-section down to 64
+     on phones. The rule below this panel is the FOOTER's border-top — the
+     copyright divider, not a section divider — so the "equal either side" rule
+     doesn't apply: the footer answers it with its own 30px (Figma). The panel
+     closes the page, so it keeps the full 96 even where sections tighten. */
+  padding-bottom: 96px;
 }
 
 /* White eyebrows/labels throughout the blue panel */
@@ -214,13 +241,15 @@
 .contact-inner {
   display: flex;
   flex-direction: column;
-  gap: 3.75rem; /* 60px between the section's blocks */
+  /* Under the big "let's connect." title before the meta columns — the same
+     big-title breathing room the About heading gets. */
+  gap: var(--gap-heading);
 }
 
 .contact-hero {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: var(--gap-content); /* eyebrow → email heading */
 }
 
 .contact-email {
@@ -245,7 +274,7 @@
 .contact-mind {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem; /* 20px between the eyebrow and its content */
+  gap: var(--gap-content); /* eyebrow → its content */
 }
 
 /* Connect: left column, sized to its links */
@@ -254,10 +283,10 @@
   min-width: 0;
 }
 
-/* On My Mind: shares the site's 542px right column; may shrink on narrower
-   desktops so the two columns never overflow the panel */
+/* On My Mind: shares the site's right column (fluid 291→542); may shrink on
+   narrower desktops so the two columns never overflow the panel */
 .contact-mind {
-  flex: 0 1 542px;
+  flex: 0 1 var(--width-right-column);
   min-width: 0;
   max-width: 100%;
 }
@@ -279,8 +308,10 @@
   transition: opacity 0.15s ease;
 }
 
-.contact-connect-links a:hover {
-  opacity: 0.6;
+@media (hover: hover) {
+  .contact-connect-links a:hover {
+    opacity: 0.6;
+  }
 }
 
 /* Outward arrow on the content links (Footprints + Contact). Decorative, so
@@ -325,7 +356,9 @@
   letter-spacing: -0.02em;
   line-height: 1;
   color: var(--color-text-70);
-  margin-bottom: 6.25rem; /* 100px — matches Figma gap between heading and content */
+  /* Breathing room under the big title before the content starts (on mobile
+     that content is the photo, since the layout stacks photo-first). */
+  margin-bottom: var(--gap-heading);
 }
 
 .about-name-accent {
@@ -354,18 +387,18 @@
 }
 
 .about-right {
-  /* 542px block flush to the container's right edge — shares the single
-     right-column edge used across the site */
-  flex: 0 0 542px;
+  /* Shared right column flush to the container's right edge — shares the
+     single right-column edge used across the site (fluid 291→542). */
+  flex: 0 0 var(--width-right-column);
   display: flex;
   flex-direction: column;
-  gap: 2.5rem; /* 40px between the two eyebrow-led sections */
+  gap: var(--gap-group); /* between the two eyebrow-led blocks */
 }
 
 .about-right section {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: var(--gap-content); /* eyebrow → its body copy */
 }
 
 .about-right section .section-label {
@@ -375,7 +408,7 @@
 .about-body {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: var(--gap-content); /* paragraph → paragraph */
 }
 
 .about-body p {

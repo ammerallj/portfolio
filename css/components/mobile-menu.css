@@ -46,6 +46,79 @@
   color: #fff;
 }
 
+/* Open transition: the panel slides in slightly from the left while fading up,
+   sitting on top of everything — the page beneath is a fixed overlay's backdrop
+   and never moves or gets pushed aside. A small 32px offset (not a full-width
+   drawer sweep) so it reads as "settling into place". Since .is-open flips the
+   panel from display:none to flex, the animation fires once on open.
+   Reduced-motion visitors get it flattened to ~instant by the global rule in
+   global.css. */
+/* Slide and fade are SEPARATE animations so each gets its own curve: the slide
+   keeps a decelerating ease (quick entry, soft settle) while the fade runs the
+   full duration on a gentle symmetric in-out — riding one keyframe set, the
+   fade would inherit the slide's front-loaded curve and be ~done in the first
+   third. */
+@keyframes menu-slide-in {
+  from {
+    transform: translateX(-32px);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes menu-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.mobile-menu.is-open {
+  /* The transform ends at 0 (and the animation has no fill-mode), so once open
+     the panel has NO transform — keeping the fixed-position close button
+     viewport-anchored. */
+  animation:
+    menu-slide-in 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+    menu-fade-in 0.4s cubic-bezier(0.45, 0, 0.55, 1);
+}
+
+/* Close (X): the reverse — slide back out to the left while fading. Slightly
+   quicker, with an accelerating ease (exits get out of the way; entrances
+   settle). `forwards` holds the faded-out end state for the beat between
+   animationend and initMobileMenu() removing .is-closing — which is what
+   returns the panel to display:none (the display gate is in responsive.css). */
+@keyframes menu-slide-out {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-32px);
+  }
+}
+
+@keyframes menu-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.mobile-menu.is-closing {
+  /* Same split as the entrance: accelerating slide, gentle full-duration fade.
+     Both `forwards` — the faded-out end state holds for the beat between
+     animationend and initMobileMenu() removing .is-closing. */
+  animation:
+    menu-slide-out 0.3s cubic-bezier(0.4, 0, 1, 1) forwards,
+    menu-fade-out 0.3s cubic-bezier(0.45, 0, 0.55, 1) forwards;
+  /* The panel is inert while leaving — don't swallow taps meant for the page. */
+  pointer-events: none;
+}
+
 /* Background glow — Figma "Ellipse 2" (node 123:3808): the exact exported
    asset (818x818 radial, white 0.8 -> 0.5 -> transparent at 0.6 opacity, with
    a fractal-noise grain). Pinned off the top-left (left:-19px) per the Figma

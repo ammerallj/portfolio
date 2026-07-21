@@ -19,25 +19,38 @@
 
 /* ------------------------------------------------------------
    1. HERO VISUAL
-   Full-bleed project image. Sits directly beneath the sticky header,
-   so it has no top padding of its own.
+   The project's thumbnail — INSET, not full-bleed. It sits in the page gutter
+   so its edges line up with the title and metadata below it, and it carries the
+   same 60px radius the homepage Work card gives this very same image (→24px at
+   the 768 tier, mirroring .work-card-image in responsive.css). Card and hero
+   are then visibly the same object, which is what makes the click feel
+   continuous rather than like a jump to somewhere new.
    ------------------------------------------------------------ */
 
 .project-hero {
-  border-bottom: 1px solid var(--color-border);
+  /* No border-bottom: the image is inset and rounded, so a full-bleed hairline
+     under it cut across the page rather than closing anything.
+
+     Bottom padding is ZERO on purpose. The gap between the image and the title
+     is owned by ONE token — the masthead .page-section's own padding-top
+     (--gap-section) — because hero and masthead are separate sections and that
+     is the section-rhythm role. Adding padding here stacked with it: 60 + 96 =
+     156px, a sum that's on no scale and larger even than --gap-heading, the
+     documented ceiling. Don't reintroduce it; retune --gap-section instead. */
+  padding: var(--gap-group) var(--page-gutter) 0;
 }
 
 .project-hero-figure {
-  /* 16:9 keeps the placeholder honest before a real image is dropped in,
-     and stops layout shift once one is. */
-  aspect-ratio: 16 / 9;
+  /* The asset's OWN ratio — all four thumbnails are 2660x830 (3.2:1), the same
+     shape the homepage Work card frames them at (1328x415). A 16:9 frame here
+     cropped ~44% of the image width away with object-fit: cover. Matching the
+     source means nothing is lost, and the wide strip also keeps the title above
+     the fold, which a tall hero would not.
+     If a future thumbnail isn't 2660x830, change this ratio with it. */
+  aspect-ratio: 2660 / 830;
   width: 100%;
-  /* On a laptop, a full-width 16:9 image is ~the whole viewport, which would
-     push the title and metadata entirely below the fold — the opposite of a
-     page meant to land in under a minute. Cap it so the title is already
-     surfacing when the page opens; object-fit crops rather than letterboxes. */
-  max-height: 62vh;
   overflow: hidden;
+  border-radius: 60px;
   background-color: #d9d9d9; /* same neutral as .about-photo's placeholder */
   display: flex;
   align-items: center;
@@ -51,18 +64,6 @@
   display: block;
 }
 
-/* Visible only until a real <img> replaces it. Reuses the eyebrow type so a
-   placeholder page still reads as part of the site. */
-.project-placeholder {
-  font-family: var(--font-ui);
-  font-size: 0.8125rem;
-  font-weight: 500;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: var(--color-text-70);
-}
-
-
 /* ------------------------------------------------------------
    2 + 3. MASTHEAD — case study title and metadata
    Title left, metadata in the shared 542px right column, matching
@@ -70,7 +71,17 @@
    and the Work cards on the homepage.
    ------------------------------------------------------------ */
 
+/* Title + dek run the FULL width, and the supporting detail sits in a two-column
+   row beneath them — not beside them. A headline constrained to a left column
+   was competing with the metadata for the same eye-line; given the whole measure
+   it lands first and the detail reads as support. */
 .project-masthead {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-group);
+}
+
+.project-masthead-cols {
   display: flex;
   gap: 11.625rem; /* 186px — same as .footprints-layout */
   align-items: flex-start;
@@ -82,13 +93,26 @@
 }
 
 .project-masthead-right {
-  flex: 0 0 542px;
+  flex: 0 0 var(--width-right-column); /* shared right column, fluid 291→542 */
   min-width: 0;
+  /* Loop and Groups have no note/button column, so the metadata would otherwise
+     fall to the LEFT edge on its own. This pins it to the right in that case and
+     is inert when a left column exists (that column already absorbs the slack) —
+     so the 542px column keeps the same right edge as the nav, the Work cards and
+     Footprints on every page. */
+  margin-left: auto;
 }
 
+/* Tier 2 — the SAME 2.5rem/700/-0.02em as .work-card-title on the homepage.
+   Deliberate: the card and this page show the same image and the same words, so
+   matching the type makes the page read as that card enlarged rather than a
+   different object. It was Tier 1 (clamp to 96px) while it sat in a left column;
+   once it went full width that read as shouting, and it wrapped to two lines —
+   at 40px the title sets on one. Phone step-down to 2rem is in responsive.css
+   with the rest of Tier 2. */
 .project-title {
   font-family: var(--font-heading);
-  font-size: clamp(2.5rem, 7vw, 6rem);
+  font-size: 2.5rem;
   font-weight: 700;
   letter-spacing: -0.02em;
   line-height: 1;
@@ -98,19 +122,271 @@
 /* Dek — the one-line description under the title. Not a heading and not a
    section: a standfirst that says what the project was before any block does.
 
-   40px at regular weight — display scale, but in the BODY face (Inter), not the
-   heading face. That's the whole idea: it reads big without competing with the
-   Hanken title above it. Note Hanken is only loaded at 200 and 700 (see the
-   font <link>), so "regular" is Inter's 400 by necessity as well as by design.
-   Phone step-down lives in responsive.css — at 480 the title drops to 2rem, so
-   the dek has to drop below it or it would outsize the title. */
+   Body size (matches .about-body p exactly). It was 40px, but once the title
+   came down to Tier 2 the two were the same size — and since the dek runs to two
+   lines while the title runs to one, the SUBTITLE became the heaviest mass in
+   the masthead. At body size the hierarchy is unambiguous and it needs no
+   per-tier overrides: body type doesn't scale on this site. */
 .project-dek {
-  margin-top: 1.5rem;
-  font-size: 2.5rem;
+  margin-top: var(--gap-content);
+  font-family: var(--font-body);
+  font-size: 1.25rem;
   font-weight: 400;
   letter-spacing: -0.02em;
-  line-height: 1.2;
+  line-height: 1.4;
   color: var(--color-text);
+}
+
+/* ---- LOCKED PANEL ----------------------------------------------------------
+   The confidentiality note and the way in, on one grey slab.
+
+   The fill carries the meaning: a surface with something behind it, which is
+   what "the rest is confidential" says in words. Centred on purpose — it's an
+   aside to the reader, not part of the page's left-aligned narrative, and the
+   change of alignment is what stops it reading as another paragraph.
+
+   A hairline outline on the page's own background rather than a grey fill: the
+   empty frame reads as an enclosure with nothing shown inside it, which is closer
+   to "the rest is confidential" than a solid slab.
+
+   The rule is --color-border (full black), NOT the --color-border-light used by
+   the Impact cards and metadata rows: at 12% black a single line around a large
+   frame is barely visible on the cream, so the enclosure didn't read. Full black
+   is the same weight as the site's section dividers.
+   40px is the .about-photo radius — smaller than the 60px on the big imagery,
+   which would over-round a panel this size. */
+.project-locked {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--gap-group);
+  padding: var(--gap-group);
+  border: 1px solid var(--color-border);
+  border-radius: 40px;
+  background-color: transparent;
+}
+
+/* Heading + copy are one group at the within-a-thing gap; the panel's own
+   --gap-group then separates that group from the button. Without this wrapper the
+   heading would sit 60px away from its own paragraph. */
+.project-locked-head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--gap-content);
+}
+
+/* Card-title scale. Deliberately NOT the 2.5rem Tier 2 that "Impact" uses below
+   it: an aside must not outrank the section it precedes. */
+.project-locked-title {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  color: var(--color-text);
+}
+
+/* Button + its helper line are one unit — the note sits close under the button,
+   not at the panel's 60px child gap. */
+.project-locked-action {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--gap-content);
+}
+
+/* Metadata scale (same 13px as .project-meta-row), muted so it reads as a helper
+   under the button rather than competing with it. The link inside stays full
+   black + underlined via the global `a`, so the action is the part that pops. */
+.project-locked-note {
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  letter-spacing: normal;
+  line-height: 1.4;
+  color: var(--color-text-70);
+}
+
+/* The panel centres its own text, so the prose inside must not keep the
+   left-aligned default it inherits from .about-body. */
+.project-locked .about-body {
+  text-align: center;
+}
+
+/* ---- MASTHEAD: SPLIT VARIANT ----------------------------------------------
+   Used by work/accessibility.html only, for now. Title, dek, metadata and the
+   description all run down the LEFT column; the project image sits in the right.
+   There is no full-width hero above it — this image replaces it.
+
+   The base .project-masthead is a column (title + dek full width, detail row
+   beneath). This variant turns it back into a single two-column row, reusing the
+   same .project-masthead-left / -right children and the same 186px column gap as
+   .footprints-layout, so the right edge still lines up with the nav and the Work
+   cards. To adopt it on another page, add the class and give that page a
+   portrait asset. */
+.project-masthead--split {
+  /* Outer stack: the [text | image] row, then the locked panel beneath it.
+     1.5x --gap-section, not the token itself: this card is a discrete object
+     floating between the masthead content and the Impact section, and at plain
+     section rhythm it read as crowded against both. Expressed as a MULTIPLE of
+     the token rather than a raw 144px so it still steps down with the tier
+     (144 desktop / 96 phone) instead of pinning a desktop value to a phone.
+     Paired with the panel's own margin-bottom below, which tops the section's
+     padding up to the same measure. */
+  flex-direction: column;
+  gap: calc(var(--gap-section) * 1.5);
+}
+
+/* Row 1. align-items:stretch is what makes the flush edge work — the left column
+   takes the row's height, and the row's height is the IMAGE's (it's the taller of
+   the two). No min-height: tying this to the viewport would stretch the row past
+   the image on a tall screen and the bottom edges would stop matching. */
+.project-masthead-top {
+  display: flex;
+  flex-direction: row;
+  gap: 11.625rem; /* 186px — same as .footprints-layout */
+  align-items: stretch;
+}
+
+/* Title and dek at the top, the metadata + description group pushed to the
+   bottom — landing level with the bottom of the image. The whitespace between
+   them is the point of the layout, not a gap to close. */
+.project-masthead--split .project-masthead-left {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.project-masthead-foot {
+  display: flex;
+  flex-direction: column;
+}
+
+/* A discrete card, centred — NOT full width. At 1328px the frame matched the
+   Impact grid's footprint exactly and read as a banner: a wide band with a small
+   centred text block in it. Narrowing fixes that at the source; constraining only
+   the text would have left the same band with more visible emptiness.
+
+   The width is derived, not picked by eye: --width-right-column (the site's prose
+   column, 542px) + the panel's 60px padding either side. So the COPY inside sits
+   on the same measure as prose everywhere else on the site. */
+/* A discrete card, centred in its own section — NOT full width. At the container
+   width the frame read as a banner rather than an object.
+
+   662px = the site's prose column at its widest (541.67px) + the panel's 60px
+   padding either side, so the COPY inside sits on the same measure as prose
+   everywhere else on the site.
+
+   A FIXED value, not --width-right-column: that token is a fluid clamp, so the
+   card shrank continuously all the way down and was already noticeably small on
+   a laptop. Fixed, it holds 662px until the container itself is narrower — around
+   a 710px viewport — and `width: 100%` then takes over so it fills the column on
+   tablet and phone. No media query needed for that handover.
+
+   Unscoped on purpose: this rule used to be nested under .project-masthead--split
+   and silently stopped applying when the card moved out of the masthead into its
+   own section — it snapped back to full width. */
+.project-locked {
+  width: 100%;
+  max-width: 662px;
+  margin-inline: auto;
+}
+
+/* Inside the left column each piece is a separate thing, so they take the
+   between-things gap. (.project-dek keeps its own --gap-content: it belongs to
+   the title, not beside it.) */
+.project-masthead--split .project-meta-list,
+.project-masthead--split .project-overview-text {
+  margin-top: var(--gap-group);
+}
+
+/* The project image. Portrait, to sit beside a tall left column; rounded on the
+   same 60px as the Work card and the hero it replaces (→24px at the 768 tier,
+   with .work-card-image in responsive.css). The neutral fill shows through at
+   full size until the asset is saved, so the layout can be judged without it. */
+.project-figure {
+  /* The asset's own ratio (1100x1400), so object-fit crops nothing. */
+  aspect-ratio: 1100 / 1400;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 60px;
+  background-color: #d9d9d9;
+}
+
+.project-figure img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* ---- Masthead carousel (all four project pages) -----------------------
+   A 3-slide crossfade inside the .project-figure frame (which keeps the ratio,
+   radius and clip). Slides stack absolutely and fade on opacity; the dots
+   overlay the bottom. JS (initCarousel in main.js) auto-advances and pauses
+   once a dot is chosen. No-JS / reduced-motion: only .is-active shows, but the
+   dots still switch images. */
+.project-carousel {
+  position: relative;
+}
+
+.project-carousel-slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+
+.project-carousel-slide.is-active {
+  opacity: 1;
+}
+
+/* Dots sit in a translucent pill so they stay legible over any slide. */
+.project-carousel-dots {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 24px;
+  z-index: 2;
+  width: max-content;
+  max-width: calc(100% - 32px);
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  padding: 9px 14px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.3);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+
+.project-carousel-dot {
+  width: 10px;
+  height: 10px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.45);
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.project-carousel-dot:hover {
+  background: rgba(255, 255, 255, 0.75);
+}
+
+.project-carousel-dot.is-active {
+  background: #fff;
+  transform: scale(1.2);
+}
+
+.project-carousel-dot:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
 }
 
 /* Metadata: a definition list, so Timeline / Role / Area / Scope are
@@ -119,7 +395,7 @@
 .project-meta-list {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: var(--gap-content);
   margin: 0;
 }
 
@@ -127,7 +403,7 @@
   display: flex;
   gap: 1.5rem;
   align-items: baseline;
-  padding-bottom: 1.25rem;
+  padding-bottom: var(--gap-content);
   border-bottom: 1px solid var(--color-border-light);
 }
 
@@ -151,8 +427,13 @@
   flex: 1 1 auto;
   min-width: 0;
   margin: 0;
-  font-size: 1.25rem;
-  letter-spacing: -0.02em;
+  /* Same size as its <dt> label — the pair reads as one small line of spec, not
+     a label with a display-size value. Sentence case and full black keep the
+     VALUE distinct from the uppercase, 70%-black label.
+     Tracking is normal, not the -0.02em this had at 20px: negative tracking is
+     tuned for display sizes and closes up the letterfit at 13px. */
+  font-size: 0.8125rem;
+  letter-spacing: normal;
   line-height: 1.4;
   color: var(--color-text);
 }
@@ -171,7 +452,11 @@
 }
 
 .project-block + .project-block {
-  margin-top: 5rem; /* 80px between blocks inside one .page-section */
+  /* block → block is exactly the "things in a section" role. Was a fixed 80px,
+     which at ≤480 exceeded --gap-section (64) and inverted the hierarchy —
+     blocks read as further apart than whole sections. The token is per-tier,
+     so that can't happen again. */
+  margin-top: var(--gap-group);
 }
 
 .project-block-left {
@@ -196,7 +481,7 @@
 }
 
 .project-block-right {
-  flex: 0 0 542px;
+  flex: 0 0 var(--width-right-column); /* shared right column, fluid 291→542 */
   min-width: 0;
 }
 
@@ -215,7 +500,7 @@
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: var(--gap-content);
 }
 
 .project-impact-list li {
@@ -223,8 +508,19 @@
   letter-spacing: -0.02em;
   line-height: 1.4;
   color: var(--color-text);
-  padding-bottom: 1.25rem;
+  padding-bottom: var(--gap-content);
   border-bottom: 1px solid var(--color-border-light);
+}
+
+/* The lead clause of each item — the claim itself — at the site's semibold.
+   600, not the browser's default 700 for <strong>: 700 is the HEADING weight
+   here (.project-block-title, card titles), and a bullet shouldn't carry the
+   same weight as a section title. Matches the nav's active state, which is the
+   only other place the site emphasises UI text.
+   <strong> rather than a styling span so the emphasis is announced, not just
+   drawn. */
+.project-impact-list strong {
+  font-weight: 600;
 }
 
 .project-impact-list li:last-child {
@@ -234,159 +530,19 @@
 
 
 /* ------------------------------------------------------------
-   ⚠️ DEAD CODE — SAFE TO DELETE. No page renders `.project-continue` any more.
-   Loop and Groups both drop their Continue step and end on Impact (Jenna is
-   building high-level case-study content to live inline below Impact instead of
-   a hand-off link). Kept for now only in case the hand-off returns; delete the
-   whole 7a block together — it's one component. The 480-tier `.project-continue`
-   selectors in responsive.css and the `.project-continue` note in CLAUDE.md go
-   with it.
-
-   7a. CONTINUE — the hand-off into a public case study.
-   Was used by Microsoft Loop and Facebook Groups.
-
-   .is-placeholder is the parked state: no href yet, so it renders as
-   inert text rather than a link that goes nowhere. Remove the class and
-   swap the <span> for an <a href="..."> once the case study exists.
-   ------------------------------------------------------------ */
-
-.project-continue {
-  display: flex;
-  align-items: baseline;
-  gap: 1.5rem;
-}
-
-.project-continue-link {
-  font-family: var(--font-heading);
-  font-size: 2.5rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  line-height: 1.1;
-  color: var(--color-text);
-  text-decoration: underline;
-  transition: opacity 0.15s ease;
-}
-
-.project-continue-link:hover {
-  opacity: 0.6;
-}
-
-.project-continue-link::after {
-  content: '→';
-  display: inline-block;
-  margin-left: 0.3em;
-  text-decoration: none;
-}
-
-.project-continue-link.is-placeholder {
-  color: var(--color-text-70);
-  text-decoration: none;
-  cursor: default;
-}
-
-.project-continue-link.is-placeholder:hover {
-  opacity: 1;
-}
-
-
-/* ------------------------------------------------------------
-   ⚠️ DEAD CODE — SAFE TO DELETE. Nothing below matches any element.
-
-   As of the Accessibility content pass, NO page uses the Conversation
-   Invitation. Its note + locked-case-study button moved up into the
-   masthead lockup (before Overview, where the primary action belongs),
-   which left this panel holding only an orphaned heading and the Connect
-   links — so it was removed from both pages that had it. Kept for now
-   only in case the panel comes back; delete the whole 7b block, the
-   `.conversation-invite-*` selectors in responsive.css (1024 + 480 tiers),
-   and the `.conversation-invite` fallback in js/main.js's `darkPanel`
-   together — they're one component.
-
-   7b. CONVERSATION INVITATION — reusable, identical on Accessibility
-   and Messaging. For work that can't be shown publicly: says so, and
-   invites a hiring team to get in touch.
-
-   Deliberately NOT a gate: no password field, no form, no AI. It is a
-   statement plus the site's existing connect links.
-
-   It reuses the Contact panel's blue treatment so it reads as the same
-   invitation the homepage already makes, and so the sticky header's
-   is-over-dark inversion carries straight through into the footer.
-   ------------------------------------------------------------ */
-
-.conversation-invite {
-  background-color: var(--color-accent);
-  color: #fff;
-  padding-top: 120px; /* matches .contact-section */
-}
-
-.conversation-invite .section-label {
-  color: #fff;
-  margin-bottom: 0;
-}
-
-.conversation-invite-inner {
-  display: flex;
-  flex-direction: column;
-  gap: 3.75rem; /* 60px — matches .contact-inner */
-}
-
-.conversation-invite-heading {
-  font-family: var(--font-heading);
-  font-size: clamp(2.5rem, 7vw, 6rem);
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  line-height: 1;
-  color: #fff;
-}
-
-.conversation-invite-meta {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 3.75rem;
-}
-
-.conversation-invite-group {
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-}
-
-/* Left: the note about why this work isn't public. Shares the 542px column. */
-.conversation-invite-note {
-  flex: 0 1 542px;
-  min-width: 0;
-  max-width: 100%;
-}
-
-.conversation-invite-note .about-body p {
-  color: #fff;
-}
-
-/* ---- Masthead lockup + locked case study button ----------------------------
-   The note and the button sit under the title, before Overview — the case study
-   is the page's primary action, so it can't wait until the panel at the bottom
-   that reads as a footer.
-
-   ONE button. The way to ask for the password is a mailto woven into the copy
-   above ("share the password"), not a second pill — the promise is the path.
+   7. LOCKED CASE STUDY BUTTON — the primary action in the masthead lockup.
+   Accessibility and Messaging use it as a locked "View case study" link (with
+   the inline lock icon); Microsoft Loop reuses the same pill as its "Explore
+   Microsoft Loop" link (no icon). It sits in .project-locked-action under the
+   title, before Overview — the case study is the page's primary action.
 
    It's an <a>, never a <button>: it navigates (see the note in the markup). The
    lock is Figma's, server-side; no secret lives in this page.
 
-   Black fill / white text inverts the body copy above it. It was white-on-blue
-   while it lived on the invitation panel; on the cream masthead a white fill
-   would be invisible. The 100px radius is the site's own pill, borrowed from the
-   nav chip (.site-nav-bar a::before in header.css). Accent blue stays reserved
-   for the panel. */
-.project-lockup {
-  margin-top: 2rem;
-}
-
-.invite-unlock {
-  margin-top: 2rem;
-}
+   Black fill / white text inverts the body copy above it. The 100px radius is the
+   site's own pill, borrowed from the nav chip (.site-nav-bar a::before in
+   header.css). Accent blue stays reserved for the Contact panel.
+   ------------------------------------------------------------ */
 
 .invite-button {
   display: inline-flex;
@@ -418,14 +574,203 @@
 }
 
 /* No focus override needed here: the global ring is var(--color-focus), which
-   reads fine against the cream masthead. (It did not on the blue panel.) */
-
-/* Right: the existing connect links, reused wholesale (.contact-connect-links
-   from sections.css carries the type, underline and ↗). */
-.conversation-invite-connect {
-  flex: 0 0 auto;
-  min-width: 0;
-}
+   reads fine against the cream masthead. */
 
 /* Project-overview breakpoints live in responsive.css with every other
    width media query — see the 1024 / 768 / 480 tiers there. */
+
+
+/* ------------------------------------------------------------
+   8. FLOATING SECTION PILLS — in-page nav for the project pages
+   A small frosted "floatie" bar, fixed at the bottom centre, that jumps
+   between this page's sections (Overview / Process / Impact). Static <a>
+   links, so it works with no JS; main.js (initSectionPills / updateScrollEffects)
+   adds the scroll-spy active state and tucks it away once the footer is in view.
+
+   It reuses the site's two established idioms so it reads as part of the same
+   system: the header's frosted glass (--color-bg tint + backdrop blur) and the
+   nav chip's 100px pill. Always visible — no data-reveal — like the footer.
+   ------------------------------------------------------------ */
+.section-pills {
+  position: fixed;
+  left: 50%;
+  bottom: 28px;
+  transform: translateX(-50%);
+  z-index: 90; /* under the sticky header (100), over the page */
+  display: flex;
+  gap: 4px;
+  padding: 6px;
+  border-radius: 100px;
+  /* Same frosted tint of the page bg as .site-header, a touch stronger blur so
+     it holds as a distinct floating object over any content. */
+  background-color: rgba(251, 252, 248, 0.8);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--color-border-light);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+
+/* Tucked away once the footer is reached — nowhere left to jump. JS toggles this;
+   keep the horizontal centring while sliding it down and out. */
+.section-pills.is-tucked {
+  opacity: 0;
+  transform: translateX(-50%) translateY(20px);
+  pointer-events: none;
+}
+
+.section-pills a {
+  font-family: var(--font-ui);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--color-text-70);
+  text-decoration: none;
+  padding: 8px 18px;
+  border-radius: 100px;
+  white-space: nowrap;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+@media (hover: hover) {
+  .section-pills a:hover {
+    color: var(--color-text);
+  }
+}
+
+/* Active (scroll-spy) — solid ink pill, the same 600 the nav uses for its
+   selected state. Text inverts to the page bg so the fill reads as filled. */
+.section-pills a.is-active {
+  font-weight: 600;
+  color: var(--color-bg);
+  background-color: var(--color-text);
+}
+
+@media (hover: hover) {
+  .section-pills a.is-active:hover {
+    color: var(--color-bg);
+  }
+}
+
+/* Locked variant — a "there's more, but it's gated" chip. Used where the Process
+   content is confidential (Accessibility / Messaging): it completes the
+   Overview → Process → Impact story while staying honestly locked. Muted, carries
+   a lock glyph, and is EXCLUDED from the scroll-spy in main.js so it never takes
+   the solid active fill. It still links — to the locked access panel at the foot
+   of the page (#process-locked), where the reader can request the password. */
+.section-pills a.section-pill-locked {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-text-70);
+  opacity: 0.75;
+}
+
+@media (hover: hover) {
+  .section-pills a.section-pill-locked:hover {
+    color: var(--color-text-70);
+    opacity: 1;
+  }
+}
+
+/* Defensive: even if the spy ever tags it, the locked chip keeps its muted look
+   rather than flipping to the solid active pill. */
+.section-pills a.section-pill-locked.is-active {
+  background-color: transparent;
+  color: var(--color-text-70);
+  font-weight: 500;
+}
+
+.section-pill-lock {
+  width: 0.95em;
+  height: 0.95em;
+  flex: none;
+}
+
+
+/* ------------------------------------------------------------
+   9. NEXT CASE STUDY — the hand-off pager at the foot of every project page.
+   A full-width link (no image) that teases the next case study with the same
+   title + description as its homepage .work-card, plus a right arrow, so a
+   reader can move straight from one project to the next. The order follows the
+   homepage Work list and WRAPS (last → first), so every page has a next. Keep
+   each page's title/description in sync with the matching card on index.html —
+   it is the same teaser, minus the image.
+
+   Built from <span>s (not <p>/<h2>) so the whole block is one valid <a>: the
+   flex containers below give each span its block layout. No heading element —
+   it's a navigational label for the link, not a section of this page's content.
+   ------------------------------------------------------------ */
+.next-case {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-content);
+  text-decoration: none;
+  color: var(--color-text);
+}
+
+/* Eyebrow — the same 13px uppercase label as .section-label / the metadata dt. */
+.next-case-label {
+  font-family: var(--font-ui);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-text-70);
+}
+
+.next-case-body {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--gap-group);
+}
+
+.next-case-text {
+  display: flex;
+  flex-direction: column;
+  /* Grow to fill the row (arrow aside) so the title and description use the full
+     width rather than shrinking to the title's own measure — otherwise the
+     description wraps early against a content-width column. */
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* Tier 2 headline — the same 2.5rem/700/-0.02em as .project-block-title and the
+   homepage .work-card-title, so the teaser reads as that card enlarged. */
+.next-case-title {
+  font-family: var(--font-heading);
+  font-size: 2.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  color: var(--color-text);
+}
+
+.next-case-description {
+  margin-top: var(--gap-content);
+  font-size: 1.25rem;
+  letter-spacing: -0.02em;
+  line-height: 1.4;
+  color: var(--color-text-70);
+}
+
+/* The right arrow — large, and it nudges toward the destination on hover. */
+.next-case-arrow {
+  flex: none;
+  font-family: var(--font-heading);
+  font-size: 3rem;
+  line-height: 1;
+  color: var(--color-text);
+  transition: transform 0.3s ease;
+}
+
+@media (hover: hover) {
+  .next-case:hover .next-case-arrow {
+    transform: translateX(10px);
+  }
+  .next-case:hover .next-case-title {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+}
