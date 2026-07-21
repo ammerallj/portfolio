@@ -53,10 +53,14 @@
   position: absolute;
   left: 50%;
   top: 50%;
-  /* The blob's SILHOUETTE is now page-centred (see --blob-dx/dy above), so the
-     lockup centres on the page too — that lands it centred within the blob.
-     (This used to carry a +24px nudge to compensate for the un-centred blob.) */
-  transform: translate(-50%, -50%);
+  /* The blob's SILHOUETTE is page-centred (see --blob-dx/dy above). Centring the
+     whole lockup on it would leave the COPY reading high, because the CTA hangs
+     80px below the text and pulls the column's balance point down past it. So
+     nudge the lockup down by ~half the CTA block (gap/2 + CTA height/2 ≈ 52px) —
+     that lands the claim+credential visually centred in the blob, with the CTA
+     sitting just below centre. (The ≤1024 tiers hide the CTA and re-anchor their
+     own copy, so this desktop-only nudge doesn't reach them.) */
+  transform: translate(-50%, calc(-50% + 52px));
   z-index: 1;
   /* 750px is the CONTENT width (Figma 258:497). The lockup is a centered fixed
      block, not a page-gutter container, so cancel the site's base 56px gutter

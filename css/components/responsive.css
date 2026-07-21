@@ -163,11 +163,9 @@
     font-size: 32px;
   }
 
-  /* Credential leads on this canvas (frame 265:501); the DOM stays claim-first
-     for the desktop composition, so flex order flips it here. */
-  .intro-claim {
-    order: 1;
-  }
+  /* Claim-first, matching desktop: "I design…" leads, the credential follows.
+     (The DOM is already claim-first, so no order override — this tier used to
+     flip to credential-first per the Figma frame; that flip was removed.) */
 
   .intro-inner {
     width: 600px;
