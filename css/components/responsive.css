@@ -595,4 +595,27 @@
     flex-direction: column;
     align-items: flex-start;
   }
+
+  /* The on-page Contact section is dropped on mobile — its info (connect block +
+     On My Mind) now lives in the Contact menu overlay. With the blue panel gone,
+     the footer would read as an orphaned blue bar, so it converts to the plain
+     cream treatment used on the project pages (.site-footer--plain). Scoped with
+     :not(--plain) so the already-plain project footers are untouched. */
+  #contact {
+    display: none;
+  }
+  /* About is the last VISIBLE section now, but #contact is still the DOM
+     :last-of-type that .page-section's divider rule spares (hidden ≠ removed),
+     so About keeps a bottom hairline that would float above the footer. Drop it
+     so the page ends clean into the plain footer, like the Overview pages. */
+  #about {
+    border-bottom: none;
+  }
+  .site-footer:not(.site-footer--plain) {
+    background-color: transparent;
+    border-top: none;
+  }
+  .site-footer:not(.site-footer--plain) p {
+    color: var(--color-text);
+  }
 }

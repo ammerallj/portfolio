@@ -507,10 +507,16 @@ function updateScrollEffects() {
   // the bar on arrival, not after scrolling further in. Read here (not at init)
   // because the @import'd CSS may not be applied when the deferred script runs.
   if (contactSection && siteHeader) {
-    const contactTop = contactSection.getBoundingClientRect().top;
-    const scrollAnchorTop = parseFloat(getComputedStyle(html).scrollPaddingTop) || 0;
-    const invertLine = Math.max(scrollAnchorTop, siteHeader.offsetHeight);
-    siteHeader.classList.toggle('is-over-dark', contactTop <= invertLine + 1);
+    const contactRect = contactSection.getBoundingClientRect();
+    if (contactRect.height === 0) {
+      // Contact is hidden (dropped at the mobile tier) — there's no blue panel to
+      // invert over, so keep the header in its normal (cream) state.
+      siteHeader.classList.remove('is-over-dark');
+    } else {
+      const scrollAnchorTop = parseFloat(getComputedStyle(html).scrollPaddingTop) || 0;
+      const invertLine = Math.max(scrollAnchorTop, siteHeader.offsetHeight);
+      siteHeader.classList.toggle('is-over-dark', contactRect.top <= invertLine + 1);
+    }
   }
 
   // Everything below is the hero's own scroll accent — project pages have no

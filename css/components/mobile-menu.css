@@ -133,12 +133,14 @@
   line-height: 1;
 }
 
-/* --- "On My Mind" — reflective note in the upper area, between the name and the
-   bottom-anchored connect block. Eyebrow + two paragraphs, mirroring the homepage
-   .contact-mind (section-label + about-body), recolored for the blue panel. --- */
+/* --- "On My Mind" — reflective note below the connect block, mirroring the
+   homepage .contact-mind (section-label + about-body), recolored for the blue
+   panel. The dividing hairline sits an EQUAL --gap-section above (margin-top) and
+   below (padding-top), so the break reads as balanced rather than the block being
+   flush-pushed to the panel's bottom. --- */
 .mobile-menu-mind {
-  margin-top: auto; /* pushed to the bottom, below the connect block */
-  padding: 60px 16px 90px;
+  margin-top: var(--gap-section); /* matches the padding-top below the hairline */
+  padding: var(--gap-section) 16px 90px;
   border-top: 1px solid #fff;
   display: flex;
   flex-direction: column;
