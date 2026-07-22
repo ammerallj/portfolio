@@ -505,6 +505,12 @@
     padding: 8px 14px;
   }
 
+  /* The homepage's mobile nav floatie (Work / About) appears here, where the
+     header nav collapses to the "Contact" trigger. */
+  .section-pills.section-pills--site-nav {
+    display: flex;
+  }
+
   /* Mobile menu: the inline Work/About/Contact links give way to a "Menu"
      trigger that opens the full-screen .mobile-menu overlay (see
      mobile-menu.css for its look, initMobileMenu() in main.js for behavior).

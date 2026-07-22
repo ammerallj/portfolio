@@ -635,6 +635,14 @@
   transition: opacity 0.35s ease, transform 0.35s ease;
 }
 
+/* Homepage-only variant — the mobile Work/About nav floatie. Hidden by default
+   (desktop/tablet show the header nav); responsive.css reveals it at the <=480
+   tier where that header nav collapses. Project pages use the plain .section-pills
+   at every width, so they're unaffected. */
+.section-pills.section-pills--site-nav {
+  display: none;
+}
+
 /* Tucked away once the footer is reached — nowhere left to jump. JS toggles this;
    keep the horizontal centring while sliding it down and out. */
 .section-pills.is-tucked {

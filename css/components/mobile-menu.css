@@ -119,24 +119,9 @@
   pointer-events: none;
 }
 
-/* Background glow — Figma "Ellipse 2" (node 123:3808): the exact exported
-   asset (818x818 radial, white 0.8 -> 0.5 -> transparent at 0.6 opacity, with
-   a fractal-noise grain). Pinned off the top-left (left:-19px) per the Figma
-   coordinates so it bleeds past the panel and is cut off by the overflow clip.
-   Painted above the blue fill (z-index:-1) but beneath the menu content. */
-.mobile-menu::before {
-  content: '';
-  position: absolute;
-  left: -19px;
-  top: calc(50% - 187px);
-  transform: translateY(-50%);
-  width: 818px;
-  height: 818px;
-  background: url('../../images/menu-glow.svg') center / 100% 100% no-repeat;
-  opacity: 0.8; /* dialed down a touch from the Figma default */
-  pointer-events: none;
-  z-index: -1;
-}
+/* The panel is a flat --color-accent fill — no gradient/glow. (The Figma
+   "Ellipse 2" radial-white + fractal-noise ::before glow was dropped per request;
+   the solid blue reads cleaner.) */
 
 /* "Jenna Ammerall." — matches the header logo but white (Figma 123:3770) */
 .mobile-menu-name {
@@ -146,6 +131,41 @@
   font-weight: 700;
   letter-spacing: -0.02em;
   line-height: 1;
+}
+
+/* --- "On My Mind" — reflective note in the upper area, between the name and the
+   bottom-anchored connect block. Eyebrow + two paragraphs, mirroring the homepage
+   .contact-mind (section-label + about-body), recolored for the blue panel. --- */
+.mobile-menu-mind {
+  margin-top: auto; /* pushed to the bottom, below the connect block */
+  padding: 60px 16px 90px;
+  border-top: 1px solid #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.mobile-menu-mind-heading {
+  font-family: var(--font-ui);
+  font-size: 0.8125rem; /* 13px eyebrow — same as .section-label */
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.mobile-menu-mind-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.mobile-menu-mind-body p {
+  font-family: var(--font-body);
+  font-size: 1.25rem; /* 20px — the overlay's body scale */
+  letter-spacing: -0.02em;
+  line-height: 1.4;
+  color: #fff;
 }
 
 /* --- Large nav links (Figma 60px; thin em-dash + bold word) --- */
@@ -172,14 +192,14 @@
   margin-right: 0.15em;
 }
 
-/* --- Connect block, anchored to the bottom with a hairline top border --- */
+/* --- Connect block, now the first block under the name (On My Mind moved to the
+   bottom). No top border/auto-margin: those roles moved to .mobile-menu-mind. --- */
 .mobile-menu-connect {
-  margin-top: auto; /* push to the bottom of the panel */
+  margin-top: 56px;
   display: flex;
   flex-direction: column;
   gap: 50px;
-  padding: 60px 16px 90px;
-  border-top: 1px solid #fff;
+  padding: 0 16px;
 }
 
 .mobile-menu-connect-heading {
@@ -202,6 +222,15 @@
   letter-spacing: -0.02em;
   color: #fff;
   text-decoration: underline;
+}
+
+/* Outward arrow on each connect link — same decorative ::after as the homepage
+   .contact-connect-links (sections.css). inline-block keeps it off the underline;
+   it inherits the link's white. */
+.mobile-menu-connect-links a::after {
+  content: '↗';
+  display: inline-block;
+  margin-left: 0.2em;
 }
 
 /* --- Circular close (X) button, bottom-right (Figma 123:3755) --- */

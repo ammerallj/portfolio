@@ -53,7 +53,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@200;700&family=Inter:wght@400..700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=329" />
+  <link rel="stylesheet" href="style.css?v=334" />
   <!-- Pre-paint flags, set only when JS runs:
        • is-motion — hides reveal targets so they can fade in without a flash
          (skipped for reduced-motion visitors, who see everything).
@@ -96,29 +96,37 @@
         </div>
       </nav>
       <!-- Mobile-only trigger; the inline nav above is hidden at <=480px
-           (see responsive.css). Opens the full-screen .mobile-menu overlay. -->
-      <button class="mobile-menu-toggle" type="button" aria-expanded="false" aria-controls="mobile-menu">Menu</button>
+           (see responsive.css). Work/About move to the bottom floatie pill below,
+           so this control opens the overlay as the mobile CONTACT (the connect
+           block). Opens the full-screen .mobile-menu overlay. -->
+      <button class="mobile-menu-toggle" type="button" aria-expanded="false" aria-controls="mobile-menu">Contact</button>
     </div>
   </header>
 
   <!-- ============================================================
-       MOBILE MENU OVERLAY (Figma nodes 123:3733 / 123:3743)
-       Full-screen blue panel: large Work / About links + a connect
-       block. Hidden by default; shown only at <=480px when .is-open
-       is set by initMobileMenu() in js/main.js.
+       MOBILE CONTACT OVERLAY (Figma nodes 123:3733 / 123:3743)
+       Full-screen blue panel, opened by the "Contact" trigger. Work/About now
+       live in the bottom floatie pill (.section-pills--site-nav), so this panel
+       is just the connect block — the mobile contact. Hidden by default; shown
+       only at <=480px when .is-open is set by initMobileMenu() in js/main.js.
        ============================================================ -->
-  <div class="mobile-menu" id="mobile-menu" role="dialog" aria-modal="true" aria-label="Site menu" aria-hidden="true">
+  <div class="mobile-menu" id="mobile-menu" role="dialog" aria-modal="true" aria-label="Contact" aria-hidden="true">
     <p class="mobile-menu-name">Jenna Ammerall.</p>
-    <nav class="mobile-menu-nav" aria-label="Mobile navigation">
-      <a href="#work-section"><span class="mobile-menu-dash">&mdash;</span> Work</a>
-      <a href="#about"><span class="mobile-menu-dash">&mdash;</span> About</a>
-    </nav>
     <div class="mobile-menu-connect">
       <p class="mobile-menu-connect-heading">If something here resonated, let's connect.</p>
       <div class="mobile-menu-connect-links">
         <a href="mailto:ammerallj@gmail.com">ammerallj@gmail.com<span class="visually-hidden"> (email)</span></a>
         <a href="https://www.linkedin.com/in/ammerallj/" target="_blank" rel="noopener noreferrer">LinkedIn<span class="visually-hidden"> (opens in new tab)</span></a>
         <a href="resume.pdf" target="_blank" rel="noopener noreferrer">Resume<span class="visually-hidden"> (PDF, opens in new tab)</span></a>
+      </div>
+    </div>
+    <!-- "On My Mind" — same copy as the homepage .contact-mind; sits below the
+         connect block as a reflective close, anchored to the bottom. -->
+    <div class="mobile-menu-mind">
+      <p class="mobile-menu-mind-heading">On My Mind</p>
+      <div class="mobile-menu-mind-body">
+        <p>Lately, I've been thinking about the interaction between people and increasingly autonomous products.</p>
+        <p>As products begin acting on our behalf, I'm interested in the foundations that help people stay oriented, maintain agency, and collaborate with confidence.</p>
       </div>
     </div>
     <button class="mobile-menu-close" type="button" aria-label="Close menu">
@@ -128,6 +136,19 @@
       </svg>
     </button>
   </div>
+
+  <!-- ============================================================
+       MOBILE NAV FLOATIE — a bottom pill bar (Work / About), shown only at the
+       <=480 tier where the header nav collapses (see .section-pills--site-nav in
+       responsive.css). Reuses .section-pills: the frosted look AND the scroll-spy
+       in main.js (sectionPills / updateScrollEffects) come for free. Static <a>
+       links, so it works with no JS. Homepage only — project pages have their own
+       Overview/Process/Impact floatie. Contact is the top-right overlay trigger.
+       ============================================================ -->
+  <nav class="section-pills section-pills--site-nav" aria-label="Sections">
+    <a href="#work-section" class="is-active" aria-current="true">Work</a>
+    <a href="#about">About</a>
+  </nav>
 
   <!-- ============================================================
        MAIN CONTENT
