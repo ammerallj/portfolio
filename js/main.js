@@ -731,60 +731,66 @@ const msLabels = document.querySelectorAll('.ms-label');
 const msCursor = document.getElementById('ms-cursor');
 const waveCursor = document.getElementById('wave-cursor');
 
-document.addEventListener('mousemove', (e) => {
-  if (cursor) {
-    cursor.style.left = e.clientX + 'px';
-    cursor.style.top = e.clientY + 'px';
-  }
-  if (waveCursor) {
-    waveCursor.style.left = e.clientX + 'px';
-    waveCursor.style.top = e.clientY + 'px';
-  }
-});
+// Custom cursors are a MOUSE affordance only. On touch, a tap fires synthetic
+// mouseenter/mousemove events with NO matching mouseleave, so a cursor badge
+// (e.g. the → over a work-card image, or the Meta/MS logo over a label) would
+// appear and then stick on screen. Gate the whole system behind a true hover +
+// fine-pointer device so none of these listeners bind on touch.
+if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+  document.addEventListener('mousemove', (e) => {
+    if (cursor) {
+      cursor.style.left = e.clientX + 'px';
+      cursor.style.top = e.clientY + 'px';
+    }
+    if (waveCursor) {
+      waveCursor.style.left = e.clientX + 'px';
+      waveCursor.style.top = e.clientY + 'px';
+    }
+  });
 
-// Show the 👋 cursor over the blue panel (Contact on the homepage, the
-// Conversation Invitation on a project page) — desktop (mouse) only
-if (darkPanel && waveCursor && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
-  darkPanel.addEventListener('mouseenter', () => waveCursor.classList.add('is-visible'));
-  darkPanel.addEventListener('mouseleave', () => waveCursor.classList.remove('is-visible'));
+  // Show the 👋 cursor over the blue panel (Contact on the homepage).
+  if (darkPanel && waveCursor) {
+    darkPanel.addEventListener('mouseenter', () => waveCursor.classList.add('is-visible'));
+    darkPanel.addEventListener('mouseleave', () => waveCursor.classList.remove('is-visible'));
+  }
+
+  cardImages.forEach(img => {
+    if (!cursor) return;
+    img.addEventListener('mouseenter', () => cursor.classList.add('is-visible'));
+    img.addEventListener('mouseleave', () => cursor.classList.remove('is-visible'));
+  });
+
+  msLabels.forEach(label => {
+    if (!msCursor) return;
+    label.addEventListener('mouseenter', () => {
+      const rect = label.getBoundingClientRect();
+      const img = msCursor.querySelector('img');
+      img.style.height = rect.height + 'px';
+      img.style.width = 'auto';
+      msCursor.style.left = (rect.left + rect.width / 2) + 'px';
+      msCursor.style.top = (rect.top + rect.height / 2) + 'px';
+      msCursor.classList.add('is-visible');
+    });
+    label.addEventListener('mouseleave', () => {
+      msCursor.classList.remove('is-visible');
+    });
+  });
+
+  metaLabels.forEach(label => {
+    if (!metaCursor) return;
+    label.addEventListener('mouseenter', () => {
+      const rect = label.getBoundingClientRect();
+      const img = metaCursor.querySelector('img');
+      img.style.height = rect.height + 'px';
+      metaCursor.style.left = (rect.left + rect.width / 2) + 'px';
+      metaCursor.style.top = (rect.top + rect.height / 2) + 'px';
+      metaCursor.classList.add('is-visible');
+    });
+    label.addEventListener('mouseleave', () => {
+      metaCursor.classList.remove('is-visible');
+    });
+  });
 }
-
-cardImages.forEach(img => {
-  if (!cursor) return;
-  img.addEventListener('mouseenter', () => cursor.classList.add('is-visible'));
-  img.addEventListener('mouseleave', () => cursor.classList.remove('is-visible'));
-});
-
-msLabels.forEach(label => {
-  if (!msCursor) return;
-  label.addEventListener('mouseenter', () => {
-    const rect = label.getBoundingClientRect();
-    const img = msCursor.querySelector('img');
-    img.style.height = rect.height + 'px';
-    img.style.width = 'auto';
-    msCursor.style.left = (rect.left + rect.width / 2) + 'px';
-    msCursor.style.top = (rect.top + rect.height / 2) + 'px';
-    msCursor.classList.add('is-visible');
-  });
-  label.addEventListener('mouseleave', () => {
-    msCursor.classList.remove('is-visible');
-  });
-});
-
-metaLabels.forEach(label => {
-  if (!metaCursor) return;
-  label.addEventListener('mouseenter', () => {
-    const rect = label.getBoundingClientRect();
-    const img = metaCursor.querySelector('img');
-    img.style.height = rect.height + 'px';
-    metaCursor.style.left = (rect.left + rect.width / 2) + 'px';
-    metaCursor.style.top = (rect.top + rect.height / 2) + 'px';
-    metaCursor.classList.add('is-visible');
-  });
-  label.addEventListener('mouseleave', () => {
-    metaCursor.classList.remove('is-visible');
-  });
-});
 
 // ============================================================
 // Mobile menu (Figma nodes 123:3733 / 123:3743)
