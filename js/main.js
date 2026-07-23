@@ -562,9 +562,9 @@ updateScrollEffects();
 // ============================================================
 
 const REVEAL = {
-  distance: 20,   // px of translate — a clear but composed rise
-  duration: 0.8,  // s — long enough to read on the way in, in either direction
-  stagger: 0.08,  // s between items in a group (80ms)
+  distance: 12,   // px of translate — a small rise; text stays readable mid-fade
+  duration: 0.5,  // s — quick enough to resolve before a fast scroller passes it
+  stagger: 0.05,  // s between items in a group (50ms) — a section lands near-together
   ease: [0.16, 1, 0.3, 1], // gentle ease-out, no overshoot
 };
 
@@ -688,7 +688,7 @@ function setupReveals(motion) {
         // section is never yanked to invisible mid-view. That harsh cut-out was
         // what you saw scrolling up, as a group left through the bottom edge.
         setVisible(group, false);
-      } else if (firstPass || (r.top < vh * 0.85 && r.bottom > vh * 0.15)) {
+      } else if (firstPass || (r.top < vh * 0.9 && r.bottom > vh * 0.15)) {
         // Meaningfully in view → fade in (typography first). Wide gap from the
         // reset condition gives hysteresis, so there's no flicker at the edges.
         setVisible(group, true);

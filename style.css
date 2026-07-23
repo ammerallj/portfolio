@@ -3,13 +3,13 @@
    index.html. Browsers cache @import URLs independently, so bumping only the
    <link> does NOT refetch these component files — the version must be on the
    imports too. */
-@import url('css/components/global.css?v=337');
-@import url('css/components/header.css?v=337');
-@import url('css/components/hero.css?v=337');
-@import url('css/components/sections.css?v=337');
-@import url('css/components/footer.css?v=337');
-@import url('css/components/project-overview.css?v=337');
-@import url('css/components/mobile-menu.css?v=337');
+@import url('css/components/global.css?v=338');
+@import url('css/components/header.css?v=338');
+@import url('css/components/hero.css?v=338');
+@import url('css/components/sections.css?v=338');
+@import url('css/components/footer.css?v=338');
+@import url('css/components/project-overview.css?v=338');
+@import url('css/components/mobile-menu.css?v=338');
 
 /* ALWAYS LAST: Media breakpoints override desktop styles */
-@import url('css/components/responsive.css?v=337');
+@import url('css/components/responsive.css?v=338');
