@@ -232,6 +232,54 @@ own version, separate from the `style.css?v=` / `@import` CSS bump below).
 - The shared right column across sections is **542px** (the site's "5 grid columns"); the layout uses **56px** horizontal page padding (`.site-container`). Reuse these, don't invent new values.
 - Accent blue is the `--color-accent` token (`#4A45FF`).
 
+## Discoverability (SEO + GEO) — the machine-readable layer
+Five things make this site legible to search engines **and** to AI answer
+engines (ChatGPT, Claude, Perplexity, AI Overviews). They are metadata only —
+nothing here changes a pixel.
+
+| File | Role |
+|---|---|
+| `robots.txt` | `User-agent: *` allow-all, **plus every AI crawler named explicitly** in two labeled groups: *answer engines* (OAI-SearchBot, Claude-SearchBot, PerplexityBot, …) and *training* (GPTBot, ClaudeBot, Google-Extended, CCBot, …). Naming them is a signal, not a functional change — the wildcard already allows them. To opt out of one, flip its `Allow: /` to `Disallow: /`. |
+| `llms.txt` | Root-level markdown digest for LLMs ([llmstxt.org](https://llmstxt.org)) — summary, the four case studies with their Impact figures, toolkit, public footprints. **Adoption is still partial**; it's cheap insurance, not the main lever. |
+| `sitemap.xml` | The 4 project pages + homepage + the résumé PDF. Bump `lastmod` when content changes. |
+| `index.html` JSON-LD | One `@graph`: `WebSite` → `ProfilePage` → `Person` → `ItemList` of the 4 case studies. |
+| `work/*.html` JSON-LD | One `@graph`: `CreativeWork` + `BreadcrumbList`. |
+
+**The `@id` coupling is the load-bearing part — do not break it.** Every node
+carries a stable `@id`, and the pages reference each other by it:
+- Person is `https://ammerallj.design/#jenna` (defined in `index.html`).
+- Each case study is `…/work/<page>.html#case-study` — **defined** in that
+  project page, **referenced** from the homepage `ItemList`.
+- Each project page's `author` and `isPartOf` point back at `#jenna` / `#website`.
+
+That cross-referencing is what merges five pages into one entity a crawler can
+reason about ("who made this, what else have they done"). Rename an `@id` in one
+place and you must rename it everywhere. To re-verify after any edit, parse every
+`<script type="application/ld+json">` block and confirm each reference-only `@id`
+is defined somewhere in the site.
+
+**Rules:**
+- **Structured data restates the page — it never adds to it.** Every `abstract`,
+  `description`, and `creditText` is a copy of text already visible in the HTML.
+  Never put a figure, credential, employer, or date in JSON-LD that a reader
+  can't also see on the page. If the visible copy changes, change the schema.
+- The `abstract` fields exist so an answer engine quotes **Jenna's own numbers**
+  rather than paraphrasing. Keep them in sync with the Impact bullets.
+- **Never add the locked case-study URL** (the Figma deck) to `llms.txt`, the
+  sitemap, or JSON-LD. It's already in the page HTML by design, gated by Figma's
+  password — don't widen its crawl surface beyond that.
+- Employment status is deliberately **`alumniOf` only**. There is no `worksFor`
+  because the site doesn't state a current employer. Don't infer one.
+- Press links are **`citation` on the relevant `CreativeWork`**, never `sameAs`
+  on the Person — those articles are about the work, not about Jenna.
+  `sameAs` is identity profiles only (currently LinkedIn).
+- **Content must stay readable with JS off.** Most AI crawlers don't run
+  JavaScript, so they fetch raw HTML — where `is-motion` is absent and every
+  `[data-reveal]` is at full opacity. This is why the motion system's
+  progressive-enhancement rule matters for reach, not just accessibility. Never
+  move real copy into JS-injected DOM.
+- HTML has no cache-buster, so metadata edits need **no `?v=` bump**.
+
 ## Image compression (pass done — recipe for new images)
 The site-wide compression pass is **done**. All 13 project-overview carousel
 images and the 4 homepage Work-card images are compressed JPEGs; there are no

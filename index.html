@@ -23,30 +23,136 @@
   <meta name="twitter:title" content="Jenna Ammerall — Product Designer" />
   <meta name="twitter:description" content="Jenna Ammerall is a product designer with over 9 years of experience at Microsoft and Meta, focused on systems, accessibility, and evolving product experiences." />
   <meta name="twitter:image" content="https://ammerallj.design/images/work-accessibility.jpg?v=4" />
-  <!-- Structured data: the person this site is about -->
+  <meta name="author" content="Jenna Ammerall" />
+  <!-- Structured data — an @graph, not a lone Person, so AI answer engines can
+       read one connected record: the site, this page, the person it's about, and
+       the four case studies. The Person @id and each case-study @id are reused
+       verbatim in work/*.html, which is what merges the whole site into a single
+       entity for a crawler. Change an @id here, change it there too.
+       Every value below is a restatement of copy already visible on the page —
+       never add a claim, figure, or credential that isn't in the HTML. -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
-    "@type": "Person",
-    "name": "Jenna Ammerall",
-    "url": "https://ammerallj.design/",
-    "jobTitle": "Senior Product Designer",
-    "description": "Jenna Ammerall is a product designer with over 9 years of experience at Microsoft and Meta, focused on systems, accessibility, and evolving product experiences.",
-    "image": "https://ammerallj.design/photo.jpg",
-    "sameAs": ["https://www.linkedin.com/in/ammerallj/"],
-    "alumniOf": [
-      { "@type": "Organization", "name": "Microsoft", "url": "https://www.microsoft.com" },
-      { "@type": "Organization", "name": "Meta", "url": "https://about.meta.com" }
-    ],
-    "knowsAbout": [
-      "Product Design",
-      "Interaction Design",
-      "Design Systems",
-      "Accessibility",
-      "Artificial Intelligence",
-      "Human-Computer Interaction",
-      "Information Architecture",
-      "UX Strategy"
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": "https://ammerallj.design/#website",
+        "url": "https://ammerallj.design/",
+        "name": "Jenna Ammerall",
+        "description": "Portfolio of Jenna Ammerall, a senior product designer with over nine years at Microsoft and Meta.",
+        "inLanguage": "en-US",
+        "publisher": { "@id": "https://ammerallj.design/#jenna" }
+      },
+      {
+        "@type": "ProfilePage",
+        "@id": "https://ammerallj.design/#webpage",
+        "url": "https://ammerallj.design/",
+        "name": "Jenna Ammerall — Product Designer",
+        "isPartOf": { "@id": "https://ammerallj.design/#website" },
+        "about": { "@id": "https://ammerallj.design/#jenna" },
+        "mainEntity": { "@id": "https://ammerallj.design/#jenna" },
+        "inLanguage": "en-US"
+      },
+      {
+        "@type": "Person",
+        "@id": "https://ammerallj.design/#jenna",
+        "name": "Jenna Ammerall",
+        "url": "https://ammerallj.design/",
+        "jobTitle": "Senior Product Designer",
+        "description": "Jenna Ammerall is a product designer with over 9 years of experience at Microsoft and Meta, focused on systems, accessibility, and evolving product experiences.",
+        "disambiguatingDescription": "Designs for products in transition — shaping how they change without losing what makes them work. Seattle-based systems thinker.",
+        "image": "https://ammerallj.design/photo.jpg",
+        "email": "mailto:ammerallj@gmail.com",
+        "sameAs": ["https://www.linkedin.com/in/ammerallj/"],
+        "mainEntityOfPage": { "@id": "https://ammerallj.design/#webpage" },
+        "homeLocation": {
+          "@type": "Place",
+          "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "Seattle",
+            "addressRegion": "WA",
+            "addressCountry": "US"
+          }
+        },
+        "hasOccupation": {
+          "@type": "Occupation",
+          "name": "Product Designer",
+          "occupationalCategory": "15-1255.00",
+          "skills": "Design systems, accessibility, interaction design, information architecture, product strategy"
+        },
+        "alumniOf": [
+          { "@type": "Organization", "name": "Microsoft", "url": "https://www.microsoft.com" },
+          { "@type": "Organization", "name": "Meta", "url": "https://about.meta.com" }
+        ],
+        "knowsAbout": [
+          "Product Design",
+          "Interaction Design",
+          "Design Systems",
+          "Accessibility",
+          "Artificial Intelligence",
+          "Human-Computer Interaction",
+          "Information Architecture",
+          "UX Strategy"
+        ]
+      },
+      {
+        "@type": "ItemList",
+        "@id": "https://ammerallj.design/#selected-work",
+        "name": "Selected work",
+        "itemListOrder": "https://schema.org/ItemListOrderAscending",
+        "numberOfItems": 4,
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "item": {
+              "@type": "CreativeWork",
+              "@id": "https://ammerallj.design/work/accessibility.html#case-study",
+              "name": "Scaling Accessibility Across Meta",
+              "url": "https://ammerallj.design/work/accessibility.html",
+              "description": "Everyone agreed accessibility mattered. Nobody agreed what it meant in practice.",
+              "author": { "@id": "https://ammerallj.design/#jenna" }
+            }
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "item": {
+              "@type": "CreativeWork",
+              "@id": "https://ammerallj.design/work/messaging.html#case-study",
+              "name": "Creating Continuity Across Messaging",
+              "url": "https://ammerallj.design/work/messaging.html",
+              "description": "Sharing something privately meant leaving Facebook to reply. It started in one place and finished in another.",
+              "author": { "@id": "https://ammerallj.design/#jenna" }
+            }
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "item": {
+              "@type": "CreativeWork",
+              "@id": "https://ammerallj.design/work/microsoft-loop.html#case-study",
+              "name": "Building Live Collaborative Components",
+              "url": "https://ammerallj.design/work/microsoft-loop.html",
+              "description": "Every object in Microsoft 365 belonged to the app it lived in. This one had to belong to itself.",
+              "author": { "@id": "https://ammerallj.design/#jenna" }
+            }
+          },
+          {
+            "@type": "ListItem",
+            "position": 4,
+            "item": {
+              "@type": "CreativeWork",
+              "@id": "https://ammerallj.design/work/facebook-groups.html#case-study",
+              "name": "Helping People Navigate Communities",
+              "url": "https://ammerallj.design/work/facebook-groups.html",
+              "description": "Each community had a sense of place. Moving between them didn't.",
+              "author": { "@id": "https://ammerallj.design/#jenna" }
+            }
+          }
+        ]
+      }
     ]
   }
   </script>
@@ -190,7 +296,7 @@
                 <h2 class="work-card-title" id="work-heading" data-reveal data-reveal-order="0">Scaling Accessibility Across Meta</h2>
               </div>
               <div class="work-card-right">
-                <p class="work-card-meta" data-reveal data-reveal-order="1">Meta &middot; Risk Areas, Accessibility &middot; 2024&ndash;2026</p>
+                <p class="work-card-meta" data-reveal data-reveal-order="1">Meta &middot; Risk Areas, Accessibility &middot; 2023&ndash;2026</p>
                 <p class="work-card-description" data-reveal data-reveal-order="1">Everyone agreed accessibility mattered. Nobody agreed what it meant in practice.</p>
               </div>
             </div>
@@ -206,7 +312,7 @@
                 <h2 class="work-card-title" data-reveal data-reveal-order="0">Creating Continuity Across Messaging</h2>
               </div>
               <div class="work-card-right">
-                <p class="work-card-meta" data-reveal data-reveal-order="1">Meta &middot; Facebook Messaging &middot; 2023&ndash;2024</p>
+                <p class="work-card-meta" data-reveal data-reveal-order="1">Meta &middot; Facebook Messaging &middot; 2023</p>
                 <p class="work-card-description" data-reveal data-reveal-order="1">Sharing something privately meant leaving Facebook to reply. It started in one place and finished in another.</p>
               </div>
             </div>

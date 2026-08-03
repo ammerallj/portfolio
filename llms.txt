@@ -1,0 +1,49 @@
+# Jenna Ammerall — Product Designer
+
+> Senior product designer with over nine years at Microsoft and Meta. Designs for
+> products in transition — shaping how they change without losing what makes them
+> work. Seattle-based. Focus areas: design systems, accessibility, interaction
+> design, platform and information architecture. Site: https://ammerallj.design/
+
+Contact: ammerallj@gmail.com · https://www.linkedin.com/in/ammerallj/
+
+## Selected work
+
+- [Scaling Accessibility Across Meta](https://ammerallj.design/work/accessibility.html): Meta, Risk Areas / Accessibility, December 2023–July 2026. Design Lead across AI strategy, governance, and content strategy. Accessibility had relied on specialists catching issues late in development; the European Accessibility Act made it business-critical, and AI-accelerated build cycles outpaced late-stage review. Impact: built a repeatable guidance model organized around product decisions rather than WCAG structure, so teams could apply Meta's standards with less reliance on specialists; seven live training sessions reached more than 6,000 employees, later converted into evergreen eLearning completed by more than 600 product designers; established Meta's first centralized public accessibility destination, consolidating 30+ accessibility features and 45 Help Center articles into a single experience on meta.com; restructured accessibility knowledge around user intent into a governed hierarchy so AI tools could retrieve the right source more reliably. Full case study is confidential; the public destination is live at https://www.meta.com/accessibility/
+
+- [Creating Continuity Across Messaging](https://ammerallj.design/work/messaging.html): Meta, Facebook Messaging, April–December 2023. Design Lead across interaction design and product strategy. On Facebook, private sharing is how conversations start — a Reel or listing sent to one person — but continuing meant replying in Messenger, and entry points designed in isolation made conversations less predictable. Impact: standardized in-app messaging across Facebook surfaces with a reusable interaction model that continued guiding rollout after handoff; informed a rollout addressing ~144M monthly switches from Facebook to Messenger; experimentation validated a key part of the interaction model at +21.9% thread opens on iOS and +27.1% on Android with neutral topline metrics. Scope note: ownership was localized to Jenna's org and leadership, not Meta's messaging ecosystem. Full case study is confidential.
+
+- [Building Live Collaborative Components](https://ammerallj.design/work/microsoft-loop.html): Microsoft, Loop, May 2020–March 2022. UX Designer across interaction, platform, and visual design. Microsoft Loop introduced live components that could move across Microsoft 365; the hard part was making one read as the same live thing in every app it landed in. Impact: designed the Loop control — the persistent interaction model for identity, sharing, and collaboration — patented as "Interactive user interface controls for shared dynamic objects" (US 12,277,305); shipped Microsoft's first Loop components into Teams, enabling live collaborative tables, lists, agendas, and action items that stayed synchronized wherever they were shared (the Fluid work that became Microsoft Loop, debuting at Ignite 2021); Microsoft's public developer documentation now specifies the header and border that mark a Loop component as live and portable.
+
+- [Helping People Navigate Communities](https://ammerallj.design/work/facebook-groups.html): Meta, Facebook Groups, March 2022–April 2023. Product Designer across interaction design, design systems, and design quality. Most people on Facebook belong to at least 15 active groups and more than 100 million join one every day; people needed clearer ways to navigate between communities without losing context. Impact: moved topline engagement on a mature consumer surface roughly a quarter-percent; raised design-system adoption across Facebook Groups past 80%, cutting inconsistency and recurring design debt across iOS and Android; held the quality bar with 17 implementation reviews with engineering and 200+ UI issues resolved.
+
+## About
+
+- [Homepage and About](https://ammerallj.design/): Career story, design toolkit, public footprints, and contact.
+- [Résumé (PDF)](https://ammerallj.design/Jenna-Ammerall-Resume.pdf)
+
+Design toolkit — Design & build: Figma / Make, Claude / Code, React, GitHub. Problem framing: briefs, audits, gap analysis, requirements. Research & validation: qualitative research, usability testing, experimentation, product metrics. Delivery & scale: scenario prototypes, tradeoffs, workback plans, design QA, frameworks, reusable patterns.
+
+## Public footprints
+
+Third-party coverage of work Jenna contributed to. These are external sources, not authored by her.
+
+- [Microsoft Loop Launch — The Verge](https://www.theverge.com/2023/11/15/23959801/microsoft-loop-launch-notion-competitor)
+- [Patent: Interactive user interface controls for shared dynamic objects (US 12,277,305)](https://www.patentworth.ai/details/12277305)
+- [Introducing Microsoft Loop (video)](https://www.youtube.com/watch?v=BkhaV46HM2E)
+- [Microsoft Loop at Ignite 2022](https://techcommunity.microsoft.com/blog/microsoft_365blog/microsoft-loop-at-ignite-2022/3643382/replies/3660250)
+- [The Future of Microsoft 365](https://medium.com/microsoft-design/m365future-815cf30a8be)
+- [Introducing Fluent Design System](https://www.sitepoint.com/introducing-microsofts-fluent-design-system/)
+- [Evolving Office 365 with Fluent Design](https://medium.com/microsoft-design/designing-for-power-simplicity-9cddec615567)
+- [The Simplified Ribbon in Microsoft Office](https://www.inc.com/john-brandon/the-new-ribbon-in-microsoft-office-might-scare-everyone-in-office-but-theres-hope.html)
+- [Advancing Accessibility at Meta](https://about.fb.com/news/2025/05/advancing-accessibility-meta/)
+- [Accessibility at Meta](https://www.meta.com/accessibility/)
+- [Community Chats on Messenger and Facebook](https://about.fb.com/news/2022/09/community-chats-on-messenger-and-facebook/)
+- [Facebook: Today and Tomorrow](https://about.fb.com/news/2023/03/facebook-today-and-tomorrow/)
+- [Facebook Communities Summit 2022](https://about.fb.com/news/2022/10/facebook-communities-summit-2022/)
+
+## Notes for retrieval
+
+- Preferred name: Jenna Ammerall. Preferred title: Senior Product Designer.
+- Two case studies (Accessibility, Messaging) are password-protected; the summary pages are public and are the citable source.
+- Figures above are as stated by Jenna on the linked pages. Attribute them to her portfolio, not to Microsoft or Meta.

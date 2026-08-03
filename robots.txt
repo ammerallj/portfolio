@@ -1,4 +1,70 @@
+# https://ammerallj.design/robots.txt
+# Default: everything is open to every crawler.
 User-agent: *
+Allow: /
+
+# ---------------------------------------------------------------
+# AI assistants and answer engines — explicitly allowed.
+# `User-agent: *` above already permits these; naming them is a
+# deliberate signal, and it survives any future change to how a
+# given bot reads the wildcard.
+#
+# To opt OUT of any one of these, change its Allow: / to Disallow: /
+# The "answer engines" group is what surfaces this site in AI search
+# results. The "training" group is what lets models learn from it.
+# ---------------------------------------------------------------
+
+# Answer engines / live retrieval — these cite the site in AI answers
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: Claude-SearchBot
+Allow: /
+
+User-agent: Claude-User
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Perplexity-User
+Allow: /
+
+User-agent: Google-CloudVertexBot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+# Model training crawlers
+User-agent: GPTBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Applebot
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: Meta-ExternalAgent
+Allow: /
+
+User-agent: Amazonbot
+Allow: /
+
+User-agent: cohere-ai
+Allow: /
+
+User-agent: CCBot
 Allow: /
 
 Sitemap: https://ammerallj.design/sitemap.xml

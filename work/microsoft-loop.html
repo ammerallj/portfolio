@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="A live object people recognize on sight, wherever it lands." />
   <!-- [Case Study Title] — mirror the <h1> below -->
-  <title>Building Collaborative Workspaces — Jenna Ammerall</title>
+  <title>Building Live Collaborative Components — Jenna Ammerall</title>
   <link rel="canonical" href="https://ammerallj.design/work/microsoft-loop.html" />
   <meta name="robots" content="index, follow" />
   <meta name="theme-color" content="#4A45FF" />
@@ -13,7 +13,7 @@
   <!-- Open Graph / social sharing previews -->
   <meta property="og:type" content="article" />
   <meta property="og:site_name" content="Jenna Ammerall" />
-  <meta property="og:title" content="Building Collaborative Workspaces — Jenna Ammerall" />
+  <meta property="og:title" content="Building Live Collaborative Components — Jenna Ammerall" />
   <meta property="og:description" content="A live object people recognize on sight, wherever it lands." />
   <meta property="og:url" content="https://ammerallj.design/work/microsoft-loop.html" />
   <meta property="og:image" content="https://ammerallj.design/images/work-loop.jpg?v=3" />
@@ -21,17 +21,54 @@
   <meta property="og:image:height" content="830" />
   <meta property="og:locale" content="en_US" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Building Collaborative Workspaces — Jenna Ammerall" />
+  <meta name="twitter:title" content="Building Live Collaborative Components — Jenna Ammerall" />
   <meta name="twitter:description" content="A live object people recognize on sight, wherever it lands." />
   <meta name="twitter:image" content="https://ammerallj.design/images/work-loop.jpg?v=3" />
-  <!-- Structured data: breadcrumb back to the homepage -->
+  <meta name="author" content="Jenna Ammerall" />
+  <!-- Structured data — CreativeWork + breadcrumb in one @graph. See the longer
+       note in work/accessibility.html for how the @ids tie this page to the
+       Person and ItemList in index.html. `abstract` restates the visible Impact
+       bullets; keep it in sync and never add a figure that isn't on the page.
+       The `citation` list is the external, verifiable evidence (patent +
+       Microsoft's own docs) an answer engine can check. -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    "itemListElement": [
-      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://ammerallj.design/" },
-      { "@type": "ListItem", "position": 2, "name": "Building Collaborative Workspaces", "item": "https://ammerallj.design/work/microsoft-loop.html" }
+    "@graph": [
+      {
+        "@type": "CreativeWork",
+        "@id": "https://ammerallj.design/work/microsoft-loop.html#case-study",
+        "name": "Building Live Collaborative Components",
+        "headline": "Building Live Collaborative Components",
+        "url": "https://ammerallj.design/work/microsoft-loop.html",
+        "description": "A live object people recognize on sight, wherever it lands.",
+        "abstract": "Microsoft Loop introduced live components that could move across Microsoft 365, and the hard part was making one read as the same live thing in every app it landed in. The work unified how every Loop component behaves across Microsoft 365 by designing the Loop control — the persistent interaction model for identity, sharing, and collaboration — patented as Interactive user interface controls for shared dynamic objects (US 12,277,305); shipped Microsoft's first Loop components into Teams, enabling live collaborative tables, lists, agendas, and action items that stayed synchronized wherever they were shared, the Fluid work that later became Microsoft Loop and debuted at Ignite 2021; and defined the component structure other developers now build to, with Microsoft's public developer documentation specifying the header and border that mark a Loop component as live and portable.",
+        "image": "https://ammerallj.design/images/work-loop.jpg?v=3",
+        "inLanguage": "en-US",
+        "temporalCoverage": "2020-05/2022-03",
+        "creditText": "UX Designer · Interaction Design · Platform Design · Visual Design",
+        "keywords": "Microsoft Loop, Microsoft 365, live components, Fluid Framework, platform design, interaction design, visual design, Microsoft Teams",
+        "author": { "@id": "https://ammerallj.design/#jenna" },
+        "sourceOrganization": { "@type": "Organization", "name": "Microsoft", "url": "https://www.microsoft.com" },
+        "about": [
+          { "@type": "SoftwareApplication", "name": "Microsoft Loop", "url": "https://www.microsoft.com/en-us/microsoft-loop" },
+          { "@type": "Organization", "name": "Microsoft", "url": "https://www.microsoft.com" }
+        ],
+        "citation": [
+          { "@type": "CreativeWork", "name": "Patent US 12,277,305 — Interactive user interface controls for shared dynamic objects", "url": "https://www.patentworth.ai/details/12277305" },
+          { "@type": "WebPage", "name": "Design Loop components — Microsoft Learn", "url": "https://learn.microsoft.com/en-us/microsoftteams/platform/m365-apps/design-loop-components" },
+          { "@type": "WebPage", "name": "Fluid Framework", "url": "https://fluidframework.com/" }
+        ],
+        "isPartOf": { "@id": "https://ammerallj.design/#website" },
+        "mainEntityOfPage": "https://ammerallj.design/work/microsoft-loop.html"
+      },
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://ammerallj.design/" },
+          { "@type": "ListItem", "position": 2, "name": "Building Live Collaborative Components", "item": "https://ammerallj.design/work/microsoft-loop.html" }
+        ]
+      }
     ]
   }
   </script>
@@ -141,7 +178,7 @@
                  the dek as its own child a gap opens above it too and it drifts
                  away from the title. -->
             <div class="project-masthead-head">
-              <h1 class="project-title" id="project-title" data-reveal data-reveal-order="0">Building Collaborative Workspaces</h1>
+              <h1 class="project-title" id="project-title" data-reveal data-reveal-order="0">Building Live Collaborative Components</h1>
 
               <!-- Dek — the one-line description. Deliberately NOT a heading: it
                    sits under the title as a standfirst. -->
@@ -154,7 +191,7 @@
               <dl class="project-meta-list">
               <div class="project-meta-row">
               <dt>Timeline</dt>
-              <dd>2020&ndash;2022</dd>
+              <dd>May 2020&ndash;March 2022</dd>
               </div>
               <div class="project-meta-row">
               <dt>Role</dt>

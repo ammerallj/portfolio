@@ -24,14 +24,44 @@
   <meta name="twitter:title" content="Helping People Navigate Communities — Jenna Ammerall" />
   <meta name="twitter:description" content="A sense of place across many communities." />
   <meta name="twitter:image" content="https://ammerallj.design/images/work-communities.jpg?v=3" />
-  <!-- Structured data: breadcrumb back to the homepage -->
+  <meta name="author" content="Jenna Ammerall" />
+  <!-- Structured data — CreativeWork + breadcrumb in one @graph. See the longer
+       note in work/accessibility.html for how the @ids tie this page to the
+       Person and ItemList in index.html. `abstract` restates the visible Impact
+       bullets; keep it in sync and never add a figure that isn't on the page. -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    "itemListElement": [
-      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://ammerallj.design/" },
-      { "@type": "ListItem", "position": 2, "name": "Helping People Navigate Communities", "item": "https://ammerallj.design/work/facebook-groups.html" }
+    "@graph": [
+      {
+        "@type": "CreativeWork",
+        "@id": "https://ammerallj.design/work/facebook-groups.html#case-study",
+        "name": "Helping People Navigate Communities",
+        "headline": "Helping People Navigate Communities",
+        "url": "https://ammerallj.design/work/facebook-groups.html",
+        "description": "A sense of place across many communities.",
+        "abstract": "Most people on Facebook belong to at least 15 active groups, and more than 100 million join one every day, so people needed clearer ways to navigate between communities and understand where they were without losing context. The work redesigned core navigation and transitions, defined shared interaction patterns that worked consistently across iOS and Android, and strengthened design quality through cross-surface audits and close engineering partnership. It moved topline engagement on a mature consumer surface by roughly a quarter-percent, raised design-system adoption across Facebook Groups past 80%, and held the quality bar across core surfaces with 17 implementation reviews with engineering and more than 200 UI issues resolved.",
+        "image": "https://ammerallj.design/images/work-communities.jpg?v=3",
+        "inLanguage": "en-US",
+        "temporalCoverage": "2022-03/2023-04",
+        "creditText": "Product Designer · Interaction Design · Design Systems · Design Quality",
+        "keywords": "Facebook Groups, online communities, interaction design, design systems, design quality, iOS, Android, mobile design",
+        "author": { "@id": "https://ammerallj.design/#jenna" },
+        "sourceOrganization": { "@type": "Organization", "name": "Meta", "url": "https://about.meta.com" },
+        "about": [
+          { "@type": "Thing", "name": "Online community navigation" },
+          { "@type": "Organization", "name": "Meta", "url": "https://about.meta.com" }
+        ],
+        "isPartOf": { "@id": "https://ammerallj.design/#website" },
+        "mainEntityOfPage": "https://ammerallj.design/work/facebook-groups.html"
+      },
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://ammerallj.design/" },
+          { "@type": "ListItem", "position": 2, "name": "Helping People Navigate Communities", "item": "https://ammerallj.design/work/facebook-groups.html" }
+        ]
+      }
     ]
   }
   </script>
@@ -154,7 +184,7 @@
               <dl class="project-meta-list">
               <div class="project-meta-row">
               <dt>Timeline</dt>
-              <dd>2022&ndash;2023</dd>
+              <dd>March 2022&ndash;April 2023</dd>
               </div>
               <div class="project-meta-row">
               <dt>Role</dt>

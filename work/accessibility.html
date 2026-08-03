@@ -24,14 +24,52 @@
   <meta name="twitter:title" content="Scaling Accessibility Across Meta — Jenna Ammerall" />
   <meta name="twitter:description" content="Making accessibility knowledge usable by product teams and retrievable by AI." />
   <meta name="twitter:image" content="https://ammerallj.design/images/work-accessibility.jpg?v=4" />
-  <!-- Structured data: breadcrumb back to the homepage -->
+  <meta name="author" content="Jenna Ammerall" />
+  <!-- Structured data — CreativeWork + breadcrumb in one @graph. The @id below
+       is the same one index.html lists in its #selected-work ItemList, and the
+       author @id points back at the Person node there; that pairing is what lets
+       a crawler read the site as one entity instead of five loose pages.
+       `abstract` restates the visible Impact bullets verbatim — it exists so an
+       answer engine cites Jenna's own numbers. Never put a figure here that
+       isn't on the page, and update both together. -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    "itemListElement": [
-      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://ammerallj.design/" },
-      { "@type": "ListItem", "position": 2, "name": "Scaling Accessibility Across Meta", "item": "https://ammerallj.design/work/accessibility.html" }
+    "@graph": [
+      {
+        "@type": "CreativeWork",
+        "@id": "https://ammerallj.design/work/accessibility.html#case-study",
+        "name": "Scaling Accessibility Across Meta",
+        "headline": "Scaling Accessibility Across Meta",
+        "url": "https://ammerallj.design/work/accessibility.html",
+        "description": "Making accessibility knowledge usable by product teams and retrievable by AI.",
+        "abstract": "Accessibility had relied on specialists catching issues late in development. The European Accessibility Act made it business-critical, and as AI accelerated how teams built, late-stage review could no longer keep pace. The work enabled product teams to apply Meta's accessibility standards with less reliance on specialists through a repeatable guidance model organized around product decisions rather than WCAG structure; scaled accessibility capability across the company with seven live training sessions reaching more than 6,000 employees, later converted into evergreen eLearning completed by more than 600 product designers; established Meta's first centralized public accessibility destination, bringing together more than 30 accessibility features and 45 Help Center articles into a single experience on meta.com; and restructured accessibility knowledge around user intent so AI tools could retrieve it.",
+        "image": "https://ammerallj.design/images/work-accessibility.jpg?v=4",
+        "inLanguage": "en-US",
+        "temporalCoverage": "2023-12/2026-07",
+        "creditText": "Design Lead · AI strategy · Governance · Content strategy",
+        "keywords": "accessibility, design leadership, AI strategy, governance, content strategy, European Accessibility Act, WCAG, design systems",
+        "author": { "@id": "https://ammerallj.design/#jenna" },
+        "sourceOrganization": { "@type": "Organization", "name": "Meta", "url": "https://about.meta.com" },
+        "about": [
+          { "@type": "Thing", "name": "Digital accessibility" },
+          { "@type": "Organization", "name": "Meta", "url": "https://about.meta.com" }
+        ],
+        "citation": [
+          { "@type": "WebPage", "name": "Accessibility at Meta", "url": "https://www.meta.com/accessibility/" },
+          { "@type": "WebPage", "name": "European Accessibility Act", "url": "https://commission.europa.eu/strategy-and-policy/policies/justice-and-fundamental-rights/disability/european-accessibility-act-eaa_en" }
+        ],
+        "isPartOf": { "@id": "https://ammerallj.design/#website" },
+        "mainEntityOfPage": "https://ammerallj.design/work/accessibility.html",
+        "conditionsOfAccess": "The full case study is confidential and password-protected; this summary page is public."
+      },
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://ammerallj.design/" },
+          { "@type": "ListItem", "position": 2, "name": "Scaling Accessibility Across Meta", "item": "https://ammerallj.design/work/accessibility.html" }
+        ]
+      }
     ]
   }
   </script>
@@ -160,7 +198,7 @@
               <dl class="project-meta-list" data-reveal data-reveal-order="2">
               <div class="project-meta-row">
               <dt>Timeline</dt>
-              <dd>2024&ndash;2026</dd>
+              <dd>December 2023&ndash;July 2026</dd>
               </div>
               <div class="project-meta-row">
               <dt>Role</dt>
