@@ -35,21 +35,30 @@ main {
      down 8%), so the color mass rides higher behind the headline while some
      bleed past the fold survives. */
   transform: translateX(-50%) translateY(-12%);
-  /* images/hero-bkg.jpg at 126.5vw, centered — 110vw zoomed a further 15%.
-     The overscan crops ~8vw each side (77.3vw tall at the asset's
-     1.6376:1). */
+  /* images/hero-bkg.jpg, centered. FROZEN at its 1440 size (1821.6px = the
+     126.5vw composition) for any narrower window: below the design width the
+     field keeps its size and position and the viewport simply crops more of
+     it, rather than the artwork shrinking with the window. Above 1440 it
+     still grows with the viewport so it never uncovers the page. */
   top: 0;
-  width: 126.5vw;
+  width: var(--field-w);
   height: auto;
   z-index: -1; /* under all in-flow content, above the body's cream */
   pointer-events: none;
 }
 
-/* --field-bottom: where the field's bottom edge lands — its 126.5vw width ÷
-   the asset's 1.6377 aspect, minus the 12% up-shift. ⚠️ Re-derive if
-   .page-field's zoom/shift changes. */
+/* The hero field's geometry, in one place — .page-field's width and the frost
+   pane's reach both read from it, so they can't drift apart.
+     --field-w       the artwork's rendered width: 126.5vw at the 1440 design
+                     size (= 1821.6px), FROZEN at that px value below 1440 so
+                     narrowing the window crops instead of scaling.
+     --field-bottom  where its bottom edge lands = width ÷ 1.6377 (the asset's
+                     aspect) × 0.88 (the 12% up-shift) — i.e. width × 0.53734.
+   ⚠️ Change the zoom or the shift on .page-field and both follow automatically;
+   only the 0.53734 needs re-deriving, and only if the SHIFT changes. */
 :root {
-  --field-bottom: 67.97vw;
+  --field-w: max(1821.6px, 126.5vw);
+  --field-bottom: calc(var(--field-w) * 0.53734);
 }
 
 .intro {
@@ -107,7 +116,13 @@ main {
   line-height: 1;
   letter-spacing: -0.02em;
   color: #fff;
-  max-width: 900px;
+  /* 9.375em — the 900px cap at the 96px desktop size, expressed in EM so the
+     wrap point scales with the type instead of being a fixed px width the
+     smaller tiers outgrow. At 1024 a px cap never engaged (the 896px
+     container was narrower than 900), so the headline ran on ONE line and the
+     composition changed character; in em it holds the two-line lockup at
+     every tier. */
+  max-width: 9.375em;
   margin: 0;
   /* Rise from behind the divider: --rise > the 40px divider gap engages the
      clip (24px dip at 64). Ease = the motion system's REVEAL.ease. */

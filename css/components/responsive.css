@@ -130,6 +130,12 @@
     --gap-heading: 96px;
     --page-gutter: 24px;
     --section-title-size: 2.75rem; /* 44px */
+    /* LOCKED across the whole 1024→481 band — no clamp. The global token is
+       fluid (6.67vw), which slid the display from 68.3px at 1024 down to 56 by
+       768: the headline changed size and, because it's bottom-anchored to the
+       divider, its top edge moved with every pixel of window. One fixed value
+       holds the tablet composition still. (≤480 steps to 44 below.) */
+    --display-size: 64px;
   }
 
   /* LANDING hero interim (no ≤1024 frames yet for the "Making products make
@@ -140,6 +146,11 @@
   .intro-band {
     padding-inline: 64px;
   }
+
+  /* NO card peek in this tier (1024 → 769): the hero keeps the full-fold
+     desktop composition, with the nav bar resting on the fold's bottom edge.
+     The peek starts at ≤768, where the layout turns portrait. */
+
   .intro-bar {
     padding-inline: 24px; /* sticky bar: gutter is padding now, not offsets */
     gap: 64px;
@@ -249,6 +260,20 @@
   /* SPACING SCALE, portrait-tablet step: identical to the 1024 tier (gutter 24,
      group 48), so nothing is re-declared here — the tokens above cascade down.
      This tier only carries what genuinely differs at portrait width. */
+
+  /* Portrait drops the two-column band (the spacer is hidden below), so the
+     bio fills the full content width instead of holding the desktop's fixed
+     right-column measure — at 768 that token floors at 369px and left 359px
+     of the band empty. The frosted pane and the nav bar are already full
+     width; this brings the copy in line with them. */
+  .intro-bio {
+    flex: 1 1 auto;
+  }
+
+  /* NO card peek at this tier either — the hero keeps the full fold, which
+     holds the headline and bio at their composed positions (both hang off the
+     divider at the hero's vertical centre) and leaves the nav bar flush to the
+     bottom edge. The peek is phone-only; see the ≤480 tier. */
 
   .site-nav-bar {
     /* Back to filling the row — the 1024 tier's fixed 542px column would
@@ -396,6 +421,25 @@
   .intro-bar {
     display: none;
   }
+
+  /* The hero ends SHORT of the fold so the first Work card peeks above it —
+     the phone's scroll cue (there's no bottom bar at this tier), and it puts
+     the card in view early enough for its reveal to play as the reader
+     scrolls rather than firing off-screen.
+     The peek has to clear the section's TOP PADDING to show anything: 62px
+     header + 64px padding + ~120px of visible card = 246. (At 160 the whole
+     "peek" was empty padding — cream, no card.) The FIELD is unaffected: it
+     keeps its own size and bleeds on past, which is the intended look. */
+  .intro {
+    height: calc(100dvh - 246px);
+  }
+
+  /* The desktop 104px (64 + 40 for the hero's frosted dissolve) is too deep to
+     peek past on a phone — back to the tier's standard section padding. */
+  #work-section {
+    padding-top: var(--gap-section);
+  }
+
   /* The homepage header comes BACK at this tier — it carries the mobile nav
      (Contact trigger + menu); the docking intro-bar above is desktop-only. */
   body:has(.intro) .site-header {

@@ -149,6 +149,14 @@ html.lenis body {
 html {
   font-size: 100%;
   scroll-behavior: smooth;
+  /* Clip at the ROOT as well as on body. The hero field is a fixed 1822px and
+     overflows the viewport by design; clipping only on body still let it grow
+     the DOCUMENT's scroll width (1295 at a 768 viewport). Everything sized to
+     the viewport — the frosted pane, the divider, the nav bar — then stops at
+     the viewport edge while the field keeps painting past it, showing a seam
+     down the right. `clip`, not `hidden`, so no scroll container is created
+     and the sticky nav bar keeps working. */
+  overflow-x: clip;
   /* ~header height, so an anchor-clicked section rests flush under the sticky
      header. Larger values leave a strip of the previous (cream) section showing
      between the header and a full-bleed panel like Contact. */

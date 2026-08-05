@@ -123,9 +123,16 @@
    "Ellipse 2" radial-white + fractal-noise ::before glow was dropped per request;
    the solid blue reads cleaner.) */
 
+/* The panel's top inset, reused as the gap on BOTH sides of the hairline so
+   the block below it starts the same distance from the rule as the wordmark
+   does from the panel's top edge. */
+.mobile-menu {
+  --menu-inset: 32px;
+}
+
 /* "Jenna Ammerall." — matches the header logo but white (Figma 123:3770) */
 .mobile-menu-name {
-  padding: 32px 16px 0;
+  padding: var(--menu-inset) 16px 0;
   font-family: var(--font-heading);
   font-size: 1.25rem; /* 20px */
   font-weight: 700;
@@ -139,8 +146,8 @@
    below (padding-top), so the break reads as balanced rather than the block being
    flush-pushed to the panel's bottom. --- */
 .mobile-menu-mind {
-  margin-top: var(--gap-section); /* matches the padding-top below the hairline */
-  padding: var(--gap-section) 16px 90px;
+  margin-top: var(--menu-inset); /* matches the padding-top below the hairline */
+  padding: var(--menu-inset) 16px 90px;
   border-top: 1px solid #fff;
   display: flex;
   flex-direction: column;
