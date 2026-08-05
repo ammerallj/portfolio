@@ -39,8 +39,27 @@ REVEAL.ease), then the bar fades in — all CSS, reduced-motion exempt. The
 sticky header stays in the DOM, tucked above the viewport over the hero
 (js/main.js) and sliding in past the fold; at ≤480 the tuck is neutralized,
 the `.intro-bar` is hidden, and the floatie pill + header Contact trigger
-carry mobile nav. ≤1024 tiers are INTERIM (desktop composition, tighter
-insets) pending frames. The previous blob-hero landing is archived, fully
+carry mobile nav. **At ≤480 the header is `position: fixed` and FLOATS over the
+hero** so the field reaches the top of the screen — it is bare while the page
+rests at the top (`html.is-at-page-top`, a third pre-paint flag set in
+index.html's inline script beside `is-motion`/`is-loading` and maintained in
+`updateScrollEffects` ABOVE its `is-loading` return) and takes back the frosted
+cream glass on scroll. The BARE state is the added one, so no-JS keeps the
+legible bar. Because the header left the flow there, `.intro`'s phone height is
+`100dvh - 184px`, not `- 246px` — the 62px it used to eat came back off; both
+numbers preserve the same ~120px Work-card peek. The phone tier also
+art-directs the field (a 15% narrower crop, nudged +50px right / +40px down)
+and drops the headline/divider/bio `--hero-drop` via `transform`, which is why
+the hero box and the peek math are unaffected by that shift. **The phone tier
+owns its own hero geometry tokens** (`--hero-h`, `--hero-drop`, `--divider-y`,
+plus a `--field-bottom` that adds the flat `--field-nudge-y` back on): change
+`--hero-drop` alone to move the whole lockup, and the frost pane follows.
+That pane is re-derived at ≤480 rather than inherited — hero.css builds it out
+of `50dvh` assuming a full-height hero with the divider at its centre, and
+neither holds here. Watch the bio's contrast whenever the field shrinks: at a
+70% crop its last lines fell off the gradient onto near-cream (white type at
+1.11:1); 85% keeps them at ~1.6–2.3:1. ≤1024 tiers are INTERIM
+(desktop composition, tighter insets) pending frames. The previous blob-hero landing is archived, fully
 self-contained, in `archive/blob-hero-2026-08/`.
 
 ## Where each page area lives

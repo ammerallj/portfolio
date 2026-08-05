@@ -403,6 +403,40 @@
     --gap-section: 64px;
     --gap-heading: 40px;
     --page-gutter: 16px;
+
+    /* Hero field, phone size: 85% of the 1821.6px the artwork is frozen at
+       everywhere else (hero.css) — a 15% narrower crop, so less of the gradient
+       is blown up off-screen. A bare px value, not the base token's max(), on
+       purpose: 126.5vw can't reach 1548px at any width in this tier, so the
+       max() would only ever resolve to the px anyway, and writing it plainly
+       keeps the field genuinely LOCKED — same artwork size at 320 as at 480.
+       ⚠️ 15%, walked back from a first pass at 30%: at 70% the artwork's bottom
+       landed at 705px and the bio's last two lines fell off the gradient onto
+       near-cream — white type at 1.11:1. 85% carries the gradient past the bio
+       again. Shrink further and re-check that contrast before shipping. */
+    --field-w: 1548.4px;
+
+    /* The flat downward nudge on .page-field (transform below). Declared as a
+       token because --field-bottom has to carry it too: hero.css derives that
+       from the width alone (× 0.53734, which bakes in the -12% PERCENTAGE
+       shift), so an additive px offset has to be added back or the frost pane
+       stops short of the artwork's real bottom edge and leaves an unfrosted
+       tail. Change the nudge here and both follow. */
+    --field-nudge-y: 40px;
+    --field-bottom: calc(var(--field-w) * 0.53734 + var(--field-nudge-y));
+
+    /* The hero's geometry at this tier, named once so the frost pane can be
+       derived from it instead of re-deriving it. --hero-h is the short hero
+       (see the card-peek note below); --hero-drop is how far the whole lockup
+       — headline, divider, bio, and the pane with them — is pushed down from
+       the composed centre; --divider-y is the resulting distance of the divider
+       from the PAGE top, which is the same thing as its distance from .intro's
+       top here because the header is fixed and .intro starts at 0.
+       ⚠️ --hero-drop is the ONE number to change to move the lockup: the
+       transform, the pane's start, and the pane's reach all read from it. */
+    --hero-h: calc(100dvh - 184px);
+    --hero-drop: 70px;
+    --divider-y: calc(var(--hero-h) / 2 + var(--hero-drop));
   }
 
   /* LANDING hero interim on phones: full-viewport field, smaller headline,
@@ -422,16 +456,75 @@
     display: none;
   }
 
+  /* The gradient field is CENTERED on the viewport by default (translateX(-50%)
+     on a box frozen at 1821.6px wide, so a phone just crops more of it). Nudge
+     that crop 50px to the RIGHT. A fixed px offset, not a %, so it is locked:
+     the field's width is already frozen at this tier, so the shift lands on the
+     same pixel of artwork at 375 as it does at 480. The Y is the base -12%
+     (hero.css) plus --field-nudge-y — the % rides the artwork's own height so
+     it already shrank with the narrower field above; the nudge is a fixed
+     offset on top of wherever that lands. */
+  .page-field {
+    transform: translateX(calc(-50% + 50px))
+               translateY(calc(-12% + var(--field-nudge-y)));
+  }
+
+  /* Headline, divider and bio all drop --hero-drop together — a TRANSFORM, so
+     the hero's own box, the card peek below it and the header math are all
+     untouched; only the composition inside the fold moves. */
+  .intro-top,
+  .intro-divider,
+  .intro-band {
+    transform: translateY(var(--hero-drop));
+  }
+
+  /* The frost pane starts at the moved divider and is re-derived here rather
+     than inherited. hero.css builds it out of 50dvh on the assumption that the
+     hero is a full 100dvh with the divider at its centre — neither holds at
+     this tier (short hero + the drop above), so its reach came up short of the
+     artwork and left an unfrosted tail of gradient behind Selected Work. In
+     terms of the tokens: run from the divider to the field's bottom edge, but
+     never stop above the hero's own bottom. */
+  .intro::after {
+    top: var(--divider-y);
+    height: max(
+      calc(var(--hero-h) - var(--divider-y)),
+      calc(var(--field-bottom) - var(--divider-y))
+    );
+  }
+
+  /* The header floats OVER the hero at this tier instead of stacking above it,
+     so the field reaches the top of the screen: fixed takes it out of flow, and
+     at rest it drops the cream glass entirely. `html.is-at-page-top` is the
+     TRANSPARENT state (set pre-paint in index.html's inline script, maintained
+     in updateScrollEffects), so scrolling — or JS never loading — leaves the
+     frosted bar that header.css already defines. :not(.is-over-dark) keeps the
+     blue Contact inversion winning if it ever fires here. */
+  .site-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+  }
+  html.is-at-page-top .site-header:not(.is-over-dark) {
+    background-color: transparent;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
   /* The hero ends SHORT of the fold so the first Work card peeks above it —
      the phone's scroll cue (there's no bottom bar at this tier), and it puts
      the card in view early enough for its reveal to play as the reader
      scrolls rather than firing off-screen.
-     The peek has to clear the section's TOP PADDING to show anything: 62px
-     header + 64px padding + ~120px of visible card = 246. (At 160 the whole
-     "peek" was empty padding — cream, no card.) The FIELD is unaffected: it
-     keeps its own size and bleeds on past, which is the intended look. */
+     The peek has to clear the section's TOP PADDING to show anything: 64px
+     padding + ~120px of visible card = 184. (At 160 the whole "peek" was empty
+     padding — cream, no card.) The FIELD is unaffected: it keeps its own size
+     and bleeds on past, which is the intended look.
+     ⚠️ Was 246 while the header sat in flow above the hero and ate 62px of the
+     fold; the header is fixed now (rule above), so the hero starts at the page
+     top and those 62 come back off — same ~120px of card showing. */
   .intro {
-    height: calc(100dvh - 246px);
+    height: var(--hero-h);
   }
 
   /* The desktop 104px (64 + 40 for the hero's frosted dissolve) is too deep to

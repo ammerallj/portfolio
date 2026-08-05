@@ -197,6 +197,15 @@ function easeIn(t) {
 }
 
 function updateScrollEffects() {
+  // Resting at the very top of the page. The ≤480 header floats over the hero
+  // there and drops its cream glass so the gradient field runs to the top of
+  // the screen (responsive.css, 480 tier); everywhere else the class is inert.
+  // Set pre-paint by the inline <head> script and maintained here — ABOVE the
+  // is-loading return, because the header is on screen throughout the load
+  // reveal and must not sit frosted until it finishes. The BARE state is the
+  // added one, so a no-JS visitor keeps the legible frosted bar.
+  html.classList.toggle('is-at-page-top', window.scrollY <= 0);
+
   // While the load reveal is in progress, let CSS control opacity
   // instead of stomping it with an inline style here
   if (html.classList.contains('is-loading')) return;

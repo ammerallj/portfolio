@@ -159,7 +159,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@200;500;700&family=Inter:wght@400..700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=436" />
+  <link rel="stylesheet" href="style.css?v=441" />
   <!-- The landing field is the LCP element — start fetching it immediately. -->
   <link rel="preload" as="image" href="images/hero-bkg.jpg?v=4" fetchpriority="high" />
   <!-- Pre-paint flags, set only when JS runs:
@@ -168,7 +168,13 @@
        • is-loading — hides content for the intro load-reveal. Kept OUT of the
          static <html> tag on purpose: if JS is disabled the class is never
          added, so the page is fully visible instead of a blank screen. The
-         failsafe timeout also reveals everything if main.js never runs. -->
+         failsafe timeout also reveals everything if main.js never runs.
+       • is-at-page-top — the ≤480 header floats over the hero and is bare while
+         the page rests at the top (responsive.css). Set HERE, pre-paint, not
+         from main.js: the header transitions its background, so applying it
+         later would show a cream bar fading out after the hero had already
+         played. Same no-JS logic as above — without JS it is never added and
+         the header simply keeps its frosted glass. -->
   <script>
     (function () {
       var root = document.documentElement;
@@ -177,6 +183,7 @@
           root.classList.add('is-motion');
         }
       } catch (e) {}
+      if (!window.scrollY) root.classList.add('is-at-page-top');
       root.classList.add('is-loading');
       setTimeout(function () { root.classList.remove('is-loading'); }, 4000);
     })();
@@ -514,6 +521,6 @@
   </div>
   <div class="wave-cursor" id="wave-cursor" aria-hidden="true">👋</div>
 
-  <script src="js/main.js?v=201" defer></script>
+  <script src="js/main.js?v=203" defer></script>
 </body>
 </html>
