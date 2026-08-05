@@ -1,138 +1,351 @@
 /* ============================================================
-   INTRO SECTION
+   INTRO SECTION — "Making products make sense." landing
+   (Figma 339:3745, promoted from lab/hero2.html 2026-08-03; the
+   previous blob hero is archived in archive/blob-hero-2026-08/.)
+
+   Layers:
+   1. .page-field — the gradient-field image, a PAGE background:
+      absolutely positioned at the document top at z:-1, never
+      clipped, so whatever extends past the hero fold bleeds on
+      behind Selected Work and dissolves into the cream page.
+   2. .intro — a 100dvh stage over it: statement (top half) →
+      full-width hairline divider at the exact center → frosted
+      band (bottom half) with the bio in its right column → the
+      landing nav bar along the bottom edge.
+
+   Load choreography (all CSS, no JS dependency): the divider
+   "emits" the headline upward and the bio downward — each masked
+   at the divider by its own region's overflow — then the bar
+   fades in. Reduced motion: everything simply shows.
    ============================================================ */
+
+/* main becomes a stacking context so the negative-z field paints INSIDE it —
+   above the body's opaque cream background, below all of main's content.
+   (Without this, body's own background paints over any z:-1 element: block
+   backgrounds come after negative-z descendants in the root paint order.) */
+main {
+  position: relative;
+  z-index: 0;
+}
+
+.page-field {
+  position: absolute;
+  left: 50%;
+  /* Shifted up by 12% of the image's own height (20% up, then walked back
+     down 8%), so the color mass rides higher behind the headline while some
+     bleed past the fold survives. */
+  transform: translateX(-50%) translateY(-12%);
+  /* images/hero-bkg.jpg at 126.5vw, centered — 110vw zoomed a further 15%.
+     The overscan crops ~8vw each side (77.3vw tall at the asset's
+     1.6376:1). */
+  top: 0;
+  width: 126.5vw;
+  height: auto;
+  z-index: -1; /* under all in-flow content, above the body's cream */
+  pointer-events: none;
+}
+
+/* --field-bottom: where the field's bottom edge lands — its 126.5vw width ÷
+   the asset's 1.6377 aspect, minus the 12% up-shift. ⚠️ Re-derive if
+   .page-field's zoom/shift changes. */
+:root {
+  --field-bottom: 67.97vw;
+}
 
 .intro {
   position: relative;
-  /* The hero fills the WHOLE viewport and spans up behind the 66px sticky header
-     (margin-top pulls it under the header, which overlays it as frosted glass).
-     This way the centered composition (blob + copy) centers on the true page
-     center, not just the area below the header. Floored at 760 so the content
-     isn't clipped on short screens. */
-  min-height: max(760px, 100dvh);
-  margin-top: -66px;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  /* (The old -66px header compensation is GONE: the sticky header is hidden
+     on the homepage now — the docking intro-bar is the nav — so the hero
+     starts at the true page top with no offset. On ≤480, where the header
+     returns, it simply sits in flow above the hero.) */
+}
+
+/* Frost PANE: one continuous sheet of glass from the divider down to the
+   field's bottom edge — through the hero's lower half AND onward BEHIND
+   Selected Work, covering the gradient's whole bleed with no seam. Overlay
+   only: Work stays where it is and, being later in the flow, paints crisply
+   ON TOP — the pane sits just above the field (z:-1) and below all content. */
+.intro::after {
+  content: '';
+  position: absolute;
+  top: 50%;   /* the divider line */
+  left: 0;
+  right: 0;
+  /* To the field's bottom, but never less than the hero's own lower half
+     (tall/narrow viewports, where the field ends above the fold). */
+  height: max(50dvh, calc(var(--field-bottom) - 50dvh));
+  pointer-events: none;
+  /* Lowest layer above the gradient: z:-1 joins the field's level in main's
+     stacking context, painting after it (above the gradient) but beneath ALL
+     in-flow content — the bio, the bar, and Selected Work stay crisp on top.
+     ⚠️ .intro must NOT get its own z-index/stacking context, or this pseudo
+     would trap above the hero's background instead. */
+  z-index: -1;
+  /* Frost strength: between the frame's 5.5px/0.05 and the heavy 10px/0.22. */
+  backdrop-filter: blur(7px);
+  -webkit-backdrop-filter: blur(7px);
+  background: rgba(251, 252, 248, 0.12);
+}
+
+/* ---- Upper region: the statement ---- */
+.intro-top {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: flex-end;
+  padding: 0 150px 40px; /* 150 inset; 40 to the divider */
+  /* The headline reveal's mask: this box's bottom edge IS the divider. */
   overflow: hidden;
 }
 
-/* Organic blue blob behind the copy (Figma node 258:479, desktop). Full-bleed
-   and centered: the path is authored in the 1440×760 frame with the silhouette
-   already centred, so the element just spans the viewport (capped at 1440) and
-   the shape lands centred at every width in the desktop range. The section clips
-   whatever overflows top/bottom. js/main.js swaps in the live/settling path. */
-.intro-blob {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  /* Centre the VISIBLE silhouette, not the 1440-wide canvas: the shape's bbox
-     sits off-centre inside its own viewBox, so initHero() measures that gap and
-     publishes it as --blob-dx/dy. Self-correcting for any path (incl. a Figma
-     re-sync); falls back to plain canvas-centring with no JS. */
-  transform:
-    translate(calc(-50% + var(--blob-dx, 0px)), calc(-50% + var(--blob-dy, 0px)))
-    translateZ(0);
-  /* FIXED at the 1440 frame size across the whole desktop band (≥1025) — the
-     blob does NOT scale with the viewport; on narrower desktops the section's
-     overflow:hidden crops its sides while the 40px/750px copy stays put. The
-     ≤1024 tiers size their own blobs. */
-  width: 1440px;
-  height: auto;            /* height follows the viewBox ratio (760/1440) */
-  max-width: none;
-  z-index: 0;
-  pointer-events: none;
-  color: var(--color-accent);
-}
-
-.intro-blob-path {
-  fill: currentColor;
-}
-
-/* Centered lockup inside the blob (Figma 258:497): a 750px block anchored on the
-   fold's center, copy left-aligned (ragged), CTA 60px below. max-width keeps it
-   inside a 56px page gutter on narrower desktops. */
-.intro-inner {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  /* The blob's SILHOUETTE is page-centred (see --blob-dx/dy above). Centring the
-     whole lockup on it would leave the COPY reading high, because the CTA hangs
-     80px below the text and pulls the column's balance point down past it. So
-     nudge the lockup down by ~half the CTA block (gap/2 + CTA height/2 ≈ 52px) —
-     that lands the claim+credential visually centred in the blob, with the CTA
-     sitting just below centre. (The ≤1024 tiers hide the CTA and re-anchor their
-     own copy, so this desktop-only nudge doesn't reach them.) */
-  transform: translate(-50%, calc(-50% + 52px));
-  z-index: 1;
-  /* 750px is the CONTENT width (Figma 258:497). The lockup is a centered fixed
-     block, not a page-gutter container, so cancel the site's base 56px gutter
-     padding it would otherwise inherit; max-width keeps a 56px gutter each side
-     on narrower desktops. */
-  padding-inline: 0;
-  width: 750px;
-  /* Keep the 750px block as long as it fits, letting the auto side margins shrink
-     to a 32px minimum before the block itself starts narrowing. */
-  max-width: calc(100% - 64px);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 80px; /* copy → CTA (Figma 258:497, claim-first revision) */
-}
-
-.intro-copy {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 48px; /* claim → credential (Figma 261:477, claim-first revision) */
-}
-
-/* Both hero lines share the type — Inter (body font), 40px, ragged-right. The
-   credential is roman (the h1); the positioning claim is italic (Figma 261:475).
-   Fluid down to 24px so the copy stays inside the blob on narrower desktops
-   until the ≤1024 tiers take over with their own frames. */
-.intro-headline,
-.intro-claim {
-  margin: 0;
-  font-family: var(--font-body);
-  font-weight: 400;
-  /* 40px held across the whole desktop band down to ~800px — the frames scale by
-     shrinking the SIDE MARGINS, not the type or the 750px block (1440 and 1280
-     are both 40px / 750px; it just holds as the viewport narrows). Below ~800 it
-     scales down as interim until the tablet/phone frames take over. */
-  font-size: clamp(24px, 5vw, 40px);
-  line-height: 1.15;
+.intro-headline {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: clamp(56px, 6.67vw, 96px); /* 96 @1440 */
+  line-height: 1;
   letter-spacing: -0.02em;
+  color: #fff;
+  max-width: 900px;
+  margin: 0;
+  /* Rise from behind the divider: --rise > the 40px divider gap engages the
+     clip (24px dip at 64). Ease = the motion system's REVEAL.ease. */
+  --rise: 64px;
+  animation: intro-headline-rise 1s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both;
+}
+
+@keyframes intro-headline-rise {
+  from { transform: translateY(var(--rise, 64px)); }
+  to { transform: translateY(0); }
+}
+
+.intro-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.65); /* full viewport width */
+}
+
+/* ---- Lower region: the bio's layout box ----
+   (Its GLASS lives on the .intro::after frost pane above, which spans from
+   the divider past the fold — one sheet, no band/pane seam. This element
+   only lays out the bio and masks its reveal.) */
+.intro-band {
+  flex: 0 0 50%; /* the divider sits at the viewport's vertical center */
+  padding: 40px 150px 0;
+  display: flex;
+  gap: 50px;
+  align-items: flex-start;
+  /* The bio reveal's mask: this box's top edge IS the divider. */
+  overflow: hidden;
+}
+
+/* Empty left column — the bio deliberately occupies only the right half. */
+.intro-band-spacer {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.intro-bio {
+  /* The site's shared right column (--width-right-column, global.css) — the
+     same measure as the Work card descriptions, nav block, and the About /
+     Contact right blocks. Was a flex half of the band's inner width, which
+     drifted from that convention (and from it at every width but 1440). */
+  flex: 0 0 var(--width-right-column);
+  min-width: 0;
+  font-size: 20px;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  color: #fff;
+  /* Mirror of the headline: descend from behind the divider. */
+  --rise: 64px;
+  animation: intro-bio-drop 1s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both;
+}
+
+@keyframes intro-bio-drop {
+  from { transform: translateY(calc(-1 * var(--rise, 64px))); }
+  to { transform: translateY(0); }
+}
+
+/* ---- The site nav: the hero's bottom bar, sticky ----
+   In flow AFTER the hero, pulled up into it: 14px pad + 36px row + 40px
+   bottom-gap = -90px margin-top lands the row 40px above the fold bottom;
+   +26px margin-bottom nets the flow delta to zero so Selected Work doesn't
+   move. Sticky top:0 → it rides up with the scroll and docks at the viewport
+   top for the rest of the page. */
+.intro-bar {
+  position: sticky;
+  top: 0;
+  z-index: 90; /* above section content; the ≤480 overlay tiers sit higher */
+  margin-top: -90px;
+  margin-bottom: 26px; /* nets the flow delta to zero (-90 + 64 + 26) */
+  padding: 14px 56px;
+  display: flex;
+  align-items: center;
+  gap: 120px;
+  /* Enters LAST: the divider reveals settle, then the bar fades in. */
+  animation: intro-bar-fade 0.6s ease-out 0.95s both;
+}
+
+/* The glass, on its own layer so it can fade: invisible while the bar rests
+   in the hero (the frame's bar is bare there), frosting in when docked.
+   opacity:0 skips painting entirely, so the blur costs nothing at rest. */
+.intro-bar::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  /* The original treatment: near-opaque cream + blur, a solid legible strip
+     (the melt experiment is retired — the deeper bottom padding above gives
+     the glass its breathing room instead). */
+  background-color: rgba(251, 252, 248, 0.9);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  opacity: 0;
+  transition: opacity 0.35s ease, background-color 0.35s ease;
+}
+
+.intro-bar.is-docked::before {
+  opacity: 1;
+}
+
+/* ---- Over the blue Contact panel: the bar inverts ----
+   Same idea the site header carries on the project pages (.is-over-dark in
+   header.css): once Contact slides under the docked bar, the cream glass
+   becomes the panel's own blue and everything on it goes white — including the
+   "Say hello" pill, which flips to a white pill with a black label. Solid
+   --color-accent (not a tint) so the strip merges into the panel with no ghost
+   of the white headings scrolling beneath. Toggled in js/main.js
+   (updateScrollEffects), alongside the header's copy of the state. */
+.intro-bar.is-over-dark::before {
+  background-color: var(--color-accent);
+  opacity: 1;
+}
+
+.intro-bar.is-over-dark .intro-bar-name {
   color: #fff;
 }
 
-.intro-claim {
-  font-style: italic;
+.intro-bar.is-over-dark .intro-bar-links a {
+  color: rgba(255, 255, 255, 0.75);
 }
 
-/* "See selected work ↓" (Figma 258:500). A link, not a button — it navigates
-   (main.js routes #-links through Lenis for the smooth scroll). White, since it
-   sits inside the blob. Underline on the label span only; the arrow hangs
-   outside it. */
-.intro-cta {
-  font-size: 24px;
+@media (hover: hover) {
+  .intro-bar.is-over-dark .intro-bar-links a:hover {
+    color: #fff;
+  }
+  .intro-bar.is-over-dark .intro-bar-links a:hover::before {
+    border-color: rgba(255, 255, 255, 0.7);
+  }
+}
+
+.intro-bar.is-over-dark .intro-bar-cta {
+  background: #fff;
+  color: #000;
+}
+
+.intro-bar.is-over-dark .intro-bar-cta:hover {
+  background: rgba(255, 255, 255, 0.75);
+}
+
+@keyframes intro-bar-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.intro-bar-name {
+  flex: 1 1 0;
+  min-width: 0;
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+  font-weight: 700;
   letter-spacing: -0.02em;
-  line-height: 1;
+  color: #000;
+  white-space: nowrap;
+  transition: color 0.35s ease;
+}
+
+.intro-bar-links {
+  flex: 0 0 450px;
+  display: flex;
+  align-items: center;
+}
+
+/* Group wrappers keep the anchors text-width so the hover chip hugs the
+   label — same structure and states as the site header's nav. */
+.intro-bar-group {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+}
+.intro-bar-group:nth-child(2) { justify-content: center; }
+.intro-bar-group:nth-child(3) { justify-content: flex-end; }
+
+.intro-bar-links a {
+  position: relative;
+  font-family: var(--font-ui);
+  font-size: 1rem;
+  letter-spacing: -0.01em;
+  line-height: 1.5;
+  color: var(--color-text-70);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 0.35s ease;
+}
+
+.intro-bar-links a::before {
+  content: '';
+  position: absolute;
+  inset: -7px -15px;
+  z-index: -1;
+  border: 1px solid transparent;
+  border-radius: 100px;
+  transition: background-color 0.35s ease, border-color 0.35s ease;
+  pointer-events: none;
+}
+
+@media (hover: hover) {
+  .intro-bar-links a:hover {
+    color: rgba(0, 0, 0, 0.9);
+  }
+  .intro-bar-links a:hover::before {
+    border-color: rgba(0, 0, 0, 0.75);
+  }
+}
+
+.intro-bar-cta-wrap {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Solid black pill, white label. */
+.intro-bar-cta {
+  display: inline-flex;
+  align-items: center;
+  height: 36px;
+  padding: 0 20px;
+  border-radius: 100px;
+  background: #000;
+  font-family: var(--font-ui);
+  font-size: 1rem;
+  letter-spacing: -0.01em;
   color: #fff;
   text-decoration: none;
   white-space: nowrap;
+  transition: background-color 0.35s ease, color 0.35s ease;
 }
 
-.intro-cta-label {
-  text-decoration: underline;
-  text-underline-position: from-font;
+.intro-bar-cta:hover {
+  background: rgba(0, 0, 0, 0.75);
 }
 
-.intro-cta:focus-visible .intro-cta-label {
-  opacity: 0.75;
-}
-
-/* True-hover devices only — on touch, tapped :hover sticks (see header.css) */
-@media (hover: hover) {
-  .intro-cta:hover .intro-cta-label {
-    opacity: 0.75;
+/* Reduced motion: no entrance choreography, everything simply shows. */
+@media (prefers-reduced-motion: reduce) {
+  .intro-headline,
+  .intro-bio,
+  .intro-bar {
+    animation: none;
   }
 }
 
@@ -140,32 +353,18 @@
 
 /* ============================================================
    SITE LOAD REVEAL
-   The blob plays its one-time entrance settle (js/main.js); the copy lockup
-   fades in over it, then the rest of the site fades in.
+   The hero runs its own CSS entrance above; is-loading (set
+   pre-paint on the homepage only) holds the rest of the page
+   back until main.js releases it, so the sections below don't
+   flash in before the hero's choreography starts.
    ============================================================ */
 
-/* The copy lockup + the rest of the page start hidden ONLY when the motion path
-   runs (is-loading is set pre-paint whenever JS runs and motion is allowed).
-   No-JS / reduced-motion visitors never get is-loading, so it's simply visible.
-   The blob itself is NOT hidden — it breathes/settles through the load. */
-html.is-loading .site-header,
-html.is-loading .intro-inner,
 html.is-loading .page-section,
 html.is-loading .site-footer {
   opacity: 0;
 }
 
-html.is-loading.is-text-revealed .intro-inner {
-  opacity: 1;
-  transition: opacity 0.5s ease;
-}
-
-html.is-revealing .site-header,
 html.is-revealing .page-section,
 html.is-revealing .site-footer {
   transition: opacity 0.6s ease;
 }
-
-/* (The .scroll-indicator mouse cue lived here until Jul 2026 — cut site-wide:
-   the desktop CTA and the tablet/phone card-peek own the "scroll" affordance.) */
-

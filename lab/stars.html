@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex" />
+  <title>Lab — NASA Starfield Hero</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@200;700&family=Inter:wght@400..700&display=swap" rel="stylesheet" />
+  <style>
+    /* ============================================================
+       LAB EXPERIMENT — particles.js "nasa" preset under the hero
+       copy (vincentgarreau.com/particles.js/#nasa). Self-contained:
+       no style.css, no js/main.js. Library loads from CDN, same
+       no-build pattern as Lenis/Motion on the live site.
+       ============================================================ */
+    :root {
+      --space: #08072e;         /* deep indigo space, kin to the accent */
+      --accent: #4A45FF;
+      --cream: #FBFCF8;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      background: var(--space);
+      font-family: 'Inter', system-ui, sans-serif;
+      overflow-x: hidden;
+    }
+
+    .lab-header {
+      position: fixed;
+      inset: 0 0 auto 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 56px;
+      z-index: 2;
+    }
+    .lab-name {
+      font-family: 'Hanken Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 20px;
+      letter-spacing: -0.02em;
+      color: var(--cream);
+      text-decoration: none;
+    }
+    .lab-nav { display: flex; gap: 180px; }
+    .lab-nav a {
+      font-size: 16px;
+      letter-spacing: -0.01em;
+      color: rgba(251, 252, 248, 0.7);
+      text-decoration: none;
+    }
+
+    .hero {
+      position: relative;
+      min-height: 100dvh;
+      overflow: hidden;
+    }
+    /* particles.js owns this layer; it injects its own <canvas>. */
+    #particles-js {
+      position: absolute;
+      inset: 0;
+    }
+
+    .hero-copy {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 660px;
+      max-width: calc(100% - 64px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 80px;
+      z-index: 1;
+      pointer-events: none; /* let the starfield feel the cursor... */
+    }
+    .hero-copy a { pointer-events: auto; } /* ...but keep the CTA clickable */
+    .claim {
+      width: 100%;
+      font-style: italic;
+      font-size: clamp(24px, 2.8vw, 40px);
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      color: #fff;
+    }
+    .cta {
+      font-size: 24px;
+      letter-spacing: -0.02em;
+      color: #fff;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .cta span { text-decoration: underline; text-underline-position: from-font; }
+    .cta:hover span { opacity: 0.75; }
+
+    .lab-note {
+      position: fixed;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 12px;
+      color: rgba(251, 252, 248, 0.4);
+      z-index: 2;
+    }
+  </style>
+</head>
+<body>
+
+  <header class="lab-header">
+    <a class="lab-name" href="../index.html">Jenna Ammerall.</a>
+    <nav class="lab-nav">
+      <a href="../index.html#work-section">Work</a>
+      <a href="../index.html#about">About</a>
+      <a href="../index.html#contact">Contact</a>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <div id="particles-js" aria-hidden="true"></div>
+    <div class="hero-copy">
+      <p class="claim">I design for products in transition &mdash; shaping how they change without losing what makes them work.</p>
+      <a class="cta" href="../index.html#work-section"><span>See selected work</span> &darr;</a>
+    </div>
+  </section>
+
+  <p class="lab-note">lab/stars.html — particles.js "nasa" preset experiment, not linked from the live site</p>
+
+  <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+  <script>
+    // The "nasa" preset from the particles.js demo: small white stars,
+    // slow random drift, twinkle via opacity animation, no linking lines.
+    // Hover "bubble" dims stars near the cursor; click "repulse" pushes
+    // them away. Skipped entirely for reduced-motion visitors (the page
+    // just shows the deep-space background), and if the CDN fails the
+    // hero still renders — the starfield is decoration, never structure.
+    (function () {
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      if (typeof particlesJS === 'undefined') return;
+      particlesJS('particles-js', {
+        particles: {
+          number: { value: 250, density: { enable: true, value_area: 800 } },
+          color: { value: '#ffffff' },
+          shape: { type: 'circle' },
+          opacity: {
+            value: 1,
+            random: true,
+            anim: { enable: true, speed: 1, opacity_min: 0, sync: false }
+          },
+          size: { value: 3, random: true, anim: { enable: false } },
+          line_linked: { enable: false },
+          move: {
+            enable: true,
+            speed: 1,
+            direction: 'none',
+            random: true,
+            straight: false,
+            out_mode: 'out',
+            bounce: false
+          }
+        },
+        interactivity: {
+          detect_on: 'canvas',
+          events: {
+            onhover: { enable: true, mode: 'bubble' },
+            onclick: { enable: true, mode: 'repulse' },
+            resize: true
+          },
+          modes: {
+            bubble: { distance: 250, size: 0, duration: 2, opacity: 0, speed: 3 },
+            repulse: { distance: 400, duration: 0.4 }
+          }
+        },
+        retina_detect: true
+      });
+    })();
+  </script>
+
+</body>
+</html>

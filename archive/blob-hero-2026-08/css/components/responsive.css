@@ -137,23 +137,49 @@
     --page-gutter: 24px;
   }
 
-  /* LANDING hero interim (no ≤1024 frames yet for the "Making products make
-     sense." landing — Figma 339:3745 is desktop-only so far): the desktop
-     composition holds with tighter insets and smaller type. The old blob-hero
-     tier rules retired with that landing (archive/blob-hero-2026-08/). */
-  .intro-top,
-  .intro-band {
-    padding-inline: 64px;
+  /* TABLET hero (Figma 265:501, 1024×1366 portrait canvas): an art-directed
+     layout, not the desktop centered one — the egg sits in the UPPER area
+     (painted y ≈ 110–700 of the canvas, js/main.js swaps in the 1024×1366
+     silhouette), the 32px lockup sits on the egg with the CREDENTIAL first
+     (the frame flips the desktop claim-first order), and the hero ends at
+     719px so the first Work card's content lands at y ≈ 783 (719 + the
+     section's 64px top padding) — fully in view at load on a portrait
+     tablet; it's also exempt from the reveal system there (js/main.js). */
+  .intro {
+    min-height: 719px;
   }
-  .intro-bar {
-    padding-inline: 24px; /* sticky bar: gutter is padding now, not offsets */
-    gap: 64px;
+
+  .intro-blob {
+    /* Top-anchored (not page-centered): the 1024×1366 canvas already places
+       the egg in the upper area, so map the canvas top to the hero's top and
+       render it 1:1. The canvas outruns the 719px hero; overflow clips it. */
+    top: 0;
+    transform: translate(-50%, 0) translateZ(0);
+    width: 1024px;
   }
-  .intro-bar-links {
-    flex-basis: 360px;
+
+  .intro-headline,
+  .intro-claim {
+    font-size: 32px;
   }
-  .intro-bio {
-    font-size: 18px;
+
+  /* Claim-first, matching desktop: "I design…" leads, the credential follows.
+     (The DOM is already claim-first, so no order override — this tier used to
+     flip to credential-first per the Figma frame; that flip was removed.) */
+
+  .intro-inner {
+    width: 600px;
+    /* Sit on the lockup's center in the frame (y 292 + 297/2 ≈ 440). */
+    top: 440px;
+    transform: translate(-50%, -50%);
+    /* This tier's frame keeps the original 60px copy→CTA gap — pin it
+       so the desktop base's claim-first 80px doesn't cascade down. */
+    gap: 60px;
+  }
+
+  .intro-copy {
+    /* Likewise the frame's 28px between the paragraphs (vs 48px desktop). */
+    gap: 28px;
   }
 
   .site-header-row {
@@ -197,32 +223,31 @@
     aspect-ratio: 1328 / 415;
   }
 
-  /* Footprints keeps its two columns (heading | links) at this tier and stacks at
-     768. Its gap needs no override here: the base clamp (sections.css) has already
-     scaled fluidly to its 48px floor by ~1025, matching the group step. */
-
-  /* The big content H2 (Work-card titles, Public Footprints, About Me) steps down
-     from its 64px desktop size here — 64px reads oversized once the cards stack
-     full-width, and it keeps long titles nearer one line. Continues to 32px at
-     the 480 tier, so the scale reads 64 → 48 → 32. */
-  .section-title {
-    font-size: 3rem; /* 48px */
-  }
-
-  /* About stays TWO-COLUMN here (photo | text) like Footprints — it stacks at
-     768, not 1024. The heading pull-up (text rides up level with "About Me.")
-     still applies, but the heading stepped down to 48px (3rem) at this tier, so
-     recompute the pull-up off 3rem instead of the desktop 4rem. The gap is the
-     fluid clamp in sections.css; the portrait photo1 keeps loading (its landscape
-     swap moved to ≤768 in index.html). */
+  /* Once stacked, this column gap stops being grid math and becomes real
+     vertical spacing — so it joins the scale here. */
   .about-layout {
-    --about-pullup: calc(3rem + var(--gap-group));
+    flex-direction: column;
+    gap: var(--gap-group);
   }
 
-  /* Contact keeps its two columns (Connect | On My Mind) at this tier like
-     Footprints / About — On My Mind stays in the fluid right column beside
-     Connect, which already narrows it to a readable measure so nothing overflows.
-     It stacks at 768 (see that tier). */
+  .about-left,
+  .about-right {
+    flex: 0 0 auto;
+    width: 100%;
+  }
+
+  /* Contact: stack the Connect / On My Mind blocks and drop the fixed 542px
+     column so the panel no longer overflows horizontally */
+  .contact-meta {
+    flex-direction: column;
+    gap: var(--gap-group);
+  }
+
+  .contact-meta-connect,
+  .contact-mind {
+    flex: 0 0 auto;
+    width: 100%;
+  }
 
   /* Project overview pages: every two-column block collapses at the same tier
      as Footprints / About / Contact above, and drops the fixed 542px column so
@@ -268,79 +293,72 @@
     gap: 24px;
   }
 
-  /* Footprints stacks here (heading over links). At portrait width the ~369px
-     link column leaves too little for the heading beside it, so it drops to one
-     column like the other two-column sections. (It stays two-column at 1024.) */
-  .footprints-layout {
-    flex-direction: column;
-    gap: var(--gap-group);
+  /* PORTRAIT-TABLET hero (Figma 277:5121, 768×760): the egg renders its 768
+     canvas 1:1, top-anchored (painted silhouette y ≈ 158–593), with the CYCLING
+     copy — one 32px slide at a time (js/main.js initHeroCycle covers ≤768) — in
+     a 584px slot centered on the egg. NO CTA; the hero ends at 596px so the
+     first Work card arrives at ~660 (596 + 64 section padding). */
+  .intro {
+    min-height: 596px;
   }
-  .footprints-left,
-  .footprints-right {
-    flex: 0 0 auto;
-    width: 100%;
+  .intro-blob {
+    top: 0;
+    transform: translate(-50%, 0) translateZ(0);
+    width: 768px;
   }
-
-  /* About stacks here too (was ≤1024, moved down with Footprints so both stay
-     two-column at 1024). Once stacked, the column gap becomes real vertical
-     spacing (joins the scale), the desktop heading pull-up no longer applies, and
-     the photo goes full-width landscape — the <picture> in index.html serves the
-     landscape about-photo2.jpg at this same ≤768 cut, so the box takes that
-     asset's frame instead of the portrait's. Keep the two breakpoints in step. */
-  .about-layout {
-    flex-direction: column;
-    gap: var(--gap-group);
-    margin-top: 0;
+  .intro-inner {
+    /* The copy slot's center in the frame (y 312 + 111/2 ≈ 368). */
+    top: 368px;
+    transform: translate(-50%, -50%);
+    width: 584px;
   }
-  .about-left,
-  .about-right {
-    flex: 0 0 auto;
-    width: 100%;
-  }
-  .about-left {
-    margin-top: 0;
-  }
-  .about-photo {
-    max-width: none;
-    aspect-ratio: 858 / 600;
+  .intro-cta {
+    display: none; /* the arriving Work card is the scroll cue from here down */
   }
 
-  /* Contact stacks here too (Connect over On My Mind), matching Footprints/About
-     — it stays two-column at 1024 and drops to one at portrait width. */
-  .contact-meta {
-    flex-direction: column;
-    gap: var(--gap-group);
+  /* Paragraph cycling (≤768, JS-gated — js/main.js adds is-hero-cycling and
+     rotates is-cycle-active / is-cycle-exit). Grid stacks both slides in one
+     cell so the container holds the taller slide's height and each slide
+     centers in it. The hand-off is SEQUENTIAL, echoing the site's data-reveal
+     rise: the outgoing line lifts away and fades, then the incoming one rises
+     in from below (its transition-delay covers the exit). The idle base state
+     has no transition, so a slide that just exited snaps back below the slot
+     while invisible, ready for its next entrance. Without JS / with reduced
+     motion no class ever appears and the paragraphs simply stack. */
+  html.is-hero-cycling .intro-copy {
+    display: grid;
+    align-items: center;
   }
-  .contact-meta-connect,
-  .contact-mind {
-    flex: 0 0 auto;
-    width: 100%;
+  html.is-hero-cycling .intro-headline,
+  html.is-hero-cycling .intro-claim {
+    grid-area: 1 / 1;
+    opacity: 0;
+    transform: translateY(14px);
+    transition: none;
+  }
+  html.is-hero-cycling .is-cycle-active {
+    opacity: 1;
+    transform: translateY(0);
+    transition:
+      opacity 0.5s ease 0.45s,
+      transform 0.55s cubic-bezier(0.22, 0.61, 0.36, 1) 0.45s;
+  }
+  html.is-hero-cycling .is-cycle-exit {
+    opacity: 0;
+    transform: translateY(-14px);
+    transition:
+      opacity 0.45s ease,
+      transform 0.5s cubic-bezier(0.55, 0.06, 0.68, 0.19);
   }
 
-  /* LANDING hero interim: the bio takes the full band width (spacer
-     collapses) and the bar tightens. */
-  .intro-top,
-  .intro-band {
-    padding-inline: 40px;
-  }
-  .intro-band-spacer {
-    display: none;
-  }
-  .intro-bar {
-    gap: 40px;
-  }
-  .intro-bar-links {
-    flex-basis: 280px;
-  }
-
-  /* Portrait tablet + phone work cards run Image -> Title -> Description
-     (their frames lead with the image; the wrappers are already flattened by
-     the 1024 tier's display:contents, which is what makes this interleaving
-     possible). The 1024 tier's title-first rhythm resets too. (The meta line
-     that used to sit between image and title was removed 2026-08-04.) */
+  /* Portrait tablet + phone work cards run Image -> Meta -> Title ->
+     Description (their frames lead with the image; the wrappers are already
+     flattened by the 1024 tier's display:contents, which is what makes this
+     interleaving possible). The 1024 tier's title-first rhythm resets too. */
   .work-card-image-link { order: 0; margin-top: 0; }
-  .section-title { order: 1; }
-  .work-card-description { order: 2; }
+  .work-card-meta { order: 1; }
+  .work-card-title { order: 2; }
+  .work-card-description { order: 3; }
 
   /* (.work-card's stacked gap is --gap-content, set in the 1024 tier and
      inherited here — the card reflows the same way at both portrait sizes.) */
@@ -356,6 +374,19 @@
 
   .work-card-image {
     height: 220px; /* fixed strip again — overrides the 1024 tier's ratio */
+  }
+
+  /* About tab panel steps to the same 24px radius as the cards above,
+     with lighter padding for the narrower column. */
+  .about-tab-panel {
+    border-radius: 24px;
+    padding: 2rem 1.5rem;
+  }
+
+  /* Both panels' two-column layouts stack — neither the long link titles
+     nor the toolkit rows fit as columns at portrait widths. */
+  .about-tab-panel--columns {
+    flex-direction: column;
   }
 
   .about-skills-list {
@@ -387,43 +418,61 @@
     --page-gutter: 16px;
   }
 
-  /* LANDING hero interim on phones: full-viewport field, smaller headline,
-     full-width bio. The landing's bottom bar is HIDDEN here — the ≤480 tier
-     already has its own nav system (the bottom floatie pill for Work/About +
-     the header's Contact trigger), and two bottom bars would collide — so the
-     sticky header also stays visible over the hero at this tier (the tuck is
-     neutralized below). */
-  .intro-top,
-  .intro-band {
-    padding-inline: 16px;
+  /* MOBILE hero (Figma 272:432, 375): a compact egg top-anchored in the upper
+     area (js/main.js swaps in the 375 silhouette — painted y ≈ 87–316, center
+     201), 17px copy inside it, NO CTA, and the hero ends at 336px (20px below
+     the egg) so the first Work card sits at ~352 (336 + the section's reduced
+     16px top padding, below) — image AND title in the first view; the card is
+     the scroll affordance.
+     The two paragraphs CYCLE to save space: js/main.js (initHeroCycle) adds
+     is-hero-cycling + rotates is-cycle-active, and the rules below overlay the
+     two slides and crossfade them. Without JS / with reduced motion the class
+     never appears and both paragraphs simply stack (they still fit the egg). */
+  .intro {
+    min-height: 336px;
   }
-  .intro-headline {
-    font-size: 44px;
+
+  /* Pull Selected Work up under the egg so the first card's TITLE (not just
+     its image) lands in the initial viewport (~613–677 on the 375 frame).
+     Top padding only — bottom keeps the 64px section rhythm. */
+  #work-section {
+    padding-top: 16px;
   }
-  .intro-bio {
+  .intro-blob {
+    /* Top-anchored (not page-centered): the 375×844 canvas already places the
+       egg in the upper area, so map the blob's top to the hero's top. Width
+       renders the frame 1:1. */
+    top: 0;
+    transform: translate(-50%, 0) translateZ(0);
+    width: 375px;
+  }
+  .intro-inner {
+    /* Sit on the egg's painted center (y 201 of the fixed-size blob). */
+    top: 201px;
+    transform: translate(-50%, -50%);
+    width: 311px;
+  }
+  .intro-copy {
+    gap: 12px;
+  }
+  .intro-cta {
+    display: none; /* the visible first Work card is the scroll cue here */
+  }
+  .intro-headline,
+  .intro-claim {
     font-size: 17px;
   }
-  .intro-band-spacer {
-    display: none;
-  }
-  .intro-bar {
-    display: none;
-  }
-  /* The homepage header comes BACK at this tier — it carries the mobile nav
-     (Contact trigger + menu); the docking intro-bar above is desktop-only. */
-  body:has(.intro) .site-header {
-    display: block;
-  }
-  .site-header.is-tucked {
-    transform: none;
-  }
+
+  /* (Paragraph-cycling rules live in the 768 tier above and cascade down.) */
 
   /* Headlines step down to 32px on phones (from their 40px floor / clamp).
      Covers Work card titles, the Public Footprints section title, and the
      About + Contact headings (the last two otherwise bottom out at 2.5rem). */
-  .section-title,
+  .work-card-title,
   .about-name,
   .contact-email,
+  .project-title,
+  .project-block-title,
   .next-case-title {
     font-size: 2rem;
   }
@@ -495,6 +544,9 @@
   .work-card-image {
     height: 201px; /* Figma (radius stays 24px from the 768 tier) */
   }
+  .work-card-meta {
+    font-size: 12px; /* Figma (down from the 13px shared eyebrow) */
+  }
   .work-card-description {
     font-size: 17px; /* Figma */
   }
@@ -503,7 +555,7 @@
      here is the photo, not text, and an image edge needs less separation from
      a title than a text block does — 40 left it floating. Contact keeps the
      full 40 because text follows it. */
-  #about-heading {
+  .about-name {
     margin-bottom: var(--gap-content);
   }
 

@@ -33,25 +33,9 @@ if (siteName && siteName.getAttribute('href') === '#') {
 // here ever runs to clear it.
 const navSections = [
   { link: navWork, el: document.getElementById('work-section') },
-  { link: document.querySelector('.site-nav-bar a[href="#footprints"]'), el: document.getElementById('footprints') },
   { link: document.querySelector('.site-nav-bar a[href="#about"]'), el: document.getElementById('about') },
   { link: document.querySelector('.site-nav-bar a[href="#contact"]'), el: document.getElementById('contact') },
 ].filter(s => s.link && s.el);
-
-// The landing's own bottom bar is the desktop nav — spy it the same way (the
-// site-header nav above only exists on ≤480 / project pages).
-const introBarSections = [
-  { sel: '#work-section', id: 'work-section' },
-  { sel: '#footprints', id: 'footprints' },
-  { sel: '#about', id: 'about' },
-  { sel: '#contact', id: 'contact' },
-]
-  .map(({ sel, id }) => ({
-    link: document.querySelector(`.intro-bar-links a[href="${sel}"], .intro-bar-cta[href="${sel}"]`),
-    el: document.getElementById(id),
-  }))
-  .filter(s => s.link && s.el);
-navSections.push(...introBarSections);
 
 const siteHeader = document.querySelector('.site-header');
 
@@ -79,7 +63,7 @@ const siteFooter = document.querySelector('.site-footer');
 const darkPanel = document.getElementById('contact');
 const contactSection = darkPanel;
 const intro = document.querySelector('.intro');
-const introBar = document.querySelector('.intro-bar'); // landing nav bar (homepage only)
+const introInner = document.querySelector('.intro-inner');
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
 // The rest of the site stays hidden through the one-time hero reveal (scribble
@@ -103,23 +87,238 @@ function revealSite() {
 }
 
 // ============================================================
-// LANDING HERO — "Making products make sense." (Figma 339:3745). The hero's
-// entrance is pure CSS (hero.css: the divider emits the headline/bio, then
-// the bar fades in); this controller only runs the page-level load reveal.
-// The previous blob-hero engine (BLOBS geometry, morph/settle loop, hover
-// push, paragraph cycling) is archived with the old landing in
-// archive/blob-hero-2026-08/js/main.js.
+// LIVING HERO — the blob stays the exact Figma silhouette but flows like a
+// fluid, and the type slowly reflows inside it. Progressive enhancement:
+// reduced-motion / no-JS visitors get the static blob + static headline via
+// CSS; this controller just reveals the site.
 // ============================================================
-function initHero() {
-  // Project pages have no hero — and, unlike the homepage, never set
-  // `is-loading` in their inline <head> script, so there is no load-reveal
-  // to run there.
-  if (!intro) return;
-  startReveal();
+
+// Per-breakpoint blob geometry, pulled from the Figma frames. Each entry is a
+// 4-anchor closed path in its own frame's viewBox (vw×vh): A = anchors, C1[k] =
+// anchor k's outgoing handle, C2[k] = anchor k+1's incoming handle. The morph
+// swaps the active set + the SVG viewBox at the breakpoints (matching the CSS
+// tiers), so every tier gets its own correctly-shaped/sized blob rather than a
+// scaled desktop one. The CSS sizes the element to vw×vh so it renders 1:1.
+const BLOBS = [
+  // Mobile (Figma 272:433, 375×844): a compact egg in the UPPER area — the
+  // cycling copy sits in it, the first Work card is fully in view below.
+  // Silhouette bbox x ~14–359, y ~87–316 (painted center ~201 — the CSS pins
+  // .intro-inner there).
+  { max: 480, vw: 375, vh: 844,
+    A:[[346.353,161.649],[69.154,109.489],[60.601,278.447],[326.125,266.869]],
+    C1:[[328.97,126.764],[10.521,144.715],[205.654,348.342],[367.811,227.346]],
+    C2:[[171.722,47.87],[-15.002,242.018],[284.439,306.392],[363.734,196.535]] },
+  // Portrait tablet (Figma 277:5122, 768×760): a mid-size egg, top-anchored —
+  // the cycling 32px copy sits on its center (painted y ≈ 158–593), no CTA.
+  { max: 768, vw: 768, vh: 760,
+    A:[[688.061,300.266],[161.719,201.226],[145.478,522.039],[649.652,500.057]],
+    C1:[[655.055,234.025],[50.387,268.111],[420.903,654.754],[728.805,425.011]],
+    C2:[[356.472,84.223],[1.924,452.867],[570.499,575.103],[721.065,366.506]] },
+  // Landscape tablet (Figma 265:502, 1024×1366 portrait canvas): the egg sits
+  // in the UPPER area (painted y ≈ 110–700), copy inside it, and the first
+  // Work card is fully in view below (card content at y 783 in the frame).
+  // Covers the 769–1024 band; the CSS top-anchors this canvas at 1:1.
+  { max: 1024, vw: 1024, vh: 1366,
+    A:[[892.259,320.768],[238.565,197.763],[218.396,596.2],[844.558,568.898]],
+    C1:[[851.269,238.499],[100.296,280.832],[560.461,761.026],[942.862,475.695]],
+    C2:[[480.441,52.45],[40.108,510.292],[746.253,662.102],[933.249,403.036]] },
+  // Laptop (Figma 265:483 @1280 / 265:521 @1025 — those two frames share ONE
+  // path, identical coordinates ±112px of x): the frames keep this silhouette
+  // ~viewport-centered at a constant size, so the coordinates below are the
+  // exact 1280-canvas path translated +91.65px in x to put the silhouette's
+  // center on the 1440 canvas center — the centered element then lands it
+  // frame-true at every width in the band. Fixed size; sides crop as the
+  // viewport narrows.
+  { max: 1439, vw: 1440, vh: 760,
+    A:[[1152.99,295.5],[403.368,154.455],[380.223,611.402],[1098.28,580.07]],
+    C1:[[1105.99,201.152],[244.803,249.727],[772.485,800.421],[1211.02,473.176]],
+    C2:[[680.745,-12.204],[175.773,512.884],[985.546,686.964],[1199.99,389.848]] },
+  // Desktop (Figma 258:479, 1440×760): the big centred egg (drawn very slightly
+  // wider/shorter than the laptop one — ≤1.5%, invisible at the swap).
+  { max: Infinity, vw: 1440, vh: 760,
+    A:[[1159.15,272.474],[373.882,169.788],[372.189,627.318],[1095.95,561.979]],
+    C1:[[1101,184],[219.966,272.39],[772.866,797.738],[1203.54,449.916]],
+    C2:[[643.129,-9.69],[163.354,538.495],[988.356,674.041],[1217.31,360.947]] },
+];
+function blobForWidth(w) {
+  for (const b of BLOBS) if (w <= b.max) return b;
+  return BLOBS[BLOBS.length - 1];
 }
 
-// Reveal sequence. Reduced motion: just show everything. Motion: the hero runs
-// its CSS entrance while the rest of the site holds, then fades in.
+// Emit the closed cubic-bezier `d` for a blob, with optional per-anchor offsets.
+function blobPathD(b, o) {
+  o = o || [[0, 0], [0, 0], [0, 0], [0, 0]];
+  let d = `M${round2(b.A[0][0] + o[0][0])} ${round2(b.A[0][1] + o[0][1])}`;
+  for (let s = 0; s < 4; s++) {
+    const a = s, z = (s + 1) % 4;
+    d += `C${round2(b.C1[s][0] + o[a][0])} ${round2(b.C1[s][1] + o[a][1])} ` +
+         `${round2(b.C2[s][0] + o[z][0])} ${round2(b.C2[s][1] + o[z][1])} ` +
+         `${round2(b.A[z][0] + o[z][0])} ${round2(b.A[z][1] + o[z][1])}`;
+  }
+  return d + 'Z';
+}
+
+function initHero() {
+  // Project pages have no hero — and, unlike the homepage, never set `is-loading`
+  // in their inline <head> script, so there is no load-reveal to run here.
+  if (!intro) return;
+
+  const blobSvg = document.querySelector('.intro-blob');
+  const blobPath = document.querySelector('.intro-blob-path');
+
+  // Centre the VISIBLE silhouette, not the canvas. The path's bbox is not
+  // centred inside its own viewBox (the shape is bottom-heavy), so centring the
+  // <svg> box leaves the blob looking low/off. Measure the gap between the
+  // element's centre and the path's centre and publish it as CSS vars for
+  // hero.css to correct. Measured from the RESTING path (called right after it's
+  // set) so the settle animation never shifts it, and it's idempotent — moving
+  // the element moves both rects together, so the delta is invariant.
+  function centerSilhouette() {
+    if (!blobSvg || !blobPath) return;
+    try {
+      const s = blobSvg.getBoundingClientRect();
+      const p = blobPath.getBoundingClientRect();
+      if (!s.width || !p.width) return;
+      blobSvg.style.setProperty('--blob-dx', `${round2((s.left + s.width / 2) - (p.left + p.width / 2))}px`);
+      blobSvg.style.setProperty('--blob-dy', `${round2((s.top + s.height / 2) - (p.top + p.height / 2))}px`);
+    } catch (e) { /* not laid out yet — the 0px fallbacks in hero.css apply */ }
+  }
+
+  // Active tier's blob; set its viewBox + resting shape up front so reduced-
+  // motion (and the first paint) get the right blob for the current breakpoint.
+  let blob = blobForWidth(window.innerWidth);
+  if (blobSvg) blobSvg.setAttribute('viewBox', `0 0 ${blob.vw} ${blob.vh}`);
+  if (blobPath) blobPath.setAttribute('d', blobPathD(blob));
+  centerSilhouette();
+  window.addEventListener('resize', () => {
+    const b = blobForWidth(window.innerWidth);
+    if (b === blob) return;
+    blob = b;
+    if (blobSvg) blobSvg.setAttribute('viewBox', `0 0 ${b.vw} ${b.vh}`);
+    // Repaint the new tier's resting shape. During the brief settle window the
+    // morph loop overwrites this next frame (seamless); once settled — or under
+    // reduced motion — this IS what keeps the blob correct across breakpoints.
+    if (blobPath) blobPath.setAttribute('d', blobPathD(b));
+    centerSilhouette();   // each tier's path has its own bbox offset
+  });
+
+  startReveal();
+  if (reducedMotion.matches || !blobPath) return;
+
+  // ---- Blob morph — a lively entrance easing into a PERPETUAL subtle idle --
+  // The blob breathes noticeably as the page loads, then eases down to a very
+  // subtle continuous drift and keeps living — never freezing. Each anchor
+  // drifts on its own slow 2D path carrying its two handles (tangent preserved,
+  // no kinks); amplitude is a fraction of the ACTIVE blob's width so it looks
+  // the same per tier. The two sine frequencies are incommensurate, so the
+  // motion never visibly repeats. Paused off-screen / hidden-tab below.
+  const AMP_FRAC = 14 / 1440;         // entrance amplitude, ~1% of width
+  const IDLE_FRAC = 0.3;              // idle floor: 30% of entrance (~4px @1440)
+  const w1 = (2 * Math.PI) / 26, w2 = (2 * Math.PI) / 34;
+  // Envelope (seconds): ease amplitude 0->1, hold lively, ease down to the idle
+  // floor — then hold that floor forever. Tune these to change how long the
+  // hero's entrance "lives" before quieting down.
+  const RAMP_IN = 1.5, HOLD = 2.0, RAMP_OUT = 2.5;
+  const SETTLE_END = RAMP_IN + HOLD + RAMP_OUT;
+  const smoothstep = (r) => r * r * (3 - 2 * r);
+  const startT = performance.now();
+  let rafId = 0, running = false;
+
+  function drift(a, t, amp) {
+    return [
+      amp * (0.6 * Math.sin(w1 * t + a * 1.3) + 0.4 * Math.sin(w2 * t + a * 2.1 + 0.5)),
+      amp * (0.6 * Math.sin(w1 * t + a * 1.9 + 1.0) + 0.4 * Math.sin(w2 * t + a * 0.7 + 2.0)),
+    ];
+  }
+
+  // Amplitude over time: rise, hold at full, ease down to the idle floor, stay.
+  function envelope(t) {
+    if (t <= RAMP_IN) return smoothstep(t / RAMP_IN);
+    if (t <= RAMP_IN + HOLD) return 1;
+    if (t < SETTLE_END) return 1 - (1 - IDLE_FRAC) * smoothstep((t - RAMP_IN - HOLD) / RAMP_OUT);
+    return IDLE_FRAC;
+  }
+
+  // ---- Hover morph — the egg yields under the cursor (fine pointers only) --
+  // A gaussian push composed with the idle drift: anchors near the pointer ease
+  // away from it, so the edge under the cursor flexes while the far side holds.
+  // hoverK eases the whole effect in/out (enter/leave never snaps) and each
+  // anchor's offset is lerped per-frame, so quick mouse sweeps read as the egg
+  // lagging softly behind the cursor rather than twitching.
+  const finePointer = window.matchMedia('(pointer: fine)');
+  const HOVER_PUSH_FRAC = 16 / 1440;   // max push ≈ 1.1% of the blob's width
+  const HOVER_SIGMA_FRAC = 0.24;       // falloff radius vs the blob's width
+  const hover = { x: 0, y: 0, over: false };
+  let hoverK = 0;
+  const hoverOff = [[0, 0], [0, 0], [0, 0], [0, 0]];
+
+  function updateHover(e) {
+    const r = blobSvg.getBoundingClientRect();
+    if (!r.width) return;
+    // Pointer position in the blob's viewBox space (the element renders 1:1 or
+    // uniformly scaled, so one scale factor maps both axes).
+    const scale = blob.vw / r.width;
+    hover.x = (e.clientX - r.left) * scale;
+    hover.y = (e.clientY - r.top) * scale;
+    try {
+      hover.over = blobPath.isPointInFill(new DOMPoint(hover.x, hover.y));
+    } catch (err) {
+      // No isPointInFill (old engines): fall back to "anywhere over the hero".
+      hover.over = true;
+    }
+  }
+  if (finePointer.matches && blobSvg) {
+    intro.addEventListener('pointermove', updateHover);
+    intro.addEventListener('pointerleave', () => { hover.over = false; });
+  }
+
+  function frame(now) {
+    if (!running) return;
+    rafId = requestAnimationFrame(frame);
+    const t = (now - startT) / 1000;
+    const k = envelope(t);
+    const amp = k * blob.vw * AMP_FRAC;
+
+    // Ease the hover presence, then each anchor's push toward its target.
+    hoverK += ((hover.over ? 1 : 0) - hoverK) * 0.08;
+    const push = blob.vw * HOVER_PUSH_FRAC;
+    const sigma = blob.vw * HOVER_SIGMA_FRAC;
+    const o = [];
+    for (let i = 0; i < 4; i++) {
+      let tx = 0, ty = 0;
+      if (hoverK > 0.001) {
+        const vx = blob.A[i][0] - hover.x, vy = blob.A[i][1] - hover.y;
+        const dist = Math.hypot(vx, vy) || 1;
+        const mag = hoverK * push * Math.exp(-(dist * dist) / (2 * sigma * sigma));
+        tx = (vx / dist) * mag;
+        ty = (vy / dist) * mag;
+      }
+      hoverOff[i][0] += (tx - hoverOff[i][0]) * 0.12;
+      hoverOff[i][1] += (ty - hoverOff[i][1]) * 0.12;
+      const dr = drift(i, t, amp);
+      o.push([dr[0] + hoverOff[i][0], dr[1] + hoverOff[i][1]]);
+    }
+    blobPath.setAttribute('d', blobPathD(blob, o));
+  }
+  function play() { if (!running) { running = true; rafId = requestAnimationFrame(frame); } }
+  function pause() { running = false; if (rafId) cancelAnimationFrame(rafId); }
+
+  // Only animate while the hero is on screen and the tab is visible — the idle
+  // loop costs nothing when the blob can't be seen, and the drift picks up
+  // exactly where its clock left off (t keeps advancing, phase stays smooth).
+  const hero = document.querySelector('.intro');
+  if (hero && 'IntersectionObserver' in window) {
+    new IntersectionObserver((entries) => {
+      entries.forEach((e) => (e.isIntersecting ? play() : pause()));
+    }, { threshold: 0 }).observe(hero);
+  } else {
+    play();
+  }
+  document.addEventListener('visibilitychange', () => (document.hidden ? pause() : play()));
+}
+
+// Reveal sequence. Reduced motion: just show everything. Motion: the blob plays
+// its entrance settle while the copy lockup fades in, then the rest of the site.
 function startReveal() {
   if (reducedMotion.matches) {
     html.classList.add('is-text-revealed');
@@ -129,8 +328,77 @@ function startReveal() {
   setTimeout(revealSite, 200);
 }
 
+function round2(x) { return Math.round(x * 100) / 100; }
+
 initHero();
 
+// ============================================================
+// HERO CYCLE — at ≤768px the two hero paragraphs share one slot and crossfade
+// every few seconds to keep the compact egg compact (Figma 277:5121 / 272:432).
+// Progressive enhancement: without JS or with reduced motion the class is never
+// added and the paragraphs simply stack (responsive.css). Guarded for project
+// pages (no .intro-copy there).
+// ============================================================
+function initHeroCycle() {
+  // Claim first: a fast-scrolling visitor should meet the point of view, not
+  // the résumé line — the credential follows on the next beat.
+  const slides = [
+    document.querySelector('.intro-claim'),
+    document.querySelector('.intro-headline'),
+  ].filter(Boolean);
+  if (slides.length < 2 || reducedMotion.matches) return;
+
+  const mq = window.matchMedia('(max-width: 768px)');
+  const HOLD_MS = 5000;
+  const EXIT_MS = 600; // covers the exit transition before the base-state snap
+  let timer = 0;
+  let resetTimer = 0;
+  let active = 0;
+
+  // Sequential hand-off (see the cycling CSS in responsive.css): the current
+  // slide gets is-cycle-exit (lifts away), the next gets is-cycle-active (its
+  // delayed transition rises it in after the exit). Once the exit has played,
+  // strip the class so the slide snaps back below the slot while invisible.
+  function show(i) {
+    slides.forEach((el, k) => {
+      if (k === i) {
+        el.classList.remove('is-cycle-exit');
+        el.classList.add('is-cycle-active');
+      } else if (el.classList.contains('is-cycle-active')) {
+        el.classList.remove('is-cycle-active');
+        el.classList.add('is-cycle-exit');
+      }
+    });
+    clearTimeout(resetTimer);
+    resetTimer = setTimeout(() => {
+      slides.forEach((el) => el.classList.remove('is-cycle-exit'));
+    }, EXIT_MS);
+  }
+  function start() {
+    if (timer) return;
+    html.classList.add('is-hero-cycling');
+    show(active);
+    timer = setInterval(() => {
+      // Skip beats in a hidden tab so a return visit isn't mid-transition.
+      if (document.hidden) return;
+      active = (active + 1) % slides.length;
+      show(active);
+    }, HOLD_MS);
+  }
+  function stop() {
+    if (!timer) return;
+    clearInterval(timer);
+    timer = 0;
+    clearTimeout(resetTimer);
+    html.classList.remove('is-hero-cycling');
+    slides.forEach((el) => el.classList.remove('is-cycle-active', 'is-cycle-exit'));
+  }
+
+  const update = () => (mq.matches ? start() : stop());
+  mq.addEventListener('change', update);
+  update();
+}
+initHeroCycle();
 
 // ============================================================
 // MASTHEAD CAROUSEL — the Accessibility overview image is a 3-slide crossfade.
@@ -184,6 +452,58 @@ function initCarousel() {
 }
 initCarousel();
 
+// ============================================================
+// ABOUT TAB VIEW — [Design toolkit] / [Public footprints] at the bottom of
+// About. The static markup shows BOTH panels stacked (that's the no-JS
+// rendering); this turns it into a tab view by hiding the inactive panel.
+// Guarded: only the homepage has .about-tabs, so this is a no-op on the
+// project pages.
+// ============================================================
+function initAboutTabs() {
+  const root = document.querySelector('.about-tabs');
+  if (!root) return;
+  const tabs = Array.from(root.querySelectorAll('.about-tab'));
+  const panels = tabs.map(t => document.getElementById(t.getAttribute('aria-controls')));
+  if (!tabs.length || panels.some(p => !p)) return;
+
+  function select(i, animate) {
+    if (animate && tabs[i].classList.contains('is-active')) return; // re-click: nothing to reveal
+    tabs.forEach((tab, k) => {
+      const on = k === i;
+      tab.classList.toggle('is-active', on);
+      tab.setAttribute('aria-selected', on ? 'true' : 'false');
+      tab.tabIndex = on ? 0 : -1; // roving tabindex: one tab stop, arrows move
+      panels[k].hidden = !on;
+      panels[k].classList.remove('is-entering');
+    });
+    if (animate) {
+      // Replay the scroll-reveal rise (sections.css about-panel-enter) on the
+      // incoming panel. The class was just cleared above; force a reflow so a
+      // rapid back-and-forth restarts the animation instead of skipping it.
+      void panels[i].offsetWidth;
+      panels[i].classList.add('is-entering');
+    }
+  }
+
+  panels.forEach((p) => {
+    p.addEventListener('animationend', () => p.classList.remove('is-entering'));
+  });
+
+  tabs.forEach((tab, i) => {
+    tab.addEventListener('click', () => select(i, true));
+    tab.addEventListener('keydown', (e) => {
+      if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+      e.preventDefault();
+      const next = (i + (e.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length;
+      select(next, true);
+      tabs[next].focus();
+    });
+  });
+
+  select(0); // initial state, no entrance — the section's own scroll reveal covers load
+}
+initAboutTabs();
+
 const heroFadeScrollRange = 320;
 const scrollEffectDelay = 40;
 
@@ -200,26 +520,6 @@ function updateScrollEffects() {
   // While the load reveal is in progress, let CSS control opacity
   // instead of stomping it with an inline style here
   if (html.classList.contains('is-loading')) return;
-
-  // Landing header tuck: while the hero (which carries its own bottom nav
-  // bar) is on screen, park the sticky header above the viewport; it slides
-  // in once the reader passes the fold. Only the homepage has .intro-bar, so
-  // this is a no-op on project pages. No-JS visitors never get the class —
-  // the header is simply always visible. (On desktop the header is hidden
-  // outright — the docking intro-bar below is the nav — so this only matters
-  // on the ≤480 tier, where the tuck is neutralized anyway.)
-  if (siteHeader && intro && introBar) {
-    siteHeader.classList.toggle('is-tucked',
-      window.scrollY < intro.offsetHeight - siteHeader.offsetHeight);
-  }
-
-  // The intro-bar docks: sticky pins it at the viewport top once the scroll
-  // carries it there — frost it (is-docked → the ::before glass fades in)
-  // while pinned, bare while it rests in the hero. Guarded: project pages
-  // have no .intro-bar.
-  if (introBar) {
-    introBar.classList.toggle('is-docked', introBar.getBoundingClientRect().top <= 0);
-  }
 
   // Scroll-spy: the active nav item is the last section whose top has
   // scrolled above a line ~35% down the viewport. In the hero, none.
@@ -258,28 +558,32 @@ function updateScrollEffects() {
   // where an anchor-clicked section rests) so clicking the Contact nav link flips
   // the bar on arrival, not after scrolling further in. Read here (not at init)
   // because the @import'd CSS may not be applied when the deferred script runs.
-  // Both bars take the state: the .site-header (project pages, and the ≤480
-  // homepage tier) and the docked .intro-bar (the homepage's own nav on
-  // desktop, where the header is display:none). Whichever is hidden reports
-  // offsetHeight 0, so the max below reads the visible one.
-  const stickyBars = [siteHeader, introBar].filter(Boolean);
-  if (contactSection && stickyBars.length) {
+  if (contactSection && siteHeader) {
     const contactRect = contactSection.getBoundingClientRect();
     if (contactRect.height === 0) {
       // Contact is hidden (dropped at the mobile tier) — there's no blue panel to
-      // invert over, so keep the bars in their normal (cream) state.
-      stickyBars.forEach(bar => bar.classList.remove('is-over-dark'));
+      // invert over, so keep the header in its normal (cream) state.
+      siteHeader.classList.remove('is-over-dark');
     } else {
       const scrollAnchorTop = parseFloat(getComputedStyle(html).scrollPaddingTop) || 0;
-      const barHeight = Math.max(...stickyBars.map(bar => bar.offsetHeight));
-      const invertLine = Math.max(scrollAnchorTop, barHeight);
-      const overDark = contactRect.top <= invertLine + 1;
-      stickyBars.forEach(bar => bar.classList.toggle('is-over-dark', overDark));
+      const invertLine = Math.max(scrollAnchorTop, siteHeader.offsetHeight);
+      siteHeader.classList.toggle('is-over-dark', contactRect.top <= invertLine + 1);
     }
   }
 
-  // (The old hero's scroll-linked copy fade retired with the blob landing —
-  // the new hero scrolls away as plain content.)
+  // Everything below is the hero's own scroll accent — project pages have no
+  // hero, so there's nothing left to do there.
+  if (!introInner) return;
+
+  if (reducedMotion.matches) {
+    introInner.style.opacity = '';
+    return;
+  }
+
+  // The one hero scroll accent: the copy lockup fades out as the reader scrolls
+  // down. Clamped to 1 so it settles.
+  const fade = easeIn(Math.min(scrollEffectRatio(heroFadeScrollRange), 1));
+  introInner.style.opacity = 1 - fade;
 
   // Contact fades in via the shared viewport-reveal system (data-reveal in the
   // markup), so there's no scroll-linked opacity for it here anymore.
@@ -310,12 +614,10 @@ updateScrollEffects();
 // ============================================================
 
 const REVEAL = {
-  distance: 16,   // px of translate — a small rise; text stays readable mid-fade
-  duration: 0.7,  // s — long enough to glide, still resolves before a fast scroller passes
-  stagger: 0.08,  // s between items in a group (80ms) — a section lands as a sequence
-  // easeOutCubic — softened 2026-08 from [0.16,1,0.3,1] (expo-out), whose
-  // near-instant first frames read as an abrupt pop across sections.
-  ease: [0.33, 1, 0.68, 1],
+  distance: 12,   // px of translate — a small rise; text stays readable mid-fade
+  duration: 0.5,  // s — quick enough to resolve before a fast scroller passes it
+  stagger: 0.05,  // s between items in a group (50ms) — a section lands near-together
+  ease: [0.16, 1, 0.3, 1], // gentle ease-out, no overshoot
 };
 
 function initMotion() {

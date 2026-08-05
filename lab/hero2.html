@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex" />
+  <title>Lab — Hero v2: Making Products Make Sense</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@200;700&family=Inter:wght@400..700&display=swap" rel="stylesheet" />
+  <style>
+    /* ============================================================
+       LAB EXPERIMENT — hero v2 (Figma 339:3745). A different test
+       from the orb: the exported gradient-field image full-bleed,
+       a bold statement headline, a frosted lower band carrying the
+       bio, and the ENTIRE NAV moved to the bottom edge with a
+       "Say hello" pill. Self-contained: no style.css, no main.js.
+
+       Background asset: lab/hero-bkg.jpg is a compressed derivative
+       (3600w q78, ~2.5MB) of images/hero-bkg.jpg (18MB source —
+       do not ship the source).
+       ============================================================ */
+    :root {
+      --cream: #FBFCF8;
+      --text: #1a1a1a;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      background: var(--cream);
+      font-family: 'Inter', system-ui, sans-serif;
+      color: var(--text);
+      overflow-x: hidden;
+    }
+
+    .hero {
+      position: relative;
+      height: 100dvh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Full-bleed gradient field laid at 100% — the asset is 1.6:1, exactly a
+       1440×900 viewport, so it fits with NO crop at the design size and its
+       white corners stay visible. (The frame's original 126% overscan was
+       tuned for the earlier sparser export and swallowed the whites.) On
+       off-ratio windows, cover crops minimally into the near-white edges. */
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* ---- Upper region: the statement ---- */
+    .hero-top {
+      position: relative;
+      z-index: 1;
+      flex: 1 1 auto;
+      display: flex;
+      align-items: flex-end;
+      padding: 0 150px 40px; /* 150 inset; tightened 40 to the divider */
+      /* The load reveal's mask: this box's bottom edge sits exactly on the
+         divider, so the rising headline is clipped AT the divider line. */
+      overflow: hidden;
+    }
+    .headline {
+      font-family: 'Hanken Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: clamp(56px, 6.67vw, 96px); /* 96 @1440 */
+      line-height: 1;
+      letter-spacing: -0.02em;
+      color: #fff;
+      max-width: 900px;
+      /* Load reveal, SUBTLE: a short rise — the headline starts just far
+         enough down that its last line dips a touch below the divider (the
+         mask clips it there), then eases the short distance up into place.
+         --rise = travel distance; the resting gap to the divider is 40px, so
+         values above 40 engage the divider clip, below 40 are a plain rise. */
+      --rise: 64px;
+      /* Ease matches the site's motion system (REVEAL.ease in js/main.js):
+         cubic-bezier(0.16, 1, 0.3, 1) — gentle ease-out, no overshoot. */
+      animation: headline-rise 1s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both;
+    }
+    @keyframes headline-rise {
+      from { transform: translateY(var(--rise, 104px)); }
+      to { transform: translateY(0); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .headline,
+      .bio,
+      .bottom-bar { animation: none; }
+    }
+
+    .divider {
+      position: relative;
+      z-index: 1;
+      height: 1px;
+      margin: 0;                   /* frame rev.2: full viewport width */
+      background: rgba(255, 255, 255, 0.65);
+    }
+
+    /* ---- Lower region: frosted band with the bio ---- */
+    .hero-bottom {
+      position: relative;
+      z-index: 1;
+      flex: 0 0 50%;               /* frame rev.3: exactly the bottom half */
+      backdrop-filter: blur(5.5px);
+      -webkit-backdrop-filter: blur(5.5px);
+      background: rgba(251, 252, 248, 0.05);
+      padding: 40px 150px 0;       /* tightened 40 below the divider, 150 inset */
+      display: flex;
+      gap: 50px;
+      align-items: flex-start;
+      /* The bio reveal's mask: this box's top edge sits exactly on the
+         divider, so the descending bio is clipped AT the divider line —
+         the mirror of the headline's mask above. */
+      overflow: hidden;
+    }
+    .bio {
+      flex: 1 1 0;
+      min-width: 0;
+      font-size: 20px;
+      line-height: 1.08;
+      letter-spacing: -0.02em;
+      color: #fff;
+      /* Load reveal, mirroring the headline: start slightly ABOVE the mask
+         edge (top dips 24px past the divider at --rise 64 / 40px gap) and
+         descend gently into place. Same travel, curve, and beat — the
+         divider emits both lines at once. */
+      --rise: 64px;
+      animation: bio-drop 1s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both;
+    }
+    @keyframes bio-drop {
+      from { transform: translateY(calc(-1 * var(--rise, 104px))); }
+      to { transform: translateY(0); }
+    }
+    /* Empty left column — the bio deliberately occupies only the right half
+       (the frame used an invisible placeholder for the same purpose). */
+    .bio-spacer { flex: 1 1 0; min-width: 0; }
+
+    /* ---- Bottom nav bar (the frame moves the whole nav down here) ---- */
+    .bottom-bar {
+      position: absolute;
+      left: 56px;
+      right: 56px;
+      bottom: 35px; /* frame rev.3 was 50 — nudged 15 down on review */
+      height: 36px;
+      display: flex;
+      align-items: center;
+      gap: 120px;
+      z-index: 2;
+      /* Enters LAST: the divider reveals settle (~0.15s delay + the curve's
+         fast early travel ≈ done by ~0.9s), then the bar fades in. */
+      animation: bar-fade 0.6s ease-out 0.95s both;
+    }
+    @keyframes bar-fade {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .bar-name {
+      flex: 1 1 0;
+      min-width: 0;
+      font-family: 'Hanken Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 20px;
+      letter-spacing: -0.02em;
+      color: #000;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .bar-links {
+      flex: 0 0 450px;
+      display: flex;
+      align-items: center;
+    }
+    /* Group wrappers (like .site-nav-group on the live site) keep the anchors
+       text-width, so the hover chip hugs the label instead of the column. */
+    .bar-group {
+      flex: 1 1 0;
+      min-width: 0;
+      display: flex;
+    }
+    .bar-group:nth-child(2) { justify-content: center; }
+    .bar-group:nth-child(3) { justify-content: flex-end; }
+    /* Nav item states — same system as the live header (header.css):
+       rest black 70% · hover black 90% + a chip (border-only pill) fading in
+       behind the text. Hover-guarded so taps don't leave a stuck chip. */
+    .bar-links a {
+      position: relative;
+      font-size: 16px;
+      letter-spacing: -0.01em;
+      line-height: 1.5;
+      color: rgba(0, 0, 0, 0.7);
+      text-decoration: none;
+      white-space: nowrap;
+      transition: color 0.35s ease;
+    }
+    .bar-links a::before {
+      content: '';
+      position: absolute;
+      inset: -7px -15px;
+      z-index: -1;
+      border: 1px solid transparent;
+      border-radius: 100px;
+      transition: background-color 0.35s ease, border-color 0.35s ease;
+      pointer-events: none;
+    }
+    @media (hover: hover) {
+      .bar-links a:hover {
+        color: rgba(0, 0, 0, 0.9);
+      }
+      .bar-links a:hover::before {
+        border-color: rgba(0, 0, 0, 0.75);
+      }
+    }
+    .bar-cta-wrap {
+      flex: 1 1 0;
+      min-width: 0;
+      display: flex;
+      justify-content: flex-end;
+    }
+    /* Solid black pill, white label (revised from the outlined glass pill). */
+    .bar-cta {
+      display: inline-flex;
+      align-items: center;
+      height: 36px;
+      padding: 0 20px;
+      border: none;
+      border-radius: 100px;
+      background: #000;
+      font-size: 16px;
+      letter-spacing: -0.01em;
+      color: #fff;
+      text-decoration: none;
+      white-space: nowrap;
+      transition: background-color 0.35s ease;
+    }
+    .bar-cta:hover {
+      background: rgba(0, 0, 0, 0.75);
+    }
+
+    .lab-note {
+      position: fixed;
+      top: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 12px;
+      color: rgba(0, 0, 0, 0.45);
+      z-index: 2;
+    }
+  </style>
+</head>
+<body>
+
+  <section class="hero">
+    <img class="hero-bg" src="hero-bkg.jpg?v=3" alt="" />
+
+    <div class="hero-top">
+      <h1 class="headline">Making products make sense.</h1>
+    </div>
+
+    <div class="divider" aria-hidden="true"></div>
+
+    <div class="hero-bottom">
+      <div class="bio-spacer" aria-hidden="true"></div>
+      <p class="bio">Senior product designer with over nine years at Microsoft and Meta. I identify the patterns that matter, then define the interaction models, product foundations, and guidance that help complex products move as one.</p>
+    </div>
+
+    <nav class="bottom-bar" aria-label="Primary navigation">
+      <a class="bar-name" href="../index.html">Jenna Ammerall.</a>
+      <div class="bar-links">
+        <div class="bar-group"><a href="../index.html#work-section">Work</a></div>
+        <div class="bar-group"><a href="../index.html#about">Footprints</a></div>
+        <div class="bar-group"><a href="../index.html#about">About</a></div>
+      </div>
+      <div class="bar-cta-wrap">
+        <a class="bar-cta" href="../index.html#contact">Say hello</a>
+      </div>
+    </nav>
+  </section>
+
+  <p class="lab-note">lab/hero2.html — hero v2 experiment (Figma 339:3745), not linked from the live site</p>
+
+</body>
+</html>

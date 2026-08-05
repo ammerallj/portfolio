@@ -2,12 +2,6 @@
    SELECTED WORK
    ============================================================ */
 
-/* Extra breathing room between the hero's frosted dissolve and the first
-   card: the shared 64px section padding + 40. */
-#work-section {
-  padding-top: 104px;
-}
-
 .work-list {
   list-style: none;
   display: flex;
@@ -108,22 +102,14 @@
 }
 
 .work-card-left {
-  /* Six grid columns (654px at 1440) — the headline's own measure, rather
-     than "whatever's left" (which resolved to 766px). margin-right:auto puts
-     the leftover between the columns so the description block stays flush to
-     the container's right edge. */
-  flex: 0 0 var(--width-title-column);
+  flex: 1 1 auto;
   min-width: 0;
-  margin-right: auto;
 }
 
-/* 64px Medium (adopted 2026-08-04 — was 40px Bold). Hanken Grotesk's 500
-   weight is loaded for this in index.html's font request; it previously
-   served only 200 and 700, so a 500 here would have fallen back to 200. */
-.section-title {
+.work-card-title {
   font-family: var(--font-heading);
-  font-size: 4rem; /* 64px */
-  font-weight: 500;
+  font-size: 2.5rem;
+  font-weight: 700;
   letter-spacing: -0.02em;
   line-height: 1;
   color: var(--color-text);
@@ -138,14 +124,7 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  /* Full row height (the body top-aligns its children by default) with the
-     description flushed to the BOTTOM, so its last line sits on the row's
-     baseline, level with the bottom of the headline beside it. flex-end, not
-     space-between: the meta line was removed from these cards (2026-08-04 —
-     the overview page's masthead carries that metadata), and a lone child
-     under space-between would sit at the TOP instead. */
-  align-self: stretch;
-  justify-content: flex-end;
+  gap: var(--gap-content); /* meta → description */
 }
 
 /* (.intro-body p used to share this rule; the Jul 2026 hero revision gave the
@@ -161,43 +140,10 @@
 }
 
 /* ============================================================
-   PUBLIC FOOTPRINTS — its own section again (the About tab view
-   that briefly housed it is gone): heading left, link groups in
-   the site's shared 542px right column.
+   PUBLIC FOOTPRINTS (link groups — rendered inside the About
+   tab view; the standalone section + its two-column layout are
+   gone, so there are no .footprints-* layout rules any more)
    ============================================================ */
-
-.footprints-layout {
-  display: flex;
-  /* The links column (.footprints-right) is a fluid clamp that pins to the shared
-     right edge (nav / Work cards), so the gap must scale WITH it — a fixed 186px
-     gap squeezed the heading to ~360px near 1025 and then snapped to 48px at the
-     1024 stack. Interpolate the gap the same way: 186px at 1440 → 48px at 1025, so
-     it lands on the ≤1024 tier's group step with no jump. (Below 768 it stacks;
-     see responsive.css.) */
-  gap: clamp(48px, 33.25vw - 292.84px, 11.625rem);
-  align-items: flex-start;
-}
-
-.footprints-left {
-  flex: 1 1 auto;
-  min-width: 0;
-}
-
-/* The "Public Footprints." heading uses .section-title (the shared big content
-   H2) — there is no .footprints-heading class rule; the id of the same name is
-   only the section's aria-labelledby target. */
-
-.footprints-right {
-  /* The shared right column — same edge as the nav and the Work-card
-     descriptions. */
-  flex: 0 0 var(--width-right-column, 542px);
-  display: flex;
-  flex-direction: column;
-  /* 96px between the eyebrow-led link groups — same three-step rhythm as
-     About's blocks: group 96 / eyebrow → content 20, so each eyebrow reads
-     as owning the list beneath it rather than floating between groups. */
-  gap: var(--gap-section);
-}
 
 .footprint-group {
   display: flex;
@@ -352,27 +298,12 @@
   display: flex;
   /* 242px gap: with the 542px right column pinned to the container's right edge,
      this makes the left column resolve to 542px at the 1440px design width,
-     giving the two equal columns from Figma while keeping the shared right edge.
-     Fluid like .footprints-layout: the gap scales WITH the fluid right column
-     (242px at 1440 → 48px floor by ~1025) so the columns stay balanced as they
-     narrow instead of the gap eating the space. Stacks at ≤768 (responsive.css). */
-  gap: clamp(48px, 46.75vw - 431.16px, 15.125rem);
+     giving the two equal columns from Figma while keeping the shared right edge */
+  gap: 15.125rem;
   /* No block padding — the heading's 100px margin-bottom sets the gap to
      content, and the section's 60px padding handles the bottom spacing */
   padding-block: 0;
   align-items: flex-start;
-  /* DESKTOP: the supporting text starts level with the "About Me." headline.
-     The pull-up lives on the CONTAINER (with the photo pushed back down by
-     the same amount below) — NOT on .about-right — so the reveal system's
-     getBoundingClientRect still covers everything it shows: a child pulled
-     up by negative margin overflows its group's rect, and the off-screen
-     reset then yanks the still-visible text mid-view (the anti-cut-out rule
-     in js/main.js setupReveals). One heading line (#about-heading is
-     .section-title: 4rem, line-height 1) + its margin-bottom (the
-     --gap-group below); keep in step if the heading's type or margin
-     changes. Reset at ≤1024 (responsive.css). */
-  --about-pullup: calc(4rem + var(--gap-group));
-  margin-top: calc(-1 * var(--about-pullup));
 }
 
 .about-left {
@@ -381,23 +312,22 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  /* Cancels the container's pull-up so the photo stays below the heading;
-     only the right column rides up beside it. */
-  margin-top: var(--about-pullup);
 }
 
-/* The About heading now uses .section-title for its type; this only restores
-   the breathing room the old .about-name margin provided, so .about-layout
-   doesn't ride up and the section above's hairline stops crossing the text.
-   (On mobile that content below is the photo, since the layout stacks
-   photo-first.) */
-#about-heading {
-  /* --gap-group, not --gap-heading: an image follows this title, and an
-     image edge needs less separation than a text block (same call as the
-     480 tier's tighter override). COUPLED to .about-layout's
-     --about-pullup above — change both together or the supporting text
-     drifts off the headline's top. */
-  margin-bottom: var(--gap-group);
+.about-name {
+  font-family: var(--font-heading);
+  font-size: clamp(2.5rem, 7vw, 6rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  color: var(--color-text-70);
+  /* Breathing room under the big title before the content starts (on mobile
+     that content is the photo, since the layout stacks photo-first). */
+  margin-bottom: var(--gap-heading);
+}
+
+.about-name-accent {
+  color: var(--color-accent);
 }
 
 .about-photo {
@@ -407,14 +337,6 @@
   overflow: hidden;
   background-color: #d9d9d9;
   aspect-ratio: 542 / 701;
-}
-
-/* The <picture> wrapper must span the box, or the img's 100% height would
-   resolve against the picture's collapsed auto height instead. */
-.about-photo picture {
-  display: block;
-  width: 100%;
-  height: 100%;
 }
 
 .about-photo img {
@@ -435,14 +357,7 @@
   flex: 0 0 var(--width-right-column);
   display: flex;
   flex-direction: column;
-  /* 96px between the two eyebrow-led blocks — the widest gap that still reads
-     as "within About" (--gap-heading at 144 is the section-title measure).
-     The eyebrow → body gap inside each block stays --gap-content (20), so the
-     eyebrow reads as belonging to the copy under it, not floating between. */
-  gap: var(--gap-section);
-  /* (The desktop pull-up beside the headline lives on .about-layout — a
-     negative margin HERE would overflow the reveal group's rect and get
-     cut out mid-view on exit. See the .about-layout comment.) */
+  gap: var(--gap-group); /* between the two eyebrow-led blocks */
 }
 
 .about-right section {
@@ -458,11 +373,7 @@
 .about-body {
   display: flex;
   flex-direction: column;
-  /* A documented one-off, NOT --gap-content (20px, which spaces the eyebrow
-     from this block above): this is the only multi-paragraph reading block on
-     the site, and prose wants a paragraph break wider than the 20px that
-     spaces a label from its content. 32px ≈ 1.15× the 28px line height. */
-  gap: 2rem; /* paragraph → paragraph */
+  gap: var(--gap-content); /* paragraph → paragraph */
 }
 
 .about-body p {
@@ -472,6 +383,110 @@
   line-height: 1.4;
   color: var(--color-text);
   max-width: none;
+}
+
+/* Toolkit / Footprints tab view: a pill switcher (same chip as the nav
+   item / .section-pills) over one full-width outlined panel. Without JS
+   both panels render stacked; initAboutTabs() (js/main.js) hides the
+   inactive one. */
+.about-tabs {
+  /* Section-scale breathing room above the switcher — the tab view reads
+     as its own act within About, not another block in the column flow */
+  margin-top: var(--gap-section);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem; /* bar → panel */
+}
+
+.about-tabs-bar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+.about-tab {
+  /* Same pill as the header nav item's chip: 1rem UI type at the body's
+     1.7 line-height, padding = the chip's -7px -15px inset (header.css
+     .site-nav-bar a::before) minus this button's own 1px border */
+  font-family: var(--font-ui);
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.7;
+  letter-spacing: -0.01em;
+  color: var(--color-text-70);
+  background-color: transparent;
+  border: 1px solid var(--color-border-light);
+  border-radius: 100px;
+  padding: 6px 14px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Hover — same as the nav item: text brightens, outline darkens. Unselected
+   tabs only; the active tab keeps its solid fill. */
+@media (hover: hover) {
+  .about-tab:not(.is-active):hover {
+    color: rgba(0, 0, 0, 0.9);
+    border-color: rgba(0, 0, 0, 0.75);
+  }
+}
+
+/* Active — solid ink pill, text inverts to the page bg (same treatment as
+   .section-pills a.is-active on the project pages) */
+.about-tab.is-active {
+  font-weight: 600;
+  color: var(--color-bg);
+  background-color: var(--color-text);
+  border-color: var(--color-text);
+}
+
+/* The outlined panel both tabs share */
+.about-tab-panel {
+  border: 1px solid var(--color-border-light);
+  border-radius: 40px; /* matches .about-photo */
+  padding: 3rem 3.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-group); /* footprint group → group; toolkit has one child */
+}
+
+/* Columns variant (the footprints panel): its groups sit side by side,
+   splitting the panel width evenly. Stacks back at ≤768 (responsive.css). */
+.about-tab-panel--columns {
+  flex-direction: row;
+  align-items: flex-start;
+}
+
+.about-tab-panel--columns > * {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+/* display:flex above would defeat the hidden attribute JS toggles */
+.about-tab-panel[hidden] {
+  display: none;
+}
+
+/* Switching tabs replays the scroll-reveal rise on the incoming panel —
+   the same numbers as REVEAL in js/main.js (12px rise, 0.5s, same ease).
+   Gated on is-motion, which reduced-motion / no-JS visitors never carry,
+   so for them the panel just appears (and this can never hide content:
+   without the class the panel is simply visible). */
+html.is-motion .about-tab-panel.is-entering {
+  animation: about-panel-enter 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes about-panel-enter {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .about-skills-list {

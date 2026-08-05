@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex" />
+  <title>Lab — Grain Orb Hero</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@200;700&family=Inter:wght@400..700&display=swap" rel="stylesheet" />
+  <style>
+    /* ============================================================
+       LAB EXPERIMENT — grainy interactive orb hero (Figma 311:2).
+       Deliberately self-contained: no style.css, no js/main.js, so
+       the experiment can't leak into the live site. If adopted,
+       fold the engine into the hero properly.
+
+       SCROLL ENTRANCE: the orb stage starts at 75% scale showing
+       only the claim. The first viewport-height of scrolling grows
+       it to full size and reveals the credential + CTA (a sticky
+       stage inside a 200dvh runway — native scroll, no jacking).
+       Past that, the page scrolls on normally. The driver script
+       at the bottom owns it; without JS or with reduced motion the
+       runway is one viewport tall and everything simply shows.
+       ============================================================ */
+    :root {
+      --cream: #FBFCF8;
+      --accent: #4A45FF;
+      --text: #1a1a1a;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      background: var(--cream);
+      font-family: 'Inter', system-ui, sans-serif;
+      color: var(--text);
+      overflow-x: hidden;
+    }
+
+    .lab-header {
+      position: fixed;
+      inset: 0 0 auto 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 56px;
+      z-index: 2;
+    }
+    .lab-name {
+      font-family: 'Hanken Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 20px;
+      letter-spacing: -0.02em;
+      color: #000;
+      text-decoration: none;
+    }
+    .lab-nav { display: flex; gap: 180px; }
+    .lab-nav a {
+      font-size: 16px;
+      letter-spacing: -0.01em;
+      color: rgba(0, 0, 0, 0.7);
+      text-decoration: none;
+    }
+
+    /* The runway is the scroll distance that drives the entrance; the stage
+       is the pinned, viewport-filling frame the orb lives in. */
+    .hero-runway { height: 100dvh; }
+    body.is-staged .hero-runway { height: 200dvh; }
+    .orb-stage {
+      position: sticky;
+      top: 0;
+      height: 100dvh;
+      overflow: hidden;
+      transform-origin: 50% 50%;
+      /* The driver script sets transform: scale(0.75 → 1) from scroll. */
+    }
+    /* The engine sizes the canvas to the orb's full reach (it can be LARGER
+       than the viewport so the orb is never cropped by its own canvas);
+       centered on the stage, which crops to the viewport at full scale. */
+    #orb {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      display: block;
+    }
+
+    .hero-copy {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 660px;
+      max-width: calc(100% - 64px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 80px;
+      z-index: 1;
+      pointer-events: none; /* the orb feels the cursor through the copy... */
+    }
+    .hero-copy a { pointer-events: auto; } /* ...but the CTA stays clickable */
+    .copy-group {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 48px; /* claim → credential, same rhythm as the live hero */
+    }
+    .claim,
+    .credential {
+      width: 100%;
+      font-size: clamp(24px, 2.8vw, 40px);
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      color: #fff;
+    }
+    .claim { font-style: italic; }
+    /* The credential holds its space from the start (hidden via opacity
+       only), so the claim never reflows while the reveal plays. Hidden ONLY
+       when the driver is active — no-JS / reduced-motion visitors see all. */
+    body.is-staged .credential,
+    body.is-staged .cta {
+      opacity: 0;
+    }
+    .cta {
+      font-size: 24px;
+      letter-spacing: -0.02em;
+      color: #fff;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .cta span { text-decoration: underline; text-underline-position: from-font; }
+    .cta:hover span { opacity: 0.75; }
+
+    /* Something below the fold so the release into normal scrolling is felt. */
+    .after-hero {
+      min-height: 100dvh;
+      display: grid;
+      place-items: center;
+      font-size: 14px;
+      color: rgba(0, 0, 0, 0.45);
+    }
+
+    .lab-note {
+      position: fixed;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 12px;
+      color: rgba(0,0,0,0.45);
+      z-index: 2;
+    }
+  </style>
+</head>
+<body>
+
+  <header class="lab-header">
+    <a class="lab-name" href="../index.html">Jenna Ammerall.</a>
+    <nav class="lab-nav">
+      <a href="../index.html#work-section">Work</a>
+      <a href="../index.html#about">About</a>
+      <a href="../index.html#contact">Contact</a>
+    </nav>
+  </header>
+
+  <section class="hero-runway">
+    <div class="orb-stage">
+      <canvas id="orb" aria-hidden="true"></canvas>
+      <div class="hero-copy">
+        <div class="copy-group">
+          <p class="claim">I design for products in transition &mdash; shaping how they change without losing what makes them work.</p>
+          <p class="credential">Senior product designer with over nine years designing at Microsoft and Meta.</p>
+        </div>
+        <a class="cta" href="../index.html#work-section"><span>See selected work</span> &darr;</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="after-hero">
+    <p>&darr; the page scrolls on from here &mdash; Selected Work would begin</p>
+  </section>
+
+  <p class="lab-note">lab/orb.html — grain-orb experiment, not linked from the live site</p>
+
+  <!-- The orb engine (rendering, dither, movers, lifecycle) — knobs at its top. -->
+  <script src="orb.js?v=24" defer></script>
+
+  <!-- Scroll entrance driver: page choreography only — the engine stays pure.
+       Progress p = scrollY / 1vh (the runway's extra height), eased:
+       stage scale 0.75 → 1; credential + CTA fade/rise over the last part. -->
+  <script>
+    (function () {
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      var stage = document.querySelector('.orb-stage');
+      var cred = document.querySelector('.credential');
+      var cta = document.querySelector('.cta');
+      if (!stage || !cred || !cta) return;
+      document.body.classList.add('is-staged');
+
+      function ss(t) {
+        var c = Math.min(1, Math.max(0, t));
+        return c * c * (3 - 2 * c);
+      }
+      var ticking = false;
+      function update() {
+        ticking = false;
+        var vh = window.innerHeight || 1;
+        var p = Math.min(1, Math.max(0, window.scrollY / vh));
+        var grow = ss(p);
+        stage.style.transform = 'scale(' + (0.75 + 0.25 * grow).toFixed(4) + ')';
+        var reveal = ss((p - 0.55) / 0.35);
+        cred.style.opacity = reveal.toFixed(3);
+        cred.style.transform = 'translateY(' + (12 * (1 - reveal)).toFixed(2) + 'px)';
+        cta.style.opacity = reveal.toFixed(3);
+      }
+      window.addEventListener('scroll', function () {
+        if (!ticking) { ticking = true; requestAnimationFrame(update); }
+      }, { passive: true });
+      window.addEventListener('resize', update);
+      update();
+    })();
+  </script>
+
+</body>
+</html>

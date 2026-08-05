@@ -103,10 +103,21 @@
   margin-left: auto;
 }
 
-/* The masthead title (<h1>) uses the shared .section-title token (64px/500,
-   sections.css) — the same heading the homepage card uses, so the page reads as
-   that card enlarged and one token governs every section title site-wide. (It was
-   a page-local .project-title at 40px/700 before that reclassification.) */
+/* Tier 2 — the SAME 2.5rem/700/-0.02em as .work-card-title on the homepage.
+   Deliberate: the card and this page show the same image and the same words, so
+   matching the type makes the page read as that card enlarged rather than a
+   different object. It was Tier 1 (clamp to 96px) while it sat in a left column;
+   once it went full width that read as shouting, and it wrapped to two lines —
+   at 40px the title sets on one. Phone step-down to 2rem is in responsive.css
+   with the rest of Tier 2. */
+.project-title {
+  font-family: var(--font-heading);
+  font-size: 2.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  color: var(--color-text);
+}
 
 /* Dek — the one-line description under the title. Not a heading and not a
    section: a standfirst that says what the project was before any block does.
@@ -477,11 +488,21 @@
   min-width: 0;
 }
 
-/* Block headings (What I Shaped, Impact, and any further detail block) also use
-   the shared .section-title token (sections.css) — NOT the 13px .section-label
-   eyebrow, which stays shared with the homepage (Career Story, Connect, On My
-   Mind). Title and content sit in side-by-side columns, so the heading needs no
-   margin of its own. */
+/* Block headings (Overview, Why This Mattered, Contribution, Impact, and any
+   further detail block) sit at the site's Tier 2 headline scale — the same
+   2.5rem/700/-0.02em as .work-card-title and .footprints-heading — NOT the 13px
+   eyebrow. Deliberately its own class: .section-label is shared with the
+   homepage (Career Story, Connect, On My Mind), which must stay an eyebrow.
+   Phone step-down to 2rem lives with the rest of Tier 2 in responsive.css. */
+.project-block-title {
+  font-family: var(--font-heading);
+  font-size: 2.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  color: var(--color-text);
+  margin-bottom: 0;
+}
 
 .project-block-right {
   flex: 0 0 var(--width-right-column); /* shared right column, fluid 291→542 */
@@ -516,9 +537,10 @@
 }
 
 /* The lead clause of each item — the claim itself — at the site's semibold.
-   600, not the browser's default 700 for <strong>: this is body emphasis, not a
-   heading, so it reads as a stressed sentence rather than a label. Matches the
-   nav's active state, which is the only other place the site emphasises UI text.
+   600, not the browser's default 700 for <strong>: 700 is the HEADING weight
+   here (.project-block-title, card titles), and a bullet shouldn't carry the
+   same weight as a section title. Matches the nav's active state, which is the
+   only other place the site emphasises UI text.
    <strong> rather than a styling span so the emphasis is announced, not just
    drawn. */
 .project-impact-list strong {
@@ -759,10 +781,8 @@
   min-width: 0;
 }
 
-/* The next-case teaser title — a pager <span>, not a section heading. It is the
-   one title still on the old Tier-2 scale (2.5rem/700), NOT the shared
-   .section-title token the masthead and block headings now use; kept smaller so
-   the bottom-of-page pager doesn't shout at the same size as the page's own H1. */
+/* Tier 2 headline — the same 2.5rem/700/-0.02em as .project-block-title and the
+   homepage .work-card-title, so the teaser reads as that card enlarged. */
 .next-case-title {
   font-family: var(--font-heading);
   font-size: 2.5rem;

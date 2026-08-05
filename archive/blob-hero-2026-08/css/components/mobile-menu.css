@@ -1,0 +1,262 @@
+/* ============================================================
+   MOBILE MENU (Figma nodes 123:3733 / 123:3743)
+   A full-screen blue overlay triggered by the "Menu" button on
+   phones. These are the component's LOOK styles; the show/hide
+   toggling by width lives in responsive.css (at <=480px):
+     - the "Menu" trigger and this overlay are display:none here
+       (desktop) and revealed only in the 480px tier
+     - .is-open (added by initMobileMenu in js/main.js) flips the
+       overlay to display:flex, but only inside that media query,
+       so it can never linger over the desktop layout.
+   ============================================================ */
+
+/* --- "Menu" trigger in the header (Inter 16px, per Figma 123:3800) --- */
+.mobile-menu-toggle {
+  display: none; /* shown at <=480px in responsive.css */
+  margin-left: auto; /* push to the right edge next to the flex:1 site-name */
+  padding: 0;
+  border: 0;
+  background: none;
+  font-family: var(--font-ui);
+  font-size: 1rem;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+/* Over the blue Contact panel the header inverts — keep the trigger legible */
+.site-header.is-over-dark .mobile-menu-toggle {
+  color: #fff;
+}
+
+/* --- The overlay panel --- */
+.mobile-menu {
+  display: none; /* set to flex at <=480px when .is-open (responsive.css) */
+  position: fixed;
+  inset: 0;
+  z-index: 200; /* above the sticky header (z-index 100) */
+  flex-direction: column;
+  /* Scroll vertically if content exceeds the viewport; clip horizontally so
+     the off-edge glow below is "cut off" without adding a horizontal scrollbar. */
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  background: var(--color-accent);
+  color: #fff;
+}
+
+/* Open transition: the panel slides in slightly from the left while fading up,
+   sitting on top of everything — the page beneath is a fixed overlay's backdrop
+   and never moves or gets pushed aside. A small 32px offset (not a full-width
+   drawer sweep) so it reads as "settling into place". Since .is-open flips the
+   panel from display:none to flex, the animation fires once on open.
+   Reduced-motion visitors get it flattened to ~instant by the global rule in
+   global.css. */
+/* Slide and fade are SEPARATE animations so each gets its own curve: the slide
+   keeps a decelerating ease (quick entry, soft settle) while the fade runs the
+   full duration on a gentle symmetric in-out — riding one keyframe set, the
+   fade would inherit the slide's front-loaded curve and be ~done in the first
+   third. */
+@keyframes menu-slide-in {
+  from {
+    transform: translateX(-32px);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes menu-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.mobile-menu.is-open {
+  /* The transform ends at 0 (and the animation has no fill-mode), so once open
+     the panel has NO transform — keeping the fixed-position close button
+     viewport-anchored. */
+  animation:
+    menu-slide-in 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+    menu-fade-in 0.4s cubic-bezier(0.45, 0, 0.55, 1);
+}
+
+/* Close (X): the reverse — slide back out to the left while fading. Slightly
+   quicker, with an accelerating ease (exits get out of the way; entrances
+   settle). `forwards` holds the faded-out end state for the beat between
+   animationend and initMobileMenu() removing .is-closing — which is what
+   returns the panel to display:none (the display gate is in responsive.css). */
+@keyframes menu-slide-out {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-32px);
+  }
+}
+
+@keyframes menu-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.mobile-menu.is-closing {
+  /* Same split as the entrance: accelerating slide, gentle full-duration fade.
+     Both `forwards` — the faded-out end state holds for the beat between
+     animationend and initMobileMenu() removing .is-closing. */
+  animation:
+    menu-slide-out 0.3s cubic-bezier(0.4, 0, 1, 1) forwards,
+    menu-fade-out 0.3s cubic-bezier(0.45, 0, 0.55, 1) forwards;
+  /* The panel is inert while leaving — don't swallow taps meant for the page. */
+  pointer-events: none;
+}
+
+/* The panel is a flat --color-accent fill — no gradient/glow. (The Figma
+   "Ellipse 2" radial-white + fractal-noise ::before glow was dropped per request;
+   the solid blue reads cleaner.) */
+
+/* "Jenna Ammerall." — matches the header logo but white (Figma 123:3770) */
+.mobile-menu-name {
+  padding: 32px 16px 0;
+  font-family: var(--font-heading);
+  font-size: 1.25rem; /* 20px */
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+/* --- "On My Mind" — reflective note below the connect block, mirroring the
+   homepage .contact-mind (section-label + about-body), recolored for the blue
+   panel. The dividing hairline sits an EQUAL --gap-section above (margin-top) and
+   below (padding-top), so the break reads as balanced rather than the block being
+   flush-pushed to the panel's bottom. --- */
+.mobile-menu-mind {
+  margin-top: var(--gap-section); /* matches the padding-top below the hairline */
+  padding: var(--gap-section) 16px 90px;
+  border-top: 1px solid #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.mobile-menu-mind-heading {
+  font-family: var(--font-ui);
+  font-size: 0.8125rem; /* 13px eyebrow — same as .section-label */
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.mobile-menu-mind-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.mobile-menu-mind-body p {
+  font-family: var(--font-body);
+  font-size: 1.25rem; /* 20px — the overlay's body scale */
+  letter-spacing: -0.02em;
+  line-height: 1.4;
+  color: #fff;
+}
+
+/* --- Large nav links (Figma 60px; thin em-dash + bold word) --- */
+.mobile-menu-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  margin-top: 72px; /* drops the block to ~y154 as in the Figma frame */
+  padding: 0 16px;
+}
+
+.mobile-menu-nav a {
+  font-family: var(--font-heading);
+  font-size: 3.75rem; /* 60px */
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  color: #fff;
+  text-decoration: none;
+}
+
+.mobile-menu-dash {
+  font-weight: 200; /* Hanken ExtraLight — the light dash from the design */
+  margin-right: 0.15em;
+}
+
+/* --- Connect block, now the first block under the name (On My Mind moved to the
+   bottom). No top border/auto-margin: those roles moved to .mobile-menu-mind. --- */
+.mobile-menu-connect {
+  margin-top: 56px;
+  display: flex;
+  flex-direction: column;
+  gap: 50px;
+  padding: 0 16px;
+}
+
+.mobile-menu-connect-heading {
+  font-family: var(--font-heading);
+  font-size: 2rem; /* 32px */
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.mobile-menu-connect-links {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.mobile-menu-connect-links a {
+  font-family: var(--font-body);
+  font-size: 1.25rem; /* 20px */
+  letter-spacing: -0.02em;
+  color: #fff;
+  text-decoration: underline;
+}
+
+/* Outward arrow on each connect link — same decorative ::after as the homepage
+   .contact-connect-links (sections.css). inline-block keeps it off the underline;
+   it inherits the link's white. */
+.mobile-menu-connect-links a::after {
+  content: '↗';
+  display: inline-block;
+  margin-left: 0.2em;
+}
+
+/* --- Circular close (X) button, bottom-right (Figma 123:3755) --- */
+.mobile-menu-close {
+  /* Fixed so it stays pinned to the viewport corner even if the overlay
+     scrolls — never scrolled away or clipped. */
+  position: fixed;
+  right: 32px;
+  bottom: 32px;
+  width: 56px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #fff;
+  border-radius: 50%;
+  background: rgba(74, 69, 255, 0.9);
+  color: #fff;
+  cursor: pointer;
+}
+
+.mobile-menu-close svg {
+  width: 20px;
+  height: 20px;
+  stroke: #fff;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+}

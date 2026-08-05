@@ -91,12 +91,6 @@
      1025 band floor; frozen at 542 above 1440. Kept flush right via each
      consumer's own right:56px / flex row. */
   --width-right-column: clamp(368.75px, 41.667vw - 58.33px, 541.67px);
-
-  /* SIX columns of the same grid — the Work card headline measure:
-     6·(100vw−332)/12 + 5 gutters = 50vw − 66px. 654px at 1440, 446.5 at the
-     1025 band floor, frozen at 654 above. (Below 1025 the cards flatten to
-     one column via display:contents, so this stops applying.) */
-  --width-title-column: clamp(446.5px, 50vw - 66px, 654px);
 }
 
 /* ============================================================
@@ -113,7 +107,7 @@
 
 html.is-motion [data-reveal] {
   opacity: 0;
-  transform: translateY(16px);
+  transform: translateY(12px);
   will-change: opacity, transform;
 }
 
@@ -174,10 +168,6 @@ body {
   font-size: var(--size-base);
   line-height: var(--line-height-body);
   -webkit-font-smoothing: antialiased;
-  /* The hero field overscans the viewport (110vw) — clip the overhang so it
-     can't mint a horizontal scrollbar. `clip`, not `hidden`: hidden would
-     turn body into a scroll container and break the sticky header. */
-  overflow-x: clip;
 }
 
 /* ============================================================
@@ -245,20 +235,11 @@ body {
   border-bottom: none;
 }
 
-/* The blue Contact panel closes the section above it with its own edge, so the
-   hairline is a second divider on the same seam. It's invisible against cream
-   until the docked nav inverts over the panel — then it reads as a line stuck
-   to the bottom of the bar. One edge per seam: drop the hairline. */
-.page-section:has(+ .contact-section) {
-  border-bottom: none;
-}
-
 /* Eyebrow — one shared small uppercase label used across every section
-   (section labels, footprint group titles). The Work cards used to share it
-   via .work-card-meta; that line was removed 2026-08-04 — the project
-   overview masthead carries the metadata instead. */
+   (section labels, footprint group titles, work-card meta) */
 .section-label,
-.footprint-group-title {
+.footprint-group-title,
+.work-card-meta {
   font-family: var(--font-ui);
   font-size: 0.8125rem;
   font-weight: 500;

@@ -10,25 +10,47 @@ shared by all of them.
 ## File Map
 - **Project overview pages:** `work/*.html` (4) — see **Project Overview Pages** below.
 - **Main HTML:** `index.html` (~260 lines) — structure/content only. A tiny inline `<script>` in `<head>` sets `is-motion` + `is-loading` pre-paint (both only when JS runs, so no-JS visitors aren't left on a blank page); ends with a single `<script src="js/main.js" defer>`.
-- **JavaScript:** `js/main.js` (~340 lines) — all interactions: nav scroll-spy, site load reveal (scribble draw + fades), hero scroll effects, header-over-Contact color inversion, custom cursors, **plus the motion system** (Lenis smooth scroll + Motion.dev viewport reveals). See **Motion & Scrolling** below for the exact knobs — don't re-read the whole file.
+- **JavaScript:** `js/main.js` — all interactions: nav scroll-spy, the landing header tuck (`is-tucked` while the hero's `.intro-bar` is on screen), page load reveal, header-over-Contact color inversion, custom cursors, the About tab view (`initAboutTabs`), **plus the motion system** (Lenis smooth scroll + Motion.dev viewport reveals). The blob-hero engine (BLOBS morph, hover push, paragraph cycling) retired 2026-08 — archived copy in `archive/blob-hero-2026-08/js/main.js`. See **Motion & Scrolling** below for knobs — don't re-read the whole file.
 - **CSS entry:** `style.css` (~6 lines) — **@import list only, no rules.** Do not add styles here.
 - **CSS components:** `css/components/`
   - `global.css` (~345) — reset, design tokens (`:root` custom properties), base typography, focus/skip-link, `.site-container` layout, `.page-section` structure, custom cursor, `.visually-hidden`, **motion reveal initial state** (`html.is-motion [data-reveal]`) + Lenis classes (`html.lenis`)
   - `header.css` (~92) — `.site-header`, `.site-nav-bar`, nav links, `.is-over-dark` inversion state
-  - `hero.css` (~214) — `.intro` section, headline/body, `.intro-divider` scribble, site-load-reveal keyframes/states
-  - `sections.css` (~390) — `.page-section` content: Selected Work, Public Footprints, Contact, About, case-study placeholder
+  - `hero.css` (~230) — the **landing** (2026-08, Figma 339:3745): `.page-field` full-page gradient image, `.intro` stage (statement / divider / frosted band / `.intro-bar` bottom nav), the divider-mask load reveals, and the `is-loading` page hold. The previous blob hero is archived in `archive/blob-hero-2026-08/`.
+  - `sections.css` (~390) — `.page-section` content: Selected Work, Contact, About (incl. the `.about-tabs` Design toolkit / Public footprints tab view), case-study placeholder
   - `footer.css` (~28) — `.site-footer`
   - `project-overview.css` (~275) — the shared Project Overview template: `.project-hero`, `.project-masthead` (title + metadata `<dl>`), `.project-block` (description / impact / role), `.project-locked` + `.invite-button` (locked case study), the `.project-carousel` masthead crossfade, and `.section-pills`. Imported after `sections.css` (it leans on `.section-label`, `.about-body`, `.contact-connect-links`) and before `responsive.css`.
   - `responsive.css` (~110) — **ALL width breakpoints, site-wide.** Organized by screen size (1000 → 768 → 700 → 600px). Imported last so it overrides desktop styles.
+
+## Landing (2026-08) — "Making products make sense."
+The homepage hero is the Figma 339:3745 landing: `images/hero-bkg-web.jpg` (a
+compressed derivative of the 18MB+ source `images/hero-bkg.jpg` — regenerate
+with `sips --resampleWidth 3600 -s formatOptions 78` and bump its `?v=` when
+the source changes; never ship the source) laid as a PAGE background at
+`z:-1` inside `main` (a stacking context — body's own background otherwise
+paints over negative-z elements). **The field is never clipped**: whatever
+extends past the hero fold bleeds behind Selected Work and dissolves into the
+cream on its own. The hero stage: statement (top half, 96px Hanken) →
+full-width hairline divider at the exact center → frosted band (bottom half,
+backdrop-blur) with the bio in its right column → `.intro-bar` along the
+bottom (wordmark / Work·Footprints·About with the header's chip hover states /
+solid-black "Say hello" pill). Load: the divider "emits" headline up + bio
+down (masked by each region's overflow, 64px travel over a 40px gap,
+REVEAL.ease), then the bar fades in — all CSS, reduced-motion exempt. The
+sticky header stays in the DOM, tucked above the viewport over the hero
+(js/main.js) and sliding in past the fold; at ≤480 the tuck is neutralized,
+the `.intro-bar` is hidden, and the floatie pill + header Contact trigger
+carry mobile nav. ≤1024 tiers are INTERIM (desktop composition, tighter
+insets) pending frames. The previous blob-hero landing is archived, fully
+self-contained, in `archive/blob-hero-2026-08/`.
 
 ## Where each page area lives
 | Area on page | CSS file | HTML location |
 |---|---|---|
 | Header / nav | `header.css` | top of `index.html` (`<header>`) |
-| Hero / intro / scribble | `hero.css` | `<section class="intro">` |
+| Landing hero (field bg, statement, divider, frosted band, bottom bar) | `hero.css` | `.page-field` img + `<section class="intro">` |
 | Selected Work | `sections.css` | `#work-section` |
-| Public Footprints | `sections.css` | footprints section |
 | About | `sections.css` | `#about` |
+| Design toolkit / Public footprints (tab view at the bottom of About; no standalone Footprints section any more) | `sections.css` (`.about-tabs`) + `js/main.js` (`initAboutTabs`) | inside `#about` |
 | Contact | `sections.css` | `#contact` |
 | Footer / copyright | `footer.css` | `<footer class="site-footer">` |
 | Any interaction/animation | `js/main.js` | — |
@@ -263,6 +285,11 @@ is defined somewhere in the site.
   `description`, and `creditText` is a copy of text already visible in the HTML.
   Never put a figure, credential, employer, or date in JSON-LD that a reader
   can't also see on the page. If the visible copy changes, change the schema.
+  - **One deliberate exception: "Senior."** The 2026-08 landing dropped the
+    "Senior product designer…" line that used to carry it, so the word now
+    appears only in metadata (`jobTitle`, the descriptions, `llms.txt`). That's
+    Jenna's call, not an oversight — it's her actual title. **Leave it.** Don't
+    "fix" it to match the visible copy in a later schema audit.
 - The `abstract` fields exist so an answer engine quotes **Jenna's own numbers**
   rather than paraphrasing. Keep them in sync with the Impact bullets.
 - **Never add the locked case-study URL** (the Figma deck) to `llms.txt`, the

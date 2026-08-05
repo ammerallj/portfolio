@@ -13,21 +13,7 @@
   -webkit-backdrop-filter: blur(4px);
   backdrop-filter: blur(4px);
   padding-block: var(--space-sm);
-  transition: background-color 0.35s ease, transform 0.4s ease;
-}
-
-/* On the landing (homepage, identified by its hero) the docking .intro-bar IS
-   the site nav on desktop — the sticky top header stands down entirely. The
-   project pages have no .intro, so they keep this header; the ≤480 tier
-   re-enables it on the homepage too (mobile nav = header trigger + floatie). */
-body:has(.intro) .site-header {
-  display: none;
-}
-
-/* (Legacy tuck, now only reachable on pages that show the header. Kept for
-   the no-JS fallback ordering; harmless where the header is hidden.) */
-.site-header.is-tucked {
-  transform: translateY(-100%);
+  transition: background-color 0.35s ease;
 }
 
 /* Over the blue Contact panel the bar inverts to blue with white text.

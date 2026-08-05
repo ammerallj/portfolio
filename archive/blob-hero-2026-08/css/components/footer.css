@@ -1,0 +1,53 @@
+/* ============================================================
+   SITE FOOTER
+   ============================================================ */
+
+.site-footer {
+  /* Continues the blue contact panel; a white rule divides copyright from it */
+  background-color: var(--color-accent);
+  border-top: 1px solid rgba(255, 255, 255, 0.25);
+  /* Figma: copyright is centered 30px from the divider line and 30px from the
+     bottom edge */
+  padding-block: 30px;
+}
+
+.site-footer .site-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.site-footer p {
+  /* Metadata treatment — the same 13px uppercase label style as .section-label /
+     the project metadata dt (--font-ui, 500, 0.05em, uppercase), at 70% so the
+     copyright recedes as fine print. opacity (not a 70% colour) so it reads as
+     70% against BOTH footer variants: white on the blue homepage footer, and
+     --color-text on the cream project footer below. */
+  font-family: var(--font-ui);
+  font-size: 0.8125rem; /* 13px */
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #fff;
+  opacity: 0.7;
+}
+
+/* Footer mobile stacking lives in css/components/responsive.css */
+
+/* ---- PLAIN VARIANT (project overview pages) --------------------------------
+   The accent fill above exists to CONTINUE the homepage's blue Contact panel —
+   the footer is the bottom of that panel, and the white rule divides the
+   copyright from it. The project pages have no Contact panel: they end on cream,
+   so the blue read as a lone bar bolted to the bottom of the page.
+
+   Here it's the page's own background with black text, and there's no divider
+   at all — the white rule was invisible on cream, and a cream-on-cream hairline
+   just drew a line under content that already ends cleanly. */
+.site-footer--plain {
+  background-color: transparent;
+  border-top: none;
+}
+
+.site-footer--plain p {
+  color: var(--color-text);
+}

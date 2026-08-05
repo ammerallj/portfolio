@@ -1,0 +1,171 @@
+/* ============================================================
+   INTRO SECTION
+   ============================================================ */
+
+.intro {
+  position: relative;
+  /* The hero fills the WHOLE viewport and spans up behind the 66px sticky header
+     (margin-top pulls it under the header, which overlays it as frosted glass).
+     This way the centered composition (blob + copy) centers on the true page
+     center, not just the area below the header. Floored at 760 so the content
+     isn't clipped on short screens. */
+  min-height: max(760px, 100dvh);
+  margin-top: -66px;
+  overflow: hidden;
+}
+
+/* Organic blue blob behind the copy (Figma node 258:479, desktop). Full-bleed
+   and centered: the path is authored in the 1440×760 frame with the silhouette
+   already centred, so the element just spans the viewport (capped at 1440) and
+   the shape lands centred at every width in the desktop range. The section clips
+   whatever overflows top/bottom. js/main.js swaps in the live/settling path. */
+.intro-blob {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  /* Centre the VISIBLE silhouette, not the 1440-wide canvas: the shape's bbox
+     sits off-centre inside its own viewBox, so initHero() measures that gap and
+     publishes it as --blob-dx/dy. Self-correcting for any path (incl. a Figma
+     re-sync); falls back to plain canvas-centring with no JS. */
+  transform:
+    translate(calc(-50% + var(--blob-dx, 0px)), calc(-50% + var(--blob-dy, 0px)))
+    translateZ(0);
+  /* FIXED at the 1440 frame size across the whole desktop band (≥1025) — the
+     blob does NOT scale with the viewport; on narrower desktops the section's
+     overflow:hidden crops its sides while the 40px/750px copy stays put. The
+     ≤1024 tiers size their own blobs. */
+  width: 1440px;
+  height: auto;            /* height follows the viewBox ratio (760/1440) */
+  max-width: none;
+  z-index: 0;
+  pointer-events: none;
+  color: var(--color-accent);
+}
+
+.intro-blob-path {
+  fill: currentColor;
+}
+
+/* Centered lockup inside the blob (Figma 258:497): a 750px block anchored on the
+   fold's center, copy left-aligned (ragged), CTA 60px below. max-width keeps it
+   inside a 56px page gutter on narrower desktops. */
+.intro-inner {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  /* The blob's SILHOUETTE is page-centred (see --blob-dx/dy above). Centring the
+     whole lockup on it would leave the COPY reading high, because the CTA hangs
+     80px below the text and pulls the column's balance point down past it. So
+     nudge the lockup down by ~half the CTA block (gap/2 + CTA height/2 ≈ 52px) —
+     that lands the claim+credential visually centred in the blob, with the CTA
+     sitting just below centre. (The ≤1024 tiers hide the CTA and re-anchor their
+     own copy, so this desktop-only nudge doesn't reach them.) */
+  transform: translate(-50%, calc(-50% + 52px));
+  z-index: 1;
+  /* 750px is the CONTENT width (Figma 258:497). The lockup is a centered fixed
+     block, not a page-gutter container, so cancel the site's base 56px gutter
+     padding it would otherwise inherit; max-width keeps a 56px gutter each side
+     on narrower desktops. */
+  padding-inline: 0;
+  width: 750px;
+  /* Keep the 750px block as long as it fits, letting the auto side margins shrink
+     to a 32px minimum before the block itself starts narrowing. */
+  max-width: calc(100% - 64px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 80px; /* copy → CTA (Figma 258:497, claim-first revision) */
+}
+
+.intro-copy {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 48px; /* claim → credential (Figma 261:477, claim-first revision) */
+}
+
+/* Both hero lines share the type — Inter (body font), 40px, ragged-right. The
+   credential is roman (the h1); the positioning claim is italic (Figma 261:475).
+   Fluid down to 24px so the copy stays inside the blob on narrower desktops
+   until the ≤1024 tiers take over with their own frames. */
+.intro-headline,
+.intro-claim {
+  margin: 0;
+  font-family: var(--font-body);
+  font-weight: 400;
+  /* 40px held across the whole desktop band down to ~800px — the frames scale by
+     shrinking the SIDE MARGINS, not the type or the 750px block (1440 and 1280
+     are both 40px / 750px; it just holds as the viewport narrows). Below ~800 it
+     scales down as interim until the tablet/phone frames take over. */
+  font-size: clamp(24px, 5vw, 40px);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: #fff;
+}
+
+.intro-claim {
+  font-style: italic;
+}
+
+/* "See selected work ↓" (Figma 258:500). A link, not a button — it navigates
+   (main.js routes #-links through Lenis for the smooth scroll). White, since it
+   sits inside the blob. Underline on the label span only; the arrow hangs
+   outside it. */
+.intro-cta {
+  font-size: 24px;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  color: #fff;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.intro-cta-label {
+  text-decoration: underline;
+  text-underline-position: from-font;
+}
+
+.intro-cta:focus-visible .intro-cta-label {
+  opacity: 0.75;
+}
+
+/* True-hover devices only — on touch, tapped :hover sticks (see header.css) */
+@media (hover: hover) {
+  .intro-cta:hover .intro-cta-label {
+    opacity: 0.75;
+  }
+}
+
+/* Width breakpoints for this section live in css/components/responsive.css */
+
+/* ============================================================
+   SITE LOAD REVEAL
+   The blob plays its one-time entrance settle (js/main.js); the copy lockup
+   fades in over it, then the rest of the site fades in.
+   ============================================================ */
+
+/* The copy lockup + the rest of the page start hidden ONLY when the motion path
+   runs (is-loading is set pre-paint whenever JS runs and motion is allowed).
+   No-JS / reduced-motion visitors never get is-loading, so it's simply visible.
+   The blob itself is NOT hidden — it breathes/settles through the load. */
+html.is-loading .site-header,
+html.is-loading .intro-inner,
+html.is-loading .page-section,
+html.is-loading .site-footer {
+  opacity: 0;
+}
+
+html.is-loading.is-text-revealed .intro-inner {
+  opacity: 1;
+  transition: opacity 0.5s ease;
+}
+
+html.is-revealing .site-header,
+html.is-revealing .page-section,
+html.is-revealing .site-footer {
+  transition: opacity 0.6s ease;
+}
+
+/* (The .scroll-indicator mouse cue lived here until Jul 2026 — cut site-wide:
+   the desktop CTA and the tablet/phone card-peek own the "scroll" affordance.) */
+
