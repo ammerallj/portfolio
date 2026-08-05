@@ -279,17 +279,23 @@ own version, separate from the `style.css?v=` / `@import` CSS bump below).
 - **All width breakpoints live in `responsive.css`**, ordered largest → smallest max-width (1440 → 1024 → 768 → 480). Do not scatter width media queries back into the component files. Motion queries (`prefers-reduced-motion`) are the exception — they stay beside their animations in `global.css` / `hero.css`.
 
 ## Conventions
-- After changing **CSS or `js/main.js`**, run **`./scripts/bump-cache.sh`** — it
-  re-stamps every `?v=` cache-buster (the `<link>` and `<script>` on every HTML
-  page, plus every `@import` in `style.css`) from a hash of the actual file
-  content. CSS and JS get **separate** hashes, so a CSS edit only refetches CSS
-  and a JS edit only refetches `js/main.js`. Do **not** hand-edit `?v=` numbers
-  any more: the old manual counter was a single shared value two parallel chats
-  would both bump and collide on; a content hash is deterministic (same content →
-  same version, so no spurious refetches) and any real divergence shows up as a
-  git merge conflict on the `?v=` line instead of a silent overwrite. Image
-  `?v=` (jpg/png/svg) are **not** touched by the script — bump those by hand per
-  the image recipe when you overwrite an asset in place.
+- The `?v=` cache-buster is **automatic** — a git `pre-commit` hook
+  (`.githooks/pre-commit`) runs `scripts/bump-cache.sh` whenever a commit stages
+  a change to a component stylesheet or `js/main.js`, re-stamping every `?v=`
+  (the `<link>`/`<script>` on every HTML page + every `@import` in `style.css`)
+  from a hash of the file content and folding the result into the same commit.
+  You do **not** hand-edit `?v=` numbers, and normally don't run the script by
+  hand either — just commit. (Run `./scripts/bump-cache.sh` manually only to
+  preview the stamp before committing.) CSS and JS get **separate** hashes, so a
+  CSS edit only refetches CSS and a JS edit only refetches `js/main.js`. Content
+  hashing is deterministic (same content → same version, no spurious refetches),
+  and any real cross-chat divergence surfaces as a git merge conflict on the
+  `?v=` line instead of a silent overwrite. Image `?v=` (jpg/png/svg) are **not**
+  touched — bump those by hand per the image recipe when you overwrite an asset.
+  - **One-time per clone:** the hook is enabled with
+    `git config core.hooksPath .githooks` (already set in this working copy, and
+    shared across its worktrees). A *fresh* `git clone` must re-run that one line
+    to arm the hook.
 - **Cross-chat workflow:** one chat per **git worktree** so parallel sessions
   can't stomp each other's files. `./scripts/new-worktree.sh <name>` creates
   `../portfolio-<name>/` on its own branch; point a fresh chat there, merge to

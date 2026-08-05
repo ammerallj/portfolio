@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+#
+# pre-commit — auto-run the content-hash cache-buster.
+#
+# When a commit stages a change to any hashed source (a component stylesheet or
+# js/main.js), re-stamp every ?v= from content and fold the updated files into
+# the same commit. Nobody has to remember scripts/bump-cache.sh, and it works
+# for every chat and for manual commits alike.
+#
+# No-op when the ?v= would not change: bump-cache.sh is content-addressed, so if
+# the hash is unchanged the re-staged files carry no diff.
+#
+# Caveat: this `git add`s index.html / style.css / work/*.html in full, so any
+# UNSTAGED edits sitting in those files at commit time get swept in too. On this
+# static site those files are edited deliberately per commit, so that's fine —
+# but don't do a partial (git add -p) commit that leaves half of one of them
+# unstaged and expect the hook to respect the split.
+#
+set -euo pipefail
+
+# Only act when the staged set touches content the ?v= hash is derived from.
+if git diff --cached --name-only | grep -qE '^(css/components/.+\.css|js/main\.js)$'; then
+  ./scripts/bump-cache.sh >/dev/null
+  git add index.html style.css work/*.html
+fi
