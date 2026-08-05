@@ -279,8 +279,22 @@ own version, separate from the `style.css?v=` / `@import` CSS bump below).
 - **All width breakpoints live in `responsive.css`**, ordered largest → smallest max-width (1440 → 1024 → 768 → 480). Do not scatter width media queries back into the component files. Motion queries (`prefers-reduced-motion`) are the exception — they stay beside their animations in `global.css` / `hero.css`.
 
 ## Conventions
-- After changing **CSS**, bump the cache-buster **in two places, to the same number**: the stylesheet link in `index.html` (`style.css?v=NNN`) **and** the `?v=NNN` on every `@import` in `style.css`. Bumping only the `<link>` does **not** refetch the component files — browsers cache `@import` URLs independently by their own URL, so a change to `sections.css` etc. stays stale until its import version changes too.
-- After changing **`js/main.js`**, bump `main.js?v=NNN` on its `<script>` in `index.html`. This is a **separate** version from the CSS one — a JS edit needs only the JS bump, a CSS edit only the CSS bump.
+- After changing **CSS or `js/main.js`**, run **`./scripts/bump-cache.sh`** — it
+  re-stamps every `?v=` cache-buster (the `<link>` and `<script>` on every HTML
+  page, plus every `@import` in `style.css`) from a hash of the actual file
+  content. CSS and JS get **separate** hashes, so a CSS edit only refetches CSS
+  and a JS edit only refetches `js/main.js`. Do **not** hand-edit `?v=` numbers
+  any more: the old manual counter was a single shared value two parallel chats
+  would both bump and collide on; a content hash is deterministic (same content →
+  same version, so no spurious refetches) and any real divergence shows up as a
+  git merge conflict on the `?v=` line instead of a silent overwrite. Image
+  `?v=` (jpg/png/svg) are **not** touched by the script — bump those by hand per
+  the image recipe when you overwrite an asset in place.
+- **Cross-chat workflow:** one chat per **git worktree** so parallel sessions
+  can't stomp each other's files. `./scripts/new-worktree.sh <name>` creates
+  `../portfolio-<name>/` on its own branch; point a fresh chat there, merge to
+  `main` when done, then `git worktree remove`. Overlapping edits then surface as
+  merge conflicts, not silent overwrites.
 - The shared right column across sections is **542px** (the site's "5 grid columns"); the layout uses **56px** horizontal page padding (`.site-container`). Reuse these, don't invent new values.
 - Accent blue is the `--color-accent` token (`#4A45FF`).
 
