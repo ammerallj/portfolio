@@ -103,7 +103,7 @@ main {
 .intro-headline {
   font-family: var(--font-heading);
   font-weight: 700;
-  font-size: clamp(56px, 6.67vw, 96px); /* 96 @1440 */
+  font-size: var(--display-size); /* shared bookend display size */
   line-height: 1;
   letter-spacing: -0.02em;
   color: #fff;
@@ -152,7 +152,7 @@ main {
      drifted from that convention (and from it at every width but 1440). */
   flex: 0 0 var(--width-right-column);
   min-width: 0;
-  font-size: 20px;
+  font-size: var(--size-lg); /* body prose — the hero bio IS body copy */
   line-height: 1.08;
   letter-spacing: -0.02em;
   color: #fff;
@@ -282,8 +282,8 @@ main {
 
 .intro-bar-links a {
   position: relative;
-  font-family: var(--font-ui);
-  font-size: 1rem;
+  font-family: var(--font-body);
+  font-size: var(--size-base);
   letter-spacing: -0.01em;
   line-height: 1.5;
   color: var(--color-text-70);
@@ -312,6 +312,17 @@ main {
   }
 }
 
+/* Active section (scroll-spy, set in js/main.js) — the muted link comes to full
+   colour + a heavier weight, mirroring the header nav's selected state. The chip
+   border stays a hover-only affordance. */
+.intro-bar-links a.is-active {
+  color: var(--color-text);
+  font-variation-settings: 'wght' 600;
+}
+.intro-bar.is-over-dark .intro-bar-links a.is-active {
+  color: #fff;
+}
+
 .intro-bar-cta-wrap {
   flex: 1 1 0;
   min-width: 0;
@@ -327,8 +338,8 @@ main {
   padding: 0 20px;
   border-radius: 100px;
   background: #000;
-  font-family: var(--font-ui);
-  font-size: 1rem;
+  font-family: var(--font-body);
+  font-size: var(--size-base);
   letter-spacing: -0.01em;
   color: #fff;
   text-decoration: none;

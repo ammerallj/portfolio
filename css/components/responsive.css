@@ -114,13 +114,7 @@
    Work / Footprints / About stack into a single full-width column.
    ========================================================================== */
 @media (max-width: 1024px) {
-  /* The fluid 24–28px copy stops here: re-value the hero-description tokens
-     (global.css) to this tier's 20px caption. The CTA stays on at every
-     breakpoint and inherits the token, so it steps down with the copy. */
   :root {
-    --size-hero-description: 1.25rem;        /* 20px */
-    --line-height-hero-description: 1.3;
-
     /* SPACING SCALE, tablet step (see the block at the top of this file).
        Group closes from the desktop 60 as the columns stack — side by side a
        60px column gap reads as one break, but stacked it becomes vertical
@@ -135,6 +129,7 @@
     --gap-group: 48px;
     --gap-heading: 96px;
     --page-gutter: 24px;
+    --section-title-size: 2.75rem; /* 44px */
   }
 
   /* LANDING hero interim (no ≤1024 frames yet for the "Making products make
@@ -151,9 +146,6 @@
   }
   .intro-bar-links {
     flex-basis: 360px;
-  }
-  .intro-bio {
-    font-size: 18px;
   }
 
   .site-header-row {
@@ -201,23 +193,20 @@
      768. Its gap needs no override here: the base clamp (sections.css) has already
      scaled fluidly to its 48px floor by ~1025, matching the group step. */
 
-  /* The big content H2 (Work-card titles, Public Footprints, About Me) steps down
-     from its 64px desktop size here — 64px reads oversized once the cards stack
-     full-width, and it keeps long titles nearer one line. Continues to 32px at
-     the 480 tier, so the scale reads 64 → 48 → 32. */
-  .section-title {
-    font-size: 3rem; /* 48px */
+  /* (The big content H2 steps 56 → 44 → 32 via --section-title-size in each
+     tier's :root above — no per-element override needed here.) */
+
+  /* Next-case pager title: 40 → 36 here → 32 (≤480). Its own scale, well under
+     the section title (44 at this tier) so the pager stays subordinate. */
+  .next-case-title {
+    font-size: 2.25rem; /* 36px */
   }
 
   /* About stays TWO-COLUMN here (photo | text) like Footprints — it stacks at
-     768, not 1024. The heading pull-up (text rides up level with "About Me.")
-     still applies, but the heading stepped down to 48px (3rem) at this tier, so
-     recompute the pull-up off 3rem instead of the desktop 4rem. The gap is the
-     fluid clamp in sections.css; the portrait photo1 keeps loading (its landscape
-     swap moved to ≤768 in index.html). */
-  .about-layout {
-    --about-pullup: calc(3rem + var(--gap-group));
-  }
+     768, not 1024. The heading pull-up still applies and now tracks the heading
+     automatically (it reads --section-title-size, which is 3rem at this tier), so
+     no per-tier recompute is needed. The gap is the fluid clamp in sections.css;
+     the portrait photo1 keeps loading (its landscape swap moved to ≤768). */
 
   /* Contact keeps its two columns (Connect | On My Mind) at this tier like
      Footprints / About — On My Mind stays in the fluid right column beside
@@ -301,6 +290,9 @@
     margin-top: 0;
   }
   .about-photo {
+    /* Back into flow — stacked, there's no text column to cap the height,
+       so the desktop absolute-fill reverts and the aspect box returns. */
+    position: static;
     max-width: none;
     aspect-ratio: 858 / 600;
   }
@@ -370,7 +362,8 @@
    ========================================================================== */
 @media (max-width: 480px) {
   :root {
-    --size-hero-description: 17px; /* Figma phone frame (other components) */
+    --display-size: 44px; /* bookend display (hero + contact) steps down here */
+    --section-title-size: 2rem; /* 32px — section headings step down here */
 
     /* SPACING SCALE, phone step — the tightest, and where the scale was
        derived (see the block at the top of this file). Group and section both
@@ -397,12 +390,6 @@
   .intro-band {
     padding-inline: 16px;
   }
-  .intro-headline {
-    font-size: 44px;
-  }
-  .intro-bio {
-    font-size: 17px;
-  }
   .intro-band-spacer {
     display: none;
   }
@@ -418,12 +405,26 @@
     transform: none;
   }
 
-  /* Headlines step down to 32px on phones (from their 40px floor / clamp).
-     Covers Work card titles, the Public Footprints section title, and the
-     About + Contact headings (the last two otherwise bottom out at 2.5rem). */
-  .section-title,
+  /* The PROJECT pages keep their top bar at this tier — it is their only nav
+     now (no .site-header there any more), so the homepage's hide above must
+     not reach it. It collapses to the same shape the header had here: wordmark
+     + "Menu" trigger, the overlay carrying Work / About / connect exactly as
+     before. (Footprints and "Say hello" drop out of the phone nav — the same
+     way they do on the homepage, whose floatie is Work / About only and whose
+     overlay is the connect block.) Overview / Process / Impact stay in the
+     bottom floatie. */
+  .intro-bar--page {
+    display: flex;
+    padding-inline: var(--page-gutter);
+  }
+  .intro-bar--page .intro-bar-links,
+  .intro-bar--page .intro-bar-cta-wrap {
+    display: none;
+  }
+
+  /* Remaining 40px→32px step-downs on phones. (.section-title now steps via
+     --section-title-size in :root above; the bookend display via --display-size.) */
   .about-name,
-  .contact-email,
   .next-case-title {
     font-size: 2rem;
   }
@@ -447,7 +448,7 @@
 
   /* The lead paragraph steps down in step with the body copy above */
   .project-lead {
-    font-size: 1.25rem;
+    font-size: var(--size-lg);
   }
 
   /* Floating section pills: tighten so a 2–3 item bar clears the 375 gutter and

@@ -18,15 +18,25 @@
   --color-focus: #4A45FF;
 
   --font-heading: 'Hanken Grotesk', system-ui, sans-serif;
-  --font-body: 'Inter', system-ui, sans-serif;
-  --font-ui: 'Inter', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif; /* body copy AND all UI text */
 
   --size-base: 1rem;       /* 16px */
-  --size-sm: 0.875rem;     /* 14px */
+  --size-xs: 0.8125rem;    /* 13px — eyebrow/label + smallest helper text */
   --size-lg: 1.25rem;      /* 20px */
   --size-xl: 1.75rem;      /* 28px */
   --size-2xl: 2.5rem;      /* 40px */
   --size-3xl: 3.5rem;      /* 56px */
+
+  /* Display — the one bold Hanken statement that OPENS (hero) and CLOSES
+     (contact) each visit. Both .intro-headline and .contact-email read this, so
+     the two bookends always match. Fluid 56→96px; steps to 44px at ≤480
+     (responsive.css :root). */
+  --display-size: clamp(56px, 6.67vw, 96px);
+
+  /* Section title — the 64px / 500-weight heading shared by every section
+     (Work cards, About, Footprints, project H1 + block headings). Steps
+     64 → 48 (≤1024) → 32 (≤480) via each tier's :root in responsive.css. */
+  --section-title-size: 3.5rem; /* 56px */
 
   --space-xs: 0.5rem;
   --space-sm: 1rem;
@@ -74,15 +84,7 @@
 
   --measure: 65ch;
 
-  --line-height-body: 1.7;
   --line-height-heading: 1.15;
-
-  /* Hero description (the intro right-column copy). Fluid 24px→28px across
-     the 1025→1440 band (Figma 217:5910 → 198:725), frozen at 28px above;
-     responsive.css re-values these per tier (20px/1.3 ≤1024, 17px ≤480)
-     instead of re-declaring rules. */
-  --size-hero-description: clamp(24px, 14.12px + 0.9639vw, 28px);
-  --line-height-hero-description: 1.05;
 
   /* The site's shared right column (nav block, hero description, Work card
      descriptions, Footprints/About/Contact right blocks): ALWAYS 5 columns
@@ -172,7 +174,7 @@ body {
   color: var(--color-text);
   font-family: var(--font-body);
   font-size: var(--size-base);
-  line-height: var(--line-height-body);
+  line-height: 1.5; /* base body rhythm; component prose overrides where needed */
   -webkit-font-smoothing: antialiased;
   /* The hero field overscans the viewport (110vw) — clip the overhang so it
      can't mint a horizontal scrollbar. `clip`, not `hidden`: hidden would
@@ -201,8 +203,8 @@ body {
   background: var(--color-text);
   color: var(--color-bg);
   padding: var(--space-xs) var(--space-sm);
-  font-family: var(--font-ui);
-  font-size: var(--size-sm);
+  font-family: var(--font-body);
+  font-size: var(--size-base);
   font-weight: 600;
   text-decoration: none;
   z-index: 9999;
@@ -259,8 +261,8 @@ body {
    overview masthead carries the metadata instead. */
 .section-label,
 .footprint-group-title {
-  font-family: var(--font-ui);
-  font-size: 0.8125rem;
+  font-family: var(--font-body);
+  font-size: var(--size-xs);
   font-weight: 500;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -326,7 +328,7 @@ a {
   height: 3rem;
   background: var(--color-text);
   color: var(--color-bg);
-  font-family: var(--font-ui);
+  font-family: var(--font-body);
   font-size: 1.5rem;
   line-height: 1;
   border-radius: 50%;

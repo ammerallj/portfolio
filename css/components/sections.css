@@ -122,8 +122,8 @@
    served only 200 and 700, so a 500 here would have fallen back to 200. */
 .section-title {
   font-family: var(--font-heading);
-  font-size: 4rem; /* 64px */
-  font-weight: 500;
+  font-size: var(--section-title-size); /* 64px → 48 → 32, tokenized */
+  font-weight: 500; /* Medium — the site's section-heading weight */
   letter-spacing: -0.02em;
   line-height: 1;
   color: var(--color-text);
@@ -217,7 +217,7 @@
 }
 
 .footprint-list a {
-  font-size: 1.25rem;
+  font-size: var(--size-lg);
   letter-spacing: -0.02em;
   line-height: 1.5;
   text-decoration: underline;
@@ -273,7 +273,7 @@
 
 .contact-email {
   font-family: var(--font-heading);
-  font-size: clamp(2.5rem, 7vw, 6rem);
+  font-size: var(--display-size); /* shared bookend display size */
   font-weight: 700;
   letter-spacing: -0.02em;
   line-height: 1;
@@ -320,7 +320,7 @@
 }
 
 .contact-connect-links a {
-  font-size: 1.25rem;
+  font-size: var(--size-lg);
   letter-spacing: -0.02em;
   text-decoration: underline;
   color: #fff;
@@ -360,7 +360,11 @@
   /* No block padding — the heading's 100px margin-bottom sets the gap to
      content, and the section's 60px padding handles the bottom spacing */
   padding-block: 0;
-  align-items: flex-start;
+  /* stretch, not flex-start: with the photo out of flow (see .about-photo),
+     the ROW's height is the right column's text alone, and the stretched
+     left column hands that height to the photo — the text column is the
+     section's height authority. */
+  align-items: stretch;
   /* DESKTOP: the supporting text starts level with the "About Me." headline.
      The pull-up lives on the CONTAINER (with the photo pushed back down by
      the same amount below) — NOT on .about-right — so the reveal system's
@@ -368,10 +372,11 @@
      up by negative margin overflows its group's rect, and the off-screen
      reset then yanks the still-visible text mid-view (the anti-cut-out rule
      in js/main.js setupReveals). One heading line (#about-heading is
-     .section-title: 4rem, line-height 1) + its margin-bottom (the
-     --gap-group below); keep in step if the heading's type or margin
-     changes. Reset at ≤1024 (responsive.css). */
-  --about-pullup: calc(4rem + var(--gap-group));
+     .section-title, line-height 1) + its margin-bottom (--gap-group). Reads
+     --section-title-size so it tracks the heading automatically at every tier
+     (64→48→32) — no per-tier pull-up override needed. Reset to 0 once About
+     stacks at ≤768 (responsive.css). */
+  --about-pullup: calc(var(--section-title-size) + var(--gap-group));
   margin-top: calc(-1 * var(--about-pullup));
 }
 
@@ -384,6 +389,8 @@
   /* Cancels the container's pull-up so the photo stays below the heading;
      only the right column rides up beside it. */
   margin-top: var(--about-pullup);
+  /* Anchors the absolute .about-photo fill (desktop only). */
+  position: relative;
 }
 
 /* The About heading now uses .section-title for its type; this only restores
@@ -401,12 +408,22 @@
 }
 
 .about-photo {
+  /* DESKTOP: an absolute fill of the stretched left column, NOT a flow box
+     with its own aspect height. Out of flow, the photo contributes nothing
+     to the row's height, so the row is exactly as tall as the supporting
+     text column (.about-right) — the image is height-capped by the text and
+     the section can never run past its last line. object-fit: cover on the
+     img absorbs the ratio change. Back in flow when About stacks
+     (responsive.css ≤768, where the landscape aspect takes over). */
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
   width: 100%;
   max-width: 429px; /* 4 grid columns (4×90px + 3×23px gutters) */
   border-radius: 40px;
   overflow: hidden;
   background-color: #d9d9d9;
-  aspect-ratio: 542 / 701;
 }
 
 /* The <picture> wrapper must span the box, or the img's 100% height would
@@ -467,7 +484,7 @@
 
 .about-body p {
   font-family: var(--font-body);
-  font-size: 1.25rem;
+  font-size: var(--size-lg);
   letter-spacing: -0.02em;
   line-height: 1.4;
   color: var(--color-text);
@@ -487,8 +504,8 @@
 
 .about-skills-row dt {
   /* The masthead-metadata / .section-label eyebrow type */
-  font-family: var(--font-ui);
-  font-size: 0.8125rem;
+  font-family: var(--font-body);
+  font-size: var(--size-xs);
   font-weight: 500;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -499,7 +516,7 @@
 .about-skills-row dd {
   margin: 0;
   font-family: var(--font-body);
-  font-size: 1.25rem;
+  font-size: var(--size-lg);
   letter-spacing: -0.02em;
   line-height: 1.4;
   color: var(--color-text);

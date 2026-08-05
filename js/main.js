@@ -221,14 +221,23 @@ function updateScrollEffects() {
     introBar.classList.toggle('is-docked', introBar.getBoundingClientRect().top <= 0);
   }
 
-  // Scroll-spy: the active nav item is the last section whose top has
-  // scrolled above a line ~35% down the viewport. In the hero, none.
+  // Scroll-spy: the active SECTION is the lowest one whose top has scrolled above
+  // a line ~35% down the viewport (in the hero, none). Find it by comparing tops,
+  // not array order — navSections mixes the header nav and the landing's intro-bar
+  // (not in DOM order), and BOTH can be on screen pointing at the same section, so
+  // highlight every link that targets it (and mark it for assistive tech).
   const marker = window.innerHeight * 0.35;
-  let activeLink = null;
+  let activeEl = null, activeTop = -Infinity;
   for (const s of navSections) {
-    if (s.el && s.el.getBoundingClientRect().top <= marker) activeLink = s.link;
+    const top = s.el.getBoundingClientRect().top;
+    if (top <= marker && top > activeTop) { activeTop = top; activeEl = s.el; }
   }
-  navSections.forEach(s => s.link.classList.toggle('is-active', s.link === activeLink));
+  navSections.forEach(s => {
+    const on = s.el === activeEl;
+    s.link.classList.toggle('is-active', on);
+    if (on) s.link.setAttribute('aria-current', 'true');
+    else s.link.removeAttribute('aria-current');
+  });
 
   // Floating section pills (project pages): same spy as the nav above, but it
   // defaults to the first pill so Overview reads active at the top of the page.

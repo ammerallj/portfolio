@@ -67,8 +67,8 @@
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@200;700&family=Inter:wght@400..700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../style.css?v=410" />
+  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@200;500;700&family=Inter:wght@400..700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../style.css?v=426" />
   <!-- Pre-paint flag, set only when JS runs:
        • is-motion — hides reveal targets so they can fade in without a flash
          (skipped for reduced-motion visitors, who see everything).
@@ -89,26 +89,25 @@
   <a class="skip-link" href="#main-content">Skip to main content</a>
 
   <!-- ============================================================
-       SITE HEADER — identical to index.html, except the nav links point
-       back to the homepage's sections rather than to in-page anchors.
+       SITE NAV — the homepage's own bar (.intro-bar), pinned to the top.
+       The old .site-header nav is retired on these pages: this is now the one
+       site nav everywhere. On the homepage the bar rests in the hero and docks
+       on scroll; here there is no hero, so .intro-bar--page pins it from the
+       first pixel with the glass already on (project-overview.css §0). Links
+       resolve back to the homepage's sections. At <=480 it collapses to
+       wordmark + "Menu" (responsive.css); the in-page Overview/Process/Impact
+       nav is the separate .section-pills floatie below.
        ============================================================ -->
-  <header class="site-header" role="banner">
-    <div class="site-header-row">
-      <a class="site-name" href="../index.html" id="site-name">Jenna Ammerall.</a>
-      <nav class="site-nav-bar" aria-label="Primary navigation">
-        <div class="site-nav-group site-nav-left">
-          <a href="../index.html#work-section" id="nav-work" class="is-active" aria-current="true">Work</a>
-        </div>
-        <div class="site-nav-group site-nav-center">
-          <a href="../index.html#about">About</a>
-        </div>
-        <div class="site-nav-group site-nav-right">
-          <a href="../index.html#contact">Contact</a>
-        </div>
-      </nav>
-      <button class="mobile-menu-toggle" type="button" aria-expanded="false" aria-controls="mobile-menu">Menu</button>
+  <nav class="intro-bar intro-bar--page" aria-label="Site navigation">
+    <a class="intro-bar-name" href="../index.html" id="site-name">Jenna Ammerall.</a>
+    <div class="intro-bar-links">
+      <div class="intro-bar-group"><a href="../index.html#work-section" id="nav-work" class="is-active" aria-current="true">Work</a></div>
+      <div class="intro-bar-group"><a href="../index.html#footprints">Footprints</a></div>
+      <div class="intro-bar-group"><a href="../index.html#about">About</a></div>
     </div>
-  </header>
+    <div class="intro-bar-cta-wrap"><a class="intro-bar-cta" href="../index.html#contact">Say hello</a></div>
+    <button class="mobile-menu-toggle" type="button" aria-expanded="false" aria-controls="mobile-menu">Menu</button>
+  </nav>
 
   <!-- ============================================================
        MOBILE MENU OVERLAY — same overlay as the homepage, links resolved
@@ -317,6 +316,6 @@
   </div>
   <div class="wave-cursor" id="wave-cursor" aria-hidden="true">👋</div>
 
-  <script src="../js/main.js?v=193" defer></script>
+  <script src="../js/main.js?v=201" defer></script>
 </body>
 </html>

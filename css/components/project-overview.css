@@ -18,6 +18,50 @@
 
 
 /* ------------------------------------------------------------
+   0. SITE NAV BAR — the landing's bar, pinned to the top
+   These pages used to carry the old .site-header nav (header.css). That bar is
+   retired here: they now share the landing's own bar (.intro-bar, hero.css), so
+   there is ONE site nav across the site. (header.css is still live — the ≤480
+   homepage tier brings .site-header back as its mobile Contact trigger — so
+   don't delete it.)
+
+   The only difference is where the bar starts. On the homepage it rests inside
+   the hero and docks as the fold scrolls past; here there is no hero, so it is
+   pinned from the first pixel: the pull-up margins are neutralized, the
+   entrance animation (choreographed against the hero reveal) is skipped, and
+   the glass is forced on rather than waiting for the .is-docked class main.js
+   toggles — which would arrive a frame late, and never at all with JS off.
+
+   The in-page Overview / Process / Impact nav is the .section-pills floatie in
+   §8 — a different job, unchanged by this.
+   ------------------------------------------------------------ */
+
+.intro-bar--page {
+  z-index: 100; /* over .section-pills (90), under the mobile overlay (200) */
+  margin-top: 0;
+  margin-bottom: 0;
+  animation: none;
+}
+
+.intro-bar--page::before {
+  opacity: 1;
+}
+
+/* The wordmark is a LINK home on these pages (a <p> on the homepage, which is
+   already home). Same lockup, minus the anchor underline; the hover mirrors
+   .site-name's, inverted — this one rests at full black. */
+a.intro-bar-name {
+  text-decoration: none;
+}
+
+@media (hover: hover) {
+  a.intro-bar-name:hover {
+    color: var(--color-text-70);
+  }
+}
+
+
+/* ------------------------------------------------------------
    1. HERO VISUAL
    The project's thumbnail — INSET, not full-bleed. It sits in the page gutter
    so its edges line up with the title and metadata below it, and it carries the
@@ -119,7 +163,7 @@
 .project-dek {
   margin-top: var(--gap-content);
   font-family: var(--font-body);
-  font-size: 1.25rem;
+  font-size: var(--size-lg);
   font-weight: 400;
   letter-spacing: -0.02em;
   line-height: 1.4;
@@ -191,7 +235,7 @@
    black + underlined via the global `a`, so the action is the part that pops. */
 .project-locked-note {
   font-family: var(--font-body);
-  font-size: 0.8125rem;
+  font-size: var(--size-xs);
   letter-spacing: normal;
   line-height: 1.4;
   color: var(--color-text-70);
@@ -428,8 +472,8 @@
 .project-meta-row dt {
   /* .section-label's type, but no bottom margin (it's inline here) */
   flex: 0 0 6.5rem;
-  font-family: var(--font-ui);
-  font-size: 0.8125rem;
+  font-family: var(--font-body);
+  font-size: var(--size-xs);
   font-weight: 500;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -445,7 +489,7 @@
      VALUE distinct from the uppercase, 70%-black label.
      Tracking is normal, not the -0.02em this had at 20px: negative tracking is
      tuned for display sizes and closes up the letterfit at 13px. */
-  font-size: 0.8125rem;
+  font-size: var(--size-xs);
   letter-spacing: normal;
   line-height: 1.4;
   color: var(--color-text);
@@ -507,7 +551,7 @@
 }
 
 .project-impact-list li {
-  font-size: 1.25rem;
+  font-size: var(--size-lg);
   letter-spacing: -0.02em;
   line-height: 1.4;
   color: var(--color-text);
@@ -549,8 +593,8 @@
 .invite-button {
   display: inline-flex;
   align-items: center;
-  font-family: var(--font-ui);
-  font-size: 1rem;
+  font-family: var(--font-body);
+  font-size: var(--size-base);
   font-weight: 700;
   letter-spacing: -0.01em;
   color: #fff;
@@ -630,7 +674,7 @@
 }
 
 .section-pills a {
-  font-family: var(--font-ui);
+  font-family: var(--font-body);
   font-size: 0.9375rem;
   /* Regular weight, matching the unselected header nav items (both are also
      --color-text-70). The active pill steps up to 600 below. */
@@ -734,8 +778,8 @@
 
 /* Eyebrow — the same 13px uppercase label as .section-label / the metadata dt. */
 .next-case-label {
-  font-family: var(--font-ui);
-  font-size: 0.8125rem;
+  font-family: var(--font-body);
+  font-size: var(--size-xs);
   font-weight: 500;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -759,14 +803,14 @@
   min-width: 0;
 }
 
-/* The next-case teaser title — a pager <span>, not a section heading. It is the
-   one title still on the old Tier-2 scale (2.5rem/700), NOT the shared
-   .section-title token the masthead and block headings now use; kept smaller so
-   the bottom-of-page pager doesn't shout at the same size as the page's own H1. */
+/* The next-case teaser title — a pager <span>, not a section heading. Same
+   Hanken 500 as .section-title, but clearly smaller at every tier (40/36/32 vs
+   56/44/32) so the bottom-of-page pager stays subordinate to the page's own H1.
+   Its own values rather than the token, since it tracks a step below it. */
 .next-case-title {
   font-family: var(--font-heading);
-  font-size: 2.5rem;
-  font-weight: 700;
+  font-size: 2.5rem; /* 40px → 36 (≤1024) → 32 (≤480); well under .section-title */
+  font-weight: 500; /* Medium — matches .section-title (Hanken 500 loads on all pages) */
   letter-spacing: -0.02em;
   line-height: 1.1;
   color: var(--color-text);
@@ -781,7 +825,7 @@
 
 .next-case-description {
   margin-top: var(--gap-content);
-  font-size: 1.25rem;
+  font-size: var(--size-lg);
   letter-spacing: -0.02em;
   line-height: 1.4;
   color: var(--color-text-70);

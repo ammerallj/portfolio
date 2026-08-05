@@ -14,11 +14,11 @@ shared by all of them.
 - **CSS entry:** `style.css` (~6 lines) — **@import list only, no rules.** Do not add styles here.
 - **CSS components:** `css/components/`
   - `global.css` (~345) — reset, design tokens (`:root` custom properties), base typography, focus/skip-link, `.site-container` layout, `.page-section` structure, custom cursor, `.visually-hidden`, **motion reveal initial state** (`html.is-motion [data-reveal]`) + Lenis classes (`html.lenis`)
-  - `header.css` (~92) — `.site-header`, `.site-nav-bar`, nav links, `.is-over-dark` inversion state
+  - `header.css` (~92) — `.site-header`, `.site-nav-bar`, nav links, `.is-over-dark` inversion state. **Now the ≤480 homepage only** — it's `display:none` over the landing at desktop and the project pages dropped it (2026-08) for the shared `.intro-bar`. Don't build new nav on it.
   - `hero.css` (~230) — the **landing** (2026-08, Figma 339:3745): `.page-field` full-page gradient image, `.intro` stage (statement / divider / frosted band / `.intro-bar` bottom nav), the divider-mask load reveals, and the `is-loading` page hold. The previous blob hero is archived in `archive/blob-hero-2026-08/`.
   - `sections.css` (~390) — `.page-section` content: Selected Work, Contact, About (incl. the `.about-tabs` Design toolkit / Public footprints tab view), case-study placeholder
   - `footer.css` (~28) — `.site-footer`
-  - `project-overview.css` (~275) — the shared Project Overview template: `.project-hero`, `.project-masthead` (title + metadata `<dl>`), `.project-block` (description / impact / role), `.project-locked` + `.invite-button` (locked case study), the `.project-carousel` masthead crossfade, and `.section-pills`. Imported after `sections.css` (it leans on `.section-label`, `.about-body`, `.contact-connect-links`) and before `responsive.css`.
+  - `project-overview.css` (~275) — the shared Project Overview template: §0 `.intro-bar--page` (the landing's nav bar pinned to the top of these pages), `.project-hero`, `.project-masthead` (title + metadata `<dl>`), `.project-block` (description / impact / role), `.project-locked` + `.invite-button` (locked case study), the `.project-carousel` masthead crossfade, and `.section-pills`. Imported after `sections.css` (it leans on `.section-label`, `.about-body`, `.contact-connect-links`) and before `responsive.css`.
   - `responsive.css` (~110) — **ALL width breakpoints, site-wide.** Organized by screen size (1000 → 768 → 700 → 600px). Imported last so it overrides desktop styles.
 
 ## Landing (2026-08) — "Making products make sense."
@@ -46,7 +46,7 @@ self-contained, in `archive/blob-hero-2026-08/`.
 ## Where each page area lives
 | Area on page | CSS file | HTML location |
 |---|---|---|
-| Header / nav | `header.css` | top of `index.html` (`<header>`) |
+| Header / nav (≤480 homepage only) | `header.css` | top of `index.html` (`<header>`) |
 | Landing hero (field bg, statement, divider, frosted band, bottom bar) | `hero.css` | `.page-field` img + `<section class="intro">` |
 | Selected Work | `sections.css` | `#work-section` |
 | About | `sections.css` | `#about` |
@@ -140,6 +140,17 @@ clauses were a table of contents for three Impact bullets, which say the same
 thing with numbers. Blocks are per-page, not mandatory; the structure is shared,
 the presence of any one block is an editorial call. A summary page should also
 not spend the framing that the full case study is there to reveal.
+
+**Top nav (2026-08).** These pages no longer carry the old `.site-header`. They
+share the landing's own bar — `<nav class="intro-bar intro-bar--page">` — so the
+site has ONE nav. Same markup as the homepage's, with the links resolved back to
+`../index.html#…` and the wordmark an `<a>` home instead of a `<p>`. The
+`--page` modifier (project-overview.css §0) is what changes: no hero to rest in,
+so the pull-up margins and the entrance animation are neutralized and the glass
+is forced on — the bar is pinned from the first pixel, with JS off too. At ≤480
+it collapses to wordmark + "Menu" (responsive.css 480 tier) and the `.mobile-menu`
+overlay is unchanged. **This bar is the SITE nav; `.section-pills` is the IN-PAGE
+nav.** Two different jobs — don't merge them.
 
 **Rules:**
 - **Content is Jenna's, not the model's.** Every content slot ships as a labeled

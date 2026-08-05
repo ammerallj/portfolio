@@ -17,8 +17,8 @@
   padding: 0;
   border: 0;
   background: none;
-  font-family: var(--font-ui);
-  font-size: 1rem;
+  font-family: var(--font-body);
+  font-size: var(--size-base);
   font-weight: 400;
   letter-spacing: -0.01em;
   color: var(--color-text);
@@ -148,8 +148,8 @@
 }
 
 .mobile-menu-mind-heading {
-  font-family: var(--font-ui);
-  font-size: 0.8125rem; /* 13px eyebrow — same as .section-label */
+  font-family: var(--font-body);
+  font-size: var(--size-xs); /* 13px eyebrow — same as .section-label */
   font-weight: 500;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -164,7 +164,7 @@
 
 .mobile-menu-mind-body p {
   font-family: var(--font-body);
-  font-size: 1.25rem; /* 20px — the overlay's body scale */
+  font-size: var(--size-lg); /* 20px — the overlay's body scale */
   letter-spacing: -0.02em;
   line-height: 1.4;
   color: #fff;
@@ -220,7 +220,7 @@
 
 .mobile-menu-connect-links a {
   font-family: var(--font-body);
-  font-size: 1.25rem; /* 20px */
+  font-size: var(--size-lg); /* 20px */
   letter-spacing: -0.02em;
   color: #fff;
   text-decoration: underline;
