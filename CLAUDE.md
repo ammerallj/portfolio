@@ -87,7 +87,11 @@ homepage Work-card images link straight to them.
 frosted "floatie" pill bar fixed at the bottom centre that jumps between its own
 sections. The target sections have ids: `#overview` (masthead), `#process` (the
 "What I Shaped" section — Loop/Groups only), `#impact`. All four pages show a
-3-pill bar (Overview/Process/Impact). On Loop/Groups the Process pill links to
+3-pill bar (Overview/Process/Impact). **Pill labels track the page's own
+headings, ids don't:** Accessibility renamed its third section to "What changed",
+so its heading *and* its third pill read that, while the section id stays
+`#impact` (shared idiom + inbound anchors). Rename the pill with the heading;
+never rename the id. On Loop/Groups the Process pill links to
 `#process`. On Accessibility/Messaging the Process content is confidential, so
 its pill is a **locked chip** (`.section-pill-locked`): a muted lock-glyph
 `Process` that keeps the three-part story whole but links to the access panel

@@ -43,7 +43,7 @@
         "headline": "Shaping Accessibility Across Products",
         "url": "https://ammerallj.design/work/accessibility.html",
         "description": "Making accessibility knowledge usable by product teams and retrievable by AI.",
-        "abstract": "Accessibility had relied on specialists catching issues late in development. The European Accessibility Act made it business-critical, and as AI accelerated how teams built, late-stage review could no longer keep pace. The work enabled product teams to apply Meta's accessibility standards with less reliance on specialists through a repeatable guidance model organized around product decisions rather than WCAG structure; scaled accessibility capability across the company with seven live training sessions reaching more than 6,000 employees, later converted into evergreen eLearning completed by more than 600 product designers; established Meta's first centralized public accessibility destination, bringing together more than 30 accessibility features and 45 Help Center articles into a single experience on meta.com; and restructured accessibility knowledge around user intent so AI tools could retrieve it.",
+        "abstract": "Accessibility had relied on specialists catching issues late in development. The European Accessibility Act made it business-critical, and as AI accelerated how teams built, late-stage review could no longer keep pace. What changed: product teams could apply the accessibility standard during design and build, with a playbook that translated 29 requirements into 23 practical topics organized around the decisions teams were already making. Accessibility review stopped being a manual bottleneck, as shared workflows reduced the manual coordination required across program managers, reviewers, and product teams, while automated checks cut a recurring 3-5 hour review to effectively zero per wave and a separate submission workflow saved 1,711 hours. Product teams could go from an accessibility question to the guidance that applied without searching through 200+ pages, reducing deprecated results from 25% to zero. And people could find accessibility support in one place for the first time, as a needs-based model became a customer-facing experience bringing 30+ features and 45 Help Center articles into a single path on meta.com.",
         "image": "https://ammerallj.design/images/work-accessibility.jpg?v=4",
         "inLanguage": "en-US",
         "temporalCoverage": "2023-12/2026-07",
@@ -103,8 +103,8 @@
        on scroll; here there is no hero, so .intro-bar--page pins it from the
        first pixel with the glass already on (project-overview.css §0). Links
        resolve back to the homepage's sections. At <=480 it collapses to
-       wordmark + "Menu" (responsive.css); the in-page Overview/Process/Impact
-       nav is the separate .section-pills floatie below.
+       wordmark + "Menu" (responsive.css); the in-page Overview/Process/What
+       changed nav is the separate .section-pills floatie below.
        ============================================================ -->
   <nav class="intro-bar intro-bar--page" aria-label="Site navigation">
     <a class="intro-bar-name" href="../index.html" id="site-name">Jenna Ammerall.</a>
@@ -148,13 +148,15 @@
        it works with no JS; main.js adds the scroll-spy active state and tucks it
        away over the footer. Always visible (no data-reveal), like the footer.
        The Process content is confidential, so its pill is a LOCKED chip: it keeps
-       the Overview → Process → Impact story whole, stays muted (skipped by the
-       spy), and links to the access panel (#process-locked) where the reader can
-       request the password. -->
+       the Overview → Process → What changed story whole, stays muted (skipped by
+       the spy), and links to the access panel (#process-locked) where the reader
+       can request the password.
+       The third pill reads "What changed" to match this page's own heading; the
+       section id stays #impact (shared idiom, inbound anchors). -->
   <nav class="section-pills" aria-label="On this page">
     <a href="#overview" class="is-active" aria-current="true">Overview</a>
     <a href="#process-locked" class="section-pill-locked"><svg class="section-pill-lock" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><rect x="4" y="9" width="16" height="12" rx="4" stroke="currentColor" stroke-width="1.5"/><path d="M12 16L12 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 9V7C16 4.79086 14.2091 3 12 3C9.79086 3 8 4.79086 8 7L8 9" stroke="currentColor" stroke-width="1.5"/></svg>Process<span class="visually-hidden"> (locked &mdash; request access below)</span></a>
-    <a href="#impact">Impact</a>
+    <a href="#impact">What changed</a>
   </nav>
 
   <main id="main-content">
@@ -284,14 +286,14 @@
              page. (The card-grid experiment is gone; per-item headlines with it.) -->
         <div class="project-block" data-reveal-group>
           <div class="project-block-left">
-            <h2 class="section-title" id="impact-heading" data-reveal data-reveal-order="0">Impact</h2>
+            <h2 class="section-title" id="impact-heading" data-reveal data-reveal-order="0">What changed</h2>
           </div>
           <div class="project-block-right" data-reveal data-reveal-order="2">
             <ul class="project-impact-list" role="list">
-              <li><strong>Enabled product teams to apply Meta's accessibility standards with less reliance on specialists</strong> through a repeatable guidance model organized around product decisions rather than WCAG structure.</li>
-              <li><strong>Scaled accessibility capability across the company:</strong> seven live training sessions reached more than 6,000 employees and were later converted into evergreen eLearning completed by more than 600 product designers.</li>
-              <li><strong>Established Meta's first centralized public accessibility destination</strong>, bringing together more than 30 accessibility features and 45 Help Center articles into a single experience on meta.com.</li>
-              <li><strong>Restructured accessibility knowledge around user intent</strong> so AI tools could retrieve it, consolidating fragmented content into a governed hierarchy that surfaced the right source more reliably.</li>
+              <li><strong>Product teams could apply the accessibility standard during design and build.</strong> The playbook translated 29 requirements into 23 practical topics organized around the decisions teams were already making, with patterns, examples, and implementation guidance.</li>
+              <li><strong>Accessibility review stopped being a manual bottleneck.</strong> Shared workflows reduced the manual coordination required across program managers, reviewers, and product teams, while automated checks cut a recurring 3&ndash;5 hour review to effectively zero per wave and a separate submission workflow saved 1,711 hours.</li>
+              <li><strong>Product teams could go from an accessibility question to the guidance that applied&mdash;without searching through 200+ pages.</strong> The system interpreted the task, routed it to the authoritative source, and returned scoped guidance, reducing deprecated results from 25% to zero.</li>
+              <li><strong>People could find accessibility support in one place for the first time.</strong> A needs-based model became a customer-facing experience, bringing 30+ features and 45 Help Center articles into a single path from access need to feature to support on meta.com.</li>
             </ul>
           </div>
         </div>
