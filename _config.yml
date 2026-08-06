@@ -1,0 +1,17 @@
+# GitHub Pages (Jekyll) build config.
+#
+# This site is hand-authored static HTML — Jekyll is only the Pages build step,
+# and its one job here is to KEEP SOURCE-ONLY AND DEV FILES OUT of the published
+# site. Pages deploys from the branch root, so without this list every repo file
+# (CLAUDE.md, scripts, README, archived experiments) is served publicly at
+# ammerallj.design/<path>. Anything listed below is omitted from the build and
+# will 404 on the live site — verify with:  curl -I https://ammerallj.design/CLAUDE.md
+#
+# Add a new dev-only file/dir here whenever you add one to the repo. Dotfiles and
+# dot-dirs (.git, .githooks, .claude, .gitignore) are excluded by Jekyll already.
+exclude:
+  - CLAUDE.md
+  - README.md
+  - scripts/
+  - archive/
+  - lab/
