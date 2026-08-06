@@ -301,6 +301,15 @@ own version, separate from the `style.css?v=` / `@import` CSS bump below).
   `../portfolio-<name>/` on its own branch; point a fresh chat there, merge to
   `main` when done, then `git worktree remove`. Overlapping edits then surface as
   merge conflicts, not silent overwrites.
+- **Deploy exposure — the repo root IS the public site.** GitHub Pages deploys
+  from the branch root (custom domain via `CNAME`), so every tracked file is
+  served at `ammerallj.design/<path>` **unless `_config.yml` excludes it**. When
+  you add any source-only or dev file/dir (docs, scripts, experiments), add it to
+  the `exclude:` list in `_config.yml` or it goes public. Dotfiles/dot-dirs
+  (`.git`, `.githooks`, `.claude`) are auto-excluded by Jekyll. Verify a file is
+  hidden with `curl -I https://ammerallj.design/<path>` (want 404). In-page HTML
+  comments are **not** stripped — the deploy is plain Jekyll, no build step — so
+  keep secrets out of comments (the site is static; anything shipped is readable).
 - The shared right column across sections is **542px** (the site's "5 grid columns"); the layout uses **56px** horizontal page padding (`.site-container`). Reuse these, don't invent new values.
 - Accent blue is the `--color-accent` token (`#4A45FF`).
 
