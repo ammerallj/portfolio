@@ -924,8 +924,25 @@ a.intro-bar-name {
   }
 }
 
-/* Per-page destination art. One line per project as each asset lands; the
-   filename names the page being linked TO, not the page it sits on. */
+/* Per-page destination art — one line per project. The filename names the page
+   being linked TO, not the page it sits on, so the chain reads:
+     accessibility → messaging → loop → groups → accessibility (wraps).
+   All four gradients are light, so the text stays --color-text / --color-text-70
+   throughout: measured on each image's darkest visible pixel, the title clears
+   10.6:1 and the description 6.0:1 at worst. A dark destination colour would
+   need the text inverted for that page, not the image dimmed. */
 .next-case--messaging {
   --next-case-image: url("../../images/messaging-next.jpg?v=2");
+}
+
+.next-case--loop {
+  --next-case-image: url("../../images/loop-next.jpg?v=1");
+}
+
+.next-case--groups {
+  --next-case-image: url("../../images/groups-next.jpg?v=1");
+}
+
+.next-case--accessibility {
+  --next-case-image: url("../../images/accessibility-next.jpg?v=1");
 }

@@ -155,12 +155,13 @@ one-liner setting `--next-case-image` (project-overview.css §9). Assets are
 recipe) and are named for the page linked **to**. `background-size: cover` is
 load-bearing: the pager box is much wider than the asset's 3.2:1, so the crop
 takes the middle band and drops the asset's own baked-in rounded corners — which
-sit on light grey and would otherwise show as wedges against the cream. Only
-Accessibility (→ Messaging) has art so far; the other three keep the bare pager
-until their asset lands. Text stays `--color-text` / `--color-text-70`, which
-clears AA on these light gradients (9.9:1 and 5.8:1 against the cyan's darkest
-visible pixel). A dark destination colour would need the text inverted there, not
-the image dimmed.
+sit on light grey and would otherwise show as wedges against the cream. **All
+four pages now carry art**, so the chain reads accessibility → messaging → loop
+→ groups → accessibility. Text stays `--color-text` / `--color-text-70`
+throughout: measured on each image's darkest visible pixel, the title clears
+10.6:1 and the description 6.0:1 at worst (loop's lavender is the tightest). A
+dark destination colour would need the text inverted for that page, not the
+image dimmed.
 
 The `.project-continue` hand-off is gone from Loop and Groups — Jenna is writing
 high-level case-study content to sit inline below Impact rather than link out.
