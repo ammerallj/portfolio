@@ -927,5 +927,5 @@ a.intro-bar-name {
 /* Per-page destination art. One line per project as each asset lands; the
    filename names the page being linked TO, not the page it sits on. */
 .next-case--messaging {
-  --next-case-image: url("../../images/messaging-next.jpg?v=1");
+  --next-case-image: url("../../images/messaging-next.jpg?v=2");
 }
