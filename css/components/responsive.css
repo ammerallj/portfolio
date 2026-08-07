@@ -130,6 +130,8 @@
     --gap-heading: 96px;
     --page-gutter: 24px;
     --section-title-size: 2.75rem; /* 44px */
+    --next-case-title-size: 2.25rem; /* 36px — one notch under the 44 above */
+    --next-case-radius: 48px;
     /* LOCKED across the whole 1024→481 band — no clamp. The global token is
        fluid (6.67vw), which slid the display from 68.3px at 1024 down to 56 by
        768: the headline changed size and, because it's bottom-anchored to the
@@ -207,11 +209,8 @@
   /* (The big content H2 steps 56 → 44 → 32 via --section-title-size in each
      tier's :root above — no per-element override needed here.) */
 
-  /* Next-case pager title: 40 → 36 here → 32 (≤480). Its own scale, well under
-     the section title (44 at this tier) so the pager stays subordinate. */
-  .next-case-title {
-    font-size: 2.25rem; /* 36px */
-  }
+  /* (The next-case pager title + card radius step via --next-case-title-size /
+     --next-case-radius in the :root above, beside the other per-tier values.) */
 
   /* About stays TWO-COLUMN here (photo | text) like Footprints — it stacks at
      768, not 1024. The heading pull-up still applies and now tracks the heading
@@ -260,6 +259,14 @@
   /* SPACING SCALE, portrait-tablet step: identical to the 1024 tier (gutter 24,
      group 48), so nothing is re-declared here — the tokens above cascade down.
      This tier only carries what genuinely differs at portrait width. */
+
+  :root {
+    /* The next-case card's corner DOES differ at portrait: the pager is still
+       full-width, so as the box narrows the 48px corner starts eating the
+       padding it sits behind. The type doesn't step here (the title holds 36
+       from 1024 to 481) — this is the card shape alone. */
+    --next-case-radius: 32px;
+  }
 
   /* Portrait drops the two-column band (the spacer is hidden below), so the
      bio fills the full content width instead of holding the desktop's fixed
@@ -367,7 +374,9 @@
   .project-hero-figure,
   .project-figure {
     /* The project hero is the same image as the Work card, so it steps to the
-       same radius here. Keep these together. */
+       same radius here. Keep these together. (The next-case card is NOT in this
+       group: it steps at every tier via --next-case-radius, so it lands on 32
+       here rather than jumping 60 → 24 in one move.) */
     border-radius: 24px;
   }
 
@@ -389,6 +398,11 @@
   :root {
     --display-size: 44px; /* bookend display (hero + contact) steps down here */
     --section-title-size: 2rem; /* 32px — section headings step down here */
+    /* The pager title converges with the section title at 32: below this the
+       "one notch down" gap stops being legible as hierarchy and just reads as
+       small type. The card's corner takes its last step with it. */
+    --next-case-title-size: 2rem; /* 32px */
+    --next-case-radius: 24px;
 
     /* SPACING SCALE, phone step — the tightest, and where the scale was
        derived (see the block at the top of this file). Group and section both
@@ -560,9 +574,9 @@
   }
 
   /* Remaining 40px→32px step-downs on phones. (.section-title now steps via
-     --section-title-size in :root above; the bookend display via --display-size.) */
-  .about-name,
-  .next-case-title {
+     --section-title-size in :root above; the bookend display via --display-size;
+     the pager title via --next-case-title-size.) */
+  .about-name {
     font-size: 2rem;
   }
 

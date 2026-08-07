@@ -130,6 +130,38 @@ a section (`data-reveal`) and sits inside `<main>` as the last section, above th
 always-visible footer. Built from `<span>`s (not `<p>`/`<h2>`) so the whole block
 is one valid `<a>`.
 
+**The pager steps on tokens, not one-off overrides.** Both live in `global.css`
+`:root` with a value per tier in each `responsive.css` `:root` — the same
+mechanism as `--section-title-size`, so all the per-breakpoint numbers sit
+together instead of scattering down the tiers:
+- `--next-case-title-size` — 40 → 36 (≤1024) → 32 (≤480). Same *stepper* as
+  `--section-title-size` (56/44/32), one notch below it at each tier so the
+  pager stays subordinate to the page's own heading; they converge at 32 on
+  phones, where a further gap would read as small type rather than hierarchy.
+- `--next-case-radius` — 60 → 48 (≤1024) → 32 (≤768) → 24 (≤480). Steps at
+  **every** tier because it's a shape, not a line of type. This is why the card
+  is deliberately NOT in the `.work-card-image-link` / `.project-figure` radius
+  group in the 768 tier, which still jumps 60 → 24 in one move.
+
+Padding stays on `--gap-group` (60/48/40) rather than taking a fourth set of
+values — it's the site's spacing scale, and the card has no reason to leave it.
+
+**Optional card treatment (`.next-case--image`).** A page can put the
+destination's own gradient behind the pager, turning it into a card on the
+Work-card system. The art is
+a **CSS background**, not an `<img>` — one shared modifier plus a per-project
+one-liner setting `--next-case-image` (project-overview.css §9). Assets are
+2660×830 like the Work cards (`images/<next-page>-next.jpg`, q70 per the image
+recipe) and are named for the page linked **to**. `background-size: cover` is
+load-bearing: the pager box is much wider than the asset's 3.2:1, so the crop
+takes the middle band and drops the asset's own baked-in rounded corners — which
+sit on light grey and would otherwise show as wedges against the cream. Only
+Accessibility (→ Messaging) has art so far; the other three keep the bare pager
+until their asset lands. Text stays `--color-text` / `--color-text-70`, which
+clears AA on these light gradients (9.9:1 and 5.8:1 against the cyan's darkest
+visible pixel). A dark destination colour would need the text inverted there, not
+the image dimmed.
+
 The `.project-continue` hand-off is gone from Loop and Groups — Jenna is writing
 high-level case-study content to sit inline below Impact rather than link out.
 The `.project-continue*` CSS has been **deleted** (project-overview.css + the

@@ -806,10 +806,12 @@ a.intro-bar-name {
 /* The next-case teaser title — a pager <span>, not a section heading. Same
    Hanken 500 as .section-title, but clearly smaller at every tier (40/36/32 vs
    56/44/32) so the bottom-of-page pager stays subordinate to the page's own H1.
-   Its own values rather than the token, since it tracks a step below it. */
+   It rides its own token on the same stepper as --section-title-size, so the
+   sizes live with the other per-tier values in responsive.css :root rather than
+   as one-off overrides down in the tiers. */
 .next-case-title {
   font-family: var(--font-heading);
-  font-size: 2.5rem; /* 40px → 36 (≤1024) → 32 (≤480); well under .section-title */
+  font-size: var(--next-case-title-size); /* 40 → 36 (≤1024) → 32 (≤480) */
   font-weight: 500; /* Medium — matches .section-title (Hanken 500 loads on all pages) */
   letter-spacing: -0.02em;
   line-height: 1.1;
@@ -848,4 +850,82 @@ a.intro-bar-name {
   .next-case:hover .next-case-title {
     text-decoration-color: currentColor;
   }
+}
+
+/* --- Optional card treatment: the pager on the next project's colour ---------
+   With .next-case--image the pager stops being bare text on cream and becomes a
+   card carrying the destination's own gradient — the same 2660x830 asset family
+   and the same 60px radius / 60px padding as a homepage .work-card, so the two
+   read as the same object. The image is supplied per page by --next-case-image
+   (see the per-project rule below), which is the ONLY thing that changes; a page
+   with no image just omits the modifier and keeps the bare pager.
+
+   Text stays --color-text on these light gradients (black on the cyan measures
+   well past AA). If a future destination colour is dark, invert the text there
+   rather than dimming the image. --------------------------------------------- */
+.next-case--image {
+  position: relative;
+  /* Padding rides the spacing scale (60 → 48 → 40), so it steps with every
+     other card on the site rather than carrying a fourth set of values. */
+  padding: var(--gap-group);
+  border-radius: var(--next-case-radius); /* 60 → 48 → 32 → 24, per tier */
+  /* Clips the hover zoom to the rounded corners — same idiom as
+     .work-card-image-link, which wraps its zooming image for the same reason. */
+  overflow: hidden;
+}
+
+/* The art rides a pseudo-element rather than the card's own background so the
+   hover zoom can be a TRANSFORM (compositor-cheap) instead of an animated
+   background-size, and so only the art moves — the text sits still on top. */
+.next-case--image::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: var(--next-case-image);
+  /* cover, not 100% 100%: the pager box is far wider than the asset's 3.2:1, so
+     the gradient scales to the width and crops top/bottom. That crop is what
+     keeps the corners the CONTAINER's — the asset has its own rounding baked in
+     against a light grey, and cropping it out avoids grey wedges on the cream. */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  transform: scale(1);
+  /* The site's card-zoom curve and duration (.work-card-image). */
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* An absolutely-positioned ::before paints ABOVE in-flow siblings, so the label
+   and the title/arrow row need a position of their own to stay on the art. */
+.next-case--image > * {
+  position: relative;
+}
+
+/* Same 1.04 as the Work cards. Keyboard gets it too — the zoom is the card's
+   "you're on this" feedback, not a mouse-only flourish. */
+.next-case--image:focus-visible::before {
+  transform: scale(1.04);
+}
+
+@media (hover: hover) {
+  .next-case--image:hover::before {
+    transform: scale(1.04);
+  }
+}
+
+/* Motion query beside its animation, per the cascade rules. The card keeps its
+   art and its radius; only the movement goes. */
+@media (prefers-reduced-motion: reduce) {
+  .next-case--image::before {
+    transition: none;
+  }
+  .next-case--image:hover::before,
+  .next-case--image:focus-visible::before {
+    transform: none;
+  }
+}
+
+/* Per-page destination art. One line per project as each asset lands; the
+   filename names the page being linked TO, not the page it sits on. */
+.next-case--messaging {
+  --next-case-image: url("../../images/messaging-next.jpg?v=1");
 }

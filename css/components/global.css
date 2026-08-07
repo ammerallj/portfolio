@@ -38,6 +38,19 @@
      64 → 48 (≤1024) → 32 (≤480) via each tier's :root in responsive.css. */
   --section-title-size: 3.5rem; /* 56px */
 
+  /* Next-case pager title — the same stepper as --section-title-size (base →
+     ≤1024 → ≤480, no portrait step), one notch down at every tier so the
+     bottom-of-page pager always reads as subordinate to the page's own
+     heading: 40/36/32 against the section title's 56/44/32. */
+  --next-case-title-size: 2.5rem; /* 40px */
+
+  /* Next-case card radius — the pager's card treatment (.next-case--image).
+     Unlike the title this steps at EVERY tier (60 → 48 → 32 → 24, each in
+     responsive.css :root): the card is a full-bleed shape rather than a line of
+     type, so its corner has to close as the box narrows or the rounding reads
+     as a pill on a phone and as a barely-bent corner on a desktop. */
+  --next-case-radius: 60px;
+
   --space-xs: 0.5rem;
   --space-sm: 1rem;
   --space-md: 2rem;
