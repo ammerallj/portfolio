@@ -18,7 +18,7 @@ shared by all of them.
   - `hero.css` (~230) — the **landing** (2026-08, Figma 339:3745): `.page-field` full-page gradient image, `.intro` stage (statement / divider / frosted band / `.intro-bar` bottom nav), the divider-mask load reveals, and the `is-loading` page hold. The previous blob hero is archived in `archive/blob-hero-2026-08/`.
   - `sections.css` (~390) — `.page-section` content: Selected Work, Contact, About (incl. the `.about-tabs` Design toolkit / Public footprints tab view), case-study placeholder
   - `footer.css` (~28) — `.site-footer`
-  - `project-overview.css` (~275) — the shared Project Overview template: §0 `.intro-bar--page` (the landing's nav bar pinned to the top of these pages), `.project-hero`, `.project-masthead` (title + metadata `<dl>`), `.project-block` (description / impact / role), `.project-locked` + `.invite-button` (locked case study), the `.project-carousel` masthead crossfade, and `.section-pills`. Imported after `sections.css` (it leans on `.section-label`, `.about-body`, `.contact-connect-links`) and before `responsive.css`.
+  - `project-overview.css` (~275) — the shared Project Overview template: §0 `.intro-bar--page` (the landing's nav bar pinned to the top of these pages), `.project-hero`, `.project-masthead` (title + metadata `<dl>`), `.project-block` (description / impact / role), §0a the section-seam rules, `.next-case` (§9) with its two treatments — `--image` (destination art, the pager) and `--outline` + `--locked` (the hairline Full-case-study card) — (`.project-locked` / `.invite-button` were deleted 2026-08), the `.project-carousel` masthead crossfade, and `.section-pills`. Imported after `sections.css` (it leans on `.section-label`, `.about-body`, `.contact-connect-links`) and before `responsive.css`.
   - `responsive.css` (~110) — **ALL width breakpoints, site-wide.** Organized by screen size (1000 → 768 → 700 → 600px). Imported last so it overrides desktop styles.
 
 ## Landing (2026-08) — "Making products make sense."
@@ -83,41 +83,136 @@ recruiter can read in under a minute, sitting between a homepage Work card and
 any deeper case study. **Four static pages, one shared structure** — the
 homepage Work-card images link straight to them.
 
-**Floating section pills (`.section-pills`).** Each project page carries a
+**ALL FOUR pages share one editorial cadence (2026-08):** Overview → **Approach.**
+→ **What changed.** Every page retired both "What I Shaped." and "Impact." as
+headings — the first named a list of activities, the second named the section after
+the author's contribution ("Standardized / Informed / Validated" reads as a
+performance review) rather than after the reader's takeaway.
+
+| | Approach holds | What changed | Closes on |
+|---|---|---|---|
+| Accessibility | one statement | **4** expandable rows | Full case study card |
+| Messaging | one statement | **3** expandable rows | Full case study card |
+| Loop | a statement **+ 3 named principles** (plain list, via `.about-body + .project-impact-list`) | **3** expandable rows | — nothing gated; the live product is an inline link in the Overview |
+| Groups | a statement **+ 3 named principles** (same shape as Loop) | **3** expandable rows | — nothing gated |
+
+**The cadence is shared; the row count and the Approach shape are not.** Never
+manufacture a row to make pages match, and the principles list (`.about-body + .project-impact-list`) is Loop's and Groups' —
+Accessibility and Messaging carry a statement alone, because their approach was one
+shift rather than a set of rules.
+
+**Section ids did NOT all follow the headings.** Accessibility and Messaging use
+`#approach` (their old `#process-locked` had become a lie); Loop and Groups keep
+`#process`, which is still true. Only the *heading* ids were renamed there
+(`shaped-heading` → `approach-heading`). `#impact` is unchanged everywhere despite
+the heading reading "What changed." — shared idiom plus inbound anchors.
+
+**Never put an `<a>` inside `.impact-row-summary`.** A link there both navigates and
+toggles the row, because the click bubbles to the summary's activation behaviour.
+Loop is the page this bites: its four evidence links live in the expanded copy, and
+"US Patent 12,277,305" is plain text in the evidence line while the patent link sits
+on "patented model for shared dynamic objects" below it.
+
+**A project page is ONE document, not stitched pages (2026-08).** This is the
+governing idea, and two things enforce it. The homepage's sections are peer
+destinations — one per nav item, where arriving at one means leaving another — so
+its equal-weight headings and full-strength dividers are correct *there*. A
+project page is a title and its chapters, one argument in sequence. Copying the
+homepage's treatment claimed the opposite, three times per page.
+
+| | Homepage | Project page |
+|---|---|---|
+| Section headings | `--section-title-size` 56/44/32 | **`--project-block-title-size` 40/36/32** — one notch under the H1 at every tier (converging at 32 on phones) |
+| Divider between sections | full-strength `--color-border` | **none** |
+| Full-strength divider kept | between peer sections | **only before the Next Case pager** — the one real seam |
+
+- **Headings:** `.project-block-left .section-title` carries the smaller token.
+  That scope is load-bearing — `.section-title` is shared with the homepage (6
+  uses), every chapter `h2` sits in a `.project-block-left`, and every `h1` sits
+  in `.project-masthead-head`. **Never fix this on the token.** Before the change
+  the outline read 56 (h1) = 56 (h2) → 16 (h3): no hierarchy at the top and a 3.5×
+  cliff below. It now reads **56 → 40 → 16** over 20px body.
+- **Dividers:** `main:has(.next-case-section)` in project-overview.css §0a — only
+  project pages have a pager, so it can't reach the homepage, and no page needs a
+  new class. The restore rule is written against *the section before the pager*,
+  not `#impact` by name. That was originally because Loop closed on an "Explore the
+  live product" step; that section is gone, so it now resolves to `#impact` on all
+  four pages — **keep the general form anyway**, it costs nothing and survives the
+  next page that closes on something else. It must stay both later **and** more
+  specific (0,3,1 vs 0,2,1) than the blanket removal.
+- **Keep the 96px `--gap-section`.** With the rules gone the air is the primary
+  separator; removing both signals would run the chapters together.
+- The weight was previously **inverted**: 100% black between chapters that belong
+  together, 12% (`--color-border-light`) between the genuinely peer items inside
+  the Impact list. If you add a new separator here, check it against that.
+
+**The insight band is GONE (`.project-insight`, built and removed 2026-08).** It
+was a full-bleed `--color-accent` band between Approach and What changed, carrying
+the design question "What does someone need to understand to know what applies and
+what to do next?". All of its CSS is deleted; don't reintroduce it.
+
+**The question is no longer anywhere on the page.** It had already been lifted OUT
+of the Approach paragraph when the band was built, so removing the band removed the
+line. If that copy is ever wanted back, put the sentence back in the paragraph
+first — don't rebuild the band to hold it.
+
+**Floating section pills (`.section-pills`) — PHONE ONLY (≤480, 2026-08).**
+Hidden by default in project-overview.css §8 and switched on in the responsive.css
+480 tier. **Above 480 there is no floatie on any page.** It was dropped on desktop
+because the page carries its own structure there (~4 screens, each chapter opening
+with a 40px heading) and the bar could only ever name 3 of the 6 places a reader
+might jump to — the Full case study card and the pager have no ids. At ≤480 it earns its place instead: `.intro-bar--page` has collapsed to
+wordmark + "Menu", so the floatie is the only in-page nav a phone reader has.
+**A 4th pill does not fit at 375 at any label length** (measured: +84px for "Full
+case study", +20px even for "More"), so extending the bar is not an option —
+re-measure in the 480 tier before changing any label. Each project page carries a
 frosted "floatie" pill bar fixed at the bottom centre that jumps between its own
 sections. The target sections have ids: `#overview` (masthead), `#process` (the
-"What I Shaped" section — Loop/Groups only), `#impact`. All four pages show a
+`#process` is Loop's **Approach.** section and Groups' "What I Shaped." one — the id stayed because it is still true on both), `#impact`. All four pages show a
 3-pill bar (Overview/Process/Impact). **Pill labels track the page's own
-headings, ids don't:** Accessibility renamed its third section to "What changed",
-so its heading *and* its third pill read that, while the section id stays
-`#impact` (shared idiom + inbound anchors). Rename the pill with the heading;
-never rename the id. On Loop/Groups the Process pill links to
-`#process`. On Accessibility/Messaging the Process content is confidential, so
-its pill is a **locked chip** (`.section-pill-locked`): a muted lock-glyph
-`Process` that keeps the three-part story whole but links to the access panel
-(`#process-locked`, the "Full case study access" section) where the reader can
-request the password. On those two pages that panel is the **Process step**: it
-sits between Overview and Impact (DOM order `#overview → #process-locked →
-#impact`) so the page order matches the pills and closes on Impact — it is no
-longer the after-Impact tail it started as. Because it maps to a real section,
-the locked chip **is in the scroll-spy** like every pill (built with plain `a`),
-so selecting it works — its active state takes the same solid fill as the others,
-just keeping the lock glyph (muted-but-filled; see `.section-pill-locked.is-active`
-in project-overview.css §8). Never link a normal pill to a section that isn't
-there — use the locked variant when the content is
-gated. The markup is static `<a>` links (works with no JS); the `sectionPills` array +
+headings, ids don't:** Accessibility now reads Overview / **Approach** / **What
+changed** — both renamed with their headings. Its middle id was renamed to
+**`#approach`** to match (2026-08); `#impact` keeps its name — shared idiom +
+inbound anchors. **Renaming an id is the exception, not the habit:** only when the
+old name has become a lie *and* nothing outside the page points at it. That held
+here — `#process-locked` described a section that is now a readable statement, and
+its only referrer was this page's own pill (no sitemap / `llms.txt` / cross-page
+anchors). Messaging keeps its `#process-locked`; that page's section really is
+just the panel. **Re-measure the ≤480 bar after any label
+change** — see the note on `.section-pills a` padding in responsive.css; that
+tier has no slack left, and Accessibility's labels are the longest on the site.
+On Loop/Groups the Process pill links to `#process`. **No page uses a locked chip
+any more** — Accessibility dropped it in 2026-08 and Messaging followed, so
+`.section-pill-locked` / `.section-pill-lock` have been **deleted** from §8.
+
+**A pill is locked when its SECTION is — not when something the section links to
+is.** Accessibility's middle pill dropped the chip in 2026-08: once that section
+carried a readable Approach statement, a lock on the pill claimed the section was
+gated when only the case study was, and the glyph moved to where it's true (the
+"Full case study" label on the locked card). Reach for the locked variant only
+when a pill leads to nothing but an access panel — and never link a *normal* pill
+to a section that isn't there. **The CSS is gone**, so reinstating one means
+rewriting it. The markup is static `<a>` links (works with no JS); the `sectionPills` array +
 the spy block in `updateScrollEffects` (js/main.js) add the active state,
-`aria-current`, and tuck the bar away once the footer is in view. Homepage has no `.section-pills`,
-so the JS is a guarded no-op there. Styles live in project-overview.css §8;
-phone tuning in responsive.css 480 tier. The bar is **always visible (no
-`data-reveal`)**, like the footer.
+`aria-current`, and tuck the bar away once the footer is in view.
+
+**The homepage DOES have a `.section-pills`** — the `--site-nav` variant (Work /
+About), also ≤480 only. Both of its targets resolve, so `sectionPills` has length 2
+there and the spy really runs; an older note here (and in js/main.js) claimed the
+homepage had none and the JS was a no-op, which is wrong and would make any
+"homepage can't reach this" assumption unsafe. The JS is indifferent to the CSS
+hiding: above 480 it keeps spying on hidden elements, which is harmless.
+
+Styles live in project-overview.css §8; the reveal and all phone tuning in the
+responsive.css 480 tier. The bar carries **no `data-reveal`** — like the footer, it
+is never faded in by the motion system.
 
 | Page | Closes with |
 |---|---|
-| `work/microsoft-loop.html` | Impact → "The Way In" (explore live product) → **Next Case Study pager** |
+| `work/microsoft-loop.html` | Approach → What changed → **Next Case Study pager** |
 | `work/facebook-groups.html` | Impact → **Next Case Study pager** |
-| `work/accessibility.html` | Process (locked) → Impact → **Next Case Study pager** |
-| `work/messaging.html` | Process (locked) → Impact → **Next Case Study pager** |
+| `work/accessibility.html` | Approach → Impact *(closing with the outlined **Full case study** card)* → **Next Case Study pager** |
+| `work/messaging.html` | Approach → What changed *(closing with the outlined **Full case study** card)* → **Next Case Study pager** |
 
 **Every page closes with a Next Case Study pager** (`.next-case`,
 project-overview.css §9): a full-width link — the next project's homepage card
@@ -134,10 +229,19 @@ is one valid `<a>`.
 `:root` with a value per tier in each `responsive.css` `:root` — the same
 mechanism as `--section-title-size`, so all the per-breakpoint numbers sit
 together instead of scattering down the tiers:
-- `--next-case-title-size` — 40 → 36 (≤1024) → 32 (≤480). Same *stepper* as
-  `--section-title-size` (56/44/32), one notch below it at each tier so the
-  pager stays subordinate to the page's own heading; they converge at 32 on
-  phones, where a further gap would read as small type rather than hierarchy.
+- `--next-case-title-size` — **32 → 28 (≤1024) → 28 (≤480, held)**. It is one notch
+  under **`--project-block-title-size`** (40/36/32), NOT under `--section-title-size`:
+  what a card title has to stay subordinate to is the chapter heading directly above
+  it. It governs **both** cards — the pager and the locked Full-case-study card.
+  - It was 40/36/32, identical to `--project-block-title-size`. That was only
+    correct while chapter headings were 56px; taking those down to 40 silently made
+    the two equal, so card titles carried the same weight as real section headings
+    and ≤480 flattened to a single 32px for H1, H2 and both card titles. **This is
+    why the two tokens stay separate even when their numbers match** — alias them
+    and the same drift recurs invisibly.
+  - It does **not** step again at ≤480: it also has to stay above the 20px
+    description *inside its own card*, and 24px would leave a 4px gap there. Not
+    every type token has to move at every tier.
 - `--next-case-radius` — 60 → 48 (≤1024) → 32 (≤768) → 24 (≤480). Steps at
   **every** tier because it's a shape, not a line of type. This is why the card
   is deliberately NOT in the `.work-card-image-link` / `.project-figure` radius
@@ -159,7 +263,10 @@ sit on light grey and would otherwise show as wedges against the cream. **All
 four pages now carry art**, so the chain reads accessibility → messaging → loop
 → groups → accessibility. Text stays `--color-text` / `--color-text-70`
 throughout: measured on each image's darkest visible pixel, the title clears
-10.6:1 and the description 6.0:1 at worst (loop's lavender is the tightest). A
+10.6:1 and the description **4.65:1** at worst. That worst case is
+`accessibility-next.jpg` on **Groups'** pager (Groups is the page that links to
+Accessibility). Still past AA (4.5:1), but there is little headroom left:
+re-measure if that gradient is ever re-exported darker. A
 dark destination colour would need the text inverted for that page, not the
 image dimmed.
 
@@ -176,14 +283,17 @@ Case Study pager — the Conversation Invitation is not part of that. All of its
 code has been **deleted**: the `.conversation-invite-*` CSS (project-overview.css
 + responsive.css 1024 / 480 tiers) and the `.conversation-invite` fallback in
 `darkPanel` (js/main.js). `darkPanel` is now just `getElementById('contact')`.
-The locked-case-study button that survived the removal is `.invite-button` (with
-`.invite-button-icon` for the lock), living in `.project-locked-action` — see
-below.
+`.invite-button` and `.project-locked` are both **deleted** (2026-08) — see the
+gating rules below.
 
 **Shared structure (identical in all four):** hero visual → title + metadata →
 Overview (description) → **Contribution/Process** → Impact → *then* the **Next
-Case Study pager** (`.next-case`). (Loop also keeps a "The Way In" explore-product
-step between Impact and the pager.)
+Case Study pager** (`.next-case`). (Loop used to keep a "The Way In" explore-product
+step between Impact and the pager — REMOVED 2026-08; the live product is now a plain
+inline link on "Microsoft Loop" in Loop's Overview paragraph, because that page has
+nothing gated and so has no primary action for a card to carry. Accessibility closes Impact with the outlined
+**Full case study** card *inside* that section — see the gating rules below; it is
+the one page whose Impact section ends on a card.)
 `work/microsoft-loop.html` is the canonical skeleton — copy it when adding a project.
 
 Contribution sits **between Overview and Impact**, in the same `.page-section` as
@@ -214,14 +324,125 @@ nav.** Two different jobs — don't merge them.
   including "reasonable" filler for a missing timeline or team.
 - **Omit, don't fabricate.** If a metadata row (Timeline / Role / Area / Scope)
   or a detail block has no information, delete it. Never leave it blank or guess.
-- **The locked panel (`.project-locked` on Accessibility / Messaging) states that
-  the work can't be shown publicly and points to the locked case study.** No AI
-  conversation. Keep the two copies in sync.
-- **`.invite-button` is the locked-case-study link** (`.invite-button-icon` is its
-  inline lock; Loop reuses the same pill without the icon for its live-product
-  link). An `<a>`, never a `<button>` — it navigates, so Cmd-click / open-in-new-tab
-  must work and a screen reader must hear "link". `href` is `[Locked Case Study URL]`
-  until the Figma share link is pasted in.
+- **Impact rows can expand (`.project-impact-list--expandable`, Accessibility,
+  2026-08).** Each row is a native `<details>`: the `<summary>` carries the
+  outcome (20px/**500**, full black) **and an evidence line** (13px/400 at
+  **`--color-text-70`**), and only the explanation collapses.
+  - **Never move a metric into the collapsed half.** The whole reason the split
+    exists is that the numbers are the strongest proof on the page — an accordion
+    that hides them trades the page's evidence for tidiness. Summary = outcome +
+    proof; detail = why.
+  - **The claim's weight and the evidence's colour are ONE decision — change them
+    together.** The outcome was 600 (inherited from `.project-impact-list strong`)
+    with the evidence at full black. That works on the plain lists, where the
+    emphasis is a lead clause *inside* a sentence; here the whole line is the claim,
+    so 600 applied to every word of four stacked 20px lines and read as a wall of
+    bold. Dropping to 500 fixed that but left two full-black elements with no focal
+    point, so the evidence went to 70%. **Undo in that order:** if the numbers ever
+    need to fight for attention again, put the claim back to 600 *before* putting
+    the evidence back to full black — two blacks was the problem, not the mute.
+  - The evidence line still takes **`.project-meta-row dd`'s size and tracking**
+    (13px, normal tracking) — same material as the masthead's Timeline / Role / Team
+    values. Only the colour departs, and only because there is no muted `dt` label
+    beside it here to do the contrast work. At 70% it is 8.4:1 — not fine print.
+  - **500 is the floor for the claim.** At 400 it would be identical to the 20px/400
+    explanation that opens underneath, and an expanded row would collapse into one
+    undifferentiated block of body copy.
+  - **`.impact-row-detail` declares NO type at all** — only padding. It inherits
+    the 20px/-0.02em/1.4 full black from `.project-impact-list li`, which is what
+    these paragraphs were before they became collapsible and the same body text
+    the Approach statement uses. **Expanding a row reveals the site's body copy,
+    not a smaller quieter variant of it.** Don't add a font-size here; a component
+    that invents its own reading size is the bug this rule exists to prevent.
+  - **One open at a time** comes from the shared `name="impact-row"` — the
+    platform's exclusive-accordion behaviour, **not** a script. Keep the name
+    identical across all four; a typo silently un-groups that row. Browsers
+    without it (pre-2024) simply allow several open, which is the old behaviour
+    rather than a broken one.
+  - **No JavaScript, deliberately** — the browser owns the toggle. `js/main.js` is
+    shared by every page (a TypeError there blanks one), and the "readable with JS
+    off" rule means a scripted accordion would hide all four explanations from the
+    AI crawlers that don't run JS. `<details>` also gives keyboard, focus, and the
+    expanded/collapsed announcement for free. Keep it that way. **This is why
+    one-at-a-time used `name` rather than a click handler** — the obvious reach
+    for JS, avoided.
+  - Rules are scoped to the modifier; plain `.project-impact-list` (Loop, Groups,
+    Messaging) is untouched. The `<details>` height itself is **not** animated —
+    that isn't portable; only the detail text fades in.
+- **Gating states that the work can't be shown publicly and points to the locked
+  case study.** No AI conversation. **Two treatments exist — pick by whether the
+  page has an Approach statement to carry:**
+  - **`.next-case--locked` + `.next-case--outline` (Accessibility, 2026-08)** — the
+    gate is a CARD on the shared `.next-case` shape, sitting at the **end of
+    `#impact`**, after the four outcomes:
+
+        ┌────────────────────────────────────────────────┐
+        │ 🔒 FULL CASE STUDY                             │
+        │ Go deeper into the work.                    →  │
+        │ Need access? Request the password at <email>   │
+        └────────────────────────────────────────────────┘
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ ← the project ends
+        NEXT CASE STUDY · Creating Continuity…       →     (art card)
+
+    **Position is the argument, and it has moved twice — don't move it again
+    without reading why.** It began under the Approach statement (~58% page depth),
+    which asked the reader to email for a password before a single number had
+    landed. It then sat *below* the full-strength rule, stacked on the pager, where
+    two identical cards 96px apart read as peers while saying opposite things
+    ("stay, there's more of this" vs "move on"). It now sits **above** that rule,
+    because the rule means *the project ends here* and going deeper into this
+    project is not leaving it.
+    - **Don't promote it to its own `<section>`.** The divider targets whatever
+      section precedes the pager (`:has(+ .next-case-section)`), so a new section
+      would take the rule off `#impact` and leave the card floating ~192px below the
+      evidence with no divider — the drift the move was meant to fix. `.page-section`
+      padding is a fixed 96px either side, so it can't be tightened without a
+      special case.
+    - **This card is a DESTINATION, not a hinge** — that's why it belongs at the
+      end of what earns it rather than floating between sections.
+    - **Spacing is asymmetric on purpose:** `--gap-group` above (via
+      `.project-block + .next-case`), ~193px + the rule below. Tight above binds the
+      card to its evidence; loose below separates it from the hand-off. Equalising
+      it would make the card read as its own section without being one.
+    - **`.next-case--outline`, not `.next-case--image`.** The pager keeps the
+      destination gradient; this card takes a hairline. That difference is the second
+      thing keeping the two cards legible as different offers — **don't give this one
+      art**. Border is full-black `--color-border`, not the 12% used by the Impact
+      rows above it: those are dividers *between* peers, this is an enclosure *around*
+      one thing, and at 12% a line around a card this wide stops reading (the same
+      finding recorded on `.project-locked`).
+    - **It is a `<div>`, not an `<a>` — forced by content, not preference.** It
+      carries a SECOND link (the mailto, the only route to the password) and anchors
+      cannot nest. The title holds the real link and stretches an invisible `::after`
+      across the card (`.next-case-link::after`); `.next-case-aside-link` is lifted
+      back above that overlay with `z-index`. Click anywhere → Figma, click the
+      address → mail, zero nested anchors. **If the mailto is ever dropped, this can
+      go back to a plain `<a>` like the pager** — hit-test either way.
+    - **The stretch needs the CARD as its containing block.** `--outline` supplies
+      `position: relative` for exactly that; any future treatment carrying
+      `--locked` must too. This bit once: `--image` sets `position: relative` on the
+      card's *children*, which made `.next-case-body` the nearest positioned ancestor,
+      so the overlay sized itself to the body (116px of a 251px card) and left the
+      eyebrow and padding dead to the click. `.next-case--locked > *` and the
+      `:focus-within` zoom are both **dormant while the card is outlined** and kept
+      only so re-adding `--image` can't silently reintroduce that bug or drop
+      keyboard parity.
+    - **The lock is on the eyebrow** — on the label of the thing that's locked,
+      never on the action.
+    - **The public-work link is not here** — it lives at the bottom of the fourth
+      Impact row's explanation, with the outcome it evidences.
+    - `.next-case-stack` and all `.project-gate*` CSS are **deleted**; don't
+      reintroduce either.
+  - **Messaging uses the SAME card, in the SAME place** (2026-08). There is one
+  locked-case-study object on the site, and on both pages it closes `#impact`, above
+  the page's one full-strength rule. Messaging gained a real Approach section at the
+  same time, so `#process-locked` is gone there too.
+- **`.project-locked`, `.project-locked-*` and `.invite-button` are DELETED**
+  (2026-08). Loop was the last holdout — its "Explore the live product" panel is
+  gone, and the live product is linked inline from the Overview paragraph instead.
+  **There is now ONE "go somewhere" component on these pages:** `.next-case`, with
+  `--image` for the pager and `--outline` (+ `--locked`) for a gated case study.
+  Anything else is a plain inline link. Don't reintroduce a third pattern.
 - **The lock lives on the DESTINATION, never in this page.** Set the Figma file's
   share access to **"Anyone with password"** — *not* "Anyone with the link",
   which has no lock at all and would make the "locked" label a lie while
@@ -263,7 +484,8 @@ When the request is about how the site looks/behaves at a **smaller screen size*
 - All width breakpoints live there, grouped by screen size (standard tiers):
   `1440px` (reserved, empty) · `1024px` (landscape tablet — nav reflow, Work/Footprints/About/Contact stack) ·
   `768px` (portrait tablet — Work card images, hero/intro full width) ·
-  `480px` (large phone — nav gap, work grid → 1 col, connect links wrap, footer stack).
+  `480px` (large phone — nav gap, work grid → 1 col, connect links wrap, footer
+  stack, **and the only tier where `.section-pills` exists on any page**).
 - To tweak an existing responsive rule, edit inside the matching `@media` block.
   To add a new one, put it in the correct block (create a new `@media` in
   largest→smallest order if the breakpoint doesn't exist yet).
@@ -316,6 +538,20 @@ own version, separate from the `style.css?v=` / `@import` CSS bump below).
 - **All width breakpoints live in `responsive.css`**, ordered largest → smallest max-width (1440 → 1024 → 768 → 480). Do not scatter width media queries back into the component files. Motion queries (`prefers-reduced-motion`) are the exception — they stay beside their animations in `global.css` / `hero.css`.
 
 ## Conventions
+- **The Google Fonts `<link>` must stay byte-identical on all five pages.** One
+  shared URL = one cached font CSS for the whole site; a page with its own variant
+  refetches the entire stylesheet instead of reusing it. So when a face is added,
+  add it **everywhere**, even to pages that don't use it — the `@font-face` rules
+  cost ~1.7KB of CSS there and download no woff2, because a face is only fetched
+  where it actually renders. Current request:
+  `Hanken+Grotesk:wght@200;500;700` + `Inter:wght@400..700`.
+  **The site loads ZERO italic faces.** So `font-style: italic` anywhere today
+  renders as a browser-sheared oblique — obvious and ugly at display sizes. Before
+  using italic, add the axis (`ital,wght@0,200;0,500;0,700;1,500` for Hanken —
+  verified available) to **all five** links. A `1,500` face was added and then
+  removed again in 2026-08 when the insight band dropped italic (and the band was
+  later removed entirely); don't leave an unused face behind if italic is dropped
+  again.
 - The `?v=` cache-buster is **automatic** — a git `pre-commit` hook
   (`.githooks/pre-commit`) runs `scripts/bump-cache.sh` whenever a commit stages
   a change to a component stylesheet or `js/main.js`, re-stamping every `?v=`

@@ -18,6 +18,50 @@
 
 
 /* ------------------------------------------------------------
+   0a. SECTION SEAMS — a project page is ONE document, not stitched pages
+   ------------------------------------------------------------
+   global.css gives every .page-section a full-strength --color-border rule. On
+   the HOMEPAGE that's right: its sections are peer destinations, one per nav
+   item, and arriving at one means leaving another. A project page is the
+   opposite — a title and its chapters, one argument in sequence (Overview sets
+   the problem, Approach says what I did, What changed shows the result).
+
+   Left alone it put THREE full-black rules inside a single document, and the
+   page's visual weight ended up inverted against its semantics: the strongest
+   line separated the parts that belong together, while the lightest
+   (--color-border-light, 12%) separated the genuinely peer items inside the
+   Impact list. Chapters were reading as destinations.
+
+   So: no rule between chapters, and keep exactly one where there IS a seam —
+   the hand-off into the Next Case pager, where the project actually ends.
+   Nothing is lost. Each chapter already opens with a 40px heading in the left
+   column against 96px of section padding, which is what was really doing the
+   separating; the rule was only reinforcing it. The floating .section-pills
+   supply the landmarks a reader might otherwise scan the rules for.
+
+   KEEP THE 96px. The air is now the primary separator — dropping both signals
+   at once would run the chapters together. This is a one-lever change.
+
+   The hook is `main:has(.next-case-section)`: only project pages carry a pager,
+   so this can't reach the homepage (verified: 0 occurrences in index.html) and
+   needs no new class on any page. The restore is deliberately MORE specific
+   (0,3,1 vs 0,2,1) as well as later, or the blanket removal above would win.
+   Written against the section BEFORE the pager rather than against #impact by
+   name. That was originally required — Loop closed on an "Explore the live product"
+   step — and although that section is gone (2026-08), so the rule now resolves to
+   #impact on all four pages, KEEP THE GENERAL FORM. It costs nothing and survives
+   the next page that closes on something other than What changed. */
+
+main:has(.next-case-section) .page-section {
+  border-bottom: none;
+}
+
+main:has(.next-case-section) .page-section:has(+ .next-case-section) {
+  border-bottom: 1px solid var(--color-border);
+}
+
+
+/* ------------------------------------------------------------
    0. SITE NAV BAR — the landing's bar, pinned to the top
    These pages used to carry the old .site-header nav (header.css). That bar is
    retired here: they now share the landing's own bar (.intro-bar, hero.css), so
@@ -170,82 +214,14 @@ a.intro-bar-name {
   color: var(--color-text);
 }
 
-/* ---- LOCKED PANEL ----------------------------------------------------------
-   The confidentiality note and the way in, on one grey slab.
+/* (.project-locked, .project-locked-* and .invite-button were DELETED 2026-08.
+   Every "go somewhere" block on the project pages is now a .next-case card:
+   --image for the Next-case pager, --outline (+ --locked) for the gated case
+   study. Loop was the last holdout — its "Explore the live product" panel is
+   gone and the live product is linked inline from the Overview paragraph
+   instead, because Loop has nothing gated and so has no primary action for a
+   card to carry. Don't reintroduce a third pattern.) */
 
-   The fill carries the meaning: a surface with something behind it, which is
-   what "the rest is confidential" says in words. Centred on purpose — it's an
-   aside to the reader, not part of the page's left-aligned narrative, and the
-   change of alignment is what stops it reading as another paragraph.
-
-   A hairline outline on the page's own background rather than a grey fill: the
-   empty frame reads as an enclosure with nothing shown inside it, which is closer
-   to "the rest is confidential" than a solid slab.
-
-   The rule is --color-border (full black), NOT the --color-border-light used by
-   the Impact cards and metadata rows: at 12% black a single line around a large
-   frame is barely visible on the cream, so the enclosure didn't read. Full black
-   is the same weight as the site's section dividers.
-   40px is the .about-photo radius — smaller than the 60px on the big imagery,
-   which would over-round a panel this size. */
-.project-locked {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: var(--gap-group);
-  padding: var(--gap-group);
-  border: 1px solid var(--color-border);
-  border-radius: 40px;
-  background-color: transparent;
-}
-
-/* Heading + copy are one group at the within-a-thing gap; the panel's own
-   --gap-group then separates that group from the button. Without this wrapper the
-   heading would sit 60px away from its own paragraph. */
-.project-locked-head {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--gap-content);
-}
-
-/* Card-title scale. Deliberately NOT the 2.5rem Tier 2 that "Impact" uses below
-   it: an aside must not outrank the section it precedes. */
-.project-locked-title {
-  font-family: var(--font-heading);
-  font-size: 1.5rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  line-height: 1.15;
-  color: var(--color-text);
-}
-
-/* Button + its helper line are one unit — the note sits close under the button,
-   not at the panel's 60px child gap. */
-.project-locked-action {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--gap-content);
-}
-
-/* Metadata scale (same 13px as .project-meta-row), muted so it reads as a helper
-   under the button rather than competing with it. The link inside stays full
-   black + underlined via the global `a`, so the action is the part that pops. */
-.project-locked-note {
-  font-family: var(--font-body);
-  font-size: var(--size-xs);
-  letter-spacing: normal;
-  line-height: 1.4;
-  color: var(--color-text-70);
-}
-
-/* The panel centres its own text, so the prose inside must not keep the
-   left-aligned default it inherits from .about-body. */
-.project-locked .about-body {
-  text-align: center;
-}
 
 /* ---- MASTHEAD: SPLIT VARIANT ----------------------------------------------
    Used by work/accessibility.html only, for now. Title, dek, metadata and the
@@ -304,27 +280,6 @@ a.intro-bar-name {
    The width is derived, not picked by eye: --width-right-column (the site's prose
    column, 542px) + the panel's 60px padding either side. So the COPY inside sits
    on the same measure as prose everywhere else on the site. */
-/* A discrete card, centred in its own section — NOT full width. At the container
-   width the frame read as a banner rather than an object.
-
-   662px = the site's prose column at its widest (541.67px) + the panel's 60px
-   padding either side, so the COPY inside sits on the same measure as prose
-   everywhere else on the site.
-
-   A FIXED value, not --width-right-column: that token is a fluid clamp, so the
-   card shrank continuously all the way down and was already noticeably small on
-   a laptop. Fixed, it holds 662px until the container itself is narrower — around
-   a 710px viewport — and `width: 100%` then takes over so it fills the column on
-   tablet and phone. No media query needed for that handover.
-
-   Unscoped on purpose: this rule used to be nested under .project-masthead--split
-   and silently stopped applying when the card moved out of the masthead into its
-   own section — it snapped back to full width. */
-.project-locked {
-  width: 100%;
-  max-width: 662px;
-  margin-inline: auto;
-}
 
 /* Inside the left column each piece is a separate thing, so they take the
    between-things gap. (.project-dek keeps its own --gap-content: it belongs to
@@ -521,16 +476,42 @@ a.intro-bar-name {
   min-width: 0;
 }
 
-/* Block headings (What I Shaped, Impact, and any further detail block) also use
-   the shared .section-title token (sections.css) — NOT the 13px .section-label
-   eyebrow, which stays shared with the homepage (Career Story, Connect, On My
-   Mind). Title and content sit in side-by-side columns, so the heading needs no
-   margin of its own. */
+/* Block headings (Approach, What I Shaped, Impact, What changed) keep
+   .section-title's face — Hanken 500, -0.02em, line-height 1 — but NOT its size.
+   They step down to --project-block-title-size: 40 → 36 (≤1024) → 32 (≤480),
+   one notch under the H1 at every tier.
+
+   WHY THIS OVERRIDE EXISTS. These H2s used to render at --section-title-size,
+   identical to the project H1 above them. A project page is ONE document — a
+   title and its chapters — and equal-weight headings claimed the opposite: that
+   each chapter was a peer destination, the way the homepage's sections stand in
+   for nav items. It also left the outline with no middle: 56 (h1) = 56 (h2), then
+   a 3.5× cliff to 16 (h3). Now it reads 56 → 40 → 16 over 20px body.
+
+   SCOPE IS LOAD-BEARING. .section-title is shared with the homepage (6 uses:
+   Selected Work, the three Work cards, Public Footprints, About), so this must
+   never touch the token itself. .project-block-left is the exact scope: every
+   chapter H2 on all four pages sits in one, every H1 sits in
+   .project-masthead-head instead, and the homepage has no .project-block at all.
+
+   They are still NOT the 13px .section-label eyebrow, which stays shared with the
+   homepage (Career Story, Connect, On My Mind). Title and content sit in
+   side-by-side columns, so the heading needs no margin of its own. */
+.project-block-left .section-title {
+  font-size: var(--project-block-title-size);
+}
 
 .project-block-right {
   flex: 0 0 var(--width-right-column); /* shared right column, fluid 291→542 */
   min-width: 0;
 }
+
+/* (.project-insight — the full-bleed accent band that carried the design
+   question between Approach and What changed — was removed 2026-08. All of its
+   CSS is gone; don't reintroduce it. The question itself is no longer anywhere
+   on the page: it had already been lifted OUT of the Approach paragraph when the
+   band was built, so dropping the band dropped the line. Re-add the sentence to
+   the paragraph first if that copy is ever wanted back.) */
 
 /* The description is the one lead paragraph — a step up from .about-body so it
    reads as the project's opening statement, not body copy. Keep it concise. */
@@ -548,6 +529,19 @@ a.intro-bar-name {
   display: flex;
   flex-direction: column;
   gap: var(--gap-content);
+}
+
+/* A list following a statement in the same column — Loop's Approach section is a
+   framing paragraph plus three named principles. --gap-group is the scale's
+   "between things in a section" step, the same token and the same role as
+   `.project-block + .project-block` and `.project-block + .next-case`. Without it
+   the first principle butts straight onto the last line of the paragraph, because
+   .about-body and the list are plain siblings with no margin of their own.
+
+   Written as a relationship rather than a margin on either component, so neither
+   drags this spacing along anywhere else. */
+.about-body + .project-impact-list {
+  margin-top: var(--gap-group);
 }
 
 .project-impact-list li {
@@ -575,52 +569,195 @@ a.intro-bar-name {
 }
 
 
-/* ------------------------------------------------------------
-   7. LOCKED CASE STUDY BUTTON — the primary action in the masthead lockup.
-   Accessibility and Messaging use it as a locked "View case study" link (with
-   the inline lock icon); Microsoft Loop reuses the same pill as its "Explore
-   Microsoft Loop" link (no icon). It sits in .project-locked-action under the
-   title, before Overview — the case study is the page's primary action.
+/* ---- IMPACT: EXPANDABLE ROWS (--expandable) --------------------------------
+   work/accessibility.html only. Four 20px paragraphs stacked under an already
+   dense Approach statement asked too much of a reader who is skimming; these
+   rows collapse the explanation and keep the claim.
 
-   It's an <a>, never a <button>: it navigates (see the note in the markup). The
-   lock is Figma's, server-side; no secret lives in this page.
+   The split is the whole point, so don't move a number into the detail: the
+   SUMMARY carries outcome + the evidence line (the proof), and only the
+   explanation collapses. Hiding the metrics behind a click would bury the
+   strongest thing on the page.
 
-   Black fill / white text inverts the body copy above it. The 100px radius is the
-   site's own pill, borrowed from the nav chip (.site-nav-bar a::before in
-   header.css). Accent blue stays reserved for the Contact panel.
-   ------------------------------------------------------------ */
+   Built on native <details>/<summary>. No JS at all — which is not laziness:
+   js/main.js is shared by every page and CLAUDE.md's rule is that content stays
+   readable with JS off (most AI crawlers don't run it). A scripted accordion
+   would have hidden all four explanations from them and put a fifth failure mode
+   into a file that can blank a whole page. The browser also gives us the
+   keyboard behaviour, the focus ring, and the expanded/collapsed announcement
+   for free.
 
-.invite-button {
-  display: inline-flex;
-  align-items: center;
-  font-family: var(--font-body);
-  font-size: var(--size-base);
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  color: #fff;
-  background-color: var(--color-text);
-  border-radius: 100px; /* same pill as the nav chip */
-  padding: 14px 28px;
-  gap: 0.5rem;
-  text-decoration: none;
-  transition: opacity 0.15s ease;
+   These rules are scoped to the modifier: Loop, Groups and Messaging keep the
+   plain .project-impact-list above, untouched.
+   ---------------------------------------------------------------------------- */
+
+/* Rows own their own padding now (it has to sit inside the summary so the whole
+   padded area is clickable), so the list's between-items gap goes to 0 — the
+   hairlines do the separating. */
+.project-impact-list--expandable {
+  gap: 0;
 }
 
-.invite-button:hover {
-  opacity: 0.85;
+.project-impact-list--expandable > li {
+  padding-bottom: 0;
 }
 
-/* Iconex Light / Lock, inlined. Sized in em so it tracks the label, and stroked
-   with currentColor so it follows the button's text colour rather than being
-   hardcoded white. */
-.invite-button-icon {
-  width: 1.25em;
-  height: 1.25em;
+/* The base list drops the last rule so the column ends open. Interactive rows
+   want the opposite: without a closing line the last row looks unbounded, and
+   more so once it expands. */
+.project-impact-list--expandable > li:last-child {
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.impact-row-summary {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--gap-content);
+  padding: var(--gap-content) 0;
+  cursor: pointer;
+  /* Kill the native disclosure triangle — we draw our own chevron, right-aligned.
+     list-style covers modern Chrome/Firefox/Safari; the ::-webkit- rule is for
+     older WebKit, which ignores the first. */
+  list-style: none;
+}
+
+.impact-row-summary::-webkit-details-marker {
+  display: none;
+}
+
+/* flex-grow is load-bearing, not tidiness: without it this box shrinks to its
+   text, so the chevron lands right after a short outcome and out at the margin
+   after a long one — the column of chevrons goes ragged. Growing pins every
+   chevron to the right edge. */
+.impact-row-text {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1 1 auto;
+  min-width: 0; /* let long outcomes wrap instead of pushing the chevron out */
+}
+
+/* Weight only. Size, tracking, line-height and colour all inherit from
+   .project-impact-list li above, so an expandable row is typographically the
+   same claim as a plain one — the same reason the Approach statement reuses
+   .about-body rather than restating 20px/-0.02em/1.4.
+
+   500, NOT the 600 of .project-impact-list strong. Four stacked 20px claims at
+   600 read as a wall of bold — the plain list can carry 600 because there the
+   emphasis is a lead clause inside a sentence, but here the whole line is the
+   claim, so the weight applies to every word of it. 500 is the site's medium
+   (.section-title, .project-meta-row dt) and still separates the claim from the
+   400 explanation that opens underneath it, which is the distinction that has to
+   survive: drop this to 400 and an expanded row becomes one undifferentiated
+   block of body copy. */
+.impact-row-outcome {
+  font-weight: 500;
+}
+
+/* The proof line, on the masthead metadata's type — this is the same MATERIAL as
+   the Timeline / Role / Team values above (a spec, read as data, its `·` and `→`
+   separators doing the same work as theirs), so it takes the SIZE and tracking
+   from .project-meta-row dd: 13px, normal tracking, 1.4. Tracking goes back to
+   normal for the same reason it does there: the -0.02em inherited from the 20px
+   claim is display tightening, and it closes up figures and separators at 13px.
+
+   COLOUR DEPARTS from that pattern, deliberately. `dd` values are full black
+   because it's the uppercase `dt` label beside them that carries the muting.
+   Here there is no label — the row is claim over evidence, both left-aligned —
+   so two full-black elements gave the row no focal point, and dropping the claim
+   from 600 to 500 removed the weight that had been separating them. At 70% the
+   claim is the only full-black thing in the row and the evidence reads as its
+   support rather than a second headline.
+
+   NOT fine print: it is still 13px on the same line as the claim, ~10:1 on the
+   cream, and it is the only place the numbers appear in the collapsed state. If
+   it ever needs to fight for attention again, take the claim back to 600 before
+   taking this back to full black — two blacks was the problem, not the mute. */
+.impact-row-evidence {
+  font-size: var(--size-xs);
+  letter-spacing: normal;
+  line-height: 1.4;
+  color: var(--color-text-70);
+}
+
+/* Sits on the first line of the outcome rather than centred on the whole
+   summary, which would drift as rows wrap to different heights. 4px = half the
+   difference between the 28px first line (20px × 1.4) and the 20px glyph. */
+.impact-row-chevron {
+  width: 20px;
+  height: 20px;
   flex: none;
+  margin-top: 4px;
+  color: var(--color-text-70);
+  transition: transform 0.2s ease, color 0.15s ease;
 }
 
-/* No focus override needed here: the global ring is var(--color-focus), which
-   reads fine against the cream masthead. */
+.impact-row[open] .impact-row-chevron {
+  transform: rotate(180deg);
+}
+
+/* Quiet affordance: the chevron takes full black on hover rather than the row
+   changing colour or underlining. True-hover devices only — same reason as the
+   global a:hover (tapped :hover sticks on touch). */
+@media (hover: hover) {
+  .impact-row-summary:hover .impact-row-chevron {
+    color: var(--color-text);
+  }
+}
+
+/* The explanation is body copy, so it DECLARES NO TYPE — it inherits the
+   20px/-0.02em/1.4 full black that .project-impact-list li already sets. That is
+   the exact treatment these paragraphs had before they became collapsible, and
+   the same body text the Approach statement uses. Expanding a row reveals the
+   site's body text; it must not reveal a smaller, quieter variant invented for
+   this component.
+
+   Only spacing belongs here. The summary already carries the row's bottom
+   padding; this takes over while open, so a row sits the same distance above its
+   hairline either way. */
+.impact-row-detail {
+  /* The summary's own 20px bottom padding left this too close to the metric
+     line — at 6px from the outcome and 20px from the paragraph, the metric read
+     as part of the prose instead of as its own line. 12px brings the total to
+     32px: the paragraph break .about-body documents as the one-off that prose
+     wants, wider than the 20px --gap-content that spaces a label from its
+     content. That is exactly the relationship here. */
+  padding-top: 12px;
+  padding-bottom: var(--gap-content);
+  /* clears the chevron column so the paragraph doesn't run under it */
+  padding-right: calc(20px + var(--gap-content));
+}
+
+/* <details> can't transition its own height portably, so don't fake it — just
+   soften the arrival of the text. Content, not layout, so nothing shifts twice. */
+@keyframes impact-row-open {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.impact-row[open] .impact-row-detail {
+  /* easeOutCubic — the same curve as REVEAL.ease in js/main.js, so an expanding
+     row moves like the rest of the site. There is no easing token to reach for. */
+  animation: impact-row-open 0.25s cubic-bezier(0.33, 1, 0.68, 1) both;
+}
+
+/* Motion queries stay beside their animation (the documented exception to
+   "all media queries live in responsive.css" — that rule is about WIDTH). */
+@media (prefers-reduced-motion: reduce) {
+  .impact-row[open] .impact-row-detail {
+    animation: none;
+  }
+  .impact-row-chevron {
+    transition: none;
+  }
+}
+
+
+/* (7b. LOCKED GATE — removed 2026-08. The gate stopped being a footnote row and
+   became a full card in the closing stack, on the shared .next-case treatment:
+   see .next-case--locked in §9. .project-gate* is gone entirely; do not
+   reintroduce it. Messaging still uses the older .project-locked panel, which is
+   a different component and stays.) */
 
 /* Project-overview breakpoints live in responsive.css with every other
    width media query — see the 1024 / 768 / 480 tiers there. */
@@ -637,13 +774,24 @@ a.intro-bar-name {
    system: the header's frosted glass (--color-bg tint + backdrop blur) and the
    nav chip's 100px pill. Always visible — no data-reveal — like the footer.
    ------------------------------------------------------------ */
+/* PHONE ONLY (2026-08). Hidden by default and revealed at ≤480 in responsive.css.
+   On desktop the page didn't need it: it is ~4 screens, each chapter opens with a
+   40px heading, and the bar could only ever name 3 of the 6 things a reader might
+   jump to — the insight band, the Full case study card and the pager have no ids,
+   and a 4th pill does not fit at 375 (measured: +84px for "Full case study", +20px
+   even for "More"). At ≤480 it earns its place instead, because .intro-bar--page
+   collapses to wordmark + "Menu" there and this is the only in-page nav left.
+
+   display is `none` here rather than in responsive.css so the DEFAULT is hidden:
+   the bar is the added thing at the phone tier, not the removed thing everywhere
+   else — same direction as the homepage's --site-nav variant below. */
 .section-pills {
   position: fixed;
   left: 50%;
   bottom: 28px;
   transform: translateX(-50%);
   z-index: 90; /* under the sticky header (100), over the page */
-  display: flex;
+  display: none;
   gap: 4px;
   padding: 6px;
   border-radius: 100px;
@@ -657,10 +805,10 @@ a.intro-bar-name {
   transition: opacity 0.35s ease, transform 0.35s ease;
 }
 
-/* Homepage-only variant — the mobile Work/About nav floatie. Hidden by default
-   (desktop/tablet show the header nav); responsive.css reveals it at the <=480
-   tier where that header nav collapses. Project pages use the plain .section-pills
-   at every width, so they're unaffected. */
+/* Homepage-only variant — the mobile Work/About nav floatie. Now redundant with
+   the base rule above (which also hides), and kept deliberately: it states the
+   intent locally, and it still guards this variant if the base is ever flipped
+   back to visible. Both are revealed at ≤480 in responsive.css. */
 .section-pills.section-pills--site-nav {
   display: none;
 }
@@ -715,44 +863,14 @@ a.intro-bar-name {
   }
 }
 
-/* Locked variant — a "there's more, but it's gated" chip. Used where the Process
-   content is confidential (Accessibility / Messaging): it completes the
-   Overview → Process → Impact story while staying honestly locked. Muted at rest
-   and carrying a lock glyph, but it maps to a real section (#process-locked, the
-   access panel), so it IS in the scroll-spy — its active state has to work like
-   any other pill. It still links there, where the reader can request the
-   password. */
-.section-pills a.section-pill-locked {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--color-text-70);
-  opacity: 0.75;
-}
-
-@media (hover: hover) {
-  .section-pills a.section-pill-locked:hover {
-    color: var(--color-text-70);
-    opacity: 1;
-  }
-}
-
-/* Selected — the locked chip takes the same solid fill as any active pill, at
-   full opacity. The lock glyph stays (currentColor turns it cream on the fill),
-   so it still reads as gated while clearly showing as the current section. The
-   extra class beats the muted base rule above it. */
-.section-pills a.section-pill-locked.is-active {
-  color: var(--color-bg);
-  background-color: var(--color-text);
-  font-weight: 600;
-  opacity: 1;
-}
-
-.section-pill-lock {
-  width: 0.95em;
-  height: 0.95em;
-  flex: none;
-}
+/* (.section-pill-locked / .section-pill-lock — the muted lock-glyph chip — were
+   DELETED 2026-08. No page uses them: Accessibility dropped the chip when its
+   middle section gained a readable Approach statement, and Messaging followed
+   when it did the same. The rule they encoded is worth keeping even though the
+   code is gone: a pill is locked when its SECTION is, not when something the
+   section links to is. The lock now lives on the "Full case study" card, which
+   is the thing that is actually gated. Never link a normal pill to a section
+   that isn't there.) */
 
 
 /* ------------------------------------------------------------
@@ -945,4 +1063,122 @@ a.intro-bar-name {
 
 .next-case--accessibility {
   --next-case-image: url("../../images/accessibility-next.jpg?v=1");
+}
+
+
+/* --- Card treatment 2: OUTLINE, and the LOCKED card --------------------------
+   .next-case--outline is the same card as --image with a hairline in place of the
+   art. Used by work/accessibility.html's "Full case study" card, which sits at the
+   END of #impact — ABOVE the page's one full-strength rule, because that rule
+   means "the project ends here" and going deeper into this project is not leaving
+   it. It briefly sat below the rule stacked on the pager, where two identical
+   cards 96px apart read as peers while saying opposite things ("stay, there's more
+   of this" vs "move on"). The rule plus this different treatment are what keep
+   them legible as two kinds of offer. Don't stack them again, and don't give this
+   one art.
+
+   Shape is shared with --image so the two are the same object: same --gap-group
+   padding, same --next-case-radius.
+
+   BORDER IS FULL-BLACK --color-border, not --color-border-light. Same finding as
+   .project-locked, recorded there: at 12% a single line around a frame this wide
+   is barely visible on the cream and the enclosure stops reading. The Impact rows
+   above use the 12% hairline, but those are dividers BETWEEN peers, not an
+   enclosure around one thing.
+
+   position: relative is load-bearing, not habit — it is the containing block the
+   stretch ::after below sizes itself against. --image supplies it too; any future
+   card treatment carrying .next-case--locked must supply it as well. */
+.next-case--outline {
+  position: relative;
+  padding: var(--gap-group);
+  border-radius: var(--next-case-radius);
+  border: 1px solid var(--color-border);
+}
+
+/* A card following a content block inside the same section. --gap-group is the
+   scale's "between things in a section" step — the same role, and the same token,
+   as .project-block + .project-block. NOT --gap-section (96px): that is the
+   card → card / section → section value, and it was what the card inherited while
+   it lived in .next-case-stack. Moving it into #impact left it with no margin at
+   all (a measured 0px gap, the card's border butting straight onto the last Impact
+   row), which is what this restores.
+
+   Written as an adjacent-sibling rule rather than a margin on .next-case--outline
+   so the spacing belongs to the RELATIONSHIP, not to the card treatment — an
+   outline card used somewhere else shouldn't drag this gap along with it. */
+.project-block + .next-case {
+  margin-top: var(--gap-group);
+}
+
+/* THE LOCKED CARD IS A <div>, NOT AN <a>, and that is forced by content: it has to
+   carry a SECOND link — the mailto, the only route to the password — and anchors
+   cannot nest. So the pattern inverts: the title holds the real link and stretches
+   an invisible ::after over the whole card, which restores click-anywhere without
+   ever nesting anchors.
+
+   The rule below only bites if this card is ever given .next-case--image again,
+   and it is kept for exactly that reason. --image sets `position: relative` on its
+   children, which made .next-case-body the nearest positioned ancestor — so the
+   stretch ::after sized itself to the BODY (116px of a 251px card) and left the
+   eyebrow and the card's padding dead to the click. These are flex items, so
+   z-index alone lifts them above the art without positioning them. */
+.next-case--locked > * {
+  position: static;
+  z-index: 1;
+}
+
+.next-case-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Stretches the title's link across the whole card — this is what makes
+   "click anywhere" work without wrapping the card in an anchor it can't have. */
+.next-case-link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+/* Lifted back above the stretch overlay so it stays independently clickable —
+   without this the overlay would swallow it and the password path would be dead
+   while still looking like a link. */
+.next-case-aside-link {
+  position: relative;
+  z-index: 2;
+}
+
+/* Focus on the OUTLINE card is the global --color-focus ring on whichever link
+   inside it is focused; nothing extra is needed, and the border must not double as
+   a focus state or the ring loses its meaning.
+
+   The pair below is dormant while this card is outlined (there is no ::before to
+   zoom) and exists only so the art card keeps keyboard parity if --image is ever
+   put back: a <div> can't take :focus-visible, so it keys off focus landing on
+   either link inside it. Same 1.04 and curve as the anchor card. */
+.next-case--locked:focus-within::before {
+  transform: scale(1.04);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .next-case--locked:focus-within::before {
+    transform: none;
+  }
+}
+
+/* The lock sits on the eyebrow, beside "Full case study" — on the label of the
+   thing that's locked, never on the action. inline-flex keeps it on the eyebrow's
+   baseline row; 1em tracks the 13px label. */
+.next-case-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+}
+
+.next-case-lock {
+  width: 1em;
+  height: 1em;
+  flex: none;
 }

@@ -42,7 +42,7 @@
         "headline": "Creating Continuity Across Messaging",
         "url": "https://ammerallj.design/work/messaging.html",
         "description": "Conversations that don't leave, as messaging expands across the app.",
-        "abstract": "On Facebook, private sharing is how conversations start—a Reel or listing sent to one person—but continuing meant replying in Messenger, and as messaging expanded, entry points designed in isolation made conversations less predictable. The work standardized in-app messaging across Facebook surfaces by designing a reusable interaction model that continued guiding rollout after handoff; informed a rollout addressing roughly 144 million monthly switches from Facebook to Messenger; and validated a key part of the interaction model through experimentation, with a 21.9% increase in thread opens on iOS and 27.1% on Android while maintaining neutral topline metrics.",
+        "abstract": "On Facebook, private sharing is how conversations start—a Reel or listing sent to one person—but continuing meant replying in Messenger, and as messaging expanded, entry points designed in isolation made conversations less predictable. What changed: in-app messaging had a shared model across Facebook surfaces — a reusable interaction model covering 11 entry points on iOS and Android, defining how conversations begin, confirm and continue, giving the surfaces in scope a common set of behaviors to design from, and continuing to guide rollout after handoff. Large-scale switching between Facebook and Messenger was reduced, addressing 100 million-plus monthly app switches by reframing repeated handoffs as a shared interaction problem. And people were more likely to continue the conversation after sending: thread opens rose 21.9% on iOS and 27.1% on Android while maintaining neutral topline metrics.",
         "image": "https://ammerallj.design/images/work-messaging.jpg?v=3",
         "inLanguage": "en-US",
         "temporalCoverage": "2023-04/2023-12",
@@ -71,7 +71,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@200;500;700&family=Inter:wght@400..700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../style.css?v=75f93987" />
+  <link rel="stylesheet" href="../style.css?v=389b9b4a" />
   <!-- Pre-paint flag, set only when JS runs:
        • is-motion — hides reveal targets so they can fade in without a flash
          (skipped for reduced-motion visitors, who see everything).
@@ -141,15 +141,22 @@
 
   <!-- Floating section nav — jumps between this page's sections. Static links so
        it works with no JS; main.js adds the scroll-spy active state and tucks it
-       away over the footer. Always visible (no data-reveal), like the footer.
-       The Process content is confidential, so its pill is a LOCKED chip: it keeps
-       the Overview → Process → Impact story whole, stays muted (skipped by the
-       spy), and links to the access panel (#process-locked) where the reader can
-       request the password. -->
+       away over the footer. PHONE ONLY (≤480) — hidden by the base rule in
+       project-overview.css §8 and switched on in the responsive.css 480 tier.
+
+       All three are PLAIN pills. The middle one was a locked chip while the
+       section behind it was nothing but an access panel; that section is now a
+       readable Approach statement, so a lock would claim it was gated when it
+       isn't. The lock lives on the one thing that IS locked — the "Full case
+       study" card at the close of What changed.
+
+       Pills track this page's own headings; #approach was renamed to match (its
+       old name, #process-locked, described a section that no longer exists here),
+       while #impact keeps its id — shared idiom, inbound anchors. -->
   <nav class="section-pills" aria-label="On this page">
     <a href="#overview" class="is-active" aria-current="true">Overview</a>
-    <a href="#process-locked" class="section-pill-locked"><svg class="section-pill-lock" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><rect x="4" y="9" width="16" height="12" rx="4" stroke="currentColor" stroke-width="1.5"/><path d="M12 16L12 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 9V7C16 4.79086 14.2091 3 12 3C9.79086 3 8 4.79086 8 7L8 9" stroke="currentColor" stroke-width="1.5"/></svg>Process<span class="visually-hidden"> (locked&mdash;request access below)</span></a>
-    <a href="#impact">Impact</a>
+    <a href="#approach">Approach</a>
+    <a href="#impact">What changed</a>
   </nav>
 
   <main id="main-content">
@@ -239,31 +246,32 @@
     </section>
 
     <!-- ========================================================
-         PROCESS — confidential, so this is the ASK rather than the work. It's
-         the Process step in the Overview → Process → Impact flow the section
-         pills present (its id, #process-locked, is what the locked Process pill
-         links to), placed between Overview and Impact so the DOM matches that
-         order. The page still CLOSES on Impact below.
+         APPROACH — the Process step in the Overview → Approach → What changed
+         flow the section pills present, placed between Overview and Impact so the
+         DOM matches that order.
 
-         No aria-labelledby: the card has no heading, so there is no id to point
-         at. aria-label names it instead.
+         ID IS #approach (renamed from #process-locked, 2026-08), matching
+         Accessibility. The old name described a section that was nothing but an
+         access panel; this one is a readable statement, and the gate that
+         justified the name has moved to the close of #impact. Only this page's own
+         pill referenced the id (no sitemap / llms.txt / cross-page anchors), which
+         is what made the rename safe.
 
-         The button is an anchor, not a <button>: it navigates. The lock is REAL
-         and lives on the destination (Figma share access = "Anyone with
-         password"). Never put the password in this page.
+         Same .project-block idiom as Accessibility — heading left, statement in the
+         542px right column, .about-body so it matches .project-impact-list li type
+         by construction rather than by a copied number.
          ======================================================== -->
-    <section class="page-section" id="process-locked" aria-label="Full case study access">
+    <section class="page-section" id="approach" aria-labelledby="approach-heading">
       <div class="site-container">
 
-        <div class="project-locked" data-reveal-group data-reveal>
-          <div class="project-locked-head">
-            <div class="about-body">
-              <p>This work shipped to millions of people across Facebook but the full case study is confidential.</p>
-            </div>
+        <div class="project-block" data-reveal-group>
+          <div class="project-block-left">
+            <h2 class="section-title" id="approach-heading" data-reveal data-reveal-order="0">Approach.</h2>
           </div>
-          <div class="project-locked-action">
-            <a class="invite-button" href="https://www.figma.com/deck/yyBb74Gk6nk5BRAJBe0PoQ/Jenna-Portfolio-A--DRAFT-?node-id=1-42" target="_blank" rel="noopener noreferrer"><svg class="invite-button-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><rect x="4" y="9" width="16" height="12" rx="4" stroke="currentColor" stroke-width="1.5"/><path d="M12 16L12 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 9V7C16 4.79086 14.2091 3 12 3C9.79086 3 8 4.79086 8 7L8 9" stroke="currentColor" stroke-width="1.5"/></svg>View case study<span class="visually-hidden"> (opens in new tab)</span></a>
-            <p class="project-locked-note">Need access? Request the password at <a href="mailto:ammerallj@gmail.com?subject=Messaging%20case%20study%20password">ammerallj@gmail.com</a></p>
+          <div class="project-block-right" data-reveal data-reveal-order="2">
+            <div class="about-body">
+              <p>Messaging inside Facebook had grown surface by surface, with each entry point making its own decisions about what happened next. I treated it as one interaction problem instead: define the behaviors that should hold as someone starts, sends, and continues a conversation, then let each surface adapt without breaking that model.</p>
+            </div>
           </div>
         </div>
 
@@ -271,24 +279,91 @@
     </section>
 
     <!-- ========================================================
-         IMPACT — the closing section, now AFTER the (locked) Process step so the
-         DOM order matches the section pills (Overview → Process → Impact) and the
-         page ends on the evidence of what the work achieved.
+         WHAT CHANGED — renamed from "Impact" (2026-08) to match Accessibility's
+         cadence: the section states what changed in the product, then the evidence,
+         then how the design caused it. The old framing (Standardized / Informed /
+         Validated) read as accomplishments rather than outcomes.
+
+         EXPANDABLE ROWS, same as Accessibility: native <details>, outcome +
+         evidence in the <summary> (always visible), explanation inside. No
+         JavaScript — the browser owns the toggle, so it survives js/main.js being
+         absent and the explanations stay real DOM for crawlers. One open at a time
+         via the shared name="impact-row".
+
+         THREE rows, not four. The cadence matches Accessibility; the quantity
+         doesn't have to, and a fourth would have to be manufactured.
+
+         The metrics sit in the SUMMARY, never the detail — collapsing them would
+         hide the strongest proof on the page behind a click.
          ======================================================== -->
     <section class="page-section" id="impact" aria-labelledby="impact-heading">
       <div class="site-container">
 
         <div class="project-block" data-reveal-group>
           <div class="project-block-left">
-            <h2 class="section-title" id="impact-heading" data-reveal data-reveal-order="0">Impact</h2>
+            <h2 class="section-title" id="impact-heading" data-reveal data-reveal-order="0">What changed.</h2>
           </div>
-          <div class="project-block-right" data-reveal data-reveal-order="1">
-            <ul class="project-impact-list" role="list">
-              <li><strong>Standardized in-app messaging across Facebook surfaces</strong> by designing a reusable interaction model that continued guiding rollout after handoff.</li>
-              <li><strong>Informed a rollout addressing ~144M monthly switches from Facebook to Messenger</strong>, advancing Facebook's strategy to bring private sharing back into the core app.</li>
-              <li><strong>Validated a key part of the interaction model through experimentation:</strong> +21.9% thread opens on iOS and +27.1% on Android, while maintaining neutral topline metrics.</li>
+          <div class="project-block-right" data-reveal data-reveal-order="2">
+            <ul class="project-impact-list project-impact-list--expandable" role="list">
+              <li>
+                <details class="impact-row" name="impact-row">
+                  <summary class="impact-row-summary">
+                    <span class="impact-row-text">
+                      <span class="impact-row-outcome">In-app messaging had a shared model across Facebook surfaces.</span>
+                      <span class="impact-row-evidence">11 entry points &middot; iOS + Android</span>
+                    </span>
+                    <svg class="impact-row-chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </summary>
+                  <p class="impact-row-detail">Rather than treating those messaging entry points as isolated experiences, I defined a reusable interaction model for how conversations begin, confirm, and continue inside Facebook. It gave the surfaces in scope a common set of behaviors to design from, and continued guiding rollout after handoff.</p>
+                </details>
+              </li>
+              <li>
+                <details class="impact-row" name="impact-row">
+                  <summary class="impact-row-summary">
+                    <span class="impact-row-text">
+                      <span class="impact-row-outcome">Reduced large-scale switching between Facebook and Messenger.</span>
+                      <span class="impact-row-evidence">100M+ monthly app switches addressed</span>
+                    </span>
+                    <svg class="impact-row-chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </summary>
+                  <p class="impact-row-detail">The work reframed repeated handoffs between Facebook and Messenger as a shared interaction problem, helping bring more of the messaging experience back into Facebook.</p>
+                </details>
+              </li>
+              <li>
+                <details class="impact-row" name="impact-row">
+                  <summary class="impact-row-summary">
+                    <span class="impact-row-text">
+                      <span class="impact-row-outcome">People were more likely to continue the conversation after sending.</span>
+                      <span class="impact-row-evidence">+21.9% thread opens on iOS &middot; +27.1% on Android</span>
+                    </span>
+                    <svg class="impact-row-chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </summary>
+                  <p class="impact-row-detail">Experimentation validated the post-send part of the interaction model. The selected experience increased thread opens 21.9% on iOS and 27.1% on Android while maintaining neutral topline metrics.</p>
+                </details>
+              </li>
             </ul>
           </div>
+        </div>
+
+        <!-- FULL CASE STUDY — the page's primary action, on THIS side of the seam.
+             Same position as Accessibility: the close of #impact, above the page's
+             one full-strength rule, because that rule means "the project ends here"
+             and going deeper into this project is not leaving it.
+
+             A <div>, not an <a>: it carries a second link (the mailto, the only
+             route to the password) and anchors cannot nest. The title stretches an
+             invisible overlay across the card; the mailto is lifted back above it.
+             The lock is REAL and lives on the destination (Figma share access =
+             "Anyone with password"). Never put the password in this page. -->
+        <div class="next-case next-case--outline next-case--locked" data-reveal-group data-reveal>
+          <span class="next-case-label"><svg class="next-case-lock" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><rect x="4" y="9" width="16" height="12" rx="4" stroke="currentColor" stroke-width="1.5"/><path d="M12 16L12 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 9V7C16 4.79086 14.2091 3 12 3C9.79086 3 8 4.79086 8 7L8 9" stroke="currentColor" stroke-width="1.5"/></svg>Full case study</span>
+          <span class="next-case-body">
+            <span class="next-case-text">
+              <span class="next-case-title"><a class="next-case-link" href="https://www.figma.com/deck/yyBb74Gk6nk5BRAJBe0PoQ/Jenna-Portfolio-A--DRAFT-?node-id=1-42" target="_blank" rel="noopener noreferrer">Go deeper into the work.<span class="visually-hidden"> (opens in new tab)</span></a></span>
+              <span class="next-case-description">This work shipped to millions of people across Facebook but the full case study is confidential. Need access? Request the password at <a class="next-case-aside-link" href="mailto:ammerallj@gmail.com?subject=Messaging%20case%20study%20password">ammerallj@gmail.com</a></span>
+            </span>
+            <span class="next-case-arrow" aria-hidden="true">&rarr;</span>
+          </span>
         </div>
 
       </div>
@@ -335,6 +410,6 @@
   </div>
   <div class="wave-cursor" id="wave-cursor" aria-hidden="true">👋</div>
 
-  <script src="../js/main.js?v=79d6c048" defer></script>
+  <script src="../js/main.js?v=1030dbec" defer></script>
 </body>
 </html>
