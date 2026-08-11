@@ -55,17 +55,22 @@ navSections.push(...introBarSections);
 
 const siteHeader = document.querySelector('.site-header');
 
-// Floating in-page section nav — only the project overview pages render
-// `.section-pills`, so `sectionPills` is empty (and every loop over it a no-op)
-// on the homepage. Each pill links to a section on its own page (#overview /
-// #process / #impact); the anchor clicks glide via the shared Lenis handler in
-// setupLenis(). The spy + footer tuck-away live in updateScrollEffects().
+// Floating in-page section nav. BOTH page types render `.section-pills`: the
+// project pages carry the in-page chapter nav (#overview / #approach|#process /
+// #impact) and the homepage carries the .section-pills--site-nav variant
+// (Work / About). So this is NOT empty on the homepage and the spy genuinely runs
+// there — an older comment here claimed otherwise, which would have made any
+// "homepage is a no-op" assumption unsafe. Both bars are CSS-hidden above the
+// ≤480 tier (project-overview.css §8 + responsive.css); the JS is indifferent to
+// that and keeps spying on hidden elements, which is harmless.
+// Anchor clicks glide via the shared Lenis handler in setupLenis(). The spy +
+// footer tuck-away live in updateScrollEffects().
 const sectionPillBar = document.querySelector('.section-pills');
-// Every pill — including the locked "Process" chip (Accessibility / Messaging) —
-// maps to a real in-page section, so all of them take part in the scroll-spy.
-// The pills are in DOM/scroll order (overview → process → impact), which the spy
-// below relies on to pick the last section above the marker. The locked chip's
-// selected look is styled muted-but-filled in project-overview.css.
+// Every pill — including the locked "Process" chip (Messaging) — maps to a real
+// in-page section, so all of them take part in the scroll-spy. The pills are in
+// DOM/scroll order, which the spy below relies on to pick the last section above
+// the marker. The locked chip's selected look is styled muted-but-filled in
+// project-overview.css.
 const sectionPills = sectionPillBar
   ? Array.from(sectionPillBar.querySelectorAll('a'))
       .map(link => ({ link, el: document.querySelector(link.getAttribute('href')) }))

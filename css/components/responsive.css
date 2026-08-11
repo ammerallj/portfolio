@@ -130,7 +130,8 @@
     --gap-heading: 96px;
     --page-gutter: 24px;
     --section-title-size: 2.75rem; /* 44px */
-    --next-case-title-size: 2.25rem; /* 36px — one notch under the 44 above */
+    --project-block-title-size: 2.25rem; /* 36px — one notch under the 44 above */
+    --next-case-title-size: 1.75rem; /* 28px — one notch under the block heading */
     --next-case-radius: 48px;
     /* LOCKED across the whole 1024→481 band — no clamp. The global token is
        fluid (6.67vw), which slid the display from 68.3px at 1024 down to 56 by
@@ -398,10 +399,19 @@
   :root {
     --display-size: 44px; /* bookend display (hero + contact) steps down here */
     --section-title-size: 2rem; /* 32px — section headings step down here */
-    /* The pager title converges with the section title at 32: below this the
-       "one notch down" gap stops being legible as hierarchy and just reads as
-       small type. The card's corner takes its last step with it. */
-    --next-case-title-size: 2rem; /* 32px */
+    /* The BLOCK heading converges with the section title at 32: below this the
+       "one notch down" gap stops being legible as hierarchy and just reads as small
+       type. On a phone the H1 and its chapter headings land on the same size — but
+       there the page is a single column and the chapters are already separated by a
+       screenful of scroll, so the size step has nothing left to do. */
+    --project-block-title-size: 2rem; /* 32px */
+    /* The CARD title deliberately does NOT step again — it holds the 28px from the
+       tier above. It has somewhere else to be subordinate to: the 20px description
+       inside its own card. Taking it to 24 would leave a 4px gap there and the card
+       would lose its internal hierarchy, which matters more on a phone than shaving
+       another step off a heading it already sits under. Not every type token has to
+       move at every tier (the radius below does, because it's a shape, not type). */
+    --next-case-title-size: 1.75rem; /* 28px — held, not stepped */
     --next-case-radius: 24px;
 
     /* SPACING SCALE, phone step — the tightest, and where the scale was
@@ -602,15 +612,40 @@
     font-size: var(--size-lg);
   }
 
-  /* Floating section pills: tighten so a 2–3 item bar clears the 375 gutter and
-     sits a little higher above the smaller footer. */
+  /* Locked-gate access row: the label and the action can't share a line in a
+     375 column, so the action drops to its own. flex-basis:100% (against the
+     flex-wrap already on .project-gate) is what forces the break; the margin-left
+     that separated the two columns has to go with it, or the action would sit
+     20px in from the label it belongs to. This is also why the row has no fixed
+     height — it grows by one line here. */
+  /* THE FLOATING SECTION PILLS EXIST ONLY AT THIS TIER (2026-08). The base rule
+     in project-overview.css §8 hides them; this is where they're switched on, and
+     it's where they earn their place — .intro-bar--page has collapsed to wordmark
+     + "Menu" by now, so this is the only in-page nav a phone reader has. Above
+     480 the page carries its own structure (4 screens, a 40px heading opening
+     each chapter) and the bar was naming 3 of 6 possible stops.
+
+     Tightened so a 2–3 item bar clears the 375 gutter and sits a little higher
+     above the smaller footer.
+
+     The 10px inline padding is measured, not eyeballed. At 14px this bar
+     overflowed its own max-width on Accessibility — whose labels are the site's
+     longest (Overview / Approach / What changed) — and clipped the third pill at
+     375. It had been over by 32px since "Impact" was renamed to "What changed";
+     "Process" → "Approach" took it to 44px, which is what made it obvious. 10px
+     sheds exactly that, with the row still on one line (bar height unchanged at
+     55px) and the last pill landing 5px inside the bar.
+     Any future pill label needs re-measuring HERE — this tier has no slack left,
+     and a 4th pill does not fit at any label length (+84px for "Full case study",
+     +20px even for "More"). */
   .section-pills {
+    display: flex;
     bottom: 16px;
     max-width: calc(100% - 32px);
   }
   .section-pills a {
     font-size: 0.875rem;
-    padding: 8px 14px;
+    padding: 8px 10px;
   }
 
   /* The homepage's mobile nav floatie (Work / About) appears here, where the

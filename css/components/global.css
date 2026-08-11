@@ -34,15 +34,40 @@
   --display-size: clamp(56px, 6.67vw, 96px);
 
   /* Section title — the 64px / 500-weight heading shared by every section
-     (Work cards, About, Footprints, project H1 + block headings). Steps
+     (Work cards, About, Footprints, and the project pages' H1). Steps
      64 → 48 (≤1024) → 32 (≤480) via each tier's :root in responsive.css. */
   --section-title-size: 3.5rem; /* 56px */
 
-  /* Next-case pager title — the same stepper as --section-title-size (base →
-     ≤1024 → ≤480, no portrait step), one notch down at every tier so the
-     bottom-of-page pager always reads as subordinate to the page's own
-     heading: 40/36/32 against the section title's 56/44/32. */
-  --next-case-title-size: 2.5rem; /* 40px */
+  /* Project-page BLOCK heading (the H2s: Approach / What I Shaped / Impact /
+     What changed). Same stepper, one notch below --section-title-size at every
+     tier — 40/36/32 against its 56/44/32.
+
+     It exists because those H2s used to BE --section-title-size, rendering the
+     project title and its chapters at an identical 56px. The outline then had no
+     hierarchy in its top two levels (h1 = h2 = 56) and a 3.5× cliff to the next
+     one (h3 = 16). A project page is ONE document — title, then chapters — not
+     the homepage's set of peer sections each standing in for a nav destination,
+     which is what an equal-weight heading claimed it was.
+     56 → 40 → 16 is the resulting scale, with 20px body under it.
+
+     Numerically the same as --next-case-title-size today; kept separate because
+     they answer to different things (a chapter heading vs. the pager's title)
+     and either should be able to move without dragging the other. */
+  --project-block-title-size: 2.5rem; /* 40px */
+
+  /* CARD title — both cards at the bottom of a project page (the Next-case pager
+     and Accessibility's outlined Full-case-study card). One notch UNDER
+     --project-block-title-size, so a card title never competes with the chapter
+     heading above it: 32/28/28 against the block heading's 40/36/32, under the H1's
+     56/44/32.
+
+     It was 40/36/32 — identical to --project-block-title-size — which was correct
+     only while chapter headings were 56. Taking those down to 40 silently made the
+     two equal, so two <span>s in cards carried the same weight as the page's real
+     section headings, and at ≤480 the whole scale collapsed to a single 32px for
+     H1, H2 and both card titles. This is why the two tokens are kept separate even
+     when their numbers match — alias them and this recurs invisibly. */
+  --next-case-title-size: 2rem; /* 32px */
 
   /* Next-case card radius — the pager's card treatment (.next-case--image).
      Unlike the title this steps at EVERY tier (60 → 48 → 32 → 24, each in

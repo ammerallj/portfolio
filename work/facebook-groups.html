@@ -40,7 +40,7 @@
         "headline": "Helping People Navigate Communities",
         "url": "https://ammerallj.design/work/facebook-groups.html",
         "description": "A sense of place across many communities.",
-        "abstract": "Most people on Facebook belong to at least 15 active groups, and more than 100 million join one every day, so people needed clearer ways to navigate between communities and understand where they were without losing context. The work redesigned core navigation and transitions, defined shared interaction patterns that worked consistently across iOS and Android, and strengthened design quality through cross-surface audits and close engineering partnership. It moved topline engagement on a mature consumer surface by roughly a quarter-percent, raised design-system adoption across Facebook Groups past 80%, and held the quality bar across core surfaces with 17 implementation reviews with engineering and more than 200 UI issues resolved.",
+        "abstract": "Most people on Facebook belong to at least 15 active groups, and more than 100 million join one every day, so people needed clearer ways to navigate between communities and understand where they were without losing context. What changed: people could move through Groups with clearer orientation and context, worth a 0.26% engagement lift on a mature consumer surface, after navigation, transitions and key entry points across Community Home were redesigned. Core Groups experiences became more consistent across platforms, with design-system adoption reaching roughly 82% as reusable panels, invitation patterns and states replaced one-off solutions across iOS and Android. And implementation quality improved across core surfaces: 17 implementation reviews with engineering and more than 200 UI issues resolved.",
         "image": "https://ammerallj.design/images/work-communities.jpg?v=3",
         "inLanguage": "en-US",
         "temporalCoverage": "2022-03/2023-04",
@@ -68,7 +68,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@200;500;700&family=Inter:wght@400..700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../style.css?v=75f93987" />
+  <link rel="stylesheet" href="../style.css?v=389b9b4a" />
   <!-- Pre-paint flag, set only when JS runs:
        • is-motion — hides reveal targets so they can fade in without a flash
          (skipped for reduced-motion visitors, who see everything).
@@ -141,8 +141,8 @@
        away over the footer. Always visible (no data-reveal), like the footer. -->
   <nav class="section-pills" aria-label="On this page">
     <a href="#overview" class="is-active" aria-current="true">Overview</a>
-    <a href="#process">Process</a>
-    <a href="#impact">Impact</a>
+    <a href="#process">Approach</a>
+    <a href="#impact">What changed</a>
   </nav>
 
   <main id="main-content">
@@ -231,23 +231,39 @@
          see CLAUDE.md: it's a per-page editorial call, not an omission)
          ======================================================== -->
     <!-- ========================================================
-         WHAT I SHAPED — a contribution section before Impact. Same .project-block
-         idiom (heading left, ruled list right) as Impact, so the two read as a
-         pair: what I did, then what it moved. Content is a placeholder — fill the
-         <li>s (add/remove to match), or swap the list for .about-body prose.
+         APPROACH — renamed from "What I Shaped." (2026-08), matching the other
+         three pages. Section id stays #process: the name is still true here (this
+         IS the process step), and ids are renamed only when the old name has become
+         a lie. The heading's own id became approach-heading because "shaped-heading"
+         no longer described it.
+
+         STATEMENT + THREE NAMED PRINCIPLES, the same shape as Loop (Accessibility
+         and Messaging carry a statement alone). The principles are the reusable
+         .project-impact-list — a headline clause in <strong> then its explanation —
+         NOT the expandable accordion: nothing is withheld and there are no metrics
+         to keep visible while collapsed. The gap to the statement above comes from
+         `.about-body + .project-impact-list` in project-overview.css.
+
+         These replaced an activity list ("Redesigned / Defined / Strengthened")
+         that named what was done; the principles name the rules the work followed,
+         and the outcomes those activities were really describing live in What
+         changed below.
          ======================================================== -->
-    <section class="page-section" id="process" aria-labelledby="shaped-heading">
+    <section class="page-section" id="process" aria-labelledby="approach-heading">
       <div class="site-container">
 
         <div class="project-block" data-reveal-group>
           <div class="project-block-left">
-            <h2 class="section-title" id="shaped-heading" data-reveal data-reveal-order="0">What I Shaped</h2>
+            <h2 class="section-title" id="approach-heading" data-reveal data-reveal-order="0">Approach.</h2>
           </div>
-          <div class="project-block-right" data-reveal data-reveal-order="1">
+          <div class="project-block-right" data-reveal data-reveal-order="2">
+            <div class="about-body">
+              <p>Groups had grown into a collection of entry points, states, and community experiences that didn't always behave as one system. I focused on restoring orientation: clarifying how people moved through Community Home, defining reusable interaction patterns across key entry points, and bringing the experience closer to a shared design language across iOS and Android.</p>
+            </div>
             <ul class="project-impact-list" role="list">
-              <li><strong>Redesigned core navigation and transitions.</strong> Refined Community Home and key entry points so people could move between Groups experiences with clearer orientation and context.</li>
-              <li><strong>Defined shared interaction patterns.</strong> Designed reusable panels, invitation experiences, and states that worked consistently across iOS and Android.</li>
-              <li><strong>Strengthened design quality.</strong> Used cross-surface audits, prototypes, and close engineering partnership to identify inconsistencies and bring core Groups experiences closer to the Facebook Design System.</li>
+              <li><strong>Restore orientation first.</strong> Refine Community Home, navigation, and transitions so people could move between Groups experiences with a clearer sense of where they were and what came next.</li>
+              <li><strong>Reuse patterns across entry points.</strong> Define shared panels, invitation experiences, and states that could work consistently across iOS and Android instead of solving each surface independently.</li>
+              <li><strong>Treat quality as a system problem.</strong> Use cross-surface audits, prototypes, and implementation reviews to catch inconsistencies and bring core Groups experiences closer to the Facebook Design System.</li>
             </ul>
           </div>
         </div>
@@ -255,18 +271,62 @@
       </div>
     </section>
 
+    <!-- ========================================================
+         WHAT CHANGED — renamed from "Impact." (2026-08), matching the other three
+         pages. Expandable rows: outcome + evidence in the <summary> (always
+         visible), explanation inside. No JavaScript; one open at a time via the
+         shared name="impact-row". Never put an <a> in .impact-row-summary — a link
+         there both navigates and toggles the row.
+
+         The figures are now stated precisely (+0.26%, ~82%) where the old bullets
+         hedged ("roughly a quarter-percent", "past 80%"). The JSON-LD abstract and
+         llms.txt restate these, so change all three together.
+         ======================================================== -->
     <section class="page-section" id="impact" aria-labelledby="impact-heading">
       <div class="site-container">
 
         <div class="project-block" data-reveal-group>
           <div class="project-block-left">
-            <h2 class="section-title" id="impact-heading" data-reveal data-reveal-order="0">Impact</h2>
+            <h2 class="section-title" id="impact-heading" data-reveal data-reveal-order="0">What changed.</h2>
           </div>
-          <div class="project-block-right" data-reveal data-reveal-order="1">
-            <ul class="project-impact-list" role="list">
-              <li><strong>Moved topline engagement on a mature consumer surface</strong>&mdash;roughly a quarter-percent lift, where gains are hard to come by.</li>
-              <li><strong>Raised design-system adoption across Facebook Groups past 80%</strong>, cutting inconsistency and recurring design debt across iOS and Android.</li>
-              <li><strong>Held the quality bar across core surfaces:</strong> 17 implementation reviews with engineering, 200+ UI issues resolved.</li>
+          <div class="project-block-right" data-reveal data-reveal-order="2">
+            <ul class="project-impact-list project-impact-list--expandable" role="list">
+              <li>
+                <details class="impact-row" name="impact-row">
+                  <summary class="impact-row-summary">
+                    <span class="impact-row-text">
+                      <span class="impact-row-outcome">People could move through Groups with clearer orientation and context.</span>
+                      <span class="impact-row-evidence">+0.26% engagement</span>
+                    </span>
+                    <svg class="impact-row-chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </summary>
+                  <p class="impact-row-detail">I redesigned navigation, transitions, and key entry points across Community Home so people could move between Groups experiences with a clearer sense of where they were and what came next.</p>
+                </details>
+              </li>
+              <li>
+                <details class="impact-row" name="impact-row">
+                  <summary class="impact-row-summary">
+                    <span class="impact-row-text">
+                      <span class="impact-row-outcome">Core Groups experiences became more consistent across platforms.</span>
+                      <span class="impact-row-evidence">~82% design-system adoption</span>
+                    </span>
+                    <svg class="impact-row-chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </summary>
+                  <p class="impact-row-detail">I defined reusable panels, invitation patterns, and states across iOS and Android, replacing one-off solutions with shared patterns and bringing more of Groups onto the Facebook Design System.</p>
+                </details>
+              </li>
+              <li>
+                <details class="impact-row" name="impact-row">
+                  <summary class="impact-row-summary">
+                    <span class="impact-row-text">
+                      <span class="impact-row-outcome">Implementation quality improved across core surfaces.</span>
+                      <span class="impact-row-evidence">17 reviews &middot; 200+ UI issues resolved</span>
+                    </span>
+                    <svg class="impact-row-chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </summary>
+                  <p class="impact-row-detail">Cross-surface audits and prototypes exposed inconsistencies that weren't visible when features were reviewed independently. I worked closely with engineering through implementation to resolve more than 200 UI issues and raise the quality bar across the experience.</p>
+                </details>
+              </li>
             </ul>
           </div>
         </div>
@@ -316,6 +376,6 @@
   </div>
   <div class="wave-cursor" id="wave-cursor" aria-hidden="true">👋</div>
 
-  <script src="../js/main.js?v=79d6c048" defer></script>
+  <script src="../js/main.js?v=1030dbec" defer></script>
 </body>
 </html>

@@ -42,7 +42,7 @@
         "headline": "Giving Components an Identity",
         "url": "https://ammerallj.design/work/microsoft-loop.html",
         "description": "A live object people recognize on sight, wherever it lands.",
-        "abstract": "Microsoft Loop introduced live components that could move across Microsoft 365, and the hard part was making one read as the same live thing in every app it landed in. The work unified how every Loop component behaves across Microsoft 365 by designing the Loop control—the persistent interaction model for identity, sharing, and collaboration—patented as Interactive user interface controls for shared dynamic objects (US 12,277,305); shipped Microsoft's first Loop components into Teams, enabling live collaborative tables, lists, agendas, and action items that stayed synchronized wherever they were shared, the Fluid work that later became Microsoft Loop and debuted at Ignite 2021; and defined the component structure other developers now build to, with Microsoft's public developer documentation specifying the header and border that mark a Loop component as live and portable.",
+        "abstract": "Microsoft Loop introduced live components that could move across Microsoft 365, and the hard part was making one read as the same live thing in every app it landed in. What changed: a Loop component could remain itself wherever it lived — a persistent interaction model for identity, sharing, and connections kept it recognizable as it moved between Microsoft 365 experiences, and those structural decisions became part of the patented model for shared dynamic objects (US 12,277,305). Collaborative components moved from concept into Microsoft 365, the first shipping in Teams as synchronized tables, lists, agendas, and action items people could work with directly in conversation, debuting at Ignite 2021. And the component structure became something others could build to: the header and boundary established a recognizable structure for a live, portable object, conventions that later appeared in Microsoft's public developer guidance.",
         "image": "https://ammerallj.design/images/work-loop.jpg?v=3",
         "inLanguage": "en-US",
         "temporalCoverage": "2020-05/2022-03",
@@ -75,7 +75,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@200;500;700&family=Inter:wght@400..700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../style.css?v=75f93987" />
+  <link rel="stylesheet" href="../style.css?v=389b9b4a" />
   <!-- Pre-paint flag, set only when JS runs:
        • is-motion — hides reveal targets so they can fade in without a flash
          (skipped for reduced-motion visitors, who see everything).
@@ -148,8 +148,8 @@
        away over the footer. Always visible (no data-reveal), like the footer. -->
   <nav class="section-pills" aria-label="On this page">
     <a href="#overview" class="is-active" aria-current="true">Overview</a>
-    <a href="#process">Process</a>
-    <a href="#impact">Impact</a>
+    <a href="#process">Approach</a>
+    <a href="#impact">What changed</a>
   </nav>
 
   <main id="main-content">
@@ -205,7 +205,7 @@
               <!-- The Overview prose lives here now, under the metadata — this page
                    has no separate Overview section any more. -->
               <div class="project-overview-text about-body" data-reveal data-reveal-order="3">
-                <p>Microsoft Loop introduced live components that could move across Microsoft 365. The hard part was making one read as the same live thing in every app it landed in, when every app had its own rules.</p>
+                <p><a href="https://www.microsoft.com/en-us/microsoft-loop" target="_blank" rel="noopener noreferrer">Microsoft Loop<span class="visually-hidden"> (opens in new tab)</span></a> introduced live components that could move across Microsoft 365. The hard part was making one read as the same live thing in every app it landed in, when every app had its own rules.</p>
               </div>
             </div>
           </div>
@@ -238,41 +238,36 @@
          paragraph already carries it)
          ======================================================== -->
     <!-- ========================================================
-         WHAT I SHAPED — contribution section before Impact, same heading and
-         .project-block idiom as facebook-groups.html so the two pages match:
-         what I did, then what it moved.
+         APPROACH — renamed from "What I Shaped." (2026-08) to match the cadence
+         Accessibility and Messaging use. Same section id (#process): unlike those
+         pages, the name is still true here — this IS the process step — and
+         CLAUDE.md's rule is that ids are renamed only when the old name has become
+         a lie. The pill label tracks the heading, as always; the heading's own id
+         became approach-heading because "shaped-heading" would not have.
+
+         SHAPE IS DIFFERENT FROM THE OTHER TWO PAGES ON PURPOSE. Accessibility and
+         Messaging carry a single Approach statement; Loop carries a statement PLUS
+         three named principles, because the work was a set of rules rather than one
+         shift. The principles reuse .project-impact-list — a headline clause in
+         <strong> followed by its explanation — which is the list idiom this page
+         already used. They are NOT the expandable accordion: nothing is being
+         withheld, and there are no metrics to keep visible while collapsed.
          ======================================================== -->
-    <section class="page-section" id="process" aria-labelledby="shaped-heading">
+    <section class="page-section" id="process" aria-labelledby="approach-heading">
       <div class="site-container">
 
         <div class="project-block" data-reveal-group>
           <div class="project-block-left">
-            <h2 class="section-title" id="shaped-heading" data-reveal data-reveal-order="0">What I Shaped</h2>
+            <h2 class="section-title" id="approach-heading" data-reveal data-reveal-order="0">Approach.</h2>
           </div>
-          <div class="project-block-right" data-reveal data-reveal-order="1">
+          <div class="project-block-right" data-reveal data-reveal-order="2">
+            <div class="about-body">
+              <p>A Loop component had to belong to itself, not the app it lived in. I focused on what needed to stay constant as the component moved across products, what could adapt to its host, and how it should behave as a live, portable object.</p>
+            </div>
             <ul class="project-impact-list" role="list">
-              <li><strong>Anchored identity in one control.</strong> Put every component's identity, sharing, and connections in a single persistent element, so it read as one object regardless of which app it lived in.</li>
-              <li><strong>Designed for portability.</strong> Structured the component to stay recognizable and live as it moved between Teams, Outlook, and Word, each with its own design language to reconcile.</li>
-              <li><strong>Explored native vs. third-party behavior.</strong> Partnered with motion design on how a component loaded and responded to hover when it lived in Loop versus embedded in a third-party app.</li>
-            </ul>
-          </div>
-        </div>
-
-      </div>
-    </section>
-
-    <section class="page-section" id="impact" aria-labelledby="impact-heading">
-      <div class="site-container">
-
-        <div class="project-block" data-reveal-group>
-          <div class="project-block-left">
-            <h2 class="section-title" id="impact-heading" data-reveal data-reveal-order="0">Impact</h2>
-          </div>
-          <div class="project-block-right" data-reveal data-reveal-order="1">
-            <ul class="project-impact-list" role="list">
-              <li><strong>Unified how every Loop component behaves across Microsoft 365</strong> by designing the Loop control&mdash;the persistent interaction model for identity, sharing, and collaboration&mdash;patented as Interactive user interface controls for shared dynamic objects (<a href="https://www.patentworth.ai/details/12277305" target="_blank" rel="noopener noreferrer">US 12,277,305<span class="visually-hidden"> (opens in new tab)</span></a>).</li>
-              <li><strong>Shipped Microsoft's first Loop components into Teams</strong>, enabling live collaborative tables, lists, agendas, and action items that stayed synchronized wherever they were shared&mdash;the <a href="https://fluidframework.com/" target="_blank" rel="noopener noreferrer">Fluid<span class="visually-hidden"> (opens in new tab)</span></a> work that later became Microsoft Loop and debuted at <a href="https://www.plainconcepts.com/recap-microsoft-ignite-2021/" target="_blank" rel="noopener noreferrer">Ignite 2021<span class="visually-hidden"> (opens in new tab)</span></a>.</li>
-              <li><strong>Defined the component structure other developers now build to:</strong> Microsoft's public <a href="https://learn.microsoft.com/en-us/microsoftteams/platform/m365-apps/design-loop-components" target="_blank" rel="noopener noreferrer">developer documentation<span class="visually-hidden"> (opens in new tab)</span></a> specifies the header and border that mark a Loop component as live and portable.</li>
+              <li><strong>Anchor identity in one control.</strong> Keep identity, sharing, and connections in a persistent element so the component remains recognizable wherever it lives.</li>
+              <li><strong>Separate what travels from what adapts.</strong> Define the structure and behaviors that belong to the component itself, while allowing Teams, Outlook, Word, and other hosts to retain their own product conventions.</li>
+              <li><strong>Give portability its own behavior.</strong> Explore how the component enters, loads, responds to hover, and feels when experienced natively versus embedded elsewhere, including third-party environments.</li>
             </ul>
           </div>
         </div>
@@ -281,22 +276,64 @@
     </section>
 
     <!-- ========================================================
-         THE WAY IN — its own section after Impact, the same slot the locked card
-         occupies on the confidential pages. This work is PUBLIC, so it's an open
-         link to the shipped product rather than a password request: same card
-         shell, no lock, no gate.
+         WHAT CHANGED — renamed from "Impact." (2026-08), matching Accessibility
+         and Messaging. Expandable rows: outcome + evidence in the <summary>
+         (always visible), explanation inside. No JavaScript; one open at a time
+         via the shared name="impact-row".
+
+         THE FOUR EVIDENCE LINKS LIVE IN THE EXPANDED COPY, NOT THE SUMMARY, and
+         that placement is forced: a link inside a <summary> both navigates AND
+         toggles the row, because the click bubbles to the summary's activation
+         behaviour. So "US Patent 12,277,305" is plain text in the evidence line
+         and the patent link sits on "patented model for shared dynamic objects"
+         below it. Never put an <a> in .impact-row-summary.
          ======================================================== -->
-    <section class="page-section" aria-label="Explore the live product">
+    <section class="page-section" id="impact" aria-labelledby="impact-heading">
       <div class="site-container">
 
-        <div class="project-locked" data-reveal-group data-reveal>
-          <div class="project-locked-head">
-            <div class="about-body">
-              <p>The first components shipped into Teams in 2021. Loop is now its own Microsoft 365 app.</p>
-            </div>
+        <div class="project-block" data-reveal-group>
+          <div class="project-block-left">
+            <h2 class="section-title" id="impact-heading" data-reveal data-reveal-order="0">What changed.</h2>
           </div>
-          <div class="project-locked-action">
-            <a class="invite-button" href="https://www.microsoft.com/en-us/microsoft-loop" target="_blank" rel="noopener noreferrer">Explore Microsoft Loop<span aria-hidden="true"> &#8599;</span><span class="visually-hidden"> (opens in new tab)</span></a>
+          <div class="project-block-right" data-reveal data-reveal-order="2">
+            <ul class="project-impact-list project-impact-list--expandable" role="list">
+              <li>
+                <details class="impact-row" name="impact-row">
+                  <summary class="impact-row-summary">
+                    <span class="impact-row-text">
+                      <span class="impact-row-outcome">A Loop component could remain itself wherever it lived.</span>
+                      <span class="impact-row-evidence">US Patent 12,277,305</span>
+                    </span>
+                    <svg class="impact-row-chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </summary>
+                  <p class="impact-row-detail">I defined a persistent interaction model for identity, sharing, and connections so the component stayed recognizable as it moved between Microsoft 365 experiences. Those structural decisions became part of the <a href="https://www.patentworth.ai/details/12277305" target="_blank" rel="noopener noreferrer">patented model for shared dynamic objects<span class="visually-hidden"> (opens in new tab)</span></a>.</p>
+                </details>
+              </li>
+              <li>
+                <details class="impact-row" name="impact-row">
+                  <summary class="impact-row-summary">
+                    <span class="impact-row-text">
+                      <span class="impact-row-outcome">Collaborative components moved from concept into Microsoft 365.</span>
+                      <span class="impact-row-evidence">First components shipped in Teams</span>
+                    </span>
+                    <svg class="impact-row-chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </summary>
+                  <p class="impact-row-detail">I helped shape the foundational interaction model and early visual identity for the first <a href="https://fluidframework.com/" target="_blank" rel="noopener noreferrer">collaborative components<span class="visually-hidden"> (opens in new tab)</span></a>, which shipped in Teams as synchronized tables, lists, agendas, and action items people could work with directly in conversation, and <a href="https://www.plainconcepts.com/recap-microsoft-ignite-2021/" target="_blank" rel="noopener noreferrer">debuted at Ignite 2021<span class="visually-hidden"> (opens in new tab)</span></a>.</p>
+                </details>
+              </li>
+              <li>
+                <details class="impact-row" name="impact-row">
+                  <summary class="impact-row-summary">
+                    <span class="impact-row-text">
+                      <span class="impact-row-outcome">The component structure became something others could build to.</span>
+                      <span class="impact-row-evidence">Codified in public developer documentation</span>
+                    </span>
+                    <svg class="impact-row-chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </summary>
+                  <p class="impact-row-detail">The component header and boundary established a recognizable structure for a live, portable object. Those conventions later appeared in Microsoft's <a href="https://learn.microsoft.com/en-us/microsoftteams/platform/m365-apps/design-loop-components" target="_blank" rel="noopener noreferrer">public developer guidance<span class="visually-hidden"> (opens in new tab)</span></a>, giving other developers a consistent model to build against.</p>
+                </details>
+              </li>
+            </ul>
           </div>
         </div>
 
@@ -344,6 +381,6 @@
   </div>
   <div class="wave-cursor" id="wave-cursor" aria-hidden="true">👋</div>
 
-  <script src="../js/main.js?v=79d6c048" defer></script>
+  <script src="../js/main.js?v=1030dbec" defer></script>
 </body>
 </html>
