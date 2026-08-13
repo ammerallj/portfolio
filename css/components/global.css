@@ -454,6 +454,43 @@ a {
   transform: translate(-50%, -50%) scale(1);
 }
 
+/* Soft white glow that trails the pointer SITE-WIDE — a "backdrop" behind the
+   native cursor. It's a white radial image, so it only reads over dark areas
+   (the landing gradient field, the Contact panel) and is imperceptible on cream
+   — which is the intent. Injected + positioned by js/main.js, gated there to
+   hover + fine-pointer devices. Sits below the affordance cursors (→, 👋, logos
+   at z 9999) so those stay on top. Size is one knob: change --cursor-glow-size. */
+.cursor-glow {
+  --cursor-glow-size: 40px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: var(--cursor-glow-size);
+  height: var(--cursor-glow-size);
+  pointer-events: none;
+  z-index: 9990;
+  background: url("../../images/main-cursor.png") center / contain no-repeat;
+  opacity: 0;
+  transform: translate(-50%, -50%);
+  transition: opacity 0.3s ease;
+  will-change: transform;
+}
+
+.cursor-glow.is-visible {
+  opacity: 0.56;
+}
+
+/* Per-project glow colours. The default glow is the white main-cursor; these
+   modifiers swap only the image (size/position/repeat stay from the shorthand
+   above). js/main.js adds one of these classes while a Work card is hovered on
+   the homepage, or for the whole page on that project's overview page. URLs live
+   here (not set from JS inline) so they resolve relative to this stylesheet and
+   stay correct from work/*.html too. */
+.cursor-glow.is-accessibility { background-image: url("../../images/ax-cursor.png"); }     /* pink */
+.cursor-glow.is-messaging     { background-image: url("../../images/msg-cursor.png"); }    /* blue */
+.cursor-glow.is-loop          { background-image: url("../../images/loop-cursor.png"); }   /* purple */
+.cursor-glow.is-groups        { background-image: url("../../images/groups-cursor.png"); } /* red */
+
 /* Only swap the native cursor on devices with a real mouse (desktop) */
 @media (hover: hover) and (pointer: fine) {
   #contact,

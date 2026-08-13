@@ -510,7 +510,21 @@ const waveCursor = document.getElementById('wave-cursor');
 // appear and then stick on screen. Gate the whole system behind a true hover +
 // fine-pointer device so none of these listeners bind on touch.
 if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+  // Site-wide soft glow that trails the pointer (decorative; aria-hidden).
+  // Injected here rather than authored into every page's HTML — it's purely
+  // presentational, so JS-only is fine and it needs no per-page markup. Only
+  // reads over dark areas (the landing gradient, Contact); see .cursor-glow.
+  const cursorGlow = document.createElement('div');
+  cursorGlow.className = 'cursor-glow';
+  cursorGlow.setAttribute('aria-hidden', 'true');
+  document.body.appendChild(cursorGlow);
+
   document.addEventListener('mousemove', (e) => {
+    cursorGlow.style.left = e.clientX + 'px';
+    cursorGlow.style.top = e.clientY + 'px';
+    if (!cursorGlow.classList.contains('is-visible')) {
+      cursorGlow.classList.add('is-visible');
+    }
     if (cursor) {
       cursor.style.left = e.clientX + 'px';
       cursor.style.top = e.clientY + 'px';
@@ -519,6 +533,38 @@ if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
       waveCursor.style.left = e.clientX + 'px';
       waveCursor.style.top = e.clientY + 'px';
     }
+  });
+
+  // Per-project glow colour. Each project maps a URL fragment (shared by its
+  // homepage Work-card link and its overview page path) to a .cursor-glow
+  // modifier class defined in global.css.
+  const GLOW_VARIANTS = [
+    { match: 'accessibility',   cls: 'is-accessibility' }, // pink
+    { match: 'messaging',       cls: 'is-messaging' },     // blue
+    { match: 'microsoft-loop',  cls: 'is-loop' },          // purple
+    { match: 'facebook-groups', cls: 'is-groups' },        // red
+  ];
+  const ALL_GLOW_CLASSES = GLOW_VARIANTS.map(v => v.cls);
+  function setGlowVariant(cls) {
+    cursorGlow.classList.remove(...ALL_GLOW_CLASSES);
+    if (cls) cursorGlow.classList.add(cls);
+  }
+
+  // On a project overview page, the glow carries that project's colour the whole
+  // time. On the homepage this is null, so the glow rests on the default white.
+  const pageVariant = GLOW_VARIANTS.find(v => location.pathname.includes(v.match)) || null;
+  setGlowVariant(pageVariant ? pageVariant.cls : null);
+
+  // Homepage Work cards: colour the glow to the card being hovered, reverting to
+  // the page default on leave. (Overview pages have no .work-card, so this is a
+  // no-op there.)
+  document.querySelectorAll('.work-card').forEach(card => {
+    const link = card.querySelector('a.work-card-image-link');
+    const href = link ? link.getAttribute('href') || '' : '';
+    const variant = GLOW_VARIANTS.find(v => href.includes(v.match));
+    if (!variant) return;
+    card.addEventListener('mouseenter', () => setGlowVariant(variant.cls));
+    card.addEventListener('mouseleave', () => setGlowVariant(pageVariant ? pageVariant.cls : null));
   });
 
   // Show the 👋 cursor over the blue panel (Contact on the homepage).
