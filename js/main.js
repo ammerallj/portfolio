@@ -136,6 +136,231 @@ function startReveal() {
 
 initHero();
 
+// Hero statement text-morph. Cycles the H1 between three statements the way the
+// motion-primitives TextMorph does — but rebuilt in vanilla JS (no React/build
+// step to import it). Each character is keyed by character + how many times it
+// has appeared; characters shared between the outgoing and incoming statement
+// KEEP THE SAME DOM NODE and slide from their old position to their new one (a
+// manual FLIP), so the words appear to morph fluidly into each other. Letters
+// only in the old statement fade out; letters only in the new one fade in.
+//
+// Progressive enhancement: the H1 ships in the HTML with the first statement as
+// plain text, so no-JS visitors and crawlers keep that (and its SEO/JSON-LD
+// value); this only runs on the homepage with motion allowed. .intro-top is
+// bottom-anchored and overflow-clipped, so the statements' differing line counts
+// never move the divider below.
+function initHeadlineMorph() {
+  const h1 = document.querySelector('.intro-headline');
+  if (!h1 || reducedMotion.matches) return;
+
+  const PHRASES = [
+    'Making products make sense.',
+    'Finding the patterns others miss.',
+    'Defining how products behave.',
+  ];
+  const SLIDE = 1100;  // ms shared letters travel to their new positions
+  const FADE = 650;    // ms enter / exit fade
+  const EASE = 'cubic-bezier(0.4, 0, 0.2, 1)'; // gentle, symmetric ease in/out
+  const DWELL = 5200;  // ms a statement rests fully shown (>5s: readable, calm)
+  const FIRST = 5200;  // ms before the first morph (lets the load reveal settle)
+  let idx = 0;
+  let busy = false;
+
+  // Absolutely-positioned exiting/entering letters are placed relative to the H1.
+  h1.style.position = 'relative';
+
+  // Key = character + its occurrence index, so the Nth "e" in one statement maps
+  // to the Nth "e" in the next. This is what decides which letters persist.
+  function makeKeyer() {
+    const seen = Object.create(null);
+    return (ch) => ch + ' ' + (seen[ch] = (seen[ch] || 0) + 1);
+  }
+
+  // Build word/char spans for `text` into `frag`. A char is REUSED (persists)
+  // when a node with its key exists and hasn't been claimed; otherwise a fresh
+  // hidden node is created and pushed to `entering`. Words are nowrap spans so
+  // the line only ever wraps between words.
+  function build(frag, text, pool, used, entering) {
+    const key = makeKeyer();
+    text.split(' ').forEach((word, wi, words) => {
+      const wspan = document.createElement('span');
+      wspan.className = 'word';
+      for (const ch of word) {
+        const k = key(ch);
+        let node = pool && pool.get(k);
+        if (node && !used.has(k)) {
+          used.add(k);
+        } else {
+          node = document.createElement('span');
+          node.className = 'char';
+          node.textContent = ch;
+          node.style.opacity = '0';
+          node.style.filter = 'blur(4px)';
+          node.style.transform = 'translateY(0.22em)';
+          entering.push(node);
+        }
+        node.dataset.key = k;
+        wspan.appendChild(node); // moves the node if it was reused
+      }
+      frag.appendChild(wspan);
+      if (wi < words.length - 1) frag.appendChild(document.createTextNode(' '));
+    });
+  }
+
+  function morphTo(text) {
+    if (busy) return;
+    busy = true;
+
+    // Purge any exit letters a throttled prior cleanup may have left behind, so
+    // they can never be re-adopted into the character pool below.
+    h1.querySelectorAll('.char-exit').forEach((n) => n.remove());
+
+    // FIRST: snapshot every current (non-exiting) character and its viewport rect.
+    const pool = new Map();
+    const firstRect = new Map();
+    h1.querySelectorAll('.char:not(.char-exit)').forEach((n) => {
+      pool.set(n.dataset.key, n);
+      firstRect.set(n.dataset.key, n.getBoundingClientRect());
+    });
+    const oldTop = [...h1.childNodes];
+
+    // Build the incoming layout, moving reused nodes into it.
+    const used = new Set();
+    const entering = [];
+    const frag = document.createDocumentFragment();
+    build(frag, text, pool, used, entering);
+
+    // Exiting = old letters not reused. Pull them out of flow (absolute) so they
+    // can fade in place without affecting the new layout; real coords set below.
+    const exiting = [];
+    pool.forEach((node, k) => {
+      if (used.has(k)) return;
+      node.classList.add('char-exit'); // excluded from the pool of any later morph
+      node.style.position = 'absolute';
+      node.style.margin = '0';
+      node.style.transition = 'none';
+      h1.appendChild(node); // reparent out of its old word span before removal
+      exiting.push(node);
+    });
+
+    // Swap old layout → new layout.
+    oldTop.forEach((n) => { if (n.parentNode === h1) h1.removeChild(n); });
+    h1.appendChild(frag);
+
+    // Now that the new layout exists, position the exiting letters at their old
+    // spot (relative to the H1's new box, so a moved box doesn't shift them).
+    const host = h1.getBoundingClientRect();
+    exiting.forEach((node) => {
+      const r = firstRect.get(node.dataset.key);
+      node.style.left = (r.left - host.left) + 'px';
+      node.style.top = (r.top - host.top) + 'px';
+    });
+
+    // LAST: decide which reused letters actually SLIDE. A letter only slides if
+    // its new home is near its old one; a letter that would fly a long way across
+    // the screen instead cross-fades — a ghost fades out at the old spot while the
+    // real letter fades in at the new one — so the morph stays calm, not chaotic.
+    const fontPx = parseFloat(getComputedStyle(h1).fontSize) || 64;
+    const MAX_SLIDE = fontPx * 1.5; // px a letter may travel before it cross-fades
+    const sliders = [];
+    used.forEach((k) => {
+      const node = pool.get(k);
+      const a = firstRect.get(k);
+      const b = node.getBoundingClientRect();
+      const dx = a.left - b.left;
+      const dy = a.top - b.top;
+      if (Math.hypot(dx, dy) <= MAX_SLIDE) {
+        // Near: FLIP slide — invert to the old spot now, release in the rAF.
+        node.style.opacity = '1';
+        node.style.filter = 'blur(0px)';
+        node.style.transition = 'none';
+        node.style.transform = 'translate(' + dx + 'px, ' + dy + 'px)';
+        sliders.push(node);
+      } else {
+        // Far: leave a ghost fading out at the old spot...
+        const ghost = node.cloneNode(true);
+        ghost.classList.add('char-exit');
+        ghost.style.position = 'absolute';
+        ghost.style.margin = '0';
+        ghost.style.left = (a.left - host.left) + 'px';
+        ghost.style.top = (a.top - host.top) + 'px';
+        ghost.style.transform = 'none';
+        ghost.style.opacity = '1';
+        ghost.style.filter = 'blur(0px)';
+        ghost.style.transition = 'none';
+        h1.appendChild(ghost);
+        exiting.push(ghost);
+        // ...and fade the real letter in at its new spot (treat it as entering).
+        node.style.transition = 'none';
+        node.style.opacity = '0';
+        node.style.filter = 'blur(4px)';
+        node.style.transform = 'translateY(0.22em)';
+        entering.push(node);
+      }
+    });
+
+    void h1.offsetWidth; // flush the inverted start state
+
+    requestAnimationFrame(() => {
+      sliders.forEach((node) => {
+        node.style.transition = 'transform ' + SLIDE + 'ms ' + EASE;
+        node.style.transform = 'translate(0px, 0px)';
+      });
+      // Entering letters drift up + sharpen once the slide is underway, so they
+      // arrive with motion instead of popping in.
+      const delay = Math.round(SLIDE * 0.2);
+      entering.forEach((node) => {
+        node.style.transition =
+          'opacity ' + FADE + 'ms ease ' + delay + 'ms, ' +
+          'filter ' + FADE + 'ms ease ' + delay + 'ms, ' +
+          'transform ' + FADE + 'ms ' + EASE + ' ' + delay + 'ms';
+        node.style.opacity = '1';
+        node.style.filter = 'blur(0px)';
+        node.style.transform = 'translateY(0)';
+      });
+      // Exiting letters drift up slightly as they soften away.
+      exiting.forEach((node) => {
+        node.style.transition =
+          'opacity ' + FADE + 'ms ease, filter ' + FADE + 'ms ease, transform ' + FADE + 'ms ' + EASE;
+        node.style.opacity = '0';
+        node.style.filter = 'blur(4px)';
+        node.style.transform = 'translateY(-0.14em)';
+      });
+    });
+
+    setTimeout(() => {
+      exiting.forEach((n) => n.remove());
+      // Clear the FLIP inline transform/transition so the next snapshot is clean.
+      h1.querySelectorAll('.char:not(.char-exit)').forEach((n) => {
+        n.style.transition = '';
+        n.style.transform = '';
+      });
+      busy = false;
+    }, SLIDE + 120);
+  }
+
+  // The initial statement is already in the HTML — convert it to keyed spans
+  // (shown, no entrance; it rides the CSS load-reveal), then start cycling.
+  const initFrag = document.createDocumentFragment();
+  const initEntering = [];
+  build(initFrag, PHRASES[0], null, new Set(), initEntering);
+  initEntering.forEach((n) => { n.style.opacity = ''; n.style.filter = ''; n.style.transform = ''; });
+  h1.textContent = '';
+  h1.appendChild(initFrag);
+
+  let first = true;
+  (function loop() {
+    setTimeout(() => {
+      idx = (idx + 1) % PHRASES.length;
+      morphTo(PHRASES[idx]);
+      first = false;
+      loop();
+    }, first ? FIRST : SLIDE + DWELL);
+  })();
+}
+
+initHeadlineMorph();
+
 
 // ============================================================
 // MASTHEAD CAROUSEL — the Accessibility overview image is a 3-slide crossfade.
