@@ -160,20 +160,35 @@ main {
   min-width: 0;
 }
 
-.intro-bio {
-  /* The site's shared right column (--width-right-column, global.css) — the
-     same measure as the Work card descriptions, nav block, and the About /
-     Contact right blocks. Was a flex half of the band's inner width, which
-     drifted from that convention (and from it at every width but 1440). */
+/* Right column of the band: the bio + the meta line stack here. Carries the
+   shared right-column measure (--width-right-column, global.css) — the same
+   measure as the Work card descriptions, nav block, and the About / Contact
+   right blocks — plus the reveal (both descend from behind the divider as one).
+   Was on .intro-bio; moved up when the meta line joined it. */
+.intro-band-right {
   flex: 0 0 var(--width-right-column);
   min-width: 0;
+  /* Mirror of the headline: descend from behind the divider. */
+  --rise: 64px;
+  animation: intro-bio-drop 1s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both;
+}
+
+.intro-bio {
   font-size: var(--size-lg); /* body prose — the hero bio IS body copy */
   line-height: 1.08;
   letter-spacing: -0.02em;
   color: #fff;
-  /* Mirror of the headline: descend from behind the divider. */
-  --rise: 64px;
-  animation: intro-bio-drop 1s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both;
+}
+
+/* Small muted employer line under the bio. Translucent white so it reads as
+   secondary against the frosted band; the " · " separators match the site's
+   other meta rows (Work-card meta, skills). */
+.intro-meta {
+  margin-top: 1rem;
+  font-size: var(--size-sm, 0.875rem);
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+  color: rgba(255, 255, 255, 0.72);
 }
 
 @keyframes intro-bio-drop {
