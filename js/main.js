@@ -375,6 +375,23 @@ function initScrollVideos() {
   if (!vids.length || reducedMotion.matches || !('IntersectionObserver' in window)) return;
   const armed = new WeakSet();
   vids.forEach((v) => armed.add(v)); // eligible to play on the first entry
+
+  // Buffer AHEAD. preload="none" keeps the page light, but if we waited until the
+  // card was in view to fetch the MP4, you'd see the poster held, then a sudden
+  // pop into playback once it downloaded — jarring. So start buffering ~a screen
+  // before the card reaches view (in either scroll direction); by the time it
+  // hits the 40% play mark the first frame is decoded and playback is instant.
+  const prep = new IntersectionObserver((entries, obs) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return;
+      const v = entry.target;
+      v.preload = 'auto';
+      v.load();
+      obs.unobserve(v); // buffer once; keep it
+    });
+  }, { rootMargin: '800px 0px 800px 0px' });
+  vids.forEach((v) => prep.observe(v));
+
   const io = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
       const v = entry.target;
