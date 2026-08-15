@@ -363,24 +363,29 @@ initHeadlineMorph();
 
 // Scroll-triggered video. A work-card video (data-autoplay-in-view) shows its
 // poster JPG as the placeholder — what no-JS visitors and crawlers see, and all
-// that loads up front (preload="none"). Once the card scrolls into view it plays
-// ONCE from the start and stops on its last frame (no loop attribute); it's
-// unobserved so it never replays. Muted + playsinline so the autoplay is allowed
-// (incl. iOS). Skipped under reduced motion, where the poster simply stays and
-// nothing downloads.
+// that loads up front (preload="none"). It plays through once from the start
+// each time the card scrolls into view (from either direction) and stops on its
+// last frame (no loop attribute); leaving view resets it to frame 0 so the next
+// re-entry replays. Muted + playsinline so the autoplay is allowed (incl. iOS).
+// Skipped under reduced motion, where the poster simply stays and nothing loads.
 function initScrollVideos() {
   const vids = document.querySelectorAll('video[data-autoplay-in-view]');
   if (!vids.length || reducedMotion.matches || !('IntersectionObserver' in window)) return;
-  const io = new IntersectionObserver((entries, obs) => {
+  const io = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
-      if (!entry.isIntersecting) return;
       const v = entry.target;
-      obs.unobserve(v); // play once — never re-trigger
-      v.removeAttribute('data-autoplay-in-view');
-      const p = v.play(); // muted → allowed; preload:none means this loads then plays
-      if (p && p.catch) p.catch(() => {}); // if the browser blocks it, the poster stays
+      if (entry.isIntersecting) {
+        // In view: restart from the top and play through once.
+        try { v.currentTime = 0; } catch (e) {}
+        const p = v.play(); // muted → allowed; preload:none means this loads then plays
+        if (p && p.catch) p.catch(() => {}); // if the browser blocks it, the poster stays
+      } else {
+        // Out of view: pause and rewind so the next entry replays from frame 0.
+        v.pause();
+        try { v.currentTime = 0; } catch (e) {}
+      }
     });
-  }, { threshold: 0.3 });
+  }, { threshold: 0.6 }); // ~60% of the card visible = "in full view"
   vids.forEach((v) => io.observe(v));
 }
 initScrollVideos();
