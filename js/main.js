@@ -711,17 +711,26 @@ function setupReveals(motion) {
   // an actual state change, so scrolling within a revealed group doesn't restart
   // the animation. Items stagger — typography first, supporting copy and imagery
   // after, honoring an optional data-reveal-order.
-  function setVisible(group, visible) {
+  function setVisible(group, visible, animateOut) {
     if (group.__revealVisible === visible) return;
     group.__revealVisible = visible;
     itemsOf(group).forEach((el, i) => {
+      const order = el.hasAttribute('data-reveal-order')
+        ? parseInt(el.getAttribute('data-reveal-order'), 10)
+        : i;
       if (visible) {
-        const order = el.hasAttribute('data-reveal-order')
-          ? parseInt(el.getAttribute('data-reveal-order'), 10)
-          : i;
         animate(
           el,
           { opacity: 1, y: 0 },
+          { duration: REVEAL.duration, delay: order * REVEAL.stagger, ease: REVEAL.ease }
+        );
+      } else if (animateOut) {
+        // Animated fade-OUT for a group that's leaving through the bottom edge
+        // while still on screen (work cards, see update()) — a mirror of the
+        // fade-in, so the card visibly sinks + fades rather than snapping away.
+        animate(
+          el,
+          { opacity: 0, y: REVEAL.distance },
           { duration: REVEAL.duration, delay: order * REVEAL.stagger, ease: REVEAL.ease }
         );
       } else {
@@ -745,17 +754,27 @@ function setupReveals(motion) {
     groups.forEach((group) => {
       const r = group.getBoundingClientRect();
       if (r.bottom <= 0 || r.top >= vh) {
-        // Fully off-screen (above or below). This is the ONLY time we reset to
-        // hidden — never while any part of the group is still on screen — so a
-        // section is never yanked to invisible mid-view. That harsh cut-out was
-        // what you saw scrolling up, as a group left through the bottom edge.
+        // Fully off-screen (above or below): instant reset to hidden, ready to
+        // fade in on the next entry.
         setVisible(group, false);
+      } else if (group.classList.contains('work-card')) {
+        // Work cards mirror the reveal on the BOTTOM edge: they fade in as the
+        // top rises past 85% of the viewport and fade OUT (animated) as it drops
+        // back past 95% — so scrolling up, the card visibly disappears as it
+        // leaves the bottom, symmetric with how it arrived. The 85→95% gap is
+        // hysteresis against flicker. (Leaving through the TOP while scrolling
+        // down still just resets once off-screen, above — no harsh cut-out there.)
+        if (firstPass || (r.top < vh * 0.85 && r.bottom > vh * 0.15)) {
+          setVisible(group, true);
+        } else if (r.top > vh * 0.95) {
+          setVisible(group, false, true);
+        }
       } else if (firstPass || (r.top < vh * 0.9 && r.bottom > vh * 0.15)) {
-        // Meaningfully in view → fade in (typography first). Wide gap from the
-        // reset condition gives hysteresis, so there's no flicker at the edges.
+        // Other sections: fade in when meaningfully in view, and only reset once
+        // fully off-screen (above) — never a mid-view cut-out.
         setVisible(group, true);
       }
-      // Partially on screen but not past the reveal line yet: hold current state.
+      // Partially on screen but not past a threshold yet: hold current state.
     });
     firstPass = false;
   }
