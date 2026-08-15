@@ -173,7 +173,7 @@ function initHeadlineMorph() {
   // to the Nth "e" in the next. This is what decides which letters persist.
   function makeKeyer() {
     const seen = Object.create(null);
-    return (ch) => ch + ' ' + (seen[ch] = (seen[ch] || 0) + 1);
+    return (ch) => ch + '#' + (seen[ch] = (seen[ch] || 0) + 1);
   }
 
   // Build word/char spans for `text` into `frag`. A char is REUSED (persists)
@@ -360,6 +360,30 @@ function initHeadlineMorph() {
 }
 
 initHeadlineMorph();
+
+// Scroll-triggered video. A work-card video (data-autoplay-in-view) shows its
+// poster JPG as the placeholder — what no-JS visitors and crawlers see, and all
+// that loads up front (preload="none"). Once the card scrolls into view it plays
+// ONCE from the start and stops on its last frame (no loop attribute); it's
+// unobserved so it never replays. Muted + playsinline so the autoplay is allowed
+// (incl. iOS). Skipped under reduced motion, where the poster simply stays and
+// nothing downloads.
+function initScrollVideos() {
+  const vids = document.querySelectorAll('video[data-autoplay-in-view]');
+  if (!vids.length || reducedMotion.matches || !('IntersectionObserver' in window)) return;
+  const io = new IntersectionObserver((entries, obs) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return;
+      const v = entry.target;
+      obs.unobserve(v); // play once — never re-trigger
+      v.removeAttribute('data-autoplay-in-view');
+      const p = v.play(); // muted → allowed; preload:none means this loads then plays
+      if (p && p.catch) p.catch(() => {}); // if the browser blocks it, the poster stays
+    });
+  }, { threshold: 0.3 });
+  vids.forEach((v) => io.observe(v));
+}
+initScrollVideos();
 
 
 // ============================================================
