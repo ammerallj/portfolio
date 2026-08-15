@@ -653,7 +653,10 @@ function initMotion() {
 // we just also nudge them from Lenis's own scroll event for extra smoothness.
 function setupLenis(Lenis) {
   const lenis = new Lenis({
-    duration: 1.1,
+    // Lower = lighter: the view catches up to the scroll target faster and
+    // settles with less glide. Was 1.1s, which read as "heavy". Keep the expo
+    // ease-out so it still feels smooth, just quicker to resolve.
+    duration: 0.85,
     easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
     smoothWheel: true,
   });
