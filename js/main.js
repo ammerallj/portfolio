@@ -364,28 +364,36 @@ initHeadlineMorph();
 // Scroll-triggered video. A work-card video (data-autoplay-in-view) shows its
 // poster JPG as the placeholder — what no-JS visitors and crawlers see, and all
 // that loads up front (preload="none"). It plays through once from the start
-// each time the card scrolls into view (from either direction) and stops on its
-// last frame (no loop attribute); leaving view resets it to frame 0 so the next
-// re-entry replays. Muted + playsinline so the autoplay is allowed (incl. iOS).
-// Skipped under reduced motion, where the poster simply stays and nothing loads.
+// when ~40% of the card scrolls into view (from either direction) and stops on
+// its last frame (no loop attribute). The rewind happens ONLY once the card is
+// COMPLETELY out of frame — never while it's still visible, which would jump the
+// frame mid-view — and an "armed" flag keeps a partial leave/re-entry from
+// restarting it. Muted + playsinline so autoplay is allowed (incl. iOS). Skipped
+// under reduced motion, where the poster simply stays and nothing loads.
 function initScrollVideos() {
   const vids = document.querySelectorAll('video[data-autoplay-in-view]');
   if (!vids.length || reducedMotion.matches || !('IntersectionObserver' in window)) return;
+  const armed = new WeakSet();
+  vids.forEach((v) => armed.add(v)); // eligible to play on the first entry
   const io = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
       const v = entry.target;
-      if (entry.isIntersecting) {
-        // In view: restart from the top and play through once.
+      if (!entry.isIntersecting) {
+        // Fully out of frame: rewind (invisible, so no glitch) and re-arm so the
+        // next scroll-in replays from the start.
+        v.pause();
+        try { v.currentTime = 0; } catch (e) {}
+        armed.add(v);
+      } else if (entry.intersectionRatio >= 0.4 && armed.has(v)) {
+        // Back to 40% in view: play once from frame 0, then disarm — so staying
+        // in view (or a partial leave that never fully exits) won't rewind it.
+        armed.delete(v);
         try { v.currentTime = 0; } catch (e) {}
         const p = v.play(); // muted → allowed; preload:none means this loads then plays
         if (p && p.catch) p.catch(() => {}); // if the browser blocks it, the poster stays
-      } else {
-        // Out of view: pause and rewind so the next entry replays from frame 0.
-        v.pause();
-        try { v.currentTime = 0; } catch (e) {}
       }
     });
-  }, { threshold: 0.6 }); // ~60% of the card visible = "in full view"
+  }, { threshold: [0, 0.4] });
   vids.forEach((v) => io.observe(v));
 }
 initScrollVideos();
