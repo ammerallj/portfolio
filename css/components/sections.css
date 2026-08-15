@@ -161,6 +161,44 @@
   max-width: none;
 }
 
+/* Per-card meta eyebrow: a small "Shipped" status pill + a company · year stamp
+   on one line, sitting above the card description in the right column. */
+.work-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin-bottom: 0.85rem;
+}
+
+.work-card-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  border: 1px solid rgba(0, 0, 0, 0.22);
+  border-radius: 100px;
+  padding: 0.4em 0.85em;
+  font-family: var(--font-body);
+  font-size: var(--size-xs); /* 13px — the site's eyebrow/meta size */
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-text-70);
+  white-space: nowrap;
+}
+
+.work-card-pill-arrow {
+  font-size: 1.15em;
+  line-height: 0;
+}
+
+.work-card-stamp {
+  font-family: var(--font-body);
+  font-size: var(--size-xs); /* 13px — matches the pill's eyebrow scale */
+  letter-spacing: -0.01em;
+  color: var(--color-text-70);
+  white-space: nowrap;
+}
+
 /* ============================================================
    PUBLIC FOOTPRINTS — its own section again (the About tab view
    that briefly housed it is gone): heading left, link groups in
