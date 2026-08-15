@@ -361,13 +361,16 @@ function initHeadlineMorph() {
 
 initHeadlineMorph();
 
-// Scroll-triggered video. A work-card video (data-autoplay-in-view) shows its
-// poster JPG as the placeholder — what no-JS visitors and crawlers see, and all
-// that loads up front (preload="none"). It plays through once from the start
-// when ~40% of the card scrolls into view (from either direction) and stops on
-// its last frame (no loop attribute). The rewind happens ONLY once the card is
-// COMPLETELY out of frame — never while it's still visible, which would jump the
-// frame mid-view — and an "armed" flag keeps a partial leave/re-entry from
+// Scroll-triggered video. A work-card video (data-autoplay-in-view) sits under a
+// sibling .work-card-poster JPG — the placeholder no-JS visitors and crawlers
+// see. Nothing but that poster loads up front (preload="none"). The video plays
+// through once from the start when ~40% of the card scrolls into view (from
+// either direction); the poster CROSSFADES out the instant playback actually
+// begins, so a poster that isn't the exact first frame never shows as a hard cut.
+// It stops on its last frame (no loop attribute), and rewinds ONLY once the card
+// is COMPLETELY out of frame — never while still visible, which would jump the
+// frame mid-view — restoring the poster (off-screen, unseen) so the next
+// scroll-in starts clean. An "armed" flag keeps a partial leave/re-entry from
 // restarting it. Muted + playsinline so autoplay is allowed (incl. iOS). Skipped
 // under reduced motion, where the poster simply stays and nothing loads.
 function initScrollVideos() {
@@ -375,6 +378,7 @@ function initScrollVideos() {
   if (!vids.length || reducedMotion.matches || !('IntersectionObserver' in window)) return;
   const armed = new WeakSet();
   vids.forEach((v) => armed.add(v)); // eligible to play on the first entry
+  const posterOf = (v) => v.parentNode.querySelector('.work-card-poster');
 
   // Buffer AHEAD. preload="none" keeps the page light, but if we waited until the
   // card was in view to fetch the MP4, you'd see the poster held, then a sudden
@@ -396,18 +400,24 @@ function initScrollVideos() {
     entries.forEach((entry) => {
       const v = entry.target;
       if (!entry.isIntersecting) {
-        // Fully out of frame: rewind (invisible, so no glitch) and re-arm so the
-        // next scroll-in replays from the start.
+        // Fully out of frame: rewind (invisible, so no glitch), re-arm, and bring
+        // the poster back (off-screen, unseen) so the next entry crossfades clean.
         v.pause();
         try { v.currentTime = 0; } catch (e) {}
         armed.add(v);
+        const poster = posterOf(v);
+        if (poster) poster.classList.remove('is-faded');
       } else if (entry.intersectionRatio >= 0.4 && armed.has(v)) {
         // Back to 40% in view: play once from frame 0, then disarm — so staying
         // in view (or a partial leave that never fully exits) won't rewind it.
         armed.delete(v);
         try { v.currentTime = 0; } catch (e) {}
-        const p = v.play(); // muted → allowed; preload:none means this loads then plays
-        if (p && p.catch) p.catch(() => {}); // if the browser blocks it, the poster stays
+        const poster = posterOf(v);
+        const reveal = () => { if (poster) poster.classList.add('is-faded'); };
+        const p = v.play(); // muted → allowed
+        // Fade the poster only once playback has actually begun (a frame is up),
+        // so the crossfade reveals moving video, never a blank/black gap.
+        if (p && p.then) p.then(reveal).catch(() => {}); else reveal();
       }
     });
   }, { threshold: [0, 0.4] });

@@ -72,13 +72,36 @@
   transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), filter 0.4s ease;
 }
 
-.work-card-image-link:focus-visible .work-card-image {
+/* Poster overlay: the static JPG sits ON TOP of the video (same box + crop) and
+   is the placeholder no-JS visitors and crawlers see. js/main.js fades it out
+   the instant the video actually starts playing, so a poster that isn't the
+   exact first frame never shows as a hard cut — and it fades back in when the
+   card leaves view, so the next scroll-in starts clean. */
+.work-card-poster {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+  transform: scale(1);
+  transition: opacity 0.45s ease, transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), filter 0.4s ease;
+  pointer-events: none;
+}
+
+.work-card-poster.is-faded {
+  opacity: 0;
+}
+
+.work-card-image-link:focus-visible .work-card-image,
+.work-card-image-link:focus-visible .work-card-poster {
   transform: scale(1.04);
   filter: blur(1px);
 }
 
 @media (hover: hover) {
-  .work-card-image-link:hover .work-card-image {
+  .work-card-image-link:hover .work-card-image,
+  .work-card-image-link:hover .work-card-poster {
     transform: scale(1.04);
     /* A slight blur behind the → badge. The simultaneous scale(1.04) overfills
        the frame, so the softened edges stay covered by the rounded clip. */
@@ -88,12 +111,15 @@
 
 @media (prefers-reduced-motion: reduce) {
   .work-card-image-link::after,
-  .work-card-image {
+  .work-card-image,
+  .work-card-poster {
     transition: none;
   }
 
   .work-card-image-link:hover .work-card-image,
-  .work-card-image-link:focus-visible .work-card-image {
+  .work-card-image-link:focus-visible .work-card-image,
+  .work-card-image-link:hover .work-card-poster,
+  .work-card-image-link:focus-visible .work-card-poster {
     transform: none;
   }
 }
