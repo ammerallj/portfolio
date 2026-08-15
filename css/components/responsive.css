@@ -270,11 +270,13 @@
   }
 
   /* Portrait drops the two-column band (the spacer is hidden below), so the
-     bio fills the full content width instead of holding the desktop's fixed
-     right-column measure — at 768 that token floors at 369px and left 359px
-     of the band empty. The frosted pane and the nav bar are already full
-     width; this brings the copy in line with them. */
-  .intro-bio {
+     bio column fills the full content width instead of holding the desktop's
+     fixed right-column measure — at 768 that token floors at 369px and left
+     359px of the band empty (and now overflowed it). The width lives on the
+     .intro-band-right WRAPPER (bio + meta), which is the band's flex child — not
+     on .intro-bio, which is only a block inside it. The frosted pane and the nav
+     bar are already full width; this brings the copy in line with them. */
+  .intro-band-right {
     flex: 1 1 auto;
   }
 

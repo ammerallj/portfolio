@@ -202,21 +202,6 @@ main {
   color: #fff;
 }
 
-/* Small employer line under the bio. It sits on the lightest part of the
-   gradient field, so a translucent white washed out (an accessibility problem);
-   it's now full white with a soft dark halo that lifts it off the light areas
-   without reading as a hard shadow. Its smaller size (not a muted colour) keeps
-   it secondary to the bio. The " · " separators match the site's other meta
-   rows (Work-card meta, skills). */
-.intro-meta {
-  margin-top: 1rem;
-  font-size: var(--size-sm, 0.875rem);
-  line-height: 1.4;
-  letter-spacing: -0.01em;
-  color: #fff;
-  text-shadow: 0 1px 14px rgba(0, 0, 0, 0.30);
-}
-
 @keyframes intro-bio-drop {
   from { transform: translateY(calc(-1 * var(--rise, 64px))); }
   to { transform: translateY(0); }
