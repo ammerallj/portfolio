@@ -245,6 +245,11 @@ main {
      dial between "see the blur" (lower) and "text legibility" (higher).
      (The is-over-dark state below stays solid blue.) */
   background-color: rgba(251, 252, 248, 0.6);
+  /* Fine ~2px grayscale film grain over the frost — an inline SVG feTurbulence
+     (no asset, CSP-safe). It rides on this same layer, so the mask below fades
+     the grain out with the blur. baseFrequency sets the grain size; the rect
+     opacity sets how strong it reads. */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='navgrain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.55' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23navgrain)' opacity='0.3'/%3E%3C/svg%3E");
   -webkit-backdrop-filter: blur(16px) saturate(1.15);
   backdrop-filter: blur(16px) saturate(1.15);
   -webkit-mask-image: linear-gradient(to bottom, #000 0, #000 calc(100% - 64px), transparent 100%);
