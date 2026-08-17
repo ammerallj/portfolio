@@ -238,19 +238,13 @@ main {
      cross-fade instead of ending on a hard edge. */
   bottom: -100px;
   z-index: -1;
-  /* Frosted overlay that BLEEDS: a translucent cream over a real blur (so
-     content shows through as a soft frost, not a solid strip), then a gradient
-     MASK holds the frost solid across the bar and fades it to nothing over the
-     64px below — the blur melts seamlessly into the sharp page. Opacity is the
-     dial between "see the blur" (lower) and "text legibility" (higher).
-     (The is-over-dark state below stays solid blue.) */
-  /* Cream fill as a top→bottom GRADIENT: opaque behind the nav row (so the items
-     stay legible over busy content) and fading to 0 at the bottom. The ~2px
-     grayscale film grain (inline SVG feTurbulence, no asset, CSP-safe) rides on
-     top. The blur + the mask below still bleed the frost's lower edge into the
-     sharp page. Grain size = feTurbulence baseFrequency; strength = rect opacity. */
+  /* Frosted overlay that BLEEDS: the cream fill is a top→bottom GRADIENT — opaque
+     behind the nav row (so the items stay legible over busy content) fading to 0
+     at the bottom — over a real backdrop blur. The mask below holds the frost
+     solid across the bar and fades it to nothing over the 100px bleed, so the
+     blur melts seamlessly into the sharp page. (Grain lives on ::after so it can
+     fade FASTER than the blur — no grainy tail. is-over-dark stays solid blue.) */
   background-image:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='navgrain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.55' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23navgrain)' opacity='0.3'/%3E%3C/svg%3E"),
     linear-gradient(to bottom,
       rgba(251, 252, 248, 0.95) 0%,
       rgba(251, 252, 248, 0.9) 38%,
@@ -268,6 +262,29 @@ main {
   opacity: 1;
 }
 
+/* Grain on its OWN layer so it fades out FASTER than the blur — otherwise the
+   film grain lingered as a visible band down the long bleed. It sits on top of
+   the ::before frost (painted after, same z), holds across the bar, then is gone
+   ~40px down while the blur keeps bleeding to 100px. Docked/page/over-dark states
+   mirror ::before. Grain size = feTurbulence baseFrequency; strength = rect opacity. */
+.intro-bar::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  bottom: -40px;
+  z-index: -1;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='navgrain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.55' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23navgrain)' opacity='0.3'/%3E%3C/svg%3E");
+  -webkit-mask-image: linear-gradient(to bottom, #000 0, #000 calc(100% - 40px), transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0, #000 calc(100% - 40px), transparent 100%);
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  pointer-events: none;
+}
+
+.intro-bar.is-docked::after {
+  opacity: 1;
+}
+
 /* ---- Over the blue Contact panel: the bar inverts ----
    Same idea the site header carries on the project pages (.is-over-dark in
    header.css): once Contact slides under the docked bar, the cream glass
@@ -278,9 +295,14 @@ main {
    (updateScrollEffects), alongside the header's copy of the state. */
 .intro-bar.is-over-dark::before {
   background-color: var(--color-accent);
-  /* Drop the cream gradient + grain so the solid blue shows over Contact. */
+  /* Drop the cream gradient so the solid blue shows over Contact. */
   background-image: none;
   opacity: 1;
+}
+
+/* No grain over the solid-blue Contact strip. */
+.intro-bar.is-over-dark::after {
+  opacity: 0;
 }
 
 .intro-bar.is-over-dark .intro-bar-name {

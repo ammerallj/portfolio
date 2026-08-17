@@ -87,7 +87,8 @@ main:has(.next-case-section) .page-section:has(+ .next-case-section) {
   animation: none;
 }
 
-.intro-bar--page::before {
+.intro-bar--page::before,
+.intro-bar--page::after {
   opacity: 1;
 }
 
