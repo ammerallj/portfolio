@@ -234,13 +234,21 @@ main {
   content: '';
   position: absolute;
   inset: 0;
+  /* Extend the frost BELOW the bar so it can bleed out instead of ending on a
+     hard edge. */
+  bottom: -64px;
   z-index: -1;
-  /* The original treatment: near-opaque cream + blur, a solid legible strip
-     (the melt experiment is retired — the deeper bottom padding above gives
-     the glass its breathing room instead). */
-  background-color: rgba(251, 252, 248, 0.9);
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
+  /* Frosted overlay that BLEEDS: a translucent cream over a real blur (so
+     content shows through as a soft frost, not a solid strip), then a gradient
+     MASK holds the frost solid across the bar and fades it to nothing over the
+     64px below — the blur melts seamlessly into the sharp page. Opacity is the
+     dial between "see the blur" (lower) and "text legibility" (higher).
+     (The is-over-dark state below stays solid blue.) */
+  background-color: rgba(251, 252, 248, 0.6);
+  -webkit-backdrop-filter: blur(16px) saturate(1.15);
+  backdrop-filter: blur(16px) saturate(1.15);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0, #000 calc(100% - 64px), transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0, #000 calc(100% - 64px), transparent 100%);
   opacity: 0;
   transition: opacity 0.35s ease, background-color 0.35s ease;
 }
