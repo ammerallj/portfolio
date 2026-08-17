@@ -234,9 +234,9 @@ main {
   content: '';
   position: absolute;
   inset: 0;
-  /* Extend the frost BELOW the bar so it can bleed out instead of ending on a
-     hard edge. */
-  bottom: -64px;
+  /* Extend the frost well BELOW the bar so it can bleed out over a long, gradual
+     cross-fade instead of ending on a hard edge. */
+  bottom: -100px;
   z-index: -1;
   /* Frosted overlay that BLEEDS: a translucent cream over a real blur (so
      content shows through as a soft frost, not a solid strip), then a gradient
@@ -258,8 +258,8 @@ main {
       rgba(251, 252, 248, 0) 100%);
   -webkit-backdrop-filter: blur(16px) saturate(1.15);
   backdrop-filter: blur(16px) saturate(1.15);
-  -webkit-mask-image: linear-gradient(to bottom, #000 0, #000 calc(100% - 64px), transparent 100%);
-  mask-image: linear-gradient(to bottom, #000 0, #000 calc(100% - 64px), transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0, #000 calc(100% - 100px), transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0, #000 calc(100% - 100px), transparent 100%);
   opacity: 0;
   transition: opacity 0.35s ease, background-color 0.35s ease;
 }
