@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 #
-# pre-commit — auto-run the content-hash cache-buster.
+# pre-commit — two jobs, in the order the script runs them:
+#   1. block a commit that silently DELETES an asset — the guard, below
+#   2. auto-run the content-hash cache-buster — explained in this note
 #
 # When a commit stages a change to any hashed source (a component stylesheet or
 # js/main.js), re-stamp every ?v= from content and fold the updated files into
@@ -10,16 +12,103 @@
 # No-op when the ?v= would not change: bump-cache.sh is content-addressed, so if
 # the hash is unchanged the re-staged files carry no diff.
 #
-# Caveat: this `git add`s index.html / style.css / work/*.html in full, so any
-# UNSTAGED edits sitting in those files at commit time get swept in too. On this
-# static site those files are edited deliberately per commit, so that's fine —
-# but don't do a partial (git add -p) commit that leaves half of one of them
-# unstaged and expect the hook to respect the split.
-#
+# The stamp files (index.html / style.css / work/*.html) are only ever staged
+# when the bump ACTUALLY changed them, and never while they hold unstaged edits
+# that are not themselves ?v= lines — see the second guard below.
 set -euo pipefail
+
+# ---------------------------------------------------------------------------
+# Guard: refuse to silently commit a DELETED asset (any PDF, anything in images/).
+#
+# Why this exists: 2026-08-16, Jenna-Ammerall-Resume.pdf was dropped by commit
+# 1a3fa23 — a nav-frost CSS commit. Nothing in this repo deleted it; it went
+# missing from the working tree outside git, and the habitual `git add -A` then
+# staged the deletion and folded it into an unrelated commit. The resume link is
+# on all five pages, in sitemap.xml and in llms.txt, so that ships a 404 on the
+# one file a recruiter actually opens.
+#
+# The failure mode is blanket staging, not any one file: `git add -A` cannot tell
+# "I removed this asset" from "this asset vanished while I was editing CSS". So
+# the guard is on the DELETION, and it makes you say the deletion out loud.
+#
+# Deleting an asset on purpose is normal here (a PNG replaced by its JPEG, an old
+# poster retired) — that's what the escape hatch is for:
+#     ALLOW_ASSET_DELETE=1 git commit -m "Remove the superseded PNG poster"
+#
+# Renames are NOT caught (filter is D, not R): resume.pdf -> Jenna-Ammerall-
+# Resume.pdf is a legitimate move git already records as one change.
+if [ "${ALLOW_ASSET_DELETE:-}" != "1" ]; then
+  deleted=$(git diff --cached --diff-filter=D --name-only | grep -E '\.pdf$|^images/' || true)
+  if [ -n "$deleted" ]; then
+    echo "pre-commit: this commit DELETES asset(s):" >&2
+    echo "$deleted" | sed 's/^/  - /' >&2
+    echo >&2
+    echo "If that was not intentional, the file is probably missing from your" >&2
+    echo "working tree. Restore it and commit again:" >&2
+    echo "  git checkout HEAD -- <path>" >&2
+    echo >&2
+    echo "If you really mean to delete it, say so:" >&2
+    echo "  ALLOW_ASSET_DELETE=1 git commit ..." >&2
+    exit 1
+  fi
+fi
 
 # Only act when the staged set touches content the ?v= hash is derived from.
 if git diff --cached --name-only | grep -qE '^(css/components/.+\.css|js/main\.js)$'; then
+
+  # Every file bump-cache.sh rewrites. Keep in step with the two sed lines there.
+  stamp_files=(index.html style.css work/*.html)
+
+  # -------------------------------------------------------------------------
+  # Guard: refuse to sweep somebody else's work into this commit.
+  #
+  # This hook used to end with a blanket `git add index.html style.css
+  # work/*.html`, which staged those files IN FULL — including any unstaged
+  # edits that happened to be sitting in them. The old header comment called
+  # that acceptable. It was not: on 2026-08-26 a Work-carousel commit swallowed
+  # a parallel session's entire #footprints section deletion and nav removal.
+  # The other session's own commit then described changes that lived in the
+  # carousel commit, and reverting the carousel would have silently resurrected
+  # the deleted section. Unpicking it meant rewriting two commits.
+  #
+  # This repo is worked one-chat-per-worktree (CLAUDE.md "Cross-chat workflow"),
+  # but sessions often share ONE working copy anyway — so these six files are
+  # exactly the ones most likely to be dirty with work that isn't yours.
+  #
+  # Note staging carefully cannot protect you here, because the hook re-adds the
+  # files after you stage. Only this check can. Lines containing ?v= are ignored:
+  # those are a previous manual ./scripts/bump-cache.sh run, which is a
+  # documented way to preview the stamp.
+  if [ "${ALLOW_DIRTY_STAMP_FILES:-}" != "1" ]; then
+    dirty=""
+    for f in "${stamp_files[@]}"; do
+      [ -e "$f" ] || continue
+      if git diff --unified=0 -- "$f" \
+           | grep -E '^[+-]' | grep -Ev '^(\+\+\+|---)' | grep -qvF '?v='; then
+        dirty="${dirty}  - ${f}"$'\n'
+      fi
+    done
+    if [ -n "$dirty" ]; then
+      echo "pre-commit: these cache-stamp files hold UNSTAGED edits that are not ?v= lines:" >&2
+      printf '%s' "$dirty" >&2
+      echo >&2
+      echo "The cache-buster stages these files, so committing now would fold that" >&2
+      echo "work into your commit. Deal with it first:" >&2
+      echo "  git stash push -- <path>     # park it" >&2
+      echo "  git commit -- <path>         # or land it on its own" >&2
+      echo >&2
+      echo "If those edits genuinely belong in THIS commit, say so:" >&2
+      echo "  ALLOW_DIRTY_STAMP_FILES=1 git commit ..." >&2
+      exit 1
+    fi
+  fi
+
   ./scripts/bump-cache.sh >/dev/null
-  git add index.html style.css work/*.html
+
+  # Stage only what the bump actually rewrote. A content-addressed no-op bump
+  # leaves the file untouched, so it never enters the commit at all.
+  for f in "${stamp_files[@]}"; do
+    [ -e "$f" ] || continue
+    git diff --quiet -- "$f" || git add -- "$f"
+  done
 fi
