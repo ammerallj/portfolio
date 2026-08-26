@@ -496,10 +496,28 @@ When the request is about how the site looks/behaves at a **smaller screen size*
 
 ## Horizontal Tracks (the Selected Work carousel, 2026-08)
 
-Selected Work is a **looping horizontal track**, not a vertical stack. The cards
-run left→right, one near-full-width card at a time with the next peeking in, and
-scrolling past the last one brings the first round again in either direction.
-`.work-list` in `sections.css`, `initWorkCarousel()` in `js/main.js`.
+Selected Work is a **looping horizontal track from 481 up, and a plain vertical
+stack at ≤480**. Above the phone tier the cards run left→right, one
+near-full-width card at a time with the next peeking in, and scrolling past the
+last one brings the first round again in either direction. `.work-list` in
+`sections.css`, `initWorkCarousel()` in `js/main.js`.
+
+**The phone has no horizontal track, and switching that off takes BOTH halves.**
+responsive.css's 480 tier reverts the layout (and must reset `.work-card`'s
+`flex` — in a column container the basis applies to the main axis, so the
+desktop `calc(100% - peek)` would set each card's *height*). `initWorkCarousel`
+watches the same boundary and disables itself, restoring the authored card
+order it captured at init. **That gate is correctness, not optimisation:** on a
+column layout `scrollLeft` is pinned at 0, so the loop's "scroll back into the
+buffer" branch is permanently true and re-prepends a card on every scroll event,
+scrambling the running order of the projects. Move the breakpoint in one place
+and you must move it in the other.
+
+The gate runs off **two** triggers — `matchMedia` `change` *and* `resize`.
+`change` is the precise one but a single point of failure, and it was measured
+being dropped on a desktop→phone transition, which leaves the loop live over a
+vertical stack: exactly the corrupting state above. `syncToTier` is idempotent,
+so the redundancy is free.
 
 **Specifying one of these — the five axes.** Name all five and there is nothing
 left to guess:
@@ -527,7 +545,8 @@ the container line, not the screen edge).
   bug: see snap-stop below.
 - **one card at a time → does the card's own layout still fit.** It did not here;
   `.work-card-left` / `.work-card-right` had to become shrinkable.
-- **horizontal → what the phone does.** Usually a different answer.
+- **horizontal → what the phone does.** Usually a different answer; here it is
+  "don't", and unwinding it needed a CSS revert *and* a JS gate.
 
 ### Invariants — break these and the loop breaks
 
