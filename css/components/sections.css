@@ -8,14 +8,67 @@
   padding-top: 104px;
 }
 
+/* The Work list is a HORIZONTAL TRACK (2026-08). The cards no longer stack down
+   the page — they run left→right, one near-full-width card at a time with the
+   next one peeking in from the right, and the reader swipes / shift-scrolls
+   through them. Native scroll only: no JS, no scroll-jacking, and it still works
+   with JS off.
+
+   ⚠️ Lenis leaves this alone, and that is not luck — do NOT add
+   `data-lenis-prevent` here. Lenis runs at its default
+   gestureOrientation: 'vertical', and it bails out of any gesture whose deltaY
+   is 0 (a horizontal trackpad swipe or touch drag) BEFORE it calls
+   preventDefault, so the browser's own horizontal scrolling survives untouched.
+   `data-lenis-prevent` would instead kill SMOOTH VERTICAL scrolling for the
+   whole section the pointer is over — the opposite of the fix. */
 .work-list {
   list-style: none;
   display: flex;
-  flex-direction: column;
-  gap: var(--gap-section); /* card → card */
+  flex-direction: row;
+  /* card → card. --gap-section (96) is the vertical rhythm between peer
+     sections; horizontally it is just dead air the reader swipes across. */
+  gap: var(--gap-group);
+
+  overflow-x: auto;
+  /* Cards scroll off the SCREEN edge, not the container's inset: the track
+     bleeds out through the page gutter and pads the same amount back, so card 1
+     still opens flush on the container's left edge. */
+  margin-inline: calc(var(--page-gutter) * -1);
+  padding-inline: var(--page-gutter);
+
+  scroll-snap-type: x mandatory;
+  /* Without this the snapport is the full scrollport, so a card would snap to
+     the screen edge and sit under the gutter instead of on the container line. */
+  scroll-padding-inline: var(--page-gutter);
+  overscroll-behavior-x: contain;
+
+  /* overflow-x: auto forces overflow-y to compute to `auto` too, so the track
+     would clip anything that leaves a card vertically: the reveal system's 16px
+     translateY and the image link's 1.02 hover scale. The padding gives both
+     room; the negative margin hands the space straight back, so the section's
+     vertical rhythm is byte-for-byte what it was. */
+  padding-block: 24px;
+  margin-block: -24px;
+
+  /* The peeking card is the affordance; a scrollbar under the track would read
+     as chrome on an editorial page. Every card holds focusable links, so
+     keyboard users still reach (and scroll) the track by tabbing. */
+  scrollbar-width: none;
+}
+
+.work-list::-webkit-scrollbar {
+  display: none;
 }
 
 .work-card {
+  /* One card at a time; --work-peek is what's left over, and it is what tells
+     the reader there IS a next card. The basis is a percentage of the TRACK's
+     content box (= the container's inner width), so the sliver stays a constant
+     number of pixels at every viewport instead of scaling with it. Neither
+     grow nor shrink: the card is a fixed slide, not a flex child. */
+  flex: 0 0 calc(100% - var(--work-peek));
+  scroll-snap-align: start;
+
   display: flex;
   flex-direction: column;
   /* Text lockup → image (Figma 60px). Stacked below 1025 the card's parts are
@@ -24,6 +77,23 @@
   gap: var(--gap-group);
   /* Reveal is handled by the shared [data-reveal] motion system (Motion.dev);
      the card's title, description, and image fade + rise in sequence. */
+}
+
+/* NO-JS FALLBACK ONLY. With the loop running (initWorkCarousel in js/main.js
+   adds .is-looping) there is no last card — the cards rotate, so :last-child is
+   whichever one happens to sit at the DOM end, and giving that one a different
+   snap alignment would break the loop's arithmetic: every snap position has to
+   stay an exact multiple of one card-step for the seamless jump to land on one.
+   Without JS the track is a plain finite scroller, and there the real last card
+   can never reach the start line — the track runs out --work-peek short, so the
+   browser falls back to "closest reachable position" and the card rests off the
+   grid by an arbitrary amount. Snapping it to the END instead puts its right
+   edge on the container's right line, mirroring the opening frame.
+   Don't "fix" the shortfall with a trailing spacer: the card's flex-basis is a
+   PERCENTAGE of the track's content box, so a padding-inline-end would shrink
+   every card by that same amount. */
+.work-list:not(.is-looping) .work-card:last-child {
+  scroll-snap-align: end;
 }
 
 /* Each work image is a link that opens an email. Block-level so it fills the
@@ -112,8 +182,13 @@
   /* Six grid columns (654px at 1440) — the headline's own measure, rather
      than "whatever's left" (which resolved to 766px). margin-right:auto puts
      the leftover between the columns so the description block stays flush to
-     the container's right edge. */
-  flex: 0 0 var(--width-title-column);
+     the card's right edge.
+     SHRINKABLE since the horizontal track (2026-08): the card is now narrower
+     than the container by --work-peek, and at 1440 the two fixed columns
+     (654 + 20 + 542) add up to more than the card has. Both sides give a
+     little rather than one of them overflowing. margin-right:auto still takes
+     the leftover whenever there IS any, so nothing moves above ~1500. */
+  flex: 0 1 var(--width-title-column);
   min-width: 0;
   margin-right: auto;
 }
@@ -135,7 +210,7 @@
      same way as the nav, so its left edge (and the description) stays aligned
      with the "Work" nav item across the whole desktop range, not just 1440.
      Fluid 291→542 across the 1025–1440 band via the shared token. */
-  flex: 0 0 var(--width-right-column);
+  flex: 0 1 var(--width-right-column);
   min-width: 0;
   display: flex;
   flex-direction: column;

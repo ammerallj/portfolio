@@ -120,6 +120,17 @@
   /* Outer page gutter (.site-container / .site-header-row) */
   --page-gutter: 56px;
 
+  /* How much of the container's inner width a Work card GIVES UP so the next
+     card in the horizontal track peeks in from the right (sections.css).
+     What the reader actually sees of that next card is NOT this number — the
+     track gap sits in front of it and the bleed adds the gutter back:
+
+         visible sliver = --work-peek − track gap + --page-gutter
+
+     Desktop: 140 − 60 + 56 = 136px. Keep that arithmetic in view when changing
+     either side; the phone tier overrides the gap for exactly this reason. */
+  --work-peek: 140px;
+
   --measure: 65ch;
 
   --line-height-heading: 1.15;

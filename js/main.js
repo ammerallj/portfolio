@@ -383,8 +383,13 @@ function initScrollVideos() {
   // Buffer AHEAD. preload="none" keeps the page light, but if we waited until the
   // card was in view to fetch the MP4, you'd see the poster held, then a sudden
   // pop into playback once it downloaded — jarring. So start buffering ~a screen
-  // before the card reaches view (in either scroll direction); by the time it
-  // hits the 40% play mark the first frame is decoded and playback is instant.
+  // before the card reaches view (in ANY direction); by the time it hits the 40%
+  // play mark the first frame is decoded and playback is instant.
+  // The margin is 800 on all four sides, not just top/bottom: since 2026-08 the
+  // Work cards sit in a HORIZONTAL track (sections.css .work-list), so cards 2–4
+  // approach from the RIGHT, not from below. With 0 horizontal margin they only
+  // began loading as they slid into frame — exactly the pop this observer exists
+  // to prevent. Vertical lead time is unchanged.
   const prep = new IntersectionObserver((entries, obs) => {
     entries.forEach((entry) => {
       if (!entry.isIntersecting) return;
@@ -393,7 +398,7 @@ function initScrollVideos() {
       v.load();
       obs.unobserve(v); // buffer once; keep it
     });
-  }, { rootMargin: '800px 0px 800px 0px' });
+  }, { rootMargin: '800px' });
   vids.forEach((v) => prep.observe(v));
 
   const io = new IntersectionObserver((entries) => {
@@ -424,6 +429,128 @@ function initScrollVideos() {
   vids.forEach((v) => io.observe(v));
 }
 initScrollVideos();
+
+// The horizontal Work track (sections.css .work-list) LOOPS: scroll past the
+// last card and the first comes round again, in either direction, with no end
+// stop. Progressive enhancement — with JS off the track is still a perfectly
+// good finite horizontal scroller (and .work-list keeps its :not(.is-looping)
+// end-snap for that case), so nothing here can hide a card.
+//
+// ROTATION, NOT CLONING. The four cards are never duplicated: when the scroll
+// crosses a threshold, the card at one end is MOVED to the other end and the
+// scroll position is walked back by exactly one card-step, so the pixels on
+// screen do not change. One DOM node per project is what lets everything else
+// keep working untouched — initScrollVideos' IntersectionObservers and the
+// reveal groups both hold ELEMENT references, and a moved element is the same
+// element. Cloning would have meant 12 cards, 12 <video> tags, duplicate
+// headings for the crawlers that read this page, and clones whose video never
+// plays because the observers were never attached to them.
+//
+// THE INVARIANT: scrollLeft always sits in [STEP, 2·STEP). That is one card of
+// buffer on each side of the visible one, which is all a track needs when the
+// card is nearly a viewport wide. Snap positions are exact multiples of STEP
+// (.work-list's scroll-padding-inline is set to its own padding-inline, so
+// card i snaps at i·STEP), which is why adding or subtracting a whole STEP
+// always lands on another snap position — the jump never has to fight
+// scroll-snap, and scroll-snap-type never has to be toggled off around it.
+function initWorkCarousel() {
+  const track = document.querySelector('.work-list');
+  if (!track) return; // project pages have no Work track
+  // Fewer than 3 and there isn't enough content to fill the buffer on both
+  // sides, so the seam would show. Leave those as a normal finite scroller.
+  if (track.children.length < 3) return;
+
+  let step = 0;
+
+  // Card width + the track's gap. Read live: every tier changes both.
+  function measureStep() {
+    const first = track.firstElementChild;
+    if (!first) return 0;
+    const gap = parseFloat(getComputedStyle(track).columnGap) || 0;
+    return first.getBoundingClientRect().width + gap;
+  }
+
+  // Pull scrollLeft back into [STEP, 2·STEP), rotating one card per step. Also
+  // does the initial placement: at load scrollLeft is 0, so the first pass
+  // moves the LAST card to the front and lands on STEP — which leaves the
+  // original first card flush on the container's left edge, exactly where it
+  // sat before the loop existed, with the previous project now reachable by
+  // scrolling backwards. The guard is a belt-and-braces stop against a
+  // pathological layout (step measured as 0) spinning the loop forever.
+  function normalize() {
+    if (step <= 0) return;
+    let guard = 0;
+    while (track.scrollLeft >= step * 2 && guard++ < 16) {
+      const from = track.scrollLeft;
+      track.appendChild(track.firstElementChild);
+      track.scrollLeft = from - step;
+    }
+    while (track.scrollLeft < step && guard++ < 16) {
+      const from = track.scrollLeft;
+      track.insertBefore(track.lastElementChild, track.firstElementChild);
+      track.scrollLeft = from + step;
+    }
+  }
+
+  // Re-measure on resize and keep the reader on the card they were looking at:
+  // the step width changes at every breakpoint, so the raw scrollLeft would
+  // point at a different card after the jump.
+  function measure() {
+    const previous = step;
+    step = measureStep();
+    if (step > 0 && previous > 0) {
+      track.scrollLeft = Math.round(track.scrollLeft / previous) * step;
+    }
+    normalize();
+  }
+
+  // KEYBOARD. Tabbing to a card's link makes the browser scroll it into view on
+  // its own, and that scroll then trips normalize() — which rotates the DOM and
+  // rewrites scrollLeft underneath the browser's own positioning. Measured, the
+  // two together landed focus on the card sitting in the PEEK slot: mostly off
+  // the right edge, with its focus ring cut in half. So don't leave the two to
+  // negotiate. Rotate until the focused card IS the flush one and put the track
+  // on the invariant directly — deterministic, and it can't fight a smooth
+  // scroll because .work-list's scroll-behavior is `auto`, not the page's
+  // `smooth`. Nothing else needs a scroll-into-view: focus order follows the
+  // rotated DOM, which IS the visual order, so tabbing walks the cards in the
+  // order they are actually seen.
+  //
+  // ⚠️ NEVER MOVE THE FOCUSED CARD ITSELF. Moving a focused element resets the
+  // browser's sequential-focus navigation starting point, and the measured
+  // result was Tab walking the projects BACKWARDS (Accessibility → Groups →
+  // Loop → Messaging) — every card correctly flush, in exactly the wrong order.
+  // Bringing the card to slot 1 by shuffling only the cards AROUND it fixes the
+  // order and costs nothing: from slot 0 one card is pulled off the end to sit
+  // in front of it; from slot i>1 the (i−1) cards ahead of it go to the back,
+  // none of which is the card itself.
+  function flushFocusedCard(event) {
+    if (step <= 0) return;
+    const card = event.target.closest('.work-card');
+    if (!card || card.parentElement !== track) return;
+    let guard = 0;
+    while (track.firstElementChild === card && guard++ < 16) {
+      track.insertBefore(track.lastElementChild, track.firstElementChild);
+    }
+    while (track.children[1] !== card && guard++ < 16) {
+      track.appendChild(track.firstElementChild);
+    }
+    track.scrollLeft = step;
+  }
+
+  // normalize() is idempotent and cheap (a comparison, and nothing else on the
+  // overwhelming majority of scroll events), so it can run on every one. It
+  // re-enters via the scroll event its own scrollLeft write fires; that pass
+  // finds the invariant already satisfied and does nothing.
+  track.addEventListener('scroll', normalize, { passive: true });
+  track.addEventListener('focusin', flushFocusedCard);
+  window.addEventListener('resize', measure);
+
+  // Tells the CSS the loop is live, so the no-JS end-snap steps aside.
+  track.classList.add('is-looping');
+  measure();
+}
+initWorkCarousel();
 
 
 // ============================================================

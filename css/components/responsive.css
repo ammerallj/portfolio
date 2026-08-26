@@ -129,6 +129,10 @@
     --gap-group: 48px;
     --gap-heading: 96px;
     --page-gutter: 24px;
+    /* Work track peek: 120 − 48 (gap) + 24 (gutter) = 96px of the next card
+       visible. Steps down with the gutter — the sliver is a proportion of the
+       screen, not a fixed sign-post. */
+    --work-peek: 120px;
     --section-title-size: 2.75rem; /* 44px */
     --project-block-title-size: 2.25rem; /* 36px — one notch under the 44 above */
     --next-case-title-size: 1.75rem; /* 28px — one notch under the block heading */
@@ -267,6 +271,11 @@
        padding it sits behind. The type doesn't step here (the title holds 36
        from 1024 to 481) — this is the card shape alone. */
     --next-case-radius: 32px;
+
+    /* Work track peek: 104 − 48 (gap) + 24 (gutter) = 80px visible. The gutter
+       and gap both hold from 1024, but the CARD is narrower here, so the peek
+       gives a little back to the content rather than staying at 120. */
+    --work-peek: 104px;
   }
 
   /* Portrait drops the two-column band (the spacer is hidden below), so the
@@ -429,6 +438,12 @@
     --gap-section: 64px;
     --gap-heading: 40px;
     --page-gutter: 16px;
+    /* Work track peek: 48 − 24 (the overridden track gap below) + 16 (gutter)
+       = 40px visible. On a 375 screen the card is the whole read, so the peek
+       is bought out of the GAP rather than out of the card: at the inherited
+       40px gap this sliver would have cost 64px of card width, squeezing a
+       32px headline into ~271px. See .work-list in this tier. */
+    --work-peek: 48px;
 
     /* Hero field, phone size: 85% of the 1821.6px the artwork is frozen at
        everywhere else (hero.css) — a 15% narrower crop, so less of the gradient
@@ -680,6 +695,13 @@
      Figma type sizes are specific to this breakpoint. */
   .work-card {
     gap: 20px;
+  }
+  /* The horizontal track's card→card gap, cut below --gap-group (40). Empty
+     space BETWEEN cards buys nothing on a phone — it is swiped past — whereas
+     every pixel it costs comes straight off the card's own width. 24 keeps the
+     40px peek (see --work-peek above) and hands 16px back to the headline. */
+  .work-list {
+    gap: 24px;
   }
   .work-card-image {
     height: 201px; /* Figma (radius stays 24px from the 768 tier) */
