@@ -33,7 +33,6 @@ if (siteName && siteName.getAttribute('href') === '#') {
 // here ever runs to clear it.
 const navSections = [
   { link: navWork, el: document.getElementById('work-section') },
-  { link: document.querySelector('.site-nav-bar a[href="#footprints"]'), el: document.getElementById('footprints') },
   { link: document.querySelector('.site-nav-bar a[href="#about"]'), el: document.getElementById('about') },
   { link: document.querySelector('.site-nav-bar a[href="#contact"]'), el: document.getElementById('contact') },
 ].filter(s => s.link && s.el);
@@ -42,7 +41,6 @@ const navSections = [
 // site-header nav above only exists on ≤480 / project pages).
 const introBarSections = [
   { sel: '#work-section', id: 'work-section' },
-  { sel: '#footprints', id: 'footprints' },
   { sel: '#about', id: 'about' },
   { sel: '#contact', id: 'contact' },
 ]
@@ -460,6 +458,20 @@ function initWorkCarousel() {
   // sides, so the seam would show. Leave those as a normal finite scroller.
   if (track.children.length < 3) return;
 
+  // PHONE HAS NO HORIZONTAL TRACK. At <=480 responsive.css reverts .work-list to
+  // a vertical stack, and the loop must switch off with it — this is a
+  // correctness gate, not an optimisation. On a column layout scrollLeft is
+  // pinned at 0, so normalize()'s "scroll back into the buffer" branch would be
+  // permanently true and re-prepend a card on every scroll event, scrambling the
+  // running order of the projects. The query has to track the CSS breakpoint;
+  // both carry a note pointing at the other.
+  const horizontal = window.matchMedia('(min-width: 481px)');
+  // The order the page shipped in. The loop rotates the DOM, so this is the only
+  // record of it — needed to hand a correct stack back when the phone tier takes
+  // over, and it must be captured before the first rotation.
+  const authored = [...track.children];
+  let active = false;
+
   let step = 0;
 
   // Card width + the track's gap. Read live: every tier changes both.
@@ -478,7 +490,7 @@ function initWorkCarousel() {
   // scrolling backwards. The guard is a belt-and-braces stop against a
   // pathological layout (step measured as 0) spinning the loop forever.
   function normalize() {
-    if (step <= 0) return;
+    if (!active || step <= 0) return;
     let guard = 0;
     while (track.scrollLeft >= step * 2 && guard++ < 16) {
       const from = track.scrollLeft;
@@ -496,6 +508,7 @@ function initWorkCarousel() {
   // the step width changes at every breakpoint, so the raw scrollLeft would
   // point at a different card after the jump.
   function measure() {
+    if (!active) return;
     const previous = step;
     step = measureStep();
     if (step > 0 && previous > 0) {
@@ -525,7 +538,7 @@ function initWorkCarousel() {
   // in front of it; from slot i>1 the (i−1) cards ahead of it go to the back,
   // none of which is the card itself.
   function flushFocusedCard(event) {
-    if (step <= 0) return;
+    if (!active || step <= 0) return;
     const card = event.target.closest('.work-card');
     if (!card || card.parentElement !== track) return;
     let guard = 0;
@@ -544,11 +557,47 @@ function initWorkCarousel() {
   // finds the invariant already satisfied and does nothing.
   track.addEventListener('scroll', normalize, { passive: true });
   track.addEventListener('focusin', flushFocusedCard);
-  window.addEventListener('resize', measure);
+  // Resize drives BOTH jobs, and the tier check comes first: crossing 480 has to
+  // switch the loop on or off before re-measuring, or measure() would size a
+  // step from whichever layout it is no longer in.
+  window.addEventListener('resize', () => { syncToTier(); measure(); });
 
-  // Tells the CSS the loop is live, so the no-JS end-snap steps aside.
-  track.classList.add('is-looping');
-  measure();
+  function enable() {
+    if (active) return;
+    active = true;
+    // Tells the CSS the loop is live, so the no-JS end-snap steps aside.
+    track.classList.add('is-looping');
+    step = 0;   // force measure() to re-read rather than trust a stale tier
+    measure();
+  }
+
+  function disable() {
+    if (!active) return;
+    active = false;
+    track.classList.remove('is-looping');
+    // Put the projects back in the order the document declares them. appendChild
+    // on an element already in the parent MOVES it, so replaying the authored
+    // list in order is enough to undo any rotation.
+    authored.forEach((card) => track.appendChild(card));
+    track.scrollLeft = 0;
+    step = 0;
+  }
+
+  function syncToTier() {
+    if (horizontal.matches) enable(); else disable();
+  }
+
+  // TWO triggers on purpose, because correctness rides on this and neither event
+  // is guaranteed on its own. `change` is the precise one — it fires only when
+  // the 480 boundary is actually crossed — but it is a single point of failure,
+  // and one was observed being dropped in testing (a desktop→phone transition
+  // left the loop live over a vertical stack, which is exactly the state that
+  // scrambles the card order). `resize` is noisier but independent, so a missed
+  // `change` self-heals on the next resize tick. syncToTier is idempotent —
+  // enable()/disable() both no-op when already in that state — so double
+  // delivery costs nothing.
+  horizontal.addEventListener('change', syncToTier);
+  syncToTier();
 }
 initWorkCarousel();
 

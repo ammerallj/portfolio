@@ -438,12 +438,9 @@
     --gap-section: 64px;
     --gap-heading: 40px;
     --page-gutter: 16px;
-    /* Work track peek: 48 − 24 (the overridden track gap below) + 16 (gutter)
-       = 40px visible. On a 375 screen the card is the whole read, so the peek
-       is bought out of the GAP rather than out of the card: at the inherited
-       40px gap this sliver would have cost 64px of card width, squeezing a
-       32px headline into ~271px. See .work-list in this tier. */
-    --work-peek: 48px;
+    /* NO --work-peek here on purpose: the phone has no horizontal track to peek
+       out of (see .work-list in this tier). The 768 value still cascades in, but
+       nothing reads it — .work-card's flex is fully overridden below. */
 
     /* Hero field, phone size: 85% of the 1821.6px the artwork is frozen at
        everywhere else (hero.css) — a 15% narrower crop, so less of the gradient
@@ -700,8 +697,39 @@
      space BETWEEN cards buys nothing on a phone — it is swiped past — whereas
      every pixel it costs comes straight off the card's own width. 24 keeps the
      40px peek (see --work-peek above) and hands 16px back to the headline. */
+  /* NO HORIZONTAL SCROLL ON PHONE (2026-08). The track is a horizontal,
+     snapping, looping carousel from 481 up; here it reverts to the plain
+     vertical stack it always was. A phone already scrolls vertically, so a
+     sideways gesture inside that is a second, competing axis — and it costs the
+     card ~48px of width it cannot spare at 32px headline type.
+     ⚠️ The JS half of this is NOT optional. initWorkCarousel (js/main.js)
+     watches the same 480 boundary and switches itself off, restoring the
+     authored card order. Without that gate it would keep rotating the DOM and
+     writing scrollLeft on a container that no longer scrolls — scrollLeft is
+     pinned at 0, so its "scroll back into the buffer" loop would re-prepend
+     cards on every scroll event and scramble the running order. Change this
+     breakpoint and you must change the matchMedia query with it. */
   .work-list {
-    gap: 24px;
+    flex-direction: column;
+    gap: var(--gap-section);
+    /* Undo the bleed, the snap, and the clip-guard padding — all of them exist
+       only to serve a horizontal scrollport. */
+    overflow-x: visible;
+    margin-inline: 0;
+    padding-inline: 0;
+    padding-block: 0;
+    margin-block: 0;
+    scroll-snap-type: none;
+    scroll-padding-inline: 0;
+  }
+
+  .work-card {
+    /* MUST be reset, not just left alone: in a COLUMN flex container the basis
+       applies to the main axis, so the desktop `flex: 0 0 calc(100% - peek)`
+       would set each card's HEIGHT to the container's height minus the peek.
+       `auto` hands height back to the content; the container's default
+       align-items: stretch gives the card the full width. */
+    flex: 0 0 auto;
   }
   .work-card-image {
     height: 201px; /* Figma (radius stays 24px from the 768 tier) */
