@@ -68,6 +68,18 @@
      grow nor shrink: the card is a fixed slide, not a flex child. */
   flex: 0 0 calc(100% - var(--work-peek));
   scroll-snap-align: start;
+  /* ONE CARD PER GESTURE, however hard the flick. The scroll is forbidden to
+     pass over a snap position, so momentum decelerates into the very next card
+     instead of running on — the browser still animates that deceleration, so
+     this caps the travel without costing any smoothness.
+     Why this track needs it and an ordinary one doesn't: a finite scroller
+     stops a fling by running out of runway. The loop (initWorkCarousel in
+     js/main.js) rewrites scrollLeft back by one card every time it rotates, so
+     there is always more runway ahead and a fast trackpad fling never runs out
+     — it spun through the whole carousel. Snap-stop is what puts the floor back
+     under it, and it does so in the browser's own scrolling, which is why the
+     fix is here rather than a JS speed limiter fighting the momentum. */
+  scroll-snap-stop: always;
 
   display: flex;
   flex-direction: column;
