@@ -10,13 +10,13 @@ shared by all of them.
 ## File Map
 - **Project overview pages:** `work/*.html` (4) — see **Project Overview Pages** below.
 - **Main HTML:** `index.html` (~260 lines) — structure/content only. A tiny inline `<script>` in `<head>` sets `is-motion` + `is-loading` pre-paint (both only when JS runs, so no-JS visitors aren't left on a blank page); ends with a single `<script src="js/main.js" defer>`.
-- **JavaScript:** `js/main.js` — all interactions: nav scroll-spy, the landing header tuck (`is-tucked` while the hero's `.intro-bar` is on screen), page load reveal, header-over-Contact color inversion, custom cursors, the About tab view (`initAboutTabs`), **plus the motion system** (Lenis smooth scroll + Motion.dev viewport reveals). The blob-hero engine (BLOBS morph, hover push, paragraph cycling) retired 2026-08 — archived copy in `archive/blob-hero-2026-08/js/main.js`. See **Motion & Scrolling** below for knobs — don't re-read the whole file.
+- **JavaScript:** `js/main.js` — all interactions: nav scroll-spy, the landing header tuck (`is-tucked` while the hero's `.intro-bar` is on screen), page load reveal, header-over-Contact color inversion, custom cursors, the About tab view (`initAboutTabs`), the looping Work carousel (`initWorkCarousel` — see **Horizontal Tracks** below), **plus the motion system** (Lenis smooth scroll + Motion.dev viewport reveals). The blob-hero engine (BLOBS morph, hover push, paragraph cycling) retired 2026-08 — archived copy in `archive/blob-hero-2026-08/js/main.js`. See **Motion & Scrolling** below for knobs — don't re-read the whole file.
 - **CSS entry:** `style.css` (~6 lines) — **@import list only, no rules.** Do not add styles here.
 - **CSS components:** `css/components/`
   - `global.css` (~345) — reset, design tokens (`:root` custom properties), base typography, focus/skip-link, `.site-container` layout, `.page-section` structure, custom cursor, `.visually-hidden`, **motion reveal initial state** (`html.is-motion [data-reveal]`) + Lenis classes (`html.lenis`)
   - `header.css` (~92) — `.site-header`, `.site-nav-bar`, nav links, `.is-over-dark` inversion state. **Now the ≤480 homepage only** — it's `display:none` over the landing at desktop and the project pages dropped it (2026-08) for the shared `.intro-bar`. Don't build new nav on it.
   - `hero.css` (~230) — the **landing** (2026-08, Figma 339:3745): `.page-field` full-page gradient image, `.intro` stage (statement / divider / frosted band / `.intro-bar` bottom nav), the divider-mask load reveals, and the `is-loading` page hold. The previous blob hero is archived in `archive/blob-hero-2026-08/`.
-  - `sections.css` (~390) — `.page-section` content: Selected Work, Contact, About (incl. the `.about-tabs` Design toolkit / Public footprints tab view), case-study placeholder
+  - `sections.css` (~650) — `.page-section` content: Selected Work (the horizontal `.work-list` track — see **Horizontal Tracks**), Contact, About (incl. the `.about-tabs` Design toolkit / Public footprints tab view), case-study placeholder
   - `footer.css` (~28) — `.site-footer`
   - `project-overview.css` (~275) — the shared Project Overview template: §0 `.intro-bar--page` (the landing's nav bar pinned to the top of these pages), `.project-hero`, `.project-masthead` (title + metadata `<dl>`), `.project-block` (description / impact / role), §0a the section-seam rules, `.next-case` (§9) with its two treatments — `--image` (destination art, the pager) and `--outline` + `--locked` (the hairline Full-case-study card) — (`.project-locked` / `.invite-button` were deleted 2026-08), the `.project-carousel` masthead crossfade, and `.section-pills`. Imported after `sections.css` (it leans on `.section-label`, `.about-body`, `.contact-connect-links`) and before `responsive.css`.
   - `responsive.css` (~110) — **ALL width breakpoints, site-wide.** Organized by screen size (1000 → 768 → 700 → 600px). Imported last so it overrides desktop styles.
@@ -493,6 +493,75 @@ When the request is about how the site looks/behaves at a **smaller screen size*
   non-responsive edit in the relevant component file.
 - Suggested phrasing: **"in responsive.css, at [breakpoint], change [selector] [property]"**
   — e.g. *"in responsive.css, at 600px, add 20px side padding to the hero."*
+
+## Horizontal Tracks (the Selected Work carousel, 2026-08)
+
+Selected Work is a **looping horizontal track**, not a vertical stack. The cards
+run left→right, one near-full-width card at a time with the next peeking in, and
+scrolling past the last one brings the first round again in either direction.
+`.work-list` in `sections.css`, `initWorkCarousel()` in `js/main.js`.
+
+**Specifying one of these — the five axes.** Name all five and there is nothing
+left to guess:
+
+| Axis | Options | Selected Work |
+|---|---|---|
+| Cards visible | one + peek · two-up · gallery | one + peek |
+| Input model | native scroll · scroll-jacked/pinned · arrow buttons | native |
+| Snap | free · snap to card · snap + **paging** | snap + paging |
+| End behaviour | hard stop · rubber band · **loop** | loop |
+| Travel per gesture | unlimited · **one card** · N cards | one card |
+
+Shared vocabulary, all of which maps to something real in the code: **peek** (the
+sliver of the next card — a token, `--work-peek`) · **snap** (lands on a card) vs
+**paging** (can only ever advance one — a different declaration, see snap-stop
+below) · **loop/infinite/circular** (endless both ways) vs **wraps** (forward
+only) · **fling/momentum** (the trackpad tail after the fingers lift) ·
+**scroll-jacking/pinned** (vertical scroll drives horizontal movement — a wholly
+different build that breaks with JS off) · **flush to the grid** (a card rests on
+the container line, not the screen edge).
+
+**Choices that silently create a second decision** — name the pair together:
+- **loop → what stops a fling.** A finite scroller kills momentum by running out
+  of runway; a loop removes that floor. This is not theoretical, it shipped as a
+  bug: see snap-stop below.
+- **one card at a time → does the card's own layout still fit.** It did not here;
+  `.work-card-left` / `.work-card-right` had to become shrinkable.
+- **horizontal → what the phone does.** Usually a different answer.
+
+### Invariants — break these and the loop breaks
+
+- **`scroll-snap-stop: always` on `.work-card` is the fling cap.** Without it a
+  hard trackpad flick spun through the whole carousel, because every rotation
+  hands the momentum another card of runway. **Never "fix" fling speed in JS** —
+  only the browser can tell a momentum tail from a fresh deliberate flick, so a
+  cooldown either fails to stop the momentum or blocks a real second flick. It
+  also has to stay CSS so a long held two-finger drag can still cross several
+  cards.
+- **ROTATION, never cloning.** The four cards are moved, never duplicated: one
+  DOM node per project is what lets `initScrollVideos`' IntersectionObservers and
+  the reveal groups keep working (they hold element references) and keeps
+  duplicate headings away from crawlers.
+- **The invariant is `scrollLeft ∈ [STEP, 2·STEP)`** — one card of buffer each
+  side. Snap positions are exact multiples of STEP (the track's
+  `scroll-padding-inline` matches its own `padding-inline`), which is why a whole
+  -STEP jump always lands on another snap position and scroll-snap never has to
+  be toggled off around it.
+- **Never move the FOCUSED card.** Moving a focused element resets the browser's
+  sequential-focus starting point; measured, it sent Tab *backwards* through the
+  projects. `flushFocusedCard` shuffles only the cards around it.
+- **Do NOT add `data-lenis-prevent` to the track.** Lenis bails out of any
+  gesture whose deltaY is 0 before it calls preventDefault, so horizontal swipes
+  already pass through. The attribute would instead kill smooth VERTICAL
+  scrolling over the whole section.
+- **The card's flex-basis is a PERCENTAGE of the track's content box**, so any
+  `padding-inline-end` (e.g. a trailing spacer) shrinks every card by that amount.
+- **`padding-block: 24px` / `margin-block: -24px` on the track is load-bearing.**
+  `overflow-x: auto` forces `overflow-y` to `auto`, which would otherwise clip
+  the reveal's 16px rise and the image's hover scale.
+- Cards reveal all at once (they share a vertical position), and the video
+  prebuffer's `rootMargin` is all four sides, not just top/bottom — cards now
+  approach from the right.
 
 ## Refining Motion & Scrolling (read THIS, don't re-explore js/main.js)
 The motion system is Lenis (smooth scroll) + Motion.dev (reveals), both loaded
