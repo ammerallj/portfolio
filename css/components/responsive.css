@@ -111,7 +111,7 @@
 /* ==========================================================================
    2. LANDSCAPE TABLETS / IPADS (max-width: 1024px)
    The 542px side-by-side columns no longer fit, so the nav reflows and
-   Work / Footprints / About stack into a single full-width column.
+   Work / About stack into a single full-width column.
    ========================================================================== */
 @media (max-width: 1024px) {
   :root {
@@ -160,12 +160,7 @@
 
   .intro-bar {
     padding-inline: 24px; /* sticky bar: gutter is padding now, not offsets */
-    gap: 64px;
   }
-  .intro-bar-links {
-    flex-basis: 360px;
-  }
-
   .site-header-row {
     gap: 2rem;
   }
@@ -207,29 +202,25 @@
     aspect-ratio: 1328 / 415;
   }
 
-  /* Footprints keeps its two columns (heading | links) at this tier and stacks at
-     768. Its gap needs no override here: the base clamp (sections.css) has already
-     scaled fluidly to its 48px floor by ~1025, matching the group step. */
-
   /* (The big content H2 steps 56 → 44 → 32 via --section-title-size in each
      tier's :root above — no per-element override needed here.) */
 
   /* (The next-case pager title + card radius step via --next-case-title-size /
      --next-case-radius in the :root above, beside the other per-tier values.) */
 
-  /* About stays TWO-COLUMN here (photo | text) like Footprints — it stacks at
+  /* About stays TWO-COLUMN here (photo | text) — it stacks at
      768, not 1024. The heading pull-up still applies and now tracks the heading
      automatically (it reads --section-title-size, which is 3rem at this tier), so
      no per-tier recompute is needed. The gap is the fluid clamp in sections.css;
      the portrait photo1 keeps loading (its landscape swap moved to ≤768). */
 
   /* Contact keeps its two columns (Connect | On My Mind) at this tier like
-     Footprints / About — On My Mind stays in the fluid right column beside
+     About — On My Mind stays in the fluid right column beside
      Connect, which already narrows it to a readable measure so nothing overflows.
      It stacks at 768 (see that tier). */
 
   /* Project overview pages: every two-column block collapses at the same tier
-     as Footprints / About / Contact above, and drops the fixed 542px column so
+     as About / Contact above, and drops the fixed 542px column so
      nothing overflows. Same idiom, so the project pages reflow in step with the
      rest of the site. */
   .project-masthead-cols,
@@ -301,21 +292,8 @@
     gap: 24px;
   }
 
-  /* Footprints stacks here (heading over links). At portrait width the ~369px
-     link column leaves too little for the heading beside it, so it drops to one
-     column like the other two-column sections. (It stays two-column at 1024.) */
-  .footprints-layout {
-    flex-direction: column;
-    gap: var(--gap-group);
-  }
-  .footprints-left,
-  .footprints-right {
-    flex: 0 0 auto;
-    width: 100%;
-  }
-
-  /* About stacks here too (was ≤1024, moved down with Footprints so both stay
-     two-column at 1024). Once stacked, the column gap becomes real vertical
+  /* About stacks here (was ≤1024, moved down so it stays two-column at 1024
+     like Contact). Once stacked, the column gap becomes real vertical
      spacing (joins the scale), the desktop heading pull-up no longer applies, and
      the photo goes full-width landscape — the <picture> in index.html serves the
      landscape about-photo2.jpg at this same ≤768 cut, so the box takes that
@@ -341,7 +319,7 @@
     aspect-ratio: 858 / 600;
   }
 
-  /* Contact stacks here too (Connect over On My Mind), matching Footprints/About
+  /* Contact stacks here too (Connect over On My Mind), matching About
      — it stays two-column at 1024 and drops to one at portrait width. */
   .contact-meta {
     flex-direction: column;
@@ -362,13 +340,6 @@
   .intro-band-spacer {
     display: none;
   }
-  .intro-bar {
-    gap: 40px;
-  }
-  .intro-bar-links {
-    flex-basis: 280px;
-  }
-
   /* Portrait tablet + phone work cards run Image -> Title -> Description
      (their frames lead with the image; the wrappers are already flattened by
      the 1024 tier's display:contents, which is what makes this interleaving
@@ -584,9 +555,9 @@
      now (no .site-header there any more), so the homepage's hide above must
      not reach it. It collapses to the same shape the header had here: wordmark
      + "Menu" trigger, the overlay carrying Work / About / connect exactly as
-     before. (Footprints and "Say hello" drop out of the phone nav — the same
-     way they do on the homepage, whose floatie is Work / About only and whose
-     overlay is the connect block.) Overview / Process / Impact stay in the
+     before. ("Say hello" drops out of the phone nav — the same way it does
+     on the homepage, whose floatie is Work / About only and whose overlay is
+     the connect block.) Overview / Process / Impact stay in the
      bottom floatie. */
   .intro-bar--page {
     display: flex;

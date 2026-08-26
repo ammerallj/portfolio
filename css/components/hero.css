@@ -222,7 +222,14 @@ main {
   padding: 14px 56px;
   display: flex;
   align-items: center;
-  gap: 120px;
+  /* This gap is now the ONE seam inside the right-hand group (links → CTA), not
+     the old three-column rig's column gap. It was a flat 120px (64 at ≤1024, 40
+     at ≤768) back when the wordmark, a fixed link track and the CTA each took a
+     third of the bar. --gap-group instead, the same token the links use, so
+     Work · About · Say hello sit at ONE repeating interval and read as a single
+     group. It steps 60 → 48 on its own, which is why the two per-tier gap
+     overrides in responsive.css are gone. */
+  gap: var(--gap-group);
   /* Enters LAST: the divider reveals settle, then the bar fades in. */
   animation: intro-bar-fade 0.6s ease-out 0.95s both;
 }
@@ -336,9 +343,15 @@ main {
   to { opacity: 1; }
 }
 
+/* The wordmark holds the left edge alone; `margin-right: auto` eats all the free
+   space and drives the links + CTA to the right as one block. It was `flex: 1 1 0`
+   (an equal third, matched by the same on .intro-bar-cta-wrap) — that rig centred
+   the links no matter how few there were, which with two items left the pair
+   marooned mid-bar with a void on each side. Auto margin rather than
+   `justify-content: space-between` so the gap above still governs the right-hand
+   group's interval; space-between would stretch it back out. */
 .intro-bar-name {
-  flex: 1 1 0;
-  min-width: 0;
+  margin-right: auto;
   font-family: var(--font-heading);
   font-size: 1.25rem;
   font-weight: 700;
@@ -348,21 +361,34 @@ main {
   transition: color 0.35s ease;
 }
 
+/* CONTENT-WIDTH CLUSTER, NOT A FIXED TRACK. This was `flex: 0 0 450px` holding
+   three `flex: 1 1 0` groups justified start / center / end — a distribution rig
+   that only composed for exactly three items, with the width restated per tier
+   (450 / 360 / 280 in responsive.css). Dropping Footprints (2026-08) broke it in
+   place: "Work" stayed pinned to the track's left edge, "About" sat adrift in the
+   middle of the right half because `:nth-child(2)` still centred it, and ~48px of
+   empty track trailed past it since the `:nth-child(3) { flex-end }` rule had
+   nothing left to match. The pair read as marooned in a three-label measure.
+
+   Sizing to content and spacing with a gap makes the links a centred cluster
+   (.intro-bar-name and .intro-bar-cta-wrap are both `flex: 1 1 0`, so the block
+   still lands in the bar's middle) and it survives the next add or removal with
+   no numbers to retune. --gap-group is the scale's "between peer things" step and
+   already tracks the tiers (60 → 48), so the three flex-basis overrides are gone
+   with the track. It reads deliberately tighter than the bar's own 120px
+   name↔links↔cta gap: Work and About are peers, the wordmark and the CTA are not,
+   and the nav should cohere as one group rather than spread across the bar. */
 .intro-bar-links {
-  flex: 0 0 450px;
   display: flex;
   align-items: center;
+  gap: var(--gap-group);
 }
 
 /* Group wrappers keep the anchors text-width so the hover chip hugs the
    label — same structure and states as the site header's nav. */
 .intro-bar-group {
-  flex: 1 1 0;
-  min-width: 0;
   display: flex;
 }
-.intro-bar-group:nth-child(2) { justify-content: center; }
-.intro-bar-group:nth-child(3) { justify-content: flex-end; }
 
 .intro-bar-links a {
   position: relative;
@@ -407,11 +433,12 @@ main {
   color: #fff;
 }
 
+/* Content-width now. The old `flex: 1 1 0` + `justify-content: flex-end` was how
+   the pill reached the right edge while claiming a third of the bar; with the
+   wordmark's auto margin doing the pushing, the wrapper only has to be its own
+   size and the bar's gap sets its distance from "About". */
 .intro-bar-cta-wrap {
-  flex: 1 1 0;
-  min-width: 0;
   display: flex;
-  justify-content: flex-end;
 }
 
 /* Solid black pill, white label. */

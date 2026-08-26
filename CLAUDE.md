@@ -16,7 +16,7 @@ shared by all of them.
   - `global.css` (~345) — reset, design tokens (`:root` custom properties), base typography, focus/skip-link, `.site-container` layout, `.page-section` structure, custom cursor, `.visually-hidden`, **motion reveal initial state** (`html.is-motion [data-reveal]`) + Lenis classes (`html.lenis`)
   - `header.css` (~92) — `.site-header`, `.site-nav-bar`, nav links, `.is-over-dark` inversion state. **Now the ≤480 homepage only** — it's `display:none` over the landing at desktop and the project pages dropped it (2026-08) for the shared `.intro-bar`. Don't build new nav on it.
   - `hero.css` (~230) — the **landing** (2026-08, Figma 339:3745): `.page-field` full-page gradient image, `.intro` stage (statement / divider / frosted band / `.intro-bar` bottom nav), the divider-mask load reveals, and the `is-loading` page hold. The previous blob hero is archived in `archive/blob-hero-2026-08/`.
-  - `sections.css` (~650) — `.page-section` content: Selected Work (the horizontal `.work-list` track — see **Horizontal Tracks**), Contact, About (incl. the `.about-tabs` Design toolkit / Public footprints tab view), case-study placeholder
+  - `sections.css` (~640) — `.page-section` content: Selected Work (the horizontal `.work-list` track — see **Horizontal Tracks**), Contact, About, case-study placeholder. It also still owns the **footprint link list** (`.footprint-group` / `.footprint-group-title` / `.footprint-list` + the `↗`), whose only consumer is now the project pages — see **Public Footprints** below.
   - `footer.css` (~28) — `.site-footer`
   - `project-overview.css` (~275) — the shared Project Overview template: §0 `.intro-bar--page` (the landing's nav bar pinned to the top of these pages), `.project-hero`, `.project-masthead` (title + metadata `<dl>`), `.project-block` (description / impact / role), §0a the section-seam rules, `.next-case` (§9) with its two treatments — `--image` (destination art, the pager) and `--outline` + `--locked` (the hairline Full-case-study card) — (`.project-locked` / `.invite-button` were deleted 2026-08), the `.project-carousel` masthead crossfade, and `.section-pills`. Imported after `sections.css` (it leans on `.section-label`, `.about-body`, `.contact-connect-links`) and before `responsive.css`.
   - `responsive.css` (~110) — **ALL width breakpoints, site-wide.** Organized by screen size (1000 → 768 → 700 → 600px). Imported last so it overrides desktop styles.
@@ -32,8 +32,9 @@ extends past the hero fold bleeds behind Selected Work and dissolves into the
 cream on its own. The hero stage: statement (top half, 96px Hanken) →
 full-width hairline divider at the exact center → frosted band (bottom half,
 backdrop-blur) with the bio in its right column → `.intro-bar` along the
-bottom (wordmark / Work·Footprints·About with the header's chip hover states /
-solid-black "Say hello" pill). Load: the divider "emits" headline up + bio
+bottom (wordmark hard left; Work·About with the header's chip hover states +
+the solid-black "Say hello" pill grouped hard right, one `--gap-group` apart —
+see **The landing nav bar** below). Load: the divider "emits" headline up + bio
 down (masked by each region's overflow, 64px travel over a 40px gap,
 REVEAL.ease), then the bar fades in — all CSS, reduced-motion exempt. The
 sticky header stays in the DOM, tucked above the viewport over the hero
@@ -62,6 +63,22 @@ neither holds here. Watch the bio's contrast whenever the field shrinks: at a
 (desktop composition, tighter insets) pending frames. The previous blob-hero landing is archived, fully
 self-contained, in `archive/blob-hero-2026-08/`.
 
+### The landing nav bar (`.intro-bar`)
+**Wordmark left, then Work · About · "Say hello" as ONE group on the right**, at a
+single repeating `--gap-group` interval (60 desktop → 48). `.intro-bar-name` takes
+`margin-right: auto` and everything else is content-width.
+
+It was a **three-column rig** — wordmark and `.intro-bar-cta-wrap` each `flex: 1 1 0`
+with a fixed 450px link track (360 at ≤1024, 280 at ≤768) holding three `flex: 1 1 0`
+groups justified start / center / end. That composed only for exactly three links.
+Dropping Footprints (2026-08) broke it in place: "Work" stayed pinned to the track's
+left edge, "About" sat adrift in the middle of the right half because `:nth-child(2)`
+still centred it, and ~90px of empty track trailed past it with `:nth-child(3)`
+matching nothing. **Don't reintroduce a fixed track or the nth-child justification** —
+the current rig has no per-count numbers and survives adding or removing a link.
+The three `flex-basis` overrides and the bar's two per-tier `gap` overrides are gone
+from responsive.css with it; the bar's `gap` is now the links→CTA seam alone.
+
 ## Where each page area lives
 | Area on page | CSS file | HTML location |
 |---|---|---|
@@ -69,7 +86,7 @@ self-contained, in `archive/blob-hero-2026-08/`.
 | Landing hero (field bg, statement, divider, frosted band, bottom bar) | `hero.css` | `.page-field` img + `<section class="intro">` |
 | Selected Work | `sections.css` | `#work-section` |
 | About | `sections.css` | `#about` |
-| Design toolkit / Public footprints (tab view at the bottom of About; no standalone Footprints section any more) | `sections.css` (`.about-tabs`) + `js/main.js` (`initAboutTabs`) | inside `#about` |
+| Public footprints (per project; **not on the homepage** — see below) | `sections.css` (link list) + `project-overview.css` (its one spacing rule) | end of `#impact` in each `work/*.html` |
 | Contact | `sections.css` | `#contact` |
 | Footer / copyright | `footer.css` | `<footer class="site-footer">` |
 | Any interaction/animation | `js/main.js` | — |
@@ -287,8 +304,9 @@ code has been **deleted**: the `.conversation-invite-*` CSS (project-overview.cs
 gating rules below.
 
 **Shared structure (identical in all four):** hero visual → title + metadata →
-Overview (description) → **Contribution/Process** → Impact → *then* the **Next
-Case Study pager** (`.next-case`). (Loop used to keep a "The Way In" explore-product
+Overview (description) → **Contribution/Process** → Impact *(whose column closes
+on that project's **Public footprints** block — see the rules below)* → *then*
+the **Next Case Study pager** (`.next-case`). (Loop used to keep a "The Way In" explore-product
 step between Impact and the pager — REMOVED 2026-08; the live product is now a plain
 inline link on "Microsoft Loop" in Loop's Overview paragraph, because that page has
 nothing gated and so has no primary action for a card to carry. Accessibility closes Impact with the outlined
@@ -451,6 +469,37 @@ nav.** Two different jobs — don't merge them.
   pages** — the site is static, so anything checked here runs in the browser and
   is readable in View Source. A client-side check is not a gate. Only the URL
   belongs here, and only once the password is on.
+- **Public footprints live HERE now, one set per project (2026-08).** The
+  homepage's standalone `#footprints` section was **deleted** — section, nav
+  item, `.footprints-layout` / `-left` / `-right`, and the `#footprints` entries
+  in `navSections` / `introBarSections` in js/main.js. Each project page closes
+  its **What changed.** column with a `.footprint-group` (eyebrow "Public
+  footprints" + `.footprint-list`) holding that project's third-party coverage:
+  Loop 4 links, Accessibility 2, Groups 2, Messaging 1.
+  - **Why the end of `#impact` and not a section of its own:** the links are
+    *evidence*. The rows above are Jenna's account of what changed; this is the
+    outside record of it. A section of its own would also steal the page's one
+    full-strength divider, which targets whatever section precedes the pager.
+  - **On Accessibility and Messaging it sits ABOVE the locked Full case study
+    card**, which still closes `#impact`. Evidence, then the destination that
+    evidence earns.
+  - **Nothing is restyled per page.** `.footprint-group` / `.footprint-group-title`
+    / `.footprint-list` survive in `sections.css` (imported first), so the block
+    is the homepage's own material. The ONLY project-page rule is
+    `.project-impact-list + .footprint-group { margin-top: var(--gap-group) }` in
+    project-overview.css — written as a sibling relationship, matching both the
+    plain and `--expandable` lists.
+  - **No `data-reveal` on the block.** It sits inside `.project-block-right`,
+    which already carries one; a nested target would be hidden by a group it
+    isn't in.
+  - **Four Microsoft links went with the deleted section** (Future of M365,
+    Fluent Design, Simplified Ribbon, Power & Simplicity) — they belong to no
+    project page and are off the site. Don't re-add them without a home.
+  - Links are external sources, **not authored by Jenna**. Keep the eyebrow
+    neutral and never fold them into the impact copy.
+  - Adding a link here means adding it to that page's JSON-LD **`citation`**
+    (never `sameAs` on the Person) and to `llms.txt`, which now groups the
+    footprints under the project page each set lives on.
 - **Messaging scope guardrail:** ownership was localized to Jenna's org and
   leadership, NOT Meta's messaging ecosystem. Don't let titles or Role copy
   widen into ecosystem-level claims.
@@ -482,7 +531,7 @@ When the request is about how the site looks/behaves at a **smaller screen size*
 (mobile, tablet, "on phones", "when it stacks", a specific breakpoint):
 - **Only open `css/components/responsive.css`. Do not read or edit any other CSS file, `index.html`, or `js/main.js`.**
 - All width breakpoints live there, grouped by screen size (standard tiers):
-  `1440px` (reserved, empty) · `1024px` (landscape tablet — nav reflow, Work/Footprints/About/Contact stack) ·
+  `1440px` (reserved, empty) · `1024px` (landscape tablet — nav reflow, Work/About/Contact stack) ·
   `768px` (portrait tablet — Work card images, hero/intro full width) ·
   `480px` (large phone — nav gap, work grid → 1 col, connect links wrap, footer
   stack, **and the only tier where `.section-pills` exists on any page**).
@@ -682,7 +731,7 @@ nothing here changes a pixel.
 | File | Role |
 |---|---|
 | `robots.txt` | `User-agent: *` allow-all, **plus every AI crawler named explicitly** in two labeled groups: *answer engines* (OAI-SearchBot, Claude-SearchBot, PerplexityBot, …) and *training* (GPTBot, ClaudeBot, Google-Extended, CCBot, …). Naming them is a signal, not a functional change — the wildcard already allows them. To opt out of one, flip its `Allow: /` to `Disallow: /`. |
-| `llms.txt` | Root-level markdown digest for LLMs ([llmstxt.org](https://llmstxt.org)) — summary, the four case studies with their Impact figures, toolkit, public footprints. **Adoption is still partial**; it's cheap insurance, not the main lever. |
+| `llms.txt` | Root-level markdown digest for LLMs ([llmstxt.org](https://llmstxt.org)) — summary, the four case studies with their Impact figures, toolkit, and the public footprints grouped **under the project page each set now lives on**. **Adoption is still partial**; it's cheap insurance, not the main lever. |
 | `sitemap.xml` | The 4 project pages + homepage + the résumé PDF. Bump `lastmod` when content changes. |
 | `index.html` JSON-LD | One `@graph`: `WebSite` → `ProfilePage` → `Person` → `ItemList` of the 4 case studies. |
 | `work/*.html` JSON-LD | One `@graph`: `CreativeWork` + `BreadcrumbList`. |

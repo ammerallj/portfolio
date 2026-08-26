@@ -287,43 +287,27 @@
 }
 
 /* ============================================================
-   PUBLIC FOOTPRINTS — its own section again (the About tab view
-   that briefly housed it is gone): heading left, link groups in
-   the site's shared 542px right column.
+   PUBLIC FOOTPRINTS — the third-party coverage links.
+
+   THERE IS NO LONGER A FOOTPRINTS SECTION (2026-08). The homepage's standalone
+   #footprints section was deleted and its links moved onto the project pages,
+   each set closing that project's "What changed." — evidence sits with the
+   outcome it backs. Only the four Microsoft links that had no project page
+   (Future of M365, Fluent Design, Simplified Ribbon, Power & Simplicity) went
+   with the section; they are off the site.
+
+   So .footprints-layout / .footprints-left / .footprints-right are GONE — they
+   were the homepage's heading-left / links-right grid and nothing renders them
+   now. What survives is the three rules below, which are the LINK LIST itself
+   (eyebrow + underlined links + the ↗ affordance). They live here rather than in
+   project-overview.css because that file already leans on this one for
+   .section-label / .about-body / .contact-connect-links, and it is imported
+   after — same direction of dependency, no cycle.
+
+   Their only consumer is now .project-block-right on the four project pages; the
+   top spacing that attaches the block to the impact list above it is the one
+   project-page-specific bit and lives in project-overview.css.
    ============================================================ */
-
-.footprints-layout {
-  display: flex;
-  /* The links column (.footprints-right) is a fluid clamp that pins to the shared
-     right edge (nav / Work cards), so the gap must scale WITH it — a fixed 186px
-     gap squeezed the heading to ~360px near 1025 and then snapped to 48px at the
-     1024 stack. Interpolate the gap the same way: 186px at 1440 → 48px at 1025, so
-     it lands on the ≤1024 tier's group step with no jump. (Below 768 it stacks;
-     see responsive.css.) */
-  gap: clamp(48px, 33.25vw - 292.84px, 11.625rem);
-  align-items: flex-start;
-}
-
-.footprints-left {
-  flex: 1 1 auto;
-  min-width: 0;
-}
-
-/* The "Public Footprints." heading uses .section-title (the shared big content
-   H2) — there is no .footprints-heading class rule; the id of the same name is
-   only the section's aria-labelledby target. */
-
-.footprints-right {
-  /* The shared right column — same edge as the nav and the Work-card
-     descriptions. */
-  flex: 0 0 var(--width-right-column, 542px);
-  display: flex;
-  flex-direction: column;
-  /* 96px between the eyebrow-led link groups — same three-step rhythm as
-     About's blocks: group 96 / eyebrow → content 20, so each eyebrow reads
-     as owning the list beneath it rather than floating between groups. */
-  gap: var(--gap-section);
-}
 
 .footprint-group {
   display: flex;
@@ -459,7 +443,8 @@
   }
 }
 
-/* Outward arrow on the content links (Footprints + Contact). Decorative, so
+/* Outward arrow on the content links (the project pages' footprint lists +
+   Contact). Decorative, so
    it's a generated ::after — not part of the copied/read text. inline-block
    keeps it off the link's underline; it inherits the link's color and dims
    with the hover opacity. The Work image links are intentionally excluded. */
@@ -479,7 +464,7 @@
   /* 242px gap: with the 542px right column pinned to the container's right edge,
      this makes the left column resolve to 542px at the 1440px design width,
      giving the two equal columns from Figma while keeping the shared right edge.
-     Fluid like .footprints-layout: the gap scales WITH the fluid right column
+     Fluid gap: it scales WITH the fluid right column
      (242px at 1440 → 48px floor by ~1025) so the columns stay balanced as they
      narrow instead of the gap eating the space. Stacks at ≤768 (responsive.css). */
   gap: clamp(48px, 46.75vw - 431.16px, 15.125rem);

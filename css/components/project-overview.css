@@ -9,7 +9,7 @@
    Nothing here invents new design language: all type, color and spacing
    resolve to the :root tokens in global.css, and the two-column
    heading-left / 542px-column-right rhythm is the same idiom as
-   .footprints-layout in sections.css.
+   .about-layout in sections.css.
 
    ORDER: imported after sections.css (so it can lean on .section-label,
    .about-body, .contact-* ) and before responsive.css (which still owns
@@ -155,9 +155,8 @@ a.intro-bar-name {
 
 /* ------------------------------------------------------------
    2 + 3. MASTHEAD — case study title and metadata
-   Title left, metadata in the shared 542px right column, matching
-   .footprints-layout so the page's right edge lines up with the nav
-   and the Work cards on the homepage.
+   Title left, metadata in the shared 542px right column, so the page's
+   right edge lines up with the nav and the Work cards on the homepage.
    ------------------------------------------------------------ */
 
 /* Title + dek run the FULL width, and the supporting detail sits in a two-column
@@ -172,7 +171,7 @@ a.intro-bar-name {
 
 .project-masthead-cols {
   display: flex;
-  gap: 11.625rem; /* 186px — same as .footprints-layout */
+  gap: 11.625rem; /* 186px — the desktop column gap for this rhythm */
   align-items: flex-start;
 }
 
@@ -231,9 +230,8 @@ a.intro-bar-name {
 
    The base .project-masthead is a column (title + dek full width, detail row
    beneath). This variant turns it back into a single two-column row, reusing the
-   same .project-masthead-left / -right children and the same 186px column gap as
-   .footprints-layout, so the right edge still lines up with the nav and the Work
-   cards. To adopt it on another page, add the class and give that page a
+   same .project-masthead-left / -right children and the same 186px column gap,
+   so the right edge still lines up with the nav and the Work cards. To adopt it on another page, add the class and give that page a
    portrait asset. */
 .project-masthead--split {
   /* Outer stack: the [text | image] row, then the locked panel beneath it.
@@ -255,7 +253,7 @@ a.intro-bar-name {
 .project-masthead-top {
   display: flex;
   flex-direction: row;
-  gap: 11.625rem; /* 186px — same as .footprints-layout */
+  gap: 11.625rem; /* 186px — same as .project-masthead-cols */
   align-items: stretch;
 }
 
@@ -489,8 +487,8 @@ a.intro-bar-name {
    for nav items. It also left the outline with no middle: 56 (h1) = 56 (h2), then
    a 3.5× cliff to 16 (h3). Now it reads 56 → 40 → 16 over 20px body.
 
-   SCOPE IS LOAD-BEARING. .section-title is shared with the homepage (6 uses:
-   Selected Work, the three Work cards, Public Footprints, About), so this must
+   SCOPE IS LOAD-BEARING. .section-title is shared with the homepage (5 uses:
+   Selected Work, the three Work cards, About), so this must
    never touch the token itself. .project-block-left is the exact scope: every
    chapter H2 on all four pages sits in one, every H1 sits in
    .project-masthead-head instead, and the homepage has no .project-block at all.
@@ -567,6 +565,35 @@ a.intro-bar-name {
 .project-impact-list li:last-child {
   border-bottom: none;
   padding-bottom: 0;
+}
+
+
+/* ---- PUBLIC FOOTPRINTS (the third-party coverage block) --------------------
+   Each project page closes its "What changed." column with the outside record of
+   that project — the links that used to sit in the homepage's own #footprints
+   section, which is gone (2026-08). The block's LOOK is entirely the homepage's:
+   .footprint-group / .footprint-group-title / .footprint-list survive in
+   sections.css and are imported before this file, so nothing is restyled here.
+
+   The only thing that is project-page-specific is how the block attaches to the
+   impact list above it, and that is what this rule is. --gap-group is the same
+   token and the same role as `.about-body + .project-impact-list` above and
+   `.project-block + .next-case` below: the scale's "between things inside one
+   section" step. Anything larger and the block floats free of the outcomes it
+   evidences — which is the argument for it being here rather than in a section
+   of its own.
+
+   Written as a SIBLING RELATIONSHIP, not a margin on .footprint-group, so the
+   spacing can't follow that component anywhere else. It matches both list
+   variants: the plain one (Loop, Groups, Messaging) ends open, the --expandable
+   one (Accessibility) ends on a hairline, and --gap-group reads correctly under
+   either.
+
+   On Accessibility and Messaging the block lands ABOVE the locked Full case
+   study card, which still closes #impact. That order is deliberate: evidence,
+   then the destination that evidence earns. */
+.project-impact-list + .footprint-group {
+  margin-top: var(--gap-group);
 }
 
 

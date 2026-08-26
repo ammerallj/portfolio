@@ -21,28 +21,38 @@ Contact: ammerallj@gmail.com · https://www.linkedin.com/in/ammerallj/
 
 ## About
 
-- [Homepage and About](https://ammerallj.design/): Career story, design toolkit, public footprints, and contact.
+- [Homepage and About](https://ammerallj.design/): Career story, design toolkit, and contact.
 - [Résumé (PDF)](https://ammerallj.design/Jenna-Ammerall-Resume.pdf)
 
 Design toolkit — Design & build: Figma / Make, Claude / Code, React, GitHub. Problem framing: briefs, audits, gap analysis, requirements. Research & validation: qualitative research, usability testing, experimentation, product metrics. Delivery & scale: scenario prototypes, tradeoffs, workback plans, design QA, frameworks, reusable patterns.
 
 ## Public footprints
 
-Third-party coverage of work Jenna contributed to. These are external sources, not authored by her.
+Third-party coverage of work Jenna contributed to. These are external sources,
+not authored by her. Each set now lives on that project's own overview page, at
+the end of its "What changed." section — there is no standalone footprints
+section on the homepage.
+
+On [Giving Components an Identity](https://ammerallj.design/work/microsoft-loop.html):
 
 - [Microsoft Loop Launch — The Verge](https://www.theverge.com/2023/11/15/23959801/microsoft-loop-launch-notion-competitor)
 - [Patent: Interactive user interface controls for shared dynamic objects (US 12,277,305)](https://www.patentworth.ai/details/12277305)
-- [Introducing Microsoft Loop (video)](https://www.youtube.com/watch?v=BkhaV46HM2E)
 - [Microsoft Loop at Ignite 2022](https://techcommunity.microsoft.com/blog/microsoft_365blog/microsoft-loop-at-ignite-2022/3643382/replies/3660250)
-- [The Future of Microsoft 365](https://medium.com/microsoft-design/m365future-815cf30a8be)
-- [Introducing Fluent Design System](https://www.sitepoint.com/introducing-microsofts-fluent-design-system/)
-- [Evolving Office 365 with Fluent Design](https://medium.com/microsoft-design/designing-for-power-simplicity-9cddec615567)
-- [The Simplified Ribbon in Microsoft Office](https://www.inc.com/john-brandon/the-new-ribbon-in-microsoft-office-might-scare-everyone-in-office-but-theres-hope.html)
-- [Advancing Accessibility at Meta](https://about.fb.com/news/2025/05/advancing-accessibility-meta/)
+- [Introducing Microsoft Loop (video)](https://www.youtube.com/watch?v=BkhaV46HM2E)
+
+On [Shaping Accessibility Across Products](https://ammerallj.design/work/accessibility.html):
+
 - [Accessibility at Meta](https://www.meta.com/accessibility/)
-- [Community Chats on Messenger and Facebook](https://about.fb.com/news/2022/09/community-chats-on-messenger-and-facebook/)
-- [Facebook: Today and Tomorrow](https://about.fb.com/news/2023/03/facebook-today-and-tomorrow/)
+- [Advancing Accessibility at Meta](https://about.fb.com/news/2025/05/advancing-accessibility-meta/)
+
+On [Helping People Navigate Communities](https://ammerallj.design/work/facebook-groups.html):
+
 - [Facebook Communities Summit 2022](https://about.fb.com/news/2022/10/facebook-communities-summit-2022/)
+- [Facebook: Today and Tomorrow](https://about.fb.com/news/2023/03/facebook-today-and-tomorrow/)
+
+On [Creating Continuity Across Messaging](https://ammerallj.design/work/messaging.html):
+
+- [Community Chats on Messenger and Facebook](https://about.fb.com/news/2022/09/community-chats-on-messenger-and-facebook/)
 
 ## Notes for retrieval
 
