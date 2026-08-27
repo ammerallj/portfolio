@@ -653,7 +653,23 @@ under the nav at a 700px window: 622 / 475 / 447.)
 band two can be in range at once; without that the first in the list would win and
 could pull the reader backwards past a nearer one.
 
-**The resting position CENTRES the section's content in the space under the nav**
+**Content is the SPAN OF THE SECTION'S CHILDREN** — first child's top to last
+child's bottom — not box-height-minus-padding. That distinction is load-bearing:
+`#about` carries a `min-height` so it fills the frame, and box-minus-padding
+counted that added empty space as content, settling the copy 48px under the nav
+with 632px of nothing beneath it. Children rather than one wrapper because the
+sections are not uniformly shaped — About has TWO (its heading, then
+`.about-layout`, which is pulled up to sit BESIDE the heading, so the span is 475
+not 531) while Work and Contact have one.
+
+**`#about` has `min-height: calc(100dvh - var(--nav-offset))`** (sections.css,
+reset at ≤480). A section SHORTER than its frame cannot both sit centred and keep
+the next one out of shot: About's natural box was 571 against 736 available, so
+centring left 34px of the blue Contact panel showing along the bottom edge and it
+read as clipped. Filling the frame makes those two goals stop competing. Work
+never needed it — its box is already taller than the frame.
+
+**The resting position CENTRES that content in the space under the nav**
 (`restingScrollY`), so the air above and below matches. It is not the section's
 top on the nav line, which is what it was first: the section is TALLER than that
 space at a normal window — 870 against 861 at 1440x900 — so top-aligning pushed

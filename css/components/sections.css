@@ -549,6 +549,19 @@
    automatically. Don't hard-code either number there. */
 #about {
   padding-top: 0;
+  /* FILL the space under the nav. About's natural box is 571 against 736
+     available at 1440x800 — 165px short — and a section shorter than its frame
+     cannot both sit centred AND keep the next section out of shot. Centred, the
+     leftover split, and 34px of the blue Contact panel showed along the bottom
+     edge, which read as About being clipped.
+     Filling the frame makes those two goals stop competing: the content still
+     centres (initSectionSettle), and because the box now reaches the bottom of
+     the viewport, Contact starts exactly off-screen. Work never needed this —
+     its box is already taller than the frame.
+     min-height, not height: if the copy ever outgrows the viewport the section
+     just grows, and short windows are unaffected. Reset at ≤480, where nothing
+     settles and a viewport-tall About would only add dead space. */
+  min-height: calc(100dvh - var(--nav-offset));
 }
 
 /* The About heading now uses .section-title for its type; this only restores

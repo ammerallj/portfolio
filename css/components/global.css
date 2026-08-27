@@ -132,6 +132,12 @@
   /* Outer page gutter (.site-container / .site-header-row) */
   --page-gutter: 56px;
 
+  /* Height of the docked nav bar — the line a section rests under. Read by
+     `scroll-padding-top` below, by #about's min-height (sections.css), and by
+     js/main.js's NAV_OFFSET, which parses the computed scroll-padding-top. One
+     value so the CSS framing and the JS resting positions cannot drift apart. */
+  --nav-offset: 64px;
+
   /* How much of the container's inner width a Work card GIVES UP so the next
      card in the horizontal track peeks in from the right (sections.css).
      What the reader actually sees of that next card is NOT this number — the
@@ -222,7 +228,7 @@ html {
   /* ~header height, so an anchor-clicked section rests flush under the sticky
      header. Larger values leave a strip of the previous (cream) section showing
      between the header and a full-bleed panel like Contact. */
-  scroll-padding-top: 64px;
+  scroll-padding-top: var(--nav-offset);
   color-scheme: light;
   background-color: var(--color-bg);
   color: var(--color-text);

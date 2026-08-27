@@ -772,6 +772,10 @@
      so the page ends clean into the plain footer, like the Overview pages. */
   #about {
     border-bottom: none;
+    /* Desktop fills the frame so the blue panel stays off-screen when About
+       settles (see sections.css). Nothing settles at this tier, so that height
+       would only add dead space above the Contact panel. */
+    min-height: 0;
   }
   .site-footer:not(.site-footer--plain) {
     background-color: transparent;

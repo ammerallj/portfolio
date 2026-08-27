@@ -1254,19 +1254,35 @@ function initSectionSettle(lenis) {
   // at 1440x900 — so top-aligning pushed its bottom padding off screen entirely
   // and the content ran flush to the bottom edge.
   //
-  // Content height comes from the section's own padding, NOT from measuring a
-  // card: the Work cards rotate as the loop runs and their heights are not
-  // guaranteed equal once a title wraps to a different number of lines.
+  // Content is measured as the SPAN OF THE SECTION'S CHILDREN — first child's top
+  // to last child's bottom — not as box-height-minus-padding.
+  //
+  // That distinction is load-bearing. #about carries a min-height so it fills the
+  // frame (sections.css), and box-minus-padding counts that added empty space as
+  // content: About's "content" measured 640 instead of its real 475, so the copy
+  // settled 48px below the nav with 632px of nothing beneath it. Any future
+  // min-height, or a section whose children do not fill its box, would do the
+  // same. The children's span is what the reader actually sees.
+  //
+  // Children, not a single wrapper: the sections are not uniformly shaped —
+  // About has TWO (its heading, then .about-layout) while Work and Contact have
+  // one. And not a card, either: the Work cards rotate as the loop runs and
+  // their heights are not guaranteed equal once a title wraps to another line.
   function restingFor(el) {
-    const cs = getComputedStyle(el);
-    const padTop = parseFloat(cs.paddingTop) || 0;
-    const padBottom = parseFloat(cs.paddingBottom) || 0;
+    const kids = el.children;
     const box = el.getBoundingClientRect();
-    const contentHeight = box.height - padTop - padBottom;
+    let contentTop = box.top;
+    let contentHeight = box.height;
+    if (kids.length) {
+      const first = kids[0].getBoundingClientRect();
+      const last = kids[kids.length - 1].getBoundingClientRect();
+      contentTop = first.top;
+      contentHeight = Math.max(0, last.bottom - first.top);
+    }
     const available = window.innerHeight - NAV_OFFSET;
     // Taller than the space it gets: nothing to centre, sit it under the nav.
     const wantedTop = NAV_OFFSET + Math.max(0, (available - contentHeight) / 2);
-    const target = window.scrollY + (box.top + padTop) - wantedTop;
+    const target = window.scrollY + contentTop - wantedTop;
     // Clamp, or the last section asks for a position the page cannot reach and
     // the settle re-fires forever trying to get there.
     const max = document.documentElement.scrollHeight - window.innerHeight;
