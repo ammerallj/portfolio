@@ -22,12 +22,9 @@ shared by all of them.
   - `responsive.css` (~110) — **ALL width breakpoints, site-wide.** Organized by screen size (1000 → 768 → 700 → 600px). Imported last so it overrides desktop styles.
 
 ## Landing (2026-08) — "Making products make sense."
-The homepage hero is the Figma 339:3745 landing: `images/hero-bkg-web.jpg` (a
-compressed derivative of the 18MB+ source `images/hero-bkg.jpg` — regenerate
-with `sips --resampleWidth 3600 -s formatOptions 78` and bump its `?v=` when
-the source changes; never ship the source) laid as a PAGE background at
-`z:-1` inside `main` (a stacking context — body's own background otherwise
-paints over negative-z elements). **The field is never clipped**: whatever
+The homepage hero is the Figma 339:3745 landing: `images/hero-bkg.jpg` laid as
+a PAGE background at `z:-1` inside `main` (a stacking context — body's own
+background otherwise paints over negative-z elements). **The field is never clipped**: whatever
 extends past the hero fold bleeds behind Selected Work and dissolves into the
 cream on its own. The hero stage: statement (top half, 96px Hanken) →
 full-width hairline divider at the exact center → frosted band (bottom half,
@@ -62,6 +59,23 @@ neither holds here. Watch the bio's contrast whenever the field shrinks: at a
 1.11:1); 85% keeps them at ~1.6–2.3:1. ≤1024 tiers are INTERIM
 (desktop composition, tighter insets) pending frames. The previous blob-hero landing is archived, fully
 self-contained, in `archive/blob-hero-2026-08/`.
+
+**The field asset is ONE file, and its name is the source's name.** The repo
+holds only `images/hero-bkg.jpg` — 3600×2198, ~1.4MB, and that file is already
+the compressed derivative. The 18MB+ Figma export it came from has **never been
+committed**; it lives outside the repo. There is no `images/hero-bkg-web.jpg`
+and there never was — an earlier version of this doc described a two-file
+source/derivative pair the repo has never had, so don't go looking for the
+`-web` file or rebuild the split. Regenerate by running
+`sips --resampleWidth 3600 -s formatOptions 78` over the external source and
+**overwriting `images/hero-bkg.jpg` in place**, then bump its `?v=` by hand
+(images aren't touched by the pre-commit stamper) in **both** places that name
+it — the `<link rel="preload" as="image">` in index.html's `<head>` and the
+`<img class="page-field">` in `<main>`. Those two URLs must stay byte-identical
+or the preload fetches a second copy of a 1.4MB LCP image instead of priming
+the one the page uses. The `<img>`'s `width`/`height` are the asset's real
+pixels — re-derive them on a re-export, and re-check the `1.6377` aspect that
+hero.css's `--field-bottom` is derived from.
 
 ### The landing nav bar (`.intro-bar`)
 **Wordmark left, then Work · About · "Say hello" as ONE group on the right**, at a

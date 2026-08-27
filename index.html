@@ -269,13 +269,15 @@
        ============================================================ -->
   <main id="main-content">
 
-    <!-- PAGE BACKGROUND FIELD — the landing's gradient field (Figma 339:3745,
-         source export images/hero-bkg.jpg; this is the compressed web
-         derivative). Deliberately a PAGE background, not a hero background:
+    <!-- PAGE BACKGROUND FIELD — the landing's gradient field (Figma 339:3745).
+         images/hero-bkg.jpg IS the compressed derivative; the 18MB+ source
+         export is not in the repo (see CLAUDE.md before re-exporting). Keep
+         this URL byte-identical to the <link rel="preload"> in <head>.
+         Deliberately a PAGE background, not a hero background:
          nothing clips it, so whatever extends past the hero fold bleeds on
          behind Selected Work — its lower reaches are near-white, so it
          dissolves into the cream page on its own. Scrolls with the page. -->
-    <img class="page-field" src="images/hero-bkg.jpg?v=4" width="3634" height="2219" alt="" fetchpriority="high" />
+    <img class="page-field" src="images/hero-bkg.jpg?v=4" width="3600" height="2198" alt="" fetchpriority="high" />
 
     <!-- INTRO — "Making products make sense." landing (Figma 339:3745).
          Structure: statement (top half) → full-width hairline divider at the
