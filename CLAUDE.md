@@ -611,11 +611,11 @@ the container line, not the screen edge).
 - **horizontal → what the phone does.** Usually a different answer; here it is
   "don't", and unwinding it needed a CSS revert *and* a JS gate.
 
-### Work settles square, then PINS (2026-08)
+### Sections settle composed; only Work PINS (2026-08)
 
-Once vertical scrolling has been silent for `SETTLE.idle` (140ms) and Work is
-within reach of its resting position (`SETTLE.band` / `bandBack`), the page is
-eased there — and then HELD
+Once vertical scrolling has been silent for `SETTLE.idle` (140ms) and a section
+is within reach of its resting position (`SETTLE.band` / `bandBack`), the page is
+eased there. **Work, About and Contact all settle; only Work is then HELD**
 (`initWorkSettle`, wired from `setupLenis`). Scrolling down past `PIN.release`
 (500px of accumulated deltaY) hands the reader on to About; scrolling up by the
 same simply unfreezes and lets them carry on.
@@ -630,6 +630,19 @@ page.
 `PIN.cooldown` (900ms) exists because without it the settle would re-align and
 instantly re-pin the reader it just released.
 
+**ONLY WORK PINS, and that is a deliberate line.** A hold has to earn its place
+by giving the reader something to do while held: Work has a second axis they must
+stop moving to traverse. About and Contact are prose, so a hold there is friction
+with nothing in exchange — someone who has finished reading would need a
+deliberate gesture just to leave. Pinning all three would also leave the 81px
+footer with nowhere to live and break find-in-page. Check any new candidate
+against that test. (Fit is NOT the objection — measured, all three contents fit
+under the nav at a 700px window: 622 / 475 / 447.)
+
+**Nearest section within reach wins.** With three of them and a generous forward
+band two can be in range at once; without that the first in the list would win and
+could pull the reader backwards past a nearer one.
+
 **The resting position CENTRES the section's content in the space under the nav**
 (`restingScrollY`), so the air above and below matches. It is not the section's
 top on the nav line, which is what it was first: the section is TALLER than that
@@ -641,10 +654,13 @@ their heights are not guaranteed equal once a title wraps to a different number
 of lines. When the content is taller than the space, there is nothing to centre
 and it sits under the nav as before.
 
-**The `#work-section` anchor aims at that same resting position**, not the generic
+The target is **clamped to the page's scroll range**, or the last section asks for
+a position the page cannot reach and the settle re-fires forever trying.
+
+**Every settling section's anchor aims at that same resting position**, not the generic
 `-scrollPaddingTop` offset the other links use (`setupLenis`, via the
-module-level `workRestingScrollY` that `initWorkSettle` publishes). Otherwise the
-Work nav link landed in one place and the settle moved it again 140ms later — a
+module-level `sectionRestingScrollY` that `initSectionSettle` publishes). Otherwise a nav
+link landed in one place and the settle moved it again 140ms later — a
 visible two-stage jump whose DIRECTION flipped with the window height: down on a
 short window, up on a tall one, and only invisible at ~894px where the two happen
 to coincide. Clicking Work also releases the hold **without** the cooldown, since

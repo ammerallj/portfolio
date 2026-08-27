@@ -1130,7 +1130,7 @@ function setupLenis(Lenis) {
   requestAnimationFrame(raf);
 
   lenis.on('scroll', onScroll);
-  initWorkSettle(lenis);
+  initSectionSettle(lenis);
 
   // Route in-page anchor clicks through Lenis so they glide instead of jumping
   // (native smooth is disabled while Lenis is active). Offset matches the
@@ -1147,14 +1147,15 @@ function setupLenis(Lenis) {
       if (!target) return;
       e.preventDefault();
       const fromMenu = !!link.closest('.mobile-menu');
-      // Selected Work does not rest with its top on the nav line — it rests
-      // CENTRED in the space under the nav (see initWorkSettle). Aiming this at
-      // the generic offset made the Work link land in one place and then get
-      // moved again 140ms later when the settle ran, a visible two-stage jump
-      // whose direction flipped with the window height: down on a short window,
-      // up on a tall one. Ask for the real resting position instead.
-      if (target.id === 'work-section' && workRestingScrollY) {
-        lenis.scrollTo(workRestingScrollY(), { immediate: fromMenu });
+      // A settling section does not rest with its top on the nav line — it rests
+      // CENTRED in the space under it (see initSectionSettle). Aiming these at
+      // the generic offset made the link land in one place and then get moved
+      // again 140ms later when the settle ran, a visible two-stage jump whose
+      // direction flipped with the window height: down on a short window, up on
+      // a tall one. Ask for the real resting position instead.
+      const resting = sectionRestingScrollY && sectionRestingScrollY(target);
+      if (resting != null) {
+        lenis.scrollTo(resting, { immediate: fromMenu });
         return;
       }
       lenis.scrollTo(target, { offset: -headerOffset, immediate: fromMenu });
@@ -1175,24 +1176,25 @@ function setupLenis(Lenis) {
 // scroll restoration or those readers get trapped. This gets the "locked in"
 // feel with none of that: scroll is never taken away, it is only tidied up
 // AFTER the reader has stopped.
-// Where Selected Work comes to rest, published by initWorkSettle so the anchor
-// handler in setupLenis can aim at the SAME place. Null until that runs (and on
-// the project pages, which have no Work section).
-let workRestingScrollY = null;
+// Where each settling section comes to rest, published by initSectionSettle so
+// the anchor handler in setupLenis can aim at the SAME place. Returns null for
+// anything that does not settle. Null itself until that runs (and on the project
+// pages, which have none of these sections).
+let sectionRestingScrollY = null;
 
 const SETTLE = {
   idle: 140,       // ms of scroll silence that counts as "stopped"
-  // How far off the nav line Work may be and still get pulled square, as a
-  // fraction of the viewport. ASYMMETRIC on purpose:
-  //   band     — Work's top still BELOW the line: the reader was on their way
-  //              here and Lenis's easing tail ran out early, so finishing the
-  //              journey continues the motion they were already making.
-  //   bandBack — Work's top ABOVE the line: they have scrolled PAST it, so this
-  //              pulls them backwards and reverses their direction. Much more
-  //              jarring, so it stays tight.
-  // band was 0.25 both ways, which in practice almost never fired: Lenis has a
-  // long easing tail, so a scroll from the hero glides well past Work and only
-  // goes silent once the reader is already into About, outside the window.
+  // How far off its resting position a section may be and still be pulled to it,
+  // as a fraction of the viewport. ASYMMETRIC on purpose:
+  //   band     — still approaching from above: the reader was on their way here
+  //              and Lenis's easing tail ran out early, so finishing the journey
+  //              continues the motion they were already making.
+  //   bandBack — already scrolled PAST it, where the same pull drags them
+  //              backwards and reverses their direction. Much more jarring, so
+  //              it stays tight.
+  // band was 0.25 both ways at first and almost never fired: Lenis's tail is
+  // long, so a scroll glides well past a section and only goes silent once the
+  // reader is into the next one, outside the window.
   band: 0.6,
   bandBack: 0.25,
   tolerance: 2,    // px — close enough, leave it alone
@@ -1206,31 +1208,37 @@ const PIN = {
                    // it just let go of
 };
 
-// Settle Selected Work square under the nav, then HOLD it there while the reader
-// works through the carousel; scrolling down past PIN.release hands them on to
-// About. Scrolling up simply unfreezes and lets them carry on.
+// Bring each major section to rest COMPOSED — its content centred in the space
+// under the nav — once vertical scrolling has stopped near it. Selected Work
+// additionally HOLDS the page there while the reader works through the carousel;
+// scrolling down past PIN.release hands them on to About, and scrolling up by the
+// same simply unfreezes.
+//
+// ⚠️ ONLY WORK PINS, and that is a deliberate line. A hold has to earn its place
+// by giving the reader something to do while they are held: Work has a second
+// axis they must stop moving to traverse. About and Contact are prose, so a hold
+// there is friction with nothing in exchange — someone who has finished reading
+// would need a deliberate gesture just to leave. Pinning all three would also
+// leave the 81px footer with nowhere to live and break find-in-page. If you are
+// tempted to pin another section, check it against that test first.
 //
 // The hold engages only ONCE THE SCROLL HAS ALREADY STOPPED and the section has
-// been eased into line — never mid-gesture. That ordering is the whole safety
-// story: someone flicking past Work at speed is never grabbed, because they
-// never come to rest here. Only a reader who actually stops at Work is held.
-//
-// ⚠️ ELIGIBILITY IS NARROWER THAN THE CAROUSEL'S. The carousel runs at ≥481,
-// but the hold additionally requires a fine pointer. A stopped Lenis swallows
-// TOUCH events as well as wheel, and touch produces no wheel events for the
-// release accumulator to count — so on a finger-only tablet the page would
-// freeze with no way out. Touch keeps ordinary scrolling.
-//
-// Every other way out of the hold is wired below (keyboard, in-page anchors,
-// history navigation, losing eligibility on resize). If you add a new way to
-// move the page, add a release with it.
-function initWorkSettle(lenis) {
+// been eased into place — never mid-gesture. That ordering IS the safety:
+// someone flicking past at speed never comes to rest here, so they are never
+// grabbed. Don't "improve" it by pinning on the section crossing the nav line —
+// that is the version that reads as a broken page.
+function initSectionSettle(lenis) {
+  const sections = ['work-section', 'about', 'contact']
+    .map(id => document.getElementById(id))
+    .filter(Boolean);
+  if (!sections.length) return;             // project pages
   const work = document.getElementById('work-section');
-  const about = document.getElementById('about');
-  if (!work) return;                  // project pages have no Work section
   // An unrequested scroll is precisely what this preference is about.
   if (reducedMotion.matches) return;
-  const eligible = window.matchMedia(
+  // The SETTLE runs wherever the horizontal track does. The HOLD needs more —
+  // see pin() below.
+  const wide = window.matchMedia('(min-width: 481px)');
+  const holdable = window.matchMedia(
     '(min-width: 481px) and (hover: hover) and (pointer: fine)');
 
   let idleTimer = 0;
@@ -1240,8 +1248,35 @@ function initWorkSettle(lenis) {
   let intent = 0;
   let releasedAt = -Infinity;
 
+  // A section rests with its CONTENT centred in the space under the nav, so the
+  // air above and below matches. Not its top on the nav line, which is what this
+  // did first: a section can be TALLER than that space — Work is 870 against 861
+  // at 1440x900 — so top-aligning pushed its bottom padding off screen entirely
+  // and the content ran flush to the bottom edge.
+  //
+  // Content height comes from the section's own padding, NOT from measuring a
+  // card: the Work cards rotate as the loop runs and their heights are not
+  // guaranteed equal once a title wraps to a different number of lines.
+  function restingFor(el) {
+    const cs = getComputedStyle(el);
+    const padTop = parseFloat(cs.paddingTop) || 0;
+    const padBottom = parseFloat(cs.paddingBottom) || 0;
+    const box = el.getBoundingClientRect();
+    const contentHeight = box.height - padTop - padBottom;
+    const available = window.innerHeight - NAV_OFFSET;
+    // Taller than the space it gets: nothing to centre, sit it under the nav.
+    const wantedTop = NAV_OFFSET + Math.max(0, (available - contentHeight) / 2);
+    const target = window.scrollY + (box.top + padTop) - wantedTop;
+    // Clamp, or the last section asks for a position the page cannot reach and
+    // the settle re-fires forever trying to get there.
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    return Math.min(Math.max(target, 0), Math.max(max, 0));
+  }
+
+  sectionRestingScrollY = (el) => (sections.includes(el) && wide.matches ? restingFor(el) : null);
+
   function pin() {
-    if (pinned || !about || !eligible.matches) return;
+    if (pinned || !holdable.matches) return;
     if (performance.now() - releasedAt < PIN.cooldown) return;
     pinned = true;
     intent = 0;
@@ -1259,60 +1294,48 @@ function initWorkSettle(lenis) {
     intent = 0;
     if (cooldown) releasedAt = performance.now();
     lenis.start();
-    if (target) lenis.scrollTo(target, { offset: -NAV_OFFSET });
-  }
-
-  // Where the page should rest: the section's CONTENT centred in the space under
-  // the nav, so the air above and below it matches.
-  //
-  // Not simply the section's top on the nav line, which is what this did first.
-  // The section is TALLER than that space at a typical window — 870 against 861
-  // at 1440x900 — so top-aligning pushed its 144px bottom padding off the screen
-  // entirely and the card ran flush to the bottom edge while 104px of padding sat
-  // above it. Centring the content makes that leftover air split evenly.
-  //
-  // Measured off the section's own padding rather than a card: the cards rotate
-  // as the loop runs, and their heights are not guaranteed identical once a
-  // title wraps to a different number of lines.
-  workRestingScrollY = restingScrollY;
-
-  function restingScrollY() {
-    const cs = getComputedStyle(work);
-    const padTop = parseFloat(cs.paddingTop) || 0;
-    const padBottom = parseFloat(cs.paddingBottom) || 0;
-    const box = work.getBoundingClientRect();
-    const contentHeight = box.height - padTop - padBottom;
-    const available = window.innerHeight - NAV_OFFSET;
-    // When the content is taller than the space it gets, there is nothing to
-    // centre — sit it directly under the nav and let it run off the bottom.
-    const wantedTop = NAV_OFFSET + Math.max(0, (available - contentHeight) / 2);
-    return window.scrollY + (box.top + padTop) - wantedTop;
+    if (target) lenis.scrollTo(restingFor(target));
   }
 
   function settle() {
     // Self-heal a desynced hold. `pinned` is our flag but `lenis.stop()` is
     // shared state, and anything else calling lenis.start() would leave us
     // believing we still hold a page that is already scrolling — after which
-    // this function bails forever and the alignment is dead for the session.
+    // this function bails forever and the settle is dead for the session.
     // Trust Lenis over our own bookkeeping.
     if (pinned && !lenis.isStopped) { pinned = false; intent = 0; }
-    if (!eligible.matches || adjusting || pinned) return;
-    // Negative = still approaching from above; positive = already scrolled past.
-    const offBy = window.scrollY - restingScrollY();
-    if (Math.abs(offBy) < SETTLE.tolerance) { pin(); return; }       // already resting
-    // Far away means the reader is somewhere else entirely — the hero, About —
-    // and pulling them to Work would be hijacking, not tidying.
-    const reach = window.innerHeight * (offBy < 0 ? SETTLE.band : SETTLE.bandBack);
-    if (Math.abs(offBy) > reach) return;
+    if (!wide.matches || adjusting || pinned) return;
+
+    // Nearest section within reach wins. With three of them and a generous
+    // forward band, two can be in range at once; without this the first in the
+    // list would win and could pull the reader backwards past a nearer one.
+    let best = null, bestOff = Infinity;
+    for (const el of sections) {
+      // Negative = still approaching from above; positive = already scrolled past.
+      const off = window.scrollY - restingFor(el);
+      const reach = window.innerHeight * (off < 0 ? SETTLE.band : SETTLE.bandBack);
+      if (Math.abs(off) <= reach && Math.abs(off) < Math.abs(bestOff)) {
+        best = el; bestOff = off;
+      }
+    }
+    if (!best) return;                       // between sections, or up in the hero
+    if (Math.abs(bestOff) < SETTLE.tolerance) {
+      if (best === work) pin();              // already resting
+      return;
+    }
 
     adjusting = true;
     // Lenis abandons a scrollTo the moment the reader scrolls again, and then
     // onComplete never fires — without this backstop `adjusting` would stay true
-    // and the alignment would never run again.
+    // and the settle would never run again.
     clearTimeout(adjustBackstop);
     adjustBackstop = setTimeout(() => { adjusting = false; }, SETTLE.backstop);
-    lenis.scrollTo(restingScrollY(), {
-      onComplete: () => { adjusting = false; clearTimeout(adjustBackstop); pin(); },
+    lenis.scrollTo(restingFor(best), {
+      onComplete: () => {
+        adjusting = false;
+        clearTimeout(adjustBackstop);
+        if (best === work) pin();
+      },
     });
   }
 
@@ -1329,7 +1352,7 @@ function initWorkSettle(lenis) {
     if (!pinned) return;
     if (Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
     intent += event.deltaY;
-    if (intent >= PIN.release) release(about);
+    if (intent >= PIN.release) release(document.getElementById('about'));
     else if (intent <= -PIN.release) release(null);
   }, { passive: true });
 
@@ -1344,8 +1367,8 @@ function initWorkSettle(lenis) {
     release(null, anchor.getAttribute('href') !== '#work-section');
   }, true);
   window.addEventListener('popstate', () => release(null));
-  eligible.addEventListener('change', () => { if (!eligible.matches) release(null); });
-  window.addEventListener('resize', () => { if (!eligible.matches) release(null); });
+  holdable.addEventListener('change', () => { if (!holdable.matches) release(null); });
+  window.addEventListener('resize', () => { if (!holdable.matches) release(null); });
 }
 
 // Viewport reveals. Each [data-reveal-group] fades its [data-reveal] items in
