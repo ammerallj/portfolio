@@ -489,6 +489,26 @@ function initWorkCarousel() {
   // sat before the loop existed, with the previous project now reachable by
   // scrolling backwards. The guard is a belt-and-braces stop against a
   // pathological layout (step measured as 0) spinning the loop forever.
+  //
+  // BOTH branches fire only at a BOUNDARY SNAP POSITION — 2*STEP going forward,
+  // 0 going back — never on merely leaving the rest position. That symmetry is
+  // the whole point, and getting it wrong is a real bug that shipped: the
+  // backward test used to be `scrollLeft < step`, which is true after ONE PIXEL
+  // of leftward movement. So the first frames of a backward gesture teleported
+  // scrollLeft forward by a whole card. The browser had already computed its
+  // snap target from the pre-jump position, so the gesture finished a card away
+  // from where the platform thought it was and came to rest off the snap line —
+  // scrolling forward snapped cleanly, scrolling back did not. Rotating only at
+  // 0 and 2*STEP means the jump always happens exactly where the gesture has
+  // naturally arrived, and -/+ STEP always lands on another snap position.
+  //
+  // The 1px tolerance on the backward test is deliberate. A fractional layout
+  // can leave scrollLeft resting at something like 0.4, which `<= 0` would never
+  // match — and unlike the forward side there is no runway left past 0 to try
+  // again on the next event, so the loop would dead-end at the left edge and the
+  // reader could not scroll back any further. Forward needs no such tolerance:
+  // past 2*STEP the track still has real distance (max is ~2.9*STEP), so a
+  // missed trigger simply fires on the next scroll event.
   function normalize() {
     if (!active || step <= 0) return;
     let guard = 0;
@@ -497,7 +517,7 @@ function initWorkCarousel() {
       track.appendChild(track.firstElementChild);
       track.scrollLeft = from - step;
     }
-    while (track.scrollLeft < step && guard++ < 16) {
+    while (track.scrollLeft <= 1 && guard++ < 16) {
       const from = track.scrollLeft;
       track.insertBefore(track.lastElementChild, track.firstElementChild);
       track.scrollLeft = from + step;

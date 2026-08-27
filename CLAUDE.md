@@ -624,11 +624,19 @@ the container line, not the screen edge).
   DOM node per project is what lets `initScrollVideos`' IntersectionObservers and
   the reveal groups keep working (they hold element references) and keeps
   duplicate headings away from crawlers.
-- **The invariant is `scrollLeft ∈ [STEP, 2·STEP)`** — one card of buffer each
-  side. Snap positions are exact multiples of STEP (the track's
-  `scroll-padding-inline` matches its own `padding-inline`), which is why a whole
-  -STEP jump always lands on another snap position and scroll-snap never has to
-  be toggled off around it.
+- **scrollLeft comes to REST at STEP**, with one card of buffer each side, but
+  mid-gesture it roams freely across `(0, 2·STEP)`. Snap positions are exact
+  multiples of STEP (the track's `scroll-padding-inline` matches its own
+  `padding-inline`), which is why a whole ±STEP jump always lands on another snap
+  position and scroll-snap never has to be toggled off around it.
+- **Rotate ONLY at a boundary snap position — `2·STEP` forward, `0` back.** Never
+  on merely leaving rest. The backward test was `scrollLeft < step`, true after
+  ONE PIXEL of leftward travel, so a backward gesture teleported scrollLeft
+  forward by a whole card in its first frames; the browser had already picked its
+  snap target from the pre-jump position, so backward scrolling landed off the
+  snap line while forward was fine. The backward test carries a 1px tolerance
+  because a fractional `0.4` would never match `<= 0` and there is no runway left
+  past 0 to retry on — it would dead-end at the left edge. Forward needs none.
 - **Never move the FOCUSED card.** Moving a focused element resets the browser's
   sequential-focus starting point; measured, it sent Tab *backwards* through the
   projects. `flushFocusedCard` shuffles only the cards around it.
