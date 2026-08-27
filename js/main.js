@@ -960,34 +960,50 @@ function updateScrollEffects() {
     introBar.classList.toggle('is-docked', introBar.getBoundingClientRect().top <= 0);
   }
 
-  // Scroll-spy: a section is active once its top has reached the STICKY NAV —
-  // the bar highlights whatever it is currently sitting over. Find it by
-  // comparing tops, not array order: navSections mixes the header nav and the
-  // landing's intro-bar (not in DOM order), and BOTH can be on screen pointing at
-  // the same section, so highlight every link that targets it (and mark it for
-  // assistive tech). In the hero, nothing has reached the bar yet — none active.
+  // Scroll-spy: the active section is the LAST one whose RESTING POSITION the
+  // page has reached. Highlight every link that targets it (and mark it for
+  // assistive tech) — navSections mixes the header nav and the landing's
+  // intro-bar, and both can be on screen pointing at the same section.
   //
-  // The marker was a line 35% down the viewport, which handed the highlight over
-  // while the outgoing section still filled the top third of the screen: About
-  // went dark with a third of About still on screen and most of it still being
-  // read. Tying it to the nav's own offset is both later and easier to reason
-  // about — the highlight matches what is under the bar.
-  const marker = NAV_OFFSET;
-  // The LAST section can never satisfy that rule: the page runs out of scroll
-  // before its top can climb to the bar. Measured at 1440x900, #contact's top
-  // bottoms out at 149px against a 64px nav — so without this, "Say hello" would
-  // simply never light up. Reaching the end of the page IS arriving at the last
-  // section, so treat it as such.
-  const atBottom = Math.ceil(window.scrollY + window.innerHeight)
-                   >= document.documentElement.scrollHeight - 2;
-  let activeEl = null, activeTop = -Infinity;
-  let lastEl = null, lastTop = -Infinity;
-  for (const s of navSections) {
-    const top = s.el.getBoundingClientRect().top;
-    if (top > lastTop) { lastTop = top; lastEl = s.el; }
-    if (top <= marker && top > activeTop) { activeTop = top; activeEl = s.el; }
+  // Resting positions, not section tops. This measured tops against the nav line
+  // until sections began settling CENTRED (initSectionSettle): once they did,
+  // About's top rests ~130px BELOW that line and never satisfied the test, so
+  // clicking About scrolled correctly and then left Work highlighted. Reading the
+  // same positions the settle and the anchors use is what keeps the three in
+  // agreement — a section is "arrived at" in exactly one sense across the site.
+  //
+  // The rule is otherwise the shape it always was: monotonic, last-reached wins,
+  // and nothing active up in the hero because no resting position has been passed
+  // yet. It also retires the old special case for the final section, which could
+  // never reach the nav line and needed "the page bottom counts as arriving" —
+  // Contact's resting position is reachable, so it simply works.
+  let activeEl = null, activeRest = -Infinity;
+  let restingKnown = false;
+  if (sectionRestingScrollY) {
+    for (const s of navSections) {
+      const rest = sectionRestingScrollY(s.el);
+      if (rest == null) continue;                  // not a settling section / not this tier
+      restingKnown = true;
+      // 2px of slack: the resting position is fractional and the scroll lands on
+      // whole pixels, so an exact >= would flicker at the boundary.
+      if (window.scrollY >= rest - 2 && rest > activeRest) { activeRest = rest; activeEl = s.el; }
+    }
   }
-  if (atBottom && lastEl) activeEl = lastEl;
+  // FALLBACK for anywhere the settle does not run — ≤480, and reduced motion,
+  // where initSectionSettle returns before publishing anything. Same rule as
+  // before: last section whose top has passed the nav, with the page bottom
+  // standing in for the final section, which can never climb that high.
+  if (!restingKnown) {
+    const atBottom = Math.ceil(window.scrollY + window.innerHeight)
+                     >= document.documentElement.scrollHeight - 2;
+    let activeTop = -Infinity, lastEl = null, lastTop = -Infinity;
+    for (const s of navSections) {
+      const top = s.el.getBoundingClientRect().top;
+      if (top > lastTop) { lastTop = top; lastEl = s.el; }
+      if (top <= NAV_OFFSET && top > activeTop) { activeTop = top; activeEl = s.el; }
+    }
+    if (atBottom && lastEl) activeEl = lastEl;
+  }
   navSections.forEach(s => {
     const on = s.el === activeEl;
     s.link.classList.toggle('is-active', on);

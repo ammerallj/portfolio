@@ -173,6 +173,18 @@ carousel rather than a join, and the 240px across that seam (144 + 96) separates
 them on its own. **Leave the base rule in place**: it is shared with the project
 pages, which is where the table below still applies.
 
+**The scroll-spy reads the SAME resting positions** (`updateScrollEffects`): the
+active section is the last one whose resting position the page has reached. It
+compared section TOPS against the nav line until sections began settling centred
+— after which About's top rests ~130px below that line and never satisfied the
+test, so clicking About scrolled correctly and then left Work highlighted. Settle,
+anchors and spy now all read one definition of "arrived at this section"; change
+it in one place and they cannot disagree. It also retired the old "page bottom
+counts as arriving" special case for the final section, which existed only because
+Contact's top could never climb to the nav line. A marker-based FALLBACK remains
+for ≤480 and reduced motion, where nothing settles and no resting position is
+published.
+
 - **Dividers:** `main:has(.next-case-section)` in project-overview.css §0a — only
   project pages have a pager, so it can't reach the homepage, and no page needs a
   new class. The restore rule is written against *the section before the pager*,
