@@ -611,30 +611,44 @@ the container line, not the screen edge).
 - **horizontal → what the phone does.** Usually a different answer; here it is
   "don't", and unwinding it needed a CSS revert *and* a JS gate.
 
-### Work rests square under the nav — and is NOT pinned (2026-08)
+### Work settles square, then PINS (2026-08)
 
-Once vertical scrolling settles within a quarter-viewport of Selected Work, the
-section is eased so its top sits exactly on the nav line rather than half-scrolled
-(`initWorkSettle`, wired from `setupLenis`). Knobs in `SETTLE`: `idle` (140ms of
-scroll silence), `band` (0.25 of a viewport — outside it the reader is somewhere
-else and pulling them would be hijacking), `tolerance` (2px).
+Once vertical scrolling has been silent for `SETTLE.idle` (140ms) and Work is
+within `SETTLE.band` (a quarter-viewport) of the nav line, the section is eased
+so its top sits exactly on that line — and then the page is HELD there
+(`initWorkSettle`, wired from `setupLenis`). Scrolling down past `PIN.release`
+(500px of accumulated deltaY) hands the reader on to About; scrolling up by the
+same simply unfreezes and lets them carry on.
 
-**It only ever acts AFTER the reader has stopped**, so it cannot fight a gesture.
-Gated to ≥481 (at ≤480 Work is a tall vertical stack and yanking its top to the
-nav would jump the reader a long way for nothing) and skipped under reduced
-motion, since an unrequested scroll is exactly what that setting is about.
-`adjusting` has a **timer backstop**: Lenis abandons a `scrollTo` the moment the
-reader scrolls again and then `onComplete` never fires, which would otherwise
-leave the flag stuck true and the alignment dead for the rest of the session.
+**The hold engages only after the scroll has already stopped and the section has
+been eased into line — never mid-gesture.** That ordering IS the safety: someone
+flicking past Work at speed never comes to rest here, so they are never grabbed.
+Only a reader who actually stops at Work is held. Don't "improve" this by pinning
+on the section crossing the nav line — that is the version that reads as a broken
+page.
 
-**A PINNED / scroll-jacked Work section was considered and rejected.** The idea
-was to hold the page while the reader scrolls the carousel, releasing to About
-after X of vertical intent. There is no workable X: a real trackpad flick carries
-800–2000px of deltaY once momentum counts, so a low threshold is cleared
-instantly and the pin is invisible, while a high one reads as the page being
-broken. It would also have to be unpicked for keyboard focus, nav anchors and
-back/forward scroll restoration or those readers get trapped. The settle above
-buys the "locked in" feel without ever taking scroll away.
+`PIN.cooldown` (900ms) exists because without it the settle would re-align and
+instantly re-pin the reader it just released.
+
+- **Eligibility is NARROWER than the carousel's.** The track runs at ≥481; the
+  hold additionally requires `(hover: hover) and (pointer: fine)`. A stopped
+  Lenis swallows TOUCH as well as wheel, and touch produces no wheel events for
+  the release accumulator — so on a finger-only tablet the page would freeze with
+  no way out. Touch keeps ordinary scrolling.
+- **Skipped under reduced motion**, since an unrequested scroll is exactly what
+  that setting is about.
+- **Every other route out of a section releases the hold first**: keydown,
+  in-page anchor clicks (bound in the CAPTURE phase so it runs before
+  `setupLenis`'s own anchor handler, which calls `lenis.scrollTo` and would do
+  nothing while Lenis is stopped), `popstate`, and losing eligibility on resize.
+  **If you add a new way to move the page, add a release with it** — a hold only
+  a wheel can break is a trap for everyone else.
+- **Horizontal gestures are not vertical intent.** Those over the track never
+  reach the accumulator (the carousel stops their propagation); any arriving
+  horizontally over the section padding are ignored by the deltaX/deltaY test.
+- `adjusting` has a **timer backstop**: Lenis abandons a `scrollTo` the moment the
+  reader scrolls again and then `onComplete` never fires, which would otherwise
+  leave the flag stuck true and the alignment dead for the session.
 
 ### Damped horizontal motion (2026-08)
 

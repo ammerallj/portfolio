@@ -1172,24 +1172,70 @@ const SETTLE = {
   backstop: 1200,  // ms — see the note on `adjusting` below
 };
 
+const PIN = {
+  release: 500,    // px of vertical intent needed to break out of the hold
+  cooldown: 900,   // ms after releasing before Work may pin again — without it,
+                   // the settle would re-align and immediately re-pin the reader
+                   // it just let go of
+};
+
+// Settle Selected Work square under the nav, then HOLD it there while the reader
+// works through the carousel; scrolling down past PIN.release hands them on to
+// About. Scrolling up simply unfreezes and lets them carry on.
+//
+// The hold engages only ONCE THE SCROLL HAS ALREADY STOPPED and the section has
+// been eased into line — never mid-gesture. That ordering is the whole safety
+// story: someone flicking past Work at speed is never grabbed, because they
+// never come to rest here. Only a reader who actually stops at Work is held.
+//
+// ⚠️ ELIGIBILITY IS NARROWER THAN THE CAROUSEL'S. The carousel runs at ≥481,
+// but the hold additionally requires a fine pointer. A stopped Lenis swallows
+// TOUCH events as well as wheel, and touch produces no wheel events for the
+// release accumulator to count — so on a finger-only tablet the page would
+// freeze with no way out. Touch keeps ordinary scrolling.
+//
+// Every other way out of the hold is wired below (keyboard, in-page anchors,
+// history navigation, losing eligibility on resize). If you add a new way to
+// move the page, add a release with it.
 function initWorkSettle(lenis) {
   const work = document.getElementById('work-section');
+  const about = document.getElementById('about');
   if (!work) return;                  // project pages have no Work section
   // An unrequested scroll is precisely what this preference is about.
   if (reducedMotion.matches) return;
-  // Only where the horizontal track exists. At ≤480 Work is a tall vertical
-  // stack of four cards, and yanking its top to the nav would jump the reader
-  // a long way for no benefit.
-  const horizontal = window.matchMedia('(min-width: 481px)');
+  const eligible = window.matchMedia(
+    '(min-width: 481px) and (hover: hover) and (pointer: fine)');
 
   let idleTimer = 0;
   let adjusting = false;
   let adjustBackstop = 0;
+  let pinned = false;
+  let intent = 0;
+  let releasedAt = -Infinity;
+
+  function pin() {
+    if (pinned || !about || !eligible.matches) return;
+    if (performance.now() - releasedAt < PIN.cooldown) return;
+    pinned = true;
+    intent = 0;
+    lenis.stop();
+  }
+
+  // `target` null means "just hand control back" — used for scrolling up and for
+  // every escape hatch, where forcing a destination would be its own hijack.
+  function release(target) {
+    if (!pinned) return;
+    pinned = false;
+    intent = 0;
+    releasedAt = performance.now();
+    lenis.start();
+    if (target) lenis.scrollTo(target, { offset: -NAV_OFFSET });
+  }
 
   function settle() {
-    if (!horizontal.matches || adjusting) return;
+    if (!eligible.matches || adjusting || pinned) return;
     const offBy = work.getBoundingClientRect().top - NAV_OFFSET;
-    if (Math.abs(offBy) < SETTLE.tolerance) return;                 // already square
+    if (Math.abs(offBy) < SETTLE.tolerance) { pin(); return; }       // already square
     // Far away means the reader is somewhere else entirely — the hero, About —
     // and pulling them to Work would be hijacking, not tidying.
     if (Math.abs(offBy) > window.innerHeight * SETTLE.band) return;
@@ -1202,7 +1248,7 @@ function initWorkSettle(lenis) {
     adjustBackstop = setTimeout(() => { adjusting = false; }, SETTLE.backstop);
     lenis.scrollTo(work, {
       offset: -NAV_OFFSET,
-      onComplete: () => { adjusting = false; clearTimeout(adjustBackstop); },
+      onComplete: () => { adjusting = false; clearTimeout(adjustBackstop); pin(); },
     });
   }
 
@@ -1210,6 +1256,30 @@ function initWorkSettle(lenis) {
     clearTimeout(idleTimer);
     idleTimer = setTimeout(settle, SETTLE.idle);
   });
+
+  // While held, count vertical intent. Horizontal gestures over the track never
+  // reach here — initWorkCarousel stops their propagation — and any that do
+  // arrive horizontally (over the section's padding, say) are not vertical
+  // intent and are ignored.
+  window.addEventListener('wheel', (event) => {
+    if (!pinned) return;
+    if (Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
+    intent += event.deltaY;
+    if (intent >= PIN.release) release(about);
+    else if (intent <= -PIN.release) release(null);
+  }, { passive: true });
+
+  // ESCAPE HATCHES. A hold that only a wheel can break is a trap for everyone
+  // else, so every other route out of a section releases it first.
+  window.addEventListener('keydown', () => release(null));
+  // Capture phase, so this runs BEFORE setupLenis's own anchor handler — that
+  // handler calls lenis.scrollTo, which does nothing while Lenis is stopped.
+  document.addEventListener('click', (event) => {
+    if (event.target.closest && event.target.closest('a[href^="#"]')) release(null);
+  }, true);
+  window.addEventListener('popstate', () => release(null));
+  eligible.addEventListener('change', () => { if (!eligible.matches) release(null); });
+  window.addEventListener('resize', () => { if (!eligible.matches) release(null); });
 }
 
 // Viewport reveals. Each [data-reveal-group] fades its [data-reveal] items in
