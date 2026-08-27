@@ -53,6 +53,13 @@ navSections.push(...introBarSections);
 
 const siteHeader = document.querySelector('.site-header');
 
+// Where the sticky nav sits — the same offset anchor-scrolling uses to rest a
+// section below the bar, so the scroll-spy and the anchor jumps agree on what
+// "arrived at this section" means. Read once: this is consulted on every scroll
+// event, and getComputedStyle there would be wasteful.
+const NAV_OFFSET = parseFloat(
+  getComputedStyle(document.documentElement).scrollPaddingTop) || 0;
+
 // Floating in-page section nav. BOTH page types render `.section-pills`: the
 // project pages carry the in-page chapter nav (#overview / #approach|#process /
 // #impact) and the homepage carries the .section-pills--site-nav variant
@@ -941,17 +948,34 @@ function updateScrollEffects() {
     introBar.classList.toggle('is-docked', introBar.getBoundingClientRect().top <= 0);
   }
 
-  // Scroll-spy: the active SECTION is the lowest one whose top has scrolled above
-  // a line ~35% down the viewport (in the hero, none). Find it by comparing tops,
-  // not array order — navSections mixes the header nav and the landing's intro-bar
-  // (not in DOM order), and BOTH can be on screen pointing at the same section, so
-  // highlight every link that targets it (and mark it for assistive tech).
-  const marker = window.innerHeight * 0.35;
+  // Scroll-spy: a section is active once its top has reached the STICKY NAV —
+  // the bar highlights whatever it is currently sitting over. Find it by
+  // comparing tops, not array order: navSections mixes the header nav and the
+  // landing's intro-bar (not in DOM order), and BOTH can be on screen pointing at
+  // the same section, so highlight every link that targets it (and mark it for
+  // assistive tech). In the hero, nothing has reached the bar yet — none active.
+  //
+  // The marker was a line 35% down the viewport, which handed the highlight over
+  // while the outgoing section still filled the top third of the screen: About
+  // went dark with a third of About still on screen and most of it still being
+  // read. Tying it to the nav's own offset is both later and easier to reason
+  // about — the highlight matches what is under the bar.
+  const marker = NAV_OFFSET;
+  // The LAST section can never satisfy that rule: the page runs out of scroll
+  // before its top can climb to the bar. Measured at 1440x900, #contact's top
+  // bottoms out at 149px against a 64px nav — so without this, "Say hello" would
+  // simply never light up. Reaching the end of the page IS arriving at the last
+  // section, so treat it as such.
+  const atBottom = Math.ceil(window.scrollY + window.innerHeight)
+                   >= document.documentElement.scrollHeight - 2;
   let activeEl = null, activeTop = -Infinity;
+  let lastEl = null, lastTop = -Infinity;
   for (const s of navSections) {
     const top = s.el.getBoundingClientRect().top;
+    if (top > lastTop) { lastTop = top; lastEl = s.el; }
     if (top <= marker && top > activeTop) { activeTop = top; activeEl = s.el; }
   }
+  if (atBottom && lastEl) activeEl = lastEl;
   navSections.forEach(s => {
     const on = s.el === activeEl;
     s.link.classList.toggle('is-active', on);
@@ -959,10 +983,18 @@ function updateScrollEffects() {
     else s.link.removeAttribute('aria-current');
   });
 
-  // Floating section pills (project pages): same spy as the nav above, but it
-  // defaults to the first pill so Overview reads active at the top of the page.
-  // Once the footer is in view there's nowhere further to jump, so tuck the bar
-  // away. Guarded by length, so this is inert on the homepage.
+  // Floating section pills: the project pages' chapter nav, and the homepage's
+  // own Work/About floatie. Same idea as the nav spy above but it DEFAULTS to the
+  // first pill, so Overview reads active at the top of a project page. Once the
+  // footer is in view there's nowhere further to jump, so tuck the bar away.
+  //
+  // This is NOT inert on the homepage — an older comment here said it was. Both
+  // of the homepage's pills resolve to real sections, so the spy genuinely runs;
+  // anything built on "this never executes on the homepage" would be unsafe.
+  // It keeps the 35% marker rather than the nav offset the nav spy now uses:
+  // About is the LAST pill here, so it holds to the bottom regardless, and on the
+  // project pages the pills sit at the BOTTOM of the screen, where a line a third
+  // of the way down is the right hand-over point.
   if (sectionPills.length) {
     const pillMarker = window.innerHeight * 0.35;
     let activePill = sectionPills[0].link;
