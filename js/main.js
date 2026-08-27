@@ -471,6 +471,7 @@ function initWorkCarousel() {
   // over, and it must be captured before the first rotation.
   const authored = [...track.children];
   let active = false;
+  let damping = false;   // true while the wheel-driven damped run owns scrollLeft
 
   let step = 0;
 
@@ -510,6 +511,12 @@ function initWorkCarousel() {
   // past 2*STEP the track still has real distance (max is ~2.9*STEP), so a
   // missed trigger simply fires on the next scroll event.
   function normalize() {
+    // The damped run owns scrollLeft for its duration and calls this itself once
+    // it has settled. Without this guard the closing frames of a BACKWARD run
+    // (approaching 0) would trip the rotation mid-flight, which sets scrollLeft
+    // to STEP while the next frame is still easing toward 0 — the two then fight
+    // for the rest of the run.
+    if (damping) return;
     if (!active || step <= 0) return;
     let guard = 0;
     while (track.scrollLeft >= step * 2 && guard++ < 16) {
@@ -575,6 +582,114 @@ function initWorkCarousel() {
   // overwhelming majority of scroll events), so it can run on every one. It
   // re-enters via the scroll event its own scrollLeft write fires; that pass
   // finds the invariant already satisfied and does nothing.
+  // DAMPED HORIZONTAL MOTION (2026-08). Wheel deltas accumulate into a single
+  // `target`, and every frame scrollLeft eases a fraction of the remaining
+  // distance toward it. Adapted from the Codrops horizontal-gallery technique,
+  // with one deliberate change: that version replaces native scrolling with a
+  // virtual value behind `overflow: hidden`. Here the damping is applied to the
+  // REAL scrollLeft of a real scroll container, so the track keeps working with
+  // JS off, keeps native keyboard scrolling (which flushFocusedCard depends on),
+  // and keeps touch — none of which survive a virtual scroller.
+  //
+  // ⚠️ THE ACCUMULATING TARGET IS THE WHOLE POINT — do not "simplify" this back
+  // into a fixed-duration animation per gesture. That was tried and reverted the
+  // same day (see CLAUDE.md): a real flick keeps firing momentum wheel events for
+  // a second or more after the fingers lift, so each one landing after an
+  // animation finished started another, and one flick lurched through two or
+  // three cards. Deltas folding into one target cannot chain, because there is no
+  // discrete animation to re-trigger — and delta MAGNITUDE starts mattering
+  // again, so a gentle scroll moves a little and a flick moves a lot.
+  const DAMP = {
+    ease: 0.12,     // fraction of the remaining distance covered per frame
+    settle: 0.5,    // px — close enough to call it arrived
+    quiet: 150,     // ms of wheel silence that means the gesture (and its
+                    // momentum tail) has genuinely ended
+    lineHeight: 16, // px per line, for mouse wheels that report deltaMode 1
+  };
+
+  let dampTarget = 0;
+  let dampAnchor = 0;
+  let dampSettling = false;
+  let dampFrame = 0;
+  let dampQuiet = 0;
+  let dampBackstop = 0;
+
+  const clamp = (v, lo, hi) => (v < lo ? lo : v > hi ? hi : v);
+
+  function endDamp() {
+    if (!damping) return;
+    damping = false;
+    dampSettling = false;
+    cancelAnimationFrame(dampFrame);
+    clearTimeout(dampQuiet);
+    clearTimeout(dampBackstop);
+    track.scrollLeft = dampTarget;   // land exactly on the boundary
+    track.style.scrollSnapType = ''; // back to the stylesheet's mandatory
+    normalize();                     // rotate, and come to rest on STEP
+  }
+
+  function dampStep() {
+    const current = track.scrollLeft;
+    track.scrollLeft = current + (dampTarget - current) * DAMP.ease;
+    if (dampSettling && Math.abs(dampTarget - track.scrollLeft) < DAMP.settle) {
+      endDamp();
+      return;
+    }
+    dampFrame = requestAnimationFrame(dampStep);
+  }
+
+  // The gesture has stopped feeding us. Quantise to whichever card the reader
+  // actually pushed toward and let the ease carry it home.
+  function onQuiet() {
+    if (!damping) return;
+    const moved = dampTarget - dampAnchor;
+    const direction = Math.abs(moved) < step * 0.15 ? 0 : Math.sign(moved);
+    dampTarget = dampAnchor + direction * step;
+    dampSettling = true;
+  }
+
+  function onWheel(event) {
+    // Reduced motion and the phone tier both fall through to native scrolling.
+    if (!active || reducedMotion.matches) return;
+    // Vertical intent belongs to the page — never swallow it. Only a gesture
+    // that is predominantly horizontal is ours.
+    if (Math.abs(event.deltaX) <= Math.abs(event.deltaY)) return;
+    event.preventDefault();
+
+    if (!damping) {
+      damping = true;
+      dampSettling = false;
+      dampAnchor = Math.round(track.scrollLeft);
+      dampTarget = dampAnchor;
+      // mandatory snap re-snaps ANY programmatic scrollLeft to the nearest snap
+      // position, which would flatten every intermediate frame. It stands down
+      // for the run and is restored in endDamp — safe against a re-snap because
+      // every position written after that point is itself a snap position.
+      track.style.scrollSnapType = 'none';
+      dampFrame = requestAnimationFrame(dampStep);
+      // See the glide note in CLAUDE.md: rAF STOPS in a backgrounded tab, and
+      // this run owns snap-off plus the `damping` flag. Timers are only
+      // throttled when hidden, never stopped, so the backstop has to be a timer.
+      dampBackstop = setTimeout(endDamp, 2000);
+    }
+
+    // deltaMode 1 means the wheel reports LINES, not pixels — common on real
+    // mouse wheels. Without this a mouse wheel would barely move the track.
+    const px = event.deltaMode === 1 ? event.deltaX * DAMP.lineHeight : event.deltaX;
+
+    // THE CAP. Clamping to one card either side of where the gesture started is
+    // what stops a hard flick running away, and it does so without needing to
+    // know when the gesture ends — the momentum tail keeps arriving and simply
+    // finds the target already pinned. This is the job scroll-snap-stop does on
+    // the native path, done here because snap is off during the run.
+    dampTarget = clamp(dampTarget + px, dampAnchor - step, dampAnchor + step);
+
+    clearTimeout(dampQuiet);
+    dampQuiet = setTimeout(onQuiet, DAMP.quiet);
+  }
+  // passive:false because the whole point is to preventDefault.
+  track.addEventListener('wheel', onWheel, { passive: false });
+
   track.addEventListener('scroll', normalize, { passive: true });
   track.addEventListener('focusin', flushFocusedCard);
   // Resize drives BOTH jobs, and the tier check comes first: crossing 480 has to

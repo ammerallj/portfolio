@@ -611,30 +611,48 @@ the container line, not the screen edge).
 - **horizontal → what the phone does.** Usually a different answer; here it is
   "don't", and unwinding it needed a CSS revert *and* a JS gate.
 
-### Don't animate the card-to-card motion in JS (tried and reverted, 2026-08)
+### Damped horizontal motion (2026-08)
 
-A wheel takeover was built and removed the same day: `glide()` intercepted
-horizontal wheel events, `preventDefault`ed them, and animated `scrollLeft` over
-620ms on easeOutCubic, to make the horizontal motion match the site's weighted
-vertical glide. **It read as far too fast, and the cause is not the duration.**
+Card-to-card motion is **damped in JS**, adapted from the Codrops horizontal
+gallery: wheel deltas accumulate into one `target`, and each frame `scrollLeft`
+eases a fraction of the remaining distance toward it (`onWheel` / `dampStep` in
+`initWorkCarousel`).
 
-A real flick keeps firing momentum wheel events for a second or more after the
-fingers lift. Every one that lands once a glide has finished immediately starts
-another, so ONE physical flick chained into two or three cards. Tuning the
-duration only moves where the chaining starts, because **JS cannot tell a
-momentum tail from a fresh deliberate flick** — the same reason the fling cap
-lives in CSS (`scroll-snap-stop`, above). Only the browser knows gesture phase.
+| To change… | Edit |
+|---|---|
+| How quickly it catches up | `DAMP.ease` (0.12 — fraction of the remaining distance per frame; lower = slower, heavier) |
+| When a gesture counts as over | `DAMP.quiet` (150ms of wheel silence) |
+| How far you must push to change card | the `step * 0.15` threshold in `onQuiet()` |
 
-If smoother horizontal motion is wanted again, the honest options are (a) accept
-the browser's snap settle, or (b) a full pointer-driven carousel that tracks the
-fingers 1:1 and owns momentum itself — not a wheel-to-animation bridge. Anything
-that samples `wheel` and plays a fixed-length animation will reproduce this.
+**The accumulating target IS the design — never turn this back into a
+fixed-duration animation per gesture.** That was built and reverted the same day:
+a real flick keeps firing momentum wheel events for a second or more after the
+fingers lift, so each one landing after an animation finished started another,
+and one flick lurched through two or three cards. Deltas folding into a single
+target cannot chain, because there is no discrete animation to re-trigger — and
+delta *magnitude* matters again, so a gentle scroll moves a little.
 
-Two things the attempt did surface, worth keeping in mind for any future version:
-mandatory snap re-snaps any programmatic `scrollLeft` and has to be switched off
-for an animation's duration, and rAF **stops** in a backgrounded tab — so any
-state owned mid-animation (snap disabled, an in-flight flag) needs a TIMER
-backstop, since timers are only throttled when hidden, never stopped.
+- **The CAP is the clamp, not gesture detection.** `dampTarget` is pinned to one
+  card either side of `dampAnchor` (where the gesture began), so a hard flick's
+  momentum tail keeps arriving and simply finds the target already pinned. This
+  is the job `scroll-snap-stop` does on the native path, done here because snap
+  is off during the run. `DAMP.quiet` only decides when to *re-arm*, so being
+  slightly wrong costs a marginally delayed second card, never a runaway.
+- **The Codrops version replaces native scroll** with a virtual value behind
+  `overflow: hidden`. That is the one thing NOT copied: damping the real
+  `scrollLeft` of a real scroll container is what keeps the track working with JS
+  off, keeps native keyboard scrolling (which `flushFocusedCard` needs), and
+  keeps touch.
+- **Mandatory snap is off for the run's duration** — it re-snaps any programmatic
+  `scrollLeft` and would flatten every frame. Restored in `endDamp`.
+- **`normalize()` stands down while damping**, or the closing frames of a
+  backward run trip the rotation mid-flight.
+- **`endDamp` has a TIMER backstop, not a rAF one.** Mid-run the code owns
+  snap-off and the `damping` flag; if the rAF chain stops before the last frame
+  both stay that way and the carousel is dead until reload. rAF *stops* outright
+  in a backgrounded tab; timers are only throttled, never stopped.
+- **`deltaMode: 1` is handled** — real mouse wheels report LINES, not pixels, and
+  without the conversion a mouse wheel barely moves the track.
 
 ### Invariants — break these and the loop breaks
 
