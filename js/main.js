@@ -1167,7 +1167,19 @@ function setupLenis(Lenis) {
 // AFTER the reader has stopped.
 const SETTLE = {
   idle: 140,       // ms of scroll silence that counts as "stopped"
-  band: 0.25,      // only pull in when already within this fraction of a viewport
+  // How far off the nav line Work may be and still get pulled square, as a
+  // fraction of the viewport. ASYMMETRIC on purpose:
+  //   band     — Work's top still BELOW the line: the reader was on their way
+  //              here and Lenis's easing tail ran out early, so finishing the
+  //              journey continues the motion they were already making.
+  //   bandBack — Work's top ABOVE the line: they have scrolled PAST it, so this
+  //              pulls them backwards and reverses their direction. Much more
+  //              jarring, so it stays tight.
+  // band was 0.25 both ways, which in practice almost never fired: Lenis has a
+  // long easing tail, so a scroll from the hero glides well past Work and only
+  // goes silent once the reader is already into About, outside the window.
+  band: 0.6,
+  bandBack: 0.25,
   tolerance: 2,    // px — close enough, leave it alone
   backstop: 1200,  // ms — see the note on `adjusting` below
 };
@@ -1238,7 +1250,8 @@ function initWorkSettle(lenis) {
     if (Math.abs(offBy) < SETTLE.tolerance) { pin(); return; }       // already square
     // Far away means the reader is somewhere else entirely — the hero, About —
     // and pulling them to Work would be hijacking, not tidying.
-    if (Math.abs(offBy) > window.innerHeight * SETTLE.band) return;
+    const reach = window.innerHeight * (offBy > 0 ? SETTLE.band : SETTLE.bandBack);
+    if (Math.abs(offBy) > reach) return;
 
     adjusting = true;
     // Lenis abandons a scrollTo the moment the reader scrolls again, and then

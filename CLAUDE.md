@@ -614,7 +614,7 @@ the container line, not the screen edge).
 ### Work settles square, then PINS (2026-08)
 
 Once vertical scrolling has been silent for `SETTLE.idle` (140ms) and Work is
-within `SETTLE.band` (a quarter-viewport) of the nav line, the section is eased
+within reach of the nav line (`SETTLE.band` / `bandBack`), the section is eased
 so its top sits exactly on that line — and then the page is HELD there
 (`initWorkSettle`, wired from `setupLenis`). Scrolling down past `PIN.release`
 (500px of accumulated deltaY) hands the reader on to About; scrolling up by the
@@ -629,6 +629,15 @@ page.
 
 `PIN.cooldown` (900ms) exists because without it the settle would re-align and
 instantly re-pin the reader it just released.
+
+**The reach is ASYMMETRIC, and it has to be.** `band` (0.6 of a viewport) applies
+when Work's top is still BELOW the line — the reader was on their way here and
+Lenis's easing tail ran out early, so finishing the journey continues the motion
+they were already making. `bandBack` (0.25) applies once they have scrolled PAST
+it, where the same pull would drag them backwards and reverse their direction.
+It was 0.25 both ways at first and in practice almost never fired: Lenis's tail
+is long, so a scroll from the hero glides well past Work and only goes silent
+once the reader is already into About, outside the window.
 
 - **Eligibility is NARROWER than the carousel's.** The track runs at ≥481; the
   hold additionally requires `(hover: hover) and (pointer: fine)`. A stopped
