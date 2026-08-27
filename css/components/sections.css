@@ -533,6 +533,24 @@
   position: relative;
 }
 
+/* About opens straight onto its heading — no top section padding. Work already
+   closes with 144px below its cards, so the seam carried 240px (144 + 96) and
+   the extra 96 read as a gap the heading was floating in rather than as the
+   start of a section.
+
+   This is a knowing exception to the equal-sides rule in global.css
+   `.page-section` (see the note there): About's bottom padding stays 96, so this
+   seam is now 144 above the heading and 96 below the section. Both numbers are
+   still on the spacing scale — nothing invented.
+
+   ⚠️ It also shifts where the section RESTS. initSectionSettle centres
+   `box.height − padding`, so zeroing the top padding changes About's resting
+   scroll position; that is derived live from computed style, so it follows this
+   automatically. Don't hard-code either number there. */
+#about {
+  padding-top: 0;
+}
+
 /* The About heading now uses .section-title for its type; this only restores
    the breathing room the old .about-name margin provided, so .about-layout
    doesn't ride up and the section above's hairline stops crossing the text.
