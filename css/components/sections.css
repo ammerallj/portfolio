@@ -377,17 +377,54 @@
    ============================================================ */
 
 .contact-section {
-  /* Full-bleed blue panel with white text (Figma). Top is 120px (the 480 tier
-     closes it to 64). */
+  /* Full-bleed blue panel with white text (Figma). The 480 tier closes the top
+     to 64.
+     Top was 120 against a 96 bottom. That asymmetry stopped meaning anything
+     once the content became flex-centred below — it only skewed the box by half
+     the difference, putting a 12px sliver of footer under the panel and needing
+     a +24 correction on the min-height to cancel it. Symmetric is the same
+     picture with none of that. */
   background-color: var(--color-accent);
   color: #fff;
-  padding-top: 120px;
+  padding-top: 96px;
   /* Pinned to 96 at EVERY tier, so it does not follow .page-section down to 64
      on phones. The rule below this panel is the FOOTER's border-top — the
      copyright divider, not a section divider — so the "equal either side" rule
      doesn't apply: the footer answers it with its own 30px (Figma). The panel
      closes the page, so it keeps the full 96 even where sections tighten. */
   padding-bottom: 96px;
+
+  /* FILL the frame and centre the content inside it. Same reasoning as #about's
+     min-height, one step further: a section shorter than the frame lets its
+     neighbours into shot, and here the neighbour is a hard blue edge, so the
+     cream band above it read as "you haven't arrived yet" — 89px at a 800px
+     window, growing to 357 at 1100.
+
+     Centring INSIDE the box (rather than relying on the padding) is what makes
+     the panel's top edge and the content's centre agree: initSectionSettle
+     centres the content span, and with the box exactly one frame tall that
+     lands the box top on the nav line. Panel edge to edge, content centred, one
+     rule doing both.
+
+     It also fixes a clamp. Contact's centred position was UNREACHABLE at ≥900 —
+     the page ran out of scroll first — so it came to rest lopsided (213 above /
+     176 below at 900, 413/176 at 1100). The taller section lengthens the page
+     enough that the position exists.
+
+     THE FOOTER IS PART OF THIS VIEW. The panel stops a footer's height short of
+     the bottom so the copyright line sits in shot when the page settles here,
+     rather than being one more scroll away — there is room for it, so it should
+     be in the frame. initSectionSettle reserves the same amount when it centres
+     this section, so the panel meets the nav and the footer fills the remainder
+     exactly. The two MUST agree: both read --footer-height, which the JS keeps
+     truthful by measuring the real footer.
+
+     min-height, not height: if the copy outgrows a short window the panel just
+     grows. Reset at ≤480, where nothing settles. */
+  min-height: calc(100dvh - var(--nav-offset) - var(--footer-height));
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 /* White eyebrows/labels throughout the blue panel */

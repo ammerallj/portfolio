@@ -138,6 +138,13 @@
      value so the CSS framing and the JS resting positions cannot drift apart. */
   --nav-offset: 64px;
 
+  /* Height of the site footer. A DEFAULT, not the truth: initSectionSettle
+     measures the real footer and rewrites this on load and resize, so the value
+     here only has to be right enough for a no-JS render. Contact's min-height
+     reads it to leave the footer exactly enough room to sit in shot when the
+     page settles on Say hello. */
+  --footer-height: 81px;
+
   /* How much of the container's inner width a Work card GIVES UP so the next
      card in the horizontal track peeks in from the right (sections.css).
      What the reader actually sees of that next card is NOT this number — the

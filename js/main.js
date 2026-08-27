@@ -1249,6 +1249,8 @@ function initSectionSettle(lenis) {
     .filter(Boolean);
   if (!sections.length) return;             // project pages
   const work = document.getElementById('work-section');
+  const footer = document.querySelector('.site-footer');
+  const lastSection = sections[sections.length - 1];
   // An unrequested scroll is precisely what this preference is about.
   if (reducedMotion.matches) return;
   // The SETTLE runs wherever the horizontal track does. The HOLD needs more —
@@ -1295,7 +1297,15 @@ function initSectionSettle(lenis) {
       contentTop = first.top;
       contentHeight = Math.max(0, last.bottom - first.top);
     }
-    const available = window.innerHeight - NAV_OFFSET;
+    // The LAST section shares its frame with the footer. There is room for the
+    // copyright line, so it belongs in shot rather than one scroll further on —
+    // reserving its height here is what lets the blue panel meet the nav AND the
+    // footer fill the remainder exactly. .contact-section's min-height subtracts
+    // the same amount; the two have to agree, which is why both go through
+    // --footer-height and why the measurement below keeps it honest.
+    const reserve = (el === lastSection && footer)
+      ? footer.getBoundingClientRect().height : 0;
+    const available = window.innerHeight - NAV_OFFSET - reserve;
     // Taller than the space it gets: nothing to centre, sit it under the nav.
     const wantedTop = NAV_OFFSET + Math.max(0, (available - contentHeight) / 2);
     const target = window.scrollY + contentTop - wantedTop;
@@ -1306,6 +1316,18 @@ function initSectionSettle(lenis) {
   }
 
   sectionRestingScrollY = (el) => (sections.includes(el) && wide.matches ? restingFor(el) : null);
+
+  // Publish the REAL footer height so the CSS reserving room for it cannot drift
+  // from the JS centring around it. global.css carries a default for the no-JS
+  // render; this replaces it with what the footer actually measures, and again
+  // whenever a resize could have reflowed it.
+  function publishFooterHeight() {
+    if (!footer) return;
+    document.documentElement.style.setProperty(
+      '--footer-height', Math.round(footer.getBoundingClientRect().height) + 'px');
+  }
+  publishFooterHeight();
+  window.addEventListener('resize', publishFooterHeight);
 
   function pin() {
     if (pinned || !holdable.matches) return;

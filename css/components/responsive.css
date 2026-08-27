@@ -745,6 +745,14 @@
      (rule above) and the blue panel's inner top: */
   .contact-section {
     padding-top: 64px; /* was the desktop 120 */
+    /* Desktop sizes this panel to the frame so it meets the nav and leaves the
+       footer exactly its own height (see sections.css). Nothing settles at this
+       tier, so drop it back to content height.
+       No `display` reset here on purpose: #contact below hides this section
+       outright on phones, and an ID beats this class — a `display: block` here
+       would look like it was trying to bring it back and would silently do
+       nothing. */
+    min-height: 0;
   }
 
   /* Let the email / LinkedIn / Resume row wrap instead of overflowing */
