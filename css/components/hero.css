@@ -176,18 +176,33 @@ main {
    only lays out the bio and masks its reveal.) */
 .intro-band {
   flex: 0 0 50%; /* the divider sits at the viewport's vertical center */
-  padding: 40px 150px 0;
+  /* MIRRORS .work-card-body's box so the bio lands on the Work card's
+     description column — same left edge, same width, at every desktop width.
+     The card is inset --page-gutter from the left and --page-gutter +
+     --work-peek from the right (the peek is the sliver of the next card), so
+     this box spans exactly the card's 56 → 1244 at 1440. Asymmetric on
+     purpose; every tier below 1025 overrides it back to a symmetric
+     padding-inline, which is correct there because the peek is phone-only. */
+  padding: 40px calc(var(--page-gutter) + var(--work-peek)) 0 var(--page-gutter);
   display: flex;
-  gap: 50px;
+  /* .work-card-body's gap, not the old 50px — the shrink below divides the
+     leftover between the two columns, so the gap has to match too. */
+  gap: 1.25rem;
   align-items: flex-start;
   /* The bio reveal's mask: this box's top edge IS the divider. */
   overflow: hidden;
 }
 
-/* Empty left column — the bio deliberately occupies only the right half. */
+/* Empty left column, standing in for .work-card-left. It renders nothing, but
+   it has to carry that column's basis and margin: the card's two columns are
+   both shrinkable and at 1440 they ask for more than the card has (654 + 20 +
+   542 = 1216 > 1188), so each gives up a share proportional to its basis. The
+   bio only lands on the description's left edge if the same subtraction
+   happens here — an empty `flex: 1 1 0` spacer would leave it 13px adrift. */
 .intro-band-spacer {
-  flex: 1 1 0;
+  flex: 0 1 var(--width-title-column);
   min-width: 0;
+  margin-right: auto;
 }
 
 /* Right column of the band: the bio + the meta line stack here. Carries the
@@ -196,7 +211,10 @@ main {
    right blocks — plus the reveal (both descend from behind the divider as one).
    Was on .intro-bio; moved up when the meta line joined it. */
 .intro-band-right {
-  flex: 0 0 var(--width-right-column);
+  /* 0 1, matching .work-card-right — see .intro-band-spacer above: it has to
+     shrink on the same terms as the card's description column, not hold the
+     token's full width. */
+  flex: 0 1 var(--width-right-column);
   min-width: 0;
   /* Mirror of the headline: descend from behind the divider. */
   --rise: 64px;
