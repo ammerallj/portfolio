@@ -614,6 +614,10 @@ function initWorkCarousel() {
     // hundreds of ms while nothing visibly moves — 2px is under half a device
     // pixel of visible error and cuts that dead tail off.
     settle: 2,
+    // Fraction of a card the reader must push before the destination is
+    // committed. Small on purpose — this is "which way did they mean", not "did
+    // they push far enough", and waiting longer is what caused the linger.
+    commit: 0.1,
     quiet: 120,     // ms of wheel silence that means the gesture (and its
                     // momentum tail) has genuinely ended
     lineHeight: 16, // px per line, for mouse wheels that report deltaMode 1
@@ -625,6 +629,21 @@ function initWorkCarousel() {
   let dampFrame = 0;
   let dampQuiet = 0;
   let dampBackstop = 0;
+  let dampLocked = false;   // swallowing the momentum tail after a run finished
+  let dampUnlock = 0;
+
+  // After a run lands, the flick that caused it is STILL firing momentum wheel
+  // events — often for another half second. Re-arming immediately would let the
+  // tail start a second run, which is the chaining that killed the first
+  // attempt at this. So the track locks on arrival and stays locked for as long
+  // as events keep arriving, unlocking only once they have been silent for
+  // DAMP.quiet. This gates RE-ARMING only, never the motion, so the worst a
+  // mis-timed unlock can do is briefly delay a genuine second flick.
+  function relock() {
+    dampLocked = true;
+    clearTimeout(dampUnlock);
+    dampUnlock = setTimeout(() => { dampLocked = false; }, DAMP.quiet);
+  }
 
   const clamp = (v, lo, hi) => (v < lo ? lo : v > hi ? hi : v);
 
@@ -638,6 +657,7 @@ function initWorkCarousel() {
     track.scrollLeft = dampTarget;   // land exactly on the boundary
     track.style.scrollSnapType = ''; // back to the stylesheet's mandatory
     normalize();                     // rotate, and come to rest on STEP
+    relock();                        // and swallow the flick's remaining tail
   }
 
   let dampLast = 0;
@@ -659,13 +679,14 @@ function initWorkCarousel() {
     dampFrame = requestAnimationFrame(dampStep);
   }
 
-  // The gesture has stopped feeding us. Quantise to whichever card the reader
-  // actually pushed toward and let the ease carry it home.
+  // Fallback resolver for a push that never got decisive: the reader nudged the
+  // track a little and stopped. Send it back where it came from. The COMMITTED
+  // case does not come through here — see onWheel — because waiting for the
+  // gesture to go quiet before choosing a destination is exactly what made the
+  // track linger part-way and then jump.
   function onQuiet() {
-    if (!damping) return;
-    const moved = dampTarget - dampAnchor;
-    const direction = Math.abs(moved) < step * 0.15 ? 0 : Math.sign(moved);
-    dampTarget = dampAnchor + direction * step;
+    if (!damping || dampSettling) return;
+    dampTarget = dampAnchor;
     dampSettling = true;
   }
 
@@ -676,6 +697,10 @@ function initWorkCarousel() {
     // that is predominantly horizontal is ours.
     if (Math.abs(event.deltaX) <= Math.abs(event.deltaY)) return;
     event.preventDefault();
+
+    // Still swallowing the previous flick's momentum tail. Keep it swallowed,
+    // and hold the lock open for as long as the tail keeps arriving.
+    if (dampLocked) { relock(); return; }
 
     if (!damping) {
       damping = true;
@@ -706,6 +731,19 @@ function initWorkCarousel() {
     // the native path, done here because snap is off during the run.
     dampTarget = clamp(dampTarget + px, dampAnchor - step, dampAnchor + step);
 
+    // COMMIT AS SOON AS THE PUSH IS DECISIVE. The destination must not wait for
+    // the gesture to end: a trackpad keeps firing momentum events for up to a
+    // second after the fingers lift, so deciding at that point left the track
+    // sitting part-way (the linger) and then jumping to the card (the snap).
+    // A tenth of a card is enough to know which way the reader meant to go.
+    const moved = dampTarget - dampAnchor;
+    if (Math.abs(moved) >= step * DAMP.commit) {
+      dampTarget = dampAnchor + Math.sign(moved) * step;
+      dampSettling = true;   // the ease can now finish and land
+      return;
+    }
+
+    // Not decisive yet — if the reader stops here, onQuiet sends it home.
     clearTimeout(dampQuiet);
     dampQuiet = setTimeout(onQuiet, DAMP.quiet);
   }

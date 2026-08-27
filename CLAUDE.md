@@ -622,8 +622,8 @@ eases a fraction of the remaining distance toward it (`onWheel` / `dampStep` in
 |---|---|
 | How quickly it catches up | `DAMP.ease` (0.25) |
 | Where the motion stops crawling | `DAMP.settle` (2px) |
-| When a gesture counts as over | `DAMP.quiet` (120ms of wheel silence) |
-| How far you must push to change card | the `step * 0.15` threshold in `onQuiet()` |
+| How far you must push to pick a card | `DAMP.commit` (0.1 of a card) |
+| How long the tail is swallowed for | `DAMP.quiet` (120ms of wheel silence) |
 
 **Arrival time is `ln(settle / step) / ln(1 - ease)` frames** — use it rather than
 guessing: 0.25 lands a card in ~370ms, 0.12 took **over a second** and read as
@@ -645,6 +645,18 @@ and one flick lurched through two or three cards. Deltas folding into a single
 target cannot chain, because there is no discrete animation to re-trigger — and
 delta *magnitude* matters again, so a gentle scroll moves a little.
 
+- **COMMIT EARLY — never wait for the gesture to end to choose a destination.**
+  It once did, via the quiet timer, and the track visibly lingered part-way and
+  then jumped to the card: a trackpad keeps firing momentum for up to a second
+  after the fingers lift, so "quiet" arrives long after the reader has stopped
+  moving. `onWheel` now commits as soon as the push passes `DAMP.commit`
+  (~67ms), and `onQuiet` only handles the undecided case — a small nudge that
+  stops, which goes back where it came from.
+- **The tail is handled by a LOCK, not by delaying the commit.** On landing,
+  `endDamp` calls `relock()`; every further wheel event is swallowed and pushes
+  the unlock out again, so the run cannot re-trigger until the tail has been
+  silent for `DAMP.quiet`. This gates re-arming only, never the motion, so a
+  mis-timed unlock costs a slightly delayed second flick rather than a runaway.
 - **The CAP is the clamp, not gesture detection.** `dampTarget` is pinned to one
   card either side of `dampAnchor` (where the gesture began), so a hard flick's
   momentum tail keeps arriving and simply finds the target already pinned. This
