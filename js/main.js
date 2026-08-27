@@ -749,6 +749,18 @@ function initWorkCarousel() {
     // that is predominantly horizontal is ours.
     if (Math.abs(event.deltaX) <= Math.abs(event.deltaY)) return;
     event.preventDefault();
+    // ...and STOP IT HERE. preventDefault only cancels the browser's own
+    // scrolling; the event still bubbles, and Lenis listens on `window`. A real
+    // trackpad swipe is never exactly deltaY 0 — measured, a horizontal flick
+    // carried deltaY 18 — so Lenis was receiving that remainder and easing the
+    // PAGE up or down underneath the reader while the track moved sideways.
+    // That is the subtle vertical drift while scrolling the carousel.
+    // (A pure deltaY of 0 never showed it, because Lenis discards those itself
+    // as an unknown gesture — which is exactly why this only bit on real
+    // hardware and never in a synthetic test.)
+    // Genuinely vertical gestures still reach Lenis untouched: they return above,
+    // before this line.
+    event.stopPropagation();
 
     // Still swallowing the previous flick's momentum tail. Keep it swallowed,
     // and hold the lock open for as long as the tail keeps arriving.

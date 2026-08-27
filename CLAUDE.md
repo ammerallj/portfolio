@@ -731,10 +731,19 @@ delta *magnitude* matters again, so a gentle scroll moves a little.
 - **Never move the FOCUSED card.** Moving a focused element resets the browser's
   sequential-focus starting point; measured, it sent Tab *backwards* through the
   projects. `flushFocusedCard` shuffles only the cards around it.
-- **Do NOT add `data-lenis-prevent` to the track.** Lenis bails out of any
-  gesture whose deltaY is 0 before it calls preventDefault, so horizontal swipes
-  already pass through. The attribute would instead kill smooth VERTICAL
-  scrolling over the whole section.
+- **A claimed horizontal gesture must be `stopPropagation`'d, not just
+  `preventDefault`'d.** preventDefault only cancels the browser's own scrolling;
+  the event still bubbles to Lenis on `window`. A real trackpad swipe is never
+  exactly deltaY 0 — measured, a horizontal flick carried deltaY 18 — so Lenis
+  received the remainder and eased the PAGE up and down while the track moved
+  sideways. That was the subtle vertical drift while scrolling the carousel, and
+  it could only ever be reproduced on real hardware: a synthetic deltaY of 0
+  never showed it, because Lenis discards those itself as an unknown gesture.
+- **Do NOT add `data-lenis-prevent` to the track.** That is the other half of the
+  same story and is still wrong: it would kill smooth VERTICAL scrolling over the
+  whole section. The `stopPropagation` above is targeted — it fires only for
+  gestures already judged predominantly horizontal, and vertical ones return
+  before it and reach Lenis untouched.
 - **The card's flex-basis is a PERCENTAGE of the track's content box**, so any
   `padding-inline-end` (e.g. a trailing spacer) shrinks every card by that amount.
 - **`padding-block: 24px` / `margin-block: -24px` on the track is load-bearing.**
