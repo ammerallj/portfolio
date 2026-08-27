@@ -171,7 +171,7 @@
 
 .mobile-menu-mind-body p {
   font-family: var(--font-body);
-  font-size: var(--size-lg); /* 20px — the overlay's body scale */
+  font-size: var(--size-lg); /* 18px — the overlay's body scale */
   letter-spacing: -0.02em;
   line-height: 1.4;
   color: #fff;
@@ -227,7 +227,7 @@
 
 .mobile-menu-connect-links a {
   font-family: var(--font-body);
-  font-size: var(--size-lg); /* 20px */
+  font-size: var(--size-lg); /* 18px */
   letter-spacing: -0.02em;
   color: #fff;
   text-decoration: underline;

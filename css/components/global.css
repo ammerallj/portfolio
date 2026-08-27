@@ -22,7 +22,7 @@
 
   --size-base: 1rem;       /* 16px */
   --size-xs: 0.8125rem;    /* 13px — eyebrow/label + smallest helper text */
-  --size-lg: 1.25rem;      /* 20px */
+  --size-lg: 1.125rem;     /* 18px — the site's body copy size */
   --size-xl: 1.75rem;      /* 28px */
   --size-2xl: 2.5rem;      /* 40px */
   --size-3xl: 3.5rem;      /* 56px */
@@ -48,7 +48,7 @@
      one (h3 = 16). A project page is ONE document — title, then chapters — not
      the homepage's set of peer sections each standing in for a nav destination,
      which is what an equal-weight heading claimed it was.
-     56 → 40 → 16 is the resulting scale, with 20px body under it.
+     56 → 40 → 16 is the resulting scale, with 18px body under it.
 
      Numerically the same as --next-case-title-size today; kept separate because
      they answer to different things (a chapter heading vs. the pager's title)

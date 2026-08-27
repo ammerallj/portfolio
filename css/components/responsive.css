@@ -388,8 +388,8 @@
        screenful of scroll, so the size step has nothing left to do. */
     --project-block-title-size: 2rem; /* 32px */
     /* The CARD title deliberately does NOT step again — it holds the 28px from the
-       tier above. It has somewhere else to be subordinate to: the 20px description
-       inside its own card. Taking it to 24 would leave a 4px gap there and the card
+       tier above. It has somewhere else to be subordinate to: the 18px description
+       inside its own card. Taking it to 24 would leave a 6px gap there and the card
        would lose its internal hierarchy, which matters more on a phone than shaving
        another step off a heading it already sits under. Not every type token has to
        move at every tier (the radius below does, because it's a shape, not type). */
@@ -400,7 +400,7 @@
        derived (see the block at the top of this file). Group and section both
        close up: on a 375-wide screen a 96px break between cards costs a
        quarter of the viewport and reads as the page having ended. Content
-       stays 20 — it is type against type, and the type is still ~17–20px.
+       stays 20 — it is type against type, and the type is still ~17–18px.
        Gutter is the tightest of the four so the copy gets the room back.
        Heading closes hardest of all: the "big title" is only 32px here, so it
        doesn't need the 96 that a 96px display line does — 96 under a 32px
@@ -419,11 +419,13 @@
        purpose: 126.5vw can't reach 1548px at any width in this tier, so the
        max() would only ever resolve to the px anyway, and writing it plainly
        keeps the field genuinely LOCKED — same artwork size at 320 as at 480.
-       ⚠️ 15%, walked back from a first pass at 30%: at 70% the artwork's bottom
-       landed at 705px and the bio's last two lines fell off the gradient onto
-       near-cream — white type at 1.11:1. 85% carries the gradient past the bio
-       again. Shrink further and re-check that contrast before shipping. */
-    --field-w: 1548.4px;
+       ⚠️ 12.45% under the original 1821.6px composition, walked back from a
+       first pass at 30%: at 70% the artwork's bottom landed at 705px and the
+       bio's last two lines fell off the gradient onto near-cream — white type
+       at 1.11:1. 85% carried the gradient past the bio again, and the +3%
+       (2026-08, matching the base tier) took it to 87.55%. Shrink further and
+       re-check that contrast before shipping. */
+    --field-w: 1594.85px;
 
     /* The flat downward nudge on .page-field (transform below). Declared as a
        token because --field-bottom has to carry it too: hero.css derives that

@@ -441,7 +441,7 @@ a.intro-bar-name {
   /* Same size as its <dt> label — the pair reads as one small line of spec, not
      a label with a display-size value. Sentence case and full black keep the
      VALUE distinct from the uppercase, 70%-black label.
-     Tracking is normal, not the -0.02em this had at 20px: negative tracking is
+     Tracking is normal, not the -0.02em this had at 18px: negative tracking is
      tuned for display sizes and closes up the letterfit at 13px. */
   font-size: var(--size-xs);
   letter-spacing: normal;
@@ -485,7 +485,7 @@ a.intro-bar-name {
    title and its chapters — and equal-weight headings claimed the opposite: that
    each chapter was a peer destination, the way the homepage's sections stand in
    for nav items. It also left the outline with no middle: 56 (h1) = 56 (h2), then
-   a 3.5× cliff to 16 (h3). Now it reads 56 → 40 → 16 over 20px body.
+   a 3.5× cliff to 16 (h3). Now it reads 56 → 40 → 16 over 18px body.
 
    SCOPE IS LOAD-BEARING. .section-title is shared with the homepage (5 uses:
    Selected Work, the three Work cards, About), so this must
@@ -598,7 +598,7 @@ a.intro-bar-name {
 
 
 /* ---- IMPACT: EXPANDABLE ROWS (--expandable) --------------------------------
-   work/accessibility.html only. Four 20px paragraphs stacked under an already
+   work/accessibility.html only. Four 18px paragraphs stacked under an already
    dense Approach statement asked too much of a reader who is skimming; these
    rows collapse the explanation and keep the claim.
 
@@ -668,9 +668,9 @@ a.intro-bar-name {
 /* Weight only. Size, tracking, line-height and colour all inherit from
    .project-impact-list li above, so an expandable row is typographically the
    same claim as a plain one — the same reason the Approach statement reuses
-   .about-body rather than restating 20px/-0.02em/1.4.
+   .about-body rather than restating 18px/-0.02em/1.4.
 
-   500, NOT the 600 of .project-impact-list strong. Four stacked 20px claims at
+   500, NOT the 600 of .project-impact-list strong. Four stacked 18px claims at
    600 read as a wall of bold — the plain list can carry 600 because there the
    emphasis is a lead clause inside a sentence, but here the whole line is the
    claim, so the weight applies to every word of it. 500 is the site's medium
@@ -686,7 +686,7 @@ a.intro-bar-name {
    the Timeline / Role / Team values above (a spec, read as data, its `·` and `→`
    separators doing the same work as theirs), so it takes the SIZE and tracking
    from .project-meta-row dd: 13px, normal tracking, 1.4. Tracking goes back to
-   normal for the same reason it does there: the -0.02em inherited from the 20px
+   normal for the same reason it does there: the -0.02em inherited from the 18px
    claim is display tightening, and it closes up figures and separators at 13px.
 
    COLOUR DEPARTS from that pattern, deliberately. `dd` values are full black
@@ -709,13 +709,14 @@ a.intro-bar-name {
 }
 
 /* Sits on the first line of the outcome rather than centred on the whole
-   summary, which would drift as rows wrap to different heights. 4px = half the
-   difference between the 28px first line (20px × 1.4) and the 20px glyph. */
+   summary, which would drift as rows wrap to different heights. 2.6px = half the
+   difference between the 25.2px first line (18px × 1.4) and the 20px glyph. It
+   was 4px while body copy was 20px; it is DERIVED, so it moves with --size-lg. */
 .impact-row-chevron {
   width: 20px;
   height: 20px;
   flex: none;
-  margin-top: 4px;
+  margin-top: 2.6px;
   color: var(--color-text-70);
   transition: transform 0.2s ease, color 0.15s ease;
 }
@@ -734,7 +735,7 @@ a.intro-bar-name {
 }
 
 /* The explanation is body copy, so it DECLARES NO TYPE — it inherits the
-   20px/-0.02em/1.4 full black that .project-impact-list li already sets. That is
+   18px/-0.02em/1.4 full black that .project-impact-list li already sets. That is
    the exact treatment these paragraphs had before they became collapsible, and
    the same body text the Approach statement uses. Expanding a row reveals the
    site's body text; it must not reveal a smaller, quieter variant invented for

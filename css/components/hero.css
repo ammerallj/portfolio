@@ -49,23 +49,24 @@ main {
 
 /* The hero field's geometry, in one place — .page-field's width and the frost
    pane's reach both read from it, so they can't drift apart.
-     --field-w       the artwork's rendered width: 113.85vw at the 1440 design
-                     size (= 1639.44px), FROZEN at that px value below 1440 so
+     --field-w       the artwork's rendered width: 117.27vw at the 1440 design
+                     size (= 1688.69px), FROZEN at that px value below 1440 so
                      narrowing the window crops instead of scaling. This is the
-                     original 126.5vw / 1821.6px composition taken down 10%
-                     (2026-08); the pair must move together — vw × 14.4 = the px
+                     original 126.5vw / 1821.6px composition taken down 10% and
+                     then back up 3% (2026-08), so it now sits 7.3% under the
+                     original; the pair must move together — vw × 14.4 = the px
                      freeze point — or the freeze stops matching the 1440 render.
                      ⚠️ Shrinking this drops the bio's contrast: at -10% its
-                     worst patch measures ~1.55:1 against the raw gradient (the
-                     frost lightens it further), already at the floor of the
-                     ~1.6-2.3 band the phone crop settled on. Re-measure before
-                     going smaller.
+                     worst patch measured ~1.55:1 against the raw gradient (the
+                     frost lightens it further), the floor of the ~1.6-2.3 band
+                     the phone crop settled on. The +3% moved AWAY from that
+                     floor; re-measure before going smaller again.
      --field-bottom  where its bottom edge lands = width ÷ 1.6377 (the asset's
                      aspect) × 0.88 (the 12% up-shift) — i.e. width × 0.53734.
    ⚠️ Change the zoom or the shift on .page-field and both follow automatically;
    only the 0.53734 needs re-deriving, and only if the SHIFT changes. */
 :root {
-  --field-w: max(1639.44px, 113.85vw);
+  --field-w: max(1688.69px, 117.27vw);
   --field-bottom: calc(var(--field-w) * 0.53734);
 }
 
@@ -222,7 +223,13 @@ main {
 }
 
 .intro-bio {
-  font-size: var(--size-lg); /* body prose — the hero bio IS body copy */
+  /* 24px, and deliberately OFF --size-lg (18px). This is the hero's dek, not
+     body copy — it is the only prose above the fold and it answers a 96px
+     headline, where body size read as a caption under it. There is no token at
+     24: the scale steps 18 → 28, and 28 would start competing with the
+     headline's own weight in the band. The tight 1.08 leading below is a
+     display setting and only becomes coherent at this size. */
+  font-size: 24px;
   line-height: 1.08;
   letter-spacing: -0.02em;
   color: #fff;
