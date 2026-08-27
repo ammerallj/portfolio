@@ -620,9 +620,22 @@ eases a fraction of the remaining distance toward it (`onWheel` / `dampStep` in
 
 | To change… | Edit |
 |---|---|
-| How quickly it catches up | `DAMP.ease` (0.12 — fraction of the remaining distance per frame; lower = slower, heavier) |
-| When a gesture counts as over | `DAMP.quiet` (150ms of wheel silence) |
+| How quickly it catches up | `DAMP.ease` (0.25) |
+| Where the motion stops crawling | `DAMP.settle` (2px) |
+| When a gesture counts as over | `DAMP.quiet` (120ms of wheel silence) |
 | How far you must push to change card | the `step * 0.15` threshold in `onQuiet()` |
+
+**Arrival time is `ln(settle / step) / ln(1 - ease)` frames** — use it rather than
+guessing: 0.25 lands a card in ~370ms, 0.12 took **over a second** and read as
+laggy, 0.35 is brisk at ~250ms. `settle` matters as much as `ease`: at 0.5px the
+last few pixels crawl for hundreds of ms while nothing visibly moves, which is
+most of what "too slow" actually was.
+
+**`ease` is normalised to elapsed TIME, not applied per frame.** A raw per-frame
+fraction ties the speed to the refresh rate — the first version ran 1033ms on a
+60Hz display and 517ms on a 120Hz one, from identical code. `dampStep` converts
+via `dt / 16.67`, and caps `dt` so a stalled tab resuming cannot jump the whole
+distance in a single frame.
 
 **The accumulating target IS the design — never turn this back into a
 fixed-duration animation per gesture.** That was built and reverted the same day:

@@ -600,9 +600,21 @@ function initWorkCarousel() {
   // discrete animation to re-trigger — and delta MAGNITUDE starts mattering
   // again, so a gentle scroll moves a little and a flick moves a lot.
   const DAMP = {
-    ease: 0.12,     // fraction of the remaining distance covered per frame
-    settle: 0.5,    // px — close enough to call it arrived
-    quiet: 150,     // ms of wheel silence that means the gesture (and its
+    // Fraction of the remaining distance covered per 60fps frame. Normalised to
+    // elapsed TIME in dampStep, so the feel is identical on a 60Hz and a 120Hz
+    // display — without that the motion literally runs twice as fast on
+    // ProMotion hardware.
+    //
+    // Arrival time for a card is  ln(settle / step) / ln(1 - ease) frames:
+    //   ease 0.12 -> ~50 frames (830ms)   far too slow, most of it a crawl
+    //   ease 0.25 -> ~22 frames (370ms)   responsive, still visibly damped
+    //   ease 0.35 -> ~15 frames (250ms)   brisk
+    ease: 0.25,
+    // How close counts as arrived. At 0.5px the last few pixels crawl for
+    // hundreds of ms while nothing visibly moves — 2px is under half a device
+    // pixel of visible error and cuts that dead tail off.
+    settle: 2,
+    quiet: 120,     // ms of wheel silence that means the gesture (and its
                     // momentum tail) has genuinely ended
     lineHeight: 16, // px per line, for mouse wheels that report deltaMode 1
   };
@@ -628,9 +640,18 @@ function initWorkCarousel() {
     normalize();                     // rotate, and come to rest on STEP
   }
 
-  function dampStep() {
+  let dampLast = 0;
+
+  function dampStep(now) {
+    // Time-normalised easing. A raw per-frame fraction ties the speed to the
+    // refresh rate — the same code runs twice as fast on a 120Hz display. dt is
+    // capped so a stalled tab resuming cannot jump the whole distance in one go.
+    const dt = dampLast ? Math.min(now - dampLast, 50) : 16.67;
+    dampLast = now;
+    const factor = 1 - Math.pow(1 - DAMP.ease, dt / 16.67);
+
     const current = track.scrollLeft;
-    track.scrollLeft = current + (dampTarget - current) * DAMP.ease;
+    track.scrollLeft = current + (dampTarget - current) * factor;
     if (dampSettling && Math.abs(dampTarget - track.scrollLeft) < DAMP.settle) {
       endDamp();
       return;
@@ -666,6 +687,7 @@ function initWorkCarousel() {
       // for the run and is restored in endDamp — safe against a re-snap because
       // every position written after that point is itself a snap position.
       track.style.scrollSnapType = 'none';
+      dampLast = 0;   // fresh clock, so the first frame uses the 60fps default
       dampFrame = requestAnimationFrame(dampStep);
       // See the glide note in CLAUDE.md: rAF STOPS in a backgrounded tab, and
       // this run owns snap-off plus the `damping` flag. Timers are only
