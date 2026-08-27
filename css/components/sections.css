@@ -18,6 +18,19 @@
 #work-section {
   padding-top: 104px;
   padding-bottom: 144px;
+  /* No hairline into About. The 240px of air across this seam (144 below the
+     cards + 96 above the About heading) already separates them, and with the
+     section now coming to rest composed under the nav (initSectionSettle), a
+     rule sitting mid-viewport read as a lid on the carousel rather than as a
+     join between two sections.
+     ⚠️ This is the LAST hairline on the homepage — global.css already drops it
+     from About (`:has(+ .contact-section)`, since the blue panel's own edge
+     closes that seam) and from Contact (`:last-of-type`). So the homepage now
+     has none, and `--color-border` is used there only by the Work card pill.
+     The base `.page-section` rule is deliberately left alone: it is shared with
+     the project pages, whose own divider logic in project-overview.css §0a
+     removes it and then restores one before the pager. */
+  border-bottom: none;
 }
 
 /* The Work list is a HORIZONTAL TRACK (2026-08). The cards no longer stack down

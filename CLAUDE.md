@@ -154,7 +154,7 @@ homepage's treatment claimed the opposite, three times per page.
 | | Homepage | Project page |
 |---|---|---|
 | Section headings | `--section-title-size` 56/44/32 | **`--project-block-title-size` 40/36/32** — one notch under the H1 at every tier (converging at 32 on phones) |
-| Divider between sections | full-strength `--color-border` | **none** |
+| Divider between sections | **none as of 2026-08** — see below | **none** |
 | Full-strength divider kept | between peer sections | **only before the Next Case pager** — the one real seam |
 
 - **Headings:** `.project-block-left .section-title` carries the smaller token.
@@ -163,6 +163,16 @@ homepage's treatment claimed the opposite, three times per page.
   in `.project-masthead-head`. **Never fix this on the token.** Before the change
   the outline read 56 (h1) = 56 (h2) → 16 (h3): no hierarchy at the top and a 3.5×
   cliff below. It now reads **56 → 40 → 16** over 20px body.
+**The HOMEPAGE now has no hairlines at all (2026-08).** `.page-section` still
+carries `border-bottom` in global.css, but all three homepage sections opt out:
+Contact via `:last-of-type`, About via `:has(+ .contact-section)` (the blue
+panel's own edge already closes that seam), and Work via `border-bottom: none` in
+sections.css. Work's was the last one and went when the sections began settling
+composed under the nav — a rule landing mid-viewport read as a lid on the
+carousel rather than a join, and the 240px across that seam (144 + 96) separates
+them on its own. **Leave the base rule in place**: it is shared with the project
+pages, which is where the table below still applies.
+
 - **Dividers:** `main:has(.next-case-section)` in project-overview.css §0a — only
   project pages have a pager, so it can't reach the homepage, and no page needs a
   new class. The restore rule is written against *the section before the pager*,
