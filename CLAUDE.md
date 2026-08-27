@@ -1012,10 +1012,16 @@ is defined somewhere in the site.
   `description`, and `creditText` is a copy of text already visible in the HTML.
   Never put a figure, credential, employer, or date in JSON-LD that a reader
   can't also see on the page. If the visible copy changes, change the schema.
-  ("Senior" was briefly an exception — the 2026-08 landing dropped the line
-  carrying it, leaving the word only in metadata. The hero bio now opens "As a
-  senior product designer…", so it's visible again and the rule above applies
-  to it with no carve-out.)
+  **"Senior" is the worked example, and it has now gone the other way (2026-08).**
+  The landing first dropped the line carrying it, leaving the credential only in
+  metadata — a rule violation. It was restored to the bio, then dropped again
+  when the bio was rewritten. Rather than re-add it to the copy, the title came
+  OUT of the schema: `jobTitle` is now "Product Designer", and the three meta
+  descriptions, both JSON-LD `description`s and llms.txt all match. **There is no
+  "senior" anywhere on the site** — check with
+  `grep -rn -i senior index.html llms.txt work/*.html` before reintroducing it,
+  and if you do, put it in the visible copy FIRST. `jobTitle` is exactly the kind
+  of field that quietly outlives the sentence it came from.
 - The `abstract` fields exist so an answer engine quotes **Jenna's own numbers**
   rather than paraphrasing. Keep them in sync with the Impact bullets.
 - **Never add the locked case-study URL** (the Figma deck) to `llms.txt`, the
