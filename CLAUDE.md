@@ -614,8 +614,8 @@ the container line, not the screen edge).
 ### Work settles square, then PINS (2026-08)
 
 Once vertical scrolling has been silent for `SETTLE.idle` (140ms) and Work is
-within reach of the nav line (`SETTLE.band` / `bandBack`), the section is eased
-so its top sits exactly on that line — and then the page is HELD there
+within reach of its resting position (`SETTLE.band` / `bandBack`), the page is
+eased there — and then HELD
 (`initWorkSettle`, wired from `setupLenis`). Scrolling down past `PIN.release`
 (500px of accumulated deltaY) hands the reader on to About; scrolling up by the
 same simply unfreezes and lets them carry on.
@@ -629,6 +629,23 @@ page.
 
 `PIN.cooldown` (900ms) exists because without it the settle would re-align and
 instantly re-pin the reader it just released.
+
+**The resting position CENTRES the section's content in the space under the nav**
+(`restingScrollY`), so the air above and below matches. It is not the section's
+top on the nav line, which is what it was first: the section is TALLER than that
+space at a normal window — 870 against 861 at 1440x900 — so top-aligning pushed
+its 144px bottom padding off the screen entirely and the card ran flush to the
+bottom edge with 104px of padding above it. Content height is derived from the
+section's own padding, NOT from a card: the cards rotate as the loop runs and
+their heights are not guaranteed equal once a title wraps to a different number
+of lines. When the content is taller than the space, there is nothing to centre
+and it sits under the nav as before.
+
+**`settle()` self-heals a desynced hold.** `pinned` is our flag but `lenis.stop()`
+is shared state, so anything else calling `lenis.start()` would leave the code
+believing it still holds a page that is already scrolling — after which settle
+bails forever and the alignment is dead for the session. It trusts
+`lenis.isStopped` over its own bookkeeping.
 
 **The reach is ASYMMETRIC, and it has to be.** `band` (0.6 of a viewport) applies
 when Work's top is still BELOW the line — the reader was on their way here and

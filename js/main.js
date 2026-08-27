@@ -1244,13 +1244,45 @@ function initWorkSettle(lenis) {
     if (target) lenis.scrollTo(target, { offset: -NAV_OFFSET });
   }
 
+  // Where the page should rest: the section's CONTENT centred in the space under
+  // the nav, so the air above and below it matches.
+  //
+  // Not simply the section's top on the nav line, which is what this did first.
+  // The section is TALLER than that space at a typical window — 870 against 861
+  // at 1440x900 — so top-aligning pushed its 144px bottom padding off the screen
+  // entirely and the card ran flush to the bottom edge while 104px of padding sat
+  // above it. Centring the content makes that leftover air split evenly.
+  //
+  // Measured off the section's own padding rather than a card: the cards rotate
+  // as the loop runs, and their heights are not guaranteed identical once a
+  // title wraps to a different number of lines.
+  function restingScrollY() {
+    const cs = getComputedStyle(work);
+    const padTop = parseFloat(cs.paddingTop) || 0;
+    const padBottom = parseFloat(cs.paddingBottom) || 0;
+    const box = work.getBoundingClientRect();
+    const contentHeight = box.height - padTop - padBottom;
+    const available = window.innerHeight - NAV_OFFSET;
+    // When the content is taller than the space it gets, there is nothing to
+    // centre — sit it directly under the nav and let it run off the bottom.
+    const wantedTop = NAV_OFFSET + Math.max(0, (available - contentHeight) / 2);
+    return window.scrollY + (box.top + padTop) - wantedTop;
+  }
+
   function settle() {
+    // Self-heal a desynced hold. `pinned` is our flag but `lenis.stop()` is
+    // shared state, and anything else calling lenis.start() would leave us
+    // believing we still hold a page that is already scrolling — after which
+    // this function bails forever and the alignment is dead for the session.
+    // Trust Lenis over our own bookkeeping.
+    if (pinned && !lenis.isStopped) { pinned = false; intent = 0; }
     if (!eligible.matches || adjusting || pinned) return;
-    const offBy = work.getBoundingClientRect().top - NAV_OFFSET;
-    if (Math.abs(offBy) < SETTLE.tolerance) { pin(); return; }       // already square
+    // Negative = still approaching from above; positive = already scrolled past.
+    const offBy = window.scrollY - restingScrollY();
+    if (Math.abs(offBy) < SETTLE.tolerance) { pin(); return; }       // already resting
     // Far away means the reader is somewhere else entirely — the hero, About —
     // and pulling them to Work would be hijacking, not tidying.
-    const reach = window.innerHeight * (offBy > 0 ? SETTLE.band : SETTLE.bandBack);
+    const reach = window.innerHeight * (offBy < 0 ? SETTLE.band : SETTLE.bandBack);
     if (Math.abs(offBy) > reach) return;
 
     adjusting = true;
@@ -1259,8 +1291,7 @@ function initWorkSettle(lenis) {
     // and the alignment would never run again.
     clearTimeout(adjustBackstop);
     adjustBackstop = setTimeout(() => { adjusting = false; }, SETTLE.backstop);
-    lenis.scrollTo(work, {
-      offset: -NAV_OFFSET,
+    lenis.scrollTo(restingScrollY(), {
       onComplete: () => { adjusting = false; clearTimeout(adjustBackstop); pin(); },
     });
   }
