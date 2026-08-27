@@ -611,6 +611,31 @@ the container line, not the screen edge).
 - **horizontal → what the phone does.** Usually a different answer; here it is
   "don't", and unwinding it needed a CSS revert *and* a JS gate.
 
+### Work rests square under the nav — and is NOT pinned (2026-08)
+
+Once vertical scrolling settles within a quarter-viewport of Selected Work, the
+section is eased so its top sits exactly on the nav line rather than half-scrolled
+(`initWorkSettle`, wired from `setupLenis`). Knobs in `SETTLE`: `idle` (140ms of
+scroll silence), `band` (0.25 of a viewport — outside it the reader is somewhere
+else and pulling them would be hijacking), `tolerance` (2px).
+
+**It only ever acts AFTER the reader has stopped**, so it cannot fight a gesture.
+Gated to ≥481 (at ≤480 Work is a tall vertical stack and yanking its top to the
+nav would jump the reader a long way for nothing) and skipped under reduced
+motion, since an unrequested scroll is exactly what that setting is about.
+`adjusting` has a **timer backstop**: Lenis abandons a `scrollTo` the moment the
+reader scrolls again and then `onComplete` never fires, which would otherwise
+leave the flag stuck true and the alignment dead for the rest of the session.
+
+**A PINNED / scroll-jacked Work section was considered and rejected.** The idea
+was to hold the page while the reader scrolls the carousel, releasing to About
+after X of vertical intent. There is no workable X: a real trackpad flick carries
+800–2000px of deltaY once momentum counts, so a low threshold is cleared
+instantly and the pin is invisible, while a high one reads as the page being
+broken. It would also have to be unpicked for keyboard focus, nav anchors and
+back/forward scroll restoration or those readers get trapped. The settle above
+buys the "locked in" feel without ever taking scroll away.
+
 ### Damped horizontal motion (2026-08)
 
 Card-to-card motion is **damped in JS**, adapted from the Codrops horizontal

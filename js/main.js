@@ -1130,6 +1130,7 @@ function setupLenis(Lenis) {
   requestAnimationFrame(raf);
 
   lenis.on('scroll', onScroll);
+  initWorkSettle(lenis);
 
   // Route in-page anchor clicks through Lenis so they glide instead of jumping
   // (native smooth is disabled while Lenis is active). Offset matches the
@@ -1148,6 +1149,66 @@ function setupLenis(Lenis) {
       const fromMenu = !!link.closest('.mobile-menu');
       lenis.scrollTo(target, { offset: -headerOffset, immediate: fromMenu });
     });
+  });
+}
+
+// Rest Selected Work SQUARE under the nav. Once vertical scrolling settles near
+// the section, ease it so its top sits exactly on the nav line, instead of
+// leaving the horizontal track half-scrolled through the viewport.
+//
+// This is deliberately NOT a pinned/scroll-jacked section. A pin would have to
+// hold the page and release it after some amount of vertical intent, and there
+// is no threshold that works: a real trackpad flick carries 800–2000px of
+// deltaY once momentum counts, so a low threshold is cleared instantly and the
+// pin is invisible, while a high one reads as the page being broken. It would
+// also have to be unpicked for keyboard focus, nav anchors and back/forward
+// scroll restoration or those readers get trapped. This gets the "locked in"
+// feel with none of that: scroll is never taken away, it is only tidied up
+// AFTER the reader has stopped.
+const SETTLE = {
+  idle: 140,       // ms of scroll silence that counts as "stopped"
+  band: 0.25,      // only pull in when already within this fraction of a viewport
+  tolerance: 2,    // px — close enough, leave it alone
+  backstop: 1200,  // ms — see the note on `adjusting` below
+};
+
+function initWorkSettle(lenis) {
+  const work = document.getElementById('work-section');
+  if (!work) return;                  // project pages have no Work section
+  // An unrequested scroll is precisely what this preference is about.
+  if (reducedMotion.matches) return;
+  // Only where the horizontal track exists. At ≤480 Work is a tall vertical
+  // stack of four cards, and yanking its top to the nav would jump the reader
+  // a long way for no benefit.
+  const horizontal = window.matchMedia('(min-width: 481px)');
+
+  let idleTimer = 0;
+  let adjusting = false;
+  let adjustBackstop = 0;
+
+  function settle() {
+    if (!horizontal.matches || adjusting) return;
+    const offBy = work.getBoundingClientRect().top - NAV_OFFSET;
+    if (Math.abs(offBy) < SETTLE.tolerance) return;                 // already square
+    // Far away means the reader is somewhere else entirely — the hero, About —
+    // and pulling them to Work would be hijacking, not tidying.
+    if (Math.abs(offBy) > window.innerHeight * SETTLE.band) return;
+
+    adjusting = true;
+    // Lenis abandons a scrollTo the moment the reader scrolls again, and then
+    // onComplete never fires — without this backstop `adjusting` would stay true
+    // and the alignment would never run again.
+    clearTimeout(adjustBackstop);
+    adjustBackstop = setTimeout(() => { adjusting = false; }, SETTLE.backstop);
+    lenis.scrollTo(work, {
+      offset: -NAV_OFFSET,
+      onComplete: () => { adjusting = false; clearTimeout(adjustBackstop); },
+    });
+  }
+
+  lenis.on('scroll', () => {
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(settle, SETTLE.idle);
   });
 }
 
