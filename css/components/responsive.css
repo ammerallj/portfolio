@@ -536,10 +536,14 @@
     height: var(--hero-h);
   }
 
-  /* The desktop 104px (64 + 40 for the hero's frosted dissolve) is too deep to
-     peek past on a phone — back to the tier's standard section padding. */
+  /* The desktop 104px (the section padding + 40 for the hero's frosted dissolve)
+     is too deep to peek past on a phone — back to the tier's standard section
+     padding. The bottom keeps the desktop's deliberate asymmetry (see
+     #work-section in sections.css) but scaled to this tier: 96 is 1.5x the
+     phone's own 64 section step, the same ratio the desktop 144 is to its 96. */
   #work-section {
     padding-top: var(--gap-section);
+    padding-bottom: 96px;
   }
 
   /* The homepage header comes BACK at this tier — it carries the mobile nav

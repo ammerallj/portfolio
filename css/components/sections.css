@@ -3,9 +3,21 @@
    ============================================================ */
 
 /* Extra breathing room between the hero's frosted dissolve and the first
-   card: the shared 64px section padding + 40. */
+   card: the shared section padding + 40.
+
+   The bottom is ALSO deliberately asymmetric, and that is a knowing exception to
+   the rule in global.css `.page-section`: normally both sides of a divider carry
+   the same measure (96), because one token driving both is what stops the
+   symmetry drifting. Two things earn the break here. The cards are a horizontal
+   track, so this section ends on the flat bottom edge of a card image rather
+   than on a text baseline — a hard edge that sits closer to the rule than type
+   would. And since the Public Footprints section was removed, Work now runs
+   straight into About with nothing between them. 144 is the scale's next value
+   up (it is --gap-heading's desktop number), not an invented one.
+   Change both numbers here and in the responsive.css 480 tier together. */
 #work-section {
   padding-top: 104px;
+  padding-bottom: 144px;
 }
 
 /* The Work list is a HORIZONTAL TRACK (2026-08). The cards no longer stack down
