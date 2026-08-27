@@ -466,7 +466,7 @@
   }
 
   /* The gradient field is CENTERED on the viewport by default (translateX(-50%)
-     on a box frozen at 1821.6px wide, so a phone just crops more of it). Nudge
+     on a box frozen at 1639.44px wide, so a phone just crops more of it). Nudge
      that crop 50px to the RIGHT. A fixed px offset, not a %, so it is locked:
      the field's width is already frozen at this tier, so the shift lands on the
      same pixel of artwork at 375 as it does at 480. The Y is the base -12%

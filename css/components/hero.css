@@ -35,8 +35,8 @@ main {
      down 8%), so the color mass rides higher behind the headline while some
      bleed past the fold survives. */
   transform: translateX(-50%) translateY(-12%);
-  /* images/hero-bkg.jpg, centered. FROZEN at its 1440 size (1821.6px = the
-     126.5vw composition) for any narrower window: below the design width the
+  /* images/hero-bkg.jpg, centered. FROZEN at its 1440 size (1639.44px = the
+     113.85vw composition) for any narrower window: below the design width the
      field keeps its size and position and the viewport simply crops more of
      it, rather than the artwork shrinking with the window. Above 1440 it
      still grows with the viewport so it never uncovers the page. */
@@ -49,15 +49,23 @@ main {
 
 /* The hero field's geometry, in one place — .page-field's width and the frost
    pane's reach both read from it, so they can't drift apart.
-     --field-w       the artwork's rendered width: 126.5vw at the 1440 design
-                     size (= 1821.6px), FROZEN at that px value below 1440 so
-                     narrowing the window crops instead of scaling.
+     --field-w       the artwork's rendered width: 113.85vw at the 1440 design
+                     size (= 1639.44px), FROZEN at that px value below 1440 so
+                     narrowing the window crops instead of scaling. This is the
+                     original 126.5vw / 1821.6px composition taken down 10%
+                     (2026-08); the pair must move together — vw × 14.4 = the px
+                     freeze point — or the freeze stops matching the 1440 render.
+                     ⚠️ Shrinking this drops the bio's contrast: at -10% its
+                     worst patch measures ~1.55:1 against the raw gradient (the
+                     frost lightens it further), already at the floor of the
+                     ~1.6-2.3 band the phone crop settled on. Re-measure before
+                     going smaller.
      --field-bottom  where its bottom edge lands = width ÷ 1.6377 (the asset's
                      aspect) × 0.88 (the 12% up-shift) — i.e. width × 0.53734.
    ⚠️ Change the zoom or the shift on .page-field and both follow automatically;
    only the 0.53734 needs re-deriving, and only if the SHIFT changes. */
 :root {
-  --field-w: max(1821.6px, 126.5vw);
+  --field-w: max(1639.44px, 113.85vw);
   --field-bottom: calc(var(--field-w) * 0.53734);
 }
 
@@ -208,17 +216,19 @@ main {
 }
 
 /* ---- The site nav: the hero's bottom bar, sticky ----
-   In flow AFTER the hero, pulled up into it: 14px pad + 36px row + 40px
-   bottom-gap = -90px margin-top lands the row 40px above the fold bottom;
-   +26px margin-bottom nets the flow delta to zero so Selected Work doesn't
-   move. Sticky top:0 → it rides up with the scroll and docks at the viewport
+   In flow AFTER the hero, pulled up into it: 14px pad + 36px row + 30px
+   bottom-gap = -80px margin-top lands the row 30px above the fold bottom;
+   +16px margin-bottom nets the flow delta to zero so Selected Work doesn't
+   move. The two margins MUST move together: -80 + 64 (the bar's own height)
+   + 16 = 0. Change one alone and every section below shifts.
+   Sticky top:0 → it rides up with the scroll and docks at the viewport
    top for the rest of the page. */
 .intro-bar {
   position: sticky;
   top: 0;
   z-index: 90; /* above section content; the ≤480 overlay tiers sit higher */
-  margin-top: -90px;
-  margin-bottom: 26px; /* nets the flow delta to zero (-90 + 64 + 26) */
+  margin-top: -80px;
+  margin-bottom: 16px; /* nets the flow delta to zero (-80 + 64 + 16) */
   padding: 14px 56px;
   display: flex;
   align-items: center;
