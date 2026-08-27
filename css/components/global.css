@@ -107,11 +107,23 @@
      responsive.css — read that for the reasoning; the per-tier
      overrides live there too, in each tier's `:root`.
 
+     `--gap-section` does DOUBLE DUTY: it is both card → card and
+     `.page-section`'s padding-block below, which is what puts an
+     equal measure either side of every divider. One token driving
+     both sides is what stops that symmetry drifting, so it is very
+     much ON the scale — an older note here called it "a flat 64 at
+     every tier", which was wrong on both counts.
+
+     Three sections deliberately override one side of that, each
+     documented at its own rule: #work-section's padding-top (104,
+     for the hero's frosted dissolve) and padding-bottom (144/96),
+     and .contact-section's phone padding-top (64).
+
      NOT part of the scale (deliberate, documented at their rules):
-     `.page-section` padding-block, which is a flat 64 at EVERY tier
-     so both sides of every divider match; the hero's blob-relative
-     spacing; and the desktop column gap on .about-layout, which is
-     grid math, not spacing. */
+     the hero's own geometry tokens (--hero-h / --hero-drop /
+     --divider-y in hero.css) and `.intro-inner`, which takes no page
+     gutter at all; and the desktop column gap on .about-layout,
+     which is grid math, not spacing. */
   --gap-content: 20px;
   --gap-group: 60px;
   --gap-section: 96px;
