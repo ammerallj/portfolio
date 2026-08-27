@@ -114,8 +114,8 @@ recruiter can read in under a minute, sitting between a homepage Work card and
 any deeper case study. **Four static pages, one shared structure** — the
 homepage Work-card images link straight to them.
 
-**ALL FOUR pages share one editorial cadence (2026-08):** Overview → **Approach.**
-→ **What changed.** Every page retired both "What I Shaped." and "Impact." as
+**ALL FOUR pages share one editorial cadence (2026-08):** Overview → **Approach**
+→ **What changed**. Every page retired both "What I Shaped." and "Impact." as
 headings — the first named a list of activities, the second named the section after
 the author's contribution ("Standardized / Informed / Validated" reads as a
 performance review) rather than after the reader's takeaway.
@@ -136,7 +136,7 @@ shift rather than a set of rules.
 `#approach` (their old `#process-locked` had become a lie); Loop and Groups keep
 `#process`, which is still true. Only the *heading* ids were renamed there
 (`shaped-heading` → `approach-heading`). `#impact` is unchanged everywhere despite
-the heading reading "What changed." — shared idiom plus inbound anchors.
+the heading reading "What changed" — shared idiom plus inbound anchors.
 
 **Never put an `<a>` inside `.impact-row-summary`.** A link there both navigates and
 toggles the row, because the click bubbles to the summary's activation behaviour.
@@ -199,7 +199,7 @@ case study", +20px even for "More"), so extending the bar is not an option —
 re-measure in the 480 tier before changing any label. Each project page carries a
 frosted "floatie" pill bar fixed at the bottom centre that jumps between its own
 sections. The target sections have ids: `#overview` (masthead), `#process` (the
-`#process` is Loop's **Approach.** section and Groups' "What I Shaped." one — the id stayed because it is still true on both), `#impact`. All four pages show a
+`#process` is Loop's and Groups' **Approach** section — the id stayed because it is still true on both), `#impact`. All four pages show a
 3-pill bar (Overview/Process/Impact). **Pill labels track the page's own
 headings, ids don't:** Accessibility now reads Overview / **Approach** / **What
 changed** — both renamed with their headings. Its middle id was renamed to
@@ -410,7 +410,7 @@ nav.** Two different jobs — don't merge them.
 
         ┌────────────────────────────────────────────────┐
         │ 🔒 FULL CASE STUDY                             │
-        │ Go deeper into the work.                    →  │
+        │ Go deeper into the work                     →  │
         │ Need access? Request the password at <email>   │
         └────────────────────────────────────────────────┘
         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ ← the project ends
@@ -487,7 +487,7 @@ nav.** Two different jobs — don't merge them.
   homepage's standalone `#footprints` section was **deleted** — section, nav
   item, `.footprints-layout` / `-left` / `-right`, and the `#footprints` entries
   in `navSections` / `introBarSections` in js/main.js. Each project page closes
-  its **What changed.** column with a `.footprint-group` (eyebrow "Public
+  its **What changed** column with a `.footprint-group` (eyebrow "Public
   footprints" + `.footprint-list`) holding that project's third-party coverage:
   Loop 4 links, Accessibility 2, Groups 2, Messaging 1.
   - **Why the end of `#impact` and not a section of its own:** the links are
@@ -774,6 +774,13 @@ own version, separate from the `style.css?v=` / `@import` CSS bump below).
 - **All width breakpoints live in `responsive.css`**, ordered largest → smallest max-width (1440 → 1024 → 768 → 480). Do not scatter width media queries back into the component files. Motion queries (`prefers-reduced-motion`) are the exception — they stay beside their animations in `global.css` / `hero.css`.
 
 ## Conventions
+- **Titles carry no terminal period (2026-08).** Homepage Work-card titles, About
+  Me, the project `h1`s, the **Approach** / **What changed** chapter headings, the
+  Next Case pager titles and the Full case study card title all dropped theirs.
+  A title is a label, not a sentence. **Sentences that happen to sit in a heading
+  slot keep their punctuation** — the landing's "Making products make sense." and
+  Contact's "If something here resonated, say hello." are statements, so the
+  period stays. `.section-label` eyebrows and `.section-pills` labels never had one.
 - **The Google Fonts `<link>` must stay byte-identical on all five pages.** One
   shared URL = one cached font CSS for the whole site; a page with its own variant
   refetches the entire stylesheet instead of reusing it. So when a face is added,
