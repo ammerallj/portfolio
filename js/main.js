@@ -614,7 +614,10 @@ function initWorkCarousel() {
     //
     // Judged on real hardware, not here — rAF does not tick in the preview pane,
     // so this dial can only be set by eye. 370ms read as too fast, 840ms as
-    // laggy, 540ms was close; 650 is the settled value.
+    // laggy, 540ms was close; 650 is the settled value. Note those were all set
+    // against the OLD exponential curve, where most of the number was an
+    // invisible tail — under the spring below, 650ms is 650ms of visible motion,
+    // so it will feel slower than the same number did before.
     arrival: 650,
     // How close counts as arrived. At 0.5px the last few pixels crawl for
     // hundreds of ms while nothing visibly moves — 2px is under half a device
@@ -660,6 +663,7 @@ function initWorkCarousel() {
     cancelAnimationFrame(dampFrame);
     clearTimeout(dampQuiet);
     clearTimeout(dampBackstop);
+    dampVel = 0;
     track.scrollLeft = dampTarget;   // land exactly on the boundary
     track.style.scrollSnapType = ''; // back to the stylesheet's mandatory
     normalize();                     // rotate, and come to rest on STEP
@@ -667,22 +671,53 @@ function initWorkCarousel() {
   }
 
   let dampLast = 0;
+  let dampVel = 0;   // px/s — carried ACROSS target changes, see below
 
+  // CRITICALLY DAMPED SPRING, not exponential decay.
+  //
+  // Exponential decay (`pos += (target - pos) * factor`) is ease-OUT ONLY: its
+  // velocity is at maximum on the very first frame and only ever falls. Measured
+  // at a 650ms setting it put 39% of the travel in the first 50ms and half of it
+  // in 70ms, then spent the remaining half of the budget covering 4% at under
+  // 8px/frame — invisible. So the motion launched hard and the number in the
+  // config bore little relation to the duration anyone perceives, which is why
+  // this dial was so hard to tune: raising it lengthened a tail you cannot see
+  // while leaving the abrupt start exactly as it was.
+  //
+  // A critically damped spring starts from REST, accelerates, then decelerates
+  // into the target — real ease-in-out — and, being critically damped, settles
+  // without overshoot. It also gives velocity CONTINUITY: `dampVel` survives a
+  // target change, so when onWheel commits mid-run the motion bends toward the
+  // new destination instead of restarting from zero.
+  //
+  // Integrated with the exact analytic solution for critical damping rather than
+  // Euler steps, so it is stable at any dt — including the 50ms cap below, where
+  // a naive integrator visibly overshoots.
   function dampStep(now) {
-    // Time-normalised easing. A raw per-frame fraction ties the speed to the
-    // refresh rate — the same code runs twice as fast on a 120Hz display. dt is
-    // capped so a stalled tab resuming cannot jump the whole distance in one go.
-    const dt = dampLast ? Math.min(now - dampLast, 50) : 16.67;
+    const dt = (dampLast ? Math.min(now - dampLast, 50) : 16.67) / 1000;
     dampLast = now;
-    // Exponential decay solved for DAMP.arrival: after that many ms the
-    // remaining distance is down to DAMP.settle, whatever the frame rate or the
-    // card width. k is the decay constant per millisecond.
-    const k = Math.log(step / DAMP.settle) / DAMP.arrival;
-    const factor = 1 - Math.exp(-k * dt);
 
-    const current = track.scrollLeft;
-    track.scrollLeft = current + (dampTarget - current) * factor;
-    if (dampSettling && Math.abs(dampTarget - track.scrollLeft) < DAMP.settle) {
+    // ω from the requested arrival time. For critical damping the remaining
+    // fraction after time T is (1 + ωT)·e^(−ωT); ωT ≈ 8.5 lands it on
+    // DAMP.settle for the card widths this site uses, so ω = 8.5 / arrival.
+    // (That holds arrival to within ~5% across the breakpoints — well under
+    // anything perceptible.)
+    const omega = 8.5 / (DAMP.arrival / 1000);
+
+    const displacement = track.scrollLeft - dampTarget;
+    const b = dampVel + omega * displacement;
+    const decay = Math.exp(-omega * dt);
+    const nextDisplacement = (displacement + b * dt) * decay;
+
+    dampVel = (b - omega * (displacement + b * dt)) * decay;
+    track.scrollLeft = dampTarget + nextDisplacement;
+
+    // Settle on position AND velocity. Position alone is not enough once
+    // velocity is carried across a target change: a reversal can arrive at the
+    // target still moving, and stopping there would cut the motion dead.
+    if (dampSettling
+        && Math.abs(nextDisplacement) < DAMP.settle
+        && Math.abs(dampVel) < DAMP.settle * 20) {
       endDamp();
       return;
     }
@@ -723,6 +758,7 @@ function initWorkCarousel() {
       // every position written after that point is itself a snap position.
       track.style.scrollSnapType = 'none';
       dampLast = 0;   // fresh clock, so the first frame uses the 60fps default
+      dampVel = 0;    // a new gesture starts from rest — that IS the ease-in
       dampFrame = requestAnimationFrame(dampStep);
       // See the glide note in CLAUDE.md: rAF STOPS in a backgrounded tab, and
       // this run owns snap-off plus the `damping` flag. Timers are only

@@ -615,8 +615,22 @@ the container line, not the screen edge).
 
 Card-to-card motion is **damped in JS**, adapted from the Codrops horizontal
 gallery: wheel deltas accumulate into one `target`, and each frame `scrollLeft`
-eases a fraction of the remaining distance toward it (`onWheel` / `dampStep` in
-`initWorkCarousel`).
+moves toward it (`onWheel` / `dampStep` in `initWorkCarousel`).
+
+**The curve is a CRITICALLY DAMPED SPRING, not exponential decay** — this was
+changed 2026-08 and the reason matters. Exponential decay
+(`pos += (target − pos) * factor`) is ease-OUT only: peak velocity is on the
+first frame and only falls. Measured at a 650ms setting it put 39% of the travel
+in the first 50ms and half in 70ms, then spent the rest of the budget covering 4%
+at under 8px/frame — invisible. So it launched hard, and the config number bore
+little relation to any perceived duration, which is exactly why the dial was so
+hard to tune: raising it lengthened a tail nobody can see and left the abrupt
+start untouched. The spring starts from REST, accelerates, then settles without
+overshoot (14% covered at 50ms, not 39%), and `dampVel` carries across a target
+change so committing mid-run bends the motion instead of restarting it.
+It is integrated with the **exact analytic solution** for critical damping, not
+Euler steps, so it stays stable at the 50ms `dt` cap where a naive integrator
+visibly overshoots.
 
 | To change… | Edit |
 |---|---|
