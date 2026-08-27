@@ -1147,6 +1147,16 @@ function setupLenis(Lenis) {
       if (!target) return;
       e.preventDefault();
       const fromMenu = !!link.closest('.mobile-menu');
+      // Selected Work does not rest with its top on the nav line — it rests
+      // CENTRED in the space under the nav (see initWorkSettle). Aiming this at
+      // the generic offset made the Work link land in one place and then get
+      // moved again 140ms later when the settle ran, a visible two-stage jump
+      // whose direction flipped with the window height: down on a short window,
+      // up on a tall one. Ask for the real resting position instead.
+      if (target.id === 'work-section' && workRestingScrollY) {
+        lenis.scrollTo(workRestingScrollY(), { immediate: fromMenu });
+        return;
+      }
       lenis.scrollTo(target, { offset: -headerOffset, immediate: fromMenu });
     });
   });
@@ -1165,6 +1175,11 @@ function setupLenis(Lenis) {
 // scroll restoration or those readers get trapped. This gets the "locked in"
 // feel with none of that: scroll is never taken away, it is only tidied up
 // AFTER the reader has stopped.
+// Where Selected Work comes to rest, published by initWorkSettle so the anchor
+// handler in setupLenis can aim at the SAME place. Null until that runs (and on
+// the project pages, which have no Work section).
+let workRestingScrollY = null;
+
 const SETTLE = {
   idle: 140,       // ms of scroll silence that counts as "stopped"
   // How far off the nav line Work may be and still get pulled square, as a
@@ -1235,11 +1250,14 @@ function initWorkSettle(lenis) {
 
   // `target` null means "just hand control back" — used for scrolling up and for
   // every escape hatch, where forcing a destination would be its own hijack.
-  function release(target) {
+  // `cooldown` false is for the one case that is navigating TOWARD Work rather
+  // than away: without it the anti-re-pin cooldown would swallow the arrival and
+  // the reader would land on Work without being held.
+  function release(target, cooldown = true) {
     if (!pinned) return;
     pinned = false;
     intent = 0;
-    releasedAt = performance.now();
+    if (cooldown) releasedAt = performance.now();
     lenis.start();
     if (target) lenis.scrollTo(target, { offset: -NAV_OFFSET });
   }
@@ -1256,6 +1274,8 @@ function initWorkSettle(lenis) {
   // Measured off the section's own padding rather than a card: the cards rotate
   // as the loop runs, and their heights are not guaranteed identical once a
   // title wraps to a different number of lines.
+  workRestingScrollY = restingScrollY;
+
   function restingScrollY() {
     const cs = getComputedStyle(work);
     const padTop = parseFloat(cs.paddingTop) || 0;
@@ -1319,7 +1339,9 @@ function initWorkSettle(lenis) {
   // Capture phase, so this runs BEFORE setupLenis's own anchor handler — that
   // handler calls lenis.scrollTo, which does nothing while Lenis is stopped.
   document.addEventListener('click', (event) => {
-    if (event.target.closest && event.target.closest('a[href^="#"]')) release(null);
+    const anchor = event.target.closest && event.target.closest('a[href^="#"]');
+    if (!anchor) return;
+    release(null, anchor.getAttribute('href') !== '#work-section');
   }, true);
   window.addEventListener('popstate', () => release(null));
   eligible.addEventListener('change', () => { if (!eligible.matches) release(null); });

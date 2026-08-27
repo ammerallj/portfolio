@@ -641,6 +641,16 @@ their heights are not guaranteed equal once a title wraps to a different number
 of lines. When the content is taller than the space, there is nothing to centre
 and it sits under the nav as before.
 
+**The `#work-section` anchor aims at that same resting position**, not the generic
+`-scrollPaddingTop` offset the other links use (`setupLenis`, via the
+module-level `workRestingScrollY` that `initWorkSettle` publishes). Otherwise the
+Work nav link landed in one place and the settle moved it again 140ms later — a
+visible two-stage jump whose DIRECTION flipped with the window height: down on a
+short window, up on a tall one, and only invisible at ~894px where the two happen
+to coincide. Clicking Work also releases the hold **without** the cooldown, since
+that cooldown exists to stop a re-pin when the reader is leaving; here they are
+arriving, and it would otherwise swallow the pin.
+
 **`settle()` self-heals a desynced hold.** `pinned` is our flag but `lenis.stop()`
 is shared state, so anything else calling `lenis.start()` would leave the code
 believing it still holds a page that is already scrolling — after which settle
