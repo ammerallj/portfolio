@@ -611,6 +611,31 @@ the container line, not the screen edge).
 - **horizontal → what the phone does.** Usually a different answer; here it is
   "don't", and unwinding it needed a CSS revert *and* a JS gate.
 
+### Don't animate the card-to-card motion in JS (tried and reverted, 2026-08)
+
+A wheel takeover was built and removed the same day: `glide()` intercepted
+horizontal wheel events, `preventDefault`ed them, and animated `scrollLeft` over
+620ms on easeOutCubic, to make the horizontal motion match the site's weighted
+vertical glide. **It read as far too fast, and the cause is not the duration.**
+
+A real flick keeps firing momentum wheel events for a second or more after the
+fingers lift. Every one that lands once a glide has finished immediately starts
+another, so ONE physical flick chained into two or three cards. Tuning the
+duration only moves where the chaining starts, because **JS cannot tell a
+momentum tail from a fresh deliberate flick** — the same reason the fling cap
+lives in CSS (`scroll-snap-stop`, above). Only the browser knows gesture phase.
+
+If smoother horizontal motion is wanted again, the honest options are (a) accept
+the browser's snap settle, or (b) a full pointer-driven carousel that tracks the
+fingers 1:1 and owns momentum itself — not a wheel-to-animation bridge. Anything
+that samples `wheel` and plays a fixed-length animation will reproduce this.
+
+Two things the attempt did surface, worth keeping in mind for any future version:
+mandatory snap re-snaps any programmatic `scrollLeft` and has to be switched off
+for an animation's duration, and rAF **stops** in a backgrounded tab — so any
+state owned mid-animation (snap disabled, an in-flight flag) needs a TIMER
+backstop, since timers are only throttled when hidden, never stopped.
+
 ### Invariants — break these and the loop breaks
 
 - **`scroll-snap-stop: always` on `.work-card` is the fling cap.** Without it a
