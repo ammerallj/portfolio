@@ -606,10 +606,13 @@ function initWorkCarousel() {
     // ProMotion hardware.
     //
     // Arrival time for a card is  ln(settle / step) / ln(1 - ease) frames:
-    //   ease 0.12 -> ~50 frames (830ms)   far too slow, most of it a crawl
-    //   ease 0.25 -> ~22 frames (370ms)   responsive, still visibly damped
+    //   ease 0.12 -> ~50 frames (830ms)   too slow — and with the old 0.5px
+    //                                      settle it ran past a full second,
+    //                                      most of that an invisible crawl
+    //   ease 0.18 -> ~32 frames (540ms)   softened; where it sits now
+    //   ease 0.25 -> ~22 frames (370ms)   read as too fast
     //   ease 0.35 -> ~15 frames (250ms)   brisk
-    ease: 0.25,
+    ease: 0.18,
     // How close counts as arrived. At 0.5px the last few pixels crawl for
     // hundreds of ms while nothing visibly moves — 2px is under half a device
     // pixel of visible error and cuts that dead tail off.

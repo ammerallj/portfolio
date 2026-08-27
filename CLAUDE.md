@@ -620,14 +620,15 @@ eases a fraction of the remaining distance toward it (`onWheel` / `dampStep` in
 
 | To change… | Edit |
 |---|---|
-| How quickly it catches up | `DAMP.ease` (0.25) |
+| How quickly it catches up | `DAMP.ease` (0.18) |
 | Where the motion stops crawling | `DAMP.settle` (2px) |
 | How far you must push to pick a card | `DAMP.commit` (0.1 of a card) |
 | How long the tail is swallowed for | `DAMP.quiet` (120ms of wheel silence) |
 
 **Arrival time is `ln(settle / step) / ln(1 - ease)` frames** — use it rather than
-guessing: 0.25 lands a card in ~370ms, 0.12 took **over a second** and read as
-laggy, 0.35 is brisk at ~250ms. `settle` matters as much as `ease`: at 0.5px the
+guessing. Tuned against real hardware, and both ends were rejected: 0.12 (~840ms,
+and past a full second with the old 0.5px settle) read as laggy, 0.25 (~370ms)
+read as too fast. **0.18 (~540ms) is the settled value.** 0.35 (~250ms) is brisk. `settle` matters as much as `ease`: at 0.5px the
 last few pixels crawl for hundreds of ms while nothing visibly moves, which is
 most of what "too slow" actually was.
 
