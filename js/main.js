@@ -600,19 +600,22 @@ function initWorkCarousel() {
   // discrete animation to re-trigger — and delta MAGNITUDE starts mattering
   // again, so a gentle scroll moves a little and a flick moves a lot.
   const DAMP = {
-    // Fraction of the remaining distance covered per 60fps frame. Normalised to
-    // elapsed TIME in dampStep, so the feel is identical on a 60Hz and a 120Hz
-    // display — without that the motion literally runs twice as fast on
-    // ProMotion hardware.
+    // MILLISECONDS to land a card. This used to be a per-frame ease fraction,
+    // which meant every adjustment needed the decay formula solved by hand and,
+    // worse, tied the speed to the refresh rate — identical code ran 1033ms on a
+    // 60Hz display and 517ms on a 120Hz one. dampStep now derives the per-frame
+    // factor from this and the elapsed time, so the number below IS the duration
+    // on any display.
     //
-    // Arrival time for a card is  ln(settle / step) / ln(1 - ease) frames:
-    //   ease 0.12 -> ~50 frames (830ms)   too slow — and with the old 0.5px
-    //                                      settle it ran past a full second,
-    //                                      most of that an invisible crawl
-    //   ease 0.18 -> ~32 frames (540ms)   softened; where it sits now
-    //   ease 0.25 -> ~22 frames (370ms)   read as too fast
-    //   ease 0.35 -> ~15 frames (250ms)   brisk
-    ease: 0.18,
+    // It also makes the timing consistent ACROSS BREAKPOINTS: a fixed ease made
+    // the smaller cards at ≤1024 arrive sooner, because the same fraction of a
+    // shorter distance is less travel. Deriving from the real step holds 650ms
+    // everywhere.
+    //
+    // Judged on real hardware, not here — rAF does not tick in the preview pane,
+    // so this dial can only be set by eye. 370ms read as too fast, 840ms as
+    // laggy, 540ms was close; 650 is the settled value.
+    arrival: 650,
     // How close counts as arrived. At 0.5px the last few pixels crawl for
     // hundreds of ms while nothing visibly moves — 2px is under half a device
     // pixel of visible error and cuts that dead tail off.
@@ -671,7 +674,11 @@ function initWorkCarousel() {
     // capped so a stalled tab resuming cannot jump the whole distance in one go.
     const dt = dampLast ? Math.min(now - dampLast, 50) : 16.67;
     dampLast = now;
-    const factor = 1 - Math.pow(1 - DAMP.ease, dt / 16.67);
+    // Exponential decay solved for DAMP.arrival: after that many ms the
+    // remaining distance is down to DAMP.settle, whatever the frame rate or the
+    // card width. k is the decay constant per millisecond.
+    const k = Math.log(step / DAMP.settle) / DAMP.arrival;
+    const factor = 1 - Math.exp(-k * dt);
 
     const current = track.scrollLeft;
     track.scrollLeft = current + (dampTarget - current) * factor;

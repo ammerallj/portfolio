@@ -620,15 +620,23 @@ eases a fraction of the remaining distance toward it (`onWheel` / `dampStep` in
 
 | To change… | Edit |
 |---|---|
-| How quickly it catches up | `DAMP.ease` (0.18) |
+| How long a card takes to land | `DAMP.arrival` (650ms — a duration, not a curve constant) |
 | Where the motion stops crawling | `DAMP.settle` (2px) |
 | How far you must push to pick a card | `DAMP.commit` (0.1 of a card) |
 | How long the tail is swallowed for | `DAMP.quiet` (120ms of wheel silence) |
 
-**Arrival time is `ln(settle / step) / ln(1 - ease)` frames** — use it rather than
-guessing. Tuned against real hardware, and both ends were rejected: 0.12 (~840ms,
-and past a full second with the old 0.5px settle) read as laggy, 0.25 (~370ms)
-read as too fast. **0.18 (~540ms) is the settled value.** 0.35 (~250ms) is brisk. `settle` matters as much as `ease`: at 0.5px the
+**`DAMP.arrival` IS the duration in milliseconds** — set it and you are done.
+`dampStep` solves the exponential decay for it each frame, so there is no curve
+constant to work out by hand. It was a per-frame ease fraction until 2026-08,
+which needed the formula solved for every adjustment AND tied the speed to the
+refresh rate. Two further wins from deriving it: the timing is identical at 60Hz
+and 120Hz, and identical across breakpoints (a fixed ease made the smaller cards
+at ≤1024 arrive sooner, since the same fraction of a shorter distance is less
+travel).
+
+Every value here was judged on real hardware — **rAF does not tick in the preview
+pane, so this dial cannot be set there at all.** Rejected on the way: ~370ms too
+fast, ~840ms laggy, ~540ms close. **650ms is the settled value.** `settle` matters as much as `ease`: at 0.5px the
 last few pixels crawl for hundreds of ms while nothing visibly moves, which is
 most of what "too slow" actually was.
 
