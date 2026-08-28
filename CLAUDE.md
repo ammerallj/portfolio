@@ -645,11 +645,20 @@ the container line, not the screen edge).
 - **horizontal → what the phone does.** Usually a different answer; here it is
   "don't", and unwinding it needed a CSS revert *and* a JS gate.
 
-### Sections settle composed; only Work PINS (2026-08)
+### Only Work settles and pins (2026-08)
 
 Once vertical scrolling has been silent for `SETTLE.idle` (140ms) and a section
 is within reach of its resting position (`SETTLE.band` / `bandBack`), the page is
-eased there. **Work, About and Contact all settle; only Work is then HELD**
+eased there and then HELD. **ONLY Selected Work does this** — About and Contact
+were included at first and it read as a glitch: the forward reach is most of a
+viewport (480–648px), so stopping anywhere in the top half of a section pulled
+the reader somewhere they had not asked to go. Prose gives nothing back for that;
+the reader stopped where they wanted to read. Work earns it because the settle is
+what engages the hold, and the hold has a carousel to justify it. **About and
+Contact keep their centred resting positions** — `sectionRestingScrollY` still
+answers for all three, so nav clicks land centred and the spy still reads one
+definition of "arrived"; only the automatic move is gone. Don't restore
+"consistency" by settling them again
 (`initWorkSettle`, wired from `setupLenis`). Scrolling down past `PIN.release`
 (500px of accumulated deltaY) hands the reader on to About; scrolling up by the
 same simply unfreezes and lets them carry on.

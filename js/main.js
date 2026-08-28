@@ -1269,13 +1269,25 @@ const PIN = {
                    // it just let go of
 };
 
-// Bring each major section to rest COMPOSED — its content centred in the space
-// under the nav — once vertical scrolling has stopped near it. Selected Work
-// additionally HOLDS the page there while the reader works through the carousel;
+// Bring SELECTED WORK to rest composed — its content centred in the space under
+// the nav — once vertical scrolling has stopped near it, and then HOLD the page
+// there while the reader works through the carousel;
 // scrolling down past PIN.release hands them on to About, and scrolling up by the
 // same simply unfreezes.
 //
-// ⚠️ ONLY WORK PINS, and that is a deliberate line. A hold has to earn its place
+// ⚠️ ONLY WORK SETTLES, AND ONLY WORK PINS. About and Contact used to settle too,
+// and it read as a glitch: the forward reach is most of a viewport (480–648px),
+// so stopping anywhere in the top half of a section pulled the reader somewhere
+// they had not asked to go. Prose sections give nothing back for that — the
+// reader stopped where they wanted to read. Work earns it because the settle is
+// what engages the hold, and the hold has a carousel to justify it.
+//
+// About and Contact KEEP their centred resting positions: `sectionRestingScrollY`
+// still answers for all three, so nav clicks land centred and the scroll-spy
+// still reads one definition of "arrived". What they lost is only the automatic
+// move. Don't "restore consistency" by settling them again.
+//
+// A hold has to earn its place
 // by giving the reader something to do while they are held: Work has a second
 // axis they must stop moving to traverse. About and Contact are prose, so a hold
 // there is friction with nothing in exchange — someone who has finished reading
@@ -1403,25 +1415,17 @@ function initSectionSettle(lenis) {
     // this function bails forever and the settle is dead for the session.
     // Trust Lenis over our own bookkeeping.
     if (pinned && !lenis.isStopped) { pinned = false; intent = 0; }
-    if (!wide.matches || adjusting || pinned) return;
+    if (!work || !wide.matches || adjusting || pinned) return;
 
-    // Nearest section within reach wins. With three of them and a generous
-    // forward band, two can be in range at once; without this the first in the
-    // list would win and could pull the reader backwards past a nearer one.
-    let best = null, bestOff = Infinity;
-    for (const el of sections) {
-      // Negative = still approaching from above; positive = already scrolled past.
-      const off = window.scrollY - restingFor(el);
-      const reach = window.innerHeight * (off < 0 ? SETTLE.band : SETTLE.bandBack);
-      if (Math.abs(off) <= reach && Math.abs(off) < Math.abs(bestOff)) {
-        best = el; bestOff = off;
-      }
-    }
-    if (!best) return;                       // between sections, or up in the hero
-    if (Math.abs(bestOff) < SETTLE.tolerance) {
-      if (best === work) pin();              // already resting
-      return;
-    }
+    // ⚠️ ONLY WORK SETTLES. About and Contact deliberately do NOT — see the
+    // header note above. They keep their resting positions for nav clicks and
+    // the scroll-spy; what they no longer do is move the page on their own.
+    //
+    // Negative = still approaching from above; positive = already scrolled past.
+    const offBy = window.scrollY - restingFor(work);
+    const reach = window.innerHeight * (offBy < 0 ? SETTLE.band : SETTLE.bandBack);
+    if (Math.abs(offBy) > reach) return;     // somewhere else entirely
+    if (Math.abs(offBy) < SETTLE.tolerance) { pin(); return; }   // already resting
 
     adjusting = true;
     // Lenis abandons a scrollTo the moment the reader scrolls again, and then
@@ -1429,11 +1433,11 @@ function initSectionSettle(lenis) {
     // and the settle would never run again.
     clearTimeout(adjustBackstop);
     adjustBackstop = setTimeout(() => { adjusting = false; }, SETTLE.backstop);
-    lenis.scrollTo(restingFor(best), {
+    lenis.scrollTo(restingFor(work), {
       onComplete: () => {
         adjusting = false;
         clearTimeout(adjustBackstop);
-        if (best === work) pin();
+        pin();
       },
     });
   }
