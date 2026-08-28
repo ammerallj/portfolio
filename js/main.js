@@ -1263,6 +1263,7 @@ const SETTLE = {
 };
 
 const PIN = {
+  enter: 0.6,      // fraction of the frame Work must fill before it takes hold
   release: 500,    // px of vertical intent needed to break out of the hold
   cooldown: 900,   // ms after releasing before Work may pin again — without it,
                    // the settle would re-align and immediately re-pin the reader
@@ -1394,6 +1395,42 @@ function initSectionSettle(lenis) {
     lenis.stop();
   }
 
+  // LOCK ON ENTRY. Fires the moment Work genuinely fills the frame, rather than
+  // waiting for the scroll to go quiet — the reader arrives and the section takes
+  // hold. It then eases to the composed resting position with `force`, because a
+  // stopped Lenis ignores an ordinary scrollTo.
+  //
+  // Engaging mid-gesture is normally what makes a pinned section read as a broken
+  // page, and PIN.release is what defuses it here: a stopped Lenis still lets the
+  // wheel events through to the accumulator below, so a fast flick keeps feeding
+  // deltaY, clears 500px almost at once and carries on to About. Only a reader who
+  // actually slows down stays held. That self-regulation is why this can be an
+  // entry trigger at all — don't remove the release threshold and leave this.
+  //
+  // The test is DIRECTION-AGNOSTIC on purpose: measuring how much of the frame
+  // Work occupies works the same arriving from the hero above or from About below,
+  // where a "top crossed the nav line" test would fire at completely different
+  // moments.
+  function pinOnEntry() {
+    if (pinned || adjusting || !holdable.matches) return;
+    if (performance.now() - releasedAt < PIN.cooldown) return;
+    const r = work.getBoundingClientRect();
+    const frame = window.innerHeight - NAV_OFFSET;
+    const visible = Math.min(r.bottom, window.innerHeight) - Math.max(r.top, NAV_OFFSET);
+    if (visible < frame * PIN.enter) return;
+
+    pinned = true;
+    intent = 0;
+    lenis.stop();
+    adjusting = true;
+    clearTimeout(adjustBackstop);
+    adjustBackstop = setTimeout(() => { adjusting = false; }, SETTLE.backstop);
+    lenis.scrollTo(restingFor(work), {
+      force: true,                 // a stopped Lenis ignores scrollTo without it
+      onComplete: () => { adjusting = false; clearTimeout(adjustBackstop); },
+    });
+  }
+
   // `target` null means "just hand control back" — used for scrolling up and for
   // every escape hatch, where forcing a destination would be its own hijack.
   // `cooldown` false is for the one case that is navigating TOWARD Work rather
@@ -1443,8 +1480,9 @@ function initSectionSettle(lenis) {
   }
 
   lenis.on('scroll', () => {
+    pinOnEntry();                 // lock as soon as Work fills the frame
     clearTimeout(idleTimer);
-    idleTimer = setTimeout(settle, SETTLE.idle);
+    idleTimer = setTimeout(settle, SETTLE.idle);   // fallback: catch a stop just short
   });
 
   // While held, count vertical intent. Horizontal gestures over the track never

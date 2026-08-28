@@ -663,12 +663,24 @@ definition of "arrived"; only the automatic move is gone. Don't restore
 (500px of accumulated deltaY) hands the reader on to About; scrolling up by the
 same simply unfreezes and lets them carry on.
 
-**The hold engages only after the scroll has already stopped and the section has
-been eased into line — never mid-gesture.** That ordering IS the safety: someone
-flicking past Work at speed never comes to rest here, so they are never grabbed.
-Only a reader who actually stops at Work is held. Don't "improve" this by pinning
-on the section crossing the nav line — that is the version that reads as a broken
-page.
+**The hold engages ON ENTRY (2026-08)** — the moment Work fills `PIN.enter` (0.6)
+of the frame, not when the scroll goes quiet — and then eases to the resting
+position with `force`, since a stopped Lenis ignores an ordinary `scrollTo`. The
+idle settle stays as a fallback for a stop just short of that.
+
+**`PIN.release` is what makes an entry trigger safe, and the two cannot be
+separated.** Engaging mid-gesture is normally exactly what makes a pinned section
+read as a broken page. It works here because a stopped Lenis still lets wheel
+events reach the accumulator: a fast flick keeps feeding deltaY, clears 500px
+almost immediately and carries on to About, so only a reader who actually slows
+down stays held. Measured: a 12-event flick (1440px) passes straight through,
+while three 80px nudges (240px) stay held. **Never remove the release threshold
+and leave the entry trigger** — that combination is the broken-page version.
+
+**The entry test is DIRECTION-AGNOSTIC on purpose** — it measures how much of the
+frame Work occupies, which behaves the same arriving from the hero above or from
+About below. A "top crossed the nav line" test fires at completely different
+moments in the two directions.
 
 `PIN.cooldown` (900ms) exists because without it the settle would re-align and
 instantly re-pin the reader it just released.
