@@ -645,69 +645,35 @@ the container line, not the screen edge).
 - **horizontal → what the phone does.** Usually a different answer; here it is
   "don't", and unwinding it needed a CSS revert *and* a JS gate.
 
-### Work HOLDS the reader — and never scrolls them (2026-08)
+### The vertical position locks while you work the carousel (2026-08)
 
-Once Selected Work fills `PIN.enter` (0.6) of the frame, the page is held there
-(`initSectionSettle`, wired from `setupLenis`). Pushing `PIN.release` (500px of
-accumulated deltaY) in either direction hands control back.
+Scrolling the carousel horizontally does not move the page vertically, and that
+is the whole of it — there is no pinned section any more. `initWorkCarousel`'s
+wheel handler `stopPropagation()`s any gesture it judges predominantly horizontal
+so it never reaches Lenis on `window`; vertical gestures return before that line
+and scroll the page normally. The Y position is therefore held for exactly as
+long as the reader is working the carousel and not a moment longer. No state,
+nothing to escape from, nothing to re-arm.
 
-**Re-taking the hold is gated by ARMING, not by a timer.** Releasing sets
-`armed = false`, and only Work falling back below `PIN.rearm` (0.35 of the frame)
-re-arms it. Without this the section grabs the reader again a moment after they
-push free — while they are still inside it — and scrolling through Work becomes a
-stutter of grab / push free / grab. `PIN.cooldown` alone cannot fix that: a timer
-only ever says "not yet", never "not here". Same shape as the `armed` flag in
-`initScrollVideos`. The bug was hidden while releasing scrolled the reader on to
-About, because that moved them out of range; removing that jump exposed it.
-`rearm` sits well below `enter` so the two cannot flap at a shared boundary.
+**⚠️ A PINNED WORK SECTION WAS BUILT FOUR TIMES AND REMOVED FOUR TIMES.** Read
+this before building a fifth:
+1. **settle on idle** — grabbed anyone who paused anywhere near the section;
+2. **settle on idle, Work only** — same grab, just rarer;
+3. **ease in on entry (1.1s, easeInOutCubic)** — took over the scroll as soon as
+   the reader came close. Softening the curve does not help: the objection is to
+   the takeover, not the motion;
+4. **hold in place on entry** — moved nothing, which was closest, but still froze
+   the page under someone only passing through, and needed an arming flag, a
+   cooldown, a release accumulator and five escape hatches to stay survivable.
+   Each of those existed to patch a symptom of the one underlying problem.
 
-**Clicking the Work nav link is the one release that keeps the hold armed**
-(`release(toWork)`), and skips the cooldown. A release has to run before that
-anchor scroll — Lenis is stopped, so `scrollTo` would no-op — and without the
-exception it would disarm the hold and the reader would land on Work without it
-taking.
+The `stopPropagation` above gets the "locked in" feeling with none of it, because
+it is scoped to the gesture rather than to the section.
 
-**⚠️ THERE IS NO SCROLL-TO, AND THAT IS THE POINT.** Three versions were built and
-all three took the scroll away from the reader:
-1. settle on idle — grabbed anyone who paused anywhere near the section;
-2. the same, but only for Work — still grabbed them, just less often;
-3. ease in on entry over 1.1s — took over the scroll as soon as they came close,
-   however gently it was curved.
-The reader chose where to stop. The hold keeps them there; it does not relocate
-them. **Don't reintroduce an automatic scroll**, and note that softening the
-curve does not fix it — the objection is to the takeover, not the motion.
-
-Releasing does not move them either: breaking out downward used to `scrollTo`
-About, which is one more takeover — the reader pushed past the threshold to
-scroll on normally, not to be delivered somewhere.
-
-**The composed resting position still exists and is still used** — by nav clicks
-and by the scroll-spy (`restingFor` / `sectionRestingScrollY`, for all three
-sections). The difference is it is only ever reached when the reader ASKS, by
-clicking a nav link. That is why About and Contact still land centred despite
-never settling on their own.
-
-- **Eligibility is NARROWER than the carousel's.** The track runs at ≥481; the
-  hold additionally requires `(hover: hover) and (pointer: fine)`. A stopped
-  Lenis swallows TOUCH as well as wheel, and touch produces no wheel events for
-  the release accumulator — so on a finger-only tablet the page would freeze with
-  no way out. Touch keeps ordinary scrolling.
-- **Skipped under reduced motion.**
-- **The entry test is DIRECTION-AGNOSTIC** — it measures how much of the frame
-  Work occupies, so it behaves the same arriving from the hero above or About
-  below. A "top crossed the nav line" test fires at different moments each way.
-- **Every other route out releases the hold first**: keydown, in-page anchor
-  clicks (CAPTURE phase, so it runs before setupLenis's own anchor handler, which
-  calls `lenis.scrollTo` and would do nothing while Lenis is stopped), `popstate`,
-  and losing eligibility on resize. **If you add a new way to move the page, add a
-  release with it** — a hold only a wheel can break is a trap for everyone else.
-- **Horizontal gestures are not vertical intent.** Those over the track never
-  reach the accumulator (the carousel stops their propagation); any arriving
-  horizontally over the section padding are ignored by the deltaX/deltaY test.
-- **`settle()` self-heals a desynced hold.** `pinned` is our flag but
-  `lenis.stop()` is shared state, so anything else calling `lenis.start()` would
-  leave the code believing it still holds a page that is already scrolling. It
-  trusts `lenis.isStopped` over its own bookkeeping.
+**`initSectionGeometry` is what survives**, and it scrolls nothing. It publishes
+two things: each section's composed resting position — used by nav-link clicks
+and by the scroll-spy, which is why About and Contact still land centred when
+CLICKED — and the measured `--footer-height` that Contact's `min-height` reads.
 
 ### Damped horizontal motion (2026-08)
 

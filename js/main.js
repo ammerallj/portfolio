@@ -1197,7 +1197,7 @@ function setupLenis(Lenis) {
   requestAnimationFrame(raf);
 
   lenis.on('scroll', onScroll);
-  initSectionSettle(lenis);
+  initSectionGeometry(lenis);
 
   // Route in-page anchor clicks through Lenis so they glide instead of jumping
   // (native smooth is disabled while Lenis is active). Offset matches the
@@ -1229,113 +1229,48 @@ function setupLenis(Lenis) {
     });
   });
 }
-
-// Rest Selected Work SQUARE under the nav. Once vertical scrolling settles near
-// the section, ease it so its top sits exactly on the nav line, instead of
-// leaving the horizontal track half-scrolled through the viewport.
+// Section GEOMETRY only — no scrolling, no holding.
 //
-// This is deliberately NOT a pinned/scroll-jacked section. A pin would have to
-// hold the page and release it after some amount of vertical intent, and there
-// is no threshold that works: a real trackpad flick carries 800–2000px of
-// deltaY once momentum counts, so a low threshold is cleared instantly and the
-// pin is invisible, while a high one reads as the page being broken. It would
-// also have to be unpicked for keyboard focus, nav anchors and back/forward
-// scroll restoration or those readers get trapped. This gets the "locked in"
-// feel with none of that: scroll is never taken away, it is only tidied up
-// AFTER the reader has stopped.
-const PIN = {
-  enter: 0.6,      // fraction of the frame Work must fill before it takes hold
-  // ...and how far it must FALL BACK before the hold may be taken again. Well
-  // below `enter`, so the two cannot flap at a shared boundary: the reader has
-  // to genuinely leave Work, not just wobble around the entry line.
-  rearm: 0.35,
-  release: 500,    // px of vertical intent needed to break out of the hold
-  cooldown: 900,   // ms after releasing before Work may pin again — without it,
-                   // the settle would re-align and immediately re-pin the reader
-                   // it just let go of
-};
-
-// HOLD Selected Work once the reader arrives in it — WITHOUT MOVING THE PAGE.
+// Publishes two things and does nothing else: each section's composed resting
+// position (used by nav-link clicks and by the scroll-spy) and the measured
+// footer height (used by Contact's min-height in CSS).
 //
-// ⚠️ There is deliberately NO scroll-to here any more. Three versions were tried
-// and each took the scroll away from the reader: settling on idle grabbed anyone
-// who paused near the section, and easing in on entry took over the scroll as
-// soon as they came close, however gently it was curved. The reader chose where
-// to stop; the hold's job is to keep them there, not to relocate them.
+// ⚠️ THE WORK PIN LIVED HERE AND IS GONE (2026-08). Four versions were built and
+// every one of them took the scroll away from the reader: settle on idle, settle
+// on idle for Work only, ease in on entry, and hold-in-place on entry. The last
+// was the closest — it moved nothing — but it still froze the page under someone
+// who was only passing through, and needed an arming flag, a cooldown, a release
+// accumulator and five escape hatches to stay survivable.
 //
-// The composed resting position still exists and is still used — by nav clicks
-// and by the scroll-spy (`sectionRestingScrollY`, `restingFor`). The difference
-// is that it is only ever reached when the reader ASKS for it by clicking a nav
-// link. Don't reintroduce an automatic scroll to it while the reader works through the carousel;
-// scrolling down past PIN.release hands them on to About, and scrolling up by the
-// same simply unfreezes.
+// What replaced it is far simpler and is already in initWorkCarousel: a gesture
+// judged predominantly horizontal is stopPropagation'd so it never reaches Lenis,
+// which pins the vertical position for exactly as long as the reader is working
+// the carousel and not a moment longer. Vertical gestures are untouched and
+// scroll the page normally. No state, nothing to escape from, nothing to re-arm.
 //
-// ⚠️ ONLY WORK SETTLES, AND ONLY WORK PINS. About and Contact used to settle too,
-// and it read as a glitch: the forward reach is most of a viewport (480–648px),
-// so stopping anywhere in the top half of a section pulled the reader somewhere
-// they had not asked to go. Prose sections give nothing back for that — the
-// reader stopped where they wanted to read. Work earns it because the settle is
-// what engages the hold, and the hold has a carousel to justify it.
-//
-// About and Contact KEEP their centred resting positions: `sectionRestingScrollY`
-// still answers for all three, so nav clicks land centred and the scroll-spy
-// still reads one definition of "arrived". What they lost is only the automatic
-// move. Don't "restore consistency" by settling them again.
-//
-// A hold has to earn its place
-// by giving the reader something to do while they are held: Work has a second
-// axis they must stop moving to traverse. About and Contact are prose, so a hold
-// there is friction with nothing in exchange — someone who has finished reading
-// would need a deliberate gesture just to leave. Pinning all three would also
-// leave the 81px footer with nowhere to live and break find-in-page. If you are
-// tempted to pin another section, check it against that test first.
-//
-// The hold engages only ONCE THE SCROLL HAS ALREADY STOPPED and the section has
-// been eased into place — never mid-gesture. That ordering IS the safety:
-// someone flicking past at speed never comes to rest here, so they are never
-// grabbed. Don't "improve" it by pinning on the section crossing the nav line —
-// that is the version that reads as a broken page.
-function initSectionSettle(lenis) {
+// If a hold is ever wanted again, read the four failures above first.
+function initSectionGeometry(lenis) {
   const sections = ['work-section', 'about', 'contact']
     .map(id => document.getElementById(id))
     .filter(Boolean);
-  if (!sections.length) return;             // project pages
-  const work = document.getElementById('work-section');
   const footer = document.querySelector('.site-footer');
   const lastSection = sections[sections.length - 1];
-  // An unrequested scroll is precisely what this preference is about.
-  if (reducedMotion.matches) return;
-  // The SETTLE runs wherever the horizontal track does. The HOLD needs more —
-  // see pin() below.
+  if (!sections.length) return;             // project pages
   const wide = window.matchMedia('(min-width: 481px)');
-  const holdable = window.matchMedia(
-    '(min-width: 481px) and (hover: hover) and (pointer: fine)');
 
-  let pinned = false;
-  let intent = 0;
-  let releasedAt = -Infinity;
-  let armed = true;   // may the hold be taken? false until Work leaves the frame
-
-  // A section rests with its CONTENT centred in the space under the nav, so the
-  // air above and below matches. Not its top on the nav line, which is what this
-  // did first: a section can be TALLER than that space — Work is 870 against 861
-  // at 1440x900 — so top-aligning pushed its bottom padding off screen entirely
-  // and the content ran flush to the bottom edge.
+  // A section's resting position: its CONTENT centred in the space under the nav,
+  // so the air above and below matches.
   //
-  // Content is measured as the SPAN OF THE SECTION'S CHILDREN — first child's top
-  // to last child's bottom — not as box-height-minus-padding.
-  //
-  // That distinction is load-bearing. #about carries a min-height so it fills the
-  // frame (sections.css), and box-minus-padding counts that added empty space as
-  // content: About's "content" measured 640 instead of its real 475, so the copy
-  // settled 48px below the nav with 632px of nothing beneath it. Any future
-  // min-height, or a section whose children do not fill its box, would do the
-  // same. The children's span is what the reader actually sees.
-  //
-  // Children, not a single wrapper: the sections are not uniformly shaped —
-  // About has TWO (its heading, then .about-layout) while Work and Contact have
-  // one. And not a card, either: the Work cards rotate as the loop runs and
-  // their heights are not guaranteed equal once a title wraps to another line.
+  // Content is the SPAN OF THE SECTION'S CHILDREN — first child's top to last
+  // child's bottom — not box-height-minus-padding. #about and #contact carry a
+  // min-height so they fill the frame, and box-minus-padding counts that added
+  // empty space as content: About measured 640 instead of its real 475 and would
+  // have settled 48px under the nav with 632px of nothing beneath it. Children
+  // rather than one wrapper because the sections are not uniformly shaped —
+  // About has TWO (its heading, then .about-layout, which is pulled up to sit
+  // BESIDE the heading, so the span is 475 not 531) while Work and Contact have
+  // one. And not a card: the Work cards rotate as the loop runs and their heights
+  // are not guaranteed equal once a title wraps to another line.
   function restingFor(el) {
     const kids = el.children;
     const box = el.getBoundingClientRect();
@@ -1347,142 +1282,26 @@ function initSectionSettle(lenis) {
       contentTop = first.top;
       contentHeight = Math.max(0, last.bottom - first.top);
     }
-    // The LAST section shares its frame with the footer. There is room for the
-    // copyright line, so it belongs in shot rather than one scroll further on —
-    // reserving its height here is what lets the blue panel meet the nav AND the
-    // footer fill the remainder exactly. .contact-section's min-height subtracts
-    // the same amount; the two have to agree, which is why both go through
-    // --footer-height and why the measurement below keeps it honest.
-    const reserve = (el === lastSection && footer)
-      ? footer.getBoundingClientRect().height : 0;
-    const available = window.innerHeight - NAV_OFFSET - reserve;
+    const available = window.innerHeight - NAV_OFFSET;
     // Taller than the space it gets: nothing to centre, sit it under the nav.
     const wantedTop = NAV_OFFSET + Math.max(0, (available - contentHeight) / 2);
     const target = window.scrollY + contentTop - wantedTop;
-    // Clamp, or the last section asks for a position the page cannot reach and
-    // the settle re-fires forever trying to get there.
+    // Clamp, or the last section asks for a position the page cannot reach.
     const max = document.documentElement.scrollHeight - window.innerHeight;
     return Math.min(Math.max(target, 0), Math.max(max, 0));
   }
 
   sectionRestingScrollY = (el) => (sections.includes(el) && wide.matches ? restingFor(el) : null);
 
-  // Publish the REAL footer height so the CSS reserving room for it cannot drift
-  // from the JS centring around it. global.css carries a default for the no-JS
-  // render; this replaces it with what the footer actually measures, and again
-  // whenever a resize could have reflowed it.
+  // Contact's min-height is `100dvh - nav - footer`, and the footer's height is
+  // set by its own type, so it has to be measured rather than guessed.
   function publishFooterHeight() {
-    if (!footer) return;
+    if (!footer || !lastSection) return;
     document.documentElement.style.setProperty(
       '--footer-height', Math.round(footer.getBoundingClientRect().height) + 'px');
   }
   publishFooterHeight();
   window.addEventListener('resize', publishFooterHeight);
-
-  function pin() {
-    if (pinned || !holdable.matches) return;
-    if (performance.now() - releasedAt < PIN.cooldown) return;
-    pinned = true;
-    intent = 0;
-    lenis.stop();
-  }
-
-  // LOCK ON ENTRY. Fires the moment Work genuinely fills the frame, rather than
-  // waiting for the scroll to go quiet — the reader arrives and the section takes
-  // hold. It then eases to the composed resting position with `force`, because a
-  // stopped Lenis ignores an ordinary scrollTo.
-  //
-  // Engaging mid-gesture is normally what makes a pinned section read as a broken
-  // page, and PIN.release is what defuses it here: a stopped Lenis still lets the
-  // wheel events through to the accumulator below, so a fast flick keeps feeding
-  // deltaY, clears 500px almost at once and carries on to About. Only a reader who
-  // actually slows down stays held. That self-regulation is why this can be an
-  // entry trigger at all — don't remove the release threshold and leave this.
-  //
-  // The test is DIRECTION-AGNOSTIC on purpose: measuring how much of the frame
-  // Work occupies works the same arriving from the hero above or from About below,
-  // where a "top crossed the nav line" test would fire at completely different
-  // moments.
-  function pinOnEntry() {
-    if (pinned || !holdable.matches) return;
-    const r = work.getBoundingClientRect();
-    const frame = window.innerHeight - NAV_OFFSET;
-    const visible = Math.min(r.bottom, window.innerHeight) - Math.max(r.top, NAV_OFFSET);
-
-    // ARMING, not a timer. Once the reader has pushed out of the hold it must not
-    // be retaken until they have actually LEFT Work — otherwise the section grabs
-    // them again a moment later while they are still inside it, and scrolling
-    // through Work becomes a stutter of grab / push free / grab.
-    //
-    // This was hidden while releasing scrolled the reader on to About: that moved
-    // them out of range, so the cooldown alone looked sufficient. It is not — the
-    // cooldown only says "not yet", never "not here". Same shape as the `armed`
-    // flag in initScrollVideos.
-    if (!armed) {
-      if (visible < frame * PIN.rearm) armed = true;
-      return;
-    }
-    if (performance.now() - releasedAt < PIN.cooldown) return;
-    if (visible < frame * PIN.enter) return;
-
-    // HOLD WHERE THE READER IS. Nothing is scrolled — see the note above.
-    pinned = true;
-    intent = 0;
-    lenis.stop();
-  }
-
-  // Releasing only ever hands control back — it never moves the reader. That is
-  // the whole point of the hold now: it keeps them where they chose to stop, and
-  // lets go when they ask.
-  //
-  // `cooldown` false is for the one case that is navigating TOWARD Work rather
-  // than away: without it the anti-re-pin cooldown would swallow the arrival and
-  // the reader would land on Work without being held.
-  // `toWork` is the one case that is navigating TOWARD Work rather than away:
-  // clicking the Work nav link. It keeps the hold ARMED and skips the cooldown,
-  // so the reader is held on arrival. Without both, the release that has to run
-  // before the anchor scroll (Lenis is stopped, so scrollTo would no-op) would
-  // also disarm the hold and they would land on Work without it taking.
-  function release(toWork = false) {
-    if (!pinned) return;
-    pinned = false;
-    intent = 0;
-    if (!toWork) {
-      armed = false;                        // not again until Work leaves the frame
-      releasedAt = performance.now();
-    }
-    lenis.start();
-  }
-
-  lenis.on('scroll', () => pinOnEntry());
-
-  // While held, count vertical intent. Horizontal gestures over the track never
-  // reach here — initWorkCarousel stops their propagation — and any that do
-  // arrive horizontally (over the section's padding, say) are not vertical
-  // intent and are ignored.
-  window.addEventListener('wheel', (event) => {
-    if (!pinned) return;
-    if (Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
-    intent += event.deltaY;
-    // BOTH directions just hand control back. Breaking out downward used to
-    // scrollTo About, which is one more takeover: the reader pushed past the
-    // threshold to "scroll down normally", not to be delivered somewhere.
-    if (Math.abs(intent) >= PIN.release) release();
-  }, { passive: true });
-
-  // ESCAPE HATCHES. A hold that only a wheel can break is a trap for everyone
-  // else, so every other route out of a section releases it first.
-  window.addEventListener('keydown', () => release());
-  // Capture phase, so this runs BEFORE setupLenis's own anchor handler — that
-  // handler calls lenis.scrollTo, which does nothing while Lenis is stopped.
-  document.addEventListener('click', (event) => {
-    const anchor = event.target.closest && event.target.closest('a[href^="#"]');
-    if (!anchor) return;
-    release(anchor.getAttribute('href') === '#work-section');
-  }, true);
-  window.addEventListener('popstate', () => release());
-  holdable.addEventListener('change', () => { if (!holdable.matches) release(); });
-  window.addEventListener('resize', () => { if (!holdable.matches) release(); });
 }
 
 // Viewport reveals. Each [data-reveal-group] fades its [data-reveal] items in
