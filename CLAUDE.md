@@ -271,8 +271,20 @@ is never faded in by the motion system.
 project-overview.css §9): a full-width link — the next project's homepage card
 title + description, no image, a right arrow (`&rarr;`) — that follows the
 homepage Work order and **wraps** (Groups → back to Accessibility) so every page
-has a next. The title/description are the same teaser as the matching
-`.work-card` on `index.html`; **keep them in sync** if the card copy changes.
+has a next.
+
+**The TITLE matches the matching `.work-card` on `index.html` exactly — the
+DESCRIPTION deliberately does not (2026-08).** The pager keeps a short 11–19 word
+teaser ("Each community had a sense of place. Moving between them didn't.") while
+the card carries the longer 29–32 word first-person account of the work. Both
+read well where they are: a card has a column to fill, a pager has one line
+across a wide box, and a 32-word paragraph sits badly there.
+
+This entry used to say "keep them in sync", and that had been false on ALL FOUR
+pages since the card copy was rewritten — the pagers were never updated. Keeping
+the shorter teasers is the deliberate call; the rule is what changed to match.
+**So: rename a project and update all five titles. Rewrite a card's description
+and leave the pagers alone.**
 It's a normal page link (not a `#` anchor), so no JS is involved; it reveals like
 a section (`data-reveal`) and sits inside `<main>` as the last section, above the
 always-visible footer. Built from `<span>`s (not `<p>`/`<h2>`) so the whole block
