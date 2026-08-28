@@ -907,15 +907,22 @@ initWorkCarousel();
 
 
 // ============================================================
-// MASTHEAD CAROUSEL — the Accessibility overview image is a 3-slide crossfade.
-// Auto-advances; clicking a dot jumps to that slide and STOPS the auto-advance
-// (the visitor has taken control). Guarded: only that page has [data-carousel],
-// so this is a no-op everywhere else. Reduced motion / no JS: the first slide
-// stays and the dots still switch manually — auto-advance just never starts.
+// IMAGE CAROUSEL — a crossfade between slides, used by the project pages'
+// masthead figure and by the homepage About photo. Auto-advances; clicking a dot
+// jumps to that slide and STOPS the auto-advance (the visitor has taken
+// control). Reduced motion / no JS: the first slide stays and the dots still
+// switch manually — auto-advance just never starts.
+//
+// EVERY [data-carousel] on the page is wired, not just the first. This used to
+// be a single querySelector, which was fine only while exactly one page element
+// ever carried the attribute; the About photo made that assumption false, and a
+// second carousel would have silently done nothing.
 // ============================================================
 function initCarousel() {
-  const root = document.querySelector('[data-carousel]');
-  if (!root) return;
+  document.querySelectorAll('[data-carousel]').forEach(initOneCarousel);
+}
+
+function initOneCarousel(root) {
   const slides = Array.from(root.querySelectorAll('.project-carousel-slide'));
   const dots = Array.from(root.querySelectorAll('.project-carousel-dot'));
   if (slides.length < 2) return;

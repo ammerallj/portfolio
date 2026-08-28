@@ -3,3 +3,9 @@
 
 # Claude Code — personal, machine-specific settings (keep local)
 .claude/settings.local.json
+
+# Camera originals for images/ derivatives — the repo root is the published site,
+# so a 4032px original would be served at ammerallj.design/images/IMG_*.JPG.
+# Keep the source outside git; commit only the compressed derivative.
+images/IMG_*.JPG
+images/IMG_*.jpg

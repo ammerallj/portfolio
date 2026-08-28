@@ -426,15 +426,42 @@
 
         <!-- LEFT COLUMN -->
         <div class="about-left" data-reveal data-reveal-order="3">
-          <div class="about-photo">
-            <!-- Art-directed swap: portrait photo1 beside the text on desktop AND
-                 the 1024 two-column tier; landscape photo2 only once the layout
-                 stacks (≤768, where the .about-photo box also goes landscape —
-                 responsive.css). Keep this breakpoint in step with the stack. -->
-            <picture>
+          <!-- Two-slide crossfade on the SAME machinery as the project pages'
+               masthead carousel (.project-carousel* in project-overview.css,
+               initCarousel in js/main.js). Those classes are reused rather than
+               duplicated: style.css imports project-overview.css on every page,
+               so they are already loaded here, and one carousel with one set of
+               rules beats two that can drift.
+               ⚠️ It takes the SLIDE and DOT classes but NOT `.project-carousel`
+               itself. That class only supplies `position: relative`, which
+               .about-photo already beats by being position:absolute — and since
+               project-overview.css imports after sections.css, adding it flipped
+               the box to relative, dropped its top/bottom anchoring and collapsed
+               it to 429x0. .about-photo is already a valid containing block for
+               the inset:0 slides, and `.about-photo img` already gives every
+               image object-fit: cover. -->
+          <div class="about-photo" data-carousel>
+            <!-- Slide 1 keeps the art-directed swap: portrait photo1 beside the
+                 text on desktop AND the 1024 two-column tier; landscape photo2
+                 only once the layout stacks (≤768, where the .about-photo box
+                 also goes landscape — responsive.css). Keep this breakpoint in
+                 step with the stack. -->
+            <picture class="project-carousel-slide is-active">
               <source srcset="images/about-photo2.jpg" media="(max-width: 768px)" />
               <img src="images/about-photo1.jpg" width="769" height="1024" loading="lazy" alt="Jenna Ammerall holding Maeve, her dachshund, outdoors in Seattle" onerror="this.style.display='none'" />
             </picture>
+            <!-- Slide 2 needs no art direction: portrait like photo1, so the same
+                 object-fit: cover crop serves the desktop box and the stacked one.
+                 The source arrived with EXIF Orientation 6 (rotate 90 CW) — the
+                 rotation is now baked into the pixels and the tag normalised to 1,
+                 so the file reads 900x1200 to everything and these width/height
+                 attributes are the real ones. Don't trust `sips -g orientation`
+                 here; it reports nil for a file that plainly carries the tag. -->
+            <img class="project-carousel-slide" src="images/about-photo3.jpg" width="900" height="1200" loading="lazy" alt="Maeve, Jenna's dachshund, nosing a bright pink rose held out to her on a Seattle sidewalk" onerror="this.style.display='none'" />
+            <div class="project-carousel-dots" role="group" aria-label="Choose photo">
+              <button type="button" class="project-carousel-dot is-active" aria-current="true" aria-label="Show photo 1 of 2"></button>
+              <button type="button" class="project-carousel-dot" aria-label="Show photo 2 of 2"></button>
+            </div>
             <div class="about-photo-placeholder" aria-hidden="true"></div>
           </div>
         </div>
@@ -511,6 +538,6 @@
   </div>
   <div class="wave-cursor" id="wave-cursor" aria-hidden="true">👋</div>
 
-  <script src="js/main.js?v=a4a15d44" defer></script>
+  <script src="js/main.js?v=398e9777" defer></script>
 </body>
 </html>
