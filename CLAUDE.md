@@ -645,143 +645,54 @@ the container line, not the screen edge).
 - **horizontal → what the phone does.** Usually a different answer; here it is
   "don't", and unwinding it needed a CSS revert *and* a JS gate.
 
-### Only Work settles and pins (2026-08)
+### Work HOLDS the reader — and never scrolls them (2026-08)
 
-Once vertical scrolling has been silent for `SETTLE.idle` (140ms) and a section
-is within reach of its resting position (`SETTLE.band` / `bandBack`), the page is
-eased there and then HELD. **ONLY Selected Work does this** — About and Contact
-were included at first and it read as a glitch: the forward reach is most of a
-viewport (480–648px), so stopping anywhere in the top half of a section pulled
-the reader somewhere they had not asked to go. Prose gives nothing back for that;
-the reader stopped where they wanted to read. Work earns it because the settle is
-what engages the hold, and the hold has a carousel to justify it. **About and
-Contact keep their centred resting positions** — `sectionRestingScrollY` still
-answers for all three, so nav clicks land centred and the spy still reads one
-definition of "arrived"; only the automatic move is gone. Don't restore
-"consistency" by settling them again
-(`initWorkSettle`, wired from `setupLenis`). Scrolling down past `PIN.release`
-(500px of accumulated deltaY) hands the reader on to About; scrolling up by the
-same simply unfreezes and lets them carry on.
+Once Selected Work fills `PIN.enter` (0.6) of the frame, the page is held there
+(`initSectionSettle`, wired from `setupLenis`). Pushing `PIN.release` (500px of
+accumulated deltaY) in either direction hands control back. `PIN.cooldown` (900ms)
+stops it re-taking the hold the instant it lets go.
 
-**The hold engages ON ENTRY (2026-08)** — the moment Work fills `PIN.enter` (0.6)
-of the frame, not when the scroll goes quiet. The idle settle stays as a fallback
-for a stop just short of that.
+**⚠️ THERE IS NO SCROLL-TO, AND THAT IS THE POINT.** Three versions were built and
+all three took the scroll away from the reader:
+1. settle on idle — grabbed anyone who paused anywhere near the section;
+2. the same, but only for Work — still grabbed them, just less often;
+3. ease in on entry over 1.1s — took over the scroll as soon as they came close,
+   however gently it was curved.
+The reader chose where to stop. The hold keeps them there; it does not relocate
+them. **Don't reintroduce an automatic scroll**, and note that softening the
+curve does not fix it — the objection is to the takeover, not the motion.
 
-**It EASES in, and the order is what makes that true.** `lenis.stop()` used to
-fire first, before the scroll — which killed the reader's velocity dead, so the
-section grabbed them rather than receiving them. The page now glides to the
-resting position over `PIN.easeIn` (1.1s) and is frozen only in that scrollTo's
-`onComplete`. The curve is **easeInOutCubic, not Lenis's own expo-out**: expo-out
-puts 50% of the travel in the first 10% of the time (measured), so it leaves at
-full speed from a position the reader is already moving through — the opposite of
-easing into somewhere. easeInOutCubic covers 0.4% in that first tenth.
-`lock: true` holds the line for the glide, and `force` is no longer needed
-because nothing is stopped yet.
+Releasing does not move them either: breaking out downward used to `scrollTo`
+About, which is one more takeover — the reader pushed past the threshold to
+scroll on normally, not to be delivered somewhere.
 
-**`PIN.release` is what makes an entry trigger safe, and the two cannot be
-separated.** Engaging mid-gesture is normally exactly what makes a pinned section
-read as a broken page. It works here because a stopped Lenis still lets wheel
-events reach the accumulator: a fast flick keeps feeding deltaY, clears 500px
-almost immediately and carries on to About, so only a reader who actually slows
-down stays held. Measured: a 12-event flick (1440px) passes straight through,
-while three 80px nudges (240px) stay held. **Never remove the release threshold
-and leave the entry trigger** — that combination is the broken-page version.
-
-**The entry test is DIRECTION-AGNOSTIC on purpose** — it measures how much of the
-frame Work occupies, which behaves the same arriving from the hero above or from
-About below. A "top crossed the nav line" test fires at completely different
-moments in the two directions.
-
-`PIN.cooldown` (900ms) exists because without it the settle would re-align and
-instantly re-pin the reader it just released.
-
-**ONLY WORK PINS, and that is a deliberate line.** A hold has to earn its place
-by giving the reader something to do while held: Work has a second axis they must
-stop moving to traverse. About and Contact are prose, so a hold there is friction
-with nothing in exchange — someone who has finished reading would need a
-deliberate gesture just to leave. Pinning all three would also leave the 81px
-footer with nowhere to live and break find-in-page. Check any new candidate
-against that test. (Fit is NOT the objection — measured, all three contents fit
-under the nav at a 700px window: 622 / 475 / 447.)
-
-**Nearest section within reach wins.** With three of them and a generous forward
-band two can be in range at once; without that the first in the list would win and
-could pull the reader backwards past a nearer one.
-
-**Content is the SPAN OF THE SECTION'S CHILDREN** — first child's top to last
-child's bottom — not box-height-minus-padding. That distinction is load-bearing:
-`#about` carries a `min-height` so it fills the frame, and box-minus-padding
-counted that added empty space as content, settling the copy 48px under the nav
-with 632px of nothing beneath it. Children rather than one wrapper because the
-sections are not uniformly shaped — About has TWO (its heading, then
-`.about-layout`, which is pulled up to sit BESIDE the heading, so the span is 475
-not 531) while Work and Contact have one.
-
-**`#about` has `min-height: calc(100dvh - var(--nav-offset))`** (sections.css,
-reset at ≤480). A section SHORTER than its frame cannot both sit centred and keep
-the next one out of shot: About's natural box was 571 against 736 available, so
-centring left 34px of the blue Contact panel showing along the bottom edge and it
-read as clipped. Filling the frame makes those two goals stop competing. Work
-never needed it — its box is already taller than the frame.
-
-**The resting position CENTRES that content in the space under the nav**
-(`restingScrollY`), so the air above and below matches. It is not the section's
-top on the nav line, which is what it was first: the section is TALLER than that
-space at a normal window — 870 against 861 at 1440x900 — so top-aligning pushed
-its 144px bottom padding off the screen entirely and the card ran flush to the
-bottom edge with 104px of padding above it. Content height is derived from the
-section's own padding, NOT from a card: the cards rotate as the loop runs and
-their heights are not guaranteed equal once a title wraps to a different number
-of lines. When the content is taller than the space, there is nothing to centre
-and it sits under the nav as before.
-
-The target is **clamped to the page's scroll range**, or the last section asks for
-a position the page cannot reach and the settle re-fires forever trying.
-
-**Every settling section's anchor aims at that same resting position**, not the generic
-`-scrollPaddingTop` offset the other links use (`setupLenis`, via the
-module-level `sectionRestingScrollY` that `initSectionSettle` publishes). Otherwise a nav
-link landed in one place and the settle moved it again 140ms later — a
-visible two-stage jump whose DIRECTION flipped with the window height: down on a
-short window, up on a tall one, and only invisible at ~894px where the two happen
-to coincide. Clicking Work also releases the hold **without** the cooldown, since
-that cooldown exists to stop a re-pin when the reader is leaving; here they are
-arriving, and it would otherwise swallow the pin.
-
-**`settle()` self-heals a desynced hold.** `pinned` is our flag but `lenis.stop()`
-is shared state, so anything else calling `lenis.start()` would leave the code
-believing it still holds a page that is already scrolling — after which settle
-bails forever and the alignment is dead for the session. It trusts
-`lenis.isStopped` over its own bookkeeping.
-
-**The reach is ASYMMETRIC, and it has to be.** `band` (0.6 of a viewport) applies
-when Work's top is still BELOW the line — the reader was on their way here and
-Lenis's easing tail ran out early, so finishing the journey continues the motion
-they were already making. `bandBack` (0.25) applies once they have scrolled PAST
-it, where the same pull would drag them backwards and reverse their direction.
-It was 0.25 both ways at first and in practice almost never fired: Lenis's tail
-is long, so a scroll from the hero glides well past Work and only goes silent
-once the reader is already into About, outside the window.
+**The composed resting position still exists and is still used** — by nav clicks
+and by the scroll-spy (`restingFor` / `sectionRestingScrollY`, for all three
+sections). The difference is it is only ever reached when the reader ASKS, by
+clicking a nav link. That is why About and Contact still land centred despite
+never settling on their own.
 
 - **Eligibility is NARROWER than the carousel's.** The track runs at ≥481; the
   hold additionally requires `(hover: hover) and (pointer: fine)`. A stopped
   Lenis swallows TOUCH as well as wheel, and touch produces no wheel events for
   the release accumulator — so on a finger-only tablet the page would freeze with
   no way out. Touch keeps ordinary scrolling.
-- **Skipped under reduced motion**, since an unrequested scroll is exactly what
-  that setting is about.
-- **Every other route out of a section releases the hold first**: keydown,
-  in-page anchor clicks (bound in the CAPTURE phase so it runs before
-  `setupLenis`'s own anchor handler, which calls `lenis.scrollTo` and would do
-  nothing while Lenis is stopped), `popstate`, and losing eligibility on resize.
-  **If you add a new way to move the page, add a release with it** — a hold only
-  a wheel can break is a trap for everyone else.
+- **Skipped under reduced motion.**
+- **The entry test is DIRECTION-AGNOSTIC** — it measures how much of the frame
+  Work occupies, so it behaves the same arriving from the hero above or About
+  below. A "top crossed the nav line" test fires at different moments each way.
+- **Every other route out releases the hold first**: keydown, in-page anchor
+  clicks (CAPTURE phase, so it runs before setupLenis's own anchor handler, which
+  calls `lenis.scrollTo` and would do nothing while Lenis is stopped), `popstate`,
+  and losing eligibility on resize. **If you add a new way to move the page, add a
+  release with it** — a hold only a wheel can break is a trap for everyone else.
 - **Horizontal gestures are not vertical intent.** Those over the track never
   reach the accumulator (the carousel stops their propagation); any arriving
   horizontally over the section padding are ignored by the deltaX/deltaY test.
-- `adjusting` has a **timer backstop**: Lenis abandons a `scrollTo` the moment the
-  reader scrolls again and then `onComplete` never fires, which would otherwise
-  leave the flag stuck true and the alignment dead for the session.
+- **`settle()` self-heals a desynced hold.** `pinned` is our flag but
+  `lenis.stop()` is shared state, so anything else calling `lenis.start()` would
+  leave the code believing it still holds a page that is already scrolling. It
+  trusts `lenis.isStopped` over its own bookkeeping.
 
 ### Damped horizontal motion (2026-08)
 

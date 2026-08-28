@@ -1243,37 +1243,26 @@ function setupLenis(Lenis) {
 // scroll restoration or those readers get trapped. This gets the "locked in"
 // feel with none of that: scroll is never taken away, it is only tidied up
 // AFTER the reader has stopped.
-const SETTLE = {
-  idle: 140,       // ms of scroll silence that counts as "stopped"
-  // How far off its resting position a section may be and still be pulled to it,
-  // as a fraction of the viewport. ASYMMETRIC on purpose:
-  //   band     — still approaching from above: the reader was on their way here
-  //              and Lenis's easing tail ran out early, so finishing the journey
-  //              continues the motion they were already making.
-  //   bandBack — already scrolled PAST it, where the same pull drags them
-  //              backwards and reverses their direction. Much more jarring, so
-  //              it stays tight.
-  // band was 0.25 both ways at first and almost never fired: Lenis's tail is
-  // long, so a scroll glides well past a section and only goes silent once the
-  // reader is into the next one, outside the window.
-  band: 0.6,
-  bandBack: 0.25,
-  tolerance: 2,    // px — close enough, leave it alone
-  backstop: 1200,  // ms — see the note on `adjusting` below
-};
-
 const PIN = {
   enter: 0.6,      // fraction of the frame Work must fill before it takes hold
-  easeIn: 1.1,     // s — the glide into the resting position before it holds
   release: 500,    // px of vertical intent needed to break out of the hold
   cooldown: 900,   // ms after releasing before Work may pin again — without it,
                    // the settle would re-align and immediately re-pin the reader
                    // it just let go of
 };
 
-// Bring SELECTED WORK to rest composed — its content centred in the space under
-// the nav — once vertical scrolling has stopped near it, and then HOLD the page
-// there while the reader works through the carousel;
+// HOLD Selected Work once the reader arrives in it — WITHOUT MOVING THE PAGE.
+//
+// ⚠️ There is deliberately NO scroll-to here any more. Three versions were tried
+// and each took the scroll away from the reader: settling on idle grabbed anyone
+// who paused near the section, and easing in on entry took over the scroll as
+// soon as they came close, however gently it was curved. The reader chose where
+// to stop; the hold's job is to keep them there, not to relocate them.
+//
+// The composed resting position still exists and is still used — by nav clicks
+// and by the scroll-spy (`sectionRestingScrollY`, `restingFor`). The difference
+// is that it is only ever reached when the reader ASKS for it by clicking a nav
+// link. Don't reintroduce an automatic scroll to it while the reader works through the carousel;
 // scrolling down past PIN.release hands them on to About, and scrolling up by the
 // same simply unfreezes.
 //
@@ -1318,9 +1307,6 @@ function initSectionSettle(lenis) {
   const holdable = window.matchMedia(
     '(min-width: 481px) and (hover: hover) and (pointer: fine)');
 
-  let idleTimer = 0;
-  let adjusting = false;
-  let adjustBackstop = 0;
   let pinned = false;
   let intent = 0;
   let releasedAt = -Infinity;
@@ -1413,99 +1399,35 @@ function initSectionSettle(lenis) {
   // where a "top crossed the nav line" test would fire at completely different
   // moments.
   function pinOnEntry() {
-    if (pinned || adjusting || !holdable.matches) return;
+    if (pinned || !holdable.matches) return;
     if (performance.now() - releasedAt < PIN.cooldown) return;
     const r = work.getBoundingClientRect();
     const frame = window.innerHeight - NAV_OFFSET;
     const visible = Math.min(r.bottom, window.innerHeight) - Math.max(r.top, NAV_OFFSET);
     if (visible < frame * PIN.enter) return;
 
-    // Mark the hold as taken NOW, before any motion, so the accumulator below is
-    // already counting — a fast flick has to be able to break out during the
-    // glide, not just after it.
+    // HOLD WHERE THE READER IS. Nothing is scrolled — see the note above.
     pinned = true;
     intent = 0;
-    adjusting = true;
-    clearTimeout(adjustBackstop);
-    adjustBackstop = setTimeout(() => { adjusting = false; }, SETTLE.backstop);
-
-    // EASE IN, don't snap. lenis.stop() used to fire here, before the scroll —
-    // which killed the reader's velocity dead and made the section grab rather
-    // than receive them. Now the page glides to the resting position first and
-    // is only frozen once it arrives.
-    //
-    // easeInOutCubic rather than Lenis's own expo-out: expo-out is front-loaded,
-    // so it leaves at full speed from a position the reader is already moving
-    // through. Starting slow is the whole point of easing INTO a section.
-    lenis.scrollTo(restingFor(work), {
-      duration: PIN.easeIn,
-      easing: (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2),
-      lock: true,        // hold the line for the glide; the accumulator can still release
-      onComplete: () => {
-        adjusting = false;
-        clearTimeout(adjustBackstop);
-        if (pinned) lenis.stop();   // only now does it actually hold
-      },
-    });
+    lenis.stop();
   }
 
-  // `target` null means "just hand control back" — used for scrolling up and for
-  // every escape hatch, where forcing a destination would be its own hijack.
+  // Releasing only ever hands control back — it never moves the reader. That is
+  // the whole point of the hold now: it keeps them where they chose to stop, and
+  // lets go when they ask.
+  //
   // `cooldown` false is for the one case that is navigating TOWARD Work rather
   // than away: without it the anti-re-pin cooldown would swallow the arrival and
   // the reader would land on Work without being held.
-  function release(target, cooldown = true) {
+  function release(cooldown = true) {
     if (!pinned) return;
     pinned = false;
     intent = 0;
     if (cooldown) releasedAt = performance.now();
-    // Also ends a glide still in flight: `pinned` is false by the time its
-    // onComplete runs, so it will not stop the page behind the reader's back.
-    adjusting = false;
-    clearTimeout(adjustBackstop);
     lenis.start();
-    if (target) lenis.scrollTo(restingFor(target));
   }
 
-  function settle() {
-    // Self-heal a desynced hold. `pinned` is our flag but `lenis.stop()` is
-    // shared state, and anything else calling lenis.start() would leave us
-    // believing we still hold a page that is already scrolling — after which
-    // this function bails forever and the settle is dead for the session.
-    // Trust Lenis over our own bookkeeping.
-    if (pinned && !lenis.isStopped) { pinned = false; intent = 0; }
-    if (!work || !wide.matches || adjusting || pinned) return;
-
-    // ⚠️ ONLY WORK SETTLES. About and Contact deliberately do NOT — see the
-    // header note above. They keep their resting positions for nav clicks and
-    // the scroll-spy; what they no longer do is move the page on their own.
-    //
-    // Negative = still approaching from above; positive = already scrolled past.
-    const offBy = window.scrollY - restingFor(work);
-    const reach = window.innerHeight * (offBy < 0 ? SETTLE.band : SETTLE.bandBack);
-    if (Math.abs(offBy) > reach) return;     // somewhere else entirely
-    if (Math.abs(offBy) < SETTLE.tolerance) { pin(); return; }   // already resting
-
-    adjusting = true;
-    // Lenis abandons a scrollTo the moment the reader scrolls again, and then
-    // onComplete never fires — without this backstop `adjusting` would stay true
-    // and the settle would never run again.
-    clearTimeout(adjustBackstop);
-    adjustBackstop = setTimeout(() => { adjusting = false; }, SETTLE.backstop);
-    lenis.scrollTo(restingFor(work), {
-      onComplete: () => {
-        adjusting = false;
-        clearTimeout(adjustBackstop);
-        pin();
-      },
-    });
-  }
-
-  lenis.on('scroll', () => {
-    pinOnEntry();                 // lock as soon as Work fills the frame
-    clearTimeout(idleTimer);
-    idleTimer = setTimeout(settle, SETTLE.idle);   // fallback: catch a stop just short
-  });
+  lenis.on('scroll', () => pinOnEntry());
 
   // While held, count vertical intent. Horizontal gestures over the track never
   // reach here — initWorkCarousel stops their propagation — and any that do
@@ -1515,23 +1437,25 @@ function initSectionSettle(lenis) {
     if (!pinned) return;
     if (Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
     intent += event.deltaY;
-    if (intent >= PIN.release) release(document.getElementById('about'));
-    else if (intent <= -PIN.release) release(null);
+    // BOTH directions just hand control back. Breaking out downward used to
+    // scrollTo About, which is one more takeover: the reader pushed past the
+    // threshold to "scroll down normally", not to be delivered somewhere.
+    if (Math.abs(intent) >= PIN.release) release();
   }, { passive: true });
 
   // ESCAPE HATCHES. A hold that only a wheel can break is a trap for everyone
   // else, so every other route out of a section releases it first.
-  window.addEventListener('keydown', () => release(null));
+  window.addEventListener('keydown', () => release());
   // Capture phase, so this runs BEFORE setupLenis's own anchor handler — that
   // handler calls lenis.scrollTo, which does nothing while Lenis is stopped.
   document.addEventListener('click', (event) => {
     const anchor = event.target.closest && event.target.closest('a[href^="#"]');
     if (!anchor) return;
-    release(null, anchor.getAttribute('href') !== '#work-section');
+    release(anchor.getAttribute('href') !== '#work-section');
   }, true);
-  window.addEventListener('popstate', () => release(null));
-  holdable.addEventListener('change', () => { if (!holdable.matches) release(null); });
-  window.addEventListener('resize', () => { if (!holdable.matches) release(null); });
+  window.addEventListener('popstate', () => release());
+  holdable.addEventListener('change', () => { if (!holdable.matches) release(); });
+  window.addEventListener('resize', () => { if (!holdable.matches) release(); });
 }
 
 // Viewport reveals. Each [data-reveal-group] fades its [data-reveal] items in
