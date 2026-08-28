@@ -458,9 +458,14 @@
                  attributes are the real ones. Don't trust `sips -g orientation`
                  here; it reports nil for a file that plainly carries the tag. -->
             <img class="project-carousel-slide" src="images/about-photo3.jpg" width="900" height="1200" loading="lazy" alt="Maeve, Jenna's dachshund, nosing a bright pink rose held out to her on a Seattle sidewalk" onerror="this.style.display='none'" />
+            <!-- Also portrait, also no art direction needed. EXIF Orientation 1
+                 on this one, so nothing to bake in — but check, don't assume:
+                 about-photo3's source was Orientation 6. -->
+            <img class="project-carousel-slide" src="images/about-photo4.jpg" width="900" height="1200" loading="lazy" alt="Jenna standing on a granite outcrop above Seoul at dusk, the city skyline and N Seoul Tower behind her" onerror="this.style.display='none'" />
             <div class="project-carousel-dots" role="group" aria-label="Choose photo">
-              <button type="button" class="project-carousel-dot is-active" aria-current="true" aria-label="Show photo 1 of 2"></button>
-              <button type="button" class="project-carousel-dot" aria-label="Show photo 2 of 2"></button>
+              <button type="button" class="project-carousel-dot is-active" aria-current="true" aria-label="Show photo 1 of 3"></button>
+              <button type="button" class="project-carousel-dot" aria-label="Show photo 2 of 3"></button>
+              <button type="button" class="project-carousel-dot" aria-label="Show photo 3 of 3"></button>
             </div>
             <div class="about-photo-placeholder" aria-hidden="true"></div>
           </div>
