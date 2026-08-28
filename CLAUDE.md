@@ -1072,3 +1072,19 @@ images land 312–448 KB each; the Work cards 296–568 KB each.
   In each carousel, slide 1 is above the fold (no `lazy`); slides 2–3 are `lazy`.
 - Bump the `?v=` cache-buster on an `<img src>` when you overwrite an existing
   file in place (e.g. the Work cards use `?v=N`), so browsers refetch it.
+
+**⚠️ THREE OF THE FOUR WORK-CARD VIDEOS ARE HALF-RESOLUTION.** Measured 2026-08:
+`work-accessibility` / `work-messaging` / `work-communities` are encoded at
+**1330×416**, while the card renders 1188 CSS px — 2376 device px on a 2× display,
+a **1.79× upscale**. `work-loop` is the outlier at 2308×720 (1.03×) and is
+visibly crisper; compare them if you want to see the difference. The `<video>`
+`width`/`height` attributes all say 2660×830, which is the POSTER's size, not the
+encoded frame's — so the markup does not reveal this. The posters are all a
+genuine 2660×830.
+
+`initScrollVideos` restores the poster on `ended`, so a card at REST shows the
+sharp JPG rather than the soft last frame. That is a mitigation, not the fix:
+while a clip is playing it is still an upscaled 1330-wide source. **The real fix
+is re-exporting those three at 2660 wide** — the repo holds only the derivatives,
+so it needs the originals. If you re-cut any clip, re-check that its poster still
+matches the END state (see the note at that handler).

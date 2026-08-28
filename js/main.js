@@ -450,6 +450,32 @@ function initScrollVideos() {
     });
   }, { threshold: [0, 0.4] });
   vids.forEach((v) => io.observe(v));
+
+  // WHEN PLAYBACK ENDS, BRING THE POSTER BACK. The card then rests on the sharp
+  // JPG instead of the video's last frame.
+  //
+  // Why it is needed: the MP4s are encoded at 1330x416 but the card renders at
+  // 1188 CSS px, which is 2376 device px on a 2x display — a 1.79x upscale, and
+  // that is the softness you see once a card has finished playing. (work-loop is
+  // the exception at 2308x720, near-native, and visibly crisper.) The posters are
+  // all 2660x830, so they carry the detail the video does not.
+  //
+  // Safe because the poster IS the end state, not the first frame — measured, its
+  // mean channel delta against the last frame is 12-18 versus 22-51 against the
+  // first, and a side-by-side shows the same headline, photo and panel text. So
+  // this reads as the image settling into focus, not as a cut to a different
+  // picture. Verify that again if any of these clips are re-cut.
+  //
+  // This only fixes the RESTING state. While a card is playing it is still a
+  // 1330-wide source upscaled; the real fix for that is re-exporting the three
+  // clips at 2660 wide, which needs the originals — the repo only has these
+  // derivatives.
+  vids.forEach((v) => {
+    v.addEventListener('ended', () => {
+      const poster = posterOf(v);
+      if (poster) poster.classList.remove('is-faded');
+    });
+  });
 }
 initScrollVideos();
 
