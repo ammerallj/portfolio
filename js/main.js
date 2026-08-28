@@ -1245,6 +1245,10 @@ function setupLenis(Lenis) {
 // AFTER the reader has stopped.
 const PIN = {
   enter: 0.6,      // fraction of the frame Work must fill before it takes hold
+  // ...and how far it must FALL BACK before the hold may be taken again. Well
+  // below `enter`, so the two cannot flap at a shared boundary: the reader has
+  // to genuinely leave Work, not just wobble around the entry line.
+  rearm: 0.35,
   release: 500,    // px of vertical intent needed to break out of the hold
   cooldown: 900,   // ms after releasing before Work may pin again — without it,
                    // the settle would re-align and immediately re-pin the reader
@@ -1310,6 +1314,7 @@ function initSectionSettle(lenis) {
   let pinned = false;
   let intent = 0;
   let releasedAt = -Infinity;
+  let armed = true;   // may the hold be taken? false until Work leaves the frame
 
   // A section rests with its CONTENT centred in the space under the nav, so the
   // air above and below matches. Not its top on the nav line, which is what this
@@ -1400,10 +1405,24 @@ function initSectionSettle(lenis) {
   // moments.
   function pinOnEntry() {
     if (pinned || !holdable.matches) return;
-    if (performance.now() - releasedAt < PIN.cooldown) return;
     const r = work.getBoundingClientRect();
     const frame = window.innerHeight - NAV_OFFSET;
     const visible = Math.min(r.bottom, window.innerHeight) - Math.max(r.top, NAV_OFFSET);
+
+    // ARMING, not a timer. Once the reader has pushed out of the hold it must not
+    // be retaken until they have actually LEFT Work — otherwise the section grabs
+    // them again a moment later while they are still inside it, and scrolling
+    // through Work becomes a stutter of grab / push free / grab.
+    //
+    // This was hidden while releasing scrolled the reader on to About: that moved
+    // them out of range, so the cooldown alone looked sufficient. It is not — the
+    // cooldown only says "not yet", never "not here". Same shape as the `armed`
+    // flag in initScrollVideos.
+    if (!armed) {
+      if (visible < frame * PIN.rearm) armed = true;
+      return;
+    }
+    if (performance.now() - releasedAt < PIN.cooldown) return;
     if (visible < frame * PIN.enter) return;
 
     // HOLD WHERE THE READER IS. Nothing is scrolled — see the note above.
@@ -1419,11 +1438,19 @@ function initSectionSettle(lenis) {
   // `cooldown` false is for the one case that is navigating TOWARD Work rather
   // than away: without it the anti-re-pin cooldown would swallow the arrival and
   // the reader would land on Work without being held.
-  function release(cooldown = true) {
+  // `toWork` is the one case that is navigating TOWARD Work rather than away:
+  // clicking the Work nav link. It keeps the hold ARMED and skips the cooldown,
+  // so the reader is held on arrival. Without both, the release that has to run
+  // before the anchor scroll (Lenis is stopped, so scrollTo would no-op) would
+  // also disarm the hold and they would land on Work without it taking.
+  function release(toWork = false) {
     if (!pinned) return;
     pinned = false;
     intent = 0;
-    if (cooldown) releasedAt = performance.now();
+    if (!toWork) {
+      armed = false;                        // not again until Work leaves the frame
+      releasedAt = performance.now();
+    }
     lenis.start();
   }
 
@@ -1451,7 +1478,7 @@ function initSectionSettle(lenis) {
   document.addEventListener('click', (event) => {
     const anchor = event.target.closest && event.target.closest('a[href^="#"]');
     if (!anchor) return;
-    release(anchor.getAttribute('href') !== '#work-section');
+    release(anchor.getAttribute('href') === '#work-section');
   }, true);
   window.addEventListener('popstate', () => release());
   holdable.addEventListener('change', () => { if (!holdable.matches) release(); });

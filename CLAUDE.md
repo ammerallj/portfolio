@@ -649,8 +649,23 @@ the container line, not the screen edge).
 
 Once Selected Work fills `PIN.enter` (0.6) of the frame, the page is held there
 (`initSectionSettle`, wired from `setupLenis`). Pushing `PIN.release` (500px of
-accumulated deltaY) in either direction hands control back. `PIN.cooldown` (900ms)
-stops it re-taking the hold the instant it lets go.
+accumulated deltaY) in either direction hands control back.
+
+**Re-taking the hold is gated by ARMING, not by a timer.** Releasing sets
+`armed = false`, and only Work falling back below `PIN.rearm` (0.35 of the frame)
+re-arms it. Without this the section grabs the reader again a moment after they
+push free — while they are still inside it — and scrolling through Work becomes a
+stutter of grab / push free / grab. `PIN.cooldown` alone cannot fix that: a timer
+only ever says "not yet", never "not here". Same shape as the `armed` flag in
+`initScrollVideos`. The bug was hidden while releasing scrolled the reader on to
+About, because that moved them out of range; removing that jump exposed it.
+`rearm` sits well below `enter` so the two cannot flap at a shared boundary.
+
+**Clicking the Work nav link is the one release that keeps the hold armed**
+(`release(toWork)`), and skips the cooldown. A release has to run before that
+anchor scroll — Lenis is stopped, so `scrollTo` would no-op — and without the
+exception it would disarm the hold and the reader would land on Work without it
+taking.
 
 **⚠️ THERE IS NO SCROLL-TO, AND THAT IS THE POINT.** Three versions were built and
 all three took the scroll away from the reader:
