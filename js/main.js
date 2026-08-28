@@ -51,6 +51,24 @@ const introBarSections = [
   .filter(s => s.link && s.el);
 navSections.push(...introBarSections);
 
+// Where each settling section comes to rest, published by initSectionSettle so
+// the anchor handler in setupLenis can aim at the SAME place. Returns null for
+// anything that does not settle, and stays null on the project pages, which have
+// none of these sections.
+//
+// ⚠️ DECLARED HERE, ABOVE updateScrollEffects, AND IT HAS TO BE. `let` sits in a
+// temporal dead zone until its declaration runs, and updateScrollEffects() is
+// called at module scope further down — so declaring this beside
+// initSectionSettle threw "Cannot access before initialization" the moment the
+// spy read it. That killed the whole script, and because `is-motion` hides every
+// [data-reveal] pre-paint, the PROJECT PAGES rendered blank.
+//
+// The homepage hid the bug: it sets `is-loading`, and updateScrollEffects returns
+// early on that before it reaches the spy. The project pages never set
+// `is-loading`, so they ran straight into it. Anything the spy reads must be
+// declared above this line, and must be tested on a project page.
+let sectionRestingScrollY = null;
+
 const siteHeader = document.querySelector('.site-header');
 
 // Where the sticky nav sits — the same offset anchor-scrolling uses to rest a
@@ -1192,12 +1210,6 @@ function setupLenis(Lenis) {
 // scroll restoration or those readers get trapped. This gets the "locked in"
 // feel with none of that: scroll is never taken away, it is only tidied up
 // AFTER the reader has stopped.
-// Where each settling section comes to rest, published by initSectionSettle so
-// the anchor handler in setupLenis can aim at the SAME place. Returns null for
-// anything that does not settle. Null itself until that runs (and on the project
-// pages, which have none of these sections).
-let sectionRestingScrollY = null;
-
 const SETTLE = {
   idle: 140,       // ms of scroll silence that counts as "stopped"
   // How far off its resting position a section may be and still be pulled to it,
