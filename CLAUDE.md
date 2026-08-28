@@ -664,9 +664,19 @@ definition of "arrived"; only the automatic move is gone. Don't restore
 same simply unfreezes and lets them carry on.
 
 **The hold engages ON ENTRY (2026-08)** — the moment Work fills `PIN.enter` (0.6)
-of the frame, not when the scroll goes quiet — and then eases to the resting
-position with `force`, since a stopped Lenis ignores an ordinary `scrollTo`. The
-idle settle stays as a fallback for a stop just short of that.
+of the frame, not when the scroll goes quiet. The idle settle stays as a fallback
+for a stop just short of that.
+
+**It EASES in, and the order is what makes that true.** `lenis.stop()` used to
+fire first, before the scroll — which killed the reader's velocity dead, so the
+section grabbed them rather than receiving them. The page now glides to the
+resting position over `PIN.easeIn` (1.1s) and is frozen only in that scrollTo's
+`onComplete`. The curve is **easeInOutCubic, not Lenis's own expo-out**: expo-out
+puts 50% of the travel in the first 10% of the time (measured), so it leaves at
+full speed from a position the reader is already moving through — the opposite of
+easing into somewhere. easeInOutCubic covers 0.4% in that first tenth.
+`lock: true` holds the line for the glide, and `force` is no longer needed
+because nothing is stopped yet.
 
 **`PIN.release` is what makes an entry trigger safe, and the two cannot be
 separated.** Engaging mid-gesture is normally exactly what makes a pinned section

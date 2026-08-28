@@ -1264,6 +1264,7 @@ const SETTLE = {
 
 const PIN = {
   enter: 0.6,      // fraction of the frame Work must fill before it takes hold
+  easeIn: 1.1,     // s — the glide into the resting position before it holds
   release: 500,    // px of vertical intent needed to break out of the hold
   cooldown: 900,   // ms after releasing before Work may pin again — without it,
                    // the settle would re-align and immediately re-pin the reader
@@ -1419,15 +1420,32 @@ function initSectionSettle(lenis) {
     const visible = Math.min(r.bottom, window.innerHeight) - Math.max(r.top, NAV_OFFSET);
     if (visible < frame * PIN.enter) return;
 
+    // Mark the hold as taken NOW, before any motion, so the accumulator below is
+    // already counting — a fast flick has to be able to break out during the
+    // glide, not just after it.
     pinned = true;
     intent = 0;
-    lenis.stop();
     adjusting = true;
     clearTimeout(adjustBackstop);
     adjustBackstop = setTimeout(() => { adjusting = false; }, SETTLE.backstop);
+
+    // EASE IN, don't snap. lenis.stop() used to fire here, before the scroll —
+    // which killed the reader's velocity dead and made the section grab rather
+    // than receive them. Now the page glides to the resting position first and
+    // is only frozen once it arrives.
+    //
+    // easeInOutCubic rather than Lenis's own expo-out: expo-out is front-loaded,
+    // so it leaves at full speed from a position the reader is already moving
+    // through. Starting slow is the whole point of easing INTO a section.
     lenis.scrollTo(restingFor(work), {
-      force: true,                 // a stopped Lenis ignores scrollTo without it
-      onComplete: () => { adjusting = false; clearTimeout(adjustBackstop); },
+      duration: PIN.easeIn,
+      easing: (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2),
+      lock: true,        // hold the line for the glide; the accumulator can still release
+      onComplete: () => {
+        adjusting = false;
+        clearTimeout(adjustBackstop);
+        if (pinned) lenis.stop();   // only now does it actually hold
+      },
     });
   }
 
@@ -1441,6 +1459,10 @@ function initSectionSettle(lenis) {
     pinned = false;
     intent = 0;
     if (cooldown) releasedAt = performance.now();
+    // Also ends a glide still in flight: `pinned` is false by the time its
+    // onComplete runs, so it will not stop the page behind the reader's back.
+    adjusting = false;
+    clearTimeout(adjustBackstop);
     lenis.start();
     if (target) lenis.scrollTo(restingFor(target));
   }
