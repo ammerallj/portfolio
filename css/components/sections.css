@@ -20,7 +20,7 @@
   padding-bottom: 144px;
   /* No hairline into About. The 240px of air across this seam (144 below the
      cards + 96 above the About heading) already separates them, and with the
-     section now coming to rest composed under the nav (initSectionSettle), a
+     section now coming to rest composed under the nav (initSectionGeometry), a
      rule sitting mid-viewport read as a lid on the carousel rather than as a
      join between two sections.
      ⚠️ This is the LAST hairline on the homepage — global.css already drops it
@@ -401,7 +401,7 @@
      window, growing to 357 at 1100.
 
      Centring INSIDE the box (rather than relying on the padding) is what makes
-     the panel's top edge and the content's centre agree: initSectionSettle
+     the panel's top edge and the content's centre agree: initSectionGeometry
      centres the content span, and with the box exactly one frame tall that
      lands the box top on the nav line. Panel edge to edge, content centred, one
      rule doing both.
@@ -414,7 +414,7 @@
      THE FOOTER IS PART OF THIS VIEW. The panel stops a footer's height short of
      the bottom so the copyright line sits in shot when the page settles here,
      rather than being one more scroll away — there is room for it, so it should
-     be in the frame. initSectionSettle reserves the same amount when it centres
+     be in the frame. initSectionGeometry reserves the same amount when it centres
      this section, so the panel meets the nav and the footer fills the remainder
      exactly. The two MUST agree: both read --footer-height, which the JS keeps
      truthful by measuring the real footer.
@@ -580,7 +580,7 @@
    seam is now 144 above the heading and 96 below the section. Both numbers are
    still on the spacing scale — nothing invented.
 
-   ⚠️ It also shifts where the section RESTS. initSectionSettle centres
+   ⚠️ It also shifts where the section RESTS. initSectionGeometry centres
    `box.height − padding`, so zeroing the top padding changes About's resting
    scroll position; that is derived live from computed style, so it follows this
    automatically. Don't hard-code either number there. */
@@ -592,7 +592,7 @@
      leftover split, and 34px of the blue Contact panel showed along the bottom
      edge, which read as About being clipped.
      Filling the frame makes those two goals stop competing: the content still
-     centres (initSectionSettle), and because the box now reaches the bottom of
+     centres (initSectionGeometry), and because the box now reaches the bottom of
      the viewport, Contact starts exactly off-screen. Work never needed this —
      its box is already taller than the frame.
      min-height, not height: if the copy ever outgrows the viewport the section

@@ -138,7 +138,7 @@
      value so the CSS framing and the JS resting positions cannot drift apart. */
   --nav-offset: 64px;
 
-  /* Height of the site footer. A DEFAULT, not the truth: initSectionSettle
+  /* Height of the site footer. A DEFAULT, not the truth: initSectionGeometry
      measures the real footer and rewrites this on load and resize, so the value
      here only has to be right enough for a no-JS render. Contact's min-height
      reads it to leave the footer exactly enough room to sit in shot when the
@@ -401,38 +401,15 @@ a {
    affordance that follows the pointer over a Work-card image. (Was a pill with
    the label "Interested in learning more?"; now just the arrow, so it's sized as
    a circle rather than a text pill.) */
-.custom-cursor {
-  position: fixed;
-  pointer-events: none;
-  z-index: 9999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 3rem;
-  height: 3rem;
-  background: var(--color-text);
-  color: var(--color-bg);
-  font-family: var(--font-body);
-  font-size: 1.5rem;
-  line-height: 1;
-  border-radius: 50%;
-  opacity: 0;
-  transform: translate(-50%, -50%) scale(0.85);
-  transition: opacity 0.2s ease, transform 0.2s ease;
-  top: 0;
-  left: 0;
-}
-
-.custom-cursor.is-visible {
-  opacity: 1;
-  transform: translate(-50%, -50%) scale(1);
-}
-
-@media (hover: hover) {
-  .work-card-image:hover {
-    cursor: none;
-  }
-}
+/* The arrow (→) cursor that followed the pointer over the Work card images is
+   GONE (2026-08). Its only trigger was .work-card-image, so removing that made
+   the element dead on every page — the markup went from all five. The card
+   already signals it is a link by scaling on hover, and the badge sat on top of
+   the artwork the reader is trying to look at.
+   `.work-card-image:hover { cursor: none }` went with it: without that, dropping
+   the badge would have left the card with no pointer at all.
+   The OTHER cursors are unrelated and still live — .cursor-glow, .meta-cursor,
+   .ms-cursor, and the 👋 .wave-cursor over Contact. */
 
 .meta-label,
 .ms-label {

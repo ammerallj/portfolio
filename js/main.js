@@ -51,7 +51,7 @@ const introBarSections = [
   .filter(s => s.link && s.el);
 navSections.push(...introBarSections);
 
-// Where each settling section comes to rest, published by initSectionSettle so
+// Where each settling section comes to rest, published by initSectionGeometry so
 // the anchor handler in setupLenis can aim at the SAME place. Returns null for
 // anything that does not settle, and stays null on the project pages, which have
 // none of these sections.
@@ -59,7 +59,7 @@ navSections.push(...introBarSections);
 // ⚠️ DECLARED HERE, ABOVE updateScrollEffects, AND IT HAS TO BE. `let` sits in a
 // temporal dead zone until its declaration runs, and updateScrollEffects() is
 // called at module scope further down — so declaring this beside
-// initSectionSettle threw "Cannot access before initialization" the moment the
+// initSectionGeometry threw "Cannot access before initialization" the moment the
 // spy read it. That killed the whole script, and because `is-motion` hides every
 // [data-reveal] pre-paint, the PROJECT PAGES rendered blank.
 //
@@ -1017,7 +1017,7 @@ function updateScrollEffects() {
   // intro-bar, and both can be on screen pointing at the same section.
   //
   // Resting positions, not section tops. This measured tops against the nav line
-  // until sections began settling CENTRED (initSectionSettle): once they did,
+  // until sections began settling CENTRED (initSectionGeometry): once they did,
   // About's top rests ~130px BELOW that line and never satisfied the test, so
   // clicking About scrolled correctly and then left Work highlighted. Reading the
   // same positions the settle and the anchors use is what keeps the three in
@@ -1041,7 +1041,7 @@ function updateScrollEffects() {
     }
   }
   // FALLBACK for anywhere the settle does not run — ≤480, and reduced motion,
-  // where initSectionSettle returns before publishing anything. Same rule as
+  // where initSectionGeometry returns before publishing anything. Same rule as
   // before: last section whose top has passed the nav, with the page bottom
   // standing in for the final section, which can never climb that high.
   if (!restingKnown) {
@@ -1215,7 +1215,7 @@ function setupLenis(Lenis) {
       e.preventDefault();
       const fromMenu = !!link.closest('.mobile-menu');
       // A settling section does not rest with its top on the nav line — it rests
-      // CENTRED in the space under it (see initSectionSettle). Aiming these at
+      // CENTRED in the space under it (see initSectionGeometry). Aiming these at
       // the generic offset made the link land in one place and then get moved
       // again 140ms later when the settle ran, a visible two-stage jump whose
       // direction flipped with the window height: down on a short window, up on
@@ -1420,10 +1420,7 @@ if (window.innerWidth <= 1024) {
 
 initMotion();
 
-// Custom cursor on work card images
-const cursor = document.getElementById('custom-cursor');
 const metaCursor = document.getElementById('meta-cursor');
-const cardImages = document.querySelectorAll('.work-card-image');
 const metaLabels = document.querySelectorAll('.meta-label');
 const msLabels = document.querySelectorAll('.ms-label');
 const msCursor = document.getElementById('ms-cursor');
@@ -1449,10 +1446,6 @@ if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
     cursorGlow.style.top = e.clientY + 'px';
     if (!cursorGlow.classList.contains('is-visible')) {
       cursorGlow.classList.add('is-visible');
-    }
-    if (cursor) {
-      cursor.style.left = e.clientX + 'px';
-      cursor.style.top = e.clientY + 'px';
     }
     if (waveCursor) {
       waveCursor.style.left = e.clientX + 'px';
@@ -1497,12 +1490,6 @@ if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
     darkPanel.addEventListener('mouseenter', () => waveCursor.classList.add('is-visible'));
     darkPanel.addEventListener('mouseleave', () => waveCursor.classList.remove('is-visible'));
   }
-
-  cardImages.forEach(img => {
-    if (!cursor) return;
-    img.addEventListener('mouseenter', () => cursor.classList.add('is-visible'));
-    img.addEventListener('mouseleave', () => cursor.classList.remove('is-visible'));
-  });
 
   msLabels.forEach(label => {
     if (!msCursor) return;
