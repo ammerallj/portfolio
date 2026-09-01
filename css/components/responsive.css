@@ -149,7 +149,7 @@
 
        WHY. hero.css freezes --field-w at 1688.69px below 1440, so the gradient
        always ends at y=907 however tall the window is — while the divider is
-       pinned to 50dvh and slides DOWN as the tablet gets taller. The lockup
+       pinned to 50svh and slides DOWN as the tablet gets taller. The lockup
        walks off the bottom of its own artwork. Measured, worst pixel under the
        glyphs, white text (bio composited with the frost sheet):
                               headline   bio
@@ -159,8 +159,10 @@
        The frozen width is right on DESKTOP, where the viewport is wider than it
        is tall and the fold is ~900px. On a portrait tablet it is the bug.
 
-       220dvh restates that same desktop relationship as a ratio, so it holds at
-       every tablet height instead of drifting with it:
+       220svh restates that same desktop relationship as a ratio, so it holds at
+       every tablet height instead of drifting with it (svh, not dvh, for the
+       reason .intro uses it — a dvh here would re-scale the whole gradient on
+       the frame iOS collapses its URL bar):
          1024x768   -> 1690px  (today's 1689 — landscape is deliberately UNCHANGED)
          768x1024   -> 2253px  headline ~2.0 / bio ~1.75
          1024x1366  -> 3005px  headline  2.25 / bio  2.35
@@ -179,7 +181,7 @@
        so its number moves with whichever is showing. Sample all three.
        The px floor keeps short viewports on today's composition; the vw term is
        the base token's width guarantee, carried over. */
-    --field-w: max(1688.69px, 220dvh, 117.27vw);
+    --field-w: max(1688.69px, 220svh, 117.27vw);
   }
 
   /* LANDING hero interim (no ≤1024 frames yet for the "Making products make
@@ -537,8 +539,8 @@
   }
 
   /* The frost pane starts at the moved divider and is re-derived here rather
-     than inherited. hero.css builds it out of 50dvh on the assumption that the
-     hero is a full 100dvh with the divider at its centre — neither holds at
+     than inherited. hero.css builds it out of 50svh on the assumption that the
+     hero is a full 100svh with the divider at its centre — neither holds at
      this tier (short hero + the drop above), so its reach came up short of the
      artwork and left an unfrosted tail of gradient behind Selected Work. In
      terms of the tokens: run from the divider to the field's bottom edge, but

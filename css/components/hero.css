@@ -8,7 +8,7 @@
       absolutely positioned at the document top at z:-1, never
       clipped, so whatever extends past the hero fold bleeds on
       behind Selected Work and dissolves into the cream page.
-   2. .intro — a 100dvh stage over it: statement (top half) →
+   2. .intro — a 100svh stage over it: statement (top half) →
       full-width hairline divider at the exact center → frosted
       band (bottom half) with the bio in its right column → the
       landing nav bar along the bottom edge.
@@ -53,9 +53,9 @@ main {
                      size (= 1688.69px), FROZEN at that px value below 1440 so
                      narrowing the window crops instead of scaling.
                      ⚠️ The freeze only survives down to 1025. At ≤1024 the tier
-                     re-sizes this to the viewport HEIGHT (220dvh) — a frozen
+                     re-sizes this to the viewport HEIGHT (220svh) — a frozen
                      width ends the gradient at y=907 while the divider tracks
-                     50dvh, so on a portrait tablet the lockup left the artwork
+                     50svh, so on a portrait tablet the lockup left the artwork
                      entirely. See responsive.css's 1024 :root before changing
                      the number here; the two are one decision. This is the
                      original 126.5vw / 1821.6px composition taken down 10% and
@@ -78,7 +78,23 @@ main {
 
 .intro {
   position: relative;
-  height: 100dvh;
+  /* svh, NOT dvh — and this is a bug fix, not a preference (2026-08-31).
+     dvh tracks the CURRENT viewport, so on iOS Safari it GROWS the instant the
+     URL bar collapses — which is the first scroll gesture a reader makes, the
+     one carrying them toward Selected Work. Measured: +60px of viewport at a
+     held scroll position grew .intro by 60px and jumped the docking .intro-bar
+     60px in a single frame. Everything after .intro in the flow moved with it.
+     Desktop browsers have no collapsing chrome, so this can only ever be seen
+     on a phone or tablet, and a preview pane cannot reproduce it either.
+     svh is the SMALL viewport — a fixed value that assumes the chrome is
+     showing — so the hero never re-lays-out mid-scroll. The trade is that once
+     the chrome collapses the fold is taller than the hero, so a little more of
+     Selected Work shows at rest. A stable composition that peeks beats a
+     correct one that lurches.
+     ⚠️ Anything sized as a FRACTION of this hero has to use svh too, or it
+     drifts away from the hero on exactly the frame that matters: the frost pane
+     below, and the tablet tier's --field-w. Keep them together. */
+  height: 100svh;
   display: flex;
   flex-direction: column;
   /* (The old -66px header compensation is GONE: the sticky header is hidden
@@ -99,8 +115,10 @@ main {
   left: 0;
   right: 0;
   /* To the field's bottom, but never less than the hero's own lower half
-     (tall/narrow viewports, where the field ends above the fold). */
-  height: max(50dvh, calc(var(--field-bottom) - 50dvh));
+     (tall/narrow viewports, where the field ends above the fold).
+     svh to match .intro — this is half of THAT box, so a dvh here would slide
+     out from under the divider whenever iOS resized the viewport. */
+  height: max(50svh, calc(var(--field-bottom) - 50svh));
   pointer-events: none;
   /* Lowest layer above the gradient: z:-1 joins the field's level in main's
      stacking context, painting after it (above the gradient) but beneath ALL

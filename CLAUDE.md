@@ -76,7 +76,23 @@ against each other: a first pass also dropped the −12% shift and took the bio 
 across the gradient too, and a formula holding the vertical fraction constant
 scored 1.81 where the measured fit scored 2.12. The cost is magnification:
 3005px from a 3600px source is a 1.67× upscale on a 2× display, invisible on a
-soft gradient but the reason not to push the ratio higher. The previous
+soft gradient but the reason not to push the ratio higher. **The hero is sized in `svh`, never `dvh` (2026-08-31).** `.intro`'s height,
+the frost pane's two `50svh` terms and the tablet `--field-w` all use it, and
+they must move together — anything sized as a fraction of the hero that stays on
+`dvh` drifts away from it on exactly the frame that matters. `dvh` tracks the
+CURRENT viewport, so on iOS Safari it grows the instant the URL bar collapses —
+the first scroll gesture a reader makes, the one carrying them into Selected
+Work — and the hero re-lays-out mid-scroll, taking the docking `.intro-bar` and
+everything after it with it. `svh` is the small viewport, a fixed value, so the
+hero never reflows. The trade is that once the chrome collapses the fold is
+taller than the hero and a little more of Selected Work shows at rest.
+⚠️ **This cannot be tested in a desktop browser or the preview pane**: `svh`,
+`dvh` and `lvh` are all equal without retractable browser UI (verified — all
+three read 1024 at a 1024-tall window), so a resize test proves the reflow
+MECHANISM but says nothing about the unit. It needs a real iOS device.
+**Two places still on `dvh` deliberately:** the ≤480 `--hero-h`
+(`calc(100dvh - 184px)`, whose 120px card-peek math is tuned and would shift)
+and About/Contact's `min-height`s in sections.css. The previous
 blob-hero landing is archived, fully self-contained, in
 `archive/blob-hero-2026-08/`.
 
