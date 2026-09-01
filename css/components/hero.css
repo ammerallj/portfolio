@@ -600,6 +600,45 @@ main {
   background: rgba(0, 0, 0, 0.75);
 }
 
+/* Shared by all three items in the bar — "Selected Work", "About Me" and the
+   "Say hello" pill. Each label becomes a row of per-character spans so it can
+   morph into its answer on hover/focus: initNavMorph in js/main.js, a port of
+   motion-primitives' TextMorph. None of this exists with JS off or under reduced
+   motion — the <a> just holds its text and every selector here matches nothing.
+
+   ONE grid cell holds three stacked children — a hidden sizer per label, plus
+   the live characters — so the cell is always as wide as the LONGER label and no
+   item can resize mid-morph and shove the ones after it sideways. Reserving the
+   width this way rather than measuring it in JS is what keeps it correct through
+   a breakpoint (--size-base changes under it) and at <=480, where the bar is
+   display:none and a measurement would come back 0.
+
+   These rules are unscoped so they serve the nav links and the pill alike; both
+   live in .intro-bar, and nothing else on the site uses the markup. */
+.nav-morph {
+  display: inline-grid;
+  text-align: center;
+  white-space: pre;
+}
+
+.nav-morph > * {
+  grid-area: 1 / 1;
+}
+
+.nav-morph-sizer {
+  visibility: hidden;
+}
+
+/* The containing block exiting letters are positioned in while they fade out. */
+.nav-morph-run {
+  position: relative;
+}
+
+/* inline-block so each letter can carry its own FLIP transform. */
+.nav-morph-char {
+  display: inline-block;
+}
+
 /* Reduced motion: no entrance choreography, everything simply shows. */
 @media (prefers-reduced-motion: reduce) {
   .intro-headline,

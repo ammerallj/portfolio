@@ -444,6 +444,274 @@ function initHeadlineMorph() {
 
 initHeadlineMorph();
 
+// Every item in the site nav answers itself while the pointer (or keyboard
+// focus) is on it: "Selected Work" -> "What I made", "About Me" -> "Who am I?",
+// "Say hello" -> "Why hello!". A vanilla port of motion-primitives' TextMorph
+// (motion-primitives.com/docs/text-morph), using the same keyed-FLIP technique
+// as initHeadlineMorph above but tuned the way a button wants rather than a
+// headline: letters only FADE (no blur, no drift), on one short spring.
+//
+// Keys are LOWERCASED character + occurrence, which is the reference's rule and
+// not this file's other one. It is what decides which letters travel and which
+// cross-fade. Measured, not guessed — counted off the animations each pair
+// actually creates:
+//
+//   Say hello     -> Why hello!    7 of 10 travel  (the strongest of the three:
+//                                  the "h" of "hello" slides left to become the
+//                                  "h" of "Why", a second "h" fades in behind it)
+//   About Me      -> Who am I?     4 travel, 5 in, 4 out
+//   Selected Work -> What I made   5 travel, 6 in, 8 out (the weakest — the two
+//                                  share little but t/space/w/d/e, so it reads
+//                                  more as a cross-fade than a slide)
+//
+// The spring IS the reference's default (stiffness 280, damping 18, mass 0.3),
+// solved here once rather than carried as a runtime dependency: omega0 = 30.55
+// rad/s, zeta = 0.982 — a hair inside critical, so it settles in 285ms with no
+// overshoot (peak 0.999). SPRING is that curve sampled at 25 points. Native
+// WAAPI throughout, no Motion.dev import, so a CDN failure can't take the nav
+// down with it.
+//
+// Progressive enhancement: every label ships as plain text in the HTML, so no-JS
+// visitors, crawlers and reduced-motion readers get the resting label and
+// nothing else. Each ACCESSIBLE NAME stays the resting label whatever is on
+// screen — these are links to real sections, and a name that changes under the
+// pointer breaks voice control ("click Selected Work") and would announce the
+// joke instead of the destination.
+//
+// Selectors match BOTH the homepage's own anchors and the project pages'
+// "../index.html#…" form, so one table covers all five pages. They are scoped to
+// .intro-bar-links on purpose: the <=480 header nav and the .section-pills
+// floatie carry the same two destinations, have no hover to drive a morph, and
+// are deliberately left alone.
+function initNavMorph() {
+  if (reducedMotion.matches) return;
+
+  const MORPHS = [
+    { selector: '.intro-bar-links a[href$="#work-section"]', rest: 'Selected Work', hover: 'What I made' },
+    { selector: '.intro-bar-links a[href$="#about"]', rest: 'About Me', hover: 'Who am I?' },
+    { selector: '.intro-bar-cta', rest: 'Say hello', hover: 'Why hello!' },
+  ];
+
+  const DURATION = 285; // ms — the spring's own settle time, see above
+  const SPRING =
+    'linear(0, 0.0521, 0.1659, 0.2993, 0.43, 0.5472, 0.6468, 0.7286, 0.7939, ' +
+    '0.8452, 0.8847, 0.9148, 0.9375, 0.9545, 0.967, 0.9763, 0.983, 0.9879, ' +
+    '0.9914, 0.9939, 0.9957, 0.997, 0.9979, 0.9986, 0.999)';
+  // linear() is Safari 17.4 / Chrome 113 and up; older engines take the closest
+  // bezier. An unsupported easing string THROWS out of animate(), so this is a
+  // guard, not a nicety.
+  const EASE =
+    window.CSS && CSS.supports && CSS.supports('animation-timing-function', 'linear(0, 1)')
+      ? SPRING
+      : 'cubic-bezier(0.2, 0.8, 0.3, 1)';
+
+  MORPHS.forEach(({ selector, rest, hover }) => {
+    document.querySelectorAll(selector).forEach((el) => setupMorph(el, rest, hover));
+  });
+
+  function setupMorph(el, REST, HOVER) {
+    // Only take over an element still reading the label this morph is written
+    // for — so a copy edit in the HTML disables the morph rather than fighting it.
+    if (el.textContent.trim() !== REST) return;
+
+    // The box reserves room for the WIDER of the two labels at all times, so a
+    // morph can never resize its own item. The whole bar is one flex row that the
+    // wordmark's `margin-right: auto` drives rightward, so ANY item that grew
+    // mid-morph would shove every item after it sideways — the nav would twitch
+    // each time a pointer crossed any of the three.
+    //
+    // It is reserved in CSS, not measured: both labels ship as hidden sizer spans
+    // stacked with the live one in a single inline-grid cell, so the cell is the
+    // max of the two and the letters centre inside it. Measuring instead was
+    // tried and is a trap — these are `display: none` at <=480, so a lock taken
+    // while the window was narrow froze the box at 0px and the label never came
+    // back, and even a correct measurement goes stale the moment a breakpoint
+    // changes --size-base underneath it.
+    const box = document.createElement('span');
+    box.className = 'nav-morph';
+    box.setAttribute('aria-hidden', 'true'); // the <a>'s aria-label is the name
+    // Each sizer is split into the SAME per-character inline-blocks as the live
+    // label. Setting it as ordinary text instead leaves the reservation a shade
+    // short — inline-blocks get no kerning between them, so the live label is
+    // marginally wider than that string shaped in one piece, and the box grew
+    // 0.26px mid-morph. (The .nav-morph-char class is shared for identical metrics;
+    // every query below is scoped to `run`, so sizer letters are never morphed.)
+    [REST, HOVER].forEach((label) => {
+      const sizer = document.createElement('span');
+      sizer.className = 'nav-morph-sizer';
+      for (const ch of label) {
+        const letter = document.createElement('span');
+        letter.className = 'nav-morph-char';
+        letter.textContent = ch === ' ' ? '\u00A0' : ch;
+        sizer.appendChild(letter);
+      }
+      box.appendChild(sizer);
+    });
+    const run = document.createElement('span');
+    run.className = 'nav-morph-run';
+    box.appendChild(run);
+
+    el.setAttribute('aria-label', REST);
+    el.textContent = '';
+    el.appendChild(box);
+
+    const live = new Map();     // key -> character node in flow
+    const exitPool = new Map(); // key -> node out of flow, fading, still adoptable
+    let current = '';
+    let hovered = false;
+    let focused = false;
+
+    render(REST, false);
+
+    el.addEventListener('pointerenter', (e) => {
+      if (e.pointerType === 'touch') return; // a tap is not a hover; it's a nav
+      hovered = true;
+      sync();
+    });
+    el.addEventListener('pointerleave', () => { hovered = false; sync(); });
+    // KEYBOARD focus only. Chrome focuses a link on mousedown, so a plain
+    // `focus` handler leaves the item stuck on its answer for as long as it keeps
+    // focus after a click — and every one of these links scrolls the page rather
+    // than leaving it, so that is the whole trip to the section and beyond.
+    // :focus-visible is exactly the distinction: it matches a Tab, not a click.
+    el.addEventListener('focus', () => {
+      focused = el.matches(':focus-visible');
+      sync();
+    });
+    el.addEventListener('blur', () => { focused = false; sync(); });
+
+    function sync() {
+      render(hovered || focused ? HOVER : REST, true);
+    }
+
+    function render(text, animate) {
+      if (text === current) return;
+      current = text;
+
+      const host = run.getBoundingClientRect();
+
+      // FIRST: where every character is right now, in-flight transform and
+      // opacity included — so interrupting a morph mid-flight resumes from what
+      // is actually on screen instead of snapping to wherever it was headed.
+      const first = new Map();
+      run.querySelectorAll('.nav-morph-char').forEach((n) => {
+        first.set(n, { rect: n.getBoundingClientRect(), opacity: getComputedStyle(n).opacity });
+      });
+
+      // Build the incoming label. A key both labels share REUSES its node, and
+      // that reuse is the whole trick: the same element ends up somewhere new, so
+      // it can slide there. Nodes mid-exit stay adoptable, so flicking off the
+      // button and back picks the same letters up mid-fade instead of popping.
+      const seen = Object.create(null);
+      const nextLive = new Map();
+      const fading = [];
+      const frag = document.createDocumentFragment();
+
+      for (const ch of text) {
+        const lower = ch.toLowerCase();
+        const key = lower + '#' + (seen[lower] = (seen[lower] || 0) + 1);
+        let node = live.get(key);
+        if (node) {
+          live.delete(key);
+        } else if ((node = exitPool.get(key))) {
+          exitPool.delete(key);
+          node.style.position = '';
+          node.style.left = '';
+          node.style.top = '';
+          fading.push(node); // turn its fade around, back up to full
+        } else {
+          node = document.createElement('span');
+          node.className = 'nav-morph-char';
+          node.style.opacity = '0';
+          fading.push(node);
+        }
+        // Keys are case-INSENSITIVE, so a reused node can be carrying the other
+        // case: the "M" of "About Me" is the very node that becomes the "m" of
+        // "Who am I?". Write the glyph every time — the node travels, and the
+        // letter it draws is whatever the incoming label says. The reference gets
+        // this for free (React re-renders the span's children under the same key);
+        // leaving it out rendered "Who AM I?" and, because a cap M is wider than
+        // an m, overflowed the width the sizers had reserved by 2.5px.
+        node.textContent = ch === ' ' ? '\u00A0' : ch;
+        nextLive.set(key, node);
+        frag.appendChild(node); // moves the node when it was reused
+      }
+
+      // Whatever `live` still holds went unclaimed. Pull it out of flow at the
+      // spot it already occupies so the new label reflows around it immediately
+      // — the reference's popLayout — and fade it away there.
+      const unclaimed = [...live.entries()];
+      live.clear();
+      nextLive.forEach((node, key) => live.set(key, node));
+
+      unclaimed.forEach(([key, node]) => {
+        const stranded = exitPool.get(key);
+        if (stranded && stranded !== node) stranded.remove();
+        const f = first.get(node);
+        node.style.position = 'absolute';
+        node.style.left = (f.rect.left - host.left) + 'px';
+        node.style.top = (f.rect.top - host.top) + 'px';
+        exitPool.set(key, node);
+      });
+
+      run.appendChild(frag);
+      // EVERY fading node is re-driven below, not just this pass's own — the
+      // cancel further down kills any exit animation still running, and a node
+      // whose fade was cancelled and not restarted would sit in the box forever.
+      const leaving = [...exitPool.entries()];
+      leaving.forEach(([, node]) => run.appendChild(node)); // fades paint on top
+
+      // Cancel in-flight work only now that its result has been measured.
+      run.querySelectorAll('.nav-morph-char').forEach((n) => {
+        n.getAnimations().forEach((a) => a.cancel());
+      });
+
+      if (!animate) {
+        leaving.forEach(([key, node]) => { exitPool.delete(key); node.remove(); });
+        fading.forEach((n) => { n.style.opacity = ''; });
+        return;
+      }
+
+      // LAST + PLAY. One spring drives the slide and both fades, the way the
+      // reference hands its single `transition` to layout and opacity alike.
+      // animate() applies its first keyframe from creation, so the inverted start
+      // state needs no separate flush.
+      live.forEach((node) => {
+        const f = first.get(node);
+        if (!f) return; // brand new — nothing to slide from
+        const dx = f.rect.left - node.getBoundingClientRect().left;
+        if (!dx) return;
+        node.animate(
+          { transform: ['translateX(' + dx + 'px)', 'translateX(0px)'] },
+          { duration: DURATION, easing: EASE }
+        );
+      });
+
+      fading.forEach((node) => {
+        const f = first.get(node);
+        node.style.opacity = '';
+        node.animate({ opacity: [f ? f.opacity : '0', '1'] }, { duration: DURATION, easing: EASE });
+      });
+
+      leaving.forEach(([key, node]) => {
+        const f = first.get(node);
+        node.animate(
+          { opacity: [f ? f.opacity : '1', '0'] },
+          { duration: DURATION, easing: EASE, fill: 'forwards' }
+        ).finished.then(
+          () => {
+            if (exitPool.get(key) === node) exitPool.delete(key);
+            node.remove();
+          },
+          () => {} // cancelled by a later morph, which has already re-driven it
+        );
+      });
+    }
+  }
+}
+
+initNavMorph();
+
 // Scroll-triggered video. A work-card video (data-autoplay-in-view) sits under a
 // sibling .work-card-poster JPG — the placeholder no-JS visitors and crawlers
 // see. Nothing but that poster loads up front (preload="none"). The video plays
