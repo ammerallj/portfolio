@@ -197,12 +197,27 @@ approach, and the glass carries the panel's blue at that alpha.
     not the same as it being painted, and a stale preview pane will not show you
     the difference. Check paint order by reasoning about the stacking context, or
     look at a real browser.
-  - The bleed mask's two stops land on the same position once `--bar-bleed` hits
-    0, and that degenerate ramp leaves the bottom row anti-aliased — **a pale
-    hairline where the bar met the panel**, because the row sat over the cream
-    section *above* Contact. `::before` therefore extends **1px past** the bleed
-    and the mask ramps over that extra pixel, putting it over the panel instead,
-    where it is the same colour as what is behind it.
+  - **`::before` extends 2px past the bleed, and both pixels earn it.** The first
+    is OVERLAP: Contact's top does not land on a whole pixel — measured at
+    1440×900 the bar's bottom is 64 and the panel's top is **64.2734375**, a
+    0.27px gap (0.55 device px at dpr 2) showing the cream page through as a
+    hairline. The panel's position is the sum of everything above it, much of it
+    fractional, so it cannot be rounded away; the bar has to paint past its own
+    box. The second is the mask's RAMP: with a bare `--bar-bleed` of 0 its two
+    stops land on the same position, and that degenerate gradient leaves an
+    anti-aliased row. Given its own pixel below the overlap it sits over the
+    panel, where it cannot be seen.
+    ⚠️ **Moving the BAR down instead re-opens the same gap at the top of the
+    viewport** once it docks. Paint lower, don't sit lower.
+  - **The frost fades out with the mix too** — `blur()` and `saturate()` both
+    scale by `1 - --dark-mix`. A blur samples a radius around every pixel, so at
+    the element's bottom edge it reached above Contact's top and pulled cream
+    down into the blue. At full mix the accent is opaque and there is nothing
+    left to frost, so `blur(0) saturate(1)` is correct as well as artifact-free.
+  - **Three separate causes drew that one hairline**, and each fix revealed the
+    next: the degenerate mask stop, the fill being painted over by its own frost,
+    and the blur sampling across the seam — plus this sub-pixel gap underneath
+    them all. If a line ever returns, check them in that order.
 - **The LABELS switch once, at `DARK_TEXT_AT` (0.85), and must not fade.** A
   half-faded black-to-white label is grey, and grey is unreadable on both ends.
   0.85 is where the two are equally legible on the part-mixed strip — measured,

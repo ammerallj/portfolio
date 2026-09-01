@@ -319,13 +319,20 @@ main {
      meet it is 0 and the two solid strips butt together.
      The 100px default is what no-JS gets, which is today's behaviour and is
      correct everywhere except that one approach. */
-  /* +1px: the mask below needs somewhere to ramp. With a bare --bar-bleed of 0
-     its two stops land on the same position, and that degenerate gradient leaves
-     the bottom row anti-aliased — a pale hairline where the bar met the panel,
-     because the row sat over the CREAM section above Contact. Extending 1px puts
-     that ramp over the panel instead, where it is the same colour as what is
-     behind it and cannot be seen. */
-  bottom: calc((var(--bar-bleed, 100px) + 1px) * -1);
+  /* +2px, and both pixels are doing a job.
+     The first is OVERLAP. Contact's top does not land on a whole pixel — measured
+     at 1440x900 the bar's bottom is 64 and the panel's top is 64.2734375, a
+     0.27px gap (0.55 device px at dpr 2) that showed the cream page through as a
+     hairline. The panel's position is the sum of everything above it, much of it
+     fractional, so this is not something to round away; the bar simply has to
+     paint past its own box. The mask below stays opaque through it.
+     The second is the mask's RAMP. With a bare --bar-bleed of 0 its two stops
+     would land on the same position, and that degenerate gradient leaves an
+     anti-aliased row; giving it a pixel of its own keeps it well defined, and it
+     now sits below the overlap, over the panel, where it cannot be seen.
+     ⚠️ Moving the BAR down instead would open the same gap at the top of the
+     viewport once it docks. Paint lower, don't sit lower. */
+  bottom: calc((var(--bar-bleed, 100px) + 2px) * -1);
   z-index: -1;
   /* Frosted overlay that BLEEDS: the cream fill is a top→bottom GRADIENT — opaque
      behind the nav row (so the items stay legible over busy content) fading to 0
