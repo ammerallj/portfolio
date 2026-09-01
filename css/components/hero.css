@@ -295,6 +295,22 @@ main {
      group. It steps 60 → 48 on its own, which is why the two per-tier gap
      overrides in responsive.css are gone. */
   gap: var(--gap-group);
+  /* The Contact panel's blue at a variable alpha — --dark-mix, published by
+     updateScrollEffects as the panel approaches. At 0 it is invisible and this is
+     exactly the cream bar; at 1 it covers the frost entirely and the strip is the
+     panel's own colour. A continuous value rather than a swapped rule, so there
+     is no moment where one state stops applying and another starts.
+
+     ⚠️ ON THE BAR, NOT ON ::before, and it has to be. ::before carries the bleed
+     MASK, whose two stops sit at the same position once --bar-bleed reaches 0 —
+     a degenerate ramp that leaves the bottom row anti-aliased and slightly
+     transparent. Over Contact that showed as a pale hairline between the bar and
+     the panel, because what is behind that row is the cream section ABOVE
+     Contact, not Contact itself. The bar's own background is unmasked, so it
+     ends on a clean edge. It also paints IN FRONT of both pseudos (they are
+     z-index: -1), so at full mix it covers the frost and the grain without
+     either needing to be switched off. */
+  background-color: rgba(var(--color-accent-rgb), var(--dark-mix, 0));
   /* Enters LAST: the divider reveals settle, then the bar fades in. */
   animation: intro-bar-fade 0.6s ease-out 0.95s both;
 }
@@ -335,17 +351,7 @@ main {
      the frost keeps its shape and the shrinking box simply clips its tail, which
      is the whole intent. These four are the old percentages resolved at the full
      164px box (64 bar + 100 bleed), so the rendering is unchanged there. */
-  /* TWO layers. The first is the Contact panel's blue at a variable alpha —
-     --dark-mix, published by updateScrollEffects as the panel approaches — over
-     the cream frost beneath it. At 0 it is invisible and this is exactly the
-     cream bar; at 1 it covers the cream completely and the strip is the panel's
-     own colour. Painting it as a LAYER rather than swapping background-color is
-     what makes the state continuous instead of binary: there is no moment where
-     one rule stops applying and another starts. */
   background-image:
-    linear-gradient(to bottom,
-      rgba(var(--color-accent-rgb), var(--dark-mix, 0)) 0,
-      rgba(var(--color-accent-rgb), var(--dark-mix, 0)) 100%),
     linear-gradient(to bottom,
       rgba(251, 252, 248, 0.95) 0,
       rgba(251, 252, 248, 0.92) 69px,

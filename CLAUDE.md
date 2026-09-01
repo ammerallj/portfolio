@@ -181,12 +181,19 @@ approach, and the glass carries the panel's blue at that alpha.
 - **Linear, deliberately.** The point is that it tracks the scroll; an eased
   curve pushes nearly all of it back onto the last few pixels, which is the
   behaviour being replaced.
-- **It is a LAYER, not a swapped `background-color`** — a blue
-  `linear-gradient` at variable alpha painted over the cream frost. That is what
-  makes it continuous: there is no point where one rule stops applying and
-  another starts. It needs `--color-accent-rgb` (global.css) because `rgba()`
-  takes components and a hex token cannot be part-way transparent; **keep that
-  triplet in sync with `--color-accent`, nothing enforces it.**
+- **The fill is on `.intro-bar` itself, NOT on `::before`** — a
+  `background-color` at variable alpha, so it is continuous (no point where one
+  rule stops applying and another starts) and, critically, **unmasked**.
+  `::before` carries the bleed mask, whose two stops sit at the same position
+  once `--bar-bleed` hits 0; that degenerate ramp leaves the bottom row
+  anti-aliased and slightly transparent, which showed over Contact as **a pale
+  hairline between the bar and the panel** — what is behind that row is the cream
+  section *above* Contact, not Contact itself. On the bar it ends on a clean
+  edge, and because both pseudos are `z-index: -1` it also covers the frost and
+  the grain at full mix without either being switched off. It needs
+  `--color-accent-rgb` (global.css) because `rgba()` takes components and a hex
+  token cannot be part-way transparent; **keep that triplet in sync with
+  `--color-accent`, nothing enforces it.**
 - **The LABELS switch once, at `DARK_TEXT_AT` (0.85), and must not fade.** A
   half-faded black-to-white label is grey, and grey is unreadable on both ends.
   0.85 is where the two are equally legible on the part-mixed strip — measured,
