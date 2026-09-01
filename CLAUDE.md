@@ -637,12 +637,15 @@ get it). The project pages' button used to read "Menu".
   specificity and responsive.css (imported last) still wins.
 - ⚠️ **The LABEL is shared; the PANEL is not.** The homepage's overlay is
   connect-only (`aria-label="Contact"`) because its floatie carries Work/About.
-  The project pages' overlay is the full **site menu** (`aria-label="Site menu"`
-  — Work / About + connect) and is the ONLY route to those two sections below
-  680, since project pages have no site-nav floatie. **Do not trim it to match
-  the label.** The cost of the shared label is that navigation now sits behind a
-  button named for contact: the accessible name says "Say hello" and the dialog
-  it opens announces as "Site menu".
+  The project pages' overlay carries **Work / About + connect** and is the ONLY
+  route to those two sections below 680, since project pages have no site-nav
+  floatie. **Do not trim it to match the label.**
+  - Its accessible name is **`aria-label="Navigation and contact"`** — it names
+    BOTH halves. It read "Site menu", which was true until the trigger became
+    "Say hello" (2026-09): activating a button named for contact and landing in
+    a dialog announced as a menu hid the fact that this panel is also the only
+    way to reach Work and About. **The homepage's stays "Contact"** — there the
+    panel really is connect-only, so a compound name would be a lie.
 - The trigger does NOT morph — `initNavMorph` is scoped to `.intro-bar`, and
   there is no hover at this tier.
 - Inversion (white pill, black label) is `.site-header` only, and that is not an

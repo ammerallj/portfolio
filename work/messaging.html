@@ -121,11 +121,17 @@
   </nav>
 
   <!-- ============================================================
-       MOBILE MENU OVERLAY — same overlay as the homepage, links resolved
-       back to index.html. (Contact is intentionally omitted: the connect
-       block below IS the mobile contact.)
-       ============================================================ -->
-  <div class="mobile-menu" id="mobile-menu" role="dialog" aria-modal="true" aria-label="Site menu" aria-hidden="true">
+       MOBILE MENU OVERLAY — the homepage's overlay with the links resolved
+       back to index.html, PLUS the Work / About nav the homepage keeps in its
+       floatie. (A Contact nav link is intentionally omitted: the connect block
+       below IS the mobile contact.)
+       The accessible name covers BOTH halves. It read "Site menu", which was
+       accurate until the trigger became "Say hello" (2026-09) — activating a
+       button named for contact and landing in a dialog announced as a menu hid
+       the fact that this panel is also the only route to Work and About below
+       680px. The homepage's overlay keeps "Contact", because there it really is
+       connect-only. -->
+  <div class="mobile-menu" id="mobile-menu" role="dialog" aria-modal="true" aria-label="Navigation and contact" aria-hidden="true">
     <p class="mobile-menu-name">Jenna Ammerall.</p>
     <nav class="mobile-menu-nav" aria-label="Mobile navigation">
       <a href="../index.html#work-section"><span class="mobile-menu-dash">&mdash;</span> Work</a>
