@@ -182,10 +182,18 @@ y=0 and the bar sits *inside* the section rather than on top of it.
 - The click sends the box's top to **0**, not to the nav line (`topAlignedFor`,
   `Math.ceil` so a fractional edge lands a hair past rather than short).
 
-**The tint is HOW MUCH OF THE BAR HAS BLUE BEHIND IT** — `(invertLine −
-contact.top) / invertLine`, clamped. 0 when the panel's top is at the bar's
-bottom, 1 when it covers the bar. Linear, because it reports a coverage fraction
-rather than performing a transition.
+**The tint is HOW MUCH OF THE BAR HAS BLUE BEHIND IT**, divided by
+`DARK_FULL_AT` — `(invertLine − contact.top) / invertLine / 0.6`, clamped. 0
+when the panel's top is at the bar's bottom, 1 once **60%** of the bar is
+covered. Linear, because it reports a coverage fraction rather than performing a
+transition.
+- **`DARK_FULL_AT` is below 1 on purpose.** Reporting coverage literally left the
+  bar visibly *lighter than the section it was sitting inside* for the whole
+  pass, with the labels stuck dark — `DARK_TEXT_AT` was only reachable at the
+  very end, because white needs a nearly-fully-blue strip to be legible. At 0.6
+  the strip commits early: the labels switch at **59% coverage** instead of ~92%,
+  and the whole change is finished 26px into the 64px pass rather than trailing
+  to its end.
 - ⚠️ **This replaced a guessed window, retuned twice and still wrong.** It was an
   arbitrary run-up of scroll — 260px, then 100px — ending at the bar's bottom
   edge, so the strip started colouring while the panel was still well below it

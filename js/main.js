@@ -137,6 +137,14 @@ const BAR_BLEED = 100;
 // fade — a half-faded black-to-white label is grey, and grey is unreadable on
 // both ends.
 const DARK_TEXT_AT = 0.85;
+// How much of the bar has to be over the panel before the strip is fully the
+// panel's colour. Below 1 on purpose: at 1 the tint tracks coverage exactly, and
+// the bar spends the whole pass visibly lighter than the section it is inside,
+// with the labels stuck dark — DARK_TEXT_AT is only reachable at the very end
+// because white needs a strip that is nearly fully blue. At 0.6 the strip
+// commits early, the labels switch at 51% coverage instead of 85%, and both
+// still land on the measured crossover rather than ahead of it.
+const DARK_FULL_AT = 0.6;
 let lastBarBleed = -1;
 let lastDarkMix = -1;
 function setDarkMix(v) {
@@ -1364,8 +1372,16 @@ function updateScrollEffects() {
       // starts exactly when blue first appears under the bar, reaches 1 exactly
       // when the bar is covered, and is linear because it reports a coverage
       // fraction rather than performing a transition.
+      // ...but it COMMITS once the panel is meaningfully behind it, rather than
+      // tracking coverage all the way to 1. Reporting coverage literally left the
+      // bar part-cream until the panel had almost entirely passed behind it —
+      // lighter than the panel it was sitting in, with the labels still dark
+      // because white cannot be made legible on a half-mixed strip. Reaching full
+      // blue at DARK_FULL_AT of coverage puts the whole change in the first ~38px
+      // of the 64px pass, so it is finished well before the section settles, and
+      // the label switch lands on a strip that is dark enough to carry white.
       const covered = (invertLine - contactRect.top) / invertLine;
-      const mix = Math.max(0, Math.min(1, covered));
+      const mix = Math.max(0, Math.min(1, covered / DARK_FULL_AT));
       setDarkMix(mix);
       // The labels switch once, near the end. See DARK_TEXT_AT.
       stickyBars.forEach(bar => bar.classList.toggle('is-over-dark', mix >= DARK_TEXT_AT));
