@@ -169,28 +169,32 @@ flip at `contact.top <= 64` with a 0.35s cross-fade. At 1440×900 that line *is
 the scroll floor* — Contact is sized `100dvh − nav − footer`, so its top comes to
 rest exactly on the nav line and the blue never travels under the bar at all —
 so the whole palette changed after the page had already stopped moving.
-`updateScrollEffects` now publishes a 0→1 progress across `DARK_WINDOW` of
-approach, and the glass carries the panel's blue at that alpha.
-- **`DARK_WINDOW` IS `BAR_BLEED` — 100px, the same number, deliberately.** A
-  first pass used 260px and read as far too early: the bar was visibly lavender
-  while the panel was still most of a screen away, which is a blue wash over
-  cream rather than a bar picking up the colour arriving beneath it. Tied to the
-  bleed there is ONE approach zone with two effects — the frost retracts as the
-  colour comes up — and the change reads as the panel meeting the bar. **Shorten
-  it before lengthening it.**
-- **Eased in (squared), and the reasoning REVERSED when the window shrank.** At
-  260px linear was right and easing would have been wrong — it would have pushed
-  the whole change onto the last few pixels, which is the binary flip this
-  replaces. At 100px the change is already compressed into the approach, and the
-  complaint became the opposite: the bar read as strongly tinted while the panel
-  was still well below it. Squaring halves the tint through the middle and leaves
-  both ends where they were — gap 75 goes 0.25 → 0.07, gap 50 goes 0.50 → 0.26.
-- **The ramp completes 1px EARLY (`gap - 1`), and that is not cosmetic.** `gap`
-  is fractional — Contact's top rests at 64.27, not 64 — so a ramp finishing at
-  exactly 0 lands on 0.997, and squaring takes it to **0.99**. That last 1% is
-  cream left in the strip at the seam: the hairline returning by another route.
-  Finishing at `gap 1` makes the arrival exact with no branch and no
-  discontinuity.
+**THE PANEL RUNS UP BEHIND THE NAV (2026-08-31), and that is what makes the rest
+of this simple.** `#contact` carries the nav's height as extra top padding and
+its box is `100dvh − footer` (not minus the nav as well), so the colour reaches
+y=0 and the bar sits *inside* the section rather than on top of it.
+- **It removes a boundary instead of patching one.** With the panel stopping at
+  the nav line there was an edge directly under the bar, and every artifact on it
+  had to be chased separately: a sub-pixel gap (Contact's top rests at **64.27**,
+  not 64), the bleed mask's ramp landing on it, and `backdrop-filter`'s blur
+  sampling cream from above it. Over one continuous colour none of them have
+  anything to act on.
+- The click sends the box's top to **0**, not to the nav line (`topAlignedFor`,
+  `Math.ceil` so a fractional edge lands a hair past rather than short).
+
+**The tint is HOW MUCH OF THE BAR HAS BLUE BEHIND IT** — `(invertLine −
+contact.top) / invertLine`, clamped. 0 when the panel's top is at the bar's
+bottom, 1 when it covers the bar. Linear, because it reports a coverage fraction
+rather than performing a transition.
+- ⚠️ **This replaced a guessed window, retuned twice and still wrong.** It was an
+  arbitrary run-up of scroll — 260px, then 100px — ending at the bar's bottom
+  edge, so the strip started colouring while the panel was still well below it
+  and nothing blue was behind the bar at all: a wash over cream. It also needed
+  an easing curve to hold the tint back, and a 1px fudge to stop the ramp
+  finishing at 0.99 on a fractional edge. **None of that survives** once the
+  quantity measured is the real one. If the tint ever needs "reducing" again,
+  the answer is not a new constant — it is that this is measuring the wrong
+  thing.
 - **The fill is the FIRST background layer of `.intro-bar::before`**, painted
   over the cream frost in the same element. It needs `--color-accent-rgb`
   (global.css) because `rgba()` takes components and a hex token cannot be

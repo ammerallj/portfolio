@@ -546,7 +546,17 @@
 
      min-height, not height: if the copy outgrows a short window the panel just
      grows. Reset at ≤480, where nothing settles. */
-  min-height: calc(100dvh - var(--nav-offset) - var(--footer-height));
+  /* THE PANEL RUNS UP BEHIND THE NAV (2026-08-31), which is why the nav's own
+     height is in here twice — once in the box, once in the top padding below.
+     It used to stop at the nav line, so the bar sat ON the panel with a boundary
+     directly under it, and every artifact on that boundary had to be chased
+     separately: a sub-pixel gap (Contact's top rests at 64.27, not 64), the
+     bleed mask's ramp landing on it, and backdrop-filter's blur sampling cream
+     from above it. Running the colour up to y=0 removes the boundary rather than
+     patching it — the bar is inside the section, over one continuous colour, and
+     all three artifacts have nothing to act on.
+     So the box is a full frame minus the footer, not minus the nav as well. */
+  min-height: calc(100dvh - var(--footer-height));
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -563,10 +573,18 @@
      its content, so at 1440x900 the min-height already gives 154px of air either
      side and this clamp resolves to the 96 cap. Nothing about that composition
      moves; the shrink only ever happens where the alternative was an overflow. */
-  padding-block: clamp(
+  --contact-pad: clamp(
     24px,
     calc((100dvh - var(--nav-offset) - var(--footer-height) - var(--contact-content, 0px)) / 2),
     var(--gap-section));
+  padding-block: var(--contact-pad);
+  /* The nav's height on TOP of that, so the copy still begins a full --contact-pad
+     below the BAR rather than below the panel's edge — the bar is inside the
+     section now, and padding is measured from the box, which starts behind it.
+     Without this the heading would ride up under the nav by exactly 64px.
+     (The clamp itself is unchanged: it already discounted the nav's height, so
+     the arithmetic for fitting the footer still holds.) */
+  padding-top: calc(var(--contact-pad) + var(--nav-offset));
 }
 
 /* White eyebrows/labels throughout the blue panel */

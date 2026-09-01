@@ -123,13 +123,12 @@ const BAR_BLEED = 100;
 // changed after the page had already stopped moving. Spreading the glass over
 // the approach ties it to the scroll instead.
 //
-// ⚠️ THE WINDOW IS THE BLEED ZONE, deliberately the same number. A first pass
-// used 260px and read as far too early: the bar was visibly lavender while the
-// panel was still most of a screen away, which is a blue wash over cream rather
-// than a bar picking up the colour arriving beneath it. Tied to BAR_BLEED there
-// is ONE approach zone with two effects — the frost retracts as the colour comes
-// up — and the change reads as the panel meeting the bar. Shorten this before
-// lengthening it.
+// The tint itself no longer HAS a window — it is the fraction of the bar that
+// actually has blue behind it (see updateScrollEffects), which needs no tuning.
+// Two guessed windows came before it, 260px then 100px, both ending at the
+// bar's bottom edge: they started colouring the strip while the panel was still
+// below it and nothing blue was under the bar at all. Only the label threshold
+// below is a choice now.
 //
 // 0.85 is where black and white are equally legible on the part-mixed strip:
 // measured on the composite, white 4.51:1 and black 4.66:1, crossing right
@@ -137,7 +136,6 @@ const BAR_BLEED = 100;
 // the switch costs nothing either way. The LABELS have to switch rather than
 // fade — a half-faded black-to-white label is grey, and grey is unreadable on
 // both ends.
-const DARK_WINDOW = BAR_BLEED;
 const DARK_TEXT_AT = 0.85;
 let lastBarBleed = -1;
 let lastDarkMix = -1;
@@ -1347,26 +1345,27 @@ function updateScrollEffects() {
       const invertLine = Math.max(scrollAnchorTop, barHeight);
       const gap = contactRect.top - invertLine;   // bar's bottom to the panel's top
 
-      // PROGRESSIVE INVERSION. The glass carries the panel's blue at an alpha
-      // that rises across DARK_WINDOW of approach, so the strip colours in as
-      // Contact comes up rather than switching once it has arrived.
+      // PROGRESSIVE INVERSION — driven by HOW MUCH OF THE BAR ACTUALLY HAS BLUE
+      // BEHIND IT, which is the whole rule and needs no tuning.
       //
-      // EASED IN (squared), not linear — and the reasoning reversed once the
-      // window came down. At 260px linear was right and easing would have been
-      // wrong: it would have pushed the whole change onto the last few pixels,
-      // which is the binary flip this replaces. At 100px the change is already
-      // compressed into the approach, and the complaint became the opposite —
-      // the bar was reading as strongly tinted while the panel was still well
-      // below it. Squaring halves the tint through the middle of the approach
-      // (gap 50 goes 0.50 -> 0.25) and leaves both ends where they were.
-      // The -1px completes the ramp a pixel EARLY, and it matters more than it
-      // looks. `gap` is fractional — Contact's top rests at 64.27, not 64 — so a
-      // ramp finishing at exactly 0 lands on 0.997, and squaring takes that to
-      // 0.99. That last 1% is cream left in the strip at the seam, which is the
-      // hairline coming back by another route. Finishing at gap 1 makes the
-      // arrival exact without a branch or a discontinuity.
-      const approach = Math.max(0, Math.min(1, 1 - (gap - 1) / DARK_WINDOW));
-      const mix = approach * approach;
+      // Contact's colour now runs up behind the nav, so the panel's top edge
+      // crosses the bar itself: it reaches the bar’s BOTTOM (invertLine) with
+      // none of the bar covered, and the viewport top with all of it covered.
+      // That fraction IS the tint, so the bar is never bluer than its own
+      // backdrop.
+      //
+      // ⚠️ THIS REPLACED A GUESSED WINDOW, retuned twice and still wrong. It was
+      // an arbitrary run-up of scroll (260px, then 100px) ending at the bar’s
+      // bottom edge, so the strip started colouring while the panel was still
+      // well below it and nothing blue was behind the bar at all — a wash over
+      // cream. It also needed an easing curve to hold the tint back, and a 1px
+      // fudge to stop the ramp finishing at 0.99 on a fractional edge. None of
+      // that survives once the quantity being measured is the real one: this
+      // starts exactly when blue first appears under the bar, reaches 1 exactly
+      // when the bar is covered, and is linear because it reports a coverage
+      // fraction rather than performing a transition.
+      const covered = (invertLine - contactRect.top) / invertLine;
+      const mix = Math.max(0, Math.min(1, covered));
       setDarkMix(mix);
       // The labels switch once, near the end. See DARK_TEXT_AT.
       stickyBars.forEach(bar => bar.classList.toggle('is-over-dark', mix >= DARK_TEXT_AT));
@@ -1557,10 +1556,18 @@ function initSectionGeometry(lenis) {
     return Math.min(Math.max(target, 0), Math.max(max, 0));
   }
 
-  // Top of the section against the nav line — the section's own top EDGE, not its
-  // content's, so the blue panel starts flush under the bar.
+  // Top of the section against the top of the VIEWPORT — not the nav line.
+  // Contact's colour runs up behind the bar (its box carries the nav's height as
+  // extra top padding), so landing its edge on the nav line would leave that
+  // 64px strip of panel above the fold and put the boundary back under the bar.
+  // Sending the box's top to 0 puts the bar inside the section, over one
+  // continuous colour.
   function topAlignedFor(el) {
-    const target = window.scrollY + el.getBoundingClientRect().top - NAV_OFFSET;
+    // ceil, not round: the section's top is fractional (64.27 before this moved,
+    // 0.27 after), and rounding DOWN would leave that sliver of the previous
+    // section showing above the panel. The bar happens to cover it either way,
+    // but landing a hair past is free and does not depend on that.
+    const target = Math.ceil(window.scrollY + el.getBoundingClientRect().top);
     const max = document.documentElement.scrollHeight - window.innerHeight;
     return Math.min(Math.max(target, 0), Math.max(max, 0));
   }
