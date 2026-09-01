@@ -770,11 +770,27 @@ and if the script never runs.
   `normalize()` — that returns early while the damped run owns `scrollLeft` and
   again when a touch gesture has spent its rotation budget, and the track is
   still moving in both.
-- **Clicking a dot lands INSTANTLY** (`bringIntoView`, shared with keyboard
-  focus). Damping exists to make a wheel gesture feel continuous with the hand; a
-  click is discrete, and easing across three cards would drag two unrelated
-  projects past the eye. It also keeps this clear of the damping machinery, which
-  owns `scrollLeft` while it runs.
+- **Clicking a dot moves ONE card, carried by the same spring a wheel gesture
+  gets** (`stepToward`). It starts a damped run exactly the way `onWheel` does,
+  with `dampSettling` true from the first frame — a wheel gesture has to wait to
+  learn where the reader meant to go, a click said so outright.
+  - **It steps rather than jumping, and that is FORCED, not preferred.** Landing
+    on a distant project with only one card of travel would mean making it
+    adjacent first, and it cannot be done: the loop reorders by ROTATION, which
+    preserves the cycle, so the distance between two cards around the ring is
+    invariant. The choice is one card of motion OR arriving in one click, never
+    both. (The earlier build took the other side of that trade and landed
+    instantly via `bringIntoView`.)
+  - **With four projects it costs almost nothing:** from any card, two of the
+    other three are one step away — one forward, one back — and only the opposite
+    card needs a second click. Direction is the shorter way round the ring; a tie
+    (the opposite card) goes forward.
+  - Under `prefers-reduced-motion` it takes the same one-card move without the
+    animation, via `bringIntoView` — the branch the wheel path takes at that
+    point too.
+  - A click during a live wheel run is IGNORED rather than retargeted: that run
+    owns `scrollLeft`, and `endDamp` is what restores snap and the `damping`
+    flag.
 - **Hidden by `.work-list:not(.is-looping) ~ .work-pagination`** — one rule
   covering both JS-off and ≤480, since `.is-looping` lands only when the
   horizontal track is actually running. The sibling combinator is why the markup

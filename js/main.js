@@ -726,7 +726,7 @@ function initWorkCarousel() {
   }
 
   dots.forEach((dot, k) => {
-    dot.addEventListener('click', () => bringIntoView(authored[k]));
+    dot.addEventListener('click', () => stepToward(k));
   });
 
   // normalize() is idempotent and cheap (a comparison, and nothing else on the
@@ -827,6 +827,7 @@ function initWorkCarousel() {
     track.scrollLeft = dampTarget;   // land exactly on the boundary
     track.style.scrollSnapType = ''; // back to the stylesheet's mandatory
     normalize();                     // rotate, and come to rest on STEP
+    updateDots();                    // the card changed — so has the page
     relock();                        // and swallow the flick's remaining tail
   }
 
@@ -882,6 +883,52 @@ function initWorkCarousel() {
       return;
     }
     dampFrame = requestAnimationFrame(dampStep);
+  }
+
+  // ONE CARD toward the project a dot names, carried by the same spring a wheel
+  // gesture gets.
+  //
+  // ⚠️ IT STEPS, IT DOES NOT JUMP — and that is forced, not preferred. Landing on
+  // a distant project with only one card of travel would mean making it adjacent
+  // first, and it cannot be done: the loop reorders by ROTATION, which preserves
+  // the cycle, so the distance between two cards around the ring is invariant.
+  // The choice is one card of motion OR arriving in one click, never both.
+  // With four projects that costs little — from any card, two of the other three
+  // are one step away (one forward, one back) and only the opposite one needs a
+  // second click.
+  //
+  // Direction is the shorter way round; a tie (the opposite card) goes forward.
+  function stepToward(k) {
+    if (!active || step <= 0) return;
+    const target = authored[k];
+    const current = track.children[Math.round(track.scrollLeft / step)];
+    if (!target || !current || target === current) return;
+    // A wheel run already owns scrollLeft — let it finish rather than fight it.
+    if (damping) return;
+
+    const n = authored.length;
+    const forward = (k - authored.indexOf(current) + n) % n;
+    const dir = forward <= n - forward ? 1 : -1;
+
+    // Reduced motion takes the same route the wheel path does at this point:
+    // no animation, just the destination.
+    if (reducedMotion.matches) {
+      bringIntoView(dir === 1 ? track.children[2] : track.firstElementChild);
+      return;
+    }
+
+    // Start a damped run exactly the way onWheel does, with one difference:
+    // dampSettling is true from the first frame. A wheel gesture has to wait to
+    // learn where the reader meant to go; a click said so outright.
+    damping = true;
+    dampSettling = true;
+    dampAnchor = Math.round(track.scrollLeft);
+    dampTarget = dampAnchor + dir * step;
+    track.style.scrollSnapType = 'none';
+    dampLast = 0;
+    dampVel = 0;
+    dampFrame = requestAnimationFrame(dampStep);
+    dampBackstop = setTimeout(endDamp, 2000);
   }
 
   // Fallback resolver for a push that never got decisive: the reader nudged the
