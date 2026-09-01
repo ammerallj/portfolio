@@ -169,8 +169,15 @@ flip at `contact.top <= 64` with a 0.35s cross-fade. At 1440×900 that line *is
 the scroll floor* — Contact is sized `100dvh − nav − footer`, so its top comes to
 rest exactly on the nav line and the blue never travels under the bar at all —
 so the whole palette changed after the page had already stopped moving.
-`updateScrollEffects` now publishes a 0→1 progress across `DARK_WINDOW` (260px)
-of approach, and the glass carries the panel's blue at that alpha.
+`updateScrollEffects` now publishes a 0→1 progress across `DARK_WINDOW` of
+approach, and the glass carries the panel's blue at that alpha.
+- **`DARK_WINDOW` IS `BAR_BLEED` — 100px, the same number, deliberately.** A
+  first pass used 260px and read as far too early: the bar was visibly lavender
+  while the panel was still most of a screen away, which is a blue wash over
+  cream rather than a bar picking up the colour arriving beneath it. Tied to the
+  bleed there is ONE approach zone with two effects — the frost retracts as the
+  colour comes up — and the change reads as the panel meeting the bar. **Shorten
+  it before lengthening it.**
 - **Linear, deliberately.** The point is that it tracks the scroll; an eased
   curve pushes nearly all of it back onto the last few pixels, which is the
   behaviour being replaced.

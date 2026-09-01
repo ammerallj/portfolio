@@ -118,14 +118,23 @@ const BAR_BLEED = 100;
 // `100dvh - nav - footer`, so its top comes to rest exactly on the nav line and
 // the blue never travels under the bar at all — which meant the whole palette
 // changed after the page had already stopped moving. Spreading the glass over
-// the last 260px ties it to the scroll instead.
+// the approach ties it to the scroll instead.
+//
+// ⚠️ THE WINDOW IS THE BLEED ZONE, deliberately the same number. A first pass
+// used 260px and read as far too early: the bar was visibly lavender while the
+// panel was still most of a screen away, which is a blue wash over cream rather
+// than a bar picking up the colour arriving beneath it. Tied to BAR_BLEED there
+// is ONE approach zone with two effects — the frost retracts as the colour comes
+// up — and the change reads as the panel meeting the bar. Shorten this before
+// lengthening it.
 //
 // 0.85 is where black and white are equally legible on the part-mixed strip:
-// both measure ~4.58:1 against blue at 85%. Below it black wins, above it white
-// does, so it is the one point where the switch costs nothing either way. The
-// LABELS have to switch rather than fade — a half-faded black-to-white label is
-// grey, and grey is unreadable on both ends.
-const DARK_WINDOW = 260;
+// measured on the composite, white 4.51:1 and black 4.66:1, crossing right
+// there. Below it black wins, above it white does, so it is the one point where
+// the switch costs nothing either way. The LABELS have to switch rather than
+// fade — a half-faded black-to-white label is grey, and grey is unreadable on
+// both ends.
+const DARK_WINDOW = BAR_BLEED;
 const DARK_TEXT_AT = 0.85;
 let lastBarBleed = -1;
 let lastDarkMix = -1;
