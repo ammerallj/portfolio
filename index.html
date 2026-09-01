@@ -211,10 +211,13 @@
         </div>
       </nav>
       <!-- Mobile-only trigger; the inline nav above is hidden at <=480px
-           (see responsive.css). Work/About move to the bottom floatie pill below,
-           so this control opens the overlay as the mobile CONTACT (the connect
-           block). Opens the full-screen .mobile-menu overlay. -->
-      <button class="mobile-menu-toggle" type="button" aria-expanded="false" aria-controls="mobile-menu">Contact</button>
+           (see responsive.css). Selected work/About me move to the bottom floatie
+           pill below, so this control opens the overlay as the mobile CONTACT
+           (the connect block). Labelled "Say hello" to match the desktop bar's
+           pill and the overlay's own heading — it does NOT morph: the morph is
+           .intro-bar only, and there is no hover to drive one here.
+           Opens the full-screen .mobile-menu overlay. -->
+      <button class="mobile-menu-toggle" type="button" aria-expanded="false" aria-controls="mobile-menu">Say hello</button>
     </div>
   </header>
 
@@ -260,8 +263,8 @@
        Overview/Process/Impact floatie. Contact is the top-right overlay trigger.
        ============================================================ -->
   <nav class="section-pills section-pills--site-nav" aria-label="Sections">
-    <a href="#work-section" class="is-active" aria-current="true">Work</a>
-    <a href="#about">About</a>
+    <a href="#work-section" class="is-active" aria-current="true">Selected work</a>
+    <a href="#about">About me</a>
   </nav>
 
   <!-- ============================================================
@@ -311,8 +314,8 @@
     <nav class="intro-bar" aria-label="Site navigation">
       <p class="intro-bar-name">Jenna Ammerall.</p>
       <div class="intro-bar-links">
-        <div class="intro-bar-group"><a href="#work-section">Selected Work</a></div>
-        <div class="intro-bar-group"><a href="#about">About Me</a></div>
+        <div class="intro-bar-group"><a href="#work-section">Selected work</a></div>
+        <div class="intro-bar-group"><a href="#about">About me</a></div>
       </div>
       <div class="intro-bar-cta-wrap"><a class="intro-bar-cta" href="#contact">Say hello</a></div>
     </nav>
@@ -559,6 +562,6 @@
   </div>
   <div class="wave-cursor" id="wave-cursor" aria-hidden="true">👋</div>
 
-  <script src="js/main.js?v=4537e0b0" defer></script>
+  <script src="js/main.js?v=9b02f53b" defer></script>
 </body>
 </html>

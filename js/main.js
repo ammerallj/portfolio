@@ -445,7 +445,7 @@ function initHeadlineMorph() {
 initHeadlineMorph();
 
 // Every item in the site nav answers itself while the pointer (or keyboard
-// focus) is on it: "Selected Work" -> "What I made", "About Me" -> "Who am I?",
+// focus) is on it: "Selected work" -> "What I made", "About me" -> "Who am I?",
 // "Say hello" -> "Why hello!". A vanilla port of motion-primitives' TextMorph
 // (motion-primitives.com/docs/text-morph), using the same keyed-FLIP technique
 // as initHeadlineMorph above but tuned the way a button wants rather than a
@@ -459,8 +459,8 @@ initHeadlineMorph();
 //   Say hello     -> Why hello!    7 of 10 travel  (the strongest of the three:
 //                                  the "h" of "hello" slides left to become the
 //                                  "h" of "Why", a second "h" fades in behind it)
-//   About Me      -> Who am I?     4 travel, 5 in, 4 out
-//   Selected Work -> What I made   5 travel, 6 in, 8 out (the weakest — the two
+//   About me      -> Who am I?     4 travel, 5 in, 4 out
+//   Selected work -> What I made   5 travel, 6 in, 8 out (the weakest — the two
 //                                  share little but t/space/w/d/e, so it reads
 //                                  more as a cross-fade than a slide)
 //
@@ -475,7 +475,7 @@ initHeadlineMorph();
 // visitors, crawlers and reduced-motion readers get the resting label and
 // nothing else. Each ACCESSIBLE NAME stays the resting label whatever is on
 // screen — these are links to real sections, and a name that changes under the
-// pointer breaks voice control ("click Selected Work") and would announce the
+// pointer breaks voice control ("click Selected work") and would announce the
 // joke instead of the destination.
 //
 // Selectors match BOTH the homepage's own anchors and the project pages'
@@ -487,8 +487,8 @@ function initNavMorph() {
   if (reducedMotion.matches) return;
 
   const MORPHS = [
-    { selector: '.intro-bar-links a[href$="#work-section"]', rest: 'Selected Work', hover: 'What I made' },
-    { selector: '.intro-bar-links a[href$="#about"]', rest: 'About Me', hover: 'Who am I?' },
+    { selector: '.intro-bar-links a[href$="#work-section"]', rest: 'Selected work', hover: 'What I made' },
+    { selector: '.intro-bar-links a[href$="#about"]', rest: 'About me', hover: 'Who am I?' },
     { selector: '.intro-bar-cta', rest: 'Say hello', hover: 'Why hello!' },
   ];
 
@@ -626,12 +626,13 @@ function initNavMorph() {
           fading.push(node);
         }
         // Keys are case-INSENSITIVE, so a reused node can be carrying the other
-        // case: the "M" of "About Me" is the very node that becomes the "m" of
+        // case: the "A" of "About me" is the very node that becomes the "a" of
         // "Who am I?". Write the glyph every time — the node travels, and the
         // letter it draws is whatever the incoming label says. The reference gets
         // this for free (React re-renders the span's children under the same key);
-        // leaving it out rendered "Who AM I?" and, because a cap M is wider than
-        // an m, overflowed the width the sizers had reserved by 2.5px.
+        // leaving it out rendered "Who AM I?" back when the label was title-case,
+        // and because a cap M is wider than an m it also overflowed the width the
+        // sizers had reserved, by 2.5px.
         node.textContent = ch === ' ' ? '\u00A0' : ch;
         nextLive.set(key, node);
         frag.appendChild(node); // moves the node when it was reused
