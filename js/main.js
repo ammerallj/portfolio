@@ -68,6 +68,9 @@ navSections.push(...introBarSections);
 // `is-loading`, so they ran straight into it. Anything the spy reads must be
 // declared above this line, and must be tested on a project page.
 let sectionRestingScrollY = null;
+// Where a NAV CLICK should land, which is not always where the section rests.
+// Same TDZ rule as above — declared here, above updateScrollEffects.
+let sectionClickScrollY = null;
 
 const siteHeader = document.querySelector('.site-header');
 
@@ -1468,8 +1471,9 @@ function setupLenis(Lenis) {
       // the generic offset made the link land in one place and then get moved
       // again 140ms later when the settle ran, a visible two-stage jump whose
       // direction flipped with the window height: down on a short window, up on
-      // a tall one. Ask for the real resting position instead.
-      const resting = sectionRestingScrollY && sectionRestingScrollY(target);
+      // a tall one. Ask for the section's own answer instead — which for Contact
+      // is its TOP, not its centre.
+      const resting = sectionClickScrollY && sectionClickScrollY(target);
       if (resting != null) {
         lenis.scrollTo(resting, { immediate: fromMenu });
         return;
@@ -1540,7 +1544,35 @@ function initSectionGeometry(lenis) {
     return Math.min(Math.max(target, 0), Math.max(max, 0));
   }
 
+  // Top of the section against the nav line — the section's own top EDGE, not its
+  // content's, so the blue panel starts flush under the bar.
+  function topAlignedFor(el) {
+    const target = window.scrollY + el.getBoundingClientRect().top - NAV_OFFSET;
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    return Math.min(Math.max(target, 0), Math.max(max, 0));
+  }
+
   sectionRestingScrollY = (el) => (sections.includes(el) && wide.matches ? restingFor(el) : null);
+
+  // WHERE A CLICK LANDS, which is deliberately not always the resting position.
+  //
+  // Contact opens on its TOP: it is a full-bleed colour panel, and arriving at it
+  // centred leaves a band of cream above the blue with the heading floating in
+  // the middle. Top-aligned, the panel meets the bar — which is also the position
+  // the progressive inversion is built around, so the bar arrives fully blue
+  // instead of part-way. Work and About still centre; their content sits on the
+  // page's own cream and centring is what balances the air around it.
+  //
+  // ⚠️ ONLY THE CLICK MOVES. The spy still asks restingFor() whether the reader
+  // has "arrived", and the two must not be swapped: the click target is now at or
+  // BELOW the spy's threshold (2541 vs 2501 at 1440x900), so clicking Contact
+  // still satisfies the spy and lights the right link. Reversing that — a click
+  // landing SHORT of the threshold — is the bug that once left Work highlighted
+  // after clicking About.
+  sectionClickScrollY = (el) => {
+    if (!sections.includes(el) || !wide.matches) return null;
+    return el.id === 'contact' ? topAlignedFor(el) : restingFor(el);
+  };
 
   // Contact's min-height is `100dvh - nav - footer`, and the footer's height is
   // set by its own type, so it has to be measured rather than guessed.
