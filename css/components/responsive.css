@@ -143,6 +143,43 @@
        divider, its top edge moved with every pixel of window. One fixed value
        holds the tablet composition still. (≤480 steps to 44 below.) */
     --display-size: 64px;
+
+    /* HERO FIELD, tablet: the artwork is sized to the VIEWPORT HEIGHT here,
+       not frozen at a px width the way every other tier does it.
+
+       WHY. hero.css freezes --field-w at 1688.69px below 1440, so the gradient
+       always ends at y=907 however tall the window is — while the divider is
+       pinned to 50dvh and slides DOWN as the tablet gets taller. The lockup
+       walks off the bottom of its own artwork. Measured, worst pixel under the
+       glyphs, white text (bio composited with the frost sheet):
+                              headline   bio
+         1024x768 landscape     1.62     1.58   (the fold is short; it survives)
+         768x1024  portrait     1.90     1.13
+         1024x1366 portrait     1.08     1.02   ← the whole lockup, white on white
+       The frozen width is right on DESKTOP, where the viewport is wider than it
+       is tall and the fold is ~900px. On a portrait tablet it is the bug.
+
+       220dvh restates that same desktop relationship as a ratio, so it holds at
+       every tablet height instead of drifting with it:
+         1024x768   -> 1690px  (today's 1689 — landscape is deliberately UNCHANGED)
+         768x1024   -> 2253px  headline ~2.0 / bio ~1.75
+         1024x1366  -> 3005px  headline  2.25 / bio  2.35
+       Both blocks now land inside the ~1.6–2.3 band the phone crop settled on.
+
+       ⚠️ THE LOCKUP IS TALLER THAN THE ARTWORK'S STRONG BAND, so this is a
+       BALANCE, not a maximum — headline and bio pull in opposite directions and
+       tuning either one alone makes the other worse. A first pass grew the field
+       AND dropped the -12% shift, which took the bio to 2.06 and the headline
+       down to 1.23. The -12% shift is kept for exactly that reason; don't
+       "improve" the bio by removing it.
+       ⚠️ MEASURE, don't derive. The bio sits in the RIGHT column, so growing the
+       field moves it HORIZONTALLY across the gradient too; a formula holding the
+       vertical fraction constant scored 1.81 where the measured fit scored 2.12.
+       ⚠️ The headline CYCLES through three statements (text-morph, js/main.js),
+       so its number moves with whichever is showing. Sample all three.
+       The px floor keeps short viewports on today's composition; the vw term is
+       the base token's width guarantee, carried over. */
+    --field-w: max(1688.69px, 220dvh, 117.27vw);
   }
 
   /* LANDING hero interim (no ≤1024 frames yet for the "Making products make

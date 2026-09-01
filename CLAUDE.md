@@ -59,8 +59,26 @@ of `50dvh` assuming a full-height hero with the divider at its centre, and
 neither holds here. Watch the bio's contrast whenever the field shrinks: at a
 70% crop its last lines fell off the gradient onto near-cream (white type at
 1.11:1); 85% keeps them at ~1.6–2.3:1. ≤1024 tiers are INTERIM
-(desktop composition, tighter insets) pending frames. The previous blob-hero landing is archived, fully
-self-contained, in `archive/blob-hero-2026-08/`.
+(desktop composition, tighter insets) pending frames — **except the field, which
+the tablet tier now sizes to the viewport HEIGHT** (`--field-w: max(1688.69px,
+220dvh, 117.27vw)`, 2026-08-31). The frozen px width is a desktop assumption: it
+ends the gradient at y=907 however tall the window is, while the divider stays
+pinned to 50dvh and slides down with the viewport, so on a portrait tablet the
+lockup walks off the bottom of its own artwork — measured 1.08:1 headline and
+1.02:1 bio at 1024×1366, white on white. 220dvh restates the desktop
+relationship as a ratio: landscape (1024×768) resolves to 1690px and is
+deliberately unchanged, 768×1024 grows to 2253, 1024×1366 to 3005, and both
+blocks land in the ~1.6–2.3 band. **It is a BALANCE, not a maximum** — the
+lockup is taller than the artwork's strong band, so headline and bio pull
+against each other: a first pass also dropped the −12% shift and took the bio to
+2.06 while the headline fell to 1.23. Keep the shift. **Measure, don't derive**
+— the bio sits in the right column, so growing the field moves it horizontally
+across the gradient too, and a formula holding the vertical fraction constant
+scored 1.81 where the measured fit scored 2.12. The cost is magnification:
+3005px from a 3600px source is a 1.67× upscale on a 2× display, invisible on a
+soft gradient but the reason not to push the ratio higher. The previous
+blob-hero landing is archived, fully self-contained, in
+`archive/blob-hero-2026-08/`.
 
 **The field asset is ONE file, and its name is the source's name.** The repo
 holds only `images/hero-bkg.jpg` — 3600×2198, ~1.4MB, and that file is already

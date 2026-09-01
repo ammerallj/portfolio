@@ -51,7 +51,13 @@ main {
    pane's reach both read from it, so they can't drift apart.
      --field-w       the artwork's rendered width: 117.27vw at the 1440 design
                      size (= 1688.69px), FROZEN at that px value below 1440 so
-                     narrowing the window crops instead of scaling. This is the
+                     narrowing the window crops instead of scaling.
+                     ⚠️ The freeze only survives down to 1025. At ≤1024 the tier
+                     re-sizes this to the viewport HEIGHT (220dvh) — a frozen
+                     width ends the gradient at y=907 while the divider tracks
+                     50dvh, so on a portrait tablet the lockup left the artwork
+                     entirely. See responsive.css's 1024 :root before changing
+                     the number here; the two are one decision. This is the
                      original 126.5vw / 1821.6px composition taken down 10% and
                      then back up 3% (2026-08), so it now sits 7.3% under the
                      original; the pair must move together — vw × 14.4 = the px
