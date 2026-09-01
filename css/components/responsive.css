@@ -431,6 +431,116 @@
 }
 
 /* ==========================================================================
+   3b. WHERE THE NAV BAR STOPS FITTING (max-width: 680px)
+   The ONE job of this tier: hand navigation over to the mobile system
+   before the desktop bar runs out of room. Nothing else belongs here.
+
+   The bar is content-width and cannot shrink — every item is `nowrap` and
+   flex items won't go below min-content — so once the viewport is narrower
+   than its contents it simply overflows, and the "Say hello" pill runs off
+   the right edge. Measured at 1440 with the 2026-09 labels: 24px padding
+   x2 + wordmark 147.8 + gap 48 + links (106.26 + 48 + 77.89) + gap 48 +
+   pill 117.89 = 641.84, and ~644.5 when the scroll-spy's `is-active` puts
+   the Work link on wght 600. Under 645px the bar is broken; 680 leaves ~35px
+   for a font fallback or a longer label.
+
+   ⚠️ This is NOT a fifth design tier. It carries no type, no spacing and no
+   composition — the hero geometry, the card peek and the phone type scale all
+   stay in the 480 tier below, because they are about a phone, and this is
+   about one bar's arithmetic. Re-measure the sum above if a nav label changes,
+   and move THIS number; do not add layout here.
+
+   Everything here was previously in the 480 tier and simply moved up, so
+   ≤480 is unchanged: max-width 680 matches every phone width too, and the
+   480 block still follows this one and wins where they overlap.
+   ========================================================================== */
+@media (max-width: 680px) {
+  /* The landing's bottom bar goes; the header + floatie below replace it.
+     .intro-bar is a SIBLING of .intro whose negative top margin is cancelled
+     by an equal bottom margin, so removing it from flow costs the hero
+     nothing — the fold, the divider and the field are all untouched. */
+  .intro-bar {
+    display: none;
+  }
+
+  /* The header floats OVER the hero here instead of stacking above it,
+     so the field reaches the top of the screen: fixed takes it out of flow, and
+     at rest it drops the cream glass entirely. `html.is-at-page-top` is the
+     TRANSPARENT state (set pre-paint in index.html's inline script, maintained
+     in updateScrollEffects), so scrolling — or JS never loading — leaves the
+     frosted bar that header.css already defines. :not(.is-over-dark) keeps the
+     blue Contact inversion winning if it ever fires here. */
+  .site-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+  }
+  html.is-at-page-top .site-header:not(.is-over-dark) {
+    background-color: transparent;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
+  /* The homepage header comes BACK here — it carries the mobile nav
+     ("Say hello" trigger + menu); the docking intro-bar above is desktop-only. */
+  body:has(.intro) .site-header {
+    display: block;
+  }
+  .site-header.is-tucked {
+    transform: none;
+  }
+
+  /* The PROJECT pages keep their top bar — it is their only nav (no
+     .site-header there any more), so the homepage's hide above must not reach
+     it. It collapses to the same shape the header has here: wordmark + "Menu"
+     trigger, the overlay carrying Work / About / connect. ("Say hello" drops
+     out of the phone nav, the same way it does on the homepage.)
+     MUST stay after `.intro-bar` above: same specificity (0,1,0), so source
+     order is the only thing re-showing this bar. */
+  .intro-bar--page {
+    display: flex;
+    padding-inline: var(--page-gutter);
+  }
+  .intro-bar--page .intro-bar-links,
+  .intro-bar--page .intro-bar-cta-wrap {
+    display: none;
+  }
+
+  /* The homepage's floatie (Selected work / About me) has to come up with the
+     bar, not stay at 480: the header's inline nav is hidden just below and its
+     trigger opens the connect panel only, so without this there is no route to
+     Work or About at all between 481 and 680.
+     The PROJECT pages' chapter floatie deliberately does NOT move — that one
+     is in-page nav for a long document, still governed by page structure
+     rather than by this bar's width, and stays ≤480 (project-overview.css §8).
+     Its phone sizing (.section-pills a) stays down there with it; at these
+     widths the base size fits with room. */
+  .section-pills.section-pills--site-nav {
+    display: flex;
+  }
+
+  /* Mobile menu: the inline Work/About/Contact links give way to a "Menu"
+     trigger that opens the full-screen .mobile-menu overlay (see
+     mobile-menu.css for its look, initMobileMenu() in main.js for behavior).
+     Showing .is-open is gated to this tier so the overlay can never linger
+     over the desktop layout if the viewport grows. */
+  .site-header-row {
+    gap: 1rem; /* let "Jenna Ammerall" sit on one line beside the trigger */
+  }
+  .site-nav-bar {
+    display: none;
+  }
+  .mobile-menu-toggle {
+    display: block;
+  }
+  .mobile-menu.is-open,
+  .mobile-menu.is-closing {
+    display: flex; /* .is-closing keeps it visible while the exit slide plays */
+  }
+}
+
+/* ==========================================================================
    4. LARGE SMARTPHONES (max-width: 480px)
    Tightest layout: nav gap collapses, grids become one column,
    the footer copyright row stacks.
@@ -521,10 +631,6 @@
   .intro-band-spacer {
     display: none;
   }
-  .intro-bar {
-    display: none;
-  }
-
   /* The gradient field is CENTERED on the viewport by default (translateX(-50%)
      on a box frozen at 1639.44px wide, so a phone just crops more of it). Nudge
      that crop 50px to the RIGHT. A fixed px offset, not a %, so it is locked:
@@ -562,25 +668,6 @@
     );
   }
 
-  /* The header floats OVER the hero at this tier instead of stacking above it,
-     so the field reaches the top of the screen: fixed takes it out of flow, and
-     at rest it drops the cream glass entirely. `html.is-at-page-top` is the
-     TRANSPARENT state (set pre-paint in index.html's inline script, maintained
-     in updateScrollEffects), so scrolling — or JS never loading — leaves the
-     frosted bar that header.css already defines. :not(.is-over-dark) keeps the
-     blue Contact inversion winning if it ever fires here. */
-  .site-header {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-  }
-  html.is-at-page-top .site-header:not(.is-over-dark) {
-    background-color: transparent;
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
-  }
-
   /* The hero ends SHORT of the fold so the first Work card peeks above it —
      the phone's scroll cue (there's no bottom bar at this tier), and it puts
      the card in view early enough for its reveal to play as the reader
@@ -604,32 +691,6 @@
   #work-section {
     padding-top: var(--gap-section);
     padding-bottom: 96px;
-  }
-
-  /* The homepage header comes BACK at this tier — it carries the mobile nav
-     (Contact trigger + menu); the docking intro-bar above is desktop-only. */
-  body:has(.intro) .site-header {
-    display: block;
-  }
-  .site-header.is-tucked {
-    transform: none;
-  }
-
-  /* The PROJECT pages keep their top bar at this tier — it is their only nav
-     now (no .site-header there any more), so the homepage's hide above must
-     not reach it. It collapses to the same shape the header had here: wordmark
-     + "Menu" trigger, the overlay carrying Work / About / connect exactly as
-     before. ("Say hello" drops out of the phone nav — the same way it does
-     on the homepage, whose floatie is Work / About only and whose overlay is
-     the connect block.) Overview / Process / Impact stay in the
-     bottom floatie. */
-  .intro-bar--page {
-    display: flex;
-    padding-inline: var(--page-gutter);
-  }
-  .intro-bar--page .intro-bar-links,
-  .intro-bar--page .intro-bar-cta-wrap {
-    display: none;
   }
 
   /* Remaining 40px→32px step-downs on phones. (.section-title now steps via
@@ -695,31 +756,6 @@
   .section-pills a {
     font-size: 0.875rem;
     padding: 8px 10px;
-  }
-
-  /* The homepage's mobile nav floatie (Work / About) appears here, where the
-     header nav collapses to the "Contact" trigger. */
-  .section-pills.section-pills--site-nav {
-    display: flex;
-  }
-
-  /* Mobile menu: the inline Work/About/Contact links give way to a "Menu"
-     trigger that opens the full-screen .mobile-menu overlay (see
-     mobile-menu.css for its look, initMobileMenu() in main.js for behavior).
-     Showing .is-open is gated to this tier so the overlay can never linger
-     over the desktop layout if the viewport grows. */
-  .site-header-row {
-    gap: 1rem; /* let "Jenna Ammerall" sit on one line beside the trigger */
-  }
-  .site-nav-bar {
-    display: none;
-  }
-  .mobile-menu-toggle {
-    display: block;
-  }
-  .mobile-menu.is-open,
-  .mobile-menu.is-closing {
-    display: flex; /* .is-closing keeps it visible while the exit slide plays */
   }
 
   /* Phone work cards inherit the Image -> Title -> Meta -> Description order

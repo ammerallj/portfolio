@@ -21,7 +21,7 @@ shared by all of them.
   - `project-overview.css` — the shared Project Overview template: §0 `.intro-bar--page` (the landing's nav bar pinned to the top of these pages), `.project-hero`, `.project-masthead` (title + metadata `<dl>`), `.project-block` (description / impact / role), §0a the section-seam rules, `.next-case` (§9) with its two treatments — `--image` (destination art, the pager) and `--outline` + `--locked` (the hairline Full-case-study card) — (`.project-locked` / `.invite-button` were deleted 2026-08), the `.project-carousel` masthead crossfade, and `.section-pills`. Imported after `sections.css` (it leans on `.section-label`, `.about-body`, `.contact-connect-links`) and before `responsive.css`.
   - `mobile-menu.css` — the ≤480 `.mobile-menu` overlay (the connect-only panel
     behind the header's "Menu" / "Contact" trigger) on every page.
-  - `responsive.css` — **ALL width breakpoints, site-wide.** Organized by screen size (1440 → 1024 → 768 → 480px). Imported last so it overrides desktop styles.
+  - `responsive.css` — **ALL width breakpoints, site-wide.** Organized by screen size (1440 → 1024 → 768 → **680** → 480px). Imported last so it overrides desktop styles. The 680 tier is a NAV-ONLY tier — see **The nav hand-off at 680** below.
 
 ## Landing (2026-08) — "Making products make sense."
 The homepage hero is the Figma 339:3745 landing: `images/hero-bkg.jpg` laid as
@@ -37,9 +37,9 @@ see **The landing nav bar** below). Load: the divider "emits" headline up + bio
 down (masked by each region's overflow, 64px travel over a 40px gap,
 REVEAL.ease), then the bar fades in — all CSS, reduced-motion exempt. The
 sticky header stays in the DOM, tucked above the viewport over the hero
-(js/main.js) and sliding in past the fold; at ≤480 the tuck is neutralized,
+(js/main.js) and sliding in past the fold; at **≤680** the tuck is neutralized,
 the `.intro-bar` is hidden, and the floatie pill + header Contact trigger
-carry mobile nav. **At ≤480 the header is `position: fixed` and FLOATS over the
+carry mobile nav. **At ≤680 the header is `position: fixed` and FLOATS over the
 hero** so the field reaches the top of the screen — it is bare while the page
 rests at the top (`html.is-at-page-top`, a third pre-paint flag set in
 index.html's inline script beside `is-motion`/`is-loading` and maintained in
@@ -127,6 +127,48 @@ or the preload fetches a second copy of a 1.4MB LCP image instead of priming
 the one the page uses. The `<img>`'s `width`/`height` are the asset's real
 pixels — re-derive them on a re-export, and re-check the `1.6377` aspect that
 hero.css's `--field-bottom` is derived from.
+
+### The nav hand-off at 680 (2026-09)
+**The desktop bar is shown down to 681px and no further**, because that is where
+it stops fitting. It is content-width and cannot shrink — every item is `nowrap`,
+and a flex item will not go below min-content — so a narrower viewport does not
+compress it, it simply overflows and the "Say hello" pill runs off the right edge.
+
+Measured at 1440 with the 2026-09 labels: `24px padding ×2 + wordmark 147.8 +
+gap 48 + links (106.26 + 48 + 77.89) + gap 48 + pill 117.89 = **641.84**`, and
+~644.5 once the scroll-spy puts the Work link on `wght 600`. **Re-measure that sum
+whenever a nav label changes, and move the breakpoint** — 680 is that number plus
+~35px for a font fallback.
+
+⚠️ **This band was broken before the 2026-09 rename too** — the old "Work"/"About"
+bar needed 541px, so 481–540 already clipped. The rename widened an existing
+fault; the 680 tier is what actually closed it.
+
+**The tier carries NAV AND NOTHING ELSE.** It holds exactly the rules that swap
+the bar for the mobile header + floatie: `.intro-bar` off, `.site-header`
+fixed/visible/bare-at-top, the tuck neutralized, `.intro-bar--page` collapsed to
+wordmark + "Menu", `.section-pills--site-nav` on, and the header row / inline nav
+/ trigger / overlay switches. Every one of them simply MOVED UP from the 480 tier,
+so ≤480 is unchanged (`max-width: 680` matches phones too, and the 480 block still
+follows and wins where they overlap).
+- **Do not put type, spacing or composition here.** The phone hero geometry
+  (`--hero-h`, `--hero-drop`, the field crop, the 120px card peek) and the phone
+  type scale stay at ≤480, because they are about a phone; this is about one bar's
+  arithmetic. Verified after the move: at 375 the hero is still `100dvh − 184`
+  and the card peek still measures exactly 120px.
+- **`.intro-bar` is a SIBLING of `.intro`**, not a child, and its negative top
+  margin is cancelled by an equal bottom margin — which is why hiding it costs the
+  hero nothing. This is what made the move safe.
+- **`.intro-bar--page` must stay after `.intro-bar`** in the block: same
+  specificity (0,1,0), so source order is the only thing re-showing the project
+  pages' bar.
+- **The homepage floatie had to come up with the bar.** The header's inline nav is
+  hidden here and its trigger opens the connect panel only, so without
+  `.section-pills--site-nav` there would be no route to Work or About at all
+  between 481 and 680.
+- **The project pages' CHAPTER floatie deliberately did NOT move** — that one is
+  in-page nav for a long document, governed by page structure rather than by this
+  bar's width, and stays ≤480 along with its phone pill sizing.
 
 ### The landing nav bar (`.intro-bar`)
 **Wordmark left, then Work · About · "Say hello" as ONE group on the right**, at a
@@ -836,6 +878,8 @@ When the request is about how the site looks/behaves at a **smaller screen size*
 - **Only open `css/components/responsive.css`. Do not read or edit any other CSS file, `index.html`, or `js/main.js`.**
 - All width breakpoints live there, grouped by screen size (standard tiers):
   `1440px` (reserved, empty) · `1024px` (landscape tablet — nav reflow, Work/About/Contact stack) ·
+  **`680px` (NAV ONLY — the desktop bar hands over to the mobile header + floatie;
+  put nothing else here, see "The nav hand-off at 680")** ·
   `768px` (portrait tablet — Work card images, hero/intro full width) ·
   `480px` (large phone — nav gap, work grid → 1 col, connect links wrap, footer
   stack, **and the only tier where `.section-pills` exists on any page**).
@@ -1200,7 +1244,7 @@ own version, separate from the `style.css?v=` / `@import` CSS bump below).
 
 ## Cascade Rules (do not break)
 - `@import` order in `style.css` is: **global → header → hero → sections → footer → project-overview → mobile-menu → responsive.** `global.css` must stay first (tokens + reset); `responsive.css` must stay **last** so its media queries override the desktop base styles.
-- **All width breakpoints live in `responsive.css`**, ordered largest → smallest max-width (1440 → 1024 → 768 → 480). Do not scatter width media queries back into the component files. Motion queries (`prefers-reduced-motion`) are the exception — they stay beside their animations in `global.css` / `hero.css`.
+- **All width breakpoints live in `responsive.css`**, ordered largest → smallest max-width (1440 → 1024 → 768 → 680 → 480). Do not scatter width media queries back into the component files. Motion queries (`prefers-reduced-motion`) are the exception — they stay beside their animations in `global.css` / `hero.css`.
 
 ## Conventions
 - **Titles carry no terminal period (2026-08).** Homepage Work-card titles, About
