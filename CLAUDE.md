@@ -161,8 +161,8 @@ homepage's treatment claimed the opposite, three times per page.
   That scope is load-bearing — `.section-title` is shared with the homepage (6
   uses), every chapter `h2` sits in a `.project-block-left`, and every `h1` sits
   in `.project-masthead-head`. **Never fix this on the token.** Before the change
-  the outline read 56 (h1) = 56 (h2) → 16 (h3): no hierarchy at the top and a 3.5×
-  cliff below. It now reads **56 → 40 → 16** over 20px body.
+  the outline read 56 (h1) = 56 (h2) → 13 (h3): no hierarchy at the top and a 4.3×
+  cliff below. It now reads **56 → 40 → 13** over 18px body.
 **The HOMEPAGE now has no hairlines at all (2026-08).** `.page-section` still
 carries `border-bottom` in global.css, but all three homepage sections opt out:
 Contact via `:last-of-type`, About via `:has(+ .contact-section)` (the blue
@@ -304,8 +304,8 @@ together instead of scattering down the tiers:
     and ≤480 flattened to a single 32px for H1, H2 and both card titles. **This is
     why the two tokens stay separate even when their numbers match** — alias them
     and the same drift recurs invisibly.
-  - It does **not** step again at ≤480: it also has to stay above the 20px
-    description *inside its own card*, and 24px would leave a 4px gap there. Not
+  - It does **not** step again at ≤480: it also has to stay above the 18px
+    description *inside its own card*, and 24px would leave a 6px gap there. Not
     every type token has to move at every tier.
 - `--next-case-radius` — 60 → 48 (≤1024) → 32 (≤768) → 24 (≤480). Steps at
   **every** tier because it's a shape, not a line of type. This is why the card
@@ -392,7 +392,7 @@ nav.** Two different jobs — don't merge them.
   or a detail block has no information, delete it. Never leave it blank or guess.
 - **Impact rows can expand (`.project-impact-list--expandable`, Accessibility,
   2026-08).** Each row is a native `<details>`: the `<summary>` carries the
-  outcome (20px/**500**, full black) **and an evidence line** (13px/400 at
+  outcome (18px/**500**, full black) **and an evidence line** (13px/400 at
   **`--color-text-70`**), and only the explanation collapses.
   - **Never move a metric into the collapsed half.** The whole reason the split
     exists is that the numbers are the strongest proof on the page — an accordion
@@ -402,7 +402,7 @@ nav.** Two different jobs — don't merge them.
     together.** The outcome was 600 (inherited from `.project-impact-list strong`)
     with the evidence at full black. That works on the plain lists, where the
     emphasis is a lead clause *inside* a sentence; here the whole line is the claim,
-    so 600 applied to every word of four stacked 20px lines and read as a wall of
+    so 600 applied to every word of four stacked 18px lines and read as a wall of
     bold. Dropping to 500 fixed that but left two full-black elements with no focal
     point, so the evidence went to 70%. **Undo in that order:** if the numbers ever
     need to fight for attention again, put the claim back to 600 *before* putting
@@ -411,11 +411,11 @@ nav.** Two different jobs — don't merge them.
     (13px, normal tracking) — same material as the masthead's Timeline / Role / Team
     values. Only the colour departs, and only because there is no muted `dt` label
     beside it here to do the contrast work. At 70% it is 8.4:1 — not fine print.
-  - **500 is the floor for the claim.** At 400 it would be identical to the 20px/400
+  - **500 is the floor for the claim.** At 400 it would be identical to the 18px/400
     explanation that opens underneath, and an expanded row would collapse into one
     undifferentiated block of body copy.
   - **`.impact-row-detail` declares NO type at all** — only padding. It inherits
-    the 20px/-0.02em/1.4 full black from `.project-impact-list li`, which is what
+    the 18px/-0.02em/1.4 full black from `.project-impact-list li`, which is what
     these paragraphs were before they became collapsible and the same body text
     the Approach statement uses. **Expanding a row reveals the site's body copy,
     not a smaller quieter variant of it.** Don't add a font-size here; a component

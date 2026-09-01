@@ -44,11 +44,11 @@
 
      It exists because those H2s used to BE --section-title-size, rendering the
      project title and its chapters at an identical 56px. The outline then had no
-     hierarchy in its top two levels (h1 = h2 = 56) and a 3.5× cliff to the next
-     one (h3 = 16). A project page is ONE document — title, then chapters — not
+     hierarchy in its top two levels (h1 = h2 = 56) and a 4.3× cliff to the next
+     one (h3 = 13). A project page is ONE document — title, then chapters — not
      the homepage's set of peer sections each standing in for a nav destination,
      which is what an equal-weight heading claimed it was.
-     56 → 40 → 16 is the resulting scale, with 18px body under it.
+     56 → 40 → 13 is the resulting scale, with 18px body under it.
 
      Numerically the same as --next-case-title-size today; kept separate because
      they answer to different things (a chapter heading vs. the pager's title)
