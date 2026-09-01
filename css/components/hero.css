@@ -335,7 +335,17 @@ main {
      the frost keeps its shape and the shrinking box simply clips its tail, which
      is the whole intent. These four are the old percentages resolved at the full
      164px box (64 bar + 100 bleed), so the rendering is unchanged there. */
+  /* TWO layers. The first is the Contact panel's blue at a variable alpha —
+     --dark-mix, published by updateScrollEffects as the panel approaches — over
+     the cream frost beneath it. At 0 it is invisible and this is exactly the
+     cream bar; at 1 it covers the cream completely and the strip is the panel's
+     own colour. Painting it as a LAYER rather than swapping background-color is
+     what makes the state continuous instead of binary: there is no moment where
+     one rule stops applying and another starts. */
   background-image:
+    linear-gradient(to bottom,
+      rgba(var(--color-accent-rgb), var(--dark-mix, 0)) 0,
+      rgba(var(--color-accent-rgb), var(--dark-mix, 0)) 100%),
     linear-gradient(to bottom,
       rgba(251, 252, 248, 0.95) 0,
       rgba(251, 252, 248, 0.92) 69px,
@@ -375,8 +385,11 @@ main {
   pointer-events: none;
 }
 
+/* Grain thins out on the same curve the blue comes up on: full over cream, gone
+   by the time the strip is the panel's colour. Replaces the old binary
+   `is-over-dark::after { opacity: 0 }`. */
 .intro-bar.is-docked::after {
-  opacity: 1;
+  opacity: calc(1 - var(--dark-mix, 0));
 }
 
 /* ---- Over the blue Contact panel: the bar inverts ----
@@ -387,16 +400,14 @@ main {
    --color-accent (not a tint) so the strip merges into the panel with no ghost
    of the white headings scrolling beneath. Toggled in js/main.js
    (updateScrollEffects), alongside the header's copy of the state. */
+/* ⚠️ is-over-dark no longer paints the glass — --dark-mix does, continuously.
+   This class is now the TEXT state alone: it is switched at the point where the
+   strip has gone dark enough that white reads better than black on it, which is
+   a threshold, not a ramp (a half-faded black-to-white label is grey, and grey
+   is unreadable on both). The only thing left here is forcing the glass visible
+   in the case where the bar is over Contact without having docked. */
 .intro-bar.is-over-dark::before {
-  background-color: var(--color-accent);
-  /* Drop the cream gradient so the solid blue shows over Contact. */
-  background-image: none;
   opacity: 1;
-}
-
-/* No grain over the solid-blue Contact strip. */
-.intro-bar.is-over-dark::after {
-  opacity: 0;
 }
 
 .intro-bar.is-over-dark .intro-bar-name {

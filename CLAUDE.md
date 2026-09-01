@@ -164,13 +164,37 @@ strips. The grain on `::after` rides the same value via
   full-bleed rendering is unchanged.
 - Written once on the root and guarded on its last value: `updateScrollEffects`
   runs every scroll frame and this invalidates a `backdrop-filter`.
-- **This does not touch WHEN the bar inverts.** That is still the binary
-  `contact.top <= 64` flip with its 0.35s cross-fade. Worth knowing if the
-  transition is revisited: at 1440×900 that line *is* the scroll floor —
-  Contact's height is `100dvh − nav − footer`, so its top comes to rest exactly
-  at 64 and the blue never travels under the bar at all. The fade therefore
-  begins as the scrolling stops. At shorter or narrower viewports Contact
-  exceeds its min-height and the edge does pass under, with runway.
+**The inversion is PROGRESSIVE (`--dark-mix`, 2026-08-31).** It was one binary
+flip at `contact.top <= 64` with a 0.35s cross-fade. At 1440×900 that line *is
+the scroll floor* — Contact is sized `100dvh − nav − footer`, so its top comes to
+rest exactly on the nav line and the blue never travels under the bar at all —
+so the whole palette changed after the page had already stopped moving.
+`updateScrollEffects` now publishes a 0→1 progress across `DARK_WINDOW` (260px)
+of approach, and the glass carries the panel's blue at that alpha.
+- **Linear, deliberately.** The point is that it tracks the scroll; an eased
+  curve pushes nearly all of it back onto the last few pixels, which is the
+  behaviour being replaced.
+- **It is a LAYER, not a swapped `background-color`** — a blue
+  `linear-gradient` at variable alpha painted over the cream frost. That is what
+  makes it continuous: there is no point where one rule stops applying and
+  another starts. It needs `--color-accent-rgb` (global.css) because `rgba()`
+  takes components and a hex token cannot be part-way transparent; **keep that
+  triplet in sync with `--color-accent`, nothing enforces it.**
+- **The LABELS switch once, at `DARK_TEXT_AT` (0.85), and must not fade.** A
+  half-faded black-to-white label is grey, and grey is unreadable on both ends.
+  0.85 is where the two are equally legible on the part-mixed strip — measured,
+  white **4.51:1** and black **4.66:1**, crossing right there, both clearing AA.
+  Below it black wins, above it white does; at mix 1 black would be 3.59, so
+  switching earlier is what keeps black off the full blue.
+- `is-over-dark` is now **the text state only**. It no longer paints the glass;
+  its one remaining job on `::before` is forcing the glass visible in the case
+  where the bar is over Contact without having docked.
+- Grain thins on the same curve (`opacity: calc(1 - var(--dark-mix))`), replacing
+  the old binary `is-over-dark::after { opacity: 0 }`.
+- Both custom properties are written on the ROOT and guarded on their last value
+  — this runs every scroll frame and repaints a backdrop-filtered layer. Project
+  pages have no `#contact`, so neither is ever set and the CSS fallbacks (`0` and
+  `100px`) give exactly the old bar.
 
 ## Where each page area lives
 | Area on page | CSS file | HTML location |

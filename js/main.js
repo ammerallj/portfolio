@@ -110,7 +110,33 @@ const darkPanel = document.getElementById('contact');
 // what a no-JS visitor gets, and it is the correct value everywhere except the
 // approach to Contact.
 const BAR_BLEED = 100;
+// How much approach the bar's colour change is spread over, in px of scroll, and
+// the point in it where the LABELS switch.
+//
+// The inversion used to be one binary flip at the moment Contact's top reached
+// the bar. At 1440x900 that moment IS the scroll floor — Contact is sized
+// `100dvh - nav - footer`, so its top comes to rest exactly on the nav line and
+// the blue never travels under the bar at all — which meant the whole palette
+// changed after the page had already stopped moving. Spreading the glass over
+// the last 260px ties it to the scroll instead.
+//
+// 0.85 is where black and white are equally legible on the part-mixed strip:
+// both measure ~4.58:1 against blue at 85%. Below it black wins, above it white
+// does, so it is the one point where the switch costs nothing either way. The
+// LABELS have to switch rather than fade — a half-faded black-to-white label is
+// grey, and grey is unreadable on both ends.
+const DARK_WINDOW = 260;
+const DARK_TEXT_AT = 0.85;
 let lastBarBleed = -1;
+let lastDarkMix = -1;
+function setDarkMix(v) {
+  // Rounded to 1% and guarded, for the reason setBarBleed is: this runs on every
+  // scroll frame and repaints a backdrop-filtered layer.
+  const px = Math.round(v * 100) / 100;
+  if (px === lastDarkMix) return;
+  lastDarkMix = px;
+  document.documentElement.style.setProperty('--dark-mix', px);
+}
 function setBarBleed(px) {
   // Written on the ROOT, not per bar: one property, and the two pseudo-elements
   // that read it inherit it. Guarded on the last value because updateScrollEffects
@@ -1302,12 +1328,23 @@ function updateScrollEffects() {
       // invert over, so keep the bars in their normal (cream) state.
       stickyBars.forEach(bar => bar.classList.remove('is-over-dark'));
       setBarBleed(BAR_BLEED);
+      setDarkMix(0);
     } else {
       const scrollAnchorTop = parseFloat(getComputedStyle(html).scrollPaddingTop) || 0;
       const barHeight = Math.max(...stickyBars.map(bar => bar.offsetHeight));
       const invertLine = Math.max(scrollAnchorTop, barHeight);
-      const overDark = contactRect.top <= invertLine + 1;
-      stickyBars.forEach(bar => bar.classList.toggle('is-over-dark', overDark));
+      const gap = contactRect.top - invertLine;   // bar's bottom to the panel's top
+
+      // PROGRESSIVE INVERSION. The glass carries the panel's blue at an alpha
+      // that rises across DARK_WINDOW of approach, so the strip colours in as
+      // Contact comes up rather than switching once it has arrived. Linear on
+      // purpose: the whole point is that it tracks the scroll, and an eased curve
+      // would push nearly all of it back onto the last few pixels — which is the
+      // behaviour being replaced.
+      const mix = Math.max(0, Math.min(1, 1 - gap / DARK_WINDOW));
+      setDarkMix(mix);
+      // The labels switch once, near the end. See DARK_TEXT_AT.
+      stickyBars.forEach(bar => bar.classList.toggle('is-over-dark', mix >= DARK_TEXT_AT));
 
       // CLIP THE FROST TO CONTACT'S TOP EDGE. The bar's glass bleeds BAR_BLEED
       // past its own bottom so it melts into the page instead of ending on a
@@ -1317,7 +1354,7 @@ function updateScrollEffects() {
       // Handing back exactly the gap keeps the frost on the cream it belongs to:
       // full bleed until the panel is within reach, then shrinking to 0 as the
       // two meet, so they butt together as solid strips.
-      setBarBleed(Math.max(0, Math.min(BAR_BLEED, Math.round(contactRect.top - invertLine))));
+      setBarBleed(Math.max(0, Math.min(BAR_BLEED, Math.round(gap))));
     }
   }
 
