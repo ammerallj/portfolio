@@ -1343,10 +1343,13 @@ finally describe the real frame rather than the poster's size.
 - **Total payload did not grow.** Trimming paid for the resolution: 9.99 MB
   before (with a 30s Accessibility clip and an 8.6s Loop) against 10.0 MB now
   with everything at 2s.
-- ⚠️ **Re-cutting a clip means re-checking its POSTER.** `initScrollVideos`
-  restores the poster on `ended`, so the card comes to rest on the JPG and it has
-  to match the video's final frame. Verified after this re-cut by sampling ten
-  frames per clip and diffing each against its poster: the difference falls
-  monotonically to a minimum at the end for all four (accessibility 55→12,
-  messaging 32→16, communities 34→14; loop settles by 0.6s and holds). The
-  residual 8–16 is q70 JPEG compression, not a different frame.
+- **The card now rests on the video's LAST FRAME.** Nothing runs on `ended` any
+  more. `initScrollVideos` used to swap the poster back in, but that was a
+  workaround for the upscale: the soft last frame was worse than the 2660×830
+  JPG. At native resolution the last frame is exactly as sharp, so the swap
+  bought nothing and cost a visible jump — the poster is *close* to the final
+  frame but not identical (measured mean channel delta 12–16, mostly q70 JPEG
+  compression), and that showed as a flicker the instant playback stopped.
+  **Bring it back only if a clip is ever re-exported small again — and fix the
+  export first.** The poster still does its real jobs: the no-JS/crawler
+  placeholder, and the image shown before playback starts.
