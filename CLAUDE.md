@@ -546,6 +546,25 @@ nav.** Two different jobs — don't merge them.
   **There is now ONE "go somewhere" component on these pages:** `.next-case`, with
   `--image` for the pager and `--outline` (+ `--locked`) for a gated case study.
   Anything else is a plain inline link. Don't reintroduce a third pattern.
+- **The HOMEPAGE signposts the gate too (`.work-card-lock`, 2026-08-31).** The
+  Work cards for **Accessibility and Messaging** open their meta row with a
+  circular lock badge — lock → `SHIPPED ↗` → `Meta · 2026`, so the gate qualifies
+  everything after it rather than trailing the provenance as a footnote. Loop and
+  Groups have nothing gated and **must not** get one; the badge's presence is the
+  same fact as the `--locked` card on that project's page, so the two move
+  together.
+  - **It reuses the `.next-case-lock` padlock verbatim** — same 24-unit viewBox,
+    same 1.5 stroke. ONE padlock on the site; don't draw a second.
+  - **The circle is the pill's box restated** (`1.5em` line + `0.8em` padding +
+    2px hairlines = its exact 31.9px height, same `rgba(0,0,0,0.22)` rule), so it
+    stands level with `SHIPPED ↗` and follows it if that type ever moves tier.
+    Spelled out as its parts on purpose — don't hard-code 31.9px.
+  - ⚠️ **It is the one place the lock does NOT name the thing it sits on.** The
+    card links to a project overview page that is fully public; the gate is one
+    step further in. That is why the accessible name is **"Full case study
+    locked"**, not "Locked" — the badge and its label are one unit, and splitting
+    them would make the card claim to be gated when it isn't. Compare the section
+    pill that lost its chip in 2026-08 for the same error made the other way.
 - **The lock lives on the DESTINATION, never in this page.** Set the Figma file's
   share access to **"Anyone with password"** — *not* "Anyone with the link",
   which has no lock at all and would make the "locked" label a lie while

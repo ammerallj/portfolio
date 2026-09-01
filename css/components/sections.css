@@ -315,6 +315,49 @@
   white-space: nowrap;
 }
 
+/* Lock badge — OPENS the meta row on the two projects whose FULL CASE STUDY is
+   password-gated (Accessibility, Messaging). Loop and Groups have nothing gated
+   and must not get one. First position, so the row reads lock → SHIPPED ↗ →
+   Meta · 2026: the gate is the qualifier on everything after it, not a footnote
+   trailing the provenance.
+
+   ⚠️ WHAT IT CLAIMS. The card itself is not locked: it links to a project
+   overview page that is entirely public. The gate is one step further in, on the
+   Figma deck that page's "Full case study" card points to. That is why the
+   accessible name is "Full case study locked" and not "Locked" — the site's
+   standing rule is that a lock names the thing that IS locked (see the section
+   pill that lost its chip in 2026-08 for the same mistake made the other way).
+   Keep the badge and its label together if this moves.
+
+   THE CIRCLE IS THE PILL'S BOX, restated. Same hairline, same 13px scale, same
+   0.4em padding — so it stands exactly as tall as "SHIPPED ↗" beside it and
+   tracks it automatically if that type ever changes tier. The height is spelled
+   out as its parts rather than hard-coded to 31.9px for that reason:
+     1.5em  the line box (--size-xs x the body's 1.5 line-height)
+   + 0.8em  the pill's 0.4em padding, top and bottom
+   + 2px    both hairlines */
+.work-card-lock {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: calc(1.5em + 0.8em + 2px);
+  height: calc(1.5em + 0.8em + 2px);
+  border: 1px solid rgba(0, 0, 0, 0.22); /* the pill's hairline, not --color-border */
+  border-radius: 50%;
+  font-size: var(--size-xs);
+  color: var(--color-text-70);
+}
+
+/* 1.15em ≈ 15px against .next-case-lock's 1em — a touch larger because it sits
+   inside a ring here rather than beside text, and reads small otherwise. Same
+   24-unit viewBox and 1.5 stroke as that one: ONE padlock on the site. */
+.work-card-lock-icon {
+  width: 1.15em;
+  height: 1.15em;
+  display: block;
+}
+
 /* ============================================================
    PUBLIC FOOTPRINTS — the third-party coverage links.
 
