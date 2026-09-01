@@ -364,8 +364,21 @@ main {
       rgba(251, 252, 248, 0.92) 69px,
       rgba(251, 252, 248, 0.4) 90px,
       rgba(251, 252, 248, 0) 112px);
-  -webkit-backdrop-filter: blur(16px) saturate(1.15);
-  backdrop-filter: blur(16px) saturate(1.15);
+  /* THE FROST FADES OUT AS THE STRIP GOES SOLID, and it has to.
+     A blur samples a radius around each pixel, so at the element's bottom edge it
+     reaches ABOVE Contact's top and pulls cream down into the blue — which is
+     what was still drawing a hairline there after the fill and the mask were
+     both fixed. At full mix the accent is opaque and there is nothing left to
+     frost, so the filter is pure artifact: taken to blur(0) saturate(1) it stops
+     sampling across the seam and the ramp row resolves to the panel's own colour.
+     Written as one expression rather than a switch so it stays continuous with
+     everything else in the approach. */
+  -webkit-backdrop-filter:
+    blur(calc(16px * (1 - var(--dark-mix, 0))))
+    saturate(calc(1 + 0.15 * (1 - var(--dark-mix, 0))));
+  backdrop-filter:
+    blur(calc(16px * (1 - var(--dark-mix, 0))))
+    saturate(calc(1 + 0.15 * (1 - var(--dark-mix, 0))));
   -webkit-mask-image: linear-gradient(to bottom, #000 0, #000 calc(100% - var(--bar-bleed, 100px) - 1px), transparent 100%);
   mask-image: linear-gradient(to bottom, #000 0, #000 calc(100% - var(--bar-bleed, 100px) - 1px), transparent 100%);
   opacity: 0;
