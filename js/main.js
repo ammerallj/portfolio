@@ -1349,11 +1349,24 @@ function updateScrollEffects() {
 
       // PROGRESSIVE INVERSION. The glass carries the panel's blue at an alpha
       // that rises across DARK_WINDOW of approach, so the strip colours in as
-      // Contact comes up rather than switching once it has arrived. Linear on
-      // purpose: the whole point is that it tracks the scroll, and an eased curve
-      // would push nearly all of it back onto the last few pixels — which is the
-      // behaviour being replaced.
-      const mix = Math.max(0, Math.min(1, 1 - gap / DARK_WINDOW));
+      // Contact comes up rather than switching once it has arrived.
+      //
+      // EASED IN (squared), not linear — and the reasoning reversed once the
+      // window came down. At 260px linear was right and easing would have been
+      // wrong: it would have pushed the whole change onto the last few pixels,
+      // which is the binary flip this replaces. At 100px the change is already
+      // compressed into the approach, and the complaint became the opposite —
+      // the bar was reading as strongly tinted while the panel was still well
+      // below it. Squaring halves the tint through the middle of the approach
+      // (gap 50 goes 0.50 -> 0.25) and leaves both ends where they were.
+      // The -1px completes the ramp a pixel EARLY, and it matters more than it
+      // looks. `gap` is fractional — Contact's top rests at 64.27, not 64 — so a
+      // ramp finishing at exactly 0 lands on 0.997, and squaring takes that to
+      // 0.99. That last 1% is cream left in the strip at the seam, which is the
+      // hairline coming back by another route. Finishing at gap 1 makes the
+      // arrival exact without a branch or a discontinuity.
+      const approach = Math.max(0, Math.min(1, 1 - (gap - 1) / DARK_WINDOW));
+      const mix = approach * approach;
       setDarkMix(mix);
       // The labels switch once, near the end. See DARK_TEXT_AT.
       stickyBars.forEach(bar => bar.classList.toggle('is-over-dark', mix >= DARK_TEXT_AT));

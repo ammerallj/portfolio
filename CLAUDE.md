@@ -178,9 +178,19 @@ approach, and the glass carries the panel's blue at that alpha.
   bleed there is ONE approach zone with two effects — the frost retracts as the
   colour comes up — and the change reads as the panel meeting the bar. **Shorten
   it before lengthening it.**
-- **Linear, deliberately.** The point is that it tracks the scroll; an eased
-  curve pushes nearly all of it back onto the last few pixels, which is the
-  behaviour being replaced.
+- **Eased in (squared), and the reasoning REVERSED when the window shrank.** At
+  260px linear was right and easing would have been wrong — it would have pushed
+  the whole change onto the last few pixels, which is the binary flip this
+  replaces. At 100px the change is already compressed into the approach, and the
+  complaint became the opposite: the bar read as strongly tinted while the panel
+  was still well below it. Squaring halves the tint through the middle and leaves
+  both ends where they were — gap 75 goes 0.25 → 0.07, gap 50 goes 0.50 → 0.26.
+- **The ramp completes 1px EARLY (`gap - 1`), and that is not cosmetic.** `gap`
+  is fractional — Contact's top rests at 64.27, not 64 — so a ramp finishing at
+  exactly 0 lands on 0.997, and squaring takes it to **0.99**. That last 1% is
+  cream left in the strip at the seam: the hairline returning by another route.
+  Finishing at `gap 1` makes the arrival exact with no branch and no
+  discontinuity.
 - **The fill is the FIRST background layer of `.intro-bar::before`**, painted
   over the cream frost in the same element. It needs `--color-accent-rgb`
   (global.css) because `rgba()` takes components and a hex token cannot be
