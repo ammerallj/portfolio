@@ -246,7 +246,7 @@
   /* Shared right column flush to the container's right edge — anchored the
      same way as the nav, so its left edge (and the description) stays aligned
      with the "Work" nav item across the whole desktop range, not just 1440.
-     Fluid 291→542 across the 1025–1440 band via the shared token. */
+     Fluid 369→542 across the 1025–1440 band via the shared token. */
   flex: 0 1 var(--width-right-column);
   min-width: 0;
   display: flex;
@@ -478,7 +478,7 @@
   min-width: 0;
 }
 
-/* On My Mind: shares the site's right column (fluid 291→542); may shrink on
+/* On My Mind: shares the site's right column (fluid 369→542); may shrink on
    narrower desktops so the two columns never overflow the panel */
 .contact-mind {
   flex: 0 1 var(--width-right-column);
@@ -656,7 +656,7 @@
 
 .about-right {
   /* Shared right column flush to the container's right edge — shares the
-     single right-column edge used across the site (fluid 291→542). */
+     single right-column edge used across the site (fluid 369→542). */
   flex: 0 0 var(--width-right-column);
   display: flex;
   flex-direction: column;

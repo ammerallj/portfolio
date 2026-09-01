@@ -9,17 +9,19 @@ shared by all of them.
 
 ## File Map
 - **Project overview pages:** `work/*.html` (4) — see **Project Overview Pages** below.
-- **Main HTML:** `index.html` (~260 lines) — structure/content only. A tiny inline `<script>` in `<head>` sets `is-motion` + `is-loading` pre-paint (both only when JS runs, so no-JS visitors aren't left on a blank page); ends with a single `<script src="js/main.js" defer>`.
+- **Main HTML:** `index.html` — structure/content only. A tiny inline `<script>` in `<head>` sets `is-motion` + `is-loading` pre-paint (both only when JS runs, so no-JS visitors aren't left on a blank page); ends with a single `<script src="js/main.js" defer>`.
 - **JavaScript:** `js/main.js` — all interactions: nav scroll-spy, the landing header tuck (`is-tucked` while the hero's `.intro-bar` is on screen), page load reveal, header-over-Contact color inversion, custom cursors, the About tab view (`initAboutTabs`), the looping Work carousel (`initWorkCarousel` — see **Horizontal Tracks** below), **plus the motion system** (Lenis smooth scroll + Motion.dev viewport reveals). The blob-hero engine (BLOBS morph, hover push, paragraph cycling) retired 2026-08 — archived copy in `archive/blob-hero-2026-08/js/main.js`. See **Motion & Scrolling** below for knobs — don't re-read the whole file.
-- **CSS entry:** `style.css` (~6 lines) — **@import list only, no rules.** Do not add styles here.
+- **CSS entry:** `style.css` — **@import list only, no rules.** Do not add styles here.
 - **CSS components:** `css/components/`
-  - `global.css` (~345) — reset, design tokens (`:root` custom properties), base typography, focus/skip-link, `.site-container` layout, `.page-section` structure, custom cursor, `.visually-hidden`, **motion reveal initial state** (`html.is-motion [data-reveal]`) + Lenis classes (`html.lenis`)
-  - `header.css` (~92) — `.site-header`, `.site-nav-bar`, nav links, `.is-over-dark` inversion state. **Now the ≤480 homepage only** — it's `display:none` over the landing at desktop and the project pages dropped it (2026-08) for the shared `.intro-bar`. Don't build new nav on it.
-  - `hero.css` (~230) — the **landing** (2026-08, Figma 339:3745): `.page-field` full-page gradient image, `.intro` stage (statement / divider / frosted band / `.intro-bar` bottom nav), the divider-mask load reveals, and the `is-loading` page hold. The previous blob hero is archived in `archive/blob-hero-2026-08/`.
-  - `sections.css` (~640) — `.page-section` content: Selected Work (the horizontal `.work-list` track — see **Horizontal Tracks**), Contact, About, case-study placeholder. It also still owns the **footprint link list** (`.footprint-group` / `.footprint-group-title` / `.footprint-list` + the `↗`), whose only consumer is now the project pages — see **Public Footprints** below.
-  - `footer.css` (~28) — `.site-footer`
-  - `project-overview.css` (~275) — the shared Project Overview template: §0 `.intro-bar--page` (the landing's nav bar pinned to the top of these pages), `.project-hero`, `.project-masthead` (title + metadata `<dl>`), `.project-block` (description / impact / role), §0a the section-seam rules, `.next-case` (§9) with its two treatments — `--image` (destination art, the pager) and `--outline` + `--locked` (the hairline Full-case-study card) — (`.project-locked` / `.invite-button` were deleted 2026-08), the `.project-carousel` masthead crossfade, and `.section-pills`. Imported after `sections.css` (it leans on `.section-label`, `.about-body`, `.contact-connect-links`) and before `responsive.css`.
-  - `responsive.css` (~110) — **ALL width breakpoints, site-wide.** Organized by screen size (1000 → 768 → 700 → 600px). Imported last so it overrides desktop styles.
+  - `global.css` — reset, design tokens (`:root` custom properties), base typography, focus/skip-link, `.site-container` layout, `.page-section` structure, custom cursor, `.visually-hidden`, **motion reveal initial state** (`html.is-motion [data-reveal]`) + Lenis classes (`html.lenis`)
+  - `header.css` — `.site-header`, `.site-nav-bar`, nav links, `.is-over-dark` inversion state. **Now the ≤480 homepage only** — it's `display:none` over the landing at desktop and the project pages dropped it (2026-08) for the shared `.intro-bar`. Don't build new nav on it.
+  - `hero.css` — the **landing** (2026-08, Figma 339:3745): `.page-field` full-page gradient image, `.intro` stage (statement / divider / frosted band / `.intro-bar` bottom nav), the divider-mask load reveals, and the `is-loading` page hold. The previous blob hero is archived in `archive/blob-hero-2026-08/`.
+  - `sections.css` — `.page-section` content: Selected Work (the horizontal `.work-list` track — see **Horizontal Tracks**), Contact, About, case-study placeholder. It also still owns the **footprint link list** (`.footprint-group` / `.footprint-group-title` / `.footprint-list` + the `↗`), whose only consumer is now the project pages — see **Public Footprints** below.
+  - `footer.css` — `.site-footer`
+  - `project-overview.css` — the shared Project Overview template: §0 `.intro-bar--page` (the landing's nav bar pinned to the top of these pages), `.project-hero`, `.project-masthead` (title + metadata `<dl>`), `.project-block` (description / impact / role), §0a the section-seam rules, `.next-case` (§9) with its two treatments — `--image` (destination art, the pager) and `--outline` + `--locked` (the hairline Full-case-study card) — (`.project-locked` / `.invite-button` were deleted 2026-08), the `.project-carousel` masthead crossfade, and `.section-pills`. Imported after `sections.css` (it leans on `.section-label`, `.about-body`, `.contact-connect-links`) and before `responsive.css`.
+  - `mobile-menu.css` — the ≤480 `.mobile-menu` overlay (the connect-only panel
+    behind the header's "Menu" / "Contact" trigger) on every page.
+  - `responsive.css` — **ALL width breakpoints, site-wide.** Organized by screen size (1440 → 1024 → 768 → 480px). Imported last so it overrides desktop styles.
 
 ## Landing (2026-08) — "Making products make sense."
 The homepage hero is the Figma 339:3745 landing: `images/hero-bkg.jpg` laid as
@@ -158,9 +160,9 @@ homepage's treatment claimed the opposite, three times per page.
 | Full-strength divider kept | between peer sections | **only before the Next Case pager** — the one real seam |
 
 - **Headings:** `.project-block-left .section-title` carries the smaller token.
-  That scope is load-bearing — `.section-title` is shared with the homepage (6
-  uses), every chapter `h2` sits in a `.project-block-left`, and every `h1` sits
-  in `.project-masthead-head`. **Never fix this on the token.** Before the change
+  That scope is load-bearing — `.section-title` is shared with the homepage (5
+  uses — the four Work-card headings and About Me), every chapter `h2` sits in a
+  `.project-block-left`, and every `h1` sits in `.project-masthead-head`. **Never fix this on the token.** Before the change
   the outline read 56 (h1) = 56 (h2) → 13 (h3): no hierarchy at the top and a 4.3×
   cliff below. It now reads **56 → 40 → 13** over 18px body.
 **The HOMEPAGE now has no hairlines at all (2026-08).** `.page-section` still
@@ -390,7 +392,7 @@ nav.** Two different jobs — don't merge them.
   including "reasonable" filler for a missing timeline or team.
 - **Omit, don't fabricate.** If a metadata row (Timeline / Role / Area / Scope)
   or a detail block has no information, delete it. Never leave it blank or guess.
-- **Impact rows can expand (`.project-impact-list--expandable`, Accessibility,
+- **Impact rows can expand (`.project-impact-list--expandable`, all four pages,
   2026-08).** Each row is a native `<details>`: the `<summary>` carries the
   outcome (18px/**500**, full black) **and an evidence line** (13px/400 at
   **`--color-text-70`**), and only the explanation collapses.
@@ -432,8 +434,9 @@ nav.** Two different jobs — don't merge them.
     expanded/collapsed announcement for free. Keep it that way. **This is why
     one-at-a-time used `name` rather than a click handler** — the obvious reach
     for JS, avoided.
-  - Rules are scoped to the modifier; plain `.project-impact-list` (Loop, Groups,
-    Messaging) is untouched. The `<details>` height itself is **not** animated —
+  - Rules are scoped to the modifier; the plain `.project-impact-list` is
+    untouched. Only Loop and Groups still have one — it holds their three named
+    principles under Approach, not their outcomes. Messaging has no plain list. The `<details>` height itself is **not** animated —
     that isn't portable; only the detail text fades in.
 - **Gating states that the work can't be shown publicly and points to the locked
   case study.** No AI conversation. **Two treatments exist — pick by whether the
@@ -589,7 +592,7 @@ When the request is about how the site looks/behaves at a **smaller screen size*
 - Desktop (≥1440px) base values are NOT here — changing those is a separate,
   non-responsive edit in the relevant component file.
 - Suggested phrasing: **"in responsive.css, at [breakpoint], change [selector] [property]"**
-  — e.g. *"in responsive.css, at 600px, add 20px side padding to the hero."*
+  — e.g. *"in responsive.css, at 480px, add 20px side padding to the hero."*
 
 ## Horizontal Tracks (the Selected Work carousel, 2026-08)
 
@@ -839,14 +842,16 @@ absent/removed and **all content just shows**. Never hide content in a way that
 depends on JS succeeding.
 
 **Where each knob lives — go straight here, no full-file read:**
+*(The line numbers drift with every edit — every one of them was 6–16× off by
+2026-08. The NAME in each row is the durable anchor: grep it.)*
 | To change… | Open `js/main.js` at… | Edit |
 |---|---|---|
-| Reveal feel (rise distance, duration, stagger, easing) | `const REVEAL` (~line 154) | `distance` px · `duration` s · `stagger` s (per item, 80ms) · `ease` cubic-bezier |
-| When a reveal fires / resets (scroll thresholds) | `setupReveals` → `update()` (~line 259) | reveal at `top < vh*0.85 && bottom > vh*0.15`; **reset only when fully off-screen** (`bottom<=0 || top>=vh`) — this is the anti-cut-out rule, keep the reset off-screen |
-| Per-item order within a group / the stagger animation | `setupReveals` → `setVisible()` (~line 238) | reads `data-reveal-order`, calls Motion `animate` |
-| Smooth-scroll feel (weight, wheel, easing) | `setupLenis` (~line 182) | Lenis `duration`, `easing`, `smoothWheel`; also routes `a[href^="#"]` clicks through `lenis.scrollTo` |
-| Hero scroll-fade, contact fade, scroll-spy, header inversion | `updateScrollEffects` (~line 72) | these are **scroll-linked** (not reveals); separate system |
-| Scribble load reveal sequence | `revealSite`/`revealRestOfSite` (~line 44) + `hero.css` keyframes | separate from viewport reveals |
+| Reveal feel (rise distance, duration, stagger, easing) | `const REVEAL` (~line 1196) | `distance` px · `duration` s · `stagger` s (per item, 80ms) · `ease` cubic-bezier |
+| When a reveal fires / resets (scroll thresholds) | `setupReveals` → `update()` (~line 1413) | reveal at `top < vh*0.85 && bottom > vh*0.15`; **reset only when fully off-screen** (`bottom<=0 || top>=vh`) — this is the anti-cut-out rule, keep the reset off-screen |
+| Per-item order within a group / the stagger animation | `setupReveals` → `setVisible()` (~line 1375) | reads `data-reveal-order`, calls Motion `animate` |
+| Smooth-scroll feel (weight, wheel, easing) | `setupLenis` (~line 1226) | Lenis `duration`, `easing`, `smoothWheel`; also routes `a[href^="#"]` clicks through `lenis.scrollTo` |
+| Hero scroll-fade, contact fade, scroll-spy, header inversion | `updateScrollEffects` (~line 1024) | these are **scroll-linked** (not reveals); separate system |
+| Scribble load reveal sequence | `revealSite`/`revealRestOfSite` (~line 119) + `hero.css` keyframes | separate from viewport reveals |
 | Pre-paint hidden state (initial opacity/translate) | `global.css` → `html.is-motion [data-reveal]` | keep its `translateY` roughly in sync with `REVEAL.distance` |
 
 **Reveal markup (in `index.html`):** wrap a section container with `data-reveal-group`;
@@ -870,7 +875,7 @@ fades in again on every re-entry (scrolling up or down). Keep the reset off-scre
 own version, separate from the `style.css?v=` / `@import` CSS bump below).
 
 ## Cascade Rules (do not break)
-- `@import` order in `style.css` is: **global → header → hero → sections → footer → responsive.** `global.css` must stay first (tokens + reset); `responsive.css` must stay **last** so its media queries override the desktop base styles.
+- `@import` order in `style.css` is: **global → header → hero → sections → footer → project-overview → mobile-menu → responsive.** `global.css` must stay first (tokens + reset); `responsive.css` must stay **last** so its media queries override the desktop base styles.
 - **All width breakpoints live in `responsive.css`**, ordered largest → smallest max-width (1440 → 1024 → 768 → 480). Do not scatter width media queries back into the component files. Motion queries (`prefers-reduced-motion`) are the exception — they stay beside their animations in `global.css` / `hero.css`.
 
 ## Conventions
@@ -988,10 +993,14 @@ is defined somewhere in the site.
 - HTML has no cache-buster, so metadata edits need **no `?v=` bump**.
 
 ## Image compression (pass done — recipe for new images)
-The site-wide compression pass is **done**. All 13 project-overview carousel
-images and the 4 homepage Work-card images are compressed JPEGs; there are no
-PNGs left in `images/`. Total image payload is ~6 MB (was ~18 MB). The overview
-images land 312–448 KB each; the Work cards 296–568 KB each.
+The site-wide compression pass is **done**. All 12 project-overview carousel
+images (3 slides × 4 pages) and the 4 homepage Work-card images are compressed
+JPEGs — together ~6.2 MB, down from ~18 MB. The overview images land 312–448 KB
+each; the Work cards 295–430 KB each. **That figure is the PASS's scope, not the
+directory**: all of tracked `images/` is ~20 MB, half of it the four `.mp4`s.
+The five cursor PNGs are also still there and four are live — `.cursor-glow`
+loads them in `global.css` — so "no PNGs" is not the rule; "no PNG
+screenshots or collages" is.
 
 **Recipe (use for any NEW image before committing it):**
 - `sips -s format jpeg -s formatOptions 82 SRC.png --out images/name.jpg` — q82

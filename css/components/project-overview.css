@@ -181,7 +181,7 @@ a.intro-bar-name {
 }
 
 .project-masthead-right {
-  flex: 0 0 var(--width-right-column); /* shared right column, fluid 291→542 */
+  flex: 0 0 var(--width-right-column); /* shared right column, fluid 369→542 */
   min-width: 0;
   /* Loop and Groups have no note/button column, so the metadata would otherwise
      fall to the LEFT edge on its own. This pins it to the right in that case and
@@ -488,7 +488,8 @@ a.intro-bar-name {
    a 4.3× cliff to 13 (h3). Now it reads 56 → 40 → 13 over 18px body.
 
    SCOPE IS LOAD-BEARING. .section-title is shared with the homepage (5 uses:
-   Selected Work, the three Work cards, About), so this must
+   the four Work-card headings and About Me — Selected Work has no heading of
+   its own, the first card carries #work-heading), so this must
    never touch the token itself. .project-block-left is the exact scope: every
    chapter H2 on all four pages sits in one, every H1 sits in
    .project-masthead-head instead, and the homepage has no .project-block at all.
@@ -501,7 +502,7 @@ a.intro-bar-name {
 }
 
 .project-block-right {
-  flex: 0 0 var(--width-right-column); /* shared right column, fluid 291→542 */
+  flex: 0 0 var(--width-right-column); /* shared right column, fluid 369→542 */
   min-width: 0;
 }
 

@@ -65,7 +65,7 @@ body:has(.intro) .site-header {
 }
 
 .site-nav-bar {
-  /* Shared right column — fluid 291→542 across the 1025–1440 band, so the
+  /* Shared right column — fluid 369→542 across the 1025–1440 band, so the
      nav scales in step with the hero description and card descriptions. */
   flex: 0 0 var(--width-right-column);
   display: flex;
