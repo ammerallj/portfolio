@@ -10,56 +10,50 @@
        so it can never linger over the desktop layout.
    ============================================================ */
 
-/* --- The header trigger (Inter 16px, per Figma 123:3800) --- */
+/* --- The header trigger: the landing bar's solid pill --- */
+/* One component, one treatment on BOTH page types — the same object as
+   .intro-bar-cta in hero.css (black, white label, 100px radius, 36px tall), so
+   the trigger reads the same wherever the desktop bar has handed over.
+
+   Sized by PADDING, not height: 8 + 20 + 8 = 36. That is not a style
+   preference. A rule that set `display: inline-flex` to centre the label would
+   need to be scoped (e.g. `.site-header .mobile-menu-toggle`, 0,2,0), and that
+   outranks the 680 tier's `.mobile-menu-toggle { display: block }` (0,1,0) —
+   the button would never appear at all. Keeping the pill on the BASE rule keeps
+   `display` at one specificity, where responsive.css (imported last) still wins.
+
+   It does NOT morph: initNavMorph is scoped to .intro-bar, and there is no
+   hover to drive one at this tier. */
 .mobile-menu-toggle {
   display: none; /* shown at <=680px in responsive.css */
   margin-left: auto; /* push to the right edge next to the flex:1 site-name */
-  padding: 0;
+  padding: 8px 20px;
   border: 0;
-  background: none;
+  border-radius: 100px;
+  background: #000;
   font-family: var(--font-body);
   font-size: var(--size-base);
   font-weight: 400;
   letter-spacing: -0.01em;
-  color: var(--color-text);
-  cursor: pointer;
-}
-
-/* On the HOMEPAGE this trigger IS the contact CTA, so it takes the landing
-   bar's solid pill rather than plain text — the same object, the same
-   treatment (.intro-bar-cta in hero.css).
-
-   Scoped to .site-header deliberately: the PROJECT pages' trigger lives in
-   .intro-bar--page and reads "Menu", which is a nav affordance rather than
-   the primary action. The desktop bar draws exactly this distinction — solid
-   black pill for "Say hello", plain links for Selected work / About me — so
-   giving "Menu" a pill would promote it to something it isn't.
-
-   Sized by PADDING, not height: 8 + 20 + 8 = the pill's 36px, matching
-   .intro-bar-cta without this rule having to set `display`. That matters —
-   `.site-header .mobile-menu-toggle` (0,2,0) outranks the responsive tier's
-   `.mobile-menu-toggle { display: block }` (0,1,0), so declaring display here
-   would override the 680 tier and the button would never appear at all.
-
-   It does NOT morph: initNavMorph is scoped to .intro-bar, and there is no
-   hover to drive one at this tier. */
-.site-header .mobile-menu-toggle {
-  padding: 8px 20px;
-  border-radius: 100px;
-  background: #000;
   line-height: 20px; /* with the padding above, an exact 36px pill */
   color: #fff;
+  cursor: pointer;
   transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 @media (hover: hover) {
-  .site-header .mobile-menu-toggle:hover {
+  .mobile-menu-toggle:hover {
     background: rgba(0, 0, 0, 0.75);
   }
 }
 
 /* Over the blue Contact panel the pill inverts the way the landing bar's does
-   — white pill, black label — rather than only recolouring its text. */
+   — white pill, black label — rather than only recolouring its text.
+   .site-header only, and that is not an oversight: the project pages have no
+   #contact, so `contactSection` is null there, updateScrollEffects' whole
+   inversion block is skipped, and .intro-bar--page never receives is-over-dark.
+   Reachable at 481–680; at <=480 #contact is display:none (its content moves
+   into the overlay), so there is no blue panel to invert over. */
 .site-header.is-over-dark .mobile-menu-toggle {
   background: #fff;
   color: #000;

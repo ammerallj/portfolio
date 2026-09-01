@@ -20,7 +20,7 @@ shared by all of them.
   - `footer.css` — `.site-footer`
   - `project-overview.css` — the shared Project Overview template: §0 `.intro-bar--page` (the landing's nav bar pinned to the top of these pages), `.project-hero`, `.project-masthead` (title + metadata `<dl>`), `.project-block` (description / impact / role), §0a the section-seam rules, `.next-case` (§9) with its two treatments — `--image` (destination art, the pager) and `--outline` + `--locked` (the hairline Full-case-study card) — (`.project-locked` / `.invite-button` were deleted 2026-08), the `.project-carousel` masthead crossfade, and `.section-pills`. Imported after `sections.css` (it leans on `.section-label`, `.about-body`, `.contact-connect-links`) and before `responsive.css`.
   - `mobile-menu.css` — the ≤480 `.mobile-menu` overlay (the connect-only panel
-    behind the header's "Menu" / "Contact" trigger) on every page.
+    behind the header's "Say hello" trigger) on every page.
   - `responsive.css` — **ALL width breakpoints, site-wide.** Organized by screen size (1440 → 1024 → 768 → **680** → 480px). Imported last so it overrides desktop styles. The 680 tier is a NAV-ONLY tier — see **The nav hand-off at 680** below.
 
 ## Landing (2026-08) — "Making products make sense."
@@ -147,7 +147,7 @@ fault; the 680 tier is what actually closed it.
 **The tier carries NAV AND NOTHING ELSE.** It holds exactly the rules that swap
 the bar for the mobile header + floatie: `.intro-bar` off, `.site-header`
 fixed/visible/bare-at-top, the tuck neutralized, `.intro-bar--page` collapsed to
-wordmark + "Menu", `.section-pills--site-nav` on, and the header row / inline nav
+wordmark + "Say hello", `.section-pills--site-nav` on, and the header row / inline nav
 / trigger / overlay switches. Every one of them simply MOVED UP from the 480 tier,
 so ≤480 is unchanged (`max-width: 680` matches phones too, and the 480 block still
 follows and wins where they overlap).
@@ -457,7 +457,7 @@ Hidden by default in project-overview.css §8 and switched on in the responsive.
 because the page carries its own structure there (~4 screens, each chapter opening
 with a 40px heading) and the bar could only ever name 3 of the 6 places a reader
 might jump to — the Full case study card and the pager have no ids. At ≤480 it earns its place instead: `.intro-bar--page` has collapsed to
-wordmark + "Menu", so the floatie is the only in-page nav a phone reader has.
+wordmark + "Say hello", so the floatie is the only in-page nav a phone reader has.
 **A 4th pill does not fit at 375 at any label length** (measured: +84px for "Full
 case study", +20px even for "More"), so extending the bar is not an option —
 re-measure in the 480 tier before changing any label. Each project page carries a
@@ -625,6 +625,33 @@ thing with numbers. Blocks are per-page, not mandatory; the structure is shared,
 the presence of any one block is an editorial call. A summary page should also
 not spend the framing that the full case study is there to reveal.
 
+**The "Say hello" trigger is site-wide below 680 (2026-09).** All five pages'
+mobile trigger carries the landing's label and its solid black pill
+(`.mobile-menu-toggle` in mobile-menu.css, on the BASE rule so both page types
+get it). The project pages' button used to read "Menu".
+- **Sized by PADDING (8 + 20 + 8 = 36px), not `height`.** A rule that set
+  `display: inline-flex` to centre the label would have to be scoped
+  (`.site-header .mobile-menu-toggle`, 0,2,0), and that outranks the 680 tier's
+  `.mobile-menu-toggle { display: block }` (0,1,0) — the button would never
+  appear at all. Keep the pill on the base rule so `display` stays at one
+  specificity and responsive.css (imported last) still wins.
+- ⚠️ **The LABEL is shared; the PANEL is not.** The homepage's overlay is
+  connect-only (`aria-label="Contact"`) because its floatie carries Work/About.
+  The project pages' overlay is the full **site menu** (`aria-label="Site menu"`
+  — Work / About + connect) and is the ONLY route to those two sections below
+  680, since project pages have no site-nav floatie. **Do not trim it to match
+  the label.** The cost of the shared label is that navigation now sits behind a
+  button named for contact: the accessible name says "Say hello" and the dialog
+  it opens announces as "Site menu".
+- The trigger does NOT morph — `initNavMorph` is scoped to `.intro-bar`, and
+  there is no hover at this tier.
+- Inversion (white pill, black label) is `.site-header` only, and that is not an
+  oversight: project pages have no `#contact`, so `contactSection` is null and
+  `updateScrollEffects` skips the whole inversion block — `.intro-bar--page`
+  never receives `is-over-dark`.
+- The project bar grew 58px → **64px** at this tier as a result, matching the
+  desktop bar's own 64px.
+
 **Top nav (2026-08).** These pages no longer carry the old `.site-header`. They
 share the landing's own bar — `<nav class="intro-bar intro-bar--page">` — so the
 site has ONE nav. Same markup as the homepage's, with the links resolved back to
@@ -632,7 +659,7 @@ site has ONE nav. Same markup as the homepage's, with the links resolved back to
 `--page` modifier (project-overview.css §0) is what changes: no hero to rest in,
 so the pull-up margins and the entrance animation are neutralized and the glass
 is forced on — the bar is pinned from the first pixel, with JS off too. At ≤480
-it collapses to wordmark + "Menu" (responsive.css 480 tier) and the `.mobile-menu`
+it collapses to wordmark + "Say hello" (responsive.css 680 tier) and the `.mobile-menu`
 overlay is unchanged. **This bar is the SITE nav; `.section-pills` is the IN-PAGE
 nav.** Two different jobs — don't merge them.
 

@@ -493,9 +493,9 @@
 
   /* The PROJECT pages keep their top bar — it is their only nav (no
      .site-header there any more), so the homepage's hide above must not reach
-     it. It collapses to the same shape the header has here: wordmark + "Menu"
-     trigger, the overlay carrying Work / About / connect. ("Say hello" drops
-     out of the phone nav, the same way it does on the homepage.)
+     it. It collapses to the same shape the header has here: wordmark + the
+     "Say hello" pill, which on these pages opens the SITE MENU overlay
+     (Work / About + connect) rather than the homepage's connect-only one.
      MUST stay after `.intro-bar` above: same specificity (0,1,0), so source
      order is the only thing re-showing this bar. */
   .intro-bar--page {
@@ -520,8 +520,8 @@
     display: flex;
   }
 
-  /* Mobile menu: the inline Work/About/Contact links give way to a "Menu"
-     trigger that opens the full-screen .mobile-menu overlay (see
+  /* Mobile menu: the inline Work/About/Contact links give way to the
+     "Say hello" trigger that opens the full-screen .mobile-menu overlay (see
      mobile-menu.css for its look, initMobileMenu() in main.js for behavior).
      Showing .is-open is gated to this tier so the overlay can never linger
      over the desktop layout if the viewport grows. */
@@ -731,7 +731,7 @@
   /* THE FLOATING SECTION PILLS EXIST ONLY AT THIS TIER (2026-08). The base rule
      in project-overview.css §8 hides them; this is where they're switched on, and
      it's where they earn their place — .intro-bar--page has collapsed to wordmark
-     + "Menu" by now, so this is the only in-page nav a phone reader has. Above
+     + "Say hello" by now, so this is the only in-page nav a phone reader has. Above
      480 the page carries its own structure (4 screens, a 40px heading opening
      each chapter) and the bar was naming 3 of 6 possible stops.
 

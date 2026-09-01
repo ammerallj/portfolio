@@ -72,7 +72,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@200;500;700&family=Inter:wght@400..700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../style.css?v=5dec74bf" />
+  <link rel="stylesheet" href="../style.css?v=85f6b910" />
   <!-- Pre-paint flag, set only when JS runs:
        • is-motion — hides reveal targets so they can fade in without a flash
          (skipped for reduced-motion visitors, who see everything).
@@ -109,7 +109,13 @@
       <div class="intro-bar-group"><a href="../index.html#about">About me</a></div>
     </div>
     <div class="intro-bar-cta-wrap"><a class="intro-bar-cta" href="../index.html#contact">Say hello</a></div>
-    <button class="mobile-menu-toggle" type="button" aria-expanded="false" aria-controls="mobile-menu">Menu</button>
+    <!-- The landing's "Say hello" carries across every page: below 680 the bar's
+         own pill is hidden and this trigger takes its place, same label, same
+         solid pill (mobile-menu.css). NOTE the panel it opens is this page's
+         SITE MENU (Work / About + connect), not the homepage's connect-only
+         one — it is the only route to Work and About here at these widths, so
+         its contents must not be trimmed to match the label. -->
+    <button class="mobile-menu-toggle" type="button" aria-expanded="false" aria-controls="mobile-menu">Say hello</button>
   </nav>
 
   <!-- ============================================================
