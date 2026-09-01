@@ -1581,8 +1581,40 @@ function initSectionGeometry(lenis) {
     document.documentElement.style.setProperty(
       '--footer-height', Math.round(footer.getBoundingClientRect().height) + 'px');
   }
-  publishFooterHeight();
-  window.addEventListener('resize', publishFooterHeight);
+  // Contact's own content height, so its padding can give way rather than push
+  // the footer off the fold.
+  //
+  // Contact reserves the footer's height in its min-height, so the two are meant
+  // to fill the space under the nav exactly — but min-height is a FLOOR, and at a
+  // short window the copy plus a fixed 96px of padding outgrew it and the footer
+  // went under. Measured at 1440x700: content 447 + 192 padding = 639 against a
+  // 555 min-height, so the panel grew 84px and pushed the footer 83px below.
+  //
+  // The padding is the part that should yield. Contact already CENTRES its
+  // content, so on a tall window the min-height makes the space and the padding
+  // is inert — 154px of air either side at 1440x900, where the padding is only
+  // 96. Shrinking it changes nothing there, and is exactly what buys the fit
+  // lower down. The arithmetic lives in the CSS clamp; this supplies the one
+  // number CSS cannot know.
+  //
+  // No feedback loop: the span is the inner block's own height, which does not
+  // depend on the section's padding. It DOES depend on width (wrapping), which is
+  // why it re-runs on resize alongside the footer.
+  function publishContactContent() {
+    const contact = document.getElementById('contact');
+    const inner = contact && contact.firstElementChild;
+    if (!inner) return;
+    document.documentElement.style.setProperty(
+      '--contact-content', Math.round(inner.getBoundingClientRect().height) + 'px');
+  }
+
+  function publishMetrics() {
+    publishFooterHeight();
+    publishContactContent();
+  }
+
+  publishMetrics();
+  window.addEventListener('resize', publishMetrics);
 }
 
 // Viewport reveals. Each [data-reveal-group] fades its [data-reveal] items in

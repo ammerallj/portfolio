@@ -550,6 +550,23 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
+  /* THE PADDING YIELDS SO THE FOOTER STAYS IN FRAME. min-height above is a floor,
+     not a cap: at a short window the copy plus a fixed 96px either side outgrew
+     it and the panel pushed the footer off the fold (measured at 1440x700:
+     content 447 + 192 = 639 against a 555 floor, footer 83px under).
+     This asks for half of whatever room is left once the nav, the footer and the
+     copy have taken theirs, capped at --gap-section and floored at 24 so it can
+     never collapse entirely. --contact-content is published by
+     initSectionGeometry; without it the fallback 0px simply yields --gap-section,
+     which is today's value, so no-JS is unchanged.
+     ⚠️ It is INERT on tall windows and that is the point — the section centres
+     its content, so at 1440x900 the min-height already gives 154px of air either
+     side and this clamp resolves to the 96 cap. Nothing about that composition
+     moves; the shrink only ever happens where the alternative was an overflow. */
+  padding-block: clamp(
+    24px,
+    calc((100dvh - var(--nav-offset) - var(--footer-height) - var(--contact-content, 0px)) / 2),
+    var(--gap-section));
 }
 
 /* White eyebrows/labels throughout the blue panel */

@@ -290,6 +290,32 @@ carousel rather than a join, and the 240px across that seam (144 + 96) separates
 them on its own. **Leave the base rule in place**: it is shared with the project
 pages, which is where the table below still applies.
 
+**Contact's padding YIELDS so the footer stays in frame (2026-08-31).** The
+footer is a child of `<body>`, **outside `<main>` and outside `#contact`** — and
+it must stay there: `role="contentinfo"` is only exposed as the page footer when
+it is not nested inside another landmark, so moving it into the section would
+quietly demote it. The sizing relationship is expressed instead: Contact reserves
+the footer's measured height in its `min-height`, so the two fill the space under
+the nav exactly. But `min-height` is a FLOOR, and at a short window the copy plus
+a fixed 96px either side outgrew it — at 1440×700, content 447 + 192 = 639
+against a 555 floor, pushing the footer 83px below the fold.
+`padding-block` is now a `clamp()` asking for half of whatever room is left once
+the nav, the footer and the copy have taken theirs, capped at `--gap-section` and
+floored at 24px. `--contact-content` is published by `initSectionGeometry`
+alongside `--footer-height`.
+- **It is INERT on tall windows, and that is the point.** The section centres its
+  content, so at 1440×900 the `min-height` already gives 154px of air either side
+  while the padding is only 96 — the clamp resolves to the cap and nothing moves.
+  The shrink only ever happens where the alternative was an overflow.
+- Measured: **900** → pad 96, footer at the fold (unchanged) · **700** → pad 54,
+  Contact exactly its 555 min-height, footer at the fold (was 83 under) · **620**
+  → pad hits the 24 floor, footer 19 under (was 164). It degrades rather than
+  failing.
+- No feedback loop: the published span is the inner block's own height, which
+  does not depend on the section's padding. It does depend on WIDTH, so it
+  re-measures on resize. The `0px` fallback yields `--gap-section`, so no-JS is
+  today's value.
+
 **The scroll-spy reads the SAME resting positions** (`updateScrollEffects`): the
 active section is the last one whose resting position the page has reached. It
 compared section TOPS against the nav line until sections began settling centred
