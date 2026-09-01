@@ -1329,18 +1329,24 @@ screenshots or collages" is.
 - Bump the `?v=` cache-buster on an `<img src>` when you overwrite an existing
   file in place (e.g. the Work cards use `?v=N`), so browsers refetch it.
 
-**⚠️ THREE OF THE FOUR WORK-CARD VIDEOS ARE HALF-RESOLUTION.** Measured 2026-08:
-`work-accessibility` / `work-messaging` / `work-communities` are encoded at
-**1330×416**, while the card renders 1188 CSS px — 2376 device px on a 2× display,
-a **1.79× upscale**. `work-loop` is the outlier at 2308×720 (1.03×) and is
-visibly crisper; compare them if you want to see the difference. The `<video>`
-`width`/`height` attributes all say 2660×830, which is the POSTER's size, not the
-encoded frame's — so the markup does not reveal this. The posters are all a
-genuine 2660×830.
+**The Work-card videos are all a native 2660×830 (fixed 2026-08-31).** They were
+1330×416 for three of the four — a **1.79× upscale** against the 2376 device px a
+1188px card needs on a 2× display — with only `work-loop` exported correctly. All
+four are now 2.0s and 2.1–3.2 MB, and the `<video>` `width`/`height` attributes
+finally describe the real frame rather than the poster's size.
 
-`initScrollVideos` restores the poster on `ended`, so a card at REST shows the
-sharp JPG rather than the soft last frame. That is a mitigation, not the fix:
-while a clip is playing it is still an upscaled 1330-wide source. **The real fix
-is re-exporting those three at 2660 wide** — the repo holds only the derivatives,
-so it needs the originals. If you re-cut any clip, re-check that its poster still
-matches the END state (see the note at that handler).
+- **They come out of FIGMA, not a desktop editor.** All four carry the
+  `MediabunnyVideoHandler` string, which is Figma's video-export encoder — which
+  is why nothing on the filesystem ever matched them. There is no local source to
+  re-encode from: **the fix is a re-export at 2× from the Figma file**, and the
+  originals live there, not in the repo.
+- **Total payload did not grow.** Trimming paid for the resolution: 9.99 MB
+  before (with a 30s Accessibility clip and an 8.6s Loop) against 10.0 MB now
+  with everything at 2s.
+- ⚠️ **Re-cutting a clip means re-checking its POSTER.** `initScrollVideos`
+  restores the poster on `ended`, so the card comes to rest on the JPG and it has
+  to match the video's final frame. Verified after this re-cut by sampling ten
+  frames per clip and diffing each against its poster: the difference falls
+  monotonically to a minimum at the end for all four (accessibility 55→12,
+  messaging 32→16, communities 34→14; loop settles by 0.6s and holds). The
+  residual 8–16 is q70 JPEG compression, not a different frame.
