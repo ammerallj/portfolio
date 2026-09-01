@@ -1074,11 +1074,19 @@ a.intro-bar-name {
 
 /* Per-page destination art — one line per project. The filename names the page
    being linked TO, not the page it sits on, so the chain reads:
-     accessibility → messaging → loop → groups → accessibility (wraps).
+     messaging → accessibility → loop → groups → messaging (wraps).
+   It follows the homepage Work order; Messaging took the lead card 2026-08-31
+   and the chain was rewired to match. Change one and you must change the other.
    All four gradients are light, so the text stays --color-text / --color-text-70
-   throughout: measured on each image's darkest visible pixel, the title clears
-   10.6:1 and the description 6.0:1 at worst. A dark destination colour would
-   need the text inverted for that page, not the image dimmed. */
+   throughout. Re-measured 2026-08-31 at 1440 (a 1328x240 card, which is the
+   tightest crop cover produces), worst pixel under the glyphs:
+     messaging-next      title 12.36   description 6.54
+     accessibility-next  title 11.84   description 6.37
+     groups-next         title 11.39   description 6.24
+     loop-next           title 10.73   description 6.00   ← the floor
+   So the worst case on the site is loop-next.jpg, which the reorder moved onto
+   ACCESSIBILITY's pager. Still comfortably past AA. A dark destination colour
+   would need the text inverted for that page, not the image dimmed. */
 .next-case--messaging {
   --next-case-image: url("../../images/messaging-next.jpg?v=2");
 }

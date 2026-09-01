@@ -306,7 +306,7 @@ is never faded in by the motion system.
 **Every page closes with a Next Case Study pager** (`.next-case`,
 project-overview.css §9): a full-width link — the next project's homepage card
 title + description, no image, a right arrow (`&rarr;`) — that follows the
-homepage Work order and **wraps** (Groups → back to Accessibility) so every page
+homepage Work order and **wraps** (Groups → back to Messaging) so every page
 has a next.
 
 **The TITLE matches the matching `.work-card` on `index.html` exactly — the
@@ -361,15 +361,25 @@ recipe) and are named for the page linked **to**. `background-size: cover` is
 load-bearing: the pager box is much wider than the asset's 3.2:1, so the crop
 takes the middle band and drops the asset's own baked-in rounded corners — which
 sit on light grey and would otherwise show as wedges against the cream. **All
-four pages now carry art**, so the chain reads accessibility → messaging → loop
-→ groups → accessibility. Text stays `--color-text` / `--color-text-70`
-throughout: measured on each image's darkest visible pixel, the title clears
-10.6:1 and the description **4.65:1** at worst. That worst case is
-`accessibility-next.jpg` on **Groups'** pager (Groups is the page that links to
-Accessibility). Still past AA (4.5:1), but there is little headroom left:
-re-measure if that gradient is ever re-exported darker. A
-dark destination colour would need the text inverted for that page, not the
-image dimmed.
+four pages now carry art**, so the chain reads messaging → accessibility → loop
+→ groups → messaging (rewired 2026-08-31 when Messaging took the lead card).
+Text stays `--color-text` / `--color-text-70` throughout. **Re-measured
+2026-08-31** at 1440, worst pixel under the glyphs, on the 1328×240 card that is
+the tightest crop `cover` produces:
+
+| art | title | description |
+|---|---|---|
+| `messaging-next` | 12.36 | 6.54 |
+| `accessibility-next` | 11.84 | 6.37 |
+| `groups-next` | 11.39 | 6.24 |
+| **`loop-next`** | **10.73** | **6.00** ← the floor |
+
+The floor is `loop-next.jpg`, which the reorder moved onto **Accessibility's**
+pager. This entry previously claimed 4.65:1 on `accessibility-next.jpg` at
+Groups — wrong on the number, the image and the page, and it made the margin
+look far thinner than it is. 6.00 against AA's 4.5 is real headroom, but
+re-measure if any gradient is re-exported darker. A dark destination colour
+would need the text inverted for that page, not the image dimmed.
 
 The `.project-continue` hand-off is gone from Loop and Groups — Jenna is writing
 high-level case-study content to sit inline below Impact rather than link out.
