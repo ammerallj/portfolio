@@ -726,6 +726,61 @@ the container line, not the screen edge).
 - **horizontal → what the phone does.** Usually a different answer; here it is
   "don't", and unwinding it needed a CSS revert *and* a JS gate.
 
+### Pagination (`.work-pagination`, 2026-08-31)
+
+Four dots on a frosted pill, drawn over the bottom of the **cover photo**, saying
+which of the four projects is on screen. Same pill as `.project-carousel-dots` —
+translucent black, backdrop blur, 10px dots, white when active — because it is
+the same object in the same situation. Restated in `sections.css` rather than
+shared, since that one is positioned for a masthead slide and this one is
+anchored to a moving track.
+
+**It is HELD STILL while the photos slide underneath**, which is the whole
+reason it sits outside the track as ONE element rather than as four copies
+riding inside the cards. A per-card version was built first and is genuinely
+simpler — **it needs no JavaScript at all**, because card 3 can just pre-mark dot
+3 and the visible photo is the answer — but it travels with its card, which is
+exactly what this must not do. If that requirement ever relaxes, go back to it.
+
+| Axis | How it is anchored |
+|---|---|
+| Horizontal | Pure CSS. The resting card is flush at the container's left edge and `100% - --work-peek` wide, so the centre is half of that. |
+| Vertical | `--work-photo-bottom`, published by `initWorkCarousel`. |
+
+**Why the vertical needs JS.** At ≥1025 the photo is the card's LAST element, so
+the container's own bottom would serve — but at ≤768 it moves to the TOP, where
+its height is a ratio of the card's **width**, and `top` percentages resolve
+against **height**. One measured number covers every tier. The `100%` fallback in
+the CSS is the desktop answer, so the bar is right before the first measurement
+and if the script never runs.
+
+- **Measured with `offsetTop`/`offsetHeight`, never `getBoundingClientRect`.**
+  The photo carries `data-reveal`, so before its group animates in it is
+  translated down by `REVEAL.distance` (16px) and the rect reports that. Measured
+  at load, it put the bar 16px low — 8px inside the photo instead of 24. Offsets
+  ignore transforms. `#work-section .site-container` must keep its
+  `position: relative`: it is both the positioning context AND the photo's
+  `offsetParent`, so the two numbers agree.
+- **Dots index `authored`, not the live DOM.** The loop rotates children
+  constantly, so dot 1 means "the first project in the document", never
+  "whatever is first right now". `updateDots()` reads
+  `Math.round(scrollLeft / step)` for the DOM position, then `authored.indexOf`
+  to get back to the project.
+- **`updateDots()` is called from the scroll listener directly**, not only via
+  `normalize()` — that returns early while the damped run owns `scrollLeft` and
+  again when a touch gesture has spent its rotation budget, and the track is
+  still moving in both.
+- **Clicking a dot lands INSTANTLY** (`bringIntoView`, shared with keyboard
+  focus). Damping exists to make a wheel gesture feel continuous with the hand; a
+  click is discrete, and easing across three cards would drag two unrelated
+  projects past the eye. It also keeps this clear of the damping machinery, which
+  owns `scrollLeft` while it runs.
+- **Hidden by `.work-list:not(.is-looping) ~ .work-pagination`** — one rule
+  covering both JS-off and ≤480, since `.is-looping` lands only when the
+  horizontal track is actually running. The sibling combinator is why the markup
+  must stay next to the track. No `data-reveal` (it is in no reveal group, and
+  one would leave it hidden for good).
+
 ### The vertical position locks while you work the carousel (2026-08)
 
 Scrolling the carousel horizontally does not move the page vertically, and that

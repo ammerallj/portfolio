@@ -783,6 +783,10 @@
     font-size: 17px; /* Figma */
   }
 
+  /* (No rule needed for .work-pagination here: this tier disables the loop, so
+     .is-looping comes off .work-list and the sibling rule in sections.css hides
+     the bar on its own — the same rule that covers JS being off.) */
+
   /* About tightens BELOW --gap-heading (40) to 20: what follows the heading
      here is the photo, not text, and an image edge needs less separation from
      a title than a text block does — 40 left it floating. Contact keeps the

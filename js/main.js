@@ -521,6 +521,15 @@ function initWorkCarousel() {
   // record of it — needed to hand a correct stack back when the phone tier takes
   // over, and it must be captured before the first rotation.
   const authored = [...track.children];
+  // The pagination bar, if the page ships one. Indexed against `authored`, NOT
+  // against the live DOM: the loop rotates children constantly, so dot 1 has to
+  // mean "the first project in the document" rather than "whatever is first
+  // right now". Optional — project pages have no track at all.
+  const pagination = track.parentElement
+    && track.parentElement.querySelector('.work-pagination');
+  const dots = pagination
+    ? [...pagination.querySelectorAll('.work-pagination-dot')]
+    : [];
   let active = false;
   let damping = false;   // true while the wheel-driven damped run owns scrollLeft
 
@@ -603,6 +612,51 @@ function initWorkCarousel() {
     }
   }
 
+  // Which project is at the resting slot, as an AUTHORED index. scrollLeft rests
+  // at STEP with one card of buffer each side, so the card on show is
+  // children[1]; Math.round(scrollLeft / step) generalises that mid-gesture to
+  // whichever card the reader is closest to landing on. That yields a DOM
+  // position, and authored.indexOf turns it back into "which project" — the only
+  // thing a dot can point at while the DOM rotates underneath it.
+  function updateDots() {
+    if (!dots.length || !active || step <= 0) return;
+    const card = track.children[Math.round(track.scrollLeft / step)];
+    const i = card ? authored.indexOf(card) : -1;
+    if (i < 0) return;
+    dots.forEach((dot, k) => {
+      const on = k === i;
+      dot.classList.toggle('is-active', on);
+      if (on) dot.setAttribute('aria-current', 'true');
+      else dot.removeAttribute('aria-current');
+    });
+  }
+
+  // Publish where the resting card's photo ENDS, as a distance from the
+  // container's top, so the bar can hold itself just inside that edge.
+  //
+  // Why this is not pure CSS: at >=1025 the photo is the card's last element, so
+  // the container's own bottom would serve — but at <=1024 it moves to the TOP
+  // and its height is a ratio of the card's WIDTH, while `top` percentages
+  // resolve against HEIGHT. One measured number covers both, and re-runs from
+  // measure(), which already fires on every resize and tier change.
+  function publishPhotoBottom() {
+    if (!pagination || !active) return;
+    const host = pagination.parentElement;
+    const card = track.children[1] || track.firstElementChild;
+    const photo = card && card.querySelector('.work-card-image-link');
+    if (!host || !photo) return;
+    // offsetTop/offsetHeight, NOT getBoundingClientRect: the photo carries
+    // data-reveal, so before its group animates in it is translated down by
+    // REVEAL.distance (16px) and the rect reports that. Measured at load, that
+    // put the bar 16px low — it read as 8px inside the photo instead of 24.
+    // Offsets ignore transforms, so the anchor is the layout position either
+    // way. host is the photo's offsetParent (#work-section .site-container is
+    // the nearest positioned ancestor); keep that `position: relative` if this
+    // ever moves.
+    const y = photo.offsetTop + photo.offsetHeight;
+    host.style.setProperty('--work-photo-bottom', y + 'px');
+  }
+
   // Re-measure on resize and keep the reader on the card they were looking at:
   // the step width changes at every breakpoint, so the raw scrollLeft would
   // point at a different card after the jump.
@@ -613,6 +667,8 @@ function initWorkCarousel() {
     if (step > 0 && previous > 0) {
       track.scrollLeft = Math.round(track.scrollLeft / previous) * step;
     }
+    publishPhotoBottom();
+    updateDots();
     normalize();
   }
 
@@ -636,9 +692,22 @@ function initWorkCarousel() {
   // order and costs nothing: from slot 0 one card is pulled off the end to sit
   // in front of it; from slot i>1 the (i−1) cards ahead of it go to the back,
   // none of which is the card itself.
-  function flushFocusedCard(event) {
+  // Rotate until `card` occupies the resting slot, then sit on it. Shared by
+  // keyboard focus and the pagination dots, so the two cannot drift into
+  // disagreeing about where "in view" is.
+  //
+  // ⚠️ It never moves `card` itself. Moving a focused element resets the
+  // browser's sequential-focus starting point; measured, that sent Tab BACKWARDS
+  // through the projects. Hence the first loop: when the card is already first,
+  // rotate the LAST card in front of it rather than appending the card away.
+  //
+  // The landing is INSTANT, not damped. Damping exists to make a wheel gesture
+  // feel continuous with the reader's hand; a dot click and a Tab press are
+  // discrete, and easing across three cards would drag two unrelated projects
+  // past the eye on the way. It also keeps this clear of the damping machinery,
+  // which owns scrollLeft while it runs.
+  function bringIntoView(card) {
     if (!active || step <= 0) return;
-    const card = event.target.closest('.work-card');
     if (!card || card.parentElement !== track) return;
     let guard = 0;
     while (track.firstElementChild === card && guard++ < 16) {
@@ -648,7 +717,17 @@ function initWorkCarousel() {
       track.appendChild(track.firstElementChild);
     }
     track.scrollLeft = step;
+    updateDots();
   }
+
+  function flushFocusedCard(event) {
+    const card = event.target.closest('.work-card');
+    if (card) bringIntoView(card);
+  }
+
+  dots.forEach((dot, k) => {
+    dot.addEventListener('click', () => bringIntoView(authored[k]));
+  });
 
   // normalize() is idempotent and cheap (a comparison, and nothing else on the
   // overwhelming majority of scroll events), so it can run on every one. It
@@ -899,6 +978,11 @@ function initWorkCarousel() {
 
   track.addEventListener('scroll', () => {
     normalize();
+    // Called here rather than inside normalize(): that returns early while the
+    // damped run owns scrollLeft, and again when a touch gesture has spent its
+    // rotation budget — in both of which the track is still very much moving.
+    // Four class toggles, cheap enough to run on every scroll event.
+    updateDots();
     // Scroll gone quiet: the gesture is over. Restore the invariant ignoring the
     // budget, so the next swipe starts from a full buffer on both sides again.
     clearTimeout(touchSettleTimer);
@@ -913,7 +997,8 @@ function initWorkCarousel() {
   function enable() {
     if (active) return;
     active = true;
-    // Tells the CSS the loop is live, so the no-JS end-snap steps aside.
+    // Tells the CSS the loop is live, so the no-JS end-snap steps aside — and
+    // reveals the pagination, which is hidden until this class lands.
     track.classList.add('is-looping');
     step = 0;   // force measure() to re-read rather than trust a stale tier
     measure();

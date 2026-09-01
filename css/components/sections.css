@@ -336,6 +336,88 @@
      1.5em  the line box (--size-xs x the body's 1.5 line-height)
    + 0.8em  the pill's 0.4em padding, top and bottom
    + 2px    both hairlines */
+/* CAROUSEL PAGINATION — which of the four projects is on screen, drawn over the
+   bottom of the cover photo.
+
+   ⚠️ IT IS HELD STILL WHILE THE PHOTOS SLIDE UNDER IT. That is the whole reason
+   it lives outside the track as one element, positioned against the container,
+   rather than as four copies riding inside the cards. A per-card version was
+   built first and needs no JS at all (card 3 simply pre-marks dot 3) — but it
+   travels with its card, which is exactly the thing this must not do. If the
+   requirement ever relaxes, that version is the simpler one.
+
+   HORIZONTAL: the resting card starts flush at the container's left edge (the
+   track's scroll-padding-inline matches its own padding-inline) and is
+   `100% - --work-peek` wide, so its centre is half of that. No JS involved.
+
+   VERTICAL: --work-photo-bottom, published by initWorkCarousel, is the distance
+   from the container's top to the resting card's photo bottom. It cannot be
+   pure CSS: at >=1025 the photo is the card's LAST element, so the container's
+   own bottom would do, but at <=1024 it moves to the TOP and its height is a
+   ratio of the card's WIDTH — and `top` percentages resolve against HEIGHT. The
+   100% fallback is the desktop answer, so the bar is already right before the
+   first measurement and if the script ever fails to run.
+
+   Same pill as .project-carousel-dots (project-overview.css) — translucent
+   black, backdrop blur, 10px dots, white when active — because it is the same
+   object in the same situation: dots over an image. Restated rather than shared
+   because that one is positioned for a masthead slide and this one is anchored
+   to a moving track. */
+#work-section .site-container {
+  position: relative;
+}
+
+.work-pagination {
+  position: absolute;
+  left: calc((100% - var(--work-peek)) / 2);
+  top: var(--work-photo-bottom, 100%);
+  /* Up by its own height plus the inset, so the pill sits INSIDE the photo's
+     bottom edge whatever height the dots end up being. */
+  transform: translate(-50%, calc(-100% - 24px));
+  z-index: 2;
+  display: flex;
+  gap: 12px;
+  padding: 9px 14px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.3);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+
+/* No loop, no pages to be on: covers JS-off and the <=480 vertical stack with
+   one rule, since .is-looping is added only when the track is actually running.
+   The sibling combinator is why the markup must stay next to the track. */
+.work-list:not(.is-looping) ~ .work-pagination {
+  display: none;
+}
+
+.work-pagination-dot {
+  width: 10px;
+  height: 10px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.45);
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.work-pagination-dot:hover {
+  background: rgba(255, 255, 255, 0.75);
+}
+
+.work-pagination-dot.is-active {
+  background: #fff;
+  transform: scale(1.2);
+}
+
+.work-pagination-dot:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+}
+
 .work-card-lock {
   display: inline-flex;
   align-items: center;

@@ -159,7 +159,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@200;500;700&family=Inter:wght@400..700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=dd5c1a8d" />
+  <link rel="stylesheet" href="style.css?v=ca2bf278" />
   <!-- The landing field is the LCP element — start fetching it immediately. -->
   <link rel="preload" as="image" href="images/hero-bkg.jpg?v=4" fetchpriority="high" />
   <!-- Pre-paint flags, set only when JS runs:
@@ -385,8 +385,7 @@
               <video class="work-card-image" muted playsinline preload="none" width="2660" height="830" data-autoplay-in-view aria-hidden="true">
                 <source src="images/work-loop.mp4?v=1" type="video/mp4" />
               </video>
-              <img class="work-card-poster" src="images/work-loop.jpg?v=3" width="2660" height="830" loading="lazy" alt="Preview of Microsoft Loop collaborative workspace components" />
-              <span class="visually-hidden">Giving Components an Identity — project overview</span>
+              <img class="work-card-poster" src="images/work-loop.jpg?v=3" width="2660" height="830" loading="lazy" alt="Preview of Microsoft Loop collaborative workspace components" /><span class="visually-hidden">Giving Components an Identity — project overview</span>
             </a>
           </li>
 
@@ -407,12 +406,28 @@
               <video class="work-card-image" muted playsinline preload="none" width="2660" height="830" data-autoplay-in-view aria-hidden="true">
                 <source src="images/work-communities.mp4?v=1" type="video/mp4" />
               </video>
-              <img class="work-card-poster" src="images/work-communities.jpg?v=5" width="2660" height="830" loading="lazy" alt="Preview of community navigation work across Facebook Groups" />
-              <span class="visually-hidden">Helping People Navigate Communities — project overview</span>
+              <img class="work-card-poster" src="images/work-communities.jpg?v=5" width="2660" height="830" loading="lazy" alt="Preview of community navigation work across Facebook Groups" /><span class="visually-hidden">Helping People Navigate Communities — project overview</span>
             </a>
           </li>
 
         </ul>
+
+        <!-- Carousel pagination. ONE bar, held still over the cover photo while
+             the photos slide underneath it — so it is a sibling of the track,
+             not a child of any card. Order is the AUTHORED project order, which
+             the loop's DOM rotation does not disturb: js/main.js maps dot k to
+             authored[k], so dot 1 always means the first project on the page.
+             Hidden until .work-list carries .is-looping, which JS adds only when
+             the horizontal track is live — so no dots with JS off, and none at
+             <=480 where the track is a plain vertical stack.
+             No data-reveal: it belongs to no reveal group, and one here would
+             leave it hidden for good. -->
+        <div class="work-pagination" role="group" aria-label="Selected work pagination">
+          <button type="button" class="work-pagination-dot is-active" aria-current="true" aria-label="Show Creating Continuity Across Messaging"></button>
+          <button type="button" class="work-pagination-dot" aria-label="Show Shaping Accessibility Across Products"></button>
+          <button type="button" class="work-pagination-dot" aria-label="Show Giving Components an Identity"></button>
+          <button type="button" class="work-pagination-dot" aria-label="Show Helping People Navigate Communities"></button>
+        </div>
       </div>
     </section>
 
@@ -544,6 +559,6 @@
   </div>
   <div class="wave-cursor" id="wave-cursor" aria-hidden="true">👋</div>
 
-  <script src="js/main.js?v=db8e28b7" defer></script>
+  <script src="js/main.js?v=e9882794" defer></script>
 </body>
 </html>
