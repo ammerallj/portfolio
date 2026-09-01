@@ -644,8 +644,34 @@ nav.** Two different jobs — don't merge them.
     for JS, avoided.
   - Rules are scoped to the modifier; the plain `.project-impact-list` is
     untouched. Only Loop and Groups still have one — it holds their three named
-    principles under Approach, not their outcomes. Messaging has no plain list. The `<details>` height itself is **not** animated —
-    that isn't portable; only the detail text fades in.
+    principles under Approach, not their outcomes. Messaging has no plain list.
+  - **The open/close motion is Motion Primitives' accordion, rebuilt in CSS
+    (2026-09).** That library's `<AccordionContent>` animates one motion.div
+    between `{height: 0, opacity: 0}` and `{height: 'auto', opacity: 1}` inside an
+    overflow-hidden item, under `AnimatePresence` — so the CLOSE animates too. Its
+    chevron demo runs that at `{duration: 0.2, ease: 'easeInOut'}` with the icon
+    rotating 180° over 200ms, which is the preset adopted here **because this row
+    already had that chevron verbatim**; the only missing half was the box itself
+    growing. `::details-content` is the native equivalent of its motion.div: the
+    browser still owns the state, the CSS owns the curve, and **the no-JS rule
+    above is untouched** — the library is React + Motion and none of it is loaded.
+    - It needs `interpolate-size: allow-keywords` (`height: auto` is otherwise not
+      an interpolable endpoint, and the row just snaps). Scoped to
+      `.project-impact-list--expandable`, **not `:root`** — it changes how `auto`
+      behaves in every transition it reaches.
+    - `content-visibility` is in the transition list with
+      `transition-behavior: allow-discrete`, or the closing half never renders.
+    - **The old text-only fade is the FALLBACK and must stay.** The whole block
+      sits behind `@supports (interpolate-size: allow-keywords) and
+      selector(::details-content)`, which switches the `impact-row-open` keyframe
+      off; a browser missing either feature keeps exactly the previous behaviour
+      (snap open, text fades). Both conditions are required — with
+      `::details-content` but no `interpolate-size` the height would snap while
+      clipped, which is worse than either.
+    - The docs page's other preset, `{type: 'spring', stiffness: 120, damping: 20}`,
+      is **not** used: that spring is underdamped (ratio 0.91) and overshoots, so it
+      needs a `linear()` approximation rather than a bezier, and it would bounce
+      the page below the row.
 - **Gating states that the work can't be shown publicly and points to the locked
   case study.** No AI conversation. **Two treatments exist — pick by whether the
   page has an Approach statement to carry:**

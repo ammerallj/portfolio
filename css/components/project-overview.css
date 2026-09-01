@@ -758,8 +758,10 @@ a.intro-bar-name {
   padding-right: calc(20px + var(--gap-content));
 }
 
-/* <details> can't transition its own height portably, so don't fake it — just
-   soften the arrival of the text. Content, not layout, so nothing shifts twice. */
+/* THE FALLBACK, and it is what shipped first: <details> could not transition its
+   own height portably, so the box snapped open and only the arrival of the text
+   was softened. Still the whole story in any browser that can't do the block
+   below. Left in place — never delete it in favour of the modern path alone. */
 @keyframes impact-row-open {
   from { opacity: 0; transform: translateY(-4px); }
   to   { opacity: 1; transform: translateY(0); }
@@ -771,11 +773,80 @@ a.intro-bar-name {
   animation: impact-row-open 0.25s cubic-bezier(0.33, 1, 0.68, 1) both;
 }
 
+/* ---- THE OPEN/CLOSE MOTION — Motion Primitives' accordion, rebuilt in CSS ---
+   motion-primitives.com/docs/accordion. Its <AccordionContent> is a motion.div
+   inside an overflow-hidden item, animating between two variants —
+   collapsed { height: 0, opacity: 0 } and expanded { height: 'auto', opacity: 1 }
+   — under AnimatePresence, so the CLOSE is animated as well as the open. Its
+   chevron demo runs that on transition={{ duration: 0.2, ease: 'easeInOut' }}
+   with the icon rotating 180° over 200ms.
+
+   That last part this row ALREADY had, verbatim (see .impact-row-chevron above),
+   which is why the icons preset is the one adopted: the only thing missing was
+   the content box itself growing. So height and opacity now move together on one
+   transition, exactly as the library puts them on one motion.div — the 0.25s
+   text fade above is switched off here rather than left to run 50ms longer than
+   the box it sits in.
+
+   Zero JavaScript, which is the point: the library is React + Motion, and this
+   component's no-JS rule (documented at the top of this section) is load-bearing
+   for AI crawlers and for the shared js/main.js. ::details-content is the native
+   equivalent of its motion.div — the browser owns the state, we own the curve.
+
+   To take the OTHER preset the docs page shows — transition={{ type: 'spring',
+   stiffness: 120, damping: 20 }} — this needs a linear() approximation, not a
+   cubic-bezier: that spring is underdamped (ratio 0.91) and overshoots, which a
+   bezier cannot express. It would also bounce the page below the row.
+   ---------------------------------------------------------------------------- */
+@supports (interpolate-size: allow-keywords) and selector(::details-content) {
+  .project-impact-list--expandable {
+    /* `height: auto` is NOT an interpolable value by default, so without this the
+       transition below has no endpoint to travel to and the row snaps as before.
+       Scoped to the list, not :root: it changes how `auto` behaves in every
+       transition it reaches, and nothing else on the site asked for that. */
+    interpolate-size: allow-keywords;
+
+    /* One transition for both properties and both directions, so open and close
+       are the same gesture played each way. */
+    --impact-row-motion: 0.2s cubic-bezier(0.42, 0, 0.58, 1); /* Motion's easeInOut */
+  }
+
+  /* The native ::details-content box wraps everything after the <summary>. */
+  .impact-row::details-content {
+    height: 0;
+    opacity: 0;
+    /* the clip that makes a height transition read as a reveal rather than a
+       squash — the `overflow-hidden` on the library's <AccordionItem> */
+    overflow: hidden;
+    transition:
+      height var(--impact-row-motion),
+      opacity var(--impact-row-motion),
+      content-visibility var(--impact-row-motion);
+    /* content-visibility is a discrete property: a closed ::details-content is
+       `hidden`, so without this it flips to visible only at the END of the
+       transition and the CLOSING half is never seen. */
+    transition-behavior: allow-discrete;
+  }
+
+  .impact-row[open]::details-content {
+    height: auto;
+    opacity: 1;
+  }
+
+  /* The box now carries the fade, so the text must not fade a second time. */
+  .impact-row[open] .impact-row-detail {
+    animation: none;
+  }
+}
+
 /* Motion queries stay beside their animation (the documented exception to
    "all media queries live in responsive.css" — that rule is about WIDTH). */
 @media (prefers-reduced-motion: reduce) {
   .impact-row[open] .impact-row-detail {
     animation: none;
+  }
+  .impact-row::details-content {
+    transition: none;
   }
   .impact-row-chevron {
     transition: none;
