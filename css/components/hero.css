@@ -389,7 +389,10 @@ main {
   -webkit-mask-image: linear-gradient(to bottom, #000 0, #000 calc(100% - var(--bar-bleed, 100px) - 1px), transparent 100%);
   mask-image: linear-gradient(to bottom, #000 0, #000 calc(100% - var(--bar-bleed, 100px) - 1px), transparent 100%);
   opacity: 0;
-  transition: opacity 0.35s ease, background-color 0.35s ease;
+  /* opacity only. background-color has not changed here since the fill became a
+     background LAYER driven by --dark-mix, and a transition on a scroll-linked
+     value is exactly what makes a nav feel like it is catching up. */
+  transition: opacity 0.35s ease;
 }
 
 .intro-bar.is-docked::before {
@@ -414,7 +417,11 @@ main {
   -webkit-mask-image: linear-gradient(to bottom, #000 0, #000 calc(100% - min(40px, var(--bar-bleed, 100px))), transparent 100%);
   mask-image: linear-gradient(to bottom, #000 0, #000 calc(100% - min(40px, var(--bar-bleed, 100px))), transparent 100%);
   opacity: 0;
-  transition: opacity 0.35s ease;
+  /* 0.15s, not 0.35: this opacity is now calc(1 - var(--dark-mix)), which is
+     driven by scroll position, and a long transition made the grain trail the
+     page by a third of a second. Short enough to track the scroll, and still
+     faster than ::before's docking fade — which is the grain's job anyway. */
+  transition: opacity 0.15s ease;
   pointer-events: none;
 }
 
@@ -489,7 +496,7 @@ main {
   letter-spacing: -0.02em;
   color: #000;
   white-space: nowrap;
-  transition: color 0.35s ease;
+  transition: color 0.15s ease;
 }
 
 /* CONTENT-WIDTH CLUSTER, NOT A FIXED TRACK. This was `flex: 0 0 450px` holding
@@ -530,7 +537,7 @@ main {
   color: var(--color-text-70);
   text-decoration: none;
   white-space: nowrap;
-  transition: color 0.35s ease;
+  transition: color 0.15s ease;
 }
 
 .intro-bar-links a::before {
@@ -586,7 +593,7 @@ main {
   color: #fff;
   text-decoration: none;
   white-space: nowrap;
-  transition: background-color 0.35s ease, color 0.35s ease;
+  transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 .intro-bar-cta:hover {

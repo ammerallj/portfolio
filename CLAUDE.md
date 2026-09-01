@@ -251,6 +251,17 @@ transition.
   where the bar is over Contact without having docked.
 - Grain thins on the same curve (`opacity: calc(1 - var(--dark-mix))`), replacing
   the old binary `is-over-dark::after { opacity: 0 }`.
+- ⚠️ **NOTHING SCROLL-LINKED MAY CARRY A TRANSITION.** The tint is a background
+  LAYER, so it was never in a transition list and always tracked the scroll — but
+  the grain's opacity became scroll-linked when it started reading `--dark-mix`,
+  and it still had the old 0.35s on it, so it trailed the page by a third of a
+  second. `::before`'s `background-color` transition was left over from before
+  the fill was a layer, and is gone. The remaining `opacity 0.35s` on `::before`
+  is correct: it belongs to the DOCKING fade, which is a state change, not a
+  scroll-linked value.
+- **The label flip is 0.15s, not 0.35s.** It fires once, mid-scroll; a third of a
+  second of cross-fade after it is what read as "the nav takes a second to
+  transition". 150ms reads as immediate without being a hard cut.
 - Both custom properties are written on the ROOT and guarded on their last value
   — this runs every scroll frame and repaints a backdrop-filtered layer. Project
   pages have no `#contact`, so neither is ever set and the CSS fallbacks (`0` and
