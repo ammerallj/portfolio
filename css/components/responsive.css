@@ -340,14 +340,23 @@
   .intro-band-spacer {
     display: none;
   }
-  /* Portrait tablet + phone work cards run Image -> Title -> Description
-     (their frames lead with the image; the wrappers are already flattened by
-     the 1024 tier's display:contents, which is what makes this interleaving
-     possible). The 1024 tier's title-first rhythm resets too. (The meta line
-     that used to sit between image and title was removed 2026-08-04.) */
+  /* Portrait tablet + phone work cards run Image -> Title -> Meta ->
+     Description (their frames lead with the image; the wrappers are already
+     flattened by the 1024 tier's display:contents, which is what makes this
+     interleaving possible). The 1024 tier's title-first rhythm resets too.
+
+     ⚠️ EVERY sibling needs an explicit order, including the ones that look
+     like they land right on their own. .work-card-meta carried none until
+     2026-08-31, which is not "leave it where it is": an unset order is 0, the
+     SAME group as the image, and within a group the flattened DOM order decides
+     — meta comes out of .work-card-right ahead of the image-link, so the pill
+     and stamp rendered ABOVE the picture, before the reader had a title to
+     attach them to. Numbering three of four siblings silently promotes the
+     fourth to first. */
   .work-card-image-link { order: 0; margin-top: 0; }
   .section-title { order: 1; }
-  .work-card-description { order: 2; }
+  .work-card-meta { order: 2; }
+  .work-card-description { order: 3; }
 
   /* (.work-card's stacked gap is --gap-content, set in the 1024 tier and
      inherited here — the card reflows the same way at both portrait sizes.) */
@@ -665,9 +674,9 @@
     display: flex; /* .is-closing keeps it visible while the exit slide plays */
   }
 
-  /* Phone work cards inherit the Image -> Meta -> Title -> Description order and
-     the flattened wrappers from the 1024 tier; only the 20px rhythm and the
-     Figma type sizes are specific to this breakpoint. */
+  /* Phone work cards inherit the Image -> Title -> Meta -> Description order
+     (set in the 768 tier) and the flattened wrappers from the 1024 tier; only
+     the 20px rhythm and the Figma type sizes are specific to this breakpoint. */
   .work-card {
     gap: 20px;
   }
