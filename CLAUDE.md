@@ -1343,6 +1343,22 @@ finally describe the real frame rather than the poster's size.
 - **Total payload did not grow.** Trimming paid for the resolution: 9.99 MB
   before (with a 30s Accessibility clip and an 8.6s Loop) against 10.0 MB now
   with everything at 2s.
+- ⚠️ **NEVER CALL `play()` BEFORE `readyState >= 3`, and the Work track is why.**
+  Asking an element that has only metadata to play does not queue the request —
+  it stalls in `waiting`, and the next `pause` kills it permanently, because
+  `initScrollVideos` has already spent the card's `armed` flag. Measured: play at
+  rs=1, `waiting`, `pause` 170ms later, `canplay` 140ms after *that*, and the
+  card sat on its poster until it left the frame and came back. That was the
+  "the accessibility video doesn't always play" bug.
+  **Rotation is what makes the prebuffer insufficient**: `normalize()` moves a
+  card's node to the other end of the list, the media element re-runs resource
+  selection, and a video that was `readyState` 4 drops back to 1 — so the 800px
+  prebuffer having already run guarantees nothing by the time the 0.4 play
+  threshold arrives. The largest file shows it most. The entry branch now waits
+  on `canplay`, checks the card has not left in the meantime (the leave handler
+  re-arms, which is the signal to abandon), and **re-arms on a rejected `play()`
+  rather than swallowing it** — a spent flag with no playback is exactly the
+  state that strands a card on its poster.
 - **The card now rests on the video's LAST FRAME.** Nothing runs on `ended` any
   more. `initScrollVideos` used to swap the poster back in, but that was a
   workaround for the upscale: the soft last frame was worse than the 2660×830

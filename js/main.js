@@ -502,10 +502,37 @@ function initScrollVideos() {
         try { v.currentTime = 0; } catch (e) {}
         const poster = posterOf(v);
         const reveal = () => { if (poster) poster.classList.add('is-faded'); };
-        const p = v.play(); // muted → allowed
-        // Fade the poster only once playback has actually begun (a frame is up),
-        // so the crossfade reveals moving video, never a blank/black gap.
-        if (p && p.then) p.then(reveal).catch(() => {}); else reveal();
+
+        // ⚠️ WAIT FOR DATA BEFORE CALLING play(). Asking an element that has only
+        // metadata (readyState 1) to play does not queue the request — it stalls
+        // in `waiting`, and the next pause kills it for good, because `armed` was
+        // already spent above. Measured: play at rs=1, `waiting`, `pause` 170ms
+        // later, `canplay` 140ms after THAT. The card then sat on its poster
+        // until it left the frame and came back. That is the "sometimes it
+        // doesn't play" bug.
+        //
+        // It bites the Work track hardest because rotation RESETS these
+        // elements: normalize() moves a card's node to the other end of the
+        // list, the media element re-runs resource selection, and a video that
+        // was readyState 4 drops back to 1 — so the 800px prebuffer having
+        // already run is no guarantee it is ready when the play threshold
+        // arrives. work-accessibility shows it most, being the largest file.
+        const startWhenReady = () => {
+          // The card may have left while we waited. The leave handler re-arms,
+          // so that is the signal to abandon this attempt rather than start
+          // playback off-screen.
+          if (armed.has(v)) return;
+          const p = v.play(); // muted → allowed
+          // Fade the poster only once playback has actually begun (a frame is
+          // up), so the crossfade reveals moving video, never a blank/black gap.
+          // On failure, re-arm rather than swallow: a spent flag with no
+          // playback is the state that leaves a card stuck on its poster.
+          if (p && p.then) p.then(reveal).catch(() => { armed.add(v); });
+          else reveal();
+        };
+        // HAVE_FUTURE_DATA — enough to start and keep going, not just one frame.
+        if (v.readyState >= 3) startWhenReady();
+        else v.addEventListener('canplay', startWhenReady, { once: true });
       }
     });
   }, { threshold: [0, 0.4] });
