@@ -768,7 +768,20 @@ delta *magnitude* matters again, so a gentle scroll moves a little.
 
 ### Invariants — break these and the loop breaks
 
-- **`scroll-snap-stop: always` on `.work-card` is the fling cap.** Without it a
+- **TOUCH needs its own cap — snap-stop is not enough there.** A finger swipe has
+  no wheel to intercept, so it falls straight through to native scroll, and the
+  loop then hands the momentum fresh runway on every rotation: on an iPad the
+  track spun through the whole carousel. iOS does not honour `scroll-snap-stop`
+  reliably through momentum, and rewriting `scrollLeft` mid-flight can defeat the
+  snap target the browser already picked. `normalize()` therefore allows at most
+  `TOUCH.rotations` (1) per gesture; once spent it simply stops rotating, and the
+  track runs out of its OWN finite runway and halts — the way a non-looping
+  carousel kills a fling. The invariant is restored `TOUCH.settle` (180ms) after
+  the scroll goes quiet, which is instant and pixel-preserving. **Not a clamp on
+  `scrollLeft`** — writing to it against live momentum is a tug-of-war the reader
+  sees as jitter. Withholding the rotation takes nothing away; it just stops
+  giving.
+- **`scroll-snap-stop: always` on `.work-card` is the fling cap ON THE WHEEL.** Without it a
   hard trackpad flick spun through the whole carousel, because every rotation
   hands the momentum another card of runway. **Never "fix" fling speed in JS** —
   only the browser can tell a momentum tail from a fresh deliberate flick, so a

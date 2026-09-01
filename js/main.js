@@ -561,7 +561,23 @@ function initWorkCarousel() {
   // reader could not scroll back any further. Forward needs no such tolerance:
   // past 2*STEP the track still has real distance (max is ~2.9*STEP), so a
   // missed trigger simply fires on the next scroll event.
-  function normalize() {
+  // TOUCH BUDGET. On a finger swipe there is no wheel to intercept — touch falls
+  // straight through to native scroll — and the loop then hands the momentum
+  // fresh runway on every rotation, so it never runs out and the track spins
+  // through the whole carousel. That is the same failure scroll-snap-stop fixes
+  // for the wheel, except iOS does not honour snap-stop reliably through
+  // momentum, and rewriting scrollLeft mid-flight can defeat the snap target the
+  // browser already picked.
+  //
+  // So: at most TOUCH.rotations per gesture. Once spent, the rotation simply
+  // stops happening and the track runs out of its OWN finite runway and halts —
+  // exactly how a non-looping carousel kills a fling. The invariant is restored
+  // once the scroll settles, which is instant and pixel-preserving, so invisible.
+  //
+  // NOT a clamp on scrollLeft: writing to it while native momentum is running is
+  // a tug-of-war the reader sees as jitter. Withholding the rotation takes
+  // nothing away — it just stops giving.
+  function normalize(force) {
     // The damped run owns scrollLeft for its duration and calls this itself once
     // it has settled. Without this guard the closing frames of a BACKWARD run
     // (approaching 0) would trip the rotation mid-flight, which sets scrollLeft
@@ -569,16 +585,21 @@ function initWorkCarousel() {
     // for the rest of the run.
     if (damping) return;
     if (!active || step <= 0) return;
+    const budgeted = !force && performance.now() - lastTouchAt < TOUCH.momentum;
     let guard = 0;
     while (track.scrollLeft >= step * 2 && guard++ < 16) {
+      if (budgeted && touchRotations >= TOUCH.rotations) return;
       const from = track.scrollLeft;
       track.appendChild(track.firstElementChild);
       track.scrollLeft = from - step;
+      touchRotations++;
     }
     while (track.scrollLeft <= 1 && guard++ < 16) {
+      if (budgeted && touchRotations >= TOUCH.rotations) return;
       const from = track.scrollLeft;
       track.insertBefore(track.lastElementChild, track.firstElementChild);
       track.scrollLeft = from + step;
+      touchRotations++;
     }
   }
 
@@ -682,6 +703,15 @@ function initWorkCarousel() {
                     // momentum tail) has genuinely ended
     lineHeight: 16, // px per line, for mouse wheels that report deltaMode 1
   };
+
+  const TOUCH = {
+    rotations: 1,    // rotations allowed per finger swipe
+    momentum: 1200,  // ms after the last touch that still counts as that gesture
+    settle: 180,     // ms of scroll silence before the invariant is restored
+  };
+  let lastTouchAt = -Infinity;
+  let touchRotations = 0;
+  let touchSettleTimer = 0;
 
   let dampTarget = 0;
   let dampAnchor = 0;
@@ -859,7 +889,21 @@ function initWorkCarousel() {
   // passive:false because the whole point is to preventDefault.
   track.addEventListener('wheel', onWheel, { passive: false });
 
-  track.addEventListener('scroll', normalize, { passive: true });
+  // A fresh swipe gets a fresh budget; touchmove keeps the window open through a
+  // long drag while the finger is still down.
+  track.addEventListener('touchstart', () => {
+    lastTouchAt = performance.now();
+    touchRotations = 0;
+  }, { passive: true });
+  track.addEventListener('touchmove', () => { lastTouchAt = performance.now(); }, { passive: true });
+
+  track.addEventListener('scroll', () => {
+    normalize();
+    // Scroll gone quiet: the gesture is over. Restore the invariant ignoring the
+    // budget, so the next swipe starts from a full buffer on both sides again.
+    clearTimeout(touchSettleTimer);
+    touchSettleTimer = setTimeout(() => { touchRotations = 0; normalize(true); }, TOUCH.settle);
+  }, { passive: true });
   track.addEventListener('focusin', flushFocusedCard);
   // Resize drives BOTH jobs, and the tier check comes first: crossing 480 has to
   // switch the loop on or off before re-measuring, or measure() would size a
