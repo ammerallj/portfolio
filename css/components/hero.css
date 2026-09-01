@@ -49,30 +49,36 @@ main {
 
 /* The hero field's geometry, in one place — .page-field's width and the frost
    pane's reach both read from it, so they can't drift apart.
-     --field-w       the artwork's rendered width: 117.27vw at the 1440 design
-                     size (= 1688.69px), FROZEN at that px value below 1440 so
+     --field-w       the artwork's rendered width: 129vw at the 1440 design
+                     size (= 1857.6px), FROZEN at that px value below 1440 so
                      narrowing the window crops instead of scaling.
+                     ⚠️ THE PAIR MUST MOVE TOGETHER — vw × 14.4 = the px freeze
+                     point — or the freeze stops matching the 1440 render.
                      ⚠️ The freeze only survives down to 1025. At ≤1024 the tier
                      re-sizes this to the viewport HEIGHT (220svh) — a frozen
-                     width ends the gradient at y=907 while the divider tracks
-                     50svh, so on a portrait tablet the lockup left the artwork
-                     entirely. See responsive.css's 1024 :root before changing
-                     the number here; the two are one decision. This is the
-                     original 126.5vw / 1821.6px composition taken down 10% and
-                     then back up 3% (2026-08), so it now sits 7.3% under the
-                     original; the pair must move together — vw × 14.4 = the px
-                     freeze point — or the freeze stops matching the 1440 render.
-                     ⚠️ Shrinking this drops the bio's contrast: at -10% its
-                     worst patch measured ~1.55:1 against the raw gradient (the
-                     frost lightens it further), the floor of the ~1.6-2.3 band
-                     the phone crop settled on. The +3% moved AWAY from that
-                     floor; re-measure before going smaller again.
+                     width ends the gradient partway down while the divider
+                     tracks 50svh, so on a portrait tablet the lockup left the
+                     artwork entirely. See responsive.css's 1024 :root before
+                     changing the number here; the two are one decision, and
+                     that tier is NOT scaled with this one (below).
+                     History: the original composition was 126.5vw / 1821.6px,
+                     taken down 10% and back up 3% in 2026-08 (to 117.27), then
+                     up 10% on 2026-08-31 to the value above — so it now sits
+                     ~2% ABOVE the original rather than 7.3% under it.
+                     ⚠️ Size drives the bio's contrast, and this is the lever.
+                     Measured at 1440×900, worst pixel under the glyphs:
+                       117.27vw   headline 1.24   bio 1.22
+                       129vw      headline 1.31   bio 1.51
+                     Earlier, at -10% from the original, the bio's worst patch
+                     measured ~1.55:1 against the RAW gradient. Every step up has
+                     moved away from that floor; re-measure before going smaller.
      --field-bottom  where its bottom edge lands = width ÷ 1.6377 (the asset's
                      aspect) × 0.88 (the 12% up-shift) — i.e. width × 0.53734.
    ⚠️ Change the zoom or the shift on .page-field and both follow automatically;
    only the 0.53734 needs re-deriving, and only if the SHIFT changes. */
 :root {
-  --field-w: max(1688.69px, 117.27vw);
+  /* DESKTOP ONLY (≥1025). The ≤1024 tier replaces this outright. */
+  --field-w: max(1857.6px, 129vw);
   --field-bottom: calc(var(--field-w) * 0.53734);
 }
 

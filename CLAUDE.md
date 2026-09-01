@@ -76,7 +76,22 @@ against each other: a first pass also dropped the −12% shift and took the bio 
 across the gradient too, and a formula holding the vertical fraction constant
 scored 1.81 where the measured fit scored 2.12. The cost is magnification:
 3005px from a 3600px source is a 1.67× upscale on a 2× display, invisible on a
-soft gradient but the reason not to push the ratio higher. **The hero is sized in `svh`, never `dvh` (2026-08-31).** `.intro`'s height,
+soft gradient but the reason not to push the ratio higher. **The desktop field grew 10% on 2026-08-31**: `--field-w` in hero.css is now
+`max(1857.6px, 129vw)`, up from `max(1688.69px, 117.27vw)`. **The px and vw
+terms move together** — `vw × 14.4` = the px freeze point — or the freeze stops
+matching the 1440 render. It puts the artwork ~2% ABOVE the original 126.5vw
+composition rather than 7.3% under it, and it helps the bio: measured at
+1440×900, headline 1.24 → 1.31 and bio 1.22 → 1.51. The gradient's bottom edge
+moves 907 → 998px, so it now clears a 900px fold outright, and the frost pane
+follows on its own (it is derived from `--field-bottom`).
+**≤1024 was deliberately NOT scaled with it.** That tier keeps
+`max(1688.69px, 220svh, 117.27vw)`, because raising its floor would re-scale the
+landscape-tablet composition that was measured and tuned separately. The cost is
+a ~10% step in field width at the 1024/1025 seam on short viewports, visible only
+while dragging a window across that exact boundary. Re-measure landscape before
+ever locking the two together.
+
+**The hero is sized in `svh`, never `dvh` (2026-08-31).** `.intro`'s height,
 the frost pane's two `50svh` terms and the tablet `--field-w` all use it, and
 they must move together — anything sized as a fraction of the hero that stays on
 `dvh` drifts away from it on exactly the frame that matters. `dvh` tracks the

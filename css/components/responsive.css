@@ -180,7 +180,16 @@
        ⚠️ The headline CYCLES through three statements (text-morph, js/main.js),
        so its number moves with whichever is showing. Sample all three.
        The px floor keeps short viewports on today's composition; the vw term is
-       the base token's width guarantee, carried over. */
+       the base token's width guarantee, carried over.
+       ⚠️ THOSE TWO TERMS ARE NOT KEPT IN SYNC WITH DESKTOP, on purpose. The base
+       token went up 10% on 2026-08-31 (to 1857.6px / 129vw); this tier's floor
+       and vw stayed at the older 1688.69 / 117.27 because raising them would
+       re-scale the LANDSCAPE tablet composition, which was measured and tuned
+       separately (1024×768 → headline 1.75 / bio 1.65). The cost is a step at
+       the 1024/1025 seam on short viewports — about 10% of field width, seen
+       only by someone dragging a window across that exact boundary. If you ever
+       do want them locked together, re-measure landscape before changing the
+       floor; don't just copy the desktop number in. */
     --field-w: max(1688.69px, 220svh, 117.27vw);
   }
 
