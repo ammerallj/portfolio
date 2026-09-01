@@ -105,6 +105,22 @@ const siteFooter = document.querySelector('.site-footer');
 // 👋 cursor appears on). Only the homepage has one (#contact) — the project
 // pages end on cream, so this is null there and both features simply stay off.
 const darkPanel = document.getElementById('contact');
+// How far the sticky bar's frosted glass reaches past its own bottom edge. Must
+// match the `100px` fallback in hero.css's .intro-bar::before — that fallback is
+// what a no-JS visitor gets, and it is the correct value everywhere except the
+// approach to Contact.
+const BAR_BLEED = 100;
+let lastBarBleed = -1;
+function setBarBleed(px) {
+  // Written on the ROOT, not per bar: one property, and the two pseudo-elements
+  // that read it inherit it. Guarded on the last value because updateScrollEffects
+  // runs on every scroll frame and this invalidates a backdrop-filter — there is
+  // no reason to re-run that while the number is unchanged, which is nearly
+  // always.
+  if (px === lastBarBleed) return;
+  lastBarBleed = px;
+  document.documentElement.style.setProperty('--bar-bleed', px + 'px');
+}
 const contactSection = darkPanel;
 const intro = document.querySelector('.intro');
 const introBar = document.querySelector('.intro-bar'); // landing nav bar (homepage only)
@@ -1285,12 +1301,23 @@ function updateScrollEffects() {
       // Contact is hidden (dropped at the mobile tier) — there's no blue panel to
       // invert over, so keep the bars in their normal (cream) state.
       stickyBars.forEach(bar => bar.classList.remove('is-over-dark'));
+      setBarBleed(BAR_BLEED);
     } else {
       const scrollAnchorTop = parseFloat(getComputedStyle(html).scrollPaddingTop) || 0;
       const barHeight = Math.max(...stickyBars.map(bar => bar.offsetHeight));
       const invertLine = Math.max(scrollAnchorTop, barHeight);
       const overDark = contactRect.top <= invertLine + 1;
       stickyBars.forEach(bar => bar.classList.toggle('is-over-dark', overDark));
+
+      // CLIP THE FROST TO CONTACT'S TOP EDGE. The bar's glass bleeds BAR_BLEED
+      // past its own bottom so it melts into the page instead of ending on a
+      // line — right over cream content, wrong over Contact, which is a
+      // hard-edged full-bleed panel. For the ~100px before the bar inverts, that
+      // cream blur was lying across the top of the blue and veiling it.
+      // Handing back exactly the gap keeps the frost on the cream it belongs to:
+      // full bleed until the panel is within reach, then shrinking to 0 as the
+      // two meet, so they butt together as solid strips.
+      setBarBleed(Math.max(0, Math.min(BAR_BLEED, Math.round(contactRect.top - invertLine))));
     }
   }
 

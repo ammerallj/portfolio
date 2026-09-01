@@ -144,6 +144,34 @@ the current rig has no per-count numbers and survives adding or removing a link.
 The three `flex-basis` overrides and the bar's two per-tier `gap` overrides are gone
 from responsive.css with it; the bar's `gap` is now the links→CTA seam alone.
 
+**The frost bleed is clipped to Contact's top edge (`--bar-bleed`, 2026-08-31).**
+`.intro-bar::before` reaches 100px past the bar's own bottom so the glass melts
+into the page instead of ending on a line. That is right over cream content and
+wrong over Contact, which is a hard-edged full-bleed blue panel: for the ~100px
+before the bar inverts, the cream blur lay **across the top of the blue**,
+veiling an architectural edge with a blur belonging to the page above it.
+`updateScrollEffects` now hands back exactly the gap — full 100 until the panel
+is within reach, shrinking to 0 as they meet, so the two butt together as solid
+strips. The grain on `::after` rides the same value via
+`min(40px, var(--bar-bleed))`; there is nothing to publish separately.
+- **The 100px default lives in the CSS**, so no-JS and the project pages (no
+  `#contact`, so the block never runs) keep today's behaviour untouched.
+- **The gradient's stops had to become PX.** They were percentages, which
+  resolve against the pseudo's height — the bar *plus* the bleed. As the bleed
+  shrank, 42%/55%/68% marched up into the 64px bar and faded the frost out
+  behind the nav items themselves (at a 74px box, 42% is 31px — inside the bar).
+  The four px values are those percentages resolved at the full 164px box, so
+  full-bleed rendering is unchanged.
+- Written once on the root and guarded on its last value: `updateScrollEffects`
+  runs every scroll frame and this invalidates a `backdrop-filter`.
+- **This does not touch WHEN the bar inverts.** That is still the binary
+  `contact.top <= 64` flip with its 0.35s cross-fade. Worth knowing if the
+  transition is revisited: at 1440×900 that line *is* the scroll floor —
+  Contact's height is `100dvh − nav − footer`, so its top comes to rest exactly
+  at 64 and the blue never travels under the bar at all. The fade therefore
+  begins as the scrolling stops. At shorter or narrower viewports Contact
+  exceeds its min-height and the edge does pass under, with runway.
+
 ## Where each page area lives
 | Area on page | CSS file | HTML location |
 |---|---|---|

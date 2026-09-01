@@ -306,26 +306,45 @@ main {
   content: '';
   position: absolute;
   inset: 0;
-  /* Extend the frost well BELOW the bar so it can bleed out over a long, gradual
-     cross-fade instead of ending on a hard edge. */
-  bottom: -100px;
+  /* Extend the frost BELOW the bar so it can bleed out over a long, gradual
+     cross-fade instead of ending on a hard edge.
+
+     ⚠️ --bar-bleed IS CLIPPED TO CONTACT'S TOP EDGE (js/main.js, 2026-08-31).
+     The bleed is right over cream page content, but Contact is a hard-edged
+     full-bleed blue panel, and for the ~100px before the bar inverts the cream
+     frost was lying ACROSS the top of it — veiling an architectural edge with a
+     blur that belongs to the page above it. The script keeps this at 100 until
+     the panel gets within 100px, then hands back exactly the gap, so the frost
+     stops where the blue starts and never reaches onto it. At the moment they
+     meet it is 0 and the two solid strips butt together.
+     The 100px default is what no-JS gets, which is today's behaviour and is
+     correct everywhere except that one approach. */
+  bottom: calc(var(--bar-bleed, 100px) * -1);
   z-index: -1;
   /* Frosted overlay that BLEEDS: the cream fill is a top→bottom GRADIENT — opaque
      behind the nav row (so the items stay legible over busy content) fading to 0
      at the bottom — over a real backdrop blur. The mask below holds the frost
-     solid across the bar and fades it to nothing over the 100px bleed, so the
-     blur melts seamlessly into the sharp page. (Grain lives on ::after so it can
-     fade FASTER than the blur — no grainy tail. is-over-dark stays solid blue.) */
+     solid across the bar and fades it to nothing over the bleed, so the blur
+     melts seamlessly into the sharp page. (Grain lives on ::after so it can fade
+     FASTER than the blur — no grainy tail. is-over-dark stays solid blue.)
+
+     ⚠️ The stops are PX, not the percentages they used to be. Percentages
+     resolve against this box's height — which is the bar plus the bleed, and the
+     bleed is now variable. As it shrank, 42%/55%/68% marched up INTO the 64px
+     bar and started fading the frost out behind the nav items themselves. In px
+     the frost keeps its shape and the shrinking box simply clips its tail, which
+     is the whole intent. These four are the old percentages resolved at the full
+     164px box (64 bar + 100 bleed), so the rendering is unchanged there. */
   background-image:
     linear-gradient(to bottom,
-      rgba(251, 252, 248, 0.95) 0%,
-      rgba(251, 252, 248, 0.92) 42%,
-      rgba(251, 252, 248, 0.4) 55%,
-      rgba(251, 252, 248, 0) 68%);
+      rgba(251, 252, 248, 0.95) 0,
+      rgba(251, 252, 248, 0.92) 69px,
+      rgba(251, 252, 248, 0.4) 90px,
+      rgba(251, 252, 248, 0) 112px);
   -webkit-backdrop-filter: blur(16px) saturate(1.15);
   backdrop-filter: blur(16px) saturate(1.15);
-  -webkit-mask-image: linear-gradient(to bottom, #000 0, #000 calc(100% - 100px), transparent 100%);
-  mask-image: linear-gradient(to bottom, #000 0, #000 calc(100% - 100px), transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0, #000 calc(100% - var(--bar-bleed, 100px)), transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0, #000 calc(100% - var(--bar-bleed, 100px)), transparent 100%);
   opacity: 0;
   transition: opacity 0.35s ease, background-color 0.35s ease;
 }
@@ -343,11 +362,14 @@ main {
   content: '';
   position: absolute;
   inset: 0;
-  bottom: -40px;
+  /* The grain's own tail is shorter than the blur's, and it takes the same clip:
+     min() means it keeps its 40px until --bar-bleed drops below that, then
+     shrinks with it. Nothing to publish separately. */
+  bottom: calc(min(40px, var(--bar-bleed, 100px)) * -1);
   z-index: -1;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='navgrain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.55' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23navgrain)' opacity='0.3'/%3E%3C/svg%3E");
-  -webkit-mask-image: linear-gradient(to bottom, #000 0, #000 calc(100% - 40px), transparent 100%);
-  mask-image: linear-gradient(to bottom, #000 0, #000 calc(100% - 40px), transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0, #000 calc(100% - min(40px, var(--bar-bleed, 100px))), transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0, #000 calc(100% - min(40px, var(--bar-bleed, 100px))), transparent 100%);
   opacity: 0;
   transition: opacity 0.35s ease;
   pointer-events: none;
