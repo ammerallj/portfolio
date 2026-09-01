@@ -363,9 +363,10 @@
     border-radius: 24px;
   }
 
-  .work-card-image {
-    height: 220px; /* fixed strip again — overrides the 1024 tier's ratio */
-  }
+  /* NO fixed height here any more — the 1024 tier's proportional rule cascades
+     down. A fixed strip crops the 3.2:1 artwork: at 720 wide, 220px made the
+     frame 3.27 and object-fit: cover shaved the top and bottom. The ratio keeps
+     the whole image at every width. */
 
   .about-skills-list {
     grid-template-columns: 1fr;
@@ -708,9 +709,19 @@
        align-items: stretch gives the card the full width. */
     flex: 0 0 auto;
   }
-  .work-card-image {
-    height: 201px; /* Figma (radius stays 24px from the 768 tier) */
-  }
+  /* NO fixed height — the 1024 tier's `aspect-ratio: 1328 / 415` cascades down.
+     This tier used to force 201px, which on a 343px card made the frame 1.71
+     against the artwork's 3.20: object-fit: cover then threw away 47% OF THE
+     IMAGE'S WIDTH, taking only the middle band. That is content, not padding —
+     work-accessibility.jpg keeps its UI in the left and right thirds, so the
+     lead card showed an empty gradient. Proportional gives 343x107 and the whole
+     composition.
+     ⚠️ The 201 came from the Figma phone frame, so this deliberately departs from
+     it. The frames were drawn before these 3.2:1 exports existed; matching the
+     number cost the picture. Every other tier is already proportional — desktop's
+     415px on a 1328 card IS 3.20 — so this makes the phone consistent rather than
+     special. If a taller phone card is wanted, it needs its own crop exported at
+     that ratio, not a shorter frame over a wide image. */
   .work-card-description {
     font-size: 17px; /* Figma */
   }

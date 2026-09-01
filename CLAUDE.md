@@ -1004,6 +1004,19 @@ images land 312–448 KB each; the Work cards 296–568 KB each.
   was removed too, so re-export from the design tool if the asset changes.
 - Keep `width`/`height` attributes on every `<img>` — they reserve the box and
   stop layout shift while the image loads.
+- **The Work card frame is PROPORTIONAL at every tier, never a fixed height
+  (2026-08).** The artwork is 2660x830 = 3.2:1, and the desktop's 415px on a
+  1328px card is exactly that ratio; ≤1024 states it as
+  `aspect-ratio: 1328 / 415`, and ≤768 and ≤480 now inherit that rather than
+  setting their own strip. Those two tiers used to force 220px and 201px, and a
+  fixed height on a variable width is a CROP: at 343 wide, 201px made the frame
+  1.71 against the artwork's 3.20, so `object-fit: cover` threw away **47% of the
+  image's width**, keeping only the middle band. That is content, not padding —
+  `work-accessibility.jpg` holds its UI in the left and right thirds, so the lead
+  card rendered as an empty gradient. The 201 came from the Figma phone frame,
+  which was drawn before these 3.2:1 exports existed. **If a taller phone card is
+  ever wanted, export a crop at that ratio — don't put a shorter frame over a
+  wide image.**
 - Above-the-fold images must NOT get `loading="lazy"`; below-the-fold ones should.
   In each carousel, slide 1 is above the fold (no `lazy`); slides 2–3 are `lazy`.
 - Bump the `?v=` cache-buster on an `<img src>` when you overwrite an existing
