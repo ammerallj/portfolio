@@ -28,6 +28,74 @@ main {
   z-index: 0;
 }
 
+/* ============================================================
+   ANIMATED FIELD (2026-09) — the gradient as a live WebGL shader,
+   layered over .page-field's JPEG. Exported from
+   lab/field-shader.html; source is Figma 521:3788.
+
+   BOTH ELEMENTS CARRY .page-field, so they inherit its box and
+   every per-tier override with it — --field-w at all three tiers
+   and the ≤480 crop nudge. That is the whole reason there is no
+   new responsive work here: the art direction is expressed as
+   width + transform, never as an image crop, so it applies to a
+   canvas unchanged. Don't move these into responsive.css.
+
+   THEY ARE INVISIBLE UNTIL THE SHADER HAS ACTUALLY DRAWN. The
+   reveal class lands in initHeroField() after the first frame, so
+   no-JS, no-WebGL and any shader failure all rest on the JPEG —
+   which is still the LCP paint and still preloaded. Never give
+   the canvas its own background: a cream fill would cover the
+   image before the first frame and make the fallback worse than
+   what it replaces.
+   ============================================================ */
+
+/* An <img> derives its aspect from width/height (3600×2198); a canvas and a
+   div cannot, so state it. 1.6377 is the same constant --field-bottom is
+   built from — re-derive BOTH together if the artwork is ever re-exported. */
+.page-field-canvas,
+.page-field-grain {
+  aspect-ratio: 1.6377;
+  opacity: 0;
+  transition: opacity 0.45s ease;
+}
+html.is-field-live .page-field-canvas { opacity: 1; }
+
+/* GRAIN — Figma bakes an feTurbulence layer into every blob, so this is art
+   direction, not a banding workaround (the shader's own dither does that).
+   It lives here rather than in the shader because the canvas renders BELOW
+   devicePixelRatio on purpose, and grain is the one element that wants device
+   pixels; an SVG background is rasterised at full device resolution whatever
+   the canvas is doing.
+     · saturate 0    — raw turbulence is COLOURED noise, and coloured speckle
+                       over a gradient reads as JPEG artifacts
+     · discrete      — THE SHARPENING STEP. feTurbulence is a smooth Perlin
+                       cloud at every frequency; quantising to two levels is
+                       what makes it crisp speckle. Figma's own export uses a
+                       discrete transfer for exactly this.
+     · alpha = 1     — or the turbulence's own alpha punches holes and the
+                       grain goes blotchy instead of even
+   baseFrequency 1.3 = cycles per CSS px (the tile is 160 units at 160px).
+   numOctaves stays at 2: a third lands past Nyquist at this frequency and
+   aliases back down as low-frequency blotch — it would look SOFTER. */
+.page-field-grain {
+  mix-blend-mode: overlay;
+  background-repeat: repeat;
+  background-size: 160px 160px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.3' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='discrete' tableValues='0 1'/%3E%3CfeFuncG type='discrete' tableValues='0 1'/%3E%3CfeFuncB type='discrete' tableValues='0 1'/%3E%3CfeFuncA type='linear' slope='0' intercept='1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23g)'/%3E%3C/svg%3E");
+}
+html.is-field-live .page-field-grain { opacity: 0.15; }
+
+/* Reduced motion still gets the shader — one static frame, drawn and left
+   alone (initHeroField never starts its loop). The artwork should not change
+   character just because someone asked the page to hold still; only the
+   movement goes. The fade goes too, or the reveal is itself an animation. */
+@media (prefers-reduced-motion: reduce) {
+  .page-field-canvas,
+  .page-field-grain {
+    transition: none;
+  }
+}
+
 .page-field {
   position: absolute;
   left: 50%;

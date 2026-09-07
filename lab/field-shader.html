@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="noindex" />
+<title>Lab — shader field</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@200;500;700&family=Inter:wght@400..700&display=swap" rel="stylesheet" />
+<style>
+/* ============================================================
+   LAB — the hero field as a WebGL FRAGMENT SHADER, rebuilt against
+   the FIGMA SOURCE rather than against the exported JPEG.
+   Figma node 521:3788 ("Frame 70", 1673x1000).
+
+   WHAT THE SOURCE ACTUALLY IS — read off the four exported blob
+   SVGs, not guessed:
+     - FOUR circles, not seven. Each is one <circle> with a radial
+       gradient, at layer opacity 0.9.
+     - Every blob shares ONE ramp:
+           offset 0        colour, alpha 1
+           offset 0.524038 colour, alpha 0.3
+           offset 1        WHITE,  alpha 0
+       So the core is nearly flat, alpha collapses to 0.3 by the
+       halfway mark, and the last stop lerps toward white as it
+       fades — that final white lift is why the artwork dissolves
+       into cream instead of greying out at the edges.
+     - Colours are SATURATED: #D64DCE #019FD8 #9238E3 #F93F3F.
+       The pastels in hero-bkg.jpg are what these become AFTER the
+       0.9 opacity and the ramp; sampling the JPEG (the first pass
+       at this) recovered the mixes, not the sources.
+     - Figma bakes a feTurbulence grain into each layer
+       (fractalNoise, baseFrequency 1, 3 octaves, luminanceToAlpha,
+       discrete alpha ~51% coverage). The grain is ART DIRECTION,
+       present in the original — not something added here to hide
+       banding. Dither is separate and does that job.
+
+   CENTRES ARE APPROXIMATE. A least-squares fit of the composite
+   against the export did not converge (blend modes and the frame's
+   layer transforms aren't recoverable from the SVGs alone), so the
+   positions below are read off the render and exposed as live
+   sliders. Nudge them, then hit "Copy config".
+   ============================================================ */
+
+:root {
+  --font-heading: 'Hanken Grotesk', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+  --color-bg: #FBFCF8;
+  --display-size: clamp(56px, 6.67vw, 96px);
+  --page-gutter: 56px;
+  --work-peek: 140px;
+  --gap-group: 60px;
+  --width-right-column: clamp(368.75px, 41.667vw - 58.33px, 541.67px);
+  --width-title-column: clamp(446.5px, 50vw - 66px, 654px);
+  --field-w: max(1857.6px, 129vw);
+  --field-bottom: calc(var(--field-w) * 0.53734);
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--color-bg); font-family: var(--font-body); color: #000; overflow-x: hidden; }
+main { position: relative; z-index: 0; }
+
+/* The field box. Canvas and grain are stacked INSIDE it so the grain sits in
+   exact register with the gradient at any render scale. */
+.field-stack {
+  position: absolute; top: 0; left: 50%;
+  width: var(--field-w); aspect-ratio: 1.6377;
+  transform: translateX(-50%) translateY(-12%);
+  z-index: -1; pointer-events: none;
+}
+#field { display: block; width: 100%; height: 100%; background: var(--color-bg); }
+
+/* GRAIN — lifted OUT of the shader and onto its own layer, using Figma's own
+   feTurbulence primitive.
+
+   Why it cannot stay in the shader: the canvas renders at `Render scale`,
+   which is deliberately BELOW devicePixelRatio (a soft gradient carries no
+   per-pixel detail, so 1.0x is a 4x fill-rate saving on a 2x display). Grain
+   is the one element that does want device pixels — in the canvas every speck
+   was being doubled. An SVG background is rasterised by the browser at device
+   resolution no matter what the canvas is doing, so the grain is now as sharp
+   as the display allows AND independent of the performance dial.
+
+   It is also static, like the source. Grain that redraws per frame crawls —
+   the artifact that makes dithered GIFs shimmer. */
+.field-grain {
+  position: absolute; inset: 0;
+  opacity: var(--grain-op, 0.30);
+  mix-blend-mode: overlay;   /* mid-grey is a no-op; lighter lifts, darker sinks */
+  background-repeat: repeat;
+}
+body.no-grain .field-grain { display: none; }
+.field-img {
+  position: absolute; top: 0; left: 50%;
+  width: var(--field-w); height: auto;
+  transform: translateX(-50%) translateY(-12%);
+  z-index: -1; pointer-events: none; display: none;
+}
+body.show-img .field-stack { display: none; }
+body.show-img .field-img { display: block; }
+
+/* ---- the lockup (copy of .intro) ---- */
+.intro { position: relative; height: 100svh; display: flex; flex-direction: column; }
+.intro::after {
+  content: ''; position: absolute; top: 50%; left: 0; right: 0;
+  height: max(50svh, calc(var(--field-bottom) - 50svh));
+  pointer-events: none; z-index: -1;
+  backdrop-filter: blur(7px); -webkit-backdrop-filter: blur(7px);
+  background: rgba(251, 252, 248, 0.12);
+}
+body.no-frost .intro::after { backdrop-filter: none; -webkit-backdrop-filter: none; background: none; }
+.intro-top { flex: 1 1 auto; display: flex; align-items: flex-end; padding: 0 150px 40px; overflow: hidden; }
+.intro-headline {
+  margin: 0; font-family: var(--font-heading); font-weight: 700;
+  font-size: var(--display-size); line-height: 1; letter-spacing: -0.02em;
+  color: #fff; max-width: 9.375em;
+}
+.intro-divider { height: 1px; background: rgba(255, 255, 255, 0.65); }
+.intro-band {
+  flex: 0 0 50%;
+  padding: 40px calc(var(--page-gutter) + var(--work-peek)) 0 var(--page-gutter);
+  display: flex; overflow: hidden;
+}
+.intro-band-spacer { flex: 0 1 var(--width-title-column); min-width: 0; margin-right: auto; }
+.intro-band-right { flex: 0 1 var(--width-right-column); min-width: 0; }
+.intro-bio { margin: 0; font-size: 24px; line-height: 1.08; letter-spacing: -0.02em; color: #fff; }
+.intro-bar {
+  position: relative; display: flex; align-items: center;
+  height: 64px; padding-inline: 24px; margin-top: -64px; margin-bottom: 64px; font-size: 15px;
+}
+.intro-bar::before {
+  content: ''; position: absolute; inset: 0; z-index: -1;
+  backdrop-filter: blur(5.5px) saturate(1.2); -webkit-backdrop-filter: blur(5.5px) saturate(1.2);
+  background: rgba(251, 252, 248, 0.05);
+}
+.intro-bar-name { margin: 0 auto 0 0; font-weight: 500; color: #fff; }
+.intro-bar-links { display: flex; gap: var(--gap-group); }
+.intro-bar a { color: #fff; text-decoration: none; }
+.intro-bar-cta-wrap { margin-left: var(--gap-group); }
+.intro-bar-cta { background: #000; color: #fff !important; padding: 8px 20px; border-radius: 999px; display: inline-block; }
+.after-fold { padding: 144px var(--page-gutter); }
+.after-fold h2 { font-family: var(--font-heading); font-weight: 700; font-size: 56px; letter-spacing: -0.02em; margin: 0; }
+.after-fold p { max-width: 542px; font-size: 18px; line-height: 1.4; }
+
+/* ---- lab panel ---- */
+.panel {
+  position: fixed; right: 16px; bottom: 16px; z-index: 100;
+  background: rgba(20,20,22,0.92);
+  -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+  color: #fff; padding: 14px 16px; border-radius: 14px;
+  font: 12px/1.5 var(--font-body); display: grid; gap: 9px; width: 250px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.35);
+  max-height: calc(100vh - 32px); overflow-y: auto;
+}
+.panel h3 { margin: 0; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.55; font-weight: 500; }
+.panel hr { border: 0; border-top: 1px solid rgba(255,255,255,0.12); margin: 2px 0; }
+.panel label { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+.panel input[type=range] { width: 100%; accent-color: #4A45FF; margin: 0; }
+.panel select { width: 100%; background: #2a2a2e; color: #fff; border: 1px solid rgba(255,255,255,0.16); border-radius: 6px; padding: 4px 6px; font: inherit; }
+.panel .row { display: flex; justify-content: space-between; gap: 10px; }
+.panel code { font-size: 11px; opacity: 0.62; font-variant-numeric: tabular-nums; }
+.panel button {
+  background: #4A45FF; color: #fff; border: 0; border-radius: 7px;
+  padding: 7px 10px; font: inherit; cursor: pointer;
+}
+.panel button:hover { filter: brightness(1.12); }
+.swatch { width: 11px; height: 11px; border-radius: 3px; display: inline-block; vertical-align: -1px; }
+.warn { color: #ffb4b4; font-size: 11px; }
+
+/* ---- export sheet ---- */
+.export-sheet {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(0,0,0,0.55);
+  display: flex; align-items: center; justify-content: center; padding: 24px;
+}
+.export-sheet[hidden] { display: none; }
+.export-card {
+  background: #1a1a1d; color: #fff; border-radius: 14px; padding: 18px;
+  width: min(720px, 100%); box-shadow: 0 24px 60px rgba(0,0,0,0.5);
+  display: grid; gap: 12px;
+}
+.export-card h3 { margin: 0; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; opacity: 0.6; font-weight: 500; }
+#export-text {
+  width: 100%; height: 46vh; resize: vertical;
+  background: #101012; color: #dfe3e8; border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 9px; padding: 12px;
+  font: 12px/1.55 ui-monospace, SFMono-Regular, Menlo, monospace;
+  white-space: pre; overflow: auto;
+}
+.export-actions { display: flex; gap: 8px; justify-content: flex-end; }
+.export-actions button {
+  background: #4A45FF; color: #fff; border: 0; border-radius: 7px;
+  padding: 8px 14px; font: inherit; font-size: 12px; cursor: pointer;
+}
+.export-actions button:last-child { background: #35353b; }
+.export-actions button:hover { filter: brightness(1.12); }
+</style>
+</head>
+<body>
+
+<main>
+  <div class="field-stack" aria-hidden="true">
+    <canvas id="field"></canvas>
+    <div class="field-grain" id="grain"></div>
+  </div>
+  <img class="field-img" src="../images/hero-bkg.jpg" width="3600" height="2198" alt="" />
+
+  <section class="intro">
+    <div class="intro-top"><h1 class="intro-headline">Making products make sense.</h1></div>
+    <div class="intro-divider" aria-hidden="true"></div>
+    <div class="intro-band">
+      <div class="intro-band-spacer" aria-hidden="true"></div>
+      <div class="intro-band-right">
+        <p class="intro-bio">I design how products behave, moving between early ideas and mature systems to make experiences feel connected across products.</p>
+      </div>
+    </div>
+  </section>
+
+  <nav class="intro-bar" aria-label="Site navigation">
+    <p class="intro-bar-name">Jenna Ammerall.</p>
+    <div class="intro-bar-links"><a href="#">Selected work</a><a href="#">About me</a></div>
+    <div class="intro-bar-cta-wrap"><a class="intro-bar-cta" href="#">Say hello</a></div>
+  </nav>
+
+  <section class="after-fold">
+    <h2>Creating Continuity Across Messaging</h2>
+    <p>Stand-in for Selected Work — here to show the field bleeding past the fold and dissolving into the cream, the same as it does on the real page.</p>
+  </section>
+</main>
+
+<div class="panel">
+  <h3>Shader field — Figma 521:3788</h3>
+  <label><input type="checkbox" id="t-img" /> Show the JPEG instead</label>
+  <label><input type="checkbox" id="t-pause" /> Pause</label>
+  <label><input type="checkbox" id="t-frost" checked /> Frost pane on</label>
+  <hr />
+  <label><input type="checkbox" id="t-grain" checked /> Grain <code>(in the Figma source)</code></label>
+  <label><input type="checkbox" id="t-dither" checked /> Dither <code>(anti-banding)</code></label>
+  <div>
+    <div class="row"><span>Grain amount</span><code id="v-grainamt">0.30</code></div>
+    <input type="range" id="r-grainamt" min="0" max="0.7" step="0.01" value="0.30" />
+  </div>
+  <div>
+    <div class="row"><span>Grain fineness</span><code id="v-grainfreq">1.80</code></div>
+    <input type="range" id="r-grainfreq" min="0.25" max="2.5" step="0.05" value="1.8" />
+  </div>
+  <div>
+    <div class="row"><span>Grain hardness</span><code id="v-grainhard">2 (binary)</code></div>
+    <input type="range" id="r-grainhard" min="2" max="10" step="1" value="2" />
+  </div>
+  <hr />
+  <div>
+    <div class="row"><span>Motion</span><code id="v-speed">1.00x</code></div>
+    <input type="range" id="r-speed" min="0" max="3" step="0.05" value="1" />
+  </div>
+  <div>
+    <div class="row"><span>Drift range</span><code id="v-amp">0.055</code></div>
+    <input type="range" id="r-amp" min="0" max="0.25" step="0.005" value="0.055" />
+  </div>
+  <div>
+    <div class="row"><span>Warp</span><code id="v-warp">0.35</code></div>
+    <input type="range" id="r-warp" min="0" max="1.2" step="0.05" value="0.35" />
+  </div>
+  <hr />
+  <h3>Blob placement</h3>
+  <select id="sel-blob"></select>
+  <div>
+    <div class="row"><span>x</span><code id="v-bx">—</code></div>
+    <input type="range" id="r-bx" min="-0.2" max="1.2" step="0.005" value="0.5" />
+  </div>
+  <div>
+    <div class="row"><span>y</span><code id="v-by">—</code></div>
+    <input type="range" id="r-by" min="-0.2" max="1.2" step="0.005" value="0.5" />
+  </div>
+  <div>
+    <div class="row"><span>radius</span><code id="v-br">—</code></div>
+    <input type="range" id="r-br" min="0.05" max="0.9" step="0.005" value="0.27" />
+  </div>
+  <button id="btn-copy">Export config</button>
+  <button id="btn-reset">Reset to tuned</button>
+  <button id="btn-source">Show Figma source</button>
+  <hr />
+  <div>
+    <div class="row"><span>Render scale</span><code id="v-dpr">1.00x</code></div>
+    <input type="range" id="r-dpr" min="0.5" max="2" step="0.25" value="1" />
+  </div>
+  <div class="row"><span>Frame rate</span><code id="v-fps">—</code></div>
+  <div class="row"><span>Buffer</span><code id="v-size">—</code></div>
+  <div id="err" class="warn" hidden></div>
+</div>
+
+<!-- EXPORT SHEET — the full tuned state as pasteable text. A textarea rather
+     than a clipboard-only button: the clipboard API fails silently in plenty
+     of contexts, and being able to SEE what is being handed over matters more
+     than saving one keystroke. -->
+<div class="export-sheet" id="export-sheet" hidden>
+  <div class="export-card">
+    <h3>Field config — paste this back to Claude</h3>
+    <textarea id="export-text" readonly spellcheck="false"></textarea>
+    <div class="export-actions">
+      <button id="btn-export-copy">Copy to clipboard</button>
+      <button id="btn-export-close">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   THE FIGMA SOURCE, transcribed.
+   Colours and the ramp are exact (read from the exported SVGs'
+   <radialGradient> stops). Radii are each circle's own r divided
+   by the 1673px frame width. Centres are eyeballed off the render
+   and are the one part meant to be tuned.
+   ============================================================ */
+const FIGMA = {
+  ramp:  { mid: 0.524038, midAlpha: 0.3 },  // stop list, verbatim
+  layer: 0.9,                               // per-layer opacity in Figma
+  cream: [0.984, 0.988, 0.973],             // #FBFCF8
+  /* THE RAW SOURCE, kept for provenance — each circle's own r over the
+     1673px frame width, and centres read off the render. This is what the
+     Figma file literally contains; it is NOT what the page starts on. Kept
+     so the derivation is never lost and so "Figma source" can restore it. */
+  source: [
+    { name: 'violet  #9238E3', col: [0x92/255, 0x38/255, 0xE3/255], r: 390.000/1673, x: 0.79, y: 0.40 },
+    { name: 'cyan    #019FD8', col: [0x01/255, 0x9F/255, 0xD8/255], r: 418.161/1673, x: 0.50, y: 0.29 },
+    { name: 'magenta #D64DCE', col: [0xD6/255, 0x4D/255, 0xCE/255], r: 446.437/1673, x: 0.27, y: 0.45 },
+    { name: 'red     #F93F3F', col: [0xF9/255, 0x3F/255, 0x3F/255], r: 427.122/1673, x: 0.61, y: 0.55 },
+  ],
+};
+
+/* TUNED — Jenna's placement, 2026-09-07, off the panel sliders. This is the
+   default the page loads on. Colours are untouched from the Figma stops; only
+   the geometry moved: violet and magenta grew (0.233 -> 0.300, 0.267 -> 0.330),
+   cyan tightened (0.250 -> 0.220) and stepped left and down, and red lifted
+   slightly (y 0.55 -> 0.515) at its source radius. Net effect is a wider, more
+   separated composition than the literal source — the field reads across the
+   full lockup instead of massing in the middle. */
+const TUNED = [
+  { name: 'violet  #9238E3', col: [0.5725, 0.2196, 0.8902], r: 0.3000, x: 0.770, y: 0.400 },
+  { name: 'cyan    #019FD8', col: [0.0039, 0.6235, 0.8471], r: 0.2200, x: 0.455, y: 0.325 },
+  { name: 'magenta #D64DCE', col: [0.8392, 0.3020, 0.8078], r: 0.3300, x: 0.270, y: 0.450 },
+  { name: 'red     #F93F3F', col: [0.9765, 0.2471, 0.2471], r: 0.2553, x: 0.610, y: 0.515 },
+];
+
+const blobs = TUNED.map(b => ({ ...b }));
+
+const VERT = `attribute vec2 aPos; void main(){ gl_Position = vec4(aPos, 0.0, 1.0); }`;
+
+const FRAG = `
+precision highp float;
+
+uniform vec2  uRes;
+uniform float uAspect;
+uniform float uTime;
+uniform float uWarp;
+uniform float uAmp;
+uniform float uDither;
+uniform vec3  uBlob[4];   // x, y, radius
+uniform vec3  uCol[4];
+
+const float MID   = ${FIGMA.ramp.mid};
+const float MIDA  = ${FIGMA.ramp.midAlpha};
+const float LAYER = ${FIGMA.layer};
+const vec3  CREAM = vec3(${FIGMA.cream.join(', ')});
+
+float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123); }
+float noise(vec2 p){
+  vec2 i = floor(p), f = fract(p);
+  vec2 u = f * f * (3.0 - 2.0 * f);
+  return mix(mix(hash(i), hash(i + vec2(1.0, 0.0)), u.x),
+             mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), u.x), u.y);
+}
+float fbm(vec2 p){
+  float v = 0.0, a = 0.5;
+  for (int i = 0; i < 4; i++){ v += a * noise(p); p *= 2.0; a *= 0.5; }
+  return v;
+}
+
+/* Figma's three-stop ramp, exactly.
+   Returns (alpha, whiteMix): alpha 1 -> MIDA over the first half, then
+   MIDA -> 0 over the second while the colour lerps toward white. That
+   final white lift is what dissolves the artwork into the cream page. */
+vec2 figmaRamp(float t){
+  if (t >= 1.0) return vec2(0.0, 1.0);
+  if (t <= MID) return vec2(1.0 + (MIDA - 1.0) * (t / MID), 0.0);
+  float u = (t - MID) / (1.0 - MID);
+  return vec2(MIDA * (1.0 - u), u);
+}
+
+void main(){
+  vec2 uv = gl_FragCoord.xy / uRes;
+  uv.y = 1.0 - uv.y;
+
+  /* Domain warp — the one liberty taken with the source. Figma's circles
+     are perfect; displacing the sample point by fBm before evaluating them
+     is what makes the boundaries curl as they drift. Warp 0 = Figma exactly. */
+  vec2 q = vec2(fbm(uv * 2.4 + vec2(0.0, uTime * 0.16)),
+                fbm(uv * 2.4 + vec2(5.2, 1.3 - uTime * 0.13)));
+  vec2 w = uv + uWarp * 0.22 * (q - 0.5);
+
+  /* Source-over compositing onto cream, bottom to top — the same model
+     Figma uses. NOT a weighted average: the overlaps have to stack the way
+     the original does or the mixed hues come out wrong. */
+  vec3 col = CREAM;
+  for (int i = 0; i < 4; i++){
+    float fi = float(i);
+    /* Orbit rates in RAD/SEC. Periods land at 48/39/33/29s for the sine and
+       57/47/40/35s for the cosine — deliberately unequal so the four never
+       return to the same arrangement. An earlier pass used 0.031 + fi*0.007,
+       which is a 203-SECOND cycle moving ~2px/sec: mathematically animated,
+       visually static. If this ever needs calming, drop uAmp (the Drift
+       slider) rather than these — amplitude is what reads as restraint,
+       frequency is what reads as alive. */
+    vec2 c = uBlob[i].xy + uAmp * vec2(
+      sin(uTime * (0.130 + fi * 0.028) + fi * 1.7),
+      cos(uTime * (0.110 + fi * 0.024) + fi * 2.3));
+    float rad = uBlob[i].z * (1.0 + 0.06 * sin(uTime * (0.075 + fi * 0.017) + fi));
+
+    vec2  d = vec2(w.x - c.x, (w.y - c.y) / uAspect);
+    vec2  ra = figmaRamp(length(d) / rad);
+    float a = ra.x * LAYER;
+    if (a <= 0.0) continue;
+    vec3 src = mix(uCol[i], vec3(1.0), ra.y);
+    col = col * (1.0 - a) + src * a;
+  }
+
+  /* GRAIN lives on .field-grain now, not here — see the CSS. A shader grain
+     is capped at the canvas's render scale, which is intentionally below
+     device resolution; the overlay is rasterised at full device resolution
+     and stays sharp however low this buffer goes. */
+
+  /* DITHER — engineering, not art. One code value of noise before the
+     8-bit quantisation turns a banding step into imperceptible grain.
+     This is the thing neither a JPEG ramp nor an H.264 encode can do. */
+  if (uDither > 0.5) col += (hash(gl_FragCoord.xy + fract(uTime) * 71.3) - 0.5) / 255.0;
+
+  gl_FragColor = vec4(col, 1.0);
+}
+`;
+
+const canvas = document.getElementById('field');
+const errEl  = document.getElementById('err');
+const state  = { speed: 1, warp: 0.35, amp: 0.055, dither: 1, grain: 0.055, grainOn: 1, scale: 1, paused: false };
+
+function fail(msg){
+  errEl.hidden = false;
+  errEl.textContent = msg + ' — falling back to the JPEG.';
+  document.body.classList.add('show-img');
+}
+
+const gl = canvas.getContext('webgl', { antialias: false, alpha: false, powerPreference: 'low-power' })
+        || canvas.getContext('experimental-webgl');
+
+if (!gl) { fail('WebGL unavailable'); } else {
+  const compile = (type, src) => {
+    const s = gl.createShader(type);
+    gl.shaderSource(s, src); gl.compileShader(s);
+    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s));
+    return s;
+  };
+  let U = {};
+  try {
+    const prog = gl.createProgram();
+    gl.attachShader(prog, compile(gl.VERTEX_SHADER, VERT));
+    gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, FRAG));
+    gl.linkProgram(prog);
+    if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(prog));
+    gl.useProgram(prog);
+
+    const buf = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 3,-1, -1,3]), gl.STATIC_DRAW);
+    const aPos = gl.getAttribLocation(prog, 'aPos');
+    gl.enableVertexAttribArray(aPos);
+    gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
+
+    for (const n of ['uRes','uAspect','uTime','uWarp','uAmp','uDither','uBlob','uCol'])
+      U[n] = gl.getUniformLocation(prog, n);
+
+    // Colours never change; upload once.
+    gl.uniform3fv(U.uCol, new Float32Array(blobs.flatMap(b => b.col)));
+  } catch (e) { fail('Shader error: ' + e.message); }
+
+  const sizeEl = document.getElementById('v-size');
+  function resize(){
+    const r = canvas.getBoundingClientRect();
+    const w = Math.max(1, Math.round(r.width  * state.scale));
+    const h = Math.max(1, Math.round(r.height * state.scale));
+    if (canvas.width !== w || canvas.height !== h) {
+      canvas.width = w; canvas.height = h;
+      gl.viewport(0, 0, w, h);
+      sizeEl.textContent = w + '×' + h;
+    }
+  }
+  addEventListener('resize', resize);
+
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+  const fpsEl  = document.getElementById('v-fps');
+  let frames = 0, last = performance.now(), clock = 0, prev = performance.now();
+
+  (function frame(now){
+    requestAnimationFrame(frame);
+    const dt = Math.min(now - prev, 100) / 1000; prev = now;
+    const still = state.paused || document.hidden || reduce.matches;
+    if (!still) clock += dt * state.speed;
+    if (still && frames > 0 && now - last < 1000) return;
+
+    resize();
+    gl.uniform2f(U.uRes, canvas.width, canvas.height);
+    gl.uniform1f(U.uAspect, canvas.width / canvas.height);
+    gl.uniform1f(U.uTime, clock);
+    gl.uniform1f(U.uWarp, state.warp);
+    gl.uniform1f(U.uAmp, state.amp);
+    gl.uniform1f(U.uDither, state.dither);
+    gl.uniform3fv(U.uBlob, new Float32Array(blobs.flatMap(b => [b.x, b.y, b.r])));
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+
+    frames++;
+    if (now - last >= 1000) {
+      fpsEl.textContent = Math.round(frames * 1000 / (now - last)) + ' fps';
+      frames = 0; last = now;
+    }
+  })(performance.now());
+}
+
+/* ---- panel ---- */
+const $ = id => document.getElementById(id);
+const on = (id, fn) => $(id).addEventListener('input', fn);
+
+on('t-img',    e => document.body.classList.toggle('show-img',  e.target.checked));
+on('t-pause',  e => state.paused = e.target.checked);
+on('t-frost',  e => document.body.classList.toggle('no-frost', !e.target.checked));
+on('t-dither', e => state.dither = e.target.checked ? 1 : 0);
+on('t-grain',  e => document.body.classList.toggle('no-grain', !e.target.checked));
+
+/* GRAIN — Figma's filter chain, including the step that actually makes it
+   crisp.
+
+   feTurbulence  fractalNoise: SMOOTH, Perlin-style cloud. On its own it is
+                 soft at every frequency — fading it down just gives faint
+                 mush, which is what "too soft" was.
+   feColorMatrix saturate 0 — raw turbulence is COLOURED noise, and coloured
+                 speckle over a gradient reads as JPEG artifacts.
+   feComponentTransfer
+                 THE SHARPENING STEP, and the one Figma uses (its export has
+                 feFuncA type="discrete"). A discrete transfer quantises the
+                 smooth cloud into hard levels; at 2 levels it is pure binary
+                 black/white speckle with no soft edge anywhere. This is what
+                 crisp grain IS — not finer noise, thresholded noise.
+                 Alpha is forced to 1 in the same pass, or the turbulence's
+                 own alpha punches holes and the grain goes blotchy.
+
+   Tile is 160 SVG units at 160 CSS px, so `fineness` = cycles per CSS pixel;
+   at 1.8 that is ~1.1 DEVICE pixels per speck on a 2x display — as sharp as
+   the panel can resolve. Rasterised by the browser at device resolution, so
+   it is independent of the canvas's Render scale. */
+const grainEl = $('grain');
+const GRAIN_OCTAVES = 2;   /* fixed: at this fineness a 3rd octave lands at
+                              3.6 cycles per DEVICE pixel, far past Nyquist,
+                              and aliases back down as low-frequency blotch —
+                              more octaves would make it softer, not sharper. */
+function paintGrain(freq, levels){
+  // evenly spaced quantisation levels; 2 -> "0 1" -> hard binary
+  const table = Array.from({length: levels}, (_, i) => (i/(levels-1)).toFixed(3)).join(' ');
+  const svg =
+    `<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'>` +
+      `<filter id='g' x='0' y='0' width='100%' height='100%'>` +
+        `<feTurbulence type='fractalNoise' baseFrequency='${freq}' numOctaves='${GRAIN_OCTAVES}' stitchTiles='stitch'/>` +
+        `<feColorMatrix type='saturate' values='0'/>` +
+        `<feComponentTransfer>` +
+          `<feFuncR type='discrete' tableValues='${table}'/>` +
+          `<feFuncG type='discrete' tableValues='${table}'/>` +
+          `<feFuncB type='discrete' tableValues='${table}'/>` +
+          `<feFuncA type='linear' slope='0' intercept='1'/>` +
+        `</feComponentTransfer>` +
+      `</filter>` +
+      `<rect width='160' height='160' filter='url(%23g)'/>` +
+    `</svg>`;
+  grainEl.style.backgroundImage = `url("data:image/svg+xml,${svg.replace(/#/g, '%23').replace(/"/g, "'")}")`;
+  grainEl.style.backgroundSize = '160px 160px';
+}
+paintGrain(1.8, 2);
+on('r-grainamt',  e => { document.documentElement.style.setProperty('--grain-op', e.target.value);
+                         $('v-grainamt').textContent = (+e.target.value).toFixed(2); });
+on('r-grainfreq', e => { paintGrain(+e.target.value, +$('r-grainhard').value);
+                         $('v-grainfreq').textContent = (+e.target.value).toFixed(2); });
+on('r-grainhard', e => { paintGrain(+$('r-grainfreq').value, +e.target.value);
+                         $('v-grainhard').textContent = e.target.value === '2' ? '2 (binary)' : e.target.value; });
+on('r-speed',  e => { state.speed = +e.target.value; $('v-speed').textContent = state.speed.toFixed(2) + 'x'; });
+on('r-amp',    e => { state.amp   = +e.target.value; $('v-amp').textContent   = state.amp.toFixed(3); });
+on('r-warp',   e => { state.warp  = +e.target.value; $('v-warp').textContent  = state.warp.toFixed(2); });
+on('r-dpr',    e => { state.scale = +e.target.value; $('v-dpr').textContent   = state.scale.toFixed(2) + 'x'; });
+
+const sel = $('sel-blob');
+blobs.forEach((b, i) => sel.add(new Option(b.name, i)));
+function syncBlobUI(){
+  const b = blobs[sel.value];
+  $('r-bx').value = b.x; $('v-bx').textContent = b.x.toFixed(3);
+  $('r-by').value = b.y; $('v-by').textContent = b.y.toFixed(3);
+  $('r-br').value = b.r; $('v-br').textContent = b.r.toFixed(3);
+}
+sel.addEventListener('change', syncBlobUI);
+on('r-bx', e => { blobs[sel.value].x = +e.target.value; $('v-bx').textContent = (+e.target.value).toFixed(3); });
+on('r-by', e => { blobs[sel.value].y = +e.target.value; $('v-by').textContent = (+e.target.value).toFixed(3); });
+on('r-br', e => { blobs[sel.value].r = +e.target.value; $('v-br').textContent = (+e.target.value).toFixed(3); });
+syncBlobUI();
+
+/* EXPORT — the COMPLETE tuned state, not just the blobs. Grain and motion are
+   tuned every bit as much as placement, and an export that silently dropped
+   them would hand back a config that does not reproduce what is on screen.
+   Invariants (ramp, layer opacity, cream) ride along so the paste is
+   self-contained and can be dropped into main.js without cross-referencing
+   this file. */
+function buildExport(){
+  const f = n => (+n).toFixed(4).replace(/0+$/, '').replace(/\.$/, '.0');
+  const rows = blobs.map(b =>
+    `    { name: '${b.name}', col: [${b.col.map(v => v.toFixed(4)).join(', ')}], ` +
+    `r: ${b.r.toFixed(4)}, x: ${b.x.toFixed(3)}, y: ${b.y.toFixed(3)} },`).join('\n');
+  return `// Hero field — exported from lab/field-shader.html
+// ${new Date().toISOString().slice(0, 10)}  ·  source: Figma 521:3788
+const FIELD = {
+  // --- invariant: read from the Figma file, do not hand-tune ---
+  ramp:  { mid: ${FIGMA.ramp.mid}, midAlpha: ${FIGMA.ramp.midAlpha} },
+  layer: ${FIGMA.layer},
+  cream: [${FIGMA.cream.join(', ')}],
+
+  // --- placement ---
+  blobs: [
+${rows}
+  ],
+
+  // --- motion ---
+  motion: {
+    speed: ${f(state.speed)},   // time multiplier
+    drift: ${f(state.amp)},   // orbit amplitude, fraction of field width
+    warp:  ${f(state.warp)},   // domain-warp amount; 0 = Figma's exact circles
+  },
+
+  // --- grain (CSS layer, not the shader) ---
+  grain: {
+    on:       ${!document.body.classList.contains('no-grain')},
+    amount:   ${f(getComputedStyle($('grain')).opacity)},   // layer opacity
+    fineness: ${f($('r-grainfreq').value)},   // cycles per CSS px
+    hardness: ${$('r-grainhard').value},        // discrete levels; 2 = binary
+    octaves:  ${GRAIN_OCTAVES},        // fixed; see the note in the lab file
+    blend:    'overlay',
+  },
+
+  // --- render ---
+  dither:      ${!!state.dither},   // +/- half a code value, kills 8-bit banding
+  renderScale: ${f(state.scale)},   // canvas buffer vs CSS px; below DPR on purpose
+};`;
+}
+
+const sheet = $('export-sheet');
+$('btn-copy').addEventListener('click', () => {
+  $('export-text').value = buildExport();
+  sheet.hidden = false;
+  $('export-text').focus(); $('export-text').select();
+});
+$('btn-export-close').addEventListener('click', () => sheet.hidden = true);
+sheet.addEventListener('click', e => { if (e.target === sheet) sheet.hidden = true; });
+addEventListener('keydown', e => { if (e.key === 'Escape') sheet.hidden = true; });
+$('btn-export-copy').addEventListener('click', () => {
+  const ta = $('export-text');
+  ta.select();
+  const done = () => { const b = $('btn-export-copy'); b.textContent = 'Copied';
+                       setTimeout(() => b.textContent = 'Copy to clipboard', 1200); };
+  // execCommand is the fallback that still works where the async API is blocked
+  navigator.clipboard?.writeText(ta.value).then(done, () => { document.execCommand('copy'); done(); });
+});
+
+const restore = set => { set.forEach((src, i) => Object.assign(blobs[i], src)); syncBlobUI(); };
+$('btn-reset').addEventListener('click',  () => restore(TUNED));
+$('btn-source').addEventListener('click', () => restore(FIGMA.source));
+</script>
+
+</body>
+</html>

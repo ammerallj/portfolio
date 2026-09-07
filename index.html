@@ -159,7 +159,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@200;500;700&family=Inter:wght@400..700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=85f6b910" />
+  <link rel="stylesheet" href="style.css?v=263934cc" />
   <!-- The landing field is the LCP element — start fetching it immediately. -->
   <link rel="preload" as="image" href="images/hero-bkg.jpg?v=4" fetchpriority="high" />
   <!-- Pre-paint flags, set only when JS runs:
@@ -281,6 +281,18 @@
          behind Selected Work — its lower reaches are near-white, so it
          dissolves into the cream page on its own. Scrolls with the page. -->
     <img class="page-field" src="images/hero-bkg.jpg?v=4" width="3600" height="2198" alt="" fetchpriority="high" />
+
+    <!-- ANIMATED FIELD (2026-09) — the same artwork as a live WebGL gradient,
+         layered OVER the JPEG above rather than replacing it. Both carry
+         .page-field, so they share one box and every per-tier override with
+         it (--field-w, the ≤480 crop nudge) with no new breakpoint work.
+         The image stays the LCP paint and keeps its <link rel="preload">;
+         these two only become visible once the shader's first frame is on
+         screen (html.is-field-live, set in initHeroField). So JS off, WebGL
+         missing, or a shader failure all land on exactly today's hero.
+         Values exported from lab/field-shader.html; source Figma 521:3788. -->
+    <canvas class="page-field page-field-canvas" id="hero-field" aria-hidden="true"></canvas>
+    <div class="page-field page-field-grain" aria-hidden="true"></div>
 
     <!-- INTRO — "Making products make sense." landing (Figma 339:3745).
          Structure: statement (top half) → full-width hairline divider at the
@@ -562,6 +574,6 @@
   </div>
   <div class="wave-cursor" id="wave-cursor" aria-hidden="true">👋</div>
 
-  <script src="js/main.js?v=9b02f53b" defer></script>
+  <script src="js/main.js?v=2ac933bc" defer></script>
 </body>
 </html>

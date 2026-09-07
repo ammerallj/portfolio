@@ -219,6 +219,192 @@ function startReveal() {
 
 initHero();
 
+// ============================================================
+// HERO FIELD — the landing's gradient as a live WebGL shader,
+// drawn over the static hero-bkg.jpg rather than instead of it.
+// Values exported from lab/field-shader.html; the artwork is
+// Figma 521:3788.
+//
+// WHAT THE SOURCE ACTUALLY IS (read off the four exported blob
+// SVGs, not eyeballed): four circles, each one radial gradient at
+// layer opacity 0.9, all sharing ONE ramp —
+//     0        colour, alpha 1
+//     0.524038 colour, alpha 0.3
+//     1        WHITE,  alpha 0
+// That last stop lifting to WHITE is why the artwork dissolves
+// into the cream page instead of greying out at its edges.
+// The colours are saturated (#9238E3 #019FD8 #D64DCE #F93F3F);
+// the pastels in the JPEG are what they become after the ramp.
+//
+// FAILURE IS ALWAYS THE JPEG. Nothing here removes the <img>, and
+// the reveal class is only set after a frame is genuinely on
+// screen — so no-JS, no-WebGL, a driver refusal or a shader
+// compile error all land on exactly the previous hero. The whole
+// body is also wrapped in try/catch: main.js is shared by every
+// page and `is-motion` hides all [data-reveal] pre-paint, so an
+// uncaught throw here would blank the site.
+// ============================================================
+const FIELD = {
+  // Invariant — transcribed from the Figma file. Not tuning knobs.
+  ramp:  { mid: 0.524038, midAlpha: 0.3 },
+  layer: 0.9,
+  cream: [0.984, 0.988, 0.973],
+  // Painted bottom to top, matching the SVG export order.
+  blobs: [
+    { col: [0.5725, 0.2196, 0.8902], r: 0.3000, x: 0.770, y: 0.400 }, // violet  #9238E3
+    { col: [0.0039, 0.6235, 0.8471], r: 0.2200, x: 0.455, y: 0.325 }, // cyan    #019FD8
+    { col: [0.8392, 0.3020, 0.8078], r: 0.3300, x: 0.270, y: 0.450 }, // magenta #D64DCE
+    { col: [0.9765, 0.2471, 0.2471], r: 0.2553, x: 0.610, y: 0.515 }, // red     #F93F3F
+  ],
+  motion: { speed: 2.05, drift: 0.05, warp: 0.55 },
+  // Buffer size vs CSS px. BELOW devicePixelRatio deliberately: a soft
+  // gradient carries no per-pixel detail, so 1.0 on a 2x display is a 4x
+  // fill-rate saving nobody can see. Grain is the one thing that does want
+  // device pixels, which is why it is a CSS layer (hero.css) and not in here.
+  renderScale: 1.0,
+};
+
+function initHeroField() {
+  const canvas = document.getElementById('hero-field');
+  if (!canvas) return;   // project pages have no field
+
+  const gl = canvas.getContext('webgl', { antialias: false, alpha: true, powerPreference: 'low-power' })
+          || canvas.getContext('experimental-webgl');
+  if (!gl) return;       // stay on the JPEG
+
+  const VERT = 'attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}';
+  const FRAG = [
+    'precision highp float;',
+    'uniform vec2 uRes;uniform float uAspect,uTime,uWarp,uAmp;',
+    'uniform vec3 uBlob[4];uniform vec3 uCol[4];',
+    'const float MID=' + FIELD.ramp.mid + ',MIDA=' + FIELD.ramp.midAlpha + ',LAYER=' + FIELD.layer + ';',
+    'const vec3 CREAM=vec3(' + FIELD.cream.join(',') + ');',
+    'float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453123);}',
+    'float noise(vec2 p){vec2 i=floor(p),f=fract(p);vec2 u=f*f*(3.-2.*f);',
+    ' return mix(mix(hash(i),hash(i+vec2(1,0)),u.x),mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),u.x),u.y);}',
+    'float fbm(vec2 p){float v=0.,a=.5;for(int i=0;i<4;i++){v+=a*noise(p);p*=2.;a*=.5;}return v;}',
+    // Figma's three-stop ramp: alpha 1 -> MIDA over the first half, then
+    // MIDA -> 0 while the colour lerps to white.
+    'vec2 ramp(float t){if(t>=1.)return vec2(0.,1.);',
+    ' if(t<=MID)return vec2(1.+(MIDA-1.)*(t/MID),0.);',
+    ' float u=(t-MID)/(1.-MID);return vec2(MIDA*(1.-u),u);}',
+    'void main(){vec2 uv=gl_FragCoord.xy/uRes;uv.y=1.-uv.y;',
+    // Domain warp — the one liberty over the source. Figma's circles are
+    // exact; displacing the sample point makes the boundaries curl as they
+    // drift. uWarp 0 renders the file verbatim.
+    ' vec2 q=vec2(fbm(uv*2.4+vec2(0.,uTime*.16)),fbm(uv*2.4+vec2(5.2,1.3-uTime*.13)));',
+    ' vec2 w=uv+uWarp*.22*(q-.5);',
+    // Source-over onto cream, bottom to top — the model Figma uses. NOT a
+    // weighted average; the overlaps have to stack or the mixed hues go wrong.
+    ' vec3 col=CREAM;float cov=0.;',
+    ' for(int i=0;i<4;i++){float fi=float(i);',
+    // Orbit periods 48/39/33/29s, deliberately unequal so the four never
+    // return to the same arrangement. To calm this down lower uAmp, not the
+    // rates: amplitude reads as restraint, frequency reads as alive.
+    '  vec2 c=uBlob[i].xy+uAmp*vec2(sin(uTime*(.130+fi*.028)+fi*1.7),cos(uTime*(.110+fi*.024)+fi*2.3));',
+    '  float rad=uBlob[i].z*(1.+.06*sin(uTime*(.075+fi*.017)+fi));',
+    '  vec2 d=vec2(w.x-c.x,(w.y-c.y)/uAspect);',
+    '  vec2 ra=ramp(length(d)/rad);float a=ra.x*LAYER;',
+    '  if(a<=0.)continue;',
+    '  col=col*(1.-a)+mix(uCol[i],vec3(1.),ra.y)*a;cov=max(cov,a);}',
+    // DITHER — one code value of noise before the 8-bit quantisation turns a
+    // banding step into imperceptible grain. Neither a JPEG ramp nor a video
+    // encode can do this; it is the technical case for rendering the field.
+    ' col+=(hash(gl_FragCoord.xy+fract(uTime)*71.3)-.5)/255.;',
+    ' gl_FragColor=vec4(col,1.);}',
+  ].join('\n');
+
+  const compile = (type, src) => {
+    const sh = gl.createShader(type);
+    gl.shaderSource(sh, src);
+    gl.compileShader(sh);
+    if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(sh));
+    return sh;
+  };
+
+  const prog = gl.createProgram();
+  gl.attachShader(prog, compile(gl.VERTEX_SHADER, VERT));
+  gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, FRAG));
+  gl.linkProgram(prog);
+  if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(prog));
+  gl.useProgram(prog);
+
+  // One full-screen triangle — cheaper than a quad, and no seam down the middle.
+  gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+  const aPos = gl.getAttribLocation(prog, 'p');
+  gl.enableVertexAttribArray(aPos);
+  gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
+
+  const U = {};
+  ['uRes', 'uAspect', 'uTime', 'uWarp', 'uAmp', 'uBlob', 'uCol']
+    .forEach(n => { U[n] = gl.getUniformLocation(prog, n); });
+
+  gl.uniform3fv(U.uCol,  new Float32Array(FIELD.blobs.flatMap(b => b.col)));
+  gl.uniform3fv(U.uBlob, new Float32Array(FIELD.blobs.flatMap(b => [b.x, b.y, b.r])));
+  gl.uniform1f(U.uWarp, FIELD.motion.warp);
+  gl.uniform1f(U.uAmp,  FIELD.motion.drift);
+
+  function resize() {
+    const r = canvas.getBoundingClientRect();
+    const w = Math.max(1, Math.round(r.width  * FIELD.renderScale));
+    const h = Math.max(1, Math.round(r.height * FIELD.renderScale));
+    if (canvas.width !== w || canvas.height !== h) {
+      canvas.width = w;
+      canvas.height = h;
+      gl.viewport(0, 0, w, h);
+    }
+  }
+
+  function draw(t) {
+    resize();
+    gl.uniform2f(U.uRes, canvas.width, canvas.height);
+    gl.uniform1f(U.uAspect, canvas.width / canvas.height);
+    gl.uniform1f(U.uTime, t);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+  }
+
+  // First frame BEFORE the reveal, so the class never uncovers an empty canvas.
+  draw(0);
+  html.classList.add('is-field-live');
+
+  // Reduced motion keeps the artwork and drops only the movement — the field
+  // should not change character because someone asked the page to hold still.
+  if (reducedMotion.matches) return;
+
+  // Only draw while the field is actually on screen. It bleeds well past the
+  // fold, so this observes the CANVAS rather than .intro — stopping at the
+  // hero's edge would freeze it while a third of it is still visible.
+  let onScreen = true;
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver(
+      es => { onScreen = es[0].isIntersecting; },
+      { rootMargin: '100px' }
+    ).observe(canvas);
+  }
+
+  let clock = 0;
+  let prev = performance.now();
+  (function frame(now) {
+    requestAnimationFrame(frame);
+    // dt-based, not frame-counted, so the speed is identical at 60 and 120Hz;
+    // capped so a backgrounded tab resuming cannot jump the whole distance.
+    const dt = Math.min(now - prev, 100) / 1000;
+    prev = now;
+    if (!onScreen || document.hidden) return;
+    clock += dt * FIELD.motion.speed;
+    draw(clock);
+  })(prev);
+}
+
+try {
+  initHeroField();
+} catch (e) {
+  // Field is decorative — the JPEG underneath is the real content. Never let
+  // it take the page down with it.
+  console.warn('Hero field unavailable, using the static image:', e);
+}
+
 // Hero statement text-morph. Cycles the H1 between three statements the way the
 // motion-primitives TextMorph does — but rebuilt in vanilla JS (no React/build
 // step to import it). Each character is keyed by character + how many times it
