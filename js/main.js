@@ -265,7 +265,7 @@ const FIELD = {
   // the gradient and swings their contrast, so it is kept short; horizontal
   // travel is close to free. Raise drift for more life, raise driftYRatio only
   // after re-measuring both blocks.
-  motion: { speed: 1.85, drift: 0.055, driftYRatio: 0.3, warp: 0.55 },
+  motion: { speed: 1.85, drift: 0.055, driftYRatio: 0.2, pulse: 0.08, warp: 0.55 },
   // Buffer size vs CSS px. BELOW devicePixelRatio deliberately: a soft
   // gradient carries no per-pixel detail, so 1.0 on a 2x display is a 4x
   // fill-rate saving nobody can see. Grain is the one thing that does want
@@ -297,6 +297,11 @@ function initHeroField() {
     'uniform vec3 uBlob[4];uniform vec3 uCol[4];',
     'const float MID=' + FIELD.ramp.mid + ',MIDA=' + FIELD.ramp.midAlpha + ',LAYER=' + FIELD.layer + ';',
     'const vec3 CREAM=vec3(' + FIELD.cream.join(',') + ');',
+    // Each blob breathes — radius +/- PULSE on its own slow cycle. Cheap
+    // life: it changes how far a blob REACHES without moving its centre,
+    // so unlike drift it does not slide colour off the text. Rates are
+    // per-blob and unequal, so they never swell in unison.
+    'const float PULSE=' + FIELD.motion.pulse + ';',
     'float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453123);}',
     'float noise(vec2 p){vec2 i=floor(p),f=fract(p);vec2 u=f*f*(3.-2.*f);',
     ' return mix(mix(hash(i),hash(i+vec2(1,0)),u.x),mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),u.x),u.y);}',
@@ -337,7 +342,7 @@ function initHeroField() {
     '  float ax=uAmp.x*(.62*sin(uTime*(.130+fi*.028)+fi*1.7)+.38*sin(uTime*(.077+fi*.019)+fi*4.1));',
     '  float ay=uAmp.y*cos(uTime*(.110+fi*.024)+fi*2.3);',
     '  vec2 c=uBlob[i].xy+vec2(ax,ay);',
-    '  float rad=uBlob[i].z*(1.+.06*sin(uTime*(.075+fi*.017)+fi));',
+    '  float rad=uBlob[i].z*(1.+PULSE*sin(uTime*(.075+fi*.017)+fi));',
     '  vec2 d=vec2(w.x-c.x,(w.y-c.y)/uAspect);',
     '  vec2 ra=ramp(length(d)/rad);float a=ra.x*LAYER;',
     '  if(a<=0.)continue;',
