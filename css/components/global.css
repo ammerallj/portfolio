@@ -403,6 +403,39 @@ p {
   max-width: var(--measure);
 }
 
+/* NO SINGLE-WORD LAST LINE, anywhere prose sets more than one (2026-09).
+   A lone word under a full-measure paragraph reads as a mistake rather than a
+   line. Found on the hero bio ("across / products."), the Accessibility and
+   Loop cards ("…public accessibility / destination.", "…sharing, and /
+   connections."), About at 1280/768/375, and most of the project pages' impact
+   rows — so it is one decision about body copy, listed once here rather than
+   repeated down the components.
+
+   `pretty` pulls ONE word down from the line above and leaves everything else
+   alone: measured, every widow above resolves with the line COUNT unchanged,
+   and paragraphs that were already fine do not move at all.
+   ⚠️ NOT `balance`. That redistributes the whole paragraph (those last lines
+   went to five and six words), it is meant for two-to-four line display text
+   rather than body copy, and Chrome stops applying it past 6 lines — so the
+   longest impact rows, which are exactly the ones that widow worst, would
+   silently opt out.
+   It degrades to `auto`, which is today's rendering, so a browser without it
+   loses nothing. This is a text-quality rule, NOT a token: it has no per-tier
+   values and nothing derives from it.
+   ⚠️ Headings are deliberately absent. They are their own composition — the
+   landing's two-line statement is broken where Jenna wants it. */
+.intro-bio,
+.work-card-description,
+.about-body p,
+.project-dek,
+.project-lead,
+.project-impact-list li,
+.impact-row-outcome,
+.impact-row-detail,
+.next-case-description {
+  text-wrap: pretty;
+}
+
 a {
   color: var(--color-text);
 }
