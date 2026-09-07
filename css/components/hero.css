@@ -334,14 +334,22 @@ html.is-field-live .page-field-grain { opacity: 0.15; }
 }
 
 .intro-bio {
-  /* 24px, and deliberately OFF --size-lg (18px). This is the hero's dek, not
-     body copy — it is the only prose above the fold and it answers a 96px
-     headline, where body size read as a caption under it. There is no token at
-     24: the scale steps 18 → 28, and 28 would start competing with the
-     headline's own weight in the band. The tight 1.08 leading below is a
-     display setting and only becomes coherent at this size. */
-  font-size: 24px;
-  line-height: 1.08;
+  /* Body copy, on the token — the same size, tracking and leading as
+     .about-body p, .work-card-description and .project-dek. It was a 24px dek
+     at 1.08, off the scale entirely (the steps are 18 → 28, and 28 competed
+     with the headline). .project-dek had already settled the same question the
+     other way on the project pages: at body size the hierarchy under a big
+     title is unambiguous and needs no per-tier overrides, because body type
+     doesn't scale on this site.
+     THE LEADING HAD TO COME WITH IT. 1.08 was a display setting that only
+     cohered at 24px — left alone it sets 19.4px leading on 18px prose. 1.4 is
+     what every other multi-line block here uses.
+     ⚠️ It also moves the WCAG threshold. At 24px this was large text (3:1); at
+     18px it is normal text and wants 4.5:1. The measured 1.51:1 below cleared
+     neither, so nothing that was passing regressed — but the gap is now against
+     the harder number, and the field is what has to close it. */
+  font-size: var(--size-lg);
+  line-height: 1.4;
   letter-spacing: -0.02em;
   color: #fff;
   /* Matches .intro-headline — one lockup, one field, one treatment. See the

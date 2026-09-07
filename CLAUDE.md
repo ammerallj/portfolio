@@ -219,6 +219,26 @@ headline 1.73–2.36, bio 1.77–2.41 across a full orbit. ⚠️ **The two pull
 each other** (every 70px of nudge is roughly +0.3 bio / −0.25 headline), the same
 balance the 1024 tier documents. Re-measure BOTH after touching either.
 
+⚠️ **THE BIO IS NOW JUDGED AGAINST 4.5:1, NOT 3:1 (2026-09).** `.intro-bio`
+moved from a 24px dek (leading 1.08) onto `--size-lg`/1.4 — plain body copy,
+matching `.about-body p`, `.work-card-description` and `.project-dek`. At 24px
+white regular type was WCAG **large text** and wanted 3:1; at 18px it is normal
+text and wants **4.5:1**. Nothing that was passing regressed — the measured band
+cleared neither threshold — but the shortfall roughly doubled, so any future
+field tuning is aiming at a target 1.5 points further away.
+- **The measured number actually IMPROVED**, which is the counter-intuitive
+  part: fewer, tighter lines means the block ends higher, and the bottom line is
+  always the weakest (it is the one that runs off the gradient onto near-cream).
+  Same orbit phase, 375×812, worst pixel per line: **5 lines at 24px floored at
+  1.92**; **4 lines at 18px floor at 2.06**. One phase, not the full orbit —
+  it is a same-phase A/B of the geometry, so use it for the DELTA and keep
+  1.77–2.41 as the band.
+- **The block's TOP is anchored, so the lockup does not move.** Measured
+  identical at 1440 (426), 768 (552) and 375 (360); only the bottom rises.
+  Desktop barely changes at all — 3 lines either way, 78px → 76px — because the
+  542px column was already setting the same count. The tiers that visibly gain
+  air are 768 (3 lines → 2) and 375 (5 → 4).
+
 ⚠️ **UNRESOLVED: `backdrop-filter` cost over a moving field.** `.intro::after`
 (blur 7px) and `.intro-bar::before` (blur 5.5px + saturate) both sample this
 field. Over the static JPEG the browser blurred once and cached; over the canvas
