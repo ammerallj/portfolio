@@ -260,7 +260,12 @@ const FIELD = {
   // most of the reduction on purpose: amplitude reads as restraint,
   // frequency reads as alive, and dropping the rates instead is what
   // produced a field that was animated in theory and static to a reader.
-  motion: { speed: 1.85, drift: 0.042, warp: 0.55 },
+  // drift is the HORIZONTAL excursion; driftYRatio scales the vertical one
+  // down from it. Vertical travel moves the headline and bio across bands of
+  // the gradient and swings their contrast, so it is kept short; horizontal
+  // travel is close to free. Raise drift for more life, raise driftYRatio only
+  // after re-measuring both blocks.
+  motion: { speed: 1.85, drift: 0.055, driftYRatio: 0.3, warp: 0.55 },
   // Buffer size vs CSS px. BELOW devicePixelRatio deliberately: a soft
   // gradient carries no per-pixel detail, so 1.0 on a 2x display is a 4x
   // fill-rate saving nobody can see. Grain is the one thing that does want
@@ -288,7 +293,7 @@ function initHeroField() {
   const VERT = 'attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}';
   const FRAG = [
     'precision highp float;',
-    'uniform vec2 uRes;uniform float uAspect,uTime,uWarp,uAmp;',
+    'uniform vec2 uRes,uAmp;uniform float uAspect,uTime,uWarp;',
     'uniform vec3 uBlob[4];uniform vec3 uCol[4];',
     'const float MID=' + FIELD.ramp.mid + ',MIDA=' + FIELD.ramp.midAlpha + ',LAYER=' + FIELD.layer + ';',
     'const vec3 CREAM=vec3(' + FIELD.cream.join(',') + ');',
@@ -314,7 +319,24 @@ function initHeroField() {
     // Orbit periods 48/39/33/29s, deliberately unequal so the four never
     // return to the same arrangement. To calm this down lower uAmp, not the
     // rates: amplitude reads as restraint, frequency reads as alive.
-    '  vec2 c=uBlob[i].xy+uAmp*vec2(sin(uTime*(.130+fi*.028)+fi*1.7),cos(uTime*(.110+fi*.024)+fi*2.3));',
+    //
+    // THE AXES ARE NOT EQUAL. uAmp.x is the horizontal wander and uAmp.y is a
+    // fraction of it (motion.driftYRatio), because vertical travel is the
+    // expensive direction: the headline and bio each sit on a band of the
+    // gradient, so moving the mass up and down swings their contrast hardest.
+    // Measured — splitting the axes cut the bio's swing across a full orbit
+    // from 0.61 to 0.41 while giving 31% MORE side-to-side travel.
+    // ⚠️ Sideways is cheaper, NOT free: the bio sits in the right column, so
+    // horizontal travel slides colour off it too. Widening x from 0.042 to
+    // 0.055 took the bio's floor 1.68 -> 1.61 — still inside the 1.6-2.3 band,
+    // but that IS the floor. Re-measure the bio before raising drift again.
+    //
+    // X SUMS TWO INCOMMENSURATE SINES so the horizontal path never repeats —
+    // one sine is an ellipse you can learn after a minute of watching. The
+    // weights total 1.0, so uAmp.x is still the true peak excursion.
+    '  float ax=uAmp.x*(.62*sin(uTime*(.130+fi*.028)+fi*1.7)+.38*sin(uTime*(.077+fi*.019)+fi*4.1));',
+    '  float ay=uAmp.y*cos(uTime*(.110+fi*.024)+fi*2.3);',
+    '  vec2 c=uBlob[i].xy+vec2(ax,ay);',
     '  float rad=uBlob[i].z*(1.+.06*sin(uTime*(.075+fi*.017)+fi));',
     '  vec2 d=vec2(w.x-c.x,(w.y-c.y)/uAspect);',
     '  vec2 ra=ramp(length(d)/rad);float a=ra.x*LAYER;',
@@ -356,7 +378,7 @@ function initHeroField() {
   gl.uniform3fv(U.uCol,  new Float32Array(FIELD.blobs.flatMap(b => b.col)));
   gl.uniform3fv(U.uBlob, new Float32Array(FIELD.blobs.flatMap(b => [b.x, b.y, b.r])));
   gl.uniform1f(U.uWarp, FIELD.motion.warp);
-  gl.uniform1f(U.uAmp,  FIELD.motion.drift);
+  gl.uniform2f(U.uAmp,  FIELD.motion.drift, FIELD.motion.drift * FIELD.motion.driftYRatio);
 
   function resize() {
     const r = canvas.getBoundingClientRect();
