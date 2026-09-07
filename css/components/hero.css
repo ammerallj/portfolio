@@ -349,6 +349,12 @@ html.is-field-live .page-field-grain { opacity: 0.15; }
      neither, so nothing that was passing regressed — but the gap is now against
      the harder number, and the field is what has to close it. */
   font-size: var(--size-lg);
+  /* 500, one step up the site's scale (200/400/500/600/700) from the 400 it
+     inherited. Body copy elsewhere sits at 400, so this is the ONE prose block
+     that departs — it is white type over the field, and the extra stroke weight
+     is doing legibility work the contrast can't (see the WCAG note below).
+     Inter is loaded variable (wght@400..700), so 500 costs no extra download. */
+  font-weight: 500;
   line-height: 1.4;
   letter-spacing: -0.02em;
   color: #fff;
