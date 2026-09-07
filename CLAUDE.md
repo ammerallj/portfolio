@@ -29,7 +29,8 @@ a PAGE background at `z:-1` inside `main` (a stacking context — body's own
 background otherwise paints over negative-z elements). **The field is never clipped**: whatever
 extends past the hero fold bleeds behind Selected Work and dissolves into the
 cream on its own. The hero stage: statement (top half, 96px Hanken) →
-full-width hairline divider at the exact center → frosted band (bottom half,
+full-width hairline divider (**at the exact centre MINUS `--hero-lift`** since
+2026-09 — see below) → frosted band (bottom half,
 backdrop-blur) with the bio in its right column → `.intro-bar` along the
 bottom (wordmark hard left; Work·About with the header's chip hover states +
 the solid-black "Say hello" pill grouped hard right, one `--gap-group` apart —
@@ -207,6 +208,28 @@ motion**. Judge it in a real browser window.
   0.031 rad/s — a 203-second cycle moving ~2px/sec — which is animated in theory
   and static to a reader.
 
+**`--hero-lift` MOVES THE WHOLE LOCKUP UP (hero.css, 60px, 2026-09).** The
+desktop mirror of the ≤480 tier's `--hero-drop`, and like it, **the ONE number
+to change**: headline, divider, bio and the frost pane all read from it.
+- It is a **TRANSFORM** on `.intro-top` / `.intro-divider` / `.intro-band`, so
+  `.intro`'s box, the Work-card peek and the docking bar's maths are untouched —
+  only the composition inside the fold moves.
+- ⚠️ **The pane's `top` AND `height` both compensate.** `top: calc(50% -
+  --hero-lift)` keeps the glass starting on the divider; the height gains the
+  same `+ --hero-lift` or the pane ends short of the artwork and leaves an
+  unfrosted tail behind Selected Work. Verified: pane bottom 930 = field bottom
+  930 at 1440×900.
+- **≤480 overrides the same three selectors** (responsive.css imported last) and
+  re-derives its own pane, so phones keep their +70px drop untouched.
+- **The contrast gain was large**, because the bio moved up onto richer colour:
+  1.95–2.47 → 2.24–2.75 from the lift alone.
+
+**THE FROST IS 0.06, NOT 0.12 (2026-09).** `.intro::after`'s cream wash was
+halved while `blur(7px)` stayed. The blur is the effect; the tint only colours
+it — and the tint was subtracting contrast from the white bio sitting on it.
+Bio 2.24–2.75 → **2.48–2.89**. ⚠️ If this is tuned again, **drop the alpha, keep
+the blur** — glass reads as glass because of the blur.
+
 ⚠️ **PHONES (≤480) GET THE JPEG ONLY — NO SHADER (2026-09).** `initHeroField`
 bails on a `(max-width: 480px)` match and the 480 tier sets the canvas and grain
 to `display: none`. Bailing in JS is the point: no WebGL context, no shader
@@ -295,7 +318,10 @@ floor: −16% 1.87 · −18% 1.68 · −20% ~1.6 · −24% 1.30.
   −28%/+80px gives 1.62 — better than −24% flat despite a higher field. So the two
   moves really do trade. But none beat −18% at rest, and lifting the lockup puts
   the divider off the exact vertical centre and drags the frost pane's `top: 50%`
-  anchor with it. **Not a nudge — a composition change.** Don't reach for it first.
+  anchor with it. **Not a nudge — a composition change.**
+  ⚠️ **This was subsequently DONE deliberately — see `--hero-lift` below.** The
+  note stands as the reason not to reach for it to fix contrast; it was reached
+  for as a composition decision, and the contrast gain came along with it.
 - **The zero-cost fix, if the bleed ever needs to go entirely:** a vertical
   falloff at the bottom of the SHADER, ramping to cream over the last ~20% of the
   canvas. It only touches the region below the text, so it costs the bio nothing
