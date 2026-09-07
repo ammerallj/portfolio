@@ -207,6 +207,20 @@ motion**. Judge it in a real browser window.
   0.031 rad/s — a 203-second cycle moving ~2px/sec — which is animated in theory
   and static to a reader.
 
+⚠️ **PHONES (≤480) GET THE JPEG ONLY — NO SHADER (2026-09).** `initHeroField`
+bails on a `(max-width: 480px)` match and the 480 tier sets the canvas and grain
+to `display: none`. Bailing in JS is the point: no WebGL context, no shader
+compile, no render loop, and none of the per-frame `backdrop-filter` work the two
+glass layers would otherwise do over a moving field — `display: none` alone would
+leave the loop running invisibly. ⚠️ **The two are PAIRED**, like
+`initWorkCarousel` and its tier: move one and you must move the other.
+⚠️ **AND THE TIER'S GEOMETRY IS TUNED TO WHATEVER IT ACTUALLY PAINTS.** The
+shader and the JPEG have different colour distributions, so `--field-w` /
+`--field-nudge-y` tuned for one is wrong for the other — the shader-tuned
+1250 + 180 renders the JPEG's headline at **1.52**, below the band. Now 1250 +
+120: headline 2.02 / 2.89, bio 1.76 / 2.59. Re-measure on a SETTLED page load;
+flipping the properties inline and sampling immediately reads low.
+
 ⚠️ **THE FIELD IS ANIMATED, SO CONTRAST IS A RANGE, NOT A NUMBER.** White type
 over it changes legibility with the orbit phase, and a single sample is worth
 little — an early ≤480 measurement was ~0.4 out for exactly this reason.

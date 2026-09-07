@@ -601,12 +601,21 @@
        ORBIT PHASE — a single reading is worth little and an early pass here was
        ~0.4 out because of it. Measure across the cycle: `FIELD.motion.speed` is
        mutable at runtime, so crank it (90 works) and sample a dozen times.
-       At 375x812, average contrast RANGE over a full orbit:
-         1594.85 + 40 nudge   bio 1.46 at the sampled phase   <- was live
-         1250    + 180 nudge  headline 1.73-2.36, bio 1.77-2.41  <- now
-       Worst single pixel at any phase: headline 1.07, bio 1.21 (that metric
-       includes the gaps between glyphs, so it reads pessimistic — the old JPEG
-       scored 1.36 on the same measure).
+       ⚠️ AND MEASURE WHATEVER IS ACTUALLY PAINTED HERE. This tier now shows the
+       JPEG, not the shader (see the display:none block below), and the two have
+       different colour distributions — geometry tuned for one is WRONG for the
+       other. Tuned against the shader this tier sat at 1250 + 180, which the
+       JPEG renders at headline 1.02 / 1.52: below the band. Caught only by
+       re-measuring after the shader was switched off here.
+       JPEG at 375x812, worst pixel / average:
+         1594.85 + 40   headline 1.36 / 2.38   bio 1.49 / 2.42   (the old pair)
+         1250    + 180  headline 1.02 / 1.52   bio 1.69 / 2.58   (shader-tuned)
+         1250    + 120  headline 2.02 / 2.89   bio 1.76 / 2.59   <- now
+       1250 keeps the container small; 120 is where the two stop fighting, and
+       both land clear of the band's floor — better than the old pair on every
+       reading. ⚠️ Take readings from a SETTLED PAGE LOAD, not from flipping the
+       custom properties inline and sampling straight away: a quick sweep here
+       scored this same pair at 1.34 / 2.33 before layout caught up.
        The old JPEG measured bio 1.36 / 2.34 here, so the shader had quietly
        REGRESSED the bio on phones: its colour mass sits higher, and the phone
        crop left the bio on near-cream. Shrinking alone made that worse (bio
@@ -625,10 +634,10 @@
        the bio after the width came down. HEADLINE AND BIO PULL AGAINST EACH
        OTHER here, the same balance the 1024 tier documents: every 70px of nudge
        buys the bio roughly +0.3 and costs the headline roughly -0.25. No value
-       puts both worst-pixel readings over 1.6; 180 is where both AVERAGES stay
-       inside the 1.6-2.3 band across the WHOLE orbit and neither is starved.
+       puts both worst-pixel readings over 1.6; 120 is where the JPEG's two
+       averages land equal (2.33 / 2.33) and neither block is starved.
        Measure both before changing it — moving it for one will move the other. */
-    --field-nudge-y: 180px;
+    --field-nudge-y: 120px;
     --field-bottom: calc(var(--field-w) * 0.53734 + var(--field-nudge-y));
 
     /* The hero's geometry at this tier, named once so the frost pane can be
@@ -671,37 +680,34 @@
                translateY(calc(-12% + var(--field-nudge-y)));
   }
 
-  /* PHONE GRAIN — a different TILE, not a scaled one (2026-09, second pass).
-     ⚠️ The first pass shrank the desktop tile with `background-size: 96px` on
-     the theory that the grain was too coarse. Measured, that was wrong twice
-     over. Speck size is PINNED at ~2 device px whatever you set: eight configs
-     from baseFrequency 1.3 to 3.0 all rasterised to runs of 1.87-1.99px, so
-     "finer" is not an available lever — binary noise cannot resolve below ~2
-     device px without resampling to grey. And the downscale itself resampled
-     the speckle, which is what made it read splotchy.
+  /* NO ANIMATED FIELD ON PHONES (2026-09). The static hero-bkg.jpg is the
+     whole hero here — the shader canvas and its grain layer are switched off.
+     Two reasons, both about the device rather than the look: a full-viewport
+     WebGL loop is a real battery cost on the hardware least able to carry it,
+     and the two backdrop-filter layers over it (.intro::after at blur 7px and
+     .intro-bar::before) have to re-blur every frame over a moving backdrop —
+     the open perf question that never had a good answer on mid-range Android.
+     Neither applies to a still image.
 
-     The real cause of the splotch was the BLEND MODE. `overlay` scales its
-     effect with the backdrop: measured over a mid-tone it swings a pixel ~10x
-     harder than over near-cream. The phone field is mostly pale now that it is
-     smaller, so grain screamed in the saturated middle and vanished in the pale
-     margins — and that unevenness is what "splotchy" actually was.
+     ⚠️ THIS BREAKPOINT IS PAIRED WITH A JS GATE. `initHeroField` in js/main.js
+     bails on the same 480 query and never creates a WebGL context, which is
+     where the actual saving is — `display: none` alone would leave the render
+     loop running invisibly. Move one and you MUST move the other, the same way
+     initWorkCarousel is paired with this tier's layout revert.
 
-     So this tile carries its own alpha instead: black speckle AND white
-     speckle on TRANSPARENT (two feTurbulence layers, different seeds, discrete
-     alpha split at 52/100 — the same fine-table trick Figma's own export uses,
-     because luminanceToAlpha on fractalNoise clusters hard around 0.5 and a
-     coarse table drops nearly everything). Blended `normal`, so grain strength
-     no longer depends on what is underneath: measured uniformity 0.89 between
-     a mid-tone and a pale backdrop, against roughly 0.1 for overlay.
-     Its slight net darkening of the palest areas is welcome here — it works in
-     the same direction as the bio contrast fix above.
-     Desktop keeps `overlay`; it is not mostly-pale, so it never had the problem. */
+     Everything the shader path needs is still intact underneath: the <img> was
+     never removed, still carries fetchpriority="high", and is still the LCP
+     paint and the preload target. Turning this tier off is a no-op for it.
+
+     History: this tier briefly carried its own grain tile (uniform black/white
+     speckle on transparent, blended `normal` at 0.08) built to fix an unevenness
+     that `overlay` caused over a mostly-pale field. That is all moot with no
+     canvas to grain — but the finding is recorded in CLAUDE.md, because it
+     applies to any future grain over a pale backdrop. */
+  .page-field-canvas,
   .page-field-grain {
-    background-size: 160px 160px;
-    mix-blend-mode: normal;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='white' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.3' numOctaves='2' seed='29' stitchTiles='stitch' result='n'/%3E%3CfeColorMatrix in='n' type='luminanceToAlpha' result='a'/%3E%3CfeComponentTransfer in='a' result='m'%3E%3CfeFuncA type='discrete' tableValues='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1'/%3E%3C/feComponentTransfer%3E%3CfeFlood flood-color='white' result='c'/%3E%3CfeComposite in='c' in2='m' operator='in'/%3E%3C/filter%3E%3Cfilter id='black' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.3' numOctaves='2' seed='11' stitchTiles='stitch' result='n'/%3E%3CfeColorMatrix in='n' type='luminanceToAlpha' result='a'/%3E%3CfeComponentTransfer in='a' result='m'%3E%3CfeFuncA type='discrete' tableValues='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1'/%3E%3C/feComponentTransfer%3E%3CfeFlood flood-color='black' result='c'/%3E%3CfeComposite in='c' in2='m' operator='in'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23white)'/%3E%3Crect width='160' height='160' filter='url(%23black)'/%3E%3C/svg%3E");
+    display: none;
   }
-  html.is-field-live .page-field-grain { opacity: 0.08; }
 
   /* Headline, divider and bio all drop --hero-drop together — a TRANSFORM, so
      the hero's own box, the card peek below it and the header math are all

@@ -268,9 +268,18 @@ const FIELD = {
   renderScale: 1.0,
 };
 
+/* Phones get the static JPEG, full stop — see the matching block in
+   responsive.css. Bailing here (rather than only hiding the canvas in CSS) is
+   the point: no WebGL context, no shader compile, no render loop, and none of
+   the per-frame backdrop-filter work the two glass layers would otherwise do
+   over a moving field. ⚠️ PAIRED WITH THE 480 TIER IN responsive.css — move one
+   and you must move the other, as initWorkCarousel is paired with that tier. */
+const FIELD_PHONE = matchMedia('(max-width: 480px)');
+
 function initHeroField() {
   const canvas = document.getElementById('hero-field');
-  if (!canvas) return;   // project pages have no field
+  if (!canvas) return;        // project pages have no field
+  if (FIELD_PHONE.matches) return;   // phones: the <img> underneath is the hero
 
   const gl = canvas.getContext('webgl', { antialias: false, alpha: true, powerPreference: 'low-power' })
           || canvas.getContext('experimental-webgl');
@@ -395,7 +404,9 @@ function initHeroField() {
     // capped so a backgrounded tab resuming cannot jump the whole distance.
     const dt = Math.min(now - prev, 100) / 1000;
     prev = now;
-    if (!onScreen || document.hidden) return;
+    // Also stops if a desktop session is resized/rotated into the phone
+    // tier, where the CSS has hidden the canvas — no point drawing it.
+    if (!onScreen || document.hidden || FIELD_PHONE.matches) return;
     clock += dt * FIELD.motion.speed;
     draw(clock);
   })(prev);
