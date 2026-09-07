@@ -256,7 +256,11 @@ const FIELD = {
     { col: [0.8392, 0.3020, 0.8078], r: 0.3300, x: 0.270, y: 0.450 }, // magenta #D64DCE
     { col: [0.9765, 0.2471, 0.2471], r: 0.2553, x: 0.610, y: 0.515 }, // red     #F93F3F
   ],
-  motion: { speed: 2.05, drift: 0.05, warp: 0.55 },
+  // Calmed 2026-09 (speed 2.05 -> 1.7, drift 0.05 -> 0.032). Drift carries
+  // most of the reduction on purpose: amplitude reads as restraint,
+  // frequency reads as alive, and dropping the rates instead is what
+  // produced a field that was animated in theory and static to a reader.
+  motion: { speed: 1.7, drift: 0.032, warp: 0.55 },
   // Buffer size vs CSS px. BELOW devicePixelRatio deliberately: a soft
   // gradient carries no per-pixel detail, so 1.0 on a 2x display is a 4x
   // fill-rate saving nobody can see. Grain is the one thing that does want

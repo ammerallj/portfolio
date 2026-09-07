@@ -671,16 +671,37 @@
                translateY(calc(-12% + var(--field-nudge-y)));
   }
 
-  /* Grain is sized in CSS px, so the SAME tile reads far coarser here than on
-     desktop — the viewport is 375 CSS px against 1440, so each speck covers
-     ~4x more of the composition. Scaling the tile down restores the desktop
-     RELATIONSHIP rather than the desktop number. Done with background-size, not
-     a second baseFrequency: the filter's frequency is baked into the data URI
-     in hero.css, and a per-tier copy of that URI would be two things to keep in
-     sync for no gain. */
+  /* PHONE GRAIN — a different TILE, not a scaled one (2026-09, second pass).
+     ⚠️ The first pass shrank the desktop tile with `background-size: 96px` on
+     the theory that the grain was too coarse. Measured, that was wrong twice
+     over. Speck size is PINNED at ~2 device px whatever you set: eight configs
+     from baseFrequency 1.3 to 3.0 all rasterised to runs of 1.87-1.99px, so
+     "finer" is not an available lever — binary noise cannot resolve below ~2
+     device px without resampling to grey. And the downscale itself resampled
+     the speckle, which is what made it read splotchy.
+
+     The real cause of the splotch was the BLEND MODE. `overlay` scales its
+     effect with the backdrop: measured over a mid-tone it swings a pixel ~10x
+     harder than over near-cream. The phone field is mostly pale now that it is
+     smaller, so grain screamed in the saturated middle and vanished in the pale
+     margins — and that unevenness is what "splotchy" actually was.
+
+     So this tile carries its own alpha instead: black speckle AND white
+     speckle on TRANSPARENT (two feTurbulence layers, different seeds, discrete
+     alpha split at 52/100 — the same fine-table trick Figma's own export uses,
+     because luminanceToAlpha on fractalNoise clusters hard around 0.5 and a
+     coarse table drops nearly everything). Blended `normal`, so grain strength
+     no longer depends on what is underneath: measured uniformity 0.89 between
+     a mid-tone and a pale backdrop, against roughly 0.1 for overlay.
+     Its slight net darkening of the palest areas is welcome here — it works in
+     the same direction as the bio contrast fix above.
+     Desktop keeps `overlay`; it is not mostly-pale, so it never had the problem. */
   .page-field-grain {
-    background-size: 96px 96px;
+    background-size: 160px 160px;
+    mix-blend-mode: normal;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='white' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.3' numOctaves='2' seed='29' stitchTiles='stitch' result='n'/%3E%3CfeColorMatrix in='n' type='luminanceToAlpha' result='a'/%3E%3CfeComponentTransfer in='a' result='m'%3E%3CfeFuncA type='discrete' tableValues='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1'/%3E%3C/feComponentTransfer%3E%3CfeFlood flood-color='white' result='c'/%3E%3CfeComposite in='c' in2='m' operator='in'/%3E%3C/filter%3E%3Cfilter id='black' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.3' numOctaves='2' seed='11' stitchTiles='stitch' result='n'/%3E%3CfeColorMatrix in='n' type='luminanceToAlpha' result='a'/%3E%3CfeComponentTransfer in='a' result='m'%3E%3CfeFuncA type='discrete' tableValues='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1'/%3E%3C/feComponentTransfer%3E%3CfeFlood flood-color='black' result='c'/%3E%3CfeComposite in='c' in2='m' operator='in'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23white)'/%3E%3Crect width='160' height='160' filter='url(%23black)'/%3E%3C/svg%3E");
   }
+  html.is-field-live .page-field-grain { opacity: 0.12; }
 
   /* Headline, divider and bio all drop --hero-drop together — a TRANSFORM, so
      the hero's own box, the card peek below it and the header math are all
