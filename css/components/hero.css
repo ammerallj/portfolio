@@ -102,7 +102,7 @@ html.is-field-live .page-field-grain { opacity: 0.15; }
   /* Shifted up by 12% of the image's own height (20% up, then walked back
      down 8%), so the color mass rides higher behind the headline while some
      bleed past the fold survives. */
-  transform: translateX(-50%) translateY(-12%);
+  transform: translateX(-50%) translateY(-18%);
   /* images/hero-bkg.jpg, centered. FROZEN at its 1440 size (1639.44px = the
      113.85vw composition) for any narrower window: below the design width the
      field keeps its size and position and the viewport simply crops more of
@@ -141,13 +141,17 @@ html.is-field-live .page-field-grain { opacity: 0.15; }
                      measured ~1.55:1 against the RAW gradient. Every step up has
                      moved away from that floor; re-measure before going smaller.
      --field-bottom  where its bottom edge lands = width ÷ 1.6377 (the asset's
-                     aspect) × 0.88 (the 12% up-shift) — i.e. width × 0.53734.
+                     aspect) × 0.82 (the 18% up-shift) — i.e. width × 0.50070.
+                     ⚠️ 2026-09: the shift went -12% -> -16%, so this factor
+                     was re-derived with it. They are ONE number expressed
+                     twice; change the transform and this must follow or the
+                     frost pane stops ending where the artwork does.
    ⚠️ Change the zoom or the shift on .page-field and both follow automatically;
    only the 0.53734 needs re-deriving, and only if the SHIFT changes. */
 :root {
   /* DESKTOP ONLY (≥1025). The ≤1024 tier replaces this outright. */
   --field-w: max(1857.6px, 129vw);
-  --field-bottom: calc(var(--field-w) * 0.53734);
+  --field-bottom: calc(var(--field-w) * 0.50070);
 }
 
 .intro {

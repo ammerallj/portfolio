@@ -260,7 +260,7 @@ const FIELD = {
   // most of the reduction on purpose: amplitude reads as restraint,
   // frequency reads as alive, and dropping the rates instead is what
   // produced a field that was animated in theory and static to a reader.
-  motion: { speed: 1.7, drift: 0.032, warp: 0.55 },
+  motion: { speed: 1.85, drift: 0.042, warp: 0.55 },
   // Buffer size vs CSS px. BELOW devicePixelRatio deliberately: a soft
   // gradient carries no per-pixel detail, so 1.0 on a 2x display is a 4x
   // fill-rate saving nobody can see. Grain is the one thing that does want

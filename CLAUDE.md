@@ -253,6 +253,31 @@ field tuning is aiming at a target 1.5 points further away.
   541.66px column was already setting the same count (verified at both sizes).
   The tiers that visibly gain air are 768 (3 lines → 2) and 375 (5 → 4).
 
+⚠️ **THE FIELD'S UP-SHIFT IS CAPPED BY THE BIO, NOT BY TASTE (2026-09).** The
+shift went **−12% → −18%** to pull the artwork's bleed out of Selected Work: the
+shader's blobs are larger and more saturated than the JPEG's, so more colour
+survived past the fold than the old "dissolves into cream on its own" assumed.
+Measured at 1440×760 (short window, where Work's top sits highest), peak
+saturation at Work's top: **−12% 0.132 · −16% 0.098 · −18% 0.061 · −20% 0.069
+· −24% 0.048.** Going further is what the bio cannot afford — avg contrast
+floor: −16% 1.87 · −18% 1.68 · −20% ~1.6 · −24% 1.30.
+- ⚠️ **`translateY` and `--field-bottom`'s factor are ONE number written twice.**
+  0.84/0.82/0.88 ÷ 1.6377 — re-derive the factor whenever the shift moves or the
+  frost pane stops ending where the artwork does. hero.css carries both.
+- **≤480 is insulated** — that tier restates BOTH the transform and the factor
+  with its own −12%, so desktop changes never reach it. It also shows the JPEG,
+  which has a different colour distribution, so it must be tuned separately.
+- **Raising the LOCKUP recovers some of the cost, but not enough to be worth it.**
+  Tested: −24% flat gives bio 1.30; −24% with the text lifted 60px gives 1.47;
+  −28%/+80px gives 1.62 — better than −24% flat despite a higher field. So the two
+  moves really do trade. But none beat −18% at rest, and lifting the lockup puts
+  the divider off the exact vertical centre and drags the frost pane's `top: 50%`
+  anchor with it. **Not a nudge — a composition change.** Don't reach for it first.
+- **The zero-cost fix, if the bleed ever needs to go entirely:** a vertical
+  falloff at the bottom of the SHADER, ramping to cream over the last ~20% of the
+  canvas. It only touches the region below the text, so it costs the bio nothing
+  and leaves the divider alone. About four lines of GLSL, not yet built.
+
 ⚠️ **UNRESOLVED: `backdrop-filter` cost over a moving field.** `.intro::after`
 (blur 7px) and `.intro-bar::before` (blur 5.5px + saturate) both sample this
 field. Over the static JPEG the browser blurred once and cached; over the canvas
