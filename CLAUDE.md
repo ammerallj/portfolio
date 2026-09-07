@@ -221,6 +221,29 @@ shader and the JPEG have different colour distributions, so `--field-w` /
 120: headline 2.02 / 2.89, bio 1.76 / 2.59. Re-measure on a SETTLED page load;
 flipping the properties inline and sampling immediately reads low.
 
+⚠️ **THE ORBS WERE GROWN TO BACK THE TEXT (2026-09), and that is what the
+radii are for.** They are not a faithful trace of the Figma file's sizes — the
+file's own r values are kept in `lab/field-shader.html`'s `FIGMA.source`. Two
+findings drove it:
+- **RED IS POSITIONED TO BACK THE BIO.** The bio's centre in field space is
+  ~(0.65, 0.64) at 1440 and 1024, and (0.50, 0.60) at 768. Red sat at (0.610,
+  0.515), which put the bio's RIGHT EDGE at 80% of red's radius where the ramp
+  has collapsed to ~0.13 alpha — visible as white behind the type.
+  ⚠️ **It cannot simply move down to meet the bio.** A blob's vertical reach is
+  `r × aspect` (the distance metric divides dy by aspect), so red already
+  reaches v≈0.93; dropping its centre to the bio's y pushes colour past the
+  field's bottom and undoes the bleed fix. **Right is free, down is not.**
+- **Growing all four is what actually fixed the pale lower-left.** Moving red
+  alone helped 1440/1024 and REGRESSED 768 to 1.57 (below band), because that
+  tier's bio is full-width and centred at x 0.50. Radii went violet .300→.325,
+  cyan .220→.285 (also y .325→.360), magenta .330→.365 (x .270→.300), red
+  .290→.310. Measured after — headline / bio avg range:
+  **1440×900 2.75–3.13 / 2.00–2.29 · 1024×768 2.88–3.17 / 2.04–2.34 ·
+  768×1024 2.58–3.29 / 1.93–2.53.** Best the hero has measured; the bleed at
+  Work's top moved only 0.016 → 0.020.
+- **Cyan was the lever**, not red: it was the smallest orb and sat highest, so
+  the gap it left was exactly the band the bio sits in.
+
 ⚠️ **THE FIELD IS ANIMATED, SO CONTRAST IS A RANGE, NOT A NUMBER.** White type
 over it changes legibility with the orbit phase, and a single sample is worth
 little — an early ≤480 measurement was ~0.4 out for exactly this reason.
