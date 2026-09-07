@@ -1001,6 +1001,20 @@ nav.** Two different jobs — don't merge them.
   pages** — the site is static, so anything checked here runs in the browser and
   is readable in View Source. A client-side check is not a gate. Only the URL
   belongs here, and only once the password is on.
+  - **Both gated pages point at ONE deck** (`GnRGdDvtKA6itBaqeNaMwd`,
+    2026-09), at different slides via `node-id` — Accessibility `37-622`,
+    Messaging `2146-581`. So the password is set once, on that single file, and
+    covers both. The previous per-page deck (`yyBb74Gk…`, titled "DRAFT") is
+    gone.
+  - **Figma's "Copy link" appends a `t=` parameter**, and it ships in the href.
+    ⚠️ VERIFY THE GATE, DON'T REASON ABOUT THE URL: paste the full link into a
+    private window and confirm it prompts for a password. Checked 2026-09 — it
+    prompts, so `t` conveys no access and the password is the only way in. Any
+    new deck needs that test again, because the risk is not the parameter, it is
+    a share setting quietly left on "Anyone with the link" — which would make
+    the "Full case study locked" label a lie while broadcasting the URL.
+  - **`&` in these hrefs must be written `&amp;`** — the deck links carry six
+    query parameters, and a bare `&` in an attribute is invalid HTML.
 - **Public footprints live HERE now, one set per project (2026-08).** The
   homepage's standalone `#footprints` section was **deleted** — section, nav
   item, `.footprints-layout` / `-left` / `-right`, and the `#footprints` entries
