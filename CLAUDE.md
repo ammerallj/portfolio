@@ -10,12 +10,12 @@ shared by all of them.
 ## File Map
 - **Project overview pages:** `work/*.html` (4) — see **Project Overview Pages** below.
 - **Main HTML:** `index.html` — structure/content only. A tiny inline `<script>` in `<head>` sets `is-motion` + `is-loading` pre-paint (both only when JS runs, so no-JS visitors aren't left on a blank page); ends with a single `<script src="js/main.js" defer>`.
-- **JavaScript:** `js/main.js` — all interactions: nav scroll-spy, the landing header tuck (`is-tucked` while the hero's `.intro-bar` is on screen), page load reveal, header-over-Contact color inversion, custom cursors, the About tab view (`initAboutTabs`), the looping Work carousel (`initWorkCarousel` — see **Horizontal Tracks** below), **plus the motion system** (Lenis smooth scroll + Motion.dev viewport reveals). The blob-hero engine (BLOBS morph, hover push, paragraph cycling) retired 2026-08 — archived copy in `archive/blob-hero-2026-08/js/main.js`. See **Motion & Scrolling** below for knobs — don't re-read the whole file.
+- **JavaScript:** `js/main.js` — all interactions: nav scroll-spy, the landing header tuck (`is-tucked` while the hero's `.intro-bar` is on screen), page load reveal, header-over-Contact color inversion, custom cursors, the About tab view (`initAboutTabs`), the animated hero field (`initHeroField` — see **The animated field** below), the looping Work carousel (`initWorkCarousel` — see **Horizontal Tracks** below), **plus the motion system** (Lenis smooth scroll + Motion.dev viewport reveals). The blob-hero engine (BLOBS morph, hover push, paragraph cycling) retired 2026-08 — archived copy in `archive/blob-hero-2026-08/js/main.js`. See **Motion & Scrolling** below for knobs — don't re-read the whole file.
 - **CSS entry:** `style.css` — **@import list only, no rules.** Do not add styles here.
 - **CSS components:** `css/components/`
   - `global.css` — reset, design tokens (`:root` custom properties), base typography, focus/skip-link, `.site-container` layout, `.page-section` structure, custom cursor, `.visually-hidden`, **motion reveal initial state** (`html.is-motion [data-reveal]`) + Lenis classes (`html.lenis`)
   - `header.css` — `.site-header`, `.site-nav-bar`, nav links, `.is-over-dark` inversion state. **Now the ≤480 homepage only** — it's `display:none` over the landing at desktop and the project pages dropped it (2026-08) for the shared `.intro-bar`. Don't build new nav on it.
-  - `hero.css` — the **landing** (2026-08, Figma 339:3745): `.page-field` full-page gradient image, `.intro` stage (statement / divider / frosted band / `.intro-bar` bottom nav), the divider-mask load reveals, and the `is-loading` page hold. The previous blob hero is archived in `archive/blob-hero-2026-08/`.
+  - `hero.css` — the **landing** (2026-08, Figma 339:3745): `.page-field` full-page gradient image **plus the WebGL field layered over it** (`.page-field-canvas` / `.page-field-grain`, 2026-09 — see **The animated field**), `.intro` stage (statement / divider / frosted band / `.intro-bar` bottom nav), the divider-mask load reveals, and the `is-loading` page hold. The previous blob hero is archived in `archive/blob-hero-2026-08/`.
   - `sections.css` — `.page-section` content: Selected Work (the horizontal `.work-list` track — see **Horizontal Tracks**), Contact, About, case-study placeholder. It also still owns the **footprint link list** (`.footprint-group` / `.footprint-group-title` / `.footprint-list` + the `↗`), whose only consumer is now the project pages — see **Public Footprints** below.
   - `footer.css` — `.site-footer`
   - `project-overview.css` — the shared Project Overview template: §0 `.intro-bar--page` (the landing's nav bar pinned to the top of these pages), `.project-hero`, `.project-masthead` (title + metadata `<dl>`), `.project-block` (description / impact / role), §0a the section-seam rules, `.next-case` (§9) with its two treatments — `--image` (destination art, the pager) and `--outline` + `--locked` (the hairline Full-case-study card) — (`.project-locked` / `.invite-button` were deleted 2026-08), the `.project-carousel` masthead crossfade, and `.section-pills`. Imported after `sections.css` (it leans on `.section-label`, `.about-body`, `.contact-connect-links`) and before `responsive.css`.
@@ -111,6 +111,112 @@ and About/Contact's `min-height`s in sections.css. The previous
 blob-hero landing is archived, fully self-contained, in
 `archive/blob-hero-2026-08/`.
 
+### The animated field (`initHeroField`, 2026-09)
+**The gradient is RENDERED, not served** — a WebGL fragment shader on
+`.page-field-canvas`, drawn **over** the JPEG rather than instead of it. Config
+lives in the `FIELD` object at the top of `initHeroField` in js/main.js; the
+tuning harness is `lab/field-shader.html` (excluded from the build), whose
+**Export config** button emits a paste-ready `FIELD`.
+
+**The values come from the FIGMA SOURCE (521:3788), never from sampling the
+JPEG** — and this is the trap, because sampling the JPEG is the obvious move and
+it is wrong. The export is the faded RESULT: sampling it recovers the blobs'
+OVERLAP PRODUCTS and presents them as sources. A first pass did exactly that and
+produced seven blobs, three of which (periwinkle, sky, pink) do not exist in the
+file at all — they are where blue meets violet and red meets magenta. Baking
+mixes in as ingredients and then mixing again is why it read muddy.
+- **FOUR circles**, layer opacity **0.9**, painted bottom to top: violet
+  `#9238E3` · cyan `#019FD8` · magenta `#D64DCE` · red `#F93F3F`.
+- **One ramp, shared by all four:** colour at alpha 1 → alpha **0.3** at offset
+  **0.524038** → **WHITE at alpha 0**. ⚠️ **That last stop lifts to WHITE, not to
+  transparent** — it is what dissolves the artwork into the cream page instead of
+  greying out at the edges. Ramping to `transparent` (i.e. `rgba(0,0,0,0)`) drags
+  every stop toward black and rings each blob with a grey halo.
+- Compositing is **source-over, bottom to top**, matching Figma. Not a weighted
+  average — the overlaps have to stack or the mixed hues come out wrong.
+- Blob **placement** is hand-tuned and is the one part not derived from the file:
+  a least-squares fit of the composite against the export did not converge
+  (blend modes and frame-level layer transforms aren't recoverable from the
+  SVGs). The raw derived values are kept in the lab file's `FIGMA.source`.
+
+**FAILURE IS ALWAYS THE JPEG, and nothing may change that.** The `<img>` stays,
+keeps `fetchpriority="high"`, and its URL stays byte-identical to the
+`<link rel="preload">`. The canvas and grain are `opacity: 0` until
+`html.is-field-live` lands, which `initHeroField` sets **only after a frame is
+genuinely drawn**. So no-JS, no-WebGL, a driver refusal and a shader compile
+error all rest on exactly the previous hero, and the image is still the LCP paint.
+- ⚠️ **Never give the canvas its own background.** A cream fill would cover the
+  image before the first frame and make the fallback worse than what it replaces.
+- The call is **null-guarded AND wrapped in try/catch**. main.js is shared by
+  every page and `is-motion` hides every `[data-reveal]` pre-paint, so an
+  uncaught throw here blanks the whole site. The field is decorative; the image
+  under it is the real content.
+
+**Canvas and grain both carry `.page-field`, and that is the whole reason there
+is no new responsive work.** They inherit its box and every per-tier override
+with it — `--field-w` at all three tiers and the ≤480 crop nudge. The art
+direction is expressed as **width + transform, never as an image crop**, so it
+applies to a canvas unchanged. **Nothing was added to responsive.css; don't add
+any.** The one thing they need of their own is `aspect-ratio: 1.6377`, because an
+`<img>` derives that from 3600×2198 and a canvas cannot — the same constant
+`--field-bottom` is built from, so **re-derive both together** on a re-export.
+
+**GRAIN IS A CSS LAYER, NOT SHADER CODE** (`.page-field-grain`), and it is **art
+direction** — Figma bakes an `feTurbulence` into every blob — not a banding
+workaround. The shader's dither does that job separately.
+- **Why it cannot live in the shader:** the canvas renders at `renderScale` 1.0,
+  deliberately BELOW `devicePixelRatio` (a soft gradient has no per-pixel detail,
+  so 1.0 on a 2× display is a 4× fill-rate saving nobody can see). Grain is the
+  one element that *does* want device pixels — in the canvas every speck was
+  doubled. An SVG background rasterises at full device resolution whatever the
+  canvas does, so sharpness and the performance dial stay independent.
+- ⚠️ **The `discrete` transfer is what makes grain SHARP — do not drop it.**
+  `feTurbulence` is a smooth Perlin cloud at *every* frequency; raising
+  `baseFrequency` and fading it down just gives finer mush. Quantising to two
+  levels is what produces speckle. Figma's own export uses a discrete transfer
+  for exactly this. `saturate 0` matters too (raw turbulence is COLOURED noise,
+  and coloured speckle over a gradient reads as JPEG artifacts), as does forcing
+  alpha to 1 (or the noise's own alpha punches holes and it goes blotchy).
+- ⚠️ **`baseFrequency` and `numOctaves` are COUPLED.** Octaves stack harmonics at
+  2×/4×/8× the base, so at the shipped 1.3 a third octave lands past Nyquist and
+  aliases back down as low-frequency blotch — raising octaves makes it SOFTER.
+  Held at 2. Coarse grain (below ~0.8) can afford 3–4.
+- It is **static**, like the source. Grain redrawn per frame crawls — the shimmer
+  that makes dithered GIFs look cheap.
+
+**Reduced motion keeps the artwork and drops only the movement**: one static
+frame, loop never started. The field should not change character because someone
+asked the page to hold still. Drawing also stops when the canvas leaves the
+viewport — observed on the **canvas**, not `.intro`, because the field bleeds
+well past the fold and stopping at the hero's edge would freeze it with a third
+still visible.
+
+**Motion is dt-based, not frame-counted**, so the speed is identical at 60 and
+120Hz, with `dt` capped at 100ms so a resuming background tab cannot jump the
+whole animation in one frame. ⚠️ **A consequence worth knowing before you debug
+it:** in any throttled context the cap makes the field run slow — at 1 rAF tick
+per second it advances at one-tenth speed. That is correct behaviour, and it is
+also why **the preview pane cannot judge this motion at all** (measured: the pane
+throttling rAF to ~1Hz, with pixel deltas indistinguishable from dither alone).
+Same limitation as `DAMP.arrival` — see the note under **Damped horizontal
+motion**. Judge it in a real browser window.
+- ⚠️ **To calm the motion, lower `motion.drift`, not the orbit rates.** Amplitude
+  reads as restraint; frequency reads as alive. An early pass took the rates to
+  0.031 rad/s — a 203-second cycle moving ~2px/sec — which is animated in theory
+  and static to a reader.
+
+⚠️ **UNRESOLVED: `backdrop-filter` cost over a moving field.** `.intro::after`
+(blur 7px) and `.intro-bar::before` (blur 5.5px + saturate) both sample this
+field. Over the static JPEG the browser blurred once and cached; over the canvas
+both re-blur every frame, full width. `updateScrollEffects`' guard on
+`--dark-mix` / `--bar-bleed` (written once and checked against its last value
+precisely because those invalidate a backdrop-filter) no longer buys anything —
+the layer is invalidated every frame regardless. Fine on an M-series Mac,
+**untested on a mid-range Android**, and not testable in the preview pane. If it
+stutters, the fix is to stop compositing: render the blurred lower half inside
+the shader instead of blurring above it — one draw rather than a draw plus two
+full-width blurs.
+
 **The field asset is ONE file, and its name is the source's name.** The repo
 holds only `images/hero-bkg.jpg` — 3600×2198, ~1.4MB, and that file is already
 the compressed derivative. The 18MB+ Figma export it came from has **never been
@@ -124,7 +230,9 @@ source/derivative pair the repo has never had, so don't go looking for the
 it — the `<link rel="preload" as="image">` in index.html's `<head>` and the
 `<img class="page-field">` in `<main>`. Those two URLs must stay byte-identical
 or the preload fetches a second copy of a 1.4MB LCP image instead of priming
-the one the page uses. The `<img>`'s `width`/`height` are the asset's real
+the one the page uses. **The image is now the FALLBACK as well as the LCP paint**
+(see **The animated field** above) — it is what every visitor without WebGL sees,
+so it cannot be dropped even though a shader usually covers it. The `<img>`'s `width`/`height` are the asset's real
 pixels — re-derive them on a re-export, and re-check the `1.6377` aspect that
 hero.css's `--field-bottom` is derived from.
 
@@ -313,7 +421,7 @@ transition.
 | Area on page | CSS file | HTML location |
 |---|---|---|
 | Header / nav (≤480 homepage only) | `header.css` | top of `index.html` (`<header>`) |
-| Landing hero (field bg, statement, divider, frosted band, bottom bar) | `hero.css` | `.page-field` img + `<section class="intro">` |
+| Landing hero (field bg, statement, divider, frosted band, bottom bar) | `hero.css` | `.page-field` img + `.page-field-canvas` + `.page-field-grain` + `<section class="intro">` |
 | Selected Work | `sections.css` | `#work-section` |
 | About | `sections.css` | `#about` |
 | Public footprints (per project; **not on the homepage** — see below) | `sections.css` (link list) + `project-overview.css` (its one spacing rule) | end of `#impact` in each `work/*.html` |
