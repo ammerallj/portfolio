@@ -362,7 +362,22 @@ html.is-field-live .page-field-grain { opacity: 0.15; }
      note there. The bio needs it at least as much: it sits in the right column
      where the gradient is weakest (measured 1.51:1 at 1440x900). */
   -webkit-text-stroke: 0.25px rgba(0, 0, 0, 0.18);
-  paint-order: stroke fill;
+  /* INSIDE, unlike .intro-headline — this is a deliberate split in what that
+     rule calls "one lockup, one treatment", so read both before changing
+     either. `normal` is fill-then-stroke, the initial value, which lets the
+     centred stroke paint OVER the fill and darken the glyph's own edge; the
+     headline's `stroke fill` buries that inner half under the fill and leaves
+     only the outer halo. Modelled at 200px with the stroke scaled to match,
+     the white stem measures 25px under `stroke fill` and 21px under `normal`
+     — the fill really does give the width back.
+     At the shipped 0.25px on 18px type it is 0.125px off each edge, roughly
+     1.4% of a stem: visible as a slightly finer letterform, not as an outline.
+     ⚠️ It costs a little of the legibility the stroke was added for. This block
+     is white on the weakest part of the field (1.51:1 at 1440x900) and the
+     stroke exists to separate it from a light gradient — inside, that
+     separation now comes at the expense of the glyph rather than beyond it.
+     Set it back to `stroke fill` to undo. */
+  paint-order: normal;
 }
 
 @keyframes intro-bio-drop {
