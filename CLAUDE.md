@@ -48,7 +48,9 @@ cream glass on scroll. The BARE state is the added one, so no-JS keeps the
 legible bar. Because the header left the flow there, `.intro`'s phone height is
 `100dvh - 184px`, not `- 246px` — the 62px it used to eat came back off; both
 numbers preserve the same ~120px Work-card peek. The phone tier also
-art-directs the field (a 15% narrower crop, nudged +50px right / +40px down)
+art-directs the field (**2026-09: `--field-w` 1250px and nudged +50px right /
++180px down** — was 1594.85 / +40 until the shader landed and the bio's contrast
+had to be re-measured; see **The animated field**)
 and drops the headline/divider/bio `--hero-drop` via `transform`, which is why
 the hero box and the peek math are unaffected by that shift. **The phone tier
 owns its own hero geometry tokens** (`--hero-h`, `--hero-drop`, `--divider-y`,
@@ -204,6 +206,18 @@ motion**. Judge it in a real browser window.
   reads as restraint; frequency reads as alive. An early pass took the rates to
   0.031 rad/s — a 203-second cycle moving ~2px/sec — which is animated in theory
   and static to a reader.
+
+⚠️ **THE FIELD IS ANIMATED, SO CONTRAST IS A RANGE, NOT A NUMBER.** White type
+over it changes legibility with the orbit phase, and a single sample is worth
+little — an early ≤480 measurement was ~0.4 out for exactly this reason.
+`FIELD.motion.speed` is mutable at runtime, so fast-forward it (90 works) and
+sample a dozen phases. **This also caught a real regression:** the shader shipped
+with the phone bio at **1.46** where the JPEG had held **2.34**, because the
+tuned blobs sit higher and the phone crop left the bio on near-cream. Fixed at
+≤480 by taking `--field-w` to 1250 and `--field-nudge-y` to 180 — measured
+headline 1.73–2.36, bio 1.77–2.41 across a full orbit. ⚠️ **The two pull against
+each other** (every 70px of nudge is roughly +0.3 bio / −0.25 headline), the same
+balance the 1024 tier documents. Re-measure BOTH after touching either.
 
 ⚠️ **UNRESOLVED: `backdrop-filter` cost over a moving field.** `.intro::after`
 (blur 7px) and `.intro-bar::before` (blur 5.5px + saturate) both sample this

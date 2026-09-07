@@ -592,16 +592,43 @@
        bio's last two lines fell off the gradient onto near-cream — white type
        at 1.11:1. 85% carried the gradient past the bio again, and the +3%
        (2026-08, matching the base tier) took it to 87.55%. Shrink further and
-       re-check that contrast before shipping. */
-    --field-w: 1594.85px;
+       re-check that contrast before shipping.
+
+       ⚠️ SUPERSEDED 2026-09 by the shader field — see below. Kept because the
+       reasoning still governs: shrink and re-measure the BIO, always.
+       Now 1250px, and the number was chosen by measurement, not by taste.
+       ⚠️ THE FIELD IS ANIMATED, so contrast under fixed text CHANGES WITH THE
+       ORBIT PHASE — a single reading is worth little and an early pass here was
+       ~0.4 out because of it. Measure across the cycle: `FIELD.motion.speed` is
+       mutable at runtime, so crank it (90 works) and sample a dozen times.
+       At 375x812, average contrast RANGE over a full orbit:
+         1594.85 + 40 nudge   bio 1.46 at the sampled phase   <- was live
+         1250    + 180 nudge  headline 1.73-2.36, bio 1.77-2.41  <- now
+       Worst single pixel at any phase: headline 1.07, bio 1.21 (that metric
+       includes the gaps between glyphs, so it reads pessimistic — the old JPEG
+       scored 1.36 on the same measure).
+       The old JPEG measured bio 1.36 / 2.34 here, so the shader had quietly
+       REGRESSED the bio on phones: its colour mass sits higher, and the phone
+       crop left the bio on near-cream. Shrinking alone made that worse (bio
+       fell to 1.06 at 1250 with the old 40px nudge) — the fix is the nudge
+       below, not the width. */
+    --field-w: 1250px;
 
     /* The flat downward nudge on .page-field (transform below). Declared as a
        token because --field-bottom has to carry it too: hero.css derives that
        from the width alone (× 0.53734, which bakes in the -12% PERCENTAGE
        shift), so an additive px offset has to be added back or the frost pane
        stops short of the artwork's real bottom edge and leaves an unfrosted
-       tail. Change the nudge here and both follow. */
-    --field-nudge-y: 40px;
+       tail. Change the nudge here and both follow.
+
+       ⚠️ RAISED 40 -> 180 (2026-09) to carry the field's strong band down under
+       the bio after the width came down. HEADLINE AND BIO PULL AGAINST EACH
+       OTHER here, the same balance the 1024 tier documents: every 70px of nudge
+       buys the bio roughly +0.3 and costs the headline roughly -0.25. No value
+       puts both worst-pixel readings over 1.6; 180 is where both AVERAGES stay
+       inside the 1.6-2.3 band across the WHOLE orbit and neither is starved.
+       Measure both before changing it — moving it for one will move the other. */
+    --field-nudge-y: 180px;
     --field-bottom: calc(var(--field-w) * 0.53734 + var(--field-nudge-y));
 
     /* The hero's geometry at this tier, named once so the frost pane can be
@@ -642,6 +669,17 @@
   .page-field {
     transform: translateX(calc(-50% + 50px))
                translateY(calc(-12% + var(--field-nudge-y)));
+  }
+
+  /* Grain is sized in CSS px, so the SAME tile reads far coarser here than on
+     desktop — the viewport is 375 CSS px against 1440, so each speck covers
+     ~4x more of the composition. Scaling the tile down restores the desktop
+     RELATIONSHIP rather than the desktop number. Done with background-size, not
+     a second baseFrequency: the filter's frequency is baked into the data URI
+     in hero.css, and a per-tier copy of that URI would be two things to keep in
+     sync for no gain. */
+  .page-field-grain {
+    background-size: 96px 96px;
   }
 
   /* Headline, divider and bio all drop --hero-drop together — a TRANSFORM, so
