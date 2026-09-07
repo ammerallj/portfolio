@@ -9,3 +9,12 @@
 # Keep the source outside git; commit only the compressed derivative.
 images/IMG_*.JPG
 images/IMG_*.jpg
+
+# Lab experiment kept LOCAL ONLY (2026-09). lab/ is already excluded from the
+# Jekyll build, so nothing under it is served — this goes further and keeps the
+# file out of the repo entirely. It is the superseded CSS-gradient version of
+# the hero field, carrying the JPEG-sampled palette that turned out to be wrong
+# (it recovered the blobs' overlap products, not the Figma sources). Kept on
+# disk for reference; lab/field-shader.html is the one that matters and stays
+# tracked, since the live FIELD values were exported from it.
+lab/field-css.html
