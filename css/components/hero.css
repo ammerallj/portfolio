@@ -223,6 +223,19 @@ html.is-field-live .page-field-grain { opacity: 0.15; }
   line-height: 1;
   letter-spacing: -0.02em;
   color: #fff;
+  /* Hairline edge on the white type (2026-09). The field it sits on is a live
+     shader now and runs more saturated than the JPEG did, so the glyphs get a
+     0.25px definition line rather than floating on the colour. Deliberately
+     sub-pixel: at 0.25 it is half a device pixel on a 2x display and reads as a
+     crispened edge, NOT as an outline. 18% black — dark enough to separate the
+     letterform from a light gradient, light enough to disappear over the
+     saturated middle.
+     `paint-order` draws the stroke BEHIND the fill, so the letterform keeps its
+     full weight; -webkit-text-stroke is otherwise centred on the outline and
+     eats into the glyph. Browsers without paint-order for HTML text get the
+     centred stroke, which at this width is indistinguishable. */
+  -webkit-text-stroke: 0.25px rgba(0, 0, 0, 0.18);
+  paint-order: stroke fill;
   /* 9.375em — the 900px cap at the 96px desktop size, expressed in EM so the
      wrap point scales with the type instead of being a fixed px width the
      smaller tiers outgrow. At 1024 a px cap never engaged (the 896px
@@ -331,6 +344,11 @@ html.is-field-live .page-field-grain { opacity: 0.15; }
   line-height: 1.08;
   letter-spacing: -0.02em;
   color: #fff;
+  /* Matches .intro-headline — one lockup, one field, one treatment. See the
+     note there. The bio needs it at least as much: it sits in the right column
+     where the gradient is weakest (measured 1.51:1 at 1440x900). */
+  -webkit-text-stroke: 0.25px rgba(0, 0, 0, 0.18);
+  paint-order: stroke fill;
 }
 
 @keyframes intro-bio-drop {
