@@ -152,6 +152,18 @@ html.is-field-live .page-field-grain { opacity: 0.15; }
   /* DESKTOP ONLY (≥1025). The ≤1024 tier replaces this outright. */
   --field-w: max(1857.6px, 129vw);
   --field-bottom: calc(var(--field-w) * 0.50070);
+
+  /* How far the whole lockup — headline, divider, bio, AND the frost pane with
+     them — sits above the hero's vertical centre. The desktop mirror of the
+     ≤480 tier's --hero-drop, which moves the same four things the other way.
+     ⚠️ ONE number to change to move the lockup: the transform below, the pane's
+     start and the pane's reach all read from it. A TRANSFORM, so .intro's box,
+     the Work-card peek below it and the docking bar's maths are all untouched —
+     only the composition inside the fold moves.
+     ⚠️ It takes the divider OFF the exact vertical centre, which the rest of
+     this file describes as centred. The pane's `top` compensates so the glass
+     still starts on the divider; they are one decision. */
+  --hero-lift: 60px;
 }
 
 .intro {
@@ -189,14 +201,17 @@ html.is-field-live .page-field-grain { opacity: 0.15; }
 .intro::after {
   content: '';
   position: absolute;
-  top: 50%;   /* the divider line */
+  top: calc(50% - var(--hero-lift));   /* the divider line, lifted with it */
   left: 0;
   right: 0;
   /* To the field's bottom, but never less than the hero's own lower half
      (tall/narrow viewports, where the field ends above the fold).
      svh to match .intro — this is half of THAT box, so a dvh here would slide
      out from under the divider whenever iOS resized the viewport. */
-  height: max(50svh, calc(var(--field-bottom) - 50svh));
+  /* + --hero-lift because the pane's TOP moved up by that much and its bottom
+     edge must still land on the artwork's — otherwise it ends short and leaves
+     an unfrosted tail of gradient behind Selected Work. */
+  height: calc(max(50svh, calc(var(--field-bottom) - 50svh)) + var(--hero-lift));
   pointer-events: none;
   /* Lowest layer above the gradient: z:-1 joins the field's level in main's
      stacking context, painting after it (above the gradient) but beneath ALL
@@ -205,9 +220,13 @@ html.is-field-live .page-field-grain { opacity: 0.15; }
      would trap above the hero's background instead. */
   z-index: -1;
   /* Frost strength: between the frame's 5.5px/0.05 and the heavy 10px/0.22. */
+  /* The BLUR is the effect; the cream wash is only what tints it. Lightened
+     0.12 -> 0.06 (2026-09) — the veil was subtracting contrast from the white
+     bio sitting on it, and the glass reads as glass because of the blur, not
+     the tint. Keep blur(7px) if this is ever tuned again; drop the alpha. */
   backdrop-filter: blur(7px);
   -webkit-backdrop-filter: blur(7px);
-  background: rgba(251, 252, 248, 0.12);
+  background: rgba(251, 252, 248, 0.06);
 }
 
 /* ---- Upper region: the statement ---- */
@@ -279,6 +298,15 @@ html.is-field-live .page-field-grain { opacity: 0.15; }
     filter 0.5s cubic-bezier(0.16, 1, 0.3, 1),
     transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
   will-change: opacity, filter, transform;
+}
+
+/* Headline, divider and bio all rise --hero-lift together. Mirrors the ≤480
+   tier's drop; that tier overrides this rule (same selectors, responsive.css
+   imported last), so phones keep their own downward offset. */
+.intro-top,
+.intro-divider,
+.intro-band {
+  transform: translateY(calc(-1 * var(--hero-lift)));
 }
 
 .intro-divider {
