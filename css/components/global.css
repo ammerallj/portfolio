@@ -152,14 +152,30 @@
 
   /* How much of the container's inner width a Work card GIVES UP so the next
      card in the horizontal track peeks in from the right (sections.css).
-     What the reader actually sees of that next card is NOT this number — the
+
+     IT IS ONE COLUMN PLUS ONE GUTTER, so the card is exactly 11 of the 12:
+     (100vw−332)/12 + 20 = 8.333vw − 7.67px, frozen at 112.33 from 1440 up
+     where the two column tokens freeze too. That is what makes the card's own
+     columns land on their full bases — 654 + 20 + 541.67 = 1215.67, and 11
+     columns is 1215.67. It was a flat 140px (2026-09), which is MORE than the
+     grid leaves over, so the card was 1188 and both of its columns shrank to
+     fit: the description painted 529.13 instead of 541.67 and the hero bio
+     followed it down. Everything else on the site was already painting the
+     full token, so those two were the only ones out.
+     ⚠️ --width-title-column and --width-right-column are the other two terms —
+     re-derive this if either moves.
+
+     What the reader actually sees of the next card is NOT this number — the
      track gap sits in front of it and the bleed adds the gutter back:
 
          visible sliver = --work-peek − track gap + --page-gutter
 
-     Desktop: 140 − 60 + 56 = 136px. Keep that arithmetic in view when changing
-     either side; the phone tier overrides the gap for exactly this reason. */
-  --work-peek: 140px;
+     Desktop is now 112.33 − 60 + 56 = 108.33px at 1440, tapering to ~74 at the
+     1025 band floor; it was a flat 136. Keep that arithmetic in view when
+     changing either side; the phone tier overrides the gap for exactly this
+     reason. The ≤1024 and ≤768 tiers keep their own flat values — the card is
+     single-column there, so it has no shrink to avoid. */
+  --work-peek: min(112.33px, 8.333vw - 7.67px);
 
   --measure: 65ch;
 

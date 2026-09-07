@@ -250,8 +250,8 @@ field tuning is aiming at a target 1.5 points further away.
 - **The block's TOP is anchored, so the lockup does not move.** Measured
   identical at 1440 (426), 768 (552) and 375 (360); only the bottom rises.
   Desktop barely changes at all — 3 lines either way, 78px → 76px — because the
-  542px column was already setting the same count. The tiers that visibly gain
-  air are 768 (3 lines → 2) and 375 (5 → 4).
+  541.66px column was already setting the same count (verified at both sizes).
+  The tiers that visibly gain air are 768 (3 lines → 2) and 375 (5 → 4).
 
 ⚠️ **UNRESOLVED: `backdrop-filter` cost over a moving field.** `.intro::after`
 (blur 7px) and `.intro-bar::before` (blur 5.5px + saturate) both sample this
@@ -1485,7 +1485,32 @@ own version, separate from the `style.css?v=` / `@import` CSS bump below).
   hidden with `curl -I https://ammerallj.design/<path>` (want 404). In-page HTML
   comments are **not** stripped — the deploy is plain Jekyll, no build step — so
   keep secrets out of comments (the site is static; anything shipped is readable).
-- The shared right column across sections is **542px** (the site's "5 grid columns"); the layout uses **56px** horizontal page padding (`.site-container`). Reuse these, don't invent new values.
+- The shared right column across sections is ONE token —
+  `--width-right-column` in global.css:
+  `clamp(368.75px, 41.667vw - 58.33px, 541.67px)`. The cap binds at **≥1440**,
+  the floor at **≤1025**; between them it is fluid. **Reuse the token; never
+  restate the number.**
+  - **Every consumer now PAINTS the token** — verified 541.66 at 1440 for the
+    hero bio, the Work-card descriptions and About Me alike, 475 at 1280, 400 at
+    1100, 369.17 at the 1026 seam. That was not true until 2026-09, and this
+    entry said "542px" through the whole period it wasn't: the two consumers
+    inside a Work card (`.work-card-right` and the hero's `.intro-band-right`,
+    both `flex: 0 1`) painted **529.13** while the other five painted 541.67.
+  - **The fix was the PEEK, not the column.** `--work-peek` was a flat 140px,
+    more than the grid leaves over, so a card was 1188 while its two columns
+    asked for 1216 (654 + 20 + 541.67) and both gave back a proportional share.
+    The peek is now one column plus one gutter, which makes the card exactly 11
+    of the 12 — see the derivation on `--work-peek` in global.css. Widening the
+    column instead would have taken the difference straight out of the card
+    title, since the two share a fixed card width.
+  - **The hero bio tracks the card description by construction.**
+    `.intro-band` pads its right edge by `--page-gutter + --work-peek`, so the
+    band's content box IS a card's width, and an empty `.intro-band-spacer`
+    carries the title column's basis so the bio lands on the description's left
+    edge. One token moves both; a plain `flex: 1 1 0` spacer would leave it 13px
+    adrift.
+- The layout uses **56px** horizontal page padding (`.site-container`). Reuse
+  it, don't invent new values.
 - Accent blue is the `--color-accent` token (`#4A45FF`).
 
 ## Discoverability (SEO + GEO) — the machine-readable layer
