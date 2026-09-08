@@ -249,11 +249,29 @@ const FIELD = {
   ramp:  { mid: 0.524038, midAlpha: 0.3 },
   layer: 0.9,
   cream: [0.984, 0.988, 0.973],
-  // ⚠️ CROWDED TOWARD THE CENTRE (2026-09): magenta moved right 0.300 -> 0.360
-  // and violet left 0.770 -> 0.710, closing the gap between them by 0.12 of the
-  // field's width. They were the two outermost orbs and the composition read as
-  // spread; pulling them in concentrates the colour behind the lockup instead of
-  // at the edges, where the viewport crops it anyway.
+  // ⚠️ VIOLET AND MAGENTA ARE A PAIR (2026-09), the way cyan and red already
+  // were. They used to be the OUTER two, 0.35 apart, with the tighter cyan/red
+  // pair (0.17 apart) sitting between and above them — so each of the outer two
+  // had its centre buried inside one of the inner two, and neither rendered as
+  // itself: violet came out #CD5895 (pink) and magenta #9390DB (periwinkle),
+  // hue errors of 55 and 67 degrees from their own colours.
+  // ⚠️ IT IS DISTANCE FROM THE ORB ABOVE, NOT SPREAD. Violet sat at 0.710 with
+  // red at 0.625 — 34% of red's radius, deep inside it. At 0.840 it is 70% of
+  // the way out, past the ramp's midpoint, and reads as itself while STILL
+  // sitting beside red on the right. Being next to red was never the problem;
+  // being inside it was.
+  // Pairing both on the left also fixes the hue (6 degrees) but strands the bio
+  // at 2.05, because the bio is in the RIGHT column and violet was its second
+  // light source. Violet right / magenta left scores 12 degrees and 2.51 — the
+  // hue fix at almost none of the contrast cost.
+  // ⚠️ Violet is the BIGGEST orb (0.42) because it sits furthest out — it has to
+  // reach back across the lockup from x 0.84. Growing IT is free (hue stays at
+  // 12 degrees, bio 2.88 -> 3.08); growing CYAN to do the same job is not, since
+  // cyan paints over magenta and buries it again — 0.38 takes the worst hue
+  // error to 22 degrees, 0.42 to 29.
+  // Lowering LAYER was tried first and does almost nothing — 55 degrees only
+  // improves to 44 between alpha 0.9 and 0.5, while everything desaturates.
+  // The burial is spatial, so only geometry fixes it.
   // Painted bottom to top. ⚠️ NO LONGER the SVG export order: cyan was second
   // and had BOTH magenta and red compositing over it, so at its own centre it
   // rendered #908ac8 — a muted periwinkle — instead of #019FD8, saturation 0.31
@@ -261,8 +279,8 @@ const FIELD = {
   // it above magenta is what brings it back; growing it alone could not, because
   // the loss was overpainting, not reach.
   blobs: [
-    { col: [0.5725, 0.2196, 0.8902], r: 0.3250, x: 0.710, y: 0.400 }, // violet  #9238E3
-    { col: [0.8392, 0.3020, 0.8078], r: 0.3650, x: 0.360, y: 0.470 }, // magenta #D64DCE
+    { col: [0.5725, 0.2196, 0.8902], r: 0.4200, x: 0.840, y: 0.540 }, // violet  #9238E3
+    { col: [0.8392, 0.3020, 0.8078], r: 0.3650, x: 0.260, y: 0.580 }, // magenta #D64DCE
     { col: [0.0039, 0.6235, 0.8471], r: 0.3300, x: 0.455, y: 0.360 }, // cyan    #019FD8
     // Red is positioned to BACK THE BIO, not just to sit in the composition.
     // The bio's centre in field space is ~(0.65, 0.64) at 1440 and 1024 and
