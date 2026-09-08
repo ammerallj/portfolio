@@ -264,6 +264,13 @@ const FIELD = {
   // at 2.05, because the bio is in the RIGHT column and violet was its second
   // light source. Violet right / magenta left scores 12 degrees and 2.51 — the
   // hue fix at almost none of the contrast cost.
+  // ⚠️ RED MOVES LEFT AND DOWN TOGETHER (0.625,0.500 -> 0.540,0.520). Left
+  // alone walks it into CYAN, which it paints over: cyan's hue error goes 3 ->
+  // 24 degrees at x 0.54 and 83 at x 0.50, i.e. the blue disappears again.
+  // Cyan sits high (y 0.360), so dropping red as it moves left keeps them apart
+  // — at 0.540/0.520 cyan holds at 17 degrees. Below x 0.46 no y works at all.
+  // Moving red off violet also FIXED violet: 15 degrees -> 1, because red was
+  // the thing covering it.
   // ⚠️ Violet is the BIGGEST orb (0.42) because it sits furthest out — it has to
   // reach back across the lockup from x 0.84. Growing IT is free (hue stays at
   // 12 degrees, bio 2.88 -> 3.08); growing CYAN to do the same job is not, since
@@ -292,7 +299,7 @@ const FIELD = {
     // reaches v~0.93 of the field; dropping its centre to the bio's y would push
     // colour past the field's bottom edge and undo the bleed fix above it.
     // Right is free, down is not.
-    { col: [0.9765, 0.2471, 0.2471], r: 0.2800, x: 0.625, y: 0.500 }, // red     #F93F3F
+    { col: [0.9765, 0.2471, 0.2471], r: 0.2800, x: 0.540, y: 0.520 }, // red     #F93F3F
   ],
   // Calmed 2026-09 (speed 2.05 -> 1.7, drift 0.05 -> 0.032). Drift carries
   // most of the reduction on purpose: amplitude reads as restraint,
