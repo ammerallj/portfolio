@@ -299,11 +299,13 @@ const FIELD = {
   // frequency reads as alive, and dropping the rates instead is what
   // produced a field that was animated in theory and static to a reader.
   // drift is the HORIZONTAL excursion; driftYRatio scales the vertical one
-  // down from it. Vertical travel moves the headline and bio across bands of
+  // down from it. Lowered 0.055 -> 0.038 (2026-09) to narrow the contrast swing
+  // under the text: the field's movement is what put the bio below threshold at
+  // its worst phases, not its resting composition. Vertical travel moves the headline and bio across bands of
   // the gradient and swings their contrast, so it is kept short; horizontal
   // travel is close to free. Raise drift for more life, raise driftYRatio only
   // after re-measuring both blocks.
-  motion: { speed: 1.85, drift: 0.055, driftYRatio: 0.2, pulse: 0.08, warp: 0.55 },
+  motion: { speed: 1.85, drift: 0.038, driftYRatio: 0.2, pulse: 0.16, warp: 0.55 },
   // Buffer size vs CSS px. BELOW devicePixelRatio deliberately: a soft
   // gradient carries no per-pixel detail, so 1.0 on a 2x display is a 4x
   // fill-rate saving nobody can see. Grain is the one thing that does want
@@ -380,7 +382,12 @@ function initHeroField() {
     '  float ax=uAmp.x*(.62*sin(uTime*(.130+fi*.028)+fi*1.7)+.38*sin(uTime*(.077+fi*.019)+fi*4.1));',
     '  float ay=uAmp.y*cos(uTime*(.110+fi*.024)+fi*2.3);',
     '  vec2 c=uBlob[i].xy+vec2(ax,ay);',
-    '  float rad=uBlob[i].z*(1.+PULSE*sin(uTime*(.075+fi*.017)+fi));',
+    // ⚠️ THE PULSE ONLY GROWS. (.5+.5*sin) rectifies the wave to 0..1, so an
+    // orb runs from its base radius up to base*(1+PULSE) and back — never
+    // below. It used to be a bare sin, i.e. +/-PULSE, and the shrink half was
+    // costing contrast: the trough pulled every orb's reach in by 8% at once,
+    // which is what put the bio's worst phases under its threshold.
+    '  float rad=uBlob[i].z*(1.+PULSE*(.5+.5*sin(uTime*(.075+fi*.017)+fi)));',
     '  vec2 d=vec2(w.x-c.x,(w.y-c.y)/uAspect);',
     '  vec2 ra=ramp(length(d)/rad);float a=ra.x*LAYER;',
     '  if(a<=0.)continue;',
