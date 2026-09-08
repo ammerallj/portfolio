@@ -26,26 +26,65 @@ shared by all of them.
 ## Landing (2026-08) — "Making products make sense."
 The homepage hero is the Figma 339:3745 landing: `images/hero-bkg.jpg` laid as
 a PAGE background at `z:-1` inside `main` (a stacking context — body's own
-background otherwise paints over negative-z elements). ⚠️ **THE FIELD IS NOW
-CLIPPED AT THE NAV BAR (2026-09) — this reverses the old rule.** It used to run
-past the fold and dissolve into the cream behind Selected Work on its own, which
-was true of the JPEG (its lower reaches are near-white) and NOT of the shader,
-whose blobs are larger and more saturated and left visible colour under the bar
-and over Selected Work. ⚠️ **A `clip-path: inset()` was tried first and REJECTED** — it ends the artwork
-on a hard line. It is a **MASK**: `mask-image: linear-gradient(to bottom, #000
-calc(100% − --field-clip − --field-fade), transparent calc(100% − --field-clip))`
-on `.page-field`, where `--field-clip` is `--field-bottom − 100svh + --bar-tail`
-and `--field-fade` (170px) is the length of the ramp. Measured at 1440×900: the
-fade runs page 714 → 884, ends exactly on the bar's bottom, clears the bio by
-208px, and is fully transparent before Selected Work at 900.
-⚠️ **`getComputedStyle` folds the stops into `calc(100% − Npx)`** — parse them
-against the element's own height, don't `parseFloat` the token (`max()`/`calc()`
-give NaN, which silently reads as 0 and makes the geometry look wrong).
+background otherwise paints over negative-z elements). **THE FIELD IS KEPT OFF
+SELECTED WORK BY TWO THINGS, AND THEY DIVIDE THE JOB BY SCROLL STATE (2026-09):
+a short eased MASK at rest, and a scroll-linked TUCK (`--field-scroll`) once the
+reader moves.** See **The field tuck** below for the second. It used to run past
+the fold and dissolve into the cream on its own, which was true of the JPEG (its
+lower reaches are near-white) and NOT of the shader, whose blobs are larger and
+more saturated and left visible colour under the bar and over Selected Work.
+
+⚠️ **THE MASK IS 17 STOPS IN PX ON `.page-field`, AND IT ENDS ON THE NAV BAR'S
+TOP EDGE — not on the artwork's bottom.** So no gradient ever paints behind the
+nav, at rest or mid-scroll. It runs `--field-mask-start` → `--field-mask-end`,
+where `--field-mask-end: min(--field-bottom, --field-bar-top)` and
+`--field-bar-top: calc(100svh - 64px - --bar-tail)`.
+⚠️ **`--field-clip` IS DELETED** (from `:root` and from the ≤480 tier); an earlier
+entry described a `calc(100% − --field-clip − --field-fade)` mask the file no
+longer has. **`--field-fade` still exists and IS live** — every stop reads it.
+- ⚠️ **A PERCENTAGE MASK CANNOT DO THIS, which is why the stops are px.** The
+  field's height follows the viewport's WIDTH and the bar's position follows its
+  HEIGHT, so the bar lands at a different FRACTION of the artwork at every window
+  size: measured, the bar's top is **93% of the field at 1440×900, 75% at
+  1440×740 and 67% at 1024×768.** One percentage is wrong at two of those. Before
+  this, the bar STRADDLED the fade — near-full colour above it, cream immediately
+  below — so the dissolve ran straight across the nav.
+- ⚠️ **THE CURVE IS A SMOOTHSTEP (`1 − (3t² − 2t³)`), AND THE SHAPE IS WHAT READS
+  SMOOTH — the length is secondary.** Three shapes were tried and each failure
+  explains the next:
+  1. `clip-path: inset()` — a hard cut by definition, rejected on sight.
+  2. a **170px LINEAR** ramp — replaced the cut with a visible horizontal **BAND**.
+     A straight alpha line has a slope discontinuity at each END and the eye reads
+     those two corners as edges even when no single pixel is a step.
+  3. an **EASE-IN** ramp — killed the band and still looked abrupt. Built to hold
+     the artwork at full strength as long as possible, it put HALF the alpha drop
+     in the last third, so the transition compressed into a narrow strip above the
+     nav *no matter how long the ramp was*. Lengthening could not fix a shape
+     problem.
+  A smoothstep has **zero slope at both ends** (neither corner exists) and puts
+  alpha 0.5 at the true midpoint. **Never take it to two stops.**
+- ⚠️ **THE STOP COUNT IS THE THIRD THING THAT MATTERED.** Browsers interpolate
+  LINEARLY between gradient stops, so the count sets how faithfully the curve is
+  actually drawn — every stop is a small slope discontinuity, the same defect that
+  made the linear ramp band, repeated small. At eighths on a 67px ramp the stops
+  land 8px apart and those seven corners read as faint Mach banding on saturated
+  colour. **Sixteenths** puts them ~4px apart with a largest alpha step of 0.093.
+  ⚠️ **The fix for a visible band is MORE STOPS BEFORE MORE LENGTH** — resampling
+  is free, lengthening spends the room between the bio and the bar. Go to 24 stops
+  before reaching for the length.
+- ⚠️ **THE LENGTH IS MEASURED, AND THE CONSTRAINT IS ONE-SIDED.**
+  `--field-fade: clamp(56px, --field-gap * 0.45, 140px)` — a fraction of the
+  measured room between the bio and the bar (see **The field tuck**), never of the
+  field's height. The ramp pulls toward cream and the bio is white type, so the
+  CEILING is `--field-gap × 1.143` (solve `1 − gap/fade ≤ 0.125`, the point where
+  a smoothstep is still at alpha 0.957). **Shorter is free and pays twice:** the
+  ramp moves away from the text, and less of the artwork is dissolved — which is
+  what recovered red's saturation when it read washed out. At 0.45 the fade is
+  67px at 1440×740, clearing the bio by 82px and sitting entirely BELOW red's
+  core. The only floor is banding; 56px is it.
 `--bar-tail` (16px) is the gap between the bar's bottom and the hero's, and
 `.intro-bar`'s `margin-bottom` reads the same token so the two cannot drift.
-Verified at 1440×900: field paints to page 884, the bar's bottom is 884, Selected
-Work starts at 900 — zero overlap, and nothing on screen once the bar docks.
-**Neutralised to `0px` at ≤480**, which has no bar and shows the JPEG. The hero stage: statement (top half, 96px Hanken) →
+The hero stage: statement (top half, 96px Hanken) →
 full-width hairline divider (**at the exact centre MINUS `--hero-lift`** since
 2026-09 — see below) → frosted band (bottom half,
 backdrop-blur) with the bio in its right column → `.intro-bar` along the
@@ -67,7 +106,9 @@ legible bar. Because the header left the flow there, `.intro`'s phone height is
 `100dvh - 184px`, not `- 246px` — the 62px it used to eat came back off; both
 numbers preserve the same ~120px Work-card peek. The phone tier also
 art-directs the field (**2026-09: `--field-w` 1250px and nudged +50px right /
-+180px down** — was 1594.85 / +40 until the shader landed and the bio's contrast
++120px down** — the +180 pair was tuned against the SHADER, and the shader is off
+at this tier, which rendered the JPEG's headline at 1.52, below the band; 120 is
+where the JPEG's two blocks land equal at 2.33 / 2.33 — was 1594.85 / +40 until the shader landed and the bio's contrast
 had to be re-measured; see **The animated field**)
 and drops the headline/divider/bio `--hero-drop` via `transform`, which is why
 the hero box and the peek math are unaffected by that shift. **The phone tier
@@ -81,7 +122,8 @@ neither holds here. Watch the bio's contrast whenever the field shrinks: at a
 1.11:1); 85% keeps them at ~1.6–2.3:1. ≤1024 tiers are INTERIM
 (desktop composition, tighter insets) pending frames — **except the field, which
 the tablet tier now sizes to the viewport HEIGHT** (`--field-w: max(1688.69px,
-220dvh, 117.27vw)`, 2026-08-31). The frozen px width is a desktop assumption: it
+220svh, 117.27vw)`, 2026-08-31 — **`svh`, not `dvh`**, for the same reason
+`.intro` uses it; the doc said `dvh` here and the code has always said `svh`). The frozen px width is a desktop assumption: it
 ends the gradient at y=907 however tall the window is, while the divider stays
 pinned to 50dvh and slides down with the viewport, so on a portrait tablet the
 lockup walks off the bottom of its own artwork — measured 1.08:1 headline and
@@ -99,7 +141,22 @@ scored 1.81 where the measured fit scored 2.12. The cost is magnification:
 soft gradient but the reason not to push the ratio higher. **The desktop field grew 10% on 2026-08-31**: `--field-w` in hero.css is now
 `max(1857.6px, 129vw)`, up from `max(1688.69px, 117.27vw)`. **The px and vw
 terms move together** — `vw × 14.4` = the px freeze point — or the freeze stops
-matching the 1440 render. It puts the artwork ~2% ABOVE the original 126.5vw
+matching the 1440 render.
+⚠️ **SUPERSEDED — DESKTOP `--field-w` IS NOW PLAIN `100vw` (2026-09).** The field
+IS the viewport rather than a larger box cropped by it: at 1857×1134 against a
+1440×900 fold, 418px of width and 234px of height were never seen, and the Figma
+composition — drawn in a 1440×800 frame that IS the viewport — could never land
+where it was drawn. **There is no px freeze and no `vw × 14.4` pairing left on
+desktop**, so the paragraph above is history, not instruction. `--field-bottom`
+is now just width ÷ aspect, `calc(--field-w * 0.61061)` = **879px at 1440 wide**,
+which does NOT clear a 900px fold — it stops 21px short of it, and the dissolve
+below is what closes that. ⚠️ **Orb x/y are now direct frame fractions** because
+the field box and the Figma frame are the same rectangle; change this width and
+every position must be re-derived.
+⚠️ **The 1024/1025 seam is now a LARGE step, not ~10%.** Desktop resolves to the
+window width (1025px at the seam) while the tablet side holds its 1688.69px
+floor — a ~65% jump. Only visible while dragging a window across that exact
+boundary, but re-measure landscape tablet before ever locking the two together. It puts the artwork ~2% ABOVE the original 126.5vw
 composition rather than 7.3% under it, and it helps the bio: measured at
 1440×900, headline 1.24 → 1.31 and bio 1.22 → 1.51. The gradient's bottom edge
 moves 907 → 998px, so it now clears a 900px fold outright, and the frost pane
@@ -131,6 +188,64 @@ and About/Contact's `min-height`s in sections.css. The previous
 blob-hero landing is archived, fully self-contained, in
 `archive/blob-hero-2026-08/`.
 
+### The field tuck (`--field-scroll` / `--field-gap`, 2026-09)
+
+**Two mechanisms keep the artwork off the nav and off Selected Work, and they
+split the job by scroll state.** The MASK (above) handles rest; the TUCK handles
+motion. Both are measured, neither restates a constant from the other.
+
+⚠️ **THE BLEED WAS A VIEWPORT-HEIGHT PROBLEM, NOT A SCROLL ONE — diagnose it that
+way or you will fix the wrong thing.** `--field-w` is `100vw`, so the artwork's
+HEIGHT follows the window's WIDTH and does not shrink when the window gets
+shorter: measured at 1440 wide, the field's bottom sits at page **879 whatever
+the height is**, while the bar's resting bottom rides `100svh`. At 1440×900 the
+bar finishes at 884 and nothing shows; at 1440×740 it finishes at 724 and **155px
+of gradient stood below the docked bar, over Selected Work**. The first report of
+this looked like a scroll bug and is not one.
+
+**`--field-scroll`** — published by `updateScrollEffects`, read by `.page-field`'s
+`transform: translate(-50%, calc(-1 * var(--field-scroll, 0px)))`. All three
+layers (img, canvas, grain) carry `.page-field`, so one transform moves the lot.
+- **It is ZERO AT REST, and that is the whole design constraint.** Every contrast
+  figure in this document is measured at `scrollY 0`, so a mechanism that costs
+  nothing there cannot regress any of them. The resting transform resolves to
+  `matrix(1, 0, 0, 1, -720, 0)` — byte-identical to the old `translateX(-50%)`.
+- ⚠️ **THE OBVIOUS ALTERNATIVE IS WORSE.** Anchoring the mask alone (no tuck)
+  compresses the dissolve on exactly the short viewports that have the problem,
+  and the fade then runs through the bio — the block the field's whole geometry
+  is tuned around.
+- **Cubic ease-out**, so it answers the first gesture: 27% of the travel in the
+  first 10% of scroll, 88% by halfway. ⚠️ **It was LINEAR while it was doing
+  correctness work** — it had to close a gap to exactly zero at the dock. Once
+  the mask ended on the bar's top by construction, the curve became free.
+- ⚠️ **Easing the MAPPING is not a transition.** It stays a pure function of
+  `scrollY` with no time term, so it cannot lag the page. The standing rule that
+  **nothing scroll-linked may carry a CSS transition** is untouched.
+
+**`--field-gap`** — the measured room between the bio's last line and the bar's
+top, published by `measureFieldTuck` and read by hero.css to size the dissolve.
+⚠️ **IT CANNOT BE A CONSTANT:** 229px at 1440×900, 179 at 800, 149 at 740, 119 at
+680, and only **96px at 1024×768**, whose bio runs longer. `--field-fade` is
+`clamp(56px, --field-gap * 0.45, 140px)`.
+
+**`measureFieldTuck` is LAYOUT-ONLY — it runs at init and on resize, never per
+frame.** Two numbers, both measured, no CSS constants restated:
+- ⚠️ **`offsetTop` IS USELESS FOR THE BAR — it tracks the sticky offset.** Measured:
+  `introBar.offsetTop` reads 660 at rest and **1500 at scrollY 1500**. The bar's
+  resting top is derived instead from `.intro`'s box plus the bar's own computed
+  negative `margin-top`, so changing the pull-up in CSS cannot leave this stale.
+- ⚠️ **The FIELD is measured with offsets, not `getBoundingClientRect`** — it
+  carries the very transform this publishes, so a rect would feed the output back
+  into its own input. Verified identical at `--field-scroll` 0 and 200px. The bio
+  is measured by accumulating `offsetTop` for the same reason: the hero's load
+  reveal translates `.intro-band` while this runs.
+- **Resize matters more than usual here**, because the overhang is created by the
+  window's HEIGHT while the field's height follows its WIDTH.
+- **It skips entirely where the bar is `display: none`** (`offsetParent === null`,
+  i.e. ≤680) and publishes `--field-scroll: 0`, which also clears any shift left
+  over from a wider layout. Phones are untouched: they keep their own tier
+  transform, which does not read the token.
+
 ### The animated field (`initHeroField`, 2026-09)
 **The gradient is RENDERED, not served** — a WebGL fragment shader on
 `.page-field-canvas`, drawn **over** the JPEG rather than instead of it. Config
@@ -145,19 +260,60 @@ OVERLAP PRODUCTS and presents them as sources. A first pass did exactly that and
 produced seven blobs, three of which (periwinkle, sky, pink) do not exist in the
 file at all — they are where blue meets violet and red meets magenta. Baking
 mixes in as ingredients and then mixing again is why it read muddy.
-- **FOUR circles**, layer opacity **0.9**, painted bottom to top: violet
-  `#9238E3` · cyan `#019FD8` · magenta `#D64DCE` · red `#F93F3F`.
-- **One ramp, shared by all four:** colour at alpha 1 → alpha **0.3** at offset
-  **0.524038** → **WHITE at alpha 0**. ⚠️ **That last stop lifts to WHITE, not to
+- **FOUR circles**, painted bottom to top: magenta `#D64DCE` · violet `#9238E3`
+  · red `#F93F3F` · cyan `#019FD8`.
+  ⚠️ **THAT ORDER IS NOT FIGMA'S, AND THE DEPARTURE IS THE POINT.** Figma paints
+  magenta, red, violet, cyan — red third from the top, under violet. **Red was
+  lifted ABOVE violet (2026-09) and it is the single change that made red
+  visible.** Measured: with red under violet the field's reddest pixel stayed at
+  x 0.42 no matter where red's CENTRE was moved, because violet (x 0.942,
+  r 0.5054) covered it and red only survived where violet's alpha had fallen off.
+  ⚠️ **PROMINENCE IS PAINT ORDER, NOT RADIUS OR POSITION** — established four
+  separate times here now (cyan, magenta, violet, red). Check the order first.
+  ⚠️ **AND RED IS THE LIGHTEST ORB, so it cannot just be parked under the bio.**
+  White on red is 3.61:1; white on violet is 5.40:1. Moving red under the bio in
+  violet's PLACE measured 2.50–2.77 — its worst of any variant, on the very block
+  the move was meant to help. Above violet it is additive instead: source-over
+  keeps violet underneath, so the bio reads **3.02–3.20** while red's visible area
+  goes 41.5% → 54.9%.
+- ⚠️ **`FIELD.layer` IS DOCUMENTATION ONLY — NOTHING READS IT.** It records
+  Figma's 0.9 layer opacity; the field has always painted at full opacity. It
+  used to be interpolated into the shader as a `LAYER` constant the shader body
+  ignored, which made a dead value into a live hazard: setting it to `1.0` made
+  JS stringify it `"1"` and emit `const float LAYER=1;`, an int-to-float type
+  error that failed the whole compile, threw `initHeroField`, and dropped the
+  page to the JPEG fallback — a config-only edit taking the field down. That
+  emission is gone. **Anything interpolated into the shader string must be a
+  GLSL-valid literal.** Do not "fix" this by wiring 0.9 into the composite: every
+  radius, `midAlpha` and both contrast bands were tuned with it absent.
+- **One ramp, shared by all four:** colour at alpha 1 → **`midAlpha` at offset
+  0.524038** → **WHITE at alpha 0**.
+  ⚠️ **`midAlpha` IS 0.5, NOT FIGMA'S 0.3 — and it is the most useful number in
+  the object.** The ramp collapses each orb to `midAlpha` by 52.4% of its radius,
+  so at 0.3 the GAPS BETWEEN ORBS — exactly where the headline and bio sit — fall
+  to near-cream. Measured over the viewport at 1440×900: 0.30 → sat 0.407,
+  headline 2.56, bio 2.74 · 0.40 → 0.447 / 2.82 / 2.99 · **0.50 → 0.486 / 3.04 /
+  3.22** · 0.60 → 0.522 / 3.17 / 3.42. Figma's own export means 0.465, so 0.50 is
+  MORE saturated than the source *and* the first setting where both blocks clear
+  3:1. It is the one lever found that improves look and accessibility together. ⚠️ **That last stop lifts to WHITE, not to
   transparent** — it is what dissolves the artwork into the cream page instead of
   greying out at the edges. Ramping to `transparent` (i.e. `rgba(0,0,0,0)`) drags
   every stop toward black and rings each blob with a grey halo.
 - Compositing is **source-over, bottom to top**, matching Figma. Not a weighted
   average — the overlaps have to stack or the mixed hues come out wrong.
-- Blob **placement** is hand-tuned and is the one part not derived from the file:
-  a least-squares fit of the composite against the export did not converge
-  (blend modes and frame-level layer transforms aren't recoverable from the
-  SVGs). The raw derived values are kept in the lab file's `FIGMA.source`.
+- Blob **placement is transcribed from Figma `TeNe3E4y6xGRTFC1CrEPuX` / `37:23`**
+  — a 1440×800 frame (the fold, not a page) holding a 2747×2309 group — with one
+  exception: red's x/y, which the paint-order work above moved to (0.590, 0.640).
+  ⚠️ **THE GROUP OFFSET IS FITTED, NOT ASSUMED.** Figma gives the group's box but
+  not where it sits in the frame, and "centred" was wrong once already (55px out).
+  A grid search against the downsampled export lands at (−662, −696), RMS 0.065.
+  **RE-FIT WHENEVER THE NODE CHANGES** — it has changed four times, each with a
+  different frame size, orb count and paint order. The conversion is in the
+  `blobs` comment in js/main.js; superseded values live in `lab/field-shader.html`'s
+  `FIGMA.source`.
+  ⚠️ **RADII ARE NOT THE FILE'S** — they are 0.5669 / 0.5054 / 0.6275 / 0.4738
+  (magenta / violet / red / cyan), roughly 1.7–2.5× the file's, grown to back the
+  text. An older entry here quoted .300→.325-scale numbers; those are long gone.
 
 **FAILURE IS ALWAYS THE JPEG, and nothing may change that.** The `<img>` stays,
 keeps `fetchpriority="high"`, and its URL stays byte-identical to the
@@ -176,8 +332,13 @@ error all rest on exactly the previous hero, and the image is still the LCP pain
 is no new responsive work.** They inherit its box and every per-tier override
 with it — `--field-w` at all three tiers and the ≤480 crop nudge. The art
 direction is expressed as **width + transform, never as an image crop**, so it
-applies to a canvas unchanged. **Nothing was added to responsive.css; don't add
-any.** The one thing they need of their own is `aspect-ratio: 1.6377`, because an
+applies to a canvas unchanged. ⚠️ **THAT COVERS THE BOX, NOT EVERYTHING — this
+entry used to say "nothing was added to responsive.css" and that is now false.**
+Two field rules live there deliberately: the **480** tier switches the canvas and
+grain off outright (`.page-field-canvas, .page-field-grain { display: none }`,
+paired with the JS bail), and the **680** tier neutralises `--field-bar-top` to
+`100000px` because there is no bar for the dissolve to end on. Both state facts
+about their own tier rather than re-tuning the artwork. The one thing they need of their own is `aspect-ratio: 1.6377`, because an
 `<img>` derives that from 3600×2198 and a canvas cannot — the same constant
 `--field-bottom` is built from, so **re-derive both together** on a re-export.
 
@@ -225,7 +386,16 @@ motion**. Judge it in a real browser window.
   0.031 rad/s — a 203-second cycle moving ~2px/sec — which is animated in theory
   and static to a reader.
 
-**`--hero-lift` MOVES THE WHOLE LOCKUP UP (hero.css, 60px, 2026-09).** The
+⚠️ **`--hero-lift` IS `0px` (2026-09) — the section below describes a 60px lift
+that is no longer applied.** It was zeroed because the Figma lockup mock
+(`TeNe3E4y` / `37:23`) places the divider at the hero's exact centre and the orb
+positions are drawn against THAT; lifting the lockup while keeping the mock's
+field put the type above its colour and measured the headline down at 1.75–2.15.
+The token is KEPT rather than deleted — the frost pane's `top` and `height` still
+read it, so one number still moves the whole lockup if it is ever wanted again.
+Everything below remains the correct description of what it does when non-zero.
+
+**`--hero-lift` MOVES THE WHOLE LOCKUP UP (hero.css, was 60px, 2026-09).** The
 desktop mirror of the ≤480 tier's `--hero-drop`, and like it, **the ONE number
 to change**: headline, divider, bio and the frost pane all read from it.
 - It is a **TRANSFORM** on `.intro-top` / `.intro-divider` / `.intro-band`, so
@@ -234,14 +404,24 @@ to change**: headline, divider, bio and the frost pane all read from it.
 - ⚠️ **The pane's `top` AND `height` both compensate.** `top: calc(50% -
   --hero-lift)` keeps the glass starting on the divider; the height gains the
   same `+ --hero-lift` or the pane ends short of the artwork and leaves an
-  unfrosted tail behind Selected Work. Verified: pane bottom 930 = field bottom
-  930 at 1440×900.
+  unfrosted tail behind Selected Work. (Measured at `--hero-lift: 0` and 1440×900
+  the pane runs 450 → 900 while the field bottom is 879, so the pane now overruns
+  the artwork by 21px rather than matching it — harmless while the frost is off,
+  but re-derive both if the pane is ever switched back on.)
 - **≤480 overrides the same three selectors** (responsive.css imported last) and
   re-derives its own pane, so phones keep their +70px drop untouched.
 - **The contrast gain was large**, because the bio moved up onto richer colour:
   1.95–2.47 → 2.24–2.75 from the lift alone.
 
-**THE FROST IS 0.06, NOT 0.12 (2026-09).** `.intro::after`'s cream wash was
+⚠️ **THE FROST IS OFF ENTIRELY (2026-09) — `.intro::after` no longer blurs or
+tints at all.** The rule still exists and still spans divider → field bottom, but
+its `backdrop-filter` lines are commented out and it declares no background: the
+Figma lockup mock has no blur below the divider, the artwork is as crisp there as
+above it, and the hairline is the only thing marking the seam. The tint had
+already been walked 0.12 → 0.06 → none, each step bought back white-bio contrast.
+The paragraph below records that middle step and is kept for the rule it states.
+
+**THE FROST WAS 0.06, NOT 0.12 (2026-09).** `.intro::after`'s cream wash was
 halved while `blur(7px)` stayed. The blur is the effect; the tint only colours
 it — and the tint was subtracting contrast from the white bio sitting on it.
 Bio 2.24–2.75 → **2.48–2.89**. ⚠️ If this is tuned again, **drop the alpha, keep
@@ -273,6 +453,11 @@ findings drove it:
   `r × aspect` (the distance metric divides dy by aspect), so red already
   reaches v≈0.93; dropping its centre to the bio's y pushes colour past the
   field's bottom and undoes the bleed fix. **Right is free, down is not.**
+  ⚠️ **SUPERSEDED (2026-09): red now sits at (0.590, 0.640)** — level with the
+  bio's own y. The prohibition held only while the mask ended at the artwork's
+  bottom; the dissolve is anchored to the nav bar now, so pushing colour below it
+  costs nothing. And moving the centre was never the lever anyway — see the
+  paint-order note above.
 - **Growing all four is what actually fixed the pale lower-left.** Moving red
   alone helped 1440/1024 and REGRESSED 768 to 1.57 (below band), because that
   tier's bio is full-width and centred at x 0.50. Radii went violet .300→.325,
@@ -296,8 +481,14 @@ headline 1.73–2.36, bio 1.77–2.41 across a full orbit. ⚠️ **The two pull
 each other** (every 70px of nudge is roughly +0.3 bio / −0.25 headline), the same
 balance the 1024 tier documents. Re-measure BOTH after touching either.
 
-⚠️ **THE BIO IS BACK AT 24px (2026-09) — AND THE REASON IS ACCESSIBILITY, NOT
-TASTE.** WCAG large text is 18pt/24px at any weight; below it, type is normal
+⚠️ **THE BIO IS 24px / weight 500 / leading 1.4 — AND THE SIZE IS ACCESSIBILITY,
+NOT TASTE.** The **500 is undocumented elsewhere and load-bearing**: body copy on
+this site sits at 400, and this is the one prose block that departs, because it is
+white type over the field and the extra stroke weight is doing legibility work the
+contrast cannot. Inter is loaded variable (`wght@400..700`), so it costs no extra
+download. ⚠️ Weight does not change the WCAG class at this size — 24px is large
+text at **any** weight — so dropping to 400 would not re-trigger 4.5:1, it would
+just lose the legibility. WCAG large text is 18pt/24px at any weight; below it, type is normal
 text and wants **4.5:1** instead of 3:1. Three passes of field tuning were spent
 chasing 4.5, and an exhaustive search of the orb space (violet x/r, magenta x,
 cyan r, red r) found **no arrangement that reaches it** — the geometry's ceiling
@@ -363,8 +554,10 @@ floor: −16% 1.87 · −18% 1.68 · −20% ~1.6 · −24% 1.30.
   and leaves the divider alone. About four lines of GLSL, not yet built.
 
 ⚠️ **UNRESOLVED: `backdrop-filter` cost over a moving field.** `.intro::after`
-(blur 7px) and `.intro-bar::before` (blur 5.5px + saturate) both sample this
-field. Over the static JPEG the browser blurred once and cached; over the canvas
+and `.intro-bar::before` both sample this field. ⚠️ **HALF OF THIS RESOLVED
+ITSELF:** `.intro::after`'s blur is commented out, so only ONE layer blurs over
+the field now, and the bar's filter is `blur(calc(16px * (1 - --dark-mix)))`
+rather than the 5.5px recorded here. Over the static JPEG the browser blurred once and cached; over the canvas
 both re-blur every frame, full width. `updateScrollEffects`' guard on
 `--dark-mix` / `--bar-bleed` (written once and checked against its last value
 precisely because those invalidate a backdrop-filter) no longer buys anything —
@@ -409,7 +602,11 @@ whenever a nav label changes, and move the breakpoint** — 680 is that number p
 bar needed 541px, so 481–540 already clipped. The rename widened an existing
 fault; the 680 tier is what actually closed it.
 
-**The tier carries NAV AND NOTHING ELSE.** It holds exactly the rules that swap
+**The tier carries NAV AND (almost) NOTHING ELSE.** The one non-nav-looking rule
+is `:root { --field-bar-top: 100000px }`, and it earns its place by stating a nav
+fact: there is no bar here, so the hero field's dissolve has no bar-top to end on
+and falls back to the artwork's own bottom. Otherwise it holds exactly the rules
+that swap
 the bar for the mobile header + floatie: `.intro-bar` off, `.site-header`
 fixed/visible/bare-at-top, the tuck neutralized, `.intro-bar--page` collapsed to
 wordmark + "Say hello", `.section-pills--site-nav` on, and the header row / inline nav
@@ -439,6 +636,18 @@ follows and wins where they overlap).
 **Wordmark left, then Work · About · "Say hello" as ONE group on the right**, at a
 single repeating `--gap-group` interval (60 desktop → 48). `.intro-bar-name` takes
 `margin-right: auto` and everything else is content-width.
+
+⚠️ **THE LINK COLOUR IS `rgba(0, 0, 0, 0.8)`, SCOPED TO `.intro-bar-links a`, AND
+IT IS A MEASURED FLOOR — not a style choice.** It is deliberately NOT
+`--color-text-70`: these links sit on the moving gradient rather than on cream, so
+the site-wide muted token does not clear AA there. 0.8 is the **lowest alpha that
+passes**, measured against the field across a full orbit at **4.93:1** (AA wants
+4.5 for normal text). ⚠️ **Do not swap it for the token, and do not lower it.**
+⚠️ **Two measurement traps here, both hit once:** the alpha must be COMPOSITED
+onto the backdrop before computing luminance (comparing `rgba(0,0,0,0.7)`'s own
+luminance read 6.77 where the real figure was 4.24), and the "Say hello" pill is
+an OPAQUE black chip — sampling the field behind it reports a false failure
+(2.71) when the actual contrast is 21:1.
 
 It was a **three-column rig** — wordmark and `.intro-bar-cta-wrap` each `flex: 1 1 0`
 with a fixed 450px link track (360 at ≤1024, 280 at ≤768) holding three `flex: 1 1 0`
@@ -498,9 +707,11 @@ transition.
   bar visibly *lighter than the section it was sitting inside* for the whole
   pass, with the labels stuck dark — `DARK_TEXT_AT` was only reachable at the
   very end, because white needs a nearly-fully-blue strip to be legible. At 0.6
-  the strip commits early: the labels switch at **59% coverage** instead of ~92%,
-  and the whole change is finished 26px into the 64px pass rather than trailing
-  to its end.
+  the strip commits early: the labels switch at **51% coverage** (mix reaches
+  `DARK_TEXT_AT` 0.85 when coverage reaches 0.85 × 0.6) instead of 85%, and the
+  change finishes ~38px into the 64px pass rather than trailing to its end.
+  ⚠️ This entry said 59% / 26px and the bullet above it said 51%; 51% is the one
+  the shipped constants produce.
 - ⚠️ **This replaced a guessed window, retuned twice and still wrong.** It was an
   arbitrary run-up of scroll — 260px, then 100px — ending at the bar's bottom
   edge, so the strip started colouring while the panel was still well below it
@@ -558,7 +769,15 @@ transition.
   where the bar is over Contact without having docked.
 - Grain thins on the same curve (`opacity: calc(1 - var(--dark-mix))`), replacing
   the old binary `is-over-dark::after { opacity: 0 }`.
-- ⚠️ **NOTHING SCROLL-LINKED MAY CARRY A TRANSITION.** The tint is a background
+- ⚠️ **NOTHING SCROLL-LINKED MAY CARRY A TRANSITION — with ONE deliberate,
+  shipped exception, so read this before "fixing" it.** `.intro-bar::after`'s
+  grain is `opacity: calc(1 - var(--dark-mix))`, which IS scroll-linked, and it
+  still carries `transition: opacity 0.15s ease`. That is intentional: 0.15s is
+  short enough to track the scroll without reading as lag, and the same
+  declaration also serves the grain's docking fade, which is a genuine state
+  change. The rule's target is the **0.35s** case — that length made the grain
+  trail the page by a third of a second. `--field-scroll` carries no transition
+  at all and must not gain one. The tint is a background
   LAYER, so it was never in a transition list and always tracked the scroll — but
   the grain's opacity became scroll-linked when it started reading `--dark-mix`,
   and it still had the old 0.35s on it, so it trailed the page by a third of a
@@ -1186,7 +1405,7 @@ When the request is about how the site looks/behaves at a **smaller screen size*
 (mobile, tablet, "on phones", "when it stacks", a specific breakpoint):
 - **Only open `css/components/responsive.css`. Do not read or edit any other CSS file, `index.html`, or `js/main.js`.**
 - All width breakpoints live there, grouped by screen size (standard tiers):
-  `1440px` (reserved, empty) · `1024px` (landscape tablet — nav reflow, Work/About/Contact stack) ·
+  `1440px` (carries `.site-nav-bar { gap: 60px }` — not empty, despite the label) · `1024px` (landscape tablet — nav reflow, Work/About/Contact stack) ·
   **`680px` (NAV ONLY — the desktop bar hands over to the mobile header + floatie;
   put nothing else here, see "The nav hand-off at 680")** ·
   `768px` (portrait tablet — Work card images, hero/intro full width) ·
@@ -1523,11 +1742,11 @@ depends on JS succeeding.
 2026-08. The NAME in each row is the durable anchor: grep it.)*
 | To change… | Open `js/main.js` at… | Edit |
 |---|---|---|
-| Reveal feel (rise distance, duration, stagger, easing) | `const REVEAL` (~line 1196) | `distance` px · `duration` s · `stagger` s (per item, 80ms) · `ease` cubic-bezier |
-| When a reveal fires / resets (scroll thresholds) | `setupReveals` → `update()` (~line 1413) | reveal at `top < vh*0.85 && bottom > vh*0.15`; **reset only when fully off-screen** (`bottom<=0 || top>=vh`) — this is the anti-cut-out rule, keep the reset off-screen |
-| Per-item order within a group / the stagger animation | `setupReveals` → `setVisible()` (~line 1375) | reads `data-reveal-order`, calls Motion `animate` |
-| Smooth-scroll feel (weight, wheel, easing) | `setupLenis` (~line 1226) | Lenis `duration`, `easing`, `smoothWheel`; also routes `a[href^="#"]` clicks through `lenis.scrollTo` |
-| Hero scroll-fade, contact fade, scroll-spy, header inversion | `updateScrollEffects` (~line 1024) | these are **scroll-linked** (not reveals); separate system |
+| Reveal feel (rise distance, duration, stagger, easing) | `const REVEAL` (~line 2146) | `distance` px · `duration` s · `stagger` s (per item, 80ms) · `ease` cubic-bezier |
+| When a reveal fires / resets (scroll thresholds) | `setupReveals` → `update()` (~line 2432) | reveal at `top < vh*0.85 && bottom > vh*0.15`; **reset only when fully off-screen** (`bottom<=0 || top>=vh`) — this is the anti-cut-out rule, keep the reset off-screen |
+| Per-item order within a group / the stagger animation | `setupReveals` → `setVisible()` (~line 2394) | reads `data-reveal-order`, calls Motion `animate` |
+| Smooth-scroll feel (weight, wheel, easing) | `setupLenis` (~line 2176) | Lenis `duration`, `easing`, `smoothWheel`; also routes `a[href^="#"]` clicks through `lenis.scrollTo` |
+| Scroll-spy, header inversion/tint, bar bleed, the field tuck | `updateScrollEffects` (~line 1906) | these are **scroll-linked** (not reveals); separate system. ⚠️ The hero scroll-fade and the contact fade named here previously are both **retired** — the hero's went with the blob landing, and Contact now fades via the shared reveal system. Don't reintroduce either; a scroll-linked opacity would fight the reveal. Properties published here: `--dark-mix`, `--bar-bleed`, `--field-scroll`, `--field-gap`, plus `is-at-page-top` / `is-tucked` / `is-docked`. |
 | Scribble load reveal sequence | `revealSite`/`revealRestOfSite` (~line 119) + `hero.css` keyframes | separate from viewport reveals |
 | Pre-paint hidden state (initial opacity/translate) | `global.css` → `html.is-motion [data-reveal]` | keep its `translateY` roughly in sync with `REVEAL.distance` |
 

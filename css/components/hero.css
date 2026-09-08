@@ -102,7 +102,21 @@ html.is-field-live .page-field-grain { opacity: 0.15; }
   /* Shifted up by 12% of the image's own height (20% up, then walked back
      down 8%), so the color mass rides higher behind the headline while some
      bleed past the fold survives. */
-  transform: translateX(-50%) translateY(-18%);
+  /* ⚠️ NO UP-SHIFT SINCE 2026-09. The field is now the size of the viewport
+     rather than a larger box cropped by it, so there is nothing to shift into
+     view — its top IS the page top. The shift existed to pull a 1857x1134 box's
+     colour mass up into a 900px fold; that box is gone. */
+  /* ⚠️ --field-scroll IS SCROLL-LINKED (2026-09) and must stay out of any
+     transition — see the rule in the --dark-mix notes. It closes the gap
+     between the field's bottom edge and the docking nav bar as the reader
+     scrolls, so the artwork is tucked exactly behind the bar by the moment it
+     pins. Published by updateScrollEffects (js/main.js), which derives it from
+     measured geometry; 0 at rest, so the hero's composition — and every
+     contrast figure measured against it — is untouched.
+     ⚠️ The ≤480 tier REPLACES this transform outright and deliberately does not
+     read the token: the .intro-bar is display:none there, so there is no pinned
+     bar to tuck behind, and the JS skips the whole block for the same reason. */
+  transform: translate(-50%, calc(-1 * var(--field-scroll, 0px)));
   /* images/hero-bkg.jpg, centered. FROZEN at its 1440 size (1639.44px = the
      113.85vw composition) for any narrower window: below the design width the
      field keeps its size and position and the viewport simply crops more of
@@ -122,12 +136,104 @@ html.is-field-live .page-field-grain { opacity: 0.15; }
      bar's bottom having faded over --field-fade before it. Distances are in the
      element's own coordinates and the transform is a pure translate, so they map
      1:1 to page pixels. */
+  /* ⚠️ THE FIELD DISSOLVES INTO SELECTED WORK'S CREAM — it does not stop.
+     The orbs are far larger than the field box (red's radius is 904px from a
+     centre at y 660, in an 879-tall box), so the box edge clips them flat and
+     that reads as a hard line where the hero meets Work.
+
+     THREE THINGS HAVE BEEN TRIED HERE, and the first two are why this one looks
+     the way it does:
+       1. clip-path: inset() — a hard cut by definition. Rejected on sight.
+       2. a 170px LINEAR mask — replaced the cut with a visible horizontal BAND.
+          A linear alpha ramp has a slope discontinuity at each end, and the eye
+          reads those as edges even when no single pixel is a step.
+       3. this: a LONG, EASED ramp. It runs the last 40% of the field's height
+          (~350px) and the stops approximate an ease-in, so the fade begins
+          imperceptibly and only accelerates once it is already faint. There is
+          no point along it where the rate of change jumps.
+     ⚠️ Do not shorten it and do not make it two-stop. The length and the easing
+     are the entire reason it does not band. */
+  /* ⚠️ THE FADE ENDS ON THE NAV BAR'S TOP EDGE, NOT THE FIELD'S BOTTOM (2026-09).
+     The artwork is fully transparent before the bar begins, so NO GRADIENT EVER
+     PAINTS BEHIND THE NAV — at rest or mid-scroll.
+     ⚠️ A PERCENTAGE MASK CANNOT DO THIS, which is why this is px. The field's
+     height follows the viewport's WIDTH (--field-w is 100vw) and the bar's
+     position follows its HEIGHT, so the bar lands at a different FRACTION of the
+     artwork at every window size — measured, the bar's top is 93% of the field
+     at 1440x900, 75% at 1440x740 and 67% at 1024x768. One percentage is wrong at
+     two of those. Before this, the bar STRADDLED the fade: at 1440x740 the strip
+     sat on near-full colour with cream immediately under it, so the dissolve ran
+     straight across the nav.
+     ⚠️ THE FADE'S LENGTH IS MEASURED, NOT CHOSEN. It has to clear the bio — the
+     ramp pulls the field toward cream and the bio is white type — and the room
+     between the bio's last line and the bar varies with the viewport far too
+     much for a constant: 229px at 1440x900, 149px at 1440x740, and only 96px at
+     1024x768, whose bio runs longer. --field-gap is that measured room, published
+     by measureFieldTuck (js/main.js) alongside --field-scroll. The 112px fallback
+     is the no-JS answer and is deliberately the SHORT end — it fits every tier
+     including the 96px one, where a longer guess would fade the bio's own lines.
+     ⚠️ THE CURVE IS A SMOOTHSTEP (1 - (3t^2 - 2t^3)), AND THAT IS WHAT MAKES IT
+     READ SMOOTH — the length is secondary. Two earlier shapes are why:
+       1. a LINEAR ramp, which banded. A straight alpha line has a slope
+          discontinuity at each END, and the eye reads those two corners as edges
+          even though no single pixel is a step.
+       2. an EASE-IN ramp (0.94/0.78/0.52/0.24 at 0.25/0.477/0.677/0.85), which
+          fixed the band and still looked abrupt. It was built to hold the
+          artwork at full strength as long as possible, so HALF the alpha drop
+          fell in the last third — the transition compressed into a narrow strip
+          just above the nav no matter how long the ramp was.
+     A smoothstep has ZERO SLOPE AT BOTH ENDS (so neither corner exists, which is
+     what kills the band) and puts alpha 0.5 at the true midpoint, spreading the
+     change over the whole distance. Lengthening the ease-in curve could not do
+     that; only changing the shape could.
+     ⚠️ SAMPLED AT SIXTEENTHS, AND THE COUNT IS THE THIRD THING THAT MATTERED.
+     The browser interpolates LINEARLY between gradient stops, so the stop count
+     sets how faithfully the smoothstep is actually drawn — every stop is a small
+     slope discontinuity, which is the same defect that made the fully linear
+     ramp band, just smaller and repeated. At eighths on a 67px ramp the stops
+     land 8px apart and those seven corners read as faint Mach banding across
+     saturated colour. Sixteenths puts them ~4px apart and the largest alpha step
+     drops to 0.094, below what shows on this artwork.
+     ⚠️ THE FIX FOR A VISIBLE BAND IS MORE STOPS BEFORE MORE LENGTH — resampling
+     costs nothing, lengthening spends the room between the bio and the bar. If
+     banding ever returns at a shorter --field-fade, go to 24 stops before
+     reaching for the length. Never take this to two stops. */
   -webkit-mask-image: linear-gradient(to bottom,
-    #000 calc(100% - var(--field-clip) - var(--field-fade)),
-    transparent calc(100% - var(--field-clip)));
+    #000 var(--field-mask-start),
+    rgba(0,0,0,0.9888) calc(var(--field-mask-start) + var(--field-fade) * 0.0625),
+    rgba(0,0,0,0.957) calc(var(--field-mask-start) + var(--field-fade) * 0.125),
+    rgba(0,0,0,0.9077) calc(var(--field-mask-start) + var(--field-fade) * 0.1875),
+    rgba(0,0,0,0.8438) calc(var(--field-mask-start) + var(--field-fade) * 0.25),
+    rgba(0,0,0,0.7681) calc(var(--field-mask-start) + var(--field-fade) * 0.3125),
+    rgba(0,0,0,0.6836) calc(var(--field-mask-start) + var(--field-fade) * 0.375),
+    rgba(0,0,0,0.5933) calc(var(--field-mask-start) + var(--field-fade) * 0.4375),
+    rgba(0,0,0,0.5) calc(var(--field-mask-start) + var(--field-fade) * 0.5),
+    rgba(0,0,0,0.4067) calc(var(--field-mask-start) + var(--field-fade) * 0.5625),
+    rgba(0,0,0,0.3164) calc(var(--field-mask-start) + var(--field-fade) * 0.625),
+    rgba(0,0,0,0.2319) calc(var(--field-mask-start) + var(--field-fade) * 0.6875),
+    rgba(0,0,0,0.1562) calc(var(--field-mask-start) + var(--field-fade) * 0.75),
+    rgba(0,0,0,0.0923) calc(var(--field-mask-start) + var(--field-fade) * 0.8125),
+    rgba(0,0,0,0.043) calc(var(--field-mask-start) + var(--field-fade) * 0.875),
+    rgba(0,0,0,0.0112) calc(var(--field-mask-start) + var(--field-fade) * 0.9375),
+    transparent var(--field-mask-end));
   mask-image: linear-gradient(to bottom,
-    #000 calc(100% - var(--field-clip) - var(--field-fade)),
-    transparent calc(100% - var(--field-clip)));
+    #000 var(--field-mask-start),
+    rgba(0,0,0,0.9888) calc(var(--field-mask-start) + var(--field-fade) * 0.0625),
+    rgba(0,0,0,0.957) calc(var(--field-mask-start) + var(--field-fade) * 0.125),
+    rgba(0,0,0,0.9077) calc(var(--field-mask-start) + var(--field-fade) * 0.1875),
+    rgba(0,0,0,0.8438) calc(var(--field-mask-start) + var(--field-fade) * 0.25),
+    rgba(0,0,0,0.7681) calc(var(--field-mask-start) + var(--field-fade) * 0.3125),
+    rgba(0,0,0,0.6836) calc(var(--field-mask-start) + var(--field-fade) * 0.375),
+    rgba(0,0,0,0.5933) calc(var(--field-mask-start) + var(--field-fade) * 0.4375),
+    rgba(0,0,0,0.5) calc(var(--field-mask-start) + var(--field-fade) * 0.5),
+    rgba(0,0,0,0.4067) calc(var(--field-mask-start) + var(--field-fade) * 0.5625),
+    rgba(0,0,0,0.3164) calc(var(--field-mask-start) + var(--field-fade) * 0.625),
+    rgba(0,0,0,0.2319) calc(var(--field-mask-start) + var(--field-fade) * 0.6875),
+    rgba(0,0,0,0.1562) calc(var(--field-mask-start) + var(--field-fade) * 0.75),
+    rgba(0,0,0,0.0923) calc(var(--field-mask-start) + var(--field-fade) * 0.8125),
+    rgba(0,0,0,0.043) calc(var(--field-mask-start) + var(--field-fade) * 0.875),
+    rgba(0,0,0,0.0112) calc(var(--field-mask-start) + var(--field-fade) * 0.9375),
+    transparent var(--field-mask-end));
 }
 
 /* The hero field's geometry, in one place — .page-field's width and the frost
@@ -156,7 +262,9 @@ html.is-field-live .page-field-grain { opacity: 0.15; }
                      measured ~1.55:1 against the RAW gradient. Every step up has
                      moved away from that floor; re-measure before going smaller.
      --field-bottom  where its bottom edge lands = width ÷ 1.6377 (the asset's
-                     aspect) × 0.82 (the 18% up-shift) — i.e. width × 0.50070.
+                     aspect) × 0.76 (the 24% up-shift) — i.e. width × 0.46407.
+                     ⚠️ 2026-09: -18% -> -24% to lift the Figma composition,
+                     whose red sits low in the frame, further into the fold.
                      ⚠️ 2026-09: the shift went -12% -> -16%, so this factor
                      was re-derived with it. They are ONE number expressed
                      twice; change the transform and this must follow or the
@@ -165,8 +273,54 @@ html.is-field-live .page-field-grain { opacity: 0.15; }
    only the 0.53734 needs re-deriving, and only if the SHIFT changes. */
 :root {
   /* DESKTOP ONLY (≥1025). The ≤1024 tier replaces this outright. */
-  --field-w: max(1857.6px, 129vw);
-  --field-bottom: calc(var(--field-w) * 0.50070);
+  /* ⚠️ THE FIELD IS THE VIEWPORT NOW (2026-09), not a larger box cropped by it.
+     Was max(1857.6px, 129vw) — 1857x1134 against a 1440x900 fold, so 418px of
+     width and 234px of height were never seen, and the Figma composition (drawn
+     in a 1440x800 frame that IS the viewport) could never land where it was
+     drawn. At 100vw the box is 1440x879 in a 1440x900 fold: all of the width and
+     98% of the height visible before any scroll.
+     ⚠️ Orb x/y in FIELD.blobs are now direct frame fractions — the field box and
+     the Figma frame are the same rectangle, so no offset maths is needed. If
+     this width ever changes, every position has to be re-derived. */
+  --field-w: 100vw;
+  /* No up-shift any more, so this is just width / aspect. */
+  --field-bottom: calc(var(--field-w) * 0.61061);
+
+  /* WHERE THE ARTWORK HAS TO BE GONE BY — the nav bar's top edge, in page px.
+     The bar is pulled up 80 (64 tall + --bar-tail below it), so its top is
+     100svh - 80. svh, not dvh, for the same reason .intro uses it: a dvh here
+     would move the mask mid-scroll on iOS the instant the URL bar collapses.
+     ⚠️ --field-mask-end takes the SMALLER of that and the field's own bottom, so
+     on a window tall enough that the artwork already stops short of the bar the
+     mask stays where it was and nothing is cut.
+     ⚠️ At <=680 the bar is display:none and this is neutralised there (see the
+     680 tier in responsive.css) so min() falls through to --field-bottom. */
+  --field-bar-top: calc(100svh - 64px - var(--bar-tail));
+  --field-mask-end: min(var(--field-bottom), var(--field-bar-top));
+  /* HOW TALL THE DISSOLVE IS, as a fraction of the room between the bio's last
+     line and the bar. --field-gap is that room, published by measureFieldTuck;
+     112px is the no-JS floor.
+     ⚠️ THE CONSTRAINT IS ONE-SIDED — 1.14 IS THE CEILING, NOT THE VALUE. The
+     ramp pulls toward cream and the bio is white type, so a fade long enough to
+     reach back into the bio costs contrast. The smoothstep is still at alpha
+     0.957 an eighth of the way down, so the ramp may start that far above the
+     bio for free: solve `1 - gap/fade <= 0.125` and the ceiling is
+     gap / 0.875 = gap x 1.143. Anything at or under that is safe for the bio.
+     ⚠️ SHORTER IS FREE, AND IT PAYS TWICE. Below the ceiling the ramp moves DOWN
+     and away from the text, so contrast can only improve, and less of the
+     artwork is dissolved — which is what recovered red's saturation when it was
+     reading washed out. The only floor is banding, and the smoothstep's
+     zero-slope ends are what hold that off at short lengths; the clamp's 90px is
+     there so a very short viewport cannot collapse it to a visible edge.
+     At 0.45: 67px at 1440x740 (clears the bio by 82px and sits entirely BELOW
+     red's core, so the orb is at full strength) and 103px at 1440x900.
+     ⚠️ 56px IS THE FLOOR AND IT IS THE BANDING LIMIT, not a round number. The
+     curve is sampled at eighths, so at 56px the stops are 7px apart and the
+     browser's linear interpolation between them is short enough to stay under
+     one 8-bit code step on this artwork. Go shorter and the segments start to
+     read as facets — the failure the original linear ramp had, in miniature. */
+  --field-fade: clamp(56px, calc(var(--field-gap, 112px) * 0.45), 140px);
+  --field-mask-start: calc(var(--field-mask-end) - var(--field-fade));
 
   /* How far the whole lockup — headline, divider, bio, AND the frost pane with
      them — sits above the hero's vertical centre. The desktop mirror of the
@@ -178,7 +332,13 @@ html.is-field-live .page-field-grain { opacity: 0.15; }
      ⚠️ It takes the divider OFF the exact vertical centre, which the rest of
      this file describes as centred. The pane's `top` compensates so the glass
      still starts on the divider; they are one decision. */
-  --hero-lift: 60px;
+  /* 0 since 2026-09: the Figma lockup mock (TeNe3E4y / 37:23) places the
+     divider at the hero's exact centre, and the orb positions are drawn against
+     THAT. Lifting the lockup and keeping the mock's field would put the type
+     above its colour — measured, the headline fell to 1.75-2.15. Kept as a token
+     rather than deleted: the pane's top and height still read it, so one number
+     still moves the whole lockup if it is ever wanted again. */
+  --hero-lift: 0px;
 
   /* The gap between the nav bar's BOTTOM and the hero's own bottom edge. The
      bar is pulled up 80 and is 64 tall, so it finishes 16px short of 100svh —
@@ -186,19 +346,15 @@ html.is-field-live .page-field-grain { opacity: 0.15; }
      two cannot drift. */
   --bar-tail: 16px;
 
-  /* How much of the field to cut off its bottom so it ENDS AT THE NAV BAR
-     instead of bleeding past it into Selected Work. --field-bottom is where the
-     artwork's bottom edge lands; the bar's bottom is 100svh - --bar-tail; the
-     difference is the overhang. max() so it never goes negative on a viewport
-     tall enough that the field already stops short. */
-  --field-clip: max(0px, calc(var(--field-bottom) - 100svh + var(--bar-tail)));
-
-  /* How long the fade INTO that line is. The field is masked, not cut — a
-     clip-path was tried first and is a hard edge by definition, which showed as
-     a visible line across the artwork. The fade runs entirely below the bio
-     (which ends around page 506 against a fade starting near 724 at 1440×900),
-     so it costs the composition nothing. */
-  --field-fade: 170px;
+  /* ⚠️ --field-clip AND A SECOND --field-fade USED TO BE DECLARED HERE, and
+     deleting them was a BUG FIX, not tidying. They belonged to a superseded
+     token-driven mask. --field-clip had gone inert, but --field-fade was still
+     live and declared LATER in this same :root than the real one above, so it
+     won the cascade and pinned the ramp at a flat 170px — the measured
+     --field-gap was computed, published and then silently discarded. The ≤480
+     tier set --field-fade: 0px for the same dead mask, which under the current
+     rule would collapse the ramp to a hard cut on every phone.
+     ⚠️ A DEAD TOKEN IS NOT A HARMLESS TOKEN once a live rule reuses its name. */
 }
 
 .intro {
@@ -255,15 +411,17 @@ html.is-field-live .page-field-grain { opacity: 0.15; }
      would trap above the hero's background instead. */
   z-index: -1;
   /* Frost strength: between the frame's 5.5px/0.05 and the heavy 10px/0.22. */
-  /* PURE BLUR, NO TINT (2026-09). Was rgba(251,252,248,0.12), then 0.06, now
-     gone entirely. backdrop-filter needs no background to work — the tint only
-     ever COLOURED the glass, and the defocus is what makes it read as glass.
-     Every step of removing it also bought the white bio contrast back, because
-     a cream veil over the field is exactly a reduction in the field's own
-     colour. ⚠️ Do not reintroduce a background here to "make the frost
-     visible"; if the pane seems to disappear, the blur radius is the dial. */
+  /* ⚠️ THE FROST IS OFF (2026-09). The Figma lockup mock has NO blur below the
+     divider — the artwork is as crisp there as above it, and the hairline is the
+     only thing marking the seam. The pane had already lost its cream tint (0.12
+     -> 0.06 -> none, each step bought the white bio contrast back); this removes
+     the blur too, which is all that was left of it.
+     The element is KEPT, not deleted, because its geometry is still load-bearing:
+     --field-clip reads --field-bottom, and the pane's top/height are the record
+     of where the glass ran from and to. Restore by uncommenting these two lines.
   backdrop-filter: blur(7px);
   -webkit-backdrop-filter: blur(7px);
+  */
 }
 
 /* ---- Upper region: the statement ---- */
@@ -730,7 +888,17 @@ html.is-field-live .page-field-grain { opacity: 0.15; }
   font-size: var(--size-base);
   letter-spacing: -0.01em;
   line-height: 1.5;
-  color: var(--color-text-70);
+  /* ⚠️ NOT --color-text-70, and deliberately so. These labels are the only use
+     of that mute that sits over the GRADIENT rather than cream. At 0.7 the
+     worst orbit phase measures 4.15:1 against the 4.5 they need as 16px text —
+     the token's usual ~8.4:1 assumes a cream backdrop and does not hold here.
+     Measured across 14 phases: 0.70 -> 4.15 · 0.74 -> 4.45 · 0.76 -> 4.60 ·
+     0.80 -> 4.88 · 1.00 -> 5.93. 0.76 is the lowest that passes; 0.80 is used
+     for margin, since the backdrop animates and 14 phases is a sample, not a
+     proof. Still visibly muted against the wordmark's solid black beside it.
+     ⚠️ Do NOT "fix" this by changing --color-text-70 — 17 rules share it, all
+     of them on cream, and they are fine. */
+  color: rgba(0, 0, 0, 0.8);
   text-decoration: none;
   white-space: nowrap;
   transition: color 0.15s ease;

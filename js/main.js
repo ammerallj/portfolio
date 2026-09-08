@@ -165,9 +165,94 @@ function setBarBleed(px) {
   lastBarBleed = px;
   document.documentElement.style.setProperty('--bar-bleed', px + 'px');
 }
+let lastFieldGap = -1;
+function setFieldGap(px) {
+  // The room between the bio's last line and the nav bar's top. hero.css sizes
+  // the field's dissolve from it — the ramp must end on the bar and must not
+  // reach back into the bio, and that distance is 96px at 1024x768 against 229px
+  // at 1440x900, so it cannot be a constant. Layout-only, so this is written
+  // once per measure rather than per scroll frame.
+  if (px === lastFieldGap) return;
+  lastFieldGap = px;
+  document.documentElement.style.setProperty('--field-gap', px + 'px');
+}
+let lastFieldScroll = -1;
+function setFieldScroll(px) {
+  // Same contract as setBarBleed: written on the ROOT (all three .page-field
+  // elements read it through one CSS transform), rounded, and guarded on its
+  // last value because this runs every scroll frame and .intro-bar::before's
+  // backdrop-filter samples the layer it moves.
+  if (px === lastFieldScroll) return;
+  lastFieldScroll = px;
+  document.documentElement.style.setProperty('--field-scroll', px + 'px');
+}
 const contactSection = darkPanel;
 const intro = document.querySelector('.intro');
 const introBar = document.querySelector('.intro-bar'); // landing nav bar (homepage only)
+const pageField = document.querySelector('img.page-field');
+
+// ⚠️ THE FIELD TUCKS BEHIND THE DOCKING BAR (2026-09) — and the bleed it closes
+// is a VIEWPORT-HEIGHT problem, not a scroll one. --field-w is 100vw, so the
+// artwork's height follows the window's WIDTH and does not shrink when the
+// window gets shorter: measured at 1440, the field's bottom sits at page 879
+// whatever the height is, while the bar's resting bottom rides 100svh. At
+// 1440x900 the bar finishes at 884 and nothing shows; at 1440x740 it finishes at
+// 724 and 155px of gradient stands below the docked bar, over Selected Work.
+//
+// The fix has to cost NOTHING at rest. Anchoring the mask to the bar instead was
+// the obvious move and is the wrong one: it compresses the dissolve on exactly
+// the short viewports that have the problem, and the fade would then run through
+// the bio — the block whose contrast the field's whole geometry is tuned around.
+// A scroll-linked shift is zero at scrollY 0, so every measured figure holds.
+//
+// TWO MEASURED NUMBERS, no constants restated from the CSS:
+//   overhang   how far the field's bottom runs past the bar's resting bottom
+//   dockScroll the scroll position at which the bar pins (its resting top)
+// The shift ramps 0 -> overhang across 0 -> dockScroll, so the gap closes
+// smoothly and is exactly zero at the instant the bar pins — no jump at the dock
+// point — and the clamp past it keeps the field from ever re-emerging.
+let fieldOverhang = 0;
+let fieldDockScroll = 0;
+function measureFieldTuck() {
+  fieldOverhang = 0;
+  fieldDockScroll = 0;
+  // offsetParent is null when the bar is display:none — the ≤680 tier, where
+  // there is no pinned bar to tuck behind and the phone tier owns the field's
+  // transform outright. Nothing to do, and setFieldScroll(0) below clears any
+  // shift left over from a wider layout.
+  if (!pageField || !intro || !introBar || !introBar.offsetParent) return;
+  const main = pageField.offsetParent;
+  if (!main) return;
+  const mainTop = main.getBoundingClientRect().top + window.scrollY;
+  // offsets, NOT getBoundingClientRect: the field carries the very transform
+  // this publishes, so a rect would feed its own output back in. Verified —
+  // offsetTop/offsetHeight read identically with --field-scroll at 0 and 200px.
+  const fieldBottom = mainTop + pageField.offsetTop + pageField.offsetHeight;
+  // The bar is a SIBLING of .intro pulled up by a negative top margin, so its
+  // resting position is .intro's bottom plus that margin. Read from the computed
+  // margin rather than from --bar-tail: same number, but derived, so changing the
+  // pull-up in CSS cannot leave this stale. (offsetTop is no use here — measured,
+  // it tracks the sticky offset and reads the scroll position once docked.)
+  // Offsets accumulated to the page, NOT getBoundingClientRect: the hero's load
+  // reveal translates .intro-band while this runs, and a rect would report the
+  // animation's mid-flight position. Same rule as initWorkCarousel's photo
+  // measurement — offsets ignore transforms.
+  const pageTop = (el) => { let y = 0; for (let n = el; n; n = n.offsetParent) y += n.offsetTop; return y; };
+  const barTop = pageTop(intro) + intro.offsetHeight
+    + parseFloat(getComputedStyle(introBar).marginTop || '0');
+  if (barTop <= 0) return;
+  const bio = document.querySelector('.intro-bio');
+  if (bio) setFieldGap(Math.max(0, Math.round(barTop - (pageTop(bio) + bio.offsetHeight))));
+  // ⚠️ THE TARGET IS THE BAR'S TOP, NOT ITS BOTTOM. Aiming at the bottom is the
+  // obvious reading of "don't bleed past the bar" and it leaves the artwork
+  // visible: the mask's last 40% is a fade, so landing its zero-alpha edge on the
+  // bar's bottom line puts the whole faint tail of the ramp BEHIND the docked
+  // bar, and the bar's own frost is translucent. Measured at 1440x740 that tail
+  // still read as a coral wash across the strip. Landing it on the bar's TOP
+  // instead means the field has ended before the bar begins.
+  fieldOverhang = Math.max(0, Math.round(fieldBottom - barTop));
+  fieldDockScroll = barTop;
+}
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
 // The rest of the site stays hidden through the one-time hero reveal (scribble
@@ -246,8 +331,30 @@ initHero();
 // ============================================================
 const FIELD = {
   // Invariant — transcribed from the Figma file. Not tuning knobs.
-  ramp:  { mid: 0.524038, midAlpha: 0.3 },
-  layer: 0.9,
+  // ⚠️ midAlpha DEPARTS FROM FIGMA (0.3 -> 0.5), and it is the single most
+  // useful number in this object. The ramp collapses each orb to midAlpha by
+  // 52.4% of its radius, so at 0.3 the GAPS BETWEEN ORBS — which is exactly
+  // where the headline and bio sit — fall to near-cream. Raising it makes each
+  // orb hold its colour further out. Measured over the viewport at 1440x900:
+  //   0.30 (Figma)  mean saturation 0.407   headline 2.56   bio 2.74
+  //   0.40          0.447                   2.82            2.99
+  //   0.50          0.486                   3.04            3.22
+  //   0.60          0.522                   3.17            3.42
+  // Figma's own export means 0.465, so 0.50 is MORE saturated than the source
+  // while also being the first setting where both text blocks clear 3:1. This
+  // is the one lever found that improves the look and the accessibility
+  // together; everything else in this field trades one against the other.
+  ramp:  { mid: 0.524038, midAlpha: 0.5 },
+  // ⚠️ DOCUMENTATION ONLY — NOTHING READS THIS. It records Figma's layer opacity;
+  // it is not applied to the render and never has been. It used to be interpolated
+  // into the shader as a constant the shader body ignored, which made it a live
+  // hazard rather than an inert note (see the comment at the shader source), so
+  // that emission is gone. The field has always painted at full opacity.
+  // ⚠️ Do NOT "fix" this by wiring it into the composite: every orb radius, the
+  // ramp's midAlpha and both text blocks' contrast were tuned by measurement
+  // against the export with it absent. Applying 0.9 now would desaturate the whole
+  // field at once and drop the headline and bio below their thresholds together.
+  layer: 1.0,
   cream: [0.984, 0.988, 0.973],
   // ⚠️ VIOLET AND MAGENTA ARE A PAIR (2026-09), the way cyan and red already
   // were. They used to be the OUTER two, 0.35 apart, with the tighter cyan/red
@@ -264,42 +371,49 @@ const FIELD = {
   // at 2.05, because the bio is in the RIGHT column and violet was its second
   // light source. Violet right / magenta left scores 12 degrees and 2.51 — the
   // hue fix at almost none of the contrast cost.
-  // ⚠️ RED MOVES LEFT AND DOWN TOGETHER (0.625,0.500 -> 0.540,0.520). Left
-  // alone walks it into CYAN, which it paints over: cyan's hue error goes 3 ->
-  // 24 degrees at x 0.54 and 83 at x 0.50, i.e. the blue disappears again.
-  // Cyan sits high (y 0.360), so dropping red as it moves left keeps them apart
-  // — at 0.540/0.520 cyan holds at 17 degrees. Below x 0.46 no y works at all.
-  // Moving red off violet also FIXED violet: 15 degrees -> 1, because red was
-  // the thing covering it.
-  // ⚠️ Violet is the BIGGEST orb (0.42) because it sits furthest out — it has to
-  // reach back across the lockup from x 0.84. Growing IT is free (hue stays at
-  // 12 degrees, bio 2.88 -> 3.08); growing CYAN to do the same job is not, since
-  // cyan paints over magenta and buries it again — 0.38 takes the worst hue
-  // error to 22 degrees, 0.42 to 29.
-  // Lowering LAYER was tried first and does almost nothing — 55 degrees only
-  // improves to 44 between alpha 0.9 and 0.5, while everything desaturates.
-  // The burial is spatial, so only geometry fixes it.
-  // Painted bottom to top. ⚠️ NO LONGER the SVG export order: cyan was second
-  // and had BOTH magenta and red compositing over it, so at its own centre it
-  // rendered #908ac8 — a muted periwinkle — instead of #019FD8, saturation 0.31
-  // against red's 0.63. The blue had effectively left the composition. Moving
-  // it above magenta is what brings it back; growing it alone could not, because
-  // the loss was overpainting, not reach.
+  /* PLACEMENT FROM FIGMA TeNe3E4y6xGRTFC1CrEPuX / 37:23, as-is.
+     A 1440x800 frame (the fold, not a full page) holding a 2747x2309 group.
+     Order bottom-to-top: magenta, red, violet, CYAN. All at opacity 1.0.
+
+     ⚠️ THE GROUP OFFSET IS FITTED, NOT ASSUMED. Figma gives the group's own box
+     but not where it sits in the frame, and assuming "centred" was wrong once
+     already. A grid search rendering this four-circle model against the
+     downsampled export lands at (-662, -696), RMS 0.065. RE-FIT WHENEVER THE
+     NODE CHANGES — it has changed four times, with a different frame size, orb
+     count-of-changes and paint order each time.
+         field x = (frame px + 208.8) / 1857.6
+         field y = (frame py + 204.2) / 1134.3
+         radius  = r / 1857.6
+     Radii convert against the WIDTH: the shader divides dy by the aspect, which
+     is what keeps the orbs circular in pixels.
+
+     ⚠️ Depends on --hero-lift being 0. The mock draws the lockup against the
+     hero's centre; reinstate the lift and every y here must drop by lift/1134.
+
+     ⚠️ THIS IS THE SOURCE COMPOSITION, UNADJUSTED. Measured, its headline band
+     runs ~2.7-3.0 against a required 3.0, and the Figma export itself measures
+     2.37 there — the shortfall is in the design, not the port. Earlier passes
+     that moved orbs around to fix it are deliberately NOT carried over. */
+  // ⚠️ RED PAINTS ABOVE VIOLET (2026-09) — a PAINT-ORDER change, and the order is
+  // the whole fix. Figma's order is magenta, red, violet, cyan; red is third from
+  // the top there, so violet (x 0.942, r 0.5054) covered it and red only survived
+  // where violet's alpha had fallen off. Measured: with red painted under violet
+  // the field's reddest pixel sat at x 0.42 no matter where red's CENTRE was moved
+  // to — moving it right just pushed it further under violet and made it worse.
+  // ⚠️ MOVING THE CENTRE IS NOT THE LEVER. This is the fourth time that has been
+  // established here (cyan, magenta, violet, now red) — check the order first.
+  // ⚠️ AND RED IS THE LIGHTEST ORB, so it cannot simply be parked under the bio.
+  // White on red is 3.61:1; white on violet is 5.40:1. Putting red under the bio
+  // in violet's PLACE dropped the bio to 2.50-2.77, its worst of any variant —
+  // the block the move was meant to help. Above violet it is additive instead:
+  // source-over keeps violet underneath, so the bio reads 2.86-3.24, better than
+  // the Figma original's 2.72-3.11, while red's visible area goes 41.5% -> 52.3%.
+  // Measured over 14 orbit phases per variant, worst pixel under the line boxes.
   blobs: [
-    { col: [0.5725, 0.2196, 0.8902], r: 0.4700, x: 0.800, y: 0.540 }, // violet  #9238E3
-    { col: [0.8392, 0.3020, 0.8078], r: 0.3650, x: 0.200, y: 0.580 }, // magenta #D64DCE
-    { col: [0.0039, 0.6235, 0.8471], r: 0.4100, x: 0.455, y: 0.360 }, // cyan    #019FD8
-    // Red is positioned to BACK THE BIO, not just to sit in the composition.
-    // The bio's centre in field space is ~(0.65, 0.64) at 1440 and 1024 and
-    // (0.50, 0.60) at 768, so red moved right and grew: at the old
-    // (0.610, 0.515, 0.2553) the bio's right edge sat at 80% of the radius,
-    // where the ramp has fallen to ~0.13 alpha — that was the white behind it.
-    // ⚠️ It could NOT simply move down to meet the bio. A blob's vertical reach
-    // is r x aspect (the distance metric divides dy by aspect), so red already
-    // reaches v~0.93 of the field; dropping its centre to the bio's y would push
-    // colour past the field's bottom edge and undo the bleed fix above it.
-    // Right is free, down is not.
-    { col: [0.9765, 0.2471, 0.2471], r: 0.2800, x: 0.540, y: 0.520 }, // red     #F93F3F
+    { col: [0.8392, 0.3020, 0.8078], r: 0.5669, x: 0.107, y: 0.375, a: 1.00 }, // magenta #D64DCE
+    { col: [0.5725, 0.2196, 0.8902], r: 0.5054, x: 0.942, y: 0.499, a: 1.00 }, // violet  #9238E3
+    { col: [0.9765, 0.2471, 0.2471], r: 0.6275, x: 0.590, y: 0.640, a: 1.00 }, // red     #F93F3F
+    { col: [0.0039, 0.6235, 0.8471], r: 0.4738, x: 0.547, y: -0.016, a: 1.00 }, // cyan   #019FD8
   ],
   // Calmed 2026-09 (speed 2.05 -> 1.7, drift 0.05 -> 0.032). Drift carries
   // most of the reduction on purpose: amplitude reads as restraint,
@@ -341,8 +455,16 @@ function initHeroField() {
   const FRAG = [
     'precision highp float;',
     'uniform vec2 uRes,uAmp;uniform float uAspect,uTime,uWarp;',
-    'uniform vec3 uBlob[4];uniform vec3 uCol[4];',
-    'const float MID=' + FIELD.ramp.mid + ',MIDA=' + FIELD.ramp.midAlpha + ',LAYER=' + FIELD.layer + ';',
+    'uniform vec4 uBlob[4];uniform vec3 uCol[4];',
+    // ⚠️ FIELD.layer is deliberately NOT emitted here. It was, as a dead constant
+    // `LAYER` that no line of the shader body ever read — and being dead did not
+    // make it harmless: the value is interpolated into GLSL source, so setting it
+    // to 1.0 emitted `const float LAYER=1;`, which is an int-to-float type error
+    // that fails the whole compile. That threw initHeroField, the try/catch caught
+    // it, and the page silently fell back to the JPEG — a config-only edit taking
+    // the entire field down. Anything interpolated into this string must be a
+    // GLSL-valid literal; JS stringifies 1.0 as "1", 0.9 as "0.9".
+    'const float MID=' + FIELD.ramp.mid + ',MIDA=' + FIELD.ramp.midAlpha + ';',
     'const vec3 CREAM=vec3(' + FIELD.cream.join(',') + ');',
     // Each blob breathes — radius +/- PULSE on its own slow cycle. Cheap
     // life: it changes how far a blob REACHES without moving its centre,
@@ -396,7 +518,7 @@ function initHeroField() {
     // which is what put the bio's worst phases under its threshold.
     '  float rad=uBlob[i].z*(1.+PULSE*(.5+.5*sin(uTime*(.075+fi*.017)+fi)));',
     '  vec2 d=vec2(w.x-c.x,(w.y-c.y)/uAspect);',
-    '  vec2 ra=ramp(length(d)/rad);float a=ra.x*LAYER;',
+    '  vec2 ra=ramp(length(d)/rad);float a=ra.x*uBlob[i].w;',
     '  if(a<=0.)continue;',
     '  col=col*(1.-a)+mix(uCol[i],vec3(1.),ra.y)*a;cov=max(cov,a);}',
     // DITHER — one code value of noise before the 8-bit quantisation turns a
@@ -433,7 +555,7 @@ function initHeroField() {
     .forEach(n => { U[n] = gl.getUniformLocation(prog, n); });
 
   gl.uniform3fv(U.uCol,  new Float32Array(FIELD.blobs.flatMap(b => b.col)));
-  gl.uniform3fv(U.uBlob, new Float32Array(FIELD.blobs.flatMap(b => [b.x, b.y, b.r])));
+  gl.uniform4fv(U.uBlob, new Float32Array(FIELD.blobs.flatMap(b => [b.x, b.y, b.r, b.a])));
   gl.uniform1f(U.uWarp, FIELD.motion.warp);
   gl.uniform2f(U.uAmp,  FIELD.motion.drift, FIELD.motion.drift * FIELD.motion.driftYRatio);
 
@@ -1815,6 +1937,23 @@ function updateScrollEffects() {
     introBar.classList.toggle('is-docked', introBar.getBoundingClientRect().top <= 0);
   }
 
+  // ...and the field lifts away as the reader moves. See measureFieldTuck above.
+  // ⚠️ EASED OUT, AND ONLY BECAUSE THE MASK MADE IT FREE TO BE. While this was
+  // the thing keeping colour off the bar it had to be LINEAR — it was reporting
+  // a distance closing, and the gap had to reach zero exactly at the dock. The
+  // mask now ends on the bar's top by construction (hero.css), so the bar is
+  // clean at every scroll position on its own and this is pure parallax. Cubic
+  // ease-out front-loads it: 27% of the travel in the first 10% of the scroll,
+  // 88% by the halfway point, so the artwork answers the first gesture instead
+  // of trailing it.
+  // ⚠️ Easing the MAPPING is not a transition. This stays a pure function of
+  // scrollY with no time term, so it cannot lag the page — see the standing rule
+  // that nothing scroll-linked may carry a CSS transition.
+  const t = fieldDockScroll > 0
+    ? Math.min(1, Math.max(0, window.scrollY / fieldDockScroll)) : 0;
+  setFieldScroll(fieldOverhang === 0 ? 0
+    : Math.round(fieldOverhang * (1 - Math.pow(1 - t, 3))));
+
   // Scroll-spy: the active section is the LAST one whose RESTING POSITION the
   // page has reached. Highlight every link that targets it (and mark it for
   // assistive tech) — navSections mixes the header nav and the landing's
@@ -1986,6 +2125,13 @@ function onScroll() {
 }
 
 window.addEventListener('scroll', onScroll, { passive: true });
+// The field tuck's two numbers are pure layout, so they are measured once and on
+// resize rather than every frame — and the resize matters more than usual here,
+// because the overhang they describe is created by the window's HEIGHT while the
+// field's own height follows its WIDTH. Re-measure, then republish immediately:
+// the ramp's slope has changed under the reader's current scroll position.
+measureFieldTuck();
+window.addEventListener('resize', () => { measureFieldTuck(); updateScrollEffects(); });
 updateScrollEffects();
 
 // ============================================================
