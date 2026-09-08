@@ -279,9 +279,9 @@ const FIELD = {
   // it above magenta is what brings it back; growing it alone could not, because
   // the loss was overpainting, not reach.
   blobs: [
-    { col: [0.5725, 0.2196, 0.8902], r: 0.4200, x: 0.840, y: 0.540 }, // violet  #9238E3
-    { col: [0.8392, 0.3020, 0.8078], r: 0.3650, x: 0.260, y: 0.580 }, // magenta #D64DCE
-    { col: [0.0039, 0.6235, 0.8471], r: 0.3300, x: 0.455, y: 0.360 }, // cyan    #019FD8
+    { col: [0.5725, 0.2196, 0.8902], r: 0.4700, x: 0.800, y: 0.540 }, // violet  #9238E3
+    { col: [0.8392, 0.3020, 0.8078], r: 0.3650, x: 0.200, y: 0.580 }, // magenta #D64DCE
+    { col: [0.0039, 0.6235, 0.8471], r: 0.4100, x: 0.455, y: 0.360 }, // cyan    #019FD8
     // Red is positioned to BACK THE BIO, not just to sit in the composition.
     // The bio's centre in field space is ~(0.65, 0.64) at 1440 and 1024 and
     // (0.50, 0.60) at 768, so red moved right and grew: at the old
@@ -292,7 +292,7 @@ const FIELD = {
     // reaches v~0.93 of the field; dropping its centre to the bio's y would push
     // colour past the field's bottom edge and undo the bleed fix above it.
     // Right is free, down is not.
-    { col: [0.9765, 0.2471, 0.2471], r: 0.3100, x: 0.625, y: 0.500 }, // red     #F93F3F
+    { col: [0.9765, 0.2471, 0.2471], r: 0.2800, x: 0.625, y: 0.500 }, // red     #F93F3F
   ],
   // Calmed 2026-09 (speed 2.05 -> 1.7, drift 0.05 -> 0.032). Drift carries
   // most of the reduction on purpose: amplitude reads as restraint,
