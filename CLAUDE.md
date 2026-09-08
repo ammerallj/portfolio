@@ -296,7 +296,25 @@ headline 1.73–2.36, bio 1.77–2.41 across a full orbit. ⚠️ **The two pull
 each other** (every 70px of nudge is roughly +0.3 bio / −0.25 headline), the same
 balance the 1024 tier documents. Re-measure BOTH after touching either.
 
-⚠️ **THE BIO IS NOW JUDGED AGAINST 4.5:1, NOT 3:1 (2026-09).** `.intro-bio`
+⚠️ **THE BIO IS BACK AT 24px (2026-09) — AND THE REASON IS ACCESSIBILITY, NOT
+TASTE.** WCAG large text is 18pt/24px at any weight; below it, type is normal
+text and wants **4.5:1** instead of 3:1. Three passes of field tuning were spent
+chasing 4.5, and an exhaustive search of the orb space (violet x/r, magenta x,
+cyan r, red r) found **no arrangement that reaches it** — the geometry's ceiling
+is ~3.8. The bio's floor was already above 3.0, so the compliant move was to
+change the TYPE CLASS rather than the artwork. **Leading stays 1.4**, not the old
+dek's 1.08: only size and weight decide the class. Measured at 1440×900 over 22
+orbit phases — **2.90–3.63, mean 3.34, below 3.0 at 2 of 22 phases.** Those two
+dips are the drift passing pale underneath; lowering `motion.drift` would close
+them. Line counts: 3 at 1440 and 768, 5 at 375, no overflow at any tier.
+⚠️ **THE HEADLINE IS THE REMAINING FAILURE**: 2.62–2.96 over the same 22 phases,
+below its 3:1 at **every** one. It is already 96px/700, so there is no type class
+left to gain — only a scrim, or accepting it as a documented exception.
+
+The paragraph below is the superseded reasoning, kept because the mechanism it
+describes is still how the threshold works:
+
+⚠️ **THE BIO WAS JUDGED AGAINST 4.5:1, NOT 3:1 (2026-09, superseded above).** `.intro-bio`
 moved from a 24px dek (leading 1.08) onto `--size-lg`/1.4 — plain body copy,
 matching `.about-body p`, `.work-card-description` and `.project-dek`. At 24px
 white regular type was WCAG **large text** and wanted 3:1; at 18px it is normal

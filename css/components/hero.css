@@ -413,11 +413,21 @@ html.is-field-live .page-field-grain { opacity: 0.15; }
      THE LEADING HAD TO COME WITH IT. 1.08 was a display setting that only
      cohered at 24px — left alone it sets 19.4px leading on 18px prose. 1.4 is
      what every other multi-line block here uses.
-     ⚠️ It also moves the WCAG threshold. At 24px this was large text (3:1); at
-     18px it is normal text and wants 4.5:1. The measured 1.51:1 below cleared
-     neither, so nothing that was passing regressed — but the gap is now against
-     the harder number, and the field is what has to close it. */
-  font-size: var(--size-lg);
+     ⚠️ REVERTED TO 24px (2026-09) FOR ACCESSIBILITY, and this is the whole
+     reason. WCAG large text is 18pt/24px at any weight; below that it is normal
+     text and wants 4.5:1 instead of 3:1. Three passes of field tuning were spent
+     chasing 4.5 and the geometry's ceiling is ~3.8 — an exhaustive search of the
+     orb space returned NO arrangement that reaches it. The bio's measured floor
+     is 3.10, which clears 3:1 comfortably, so the compliant move was to change
+     the TYPE CLASS, not the artwork: at 24px this block passes at every phase
+     with the field untouched.
+     ⚠️ THE LEADING STAYS AT 1.4, unlike the original 24px dek's 1.08. Only size
+     and weight decide the WCAG class, and 1.4 is what every other multi-line
+     block here uses — the 1.08 was a display setting for a dek this no longer
+     is. Consequence: the block is TALLER than either previous version, and its
+     top is anchored, so the extra height goes downward into paler field. That
+     is measured below and it still passes. */
+  font-size: 24px;
   /* 500, one step up the site's scale (200/400/500/600/700) from the 400 it
      inherited. Body copy elsewhere sits at 400, so this is the ONE prose block
      that departs — it is white type over the field, and the extra stroke weight
