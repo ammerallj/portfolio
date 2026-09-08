@@ -113,6 +113,13 @@ html.is-field-live .page-field-grain { opacity: 0.15; }
   height: auto;
   z-index: -1; /* under all in-flow content, above the body's cream */
   pointer-events: none;
+  /* ⚠️ THE FIELD IS CLIPPED AT THE NAV BAR (2026-09). It used to run on past the
+     fold and dissolve into the cream behind Selected Work on its own — true of
+     the JPEG, whose lower reaches were near-white, but NOT of the shader, whose
+     blobs are larger and more saturated and left visible colour under the bar.
+     The inset is in the element's own coordinates and the transform is a pure
+     translate, so it maps 1:1 to page pixels. */
+  clip-path: inset(0 0 var(--field-clip) 0);
 }
 
 /* The hero field's geometry, in one place — .page-field's width and the frost
@@ -164,6 +171,19 @@ html.is-field-live .page-field-grain { opacity: 0.15; }
      this file describes as centred. The pane's `top` compensates so the glass
      still starts on the divider; they are one decision. */
   --hero-lift: 60px;
+
+  /* The gap between the nav bar's BOTTOM and the hero's own bottom edge. The
+     bar is pulled up 80 and is 64 tall, so it finishes 16px short of 100svh —
+     this token is that 16, and .intro-bar's margin-bottom reads it too, so the
+     two cannot drift. */
+  --bar-tail: 16px;
+
+  /* How much of the field to cut off its bottom so it ENDS AT THE NAV BAR
+     instead of bleeding past it into Selected Work. --field-bottom is where the
+     artwork's bottom edge lands; the bar's bottom is 100svh - --bar-tail; the
+     difference is the overhang. max() so it never goes negative on a viewport
+     tall enough that the field already stops short. */
+  --field-clip: max(0px, calc(var(--field-bottom) - 100svh + var(--bar-tail)));
 }
 
 .intro {
@@ -220,13 +240,15 @@ html.is-field-live .page-field-grain { opacity: 0.15; }
      would trap above the hero's background instead. */
   z-index: -1;
   /* Frost strength: between the frame's 5.5px/0.05 and the heavy 10px/0.22. */
-  /* The BLUR is the effect; the cream wash is only what tints it. Lightened
-     0.12 -> 0.06 (2026-09) — the veil was subtracting contrast from the white
-     bio sitting on it, and the glass reads as glass because of the blur, not
-     the tint. Keep blur(7px) if this is ever tuned again; drop the alpha. */
+  /* PURE BLUR, NO TINT (2026-09). Was rgba(251,252,248,0.12), then 0.06, now
+     gone entirely. backdrop-filter needs no background to work — the tint only
+     ever COLOURED the glass, and the defocus is what makes it read as glass.
+     Every step of removing it also bought the white bio contrast back, because
+     a cream veil over the field is exactly a reduction in the field's own
+     colour. ⚠️ Do not reintroduce a background here to "make the frost
+     visible"; if the pane seems to disappear, the blur radius is the dial. */
   backdrop-filter: blur(7px);
   -webkit-backdrop-filter: blur(7px);
-  background: rgba(251, 252, 248, 0.06);
 }
 
 /* ---- Upper region: the statement ---- */
@@ -430,7 +452,9 @@ html.is-field-live .page-field-grain { opacity: 0.15; }
   top: 0;
   z-index: 90; /* above section content; the ≤480 overlay tiers sit higher */
   margin-top: -80px;
-  margin-bottom: 16px; /* nets the flow delta to zero (-80 + 64 + 16) */
+  /* nets the flow delta to zero (-80 + 64 + 16). Shared with --field-clip,
+     which needs this same gap to find the bar's bottom edge. */
+  margin-bottom: var(--bar-tail);
   padding: 14px 56px;
   display: flex;
   align-items: center;

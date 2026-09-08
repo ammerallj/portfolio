@@ -638,6 +638,12 @@
        averages land equal (2.33 / 2.33) and neither block is starved.
        Measure both before changing it — moving it for one will move the other. */
     --field-nudge-y: 120px;
+
+    /* No nav bar at this tier (hidden since 680) and no shader either, so
+       there is nothing to clip the field to. Neutralised rather than
+       re-derived — hero.css's --field-clip is written against 100svh and a
+       docked bar, and neither describes this hero. */
+    --field-clip: 0px;
     --field-bottom: calc(var(--field-w) * 0.53734 + var(--field-nudge-y));
 
     /* The hero's geometry at this tier, named once so the frost pane can be

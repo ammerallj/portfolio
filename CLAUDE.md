@@ -26,9 +26,18 @@ shared by all of them.
 ## Landing (2026-08) — "Making products make sense."
 The homepage hero is the Figma 339:3745 landing: `images/hero-bkg.jpg` laid as
 a PAGE background at `z:-1` inside `main` (a stacking context — body's own
-background otherwise paints over negative-z elements). **The field is never clipped**: whatever
-extends past the hero fold bleeds behind Selected Work and dissolves into the
-cream on its own. The hero stage: statement (top half, 96px Hanken) →
+background otherwise paints over negative-z elements). ⚠️ **THE FIELD IS NOW
+CLIPPED AT THE NAV BAR (2026-09) — this reverses the old rule.** It used to run
+past the fold and dissolve into the cream behind Selected Work on its own, which
+was true of the JPEG (its lower reaches are near-white) and NOT of the shader,
+whose blobs are larger and more saturated and left visible colour under the bar
+and over Selected Work. `clip-path: inset(0 0 var(--field-clip) 0)` on
+`.page-field`, where `--field-clip` is `--field-bottom − 100svh + --bar-tail`.
+`--bar-tail` (16px) is the gap between the bar's bottom and the hero's, and
+`.intro-bar`'s `margin-bottom` reads the same token so the two cannot drift.
+Verified at 1440×900: field paints to page 884, the bar's bottom is 884, Selected
+Work starts at 900 — zero overlap, and nothing on screen once the bar docks.
+**Neutralised to `0px` at ≤480**, which has no bar and shows the JPEG. The hero stage: statement (top half, 96px Hanken) →
 full-width hairline divider (**at the exact centre MINUS `--hero-lift`** since
 2026-09 — see below) → frosted band (bottom half,
 backdrop-blur) with the bio in its right column → `.intro-bar` along the
