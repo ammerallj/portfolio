@@ -31,8 +31,16 @@ CLIPPED AT THE NAV BAR (2026-09) — this reverses the old rule.** It used to ru
 past the fold and dissolve into the cream behind Selected Work on its own, which
 was true of the JPEG (its lower reaches are near-white) and NOT of the shader,
 whose blobs are larger and more saturated and left visible colour under the bar
-and over Selected Work. `clip-path: inset(0 0 var(--field-clip) 0)` on
-`.page-field`, where `--field-clip` is `--field-bottom − 100svh + --bar-tail`.
+and over Selected Work. ⚠️ **A `clip-path: inset()` was tried first and REJECTED** — it ends the artwork
+on a hard line. It is a **MASK**: `mask-image: linear-gradient(to bottom, #000
+calc(100% − --field-clip − --field-fade), transparent calc(100% − --field-clip))`
+on `.page-field`, where `--field-clip` is `--field-bottom − 100svh + --bar-tail`
+and `--field-fade` (170px) is the length of the ramp. Measured at 1440×900: the
+fade runs page 714 → 884, ends exactly on the bar's bottom, clears the bio by
+208px, and is fully transparent before Selected Work at 900.
+⚠️ **`getComputedStyle` folds the stops into `calc(100% − Npx)`** — parse them
+against the element's own height, don't `parseFloat` the token (`max()`/`calc()`
+give NaN, which silently reads as 0 and makes the geometry look wrong).
 `--bar-tail` (16px) is the gap between the bar's bottom and the hero's, and
 `.intro-bar`'s `margin-bottom` reads the same token so the two cannot drift.
 Verified at 1440×900: field paints to page 884, the bar's bottom is 884, Selected

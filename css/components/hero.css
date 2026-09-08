@@ -113,13 +113,21 @@ html.is-field-live .page-field-grain { opacity: 0.15; }
   height: auto;
   z-index: -1; /* under all in-flow content, above the body's cream */
   pointer-events: none;
-  /* ⚠️ THE FIELD IS CLIPPED AT THE NAV BAR (2026-09). It used to run on past the
+  /* ⚠️ THE FIELD FADES OUT AT THE NAV BAR (2026-09). It used to run on past the
      fold and dissolve into the cream behind Selected Work on its own — true of
      the JPEG, whose lower reaches were near-white, but NOT of the shader, whose
      blobs are larger and more saturated and left visible colour under the bar.
-     The inset is in the element's own coordinates and the transform is a pure
-     translate, so it maps 1:1 to page pixels. */
-  clip-path: inset(0 0 var(--field-clip) 0);
+     ⚠️ A `clip-path: inset()` was tried first and REJECTED: it ends the artwork
+     on a hard line. This is a mask, so the artwork reaches zero exactly at the
+     bar's bottom having faded over --field-fade before it. Distances are in the
+     element's own coordinates and the transform is a pure translate, so they map
+     1:1 to page pixels. */
+  -webkit-mask-image: linear-gradient(to bottom,
+    #000 calc(100% - var(--field-clip) - var(--field-fade)),
+    transparent calc(100% - var(--field-clip)));
+  mask-image: linear-gradient(to bottom,
+    #000 calc(100% - var(--field-clip) - var(--field-fade)),
+    transparent calc(100% - var(--field-clip)));
 }
 
 /* The hero field's geometry, in one place — .page-field's width and the frost
@@ -184,6 +192,13 @@ html.is-field-live .page-field-grain { opacity: 0.15; }
      difference is the overhang. max() so it never goes negative on a viewport
      tall enough that the field already stops short. */
   --field-clip: max(0px, calc(var(--field-bottom) - 100svh + var(--bar-tail)));
+
+  /* How long the fade INTO that line is. The field is masked, not cut — a
+     clip-path was tried first and is a hard edge by definition, which showed as
+     a visible line across the artwork. The fade runs entirely below the bio
+     (which ends around page 506 against a fade starting near 724 at 1440×900),
+     so it costs the composition nothing. */
+  --field-fade: 170px;
 }
 
 .intro {

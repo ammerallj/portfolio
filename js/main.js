@@ -249,6 +249,11 @@ const FIELD = {
   ramp:  { mid: 0.524038, midAlpha: 0.3 },
   layer: 0.9,
   cream: [0.984, 0.988, 0.973],
+  // ⚠️ CROWDED TOWARD THE CENTRE (2026-09): magenta moved right 0.300 -> 0.360
+  // and violet left 0.770 -> 0.710, closing the gap between them by 0.12 of the
+  // field's width. They were the two outermost orbs and the composition read as
+  // spread; pulling them in concentrates the colour behind the lockup instead of
+  // at the edges, where the viewport crops it anyway.
   // Painted bottom to top. ⚠️ NO LONGER the SVG export order: cyan was second
   // and had BOTH magenta and red compositing over it, so at its own centre it
   // rendered #908ac8 — a muted periwinkle — instead of #019FD8, saturation 0.31
@@ -256,8 +261,8 @@ const FIELD = {
   // it above magenta is what brings it back; growing it alone could not, because
   // the loss was overpainting, not reach.
   blobs: [
-    { col: [0.5725, 0.2196, 0.8902], r: 0.3250, x: 0.770, y: 0.400 }, // violet  #9238E3
-    { col: [0.8392, 0.3020, 0.8078], r: 0.3650, x: 0.300, y: 0.470 }, // magenta #D64DCE
+    { col: [0.5725, 0.2196, 0.8902], r: 0.3250, x: 0.710, y: 0.400 }, // violet  #9238E3
+    { col: [0.8392, 0.3020, 0.8078], r: 0.3650, x: 0.360, y: 0.470 }, // magenta #D64DCE
     { col: [0.0039, 0.6235, 0.8471], r: 0.3300, x: 0.455, y: 0.360 }, // cyan    #019FD8
     // Red is positioned to BACK THE BIO, not just to sit in the composition.
     // The bio's centre in field space is ~(0.65, 0.64) at 1440 and 1024 and
