@@ -1195,6 +1195,29 @@ initNavMorph();
 function initScrollVideos() {
   const vids = document.querySelectorAll('video[data-autoplay-in-view]');
   if (!vids.length || reducedMotion.matches || !('IntersectionObserver' in window)) return;
+  // ⚠️ HOW MUCH OF THE CARD MUST BE IN VIEW BEFORE IT PLAYS AND CROSSFADES.
+  // Raised 0.4 -> 0.6 (2026-09) because at 0.4 THE FIRST REVEAL OF A PAGE LOAD
+  // WAS INVISIBLE. That arrival is VERTICAL — the reader scrolls down and the
+  // card rises from the bottom of the screen — so 40% is crossed while the card
+  // is still climbing, the 0.25s fade runs during the climb, and the card is
+  // already revealed by the time it settles. Reported exactly that way: "it just
+  // appears with no fade... only the first time when page loads".
+  // Every LATER arrival is a horizontal 650ms damped advance, where the fade was
+  // already visible — measured on the live site at 0.4: play 85ms, fade
+  // 116->483ms, card fully arrived at 266ms, so 217ms of fade landed AFTER
+  // arrival. That is why it self-corrected after the first time.
+  // ⚠️ THE COST ON HORIZONTAL ADVANCES IS ~45ms AND NOTHING ELSE. From the same
+  // frame capture, ratio 0.4 is crossed at ~85ms and 0.6 at ~130ms.
+  // ⚠️ IT IS PAIRED WITH THE OBSERVER'S THRESHOLD ARRAY at the bottom of this
+  // function — an IntersectionObserver only delivers a callback when a listed
+  // threshold is CROSSED, so raising the comparison without raising the
+  // threshold means the callback that would satisfy it never arrives, and no
+  // card ever plays. Move both or neither.
+  // ⚠️ Do not push it much higher. The ratio is the VIDEO's, and it must stay
+  // reachable on a short viewport: the clip renders ~371px tall at 1440, so 0.6
+  // needs 223px of it on screen. Fine everywhere realistic, but 0.9 would strand
+  // the card on its poster on a laptop with a short window.
+  const PLAY_AT = 0.6;
   const armed = new WeakSet();
   vids.forEach((v) => armed.add(v)); // eligible to play on the first entry
   const posterOf = (v) => v.parentNode.querySelector('.work-card-poster');
@@ -1229,10 +1252,25 @@ function initScrollVideos() {
   // holding data restarts the fetch and throws the buffer away; on one that is
   // PLAYING it also stops playback dead. readyState >= 3 is the same threshold
   // the play path uses, so anything it would accept is left alone.
+  // ⚠️ IT WARMS THE POSTER TOO, NOT JUST THE VIDEO — and forgetting that is what
+  // made a card "harshly appear" instead of sliding in. The posters are
+  // loading="lazy", which is right for a vertical page and WRONG for this
+  // horizontal track: the two buffer cards sit ~1200-2600px off-screen
+  // SIDEWAYS, well past the browser's own lazy threshold. Measured at rest, both
+  // far cards reported `poster.complete === false` and naturalWidth 0 — so they
+  // were rendering as genuinely BLANK boxes, and the image only arrived, fully
+  // formed and with no transition, once the card had slid into view.
+  // ⚠️ The card's LAYOUT never moved (verified: every card 1216x596 through an
+  // advance, no size change anywhere), so this is not a reflow — it is an empty
+  // box being filled at the last moment.
+  // Flipping `loading` to eager on an image that has not loaded starts the fetch
+  // immediately, which is all this needs; posters are 296-432KB each.
   const prep = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
       if (!entry.isIntersecting) return;
       const v = entry.target;
+      const poster = posterOf(v);
+      if (poster && !poster.complete) poster.loading = 'eager';
       if (v.readyState >= 3 || !v.paused) return;
       v.preload = 'auto';
       v.load();
@@ -1251,9 +1289,10 @@ function initScrollVideos() {
         armed.add(v);
         const poster = posterOf(v);
         if (poster) poster.classList.remove('is-faded');
-      } else if (entry.intersectionRatio >= 0.4 && armed.has(v)) {
-        // Back to 40% in view: play once from frame 0, then disarm — so staying
-        // in view (or a partial leave that never fully exits) won't rewind it.
+      } else if (entry.intersectionRatio >= PLAY_AT && armed.has(v)) {
+        // Back to PLAY_AT in view: play once from frame 0, then disarm — so
+        // staying in view (or a partial leave that never fully exits) won't
+        // rewind it.
         armed.delete(v);
         try { v.currentTime = 0; } catch (e) {}
         const poster = posterOf(v);
@@ -1291,8 +1330,53 @@ function initScrollVideos() {
         else v.addEventListener('canplay', startWhenReady, { once: true });
       }
     });
-  }, { threshold: [0, 0.4] });
+  }, { threshold: [0, PLAY_AT] });
   vids.forEach((v) => io.observe(v));
+
+  // ⚠️ AND WARM EVERY POSTER ONCE THE PAGE IS IDLE, UNCONDITIONALLY. The
+  // observer above covers a card that comes within 800px, but the LEFT BUFFER
+  // card never does: at rest it sits ~1220px off-screen to the left and stays
+  // there until the reader scrolls backward or cycles all the way round.
+  // Measured — it reported `complete: false` and naturalWidth 0 through a full
+  // forward advance, i.e. it renders as a BLANK box, and the image then arrives
+  // fully formed with no transition the moment it slides in. That is the
+  // "harshly appears" report.
+  // ⚠️ This is deliberately NOT geometry-driven. Tying it to the observer would
+  // make a blank card depend on rootMargin arithmetic against a horizontally
+  // rotating track — the exact reasoning that produced the bug. Four posters at
+  // 296-432KB, fetched when the browser says it is idle, is the cheap
+  // deterministic answer.
+  // ⚠️ It stays `loading="lazy"` IN THE MARKUP on purpose: no-JS visitors and
+  // crawlers keep the lazy behaviour, and the initial page load is unchanged —
+  // idle means after first paint, not during it.
+  // ⚠️ GATED ON THE SECTION, NOT ON IDLE AND NOT ON EACH CARD. Warming on idle
+  // alone works but spends ~1.1MB of posters on a visitor who never scrolls to
+  // Selected Work — including on a phone. Watching the SECTION instead keeps the
+  // determinism (one big static target, no rotation, no per-card rootMargin
+  // arithmetic) while costing a bouncing visitor nothing.
+  const warmPosters = () => vids.forEach((v) => {
+    const poster = posterOf(v);
+    if (poster && !poster.complete) poster.loading = 'eager';
+  });
+  const section = document.getElementById('work-section');
+  if (section) {
+    // ⚠️ 200px, NOT a screenful. MEASURED: Selected Work's top sits EXACTLY at the
+    // fold (workSectionTopFromFold = 0 at 1440x900), so any margin much above
+    // zero is already satisfied before the reader has scrolled at all — the warm
+    // fires at load and the gate saves nothing, which is exactly what a 1200px
+    // margin did on the first attempt here. 200px means one small downward
+    // gesture arms it, while a visitor who reads the hero and leaves pays
+    // nothing. There is still a whole section heading above the track, so the
+    // posters have that scroll distance in which to arrive.
+    const warm = new IntersectionObserver((entries, obs) => {
+      if (!entries.some((e) => e.isIntersecting)) return;
+      obs.disconnect();          // once is enough; images stay loaded
+      warmPosters();
+    }, { rootMargin: '200px 0px' });
+    warm.observe(section);
+  } else {
+    warmPosters();               // no section to gate on: just warm them
+  }
 
   // THE CARD RESTS ON THE VIDEO'S LAST FRAME. Nothing runs on `ended` — the
   // paused video simply holds its final frame, and the poster stays faded out
