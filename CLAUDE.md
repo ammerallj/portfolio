@@ -455,10 +455,34 @@ also why **the preview pane cannot judge this motion at all** (measured: the pan
 throttling rAF to ~1Hz, with pixel deltas indistinguishable from dither alone).
 Same limitation as `DAMP.arrival` — see the note under **Damped horizontal
 motion**. Judge it in a real browser window.
-- ⚠️ **To calm the motion, lower `motion.drift`, not the orbit rates.** Amplitude
-  reads as restraint; frequency reads as alive. An early pass took the rates to
-  0.031 rad/s — a 203-second cycle moving ~2px/sec — which is animated in theory
-  and static to a reader.
+- ⚠️ **`motion.drift` IS THE DIAL FOR LIVELINESS — never the orbit rates.**
+  Amplitude reads as restraint; frequency reads as alive. An early pass took the
+  rates to 0.031 rad/s — a 203-second cycle moving ~2px/sec — which is animated
+  in theory and static to a reader.
+- **Shipped at 0.050 (raised from 0.038, 2026-09), and the CEILING IS MEASURED.**
+  Swept at 1440×900 over 20 phases of the slowest component, composited through
+  the mask: **0.038 → ±55px, bio 3.03–3.22 · 0.050 → ±72px, bio 3.02–3.24 ·
+  0.056 → ±81px, bio 3.01–3.26 (passes by 0.01, too thin to ship) · 0.062 →
+  ±89px, bio 2.98 FAILS · 0.070 → ±101px, bio 2.94 FAILS.** Verified at 1440×740
+  too, where the bio is more comfortable (3.14–3.32) because the ramp clears it
+  by 80px there.
+- ⚠️ **THE FLOOR FAILS, NOT THE MEAN.** Widening drift widens the SWING (0.19 →
+  0.33 across that sweep) while the ceiling *rises*, so a mean — or any single
+  sample — looks fine right up to the point the worst phase is illegal. Always
+  re-measure the bio's FLOOR over a full cycle before raising this.
+- ⚠️ **THE ORBIT IS TOO SLOW TO SWEEP BY WAITING — drive `uTime` directly.** The
+  slowest component has a ~84-unit period, and the preview pane throttles rAF to
+  ~0.9Hz, so waiting for phases takes minutes and times out. Set the `uTime`
+  uniform yourself and draw+`readPixels` synchronously inside ONE rAF callback:
+  20 exact phases in a single frame, and the phases are reproducible instead of
+  wherever the clock happened to land.
+- **The motion is real but slow by design** — measured on the live site: ±72px
+  horizontal over 16–44s per orb (two incommensurate sines, so the path never
+  repeats), ±9px vertical, and a +16% radius pulse over 27–45s. ⚠️ Confirming it
+  runs is a MEASUREMENT, not a look: in the pane, rAF at 0.9Hz plus the 100ms
+  `dt` cap means the field advances ~0.09s of animation per wall second, ~11×
+  slow. Sample the canvas twice a few seconds apart and compare against the
+  dither floor (±1 code value); a max delta of ~10 is the loop running.
 
 ⚠️ **`--hero-lift` IS `0px` (2026-09) — the section below describes a 60px lift
 that is no longer applied.** It was zeroed because the Figma lockup mock

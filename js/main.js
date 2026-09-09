@@ -426,7 +426,23 @@ const FIELD = {
   // the gradient and swings their contrast, so it is kept short; horizontal
   // travel is close to free. Raise drift for more life, raise driftYRatio only
   // after re-measuring both blocks.
-  motion: { speed: 1.85, drift: 0.038, driftYRatio: 0.2, pulse: 0.16, warp: 0.55 },
+  // ⚠️ drift RAISED 0.038 -> 0.050 (2026-09), and the ceiling is MEASURED, not
+  // guessed. Amplitude is the dial for liveliness — never the orbit rates, which
+  // were once taken to 0.031 rad/s giving a 203-second cycle moving ~2px/sec:
+  // animated on paper, static to a reader.
+  // Swept at 1440x900 over 20 phases of the slowest component, COMPOSITED THROUGH
+  // THE MASK (sampling the raw canvas overstates every one of these):
+  //   drift  x travel  bio floor-ceiling   passes 3:1
+  //   0.038  +/-55px   3.03 - 3.22         yes
+  //   0.050  +/-72px   3.02 - 3.24         yes   <- shipped
+  //   0.056  +/-81px   3.01 - 3.26         yes, by 0.01 — too thin to ship
+  //   0.062  +/-89px   2.98 - 3.27         NO
+  //   0.070  +/-101px  2.94 - 3.27         NO
+  // ⚠️ The FLOOR is what fails, not the mean: widening drift widens the SWING
+  // (0.19 -> 0.33 across that range) while the ceiling rises, so a mean or a
+  // single sample looks fine right up to the point the worst phase is illegal.
+  // Re-measure the bio's floor over a full cycle before raising this again.
+  motion: { speed: 1.85, drift: 0.050, driftYRatio: 0.2, pulse: 0.16, warp: 0.55 },
   // Buffer size vs CSS px. BELOW devicePixelRatio deliberately: a soft
   // gradient carries no per-pixel detail, so 1.0 on a 2x display is a 4x
   // fill-rate saving nobody can see. Grain is the one thing that does want
