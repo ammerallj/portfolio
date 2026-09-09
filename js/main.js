@@ -1196,18 +1196,17 @@ function initScrollVideos() {
   const vids = document.querySelectorAll('video[data-autoplay-in-view]');
   if (!vids.length || reducedMotion.matches || !('IntersectionObserver' in window)) return;
   // ⚠️ HOW MUCH OF THE CARD MUST BE IN VIEW BEFORE IT PLAYS AND CROSSFADES.
-  // Raised 0.4 -> 0.6 (2026-09) because at 0.4 THE FIRST REVEAL OF A PAGE LOAD
-  // WAS INVISIBLE. That arrival is VERTICAL — the reader scrolls down and the
-  // card rises from the bottom of the screen — so 40% is crossed while the card
-  // is still climbing, the 0.25s fade runs during the climb, and the card is
-  // already revealed by the time it settles. Reported exactly that way: "it just
-  // appears with no fade... only the first time when page loads".
-  // Every LATER arrival is a horizontal 650ms damped advance, where the fade was
-  // already visible — measured on the live site at 0.4: play 85ms, fade
-  // 116->483ms, card fully arrived at 266ms, so 217ms of fade landed AFTER
-  // arrival. That is why it self-corrected after the first time.
-  // ⚠️ THE COST ON HORIZONTAL ADVANCES IS ~45ms AND NOTHING ELSE. From the same
-  // frame capture, ratio 0.4 is crossed at ~85ms and 0.6 at ~130ms.
+  // ⚠️ IT WENT TO 0.6 AND CAME BACK — don't raise it again without reading why.
+  // It was raised chasing a report of cards "appearing with no fade", which the
+  // ROTATION BUG turned out to explain in full: normalize()'s forward test was
+  // missing a 1px tolerance, so on any viewport with a fractional card width the
+  // track stranded one step past rest and mandatory snap yanked it on the next
+  // gesture. 0.6 was treating a symptom of that, and once the real cause was
+  // fixed it was pure cost: ~45ms later on every horizontal advance (measured —
+  // ratio 0.4 is crossed at ~85ms, 0.6 at ~130ms) in exchange for nothing.
+  // For reference, the fade was already comfortably visible at 0.4: measured on
+  // the live site, play at 85ms, fade 116->483ms, card fully arrived at 266ms —
+  // so 217ms of the crossfade lands AFTER the card is in place.
   // ⚠️ IT IS PAIRED WITH THE OBSERVER'S THRESHOLD ARRAY at the bottom of this
   // function — an IntersectionObserver only delivers a callback when a listed
   // threshold is CROSSED, so raising the comparison without raising the
@@ -1217,7 +1216,7 @@ function initScrollVideos() {
   // reachable on a short viewport: the clip renders ~371px tall at 1440, so 0.6
   // needs 223px of it on screen. Fine everywhere realistic, but 0.9 would strand
   // the card on its poster on a laptop with a short window.
-  const PLAY_AT = 0.6;
+  const PLAY_AT = 0.4;
   const armed = new WeakSet();
   vids.forEach((v) => armed.add(v)); // eligible to play on the first entry
   const posterOf = (v) => v.parentNode.querySelector('.work-card-poster');
