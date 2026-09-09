@@ -442,7 +442,26 @@ const FIELD = {
   // (0.19 -> 0.33 across that range) while the ceiling rises, so a mean or a
   // single sample looks fine right up to the point the worst phase is illegal.
   // Re-measure the bio's floor over a full cycle before raising this again.
-  motion: { speed: 1.85, drift: 0.050, driftYRatio: 0.2, pulse: 0.16, warp: 0.55 },
+  // ⚠️ pulse RAISED 0.16 -> 0.35 (2026-09). At 0.35 the largest orb (red) swells
+  // 316px in radius and back over its 27-45s period, against 145px before.
+  // ⚠️ PULSE HAS NO ACCESSIBILITY CEILING, AND THAT IS A PROPERTY OF THE
+  // RECTIFIED WAVE, not luck. `(.5+.5*sin)` runs 0..1, so an orb's MINIMUM is
+  // always its base radius whatever pulse is set to — raising it can only add
+  // colour at the peak, never take any away. Contrast therefore improves
+  // monotonically. Swept at 1440x900 over 20 exact phases, composited:
+  //   pulse  red grows  bio floor-ceiling   headline
+  //   0.16   +145px     3.02 - 3.24         2.43 - 2.63
+  //   0.35   +316px     3.13 - 3.32         2.55 - 2.78   <- shipped
+  //   0.45   +407px     3.18 - 3.38         2.56 - 2.89
+  //   0.60   +542px     3.24 - 3.51         2.60 - 3.23
+  // So the ONLY constraint here is taste — bigger is measurably safer, and at
+  // 0.60 even the headline's best phases clear 3:1. Contrast that with `drift`
+  // directly above, which fails at 0.062: the two dials are not alike, and the
+  // difference is entirely that one is rectified and the other is not.
+  // ⚠️ Do NOT "restore" a bare sin to make it shrink below base. That was the
+  // original form and the trough pulled every orb's reach in by 8% at once,
+  // which is what put the bio's worst phases under threshold.
+  motion: { speed: 1.85, drift: 0.050, driftYRatio: 0.2, pulse: 0.35, warp: 0.55 },
   // Buffer size vs CSS px. BELOW devicePixelRatio deliberately: a soft
   // gradient carries no per-pixel detail, so 1.0 on a 2x display is a 4x
   // fill-rate saving nobody can see. Grain is the one thing that does want

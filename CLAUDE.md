@@ -476,9 +476,23 @@ motion**. Judge it in a real browser window.
   uniform yourself and draw+`readPixels` synchronously inside ONE rAF callback:
   20 exact phases in a single frame, and the phases are reproducible instead of
   wherever the clock happened to land.
+- ⚠️ **`motion.pulse` HAS NO ACCESSIBILITY CEILING, AND `motion.drift` DOES — the
+  two dials are NOT alike.** The difference is entirely that the pulse is
+  RECTIFIED: `(.5+.5*sin)` runs 0..1, so an orb's minimum is always its base
+  radius whatever pulse is set to. Raising it can only add colour at the peak,
+  never take any away, so contrast improves MONOTONICALLY. Swept at 1440×900 over
+  20 exact phases, composited: **0.16 → red grows 145px, bio 3.02–3.24 · 0.35 →
+  +316px, bio 3.13–3.32 · 0.45 → +407px, bio 3.18–3.38 · 0.60 → +542px, bio
+  3.24–3.51** — and at 0.60 even the headline's best phases reach 3.23. Shipped
+  at **0.35**; the only constraint is taste, and bigger is measurably safer.
+  ⚠️ **Do NOT "restore" a bare sin so it shrinks below base.** That was the
+  original form and the trough pulled every orb's reach in by 8% at once, which
+  is what put the bio's worst phases under threshold.
 - **The motion is real but slow by design** — measured on the live site: ±72px
   horizontal over 16–44s per orb (two incommensurate sines, so the path never
-  repeats), ±9px vertical, and a +16% radius pulse over 27–45s. ⚠️ Confirming it
+  repeats), ±9px vertical, and a +35% radius pulse over 27–45s. Raising drift
+  0.038→0.050 and pulse 0.16→0.35 took the share of the field moving more than
+  the dither floor from **5.8% → 10.7% → 21.6%.** ⚠️ Confirming it
   runs is a MEASUREMENT, not a look: in the pane, rAF at 0.9Hz plus the 100ms
   `dt` cap means the field advances ~0.09s of animation per wall second, ~11×
   slow. Sample the canvas twice a few seconds apart and compare against the
