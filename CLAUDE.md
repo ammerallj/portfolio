@@ -37,8 +37,29 @@ more saturated and left visible colour under the bar and over Selected Work.
 ⚠️ **THE MASK IS 17 STOPS IN PX ON `.page-field`, AND IT ENDS ON THE NAV BAR'S
 TOP EDGE — not on the artwork's bottom.** So no gradient ever paints behind the
 nav, at rest or mid-scroll. It runs `--field-mask-start` → `--field-mask-end`,
-where `--field-mask-end: min(100%, 100svh)` — **the end of the landing
-viewport**.
+where `--field-mask-end: min(100%, calc(100svh + --field-rise))` — **the end of
+the landing viewport**.
+
+⚠️ **`--field-rise` (30px) MOVES THE ARTWORK WITHOUT MOVING THE SCRIM, and the
+`+ --field-rise` in the mask is what buys that.** The two live in different
+coordinate spaces: a mask resolves in the ELEMENT'S OWN BOX, so translating the
+element drags the dissolve along with it. Adding the same amount to the mask's
+end cancels it exactly — element goes up N, stops go down N in element space,
+ramp lands on the same PAGE pixel.
+- ⚠️ **It cancels only the `100svh` term, deliberately.** `100svh` is a PAGE
+  position (the fold) and must be held. `100%` is the ARTWORK'S OWN BOTTOM EDGE,
+  which genuinely does move up with the artwork — there is nothing below it left
+  to dissolve. Verified: at 1440×740 (fold binds) the scrim stays on page 591→740
+  at every rise; at 1440×900 (artwork's bottom binds) it rides 879 → 849.
+- ⚠️ **30px IS THE CEILING, MEASURED — 45 ALREADY FAILS.** Raising the artwork
+  trades the bio for the headline, pulling richer colour up behind the headline
+  and leaving the bio on paler ground. At 1440×900, the binding case: **rise 0 →
+  bio 3.10 / headline 2.53 · 30 → 3.04 / 2.60 (shipped) · 45 → 2.99 FAILS · 60 →
+  2.97 FAILS · 90 → 2.84 FAILS.** 1440×740 is looser (3.22 → 3.16) and does not
+  bind. The bio's 3:1 is the wall.
+- **≤480 is untouched**: that tier replaces `.page-field`'s transform outright so
+  it never reads `--field-rise`, and its mask's `100%` term binds at 763 against
+  the `842` the `+30` produces, so the shift cannot reach it either.
 ⚠️ **THIS USED TO BE THE NAV BAR'S TOP (`100svh - 80`) and was moved DOWN a whole
 bar-height, deliberately, to reveal more gradient.** The ramp keeps its length
 and simply sits 80px lower, so nothing is traded for the extra colour — and it

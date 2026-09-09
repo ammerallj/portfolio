@@ -116,7 +116,7 @@ html.is-field-live .page-field-grain { opacity: 0.15; }
      ⚠️ The ≤480 tier REPLACES this transform outright and deliberately does not
      read the token: the .intro-bar is display:none there, so there is no pinned
      bar to tuck behind, and the JS skips the whole block for the same reason. */
-  transform: translate(-50%, calc(-1 * var(--field-scroll, 0px)));
+  transform: translate(-50%, calc(-1 * var(--field-rise, 0px) - var(--field-scroll, 0px)));
   /* images/hero-bkg.jpg, centered. FROZEN at its 1440 size (1639.44px = the
      113.85vw composition) for any narrower window: below the design width the
      field keeps its size and position and the viewport simply crops more of
@@ -314,7 +314,32 @@ html.is-field-live .page-field-grain { opacity: 0.15; }
      dead GLSL `LAYER`) and silently pinned the ramp another time (a stale
      `--field-fade`). The ≤680 tier's neutralising override went with it — this
      needs no per-tier handling, because 100svh is true where there is no bar. */
-  --field-mask-end: min(100%, 100svh);
+  /* A STATIC UP-SHIFT ON THE ARTWORK ONLY — the scrim stays put (2026-09).
+     ⚠️ THE TWO LIVE IN DIFFERENT COORDINATE SPACES, and that is the whole trick.
+     A mask resolves in the ELEMENT'S OWN BOX, so translating the element moves
+     the dissolve with it. Adding --field-rise to the mask's end cancels exactly
+     that: the element goes up N, the mask's stops go down N in element space,
+     and the ramp lands on the same PAGE pixel it did before.
+     ⚠️ IT CANCELS ONLY THE `100svh` TERM, and that is correct rather than an
+     oversight. `100svh` is a PAGE position (the fold) and must be held; `100%`
+     is the ARTWORK'S OWN BOTTOM EDGE, which genuinely does move up with the
+     artwork — there is nothing below it left to dissolve. So on a short window,
+     where the fold binds, the scrim does not move at all; on a tall one, where
+     the artwork already stops short of the fold, its trailing edge rides up with
+     it. Verified at 1440x740: mask end stays on page 740 at every rise.
+     ⚠️ 30px IS THE CEILING, MEASURED — 45 ALREADY FAILS. Raising the artwork
+     trades the bio for the headline: it pulls richer colour up behind the
+     headline and leaves the bio on paler ground. At 1440x900, the binding case:
+       rise   bio floor   headline floor
+       0      3.10        2.53
+       30     3.04        2.60   <- shipped, the last one that passes
+       45     2.99        2.59   FAILS
+       60     2.97        2.57   FAILS
+       90     2.84        2.54   FAILS
+     1440x740 is looser (bio 3.22 -> 3.16 at rise 30) so it does not bind. Going
+     higher needs something else to give first — the bio's 3:1 is the wall. */
+  --field-rise: 30px;
+  --field-mask-end: min(100%, calc(100svh + var(--field-rise)));
   /* HOW TALL THE DISSOLVE IS, as a fraction of the room between the bio's last
      line and the bar. --field-gap is that room, published by measureFieldTuck;
      112px is the no-JS floor.
