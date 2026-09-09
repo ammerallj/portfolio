@@ -187,7 +187,22 @@
   height: 100%;
   object-fit: cover;
   border-radius: inherit;
-  transition: opacity 0.45s ease;
+  /* ⚠️ 0.25s, DOWN FROM 0.45s (2026-09) — this is a fraction of a 2.03s CLIP,
+     not a page transition, and that is the whole reason it is short.
+     The reveal only starts once play() resolves, which is itself ~350-400ms into
+     the damped advance (the play trigger is intersectionRatio >= 0.4). At 0.45s
+     the crossfade then ate a further 22% of the clip, so the card finished
+     revealing with under 1.6s of motion left — reported as "it reveals late,
+     then it's over". 0.25s hands ~200ms of that back.
+     ⚠️ It is felt most on work-accessibility, and NOT because that card is
+     special: all four clips are 2.03s, but accessibility is the densest encode
+     at 1.50 MB/s against 1.00-1.13 for the others, so a late reveal costs the
+     most motion there. Fixing it here fixes it everywhere.
+     ⚠️ DO NOT take this to 0. The crossfade exists so the reveal shows moving
+     video rather than a blank or black gap; the poster and the first frame are
+     close but not identical (measured mean channel delta 12-16), so a hard cut
+     shows as a flicker. */
+  transition: opacity 0.25s ease;
   pointer-events: none;
 }
 
