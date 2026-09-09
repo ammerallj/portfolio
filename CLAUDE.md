@@ -1848,7 +1848,21 @@ delta *magnitude* matters again, so a gentle scroll moves a little.
   snap target from the pre-jump position, so backward scrolling landed off the
   snap line while forward was fine. The backward test carries a 1px tolerance
   because a fractional `0.4` would never match `<= 0` and there is no runway left
-  past 0 to retry on — it would dead-end at the left edge. Forward needs none.
+  past 0 to retry on — it would dead-end at the left edge.
+  ⚠️ **THE FORWARD TEST NEEDS THE SAME 1px TOLERANCE, and this entry used to say
+  "Forward needs none." That was WRONG and it stranded the carousel.** The
+  boundary is `step * 2`, and `step` is the CARD'S WIDTH plus the gap — which is
+  fractional wherever `--width-right-column`'s clamp lands on a fraction.
+  Measured in a **1396px** window: card 1175.3359375, step 1235.3359375, boundary
+  **2470.671875** — but `scrollLeft` can only land on a device pixel, so it stops
+  at **2470.5**, short by **0.17px**. `>=` is then false forever: `normalize()`
+  never rotates, the track sits one step past rest, and the reader sees the
+  PREVIOUS card hanging on the left with no next-card peek on the right. Mandatory
+  snap then yanks the track on the next gesture, which is the "it harshly appears
+  and pushes the card in view over" report.
+  ⚠️ **IT IS INVISIBLE AT 1440** — the design width makes the card exactly 1216 and
+  every boundary a whole number. Reproducing this needs a width where the clamp
+  produces a fraction; testing at 1440 will always pass.
 - **Never move the FOCUSED card.** Moving a focused element resets the browser's
   sequential-focus starting point; measured, it sent Tab *backwards* through the
   projects. `flushFocusedCard` shuffles only the cards around it.

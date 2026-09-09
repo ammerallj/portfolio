@@ -1358,25 +1358,25 @@ function initScrollVideos() {
     const poster = posterOf(v);
     if (poster && !poster.complete) poster.loading = 'eager';
   });
-  const section = document.getElementById('work-section');
-  if (section) {
-    // ⚠️ 200px, NOT a screenful. MEASURED: Selected Work's top sits EXACTLY at the
-    // fold (workSectionTopFromFold = 0 at 1440x900), so any margin much above
-    // zero is already satisfied before the reader has scrolled at all — the warm
-    // fires at load and the gate saves nothing, which is exactly what a 1200px
-    // margin did on the first attempt here. 200px means one small downward
-    // gesture arms it, while a visitor who reads the hero and leaves pays
-    // nothing. There is still a whole section heading above the track, so the
-    // posters have that scroll distance in which to arrive.
-    const warm = new IntersectionObserver((entries, obs) => {
-      if (!entries.some((e) => e.isIntersecting)) return;
-      obs.disconnect();          // once is enough; images stay loaded
-      warmPosters();
-    }, { rootMargin: '200px 0px' });
-    warm.observe(section);
-  } else {
-    warmPosters();               // no section to gate on: just warm them
-  }
+  // ⚠️ ON IDLE, AS EARLY AS POSSIBLE — NOT GATED ON SCROLL POSITION. This was
+  // tried twice the other way and both were wrong, so don't re-derive it:
+  //   1200px margin — MEASURED useless. Selected Work's top sits EXACTLY at the
+  //     fold, so the gate was already satisfied at page load and deferred nothing.
+  //   200px margin — deferred correctly and was still TOO LATE. It arms about one
+  //     gesture before a section that begins at the fold, so three ~400KB posters
+  //     were still arriving while the reader was already looking at the cards,
+  //     and the image popped in. Reported as "not loading smoothly, it just
+  //     harshly appears".
+  // A poster has no fade of its own: whenever it finishes decoding it simply
+  // paints, so the ONLY way it is not a pop is for it to be there first. Idle is
+  // the earliest moment that costs the initial render nothing.
+  // ⚠️ The data trade is deliberate and small: ~1.1MB of posters for a section
+  // that starts at the fold, i.e. one that virtually every visitor reaches. It is
+  // NOT during first paint — requestIdleCallback means after it — so LCP and the
+  // hero are untouched, and preload="none" still keeps the 10MB of VIDEO out of
+  // the initial load, which was always the expensive part.
+  if ('requestIdleCallback' in window) requestIdleCallback(warmPosters, { timeout: 2000 });
+  else setTimeout(warmPosters, 800);
 
   // THE CARD RESTS ON THE VIDEO'S LAST FRAME. Nothing runs on `ended` — the
   // paused video simply holds its final frame, and the poster stays faded out
@@ -1515,7 +1515,19 @@ function initWorkCarousel() {
     if (!active || step <= 0) return;
     const budgeted = !force && performance.now() - lastTouchAt < TOUCH.momentum;
     let guard = 0;
-    while (track.scrollLeft >= step * 2 && guard++ < 16) {
+    // ⚠️ THE FORWARD TEST NEEDS THE SAME 1px TOLERANCE THE BACKWARD ONE HAS, and
+    // an earlier note here explicitly claimed it did not. That was wrong, and it
+    // stranded the carousel on any viewport where the card's width is fractional.
+    // MEASURED at a 1396px window: --width-right-column's clamp resolves the card
+    // to 1175.3359375, so step is 1235.3359375 and the boundary is 2470.671875 —
+    // but scrollLeft can only land on a device pixel, so it stops at 2470.5, a
+    // shortfall of 0.17px. `>=` is then false forever: normalize() never rotates,
+    // the track sits one step past its rest position, and the reader sees the
+    // PREVIOUS card hanging on the left with no next-card peek on the right.
+    // ⚠️ THIS IS INVISIBLE AT 1440. The design width makes the card exactly 1216
+    // and every boundary a whole number, so testing there will never show it.
+    // Test any width that makes the clamp produce a fraction.
+    while (track.scrollLeft >= step * 2 - 1 && guard++ < 16) {
       if (budgeted && touchRotations >= TOUCH.rotations) return;
       const from = track.scrollLeft;
       track.appendChild(track.firstElementChild);
