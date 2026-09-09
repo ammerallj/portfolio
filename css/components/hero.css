@@ -296,7 +296,15 @@ html.is-field-live .page-field-grain { opacity: 0.15; }
      ⚠️ At <=680 the bar is display:none and this is neutralised there (see the
      680 tier in responsive.css) so min() falls through to --field-bottom. */
   --field-bar-top: calc(100svh - 64px - var(--bar-tail));
-  --field-mask-end: min(var(--field-bottom), var(--field-bar-top));
+  /* ⚠️ `100%`, NOT `--field-bottom` — they are the same number on desktop and
+     DIFFERENT ONES at ≤480, which is a units bug waiting to happen. A mask
+     resolves in the ELEMENT'S OWN BOX; `--field-bottom` is a PAGE coordinate,
+     and the phone tier bakes its `+--field-nudge-y` transform into it. Measured
+     at 375: `--field-bottom` is 792 against an element only 763 tall, so the
+     ramp ran off the bottom of its own box and the artwork ended at alpha 0.16
+     — a soft cut instead of a dissolve. `100%` is the artwork's bottom at every
+     tier, transform or no transform. */
+  --field-mask-end: min(100%, var(--field-bar-top));
   /* HOW TALL THE DISSOLVE IS, as a fraction of the room between the bio's last
      line and the bar. --field-gap is that room, published by measureFieldTuck;
      112px is the no-JS floor.
@@ -312,14 +320,27 @@ html.is-field-live .page-field-grain { opacity: 0.15; }
      reading washed out. The only floor is banding, and the smoothstep's
      zero-slope ends are what hold that off at short lengths; the clamp's 90px is
      there so a very short viewport cannot collapse it to a visible edge.
-     At 0.45: 67px at 1440x740 (clears the bio by 82px and sits entirely BELOW
-     red's core, so the orb is at full strength) and 103px at 1440x900.
-     ⚠️ 56px IS THE FLOOR AND IT IS THE BANDING LIMIT, not a round number. The
-     curve is sampled at eighths, so at 56px the stops are 7px apart and the
-     browser's linear interpolation between them is short enough to stay under
-     one 8-bit code step on this artwork. Go shorter and the segments start to
-     read as facets — the failure the original linear ramp had, in miniature. */
-  --field-fade: clamp(56px, calc(var(--field-gap, 112px) * 0.45), 140px);
+     ⚠️ **1.0 IS THE CEILING, AND IT IS A HARD ONE — the ramp starts exactly where
+     the bio ends and never touches it.** `--field-gap` IS the room between those
+     two, so a factor of 1 spends all of it and no more.
+     ⚠️ **1.14 WAS TRIED AND MEASURED AS A REGRESSION — do not "reclaim" it.** The
+     reasoning was that a smoothstep is still at alpha 0.957 an eighth of the way
+     down, so the ramp could start that much higher for free (solve
+     `1 - gap/fade <= 0.125`). It is not free. Composited through the mask at
+     1440x900 the bio's floor went **3.02 -> 2.95, under its 3:1 threshold**, on a
+     nominal 4% attenuation. A ramp that touches white type costs more than the
+     alpha figure suggests, because it lightens the worst pixel and the worst
+     pixel is what the threshold is measured on.
+     **The trade this settles:** "shorter" and "smoother" pull against each other
+     and only one constraint binds. It is NOT the fold — below-fold bleed is the
+     TUCK's job (`--field-scroll`) — it is the type above. Resolved: **229px at
+     1440x900 · 149px at 1440x740 · 119px at 1440x680 · 96px at 1024x768.**
+     ⚠️ 90px is the floor and it is the BANDING limit, not a round number: the
+     curve is sampled at sixteenths, so at 90px the stops sit ~6px apart and the
+     browser's linear interpolation between them stays under one 8-bit code step
+     on this artwork. Shorter and the segments start to read as facets — the
+     original linear ramp's failure, in miniature. */
+  --field-fade: clamp(90px, var(--field-gap, 112px), 300px);
   --field-mask-start: calc(var(--field-mask-end) - var(--field-fade));
 
   /* How far the whole lockup — headline, divider, bio, AND the frost pane with

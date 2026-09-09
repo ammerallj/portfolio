@@ -37,8 +37,14 @@ more saturated and left visible colour under the bar and over Selected Work.
 ⚠️ **THE MASK IS 17 STOPS IN PX ON `.page-field`, AND IT ENDS ON THE NAV BAR'S
 TOP EDGE — not on the artwork's bottom.** So no gradient ever paints behind the
 nav, at rest or mid-scroll. It runs `--field-mask-start` → `--field-mask-end`,
-where `--field-mask-end: min(--field-bottom, --field-bar-top)` and
+where `--field-mask-end: min(100%, --field-bar-top)` and
 `--field-bar-top: calc(100svh - 64px - --bar-tail)`.
+⚠️ **`100%`, NOT `--field-bottom` — they are the same number on desktop and
+DIFFERENT ONES at ≤480.** A mask resolves in the ELEMENT'S OWN BOX;
+`--field-bottom` is a PAGE coordinate, and the phone tier bakes its
+`+--field-nudge-y` transform into it. Measured at 375: `--field-bottom` is 792
+against an element only 763 tall, so the ramp ran off the bottom of its own box
+and the artwork ended at **alpha 0.16 — a soft cut instead of a dissolve.**
 ⚠️ **`--field-clip` IS DELETED** (from `:root` and from the ≤480 tier); an earlier
 entry described a `calc(100% − --field-clip − --field-fade)` mask the file no
 longer has. **`--field-fade` still exists and IS live** — every stop reads it.
@@ -73,15 +79,26 @@ longer has. **`--field-fade` still exists and IS live** — every stop reads it.
   is free, lengthening spends the room between the bio and the bar. Go to 24 stops
   before reaching for the length.
 - ⚠️ **THE LENGTH IS MEASURED, AND THE CONSTRAINT IS ONE-SIDED.**
-  `--field-fade: clamp(56px, --field-gap * 0.45, 140px)` — a fraction of the
-  measured room between the bio and the bar (see **The field tuck**), never of the
-  field's height. The ramp pulls toward cream and the bio is white type, so the
-  CEILING is `--field-gap × 1.143` (solve `1 − gap/fade ≤ 0.125`, the point where
-  a smoothstep is still at alpha 0.957). **Shorter is free and pays twice:** the
-  ramp moves away from the text, and less of the artwork is dissolved — which is
-  what recovered red's saturation when it read washed out. At 0.45 the fade is
-  67px at 1440×740, clearing the bio by 82px and sitting entirely BELOW red's
-  core. The only floor is banding; 56px is it.
+  `--field-fade: clamp(90px, --field-gap, 300px)` — the measured room between the
+  bio and the bar (see **The field tuck**), never a fraction of the field's height.
+  Resolved: **229px at 1440×900 · 149px at 1440×740 · 119px at 1440×680 · 96px at
+  1024×768.**
+  ⚠️ **A FACTOR OF 1.0 IS THE CEILING: the ramp starts exactly where the bio ends
+  and never touches it.** `--field-gap` IS that room, so 1.0 spends all of it.
+  ⚠️ **1.14 WAS TRIED AND MEASURED AS A REGRESSION — do not "reclaim" it.** The
+  reasoning was that a smoothstep is still at alpha 0.957 an eighth of the way
+  down, so the ramp could start that much higher for free (solve
+  `1 − gap/fade ≤ 0.125`). It is not free: composited through the mask at
+  1440×900 the bio's floor went **3.02 → 2.95, under its 3:1 threshold**, on a
+  nominal 4% attenuation. A ramp that touches white type costs more than its
+  alpha figure suggests, because it lightens the WORST pixel and the worst pixel
+  is what the threshold is measured on.
+  ⚠️ **MEASURE CONTRAST COMPOSITED THROUGH THE MASK, NOT OFF THE CANVAS.**
+  `readPixels` reads the drawing buffer, which is BEFORE the CSS mask, so any
+  figure taken that way is optimistic wherever the ramp overlaps the type — that
+  is what hid the 1.14 regression at first. Sample the canvas, then blend each
+  pixel toward `FIELD.cream` by the smoothstep's alpha at that page y.
+  The only floor is banding; 90px is it.
 `--bar-tail` (16px) is the gap between the bar's bottom and the hero's, and
 `.intro-bar`'s `margin-bottom` reads the same token so the two cannot drift.
 The hero stage: statement (top half, 96px Hanken) →
@@ -226,7 +243,8 @@ layers (img, canvas, grain) carry `.page-field`, so one transform moves the lot.
 top, published by `measureFieldTuck` and read by hero.css to size the dissolve.
 ⚠️ **IT CANNOT BE A CONSTANT:** 229px at 1440×900, 179 at 800, 149 at 740, 119 at
 680, and only **96px at 1024×768**, whose bio runs longer. `--field-fade` is
-`clamp(56px, --field-gap * 0.45, 140px)`.
+`clamp(90px, --field-gap, 300px)` — the whole gap, which is the ceiling. See the
+mask notes above for why 1.14× the gap is a measured regression, not headroom.
 
 **`measureFieldTuck` is LAYOUT-ONLY — it runs at init and on resize, never per
 frame.** Two numbers, both measured, no CSS constants restated:
