@@ -1209,13 +1209,33 @@ function initScrollVideos() {
   // approach from the RIGHT, not from below. With 0 horizontal margin they only
   // began loading as they slid into frame — exactly the pop this observer exists
   // to prevent. Vertical lead time is unchanged.
-  const prep = new IntersectionObserver((entries, obs) => {
+  // ⚠️ IT KEEPS OBSERVING. This used to `obs.unobserve(v)` on the first hit, with
+  // the comment "buffer once; keep it" — and the premise is false in a LOOP. The
+  // track rotates (normalize()), so a card that was two steps away and never
+  // reached, or whose media element was reset by the move, has no way back to
+  // buffered once its observer is gone. Measured on the live site: two of the
+  // four videos sat at readyState 0 with networkState IDLE at any moment — the
+  // far buffer positions — so the FIRST advance was instant and the SECOND
+  // landed on a cold card. That is the "delay, and it doesn't quite load the
+  // next card in a full loop" report: after one rotation the card that becomes
+  // "next" is the one that was two away, and it is cold.
+  // Cold start costs 672ms from load() to canplay for a 2.03MB clip, and the
+  // play path below deliberately waits on canplay — so that is 672ms of poster
+  // on top of DAMP.arrival's 650ms of travel.
+  // ⚠️ An IntersectionObserver DOES re-fire when a node is moved in the DOM
+  // (verified: re-appending a target produced one extra callback), which is
+  // exactly the signal rotation generates and unobserve was throwing away.
+  // ⚠️ THE TWO GUARDS ARE LOAD-BEARING. `load()` on an element that is already
+  // holding data restarts the fetch and throws the buffer away; on one that is
+  // PLAYING it also stops playback dead. readyState >= 3 is the same threshold
+  // the play path uses, so anything it would accept is left alone.
+  const prep = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
       if (!entry.isIntersecting) return;
       const v = entry.target;
+      if (v.readyState >= 3 || !v.paused) return;
       v.preload = 'auto';
       v.load();
-      obs.unobserve(v); // buffer once; keep it
     });
   }, { rootMargin: '800px' });
   vids.forEach((v) => prep.observe(v));

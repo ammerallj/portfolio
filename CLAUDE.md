@@ -2127,6 +2127,31 @@ finally describe the real frame rather than the poster's size.
   re-arms, which is the signal to abandon), and **re-arms on a rejected `play()`
   rather than swallowing it** — a spent flag with no playback is exactly the
   state that strands a card on its poster.
+- ⚠️ **THE PREBUFFER MUST KEEP OBSERVING — it used to `unobserve` after one hit
+  ("buffer once; keep it") and that premise is FALSE IN A LOOP.** The track
+  rotates, so a card that sat two steps away and was never reached has no route
+  back to buffered once its observer is gone. **Measured on the live site: two of
+  the four videos sat at `readyState 0` with `networkState` IDLE at any moment** —
+  always the two far buffer positions.
+  - **This is why it failed PARTWAY through a loop rather than immediately**, which
+    is exactly how it was reported ("doesn't quite load the next card in a full
+    loop"). At rest the next card is warm, so the FIRST advance is instant; after
+    one rotation the card that becomes "next" is the one that was two away, and
+    it is cold.
+  - **The cost is 672ms** from `load()` to `canplay` for a 2.03MB clip, and the
+    play path deliberately waits on `canplay` — so that is 672ms of poster ON TOP
+    of `DAMP.arrival`'s 650ms of travel. That is the "delay".
+  - ⚠️ **An IntersectionObserver DOES re-fire when a node is MOVED** in the DOM
+    (verified: re-appending a target produced one extra callback). That is
+    precisely the signal rotation generates, and `unobserve` was discarding it.
+  - ⚠️ **The two guards are load-bearing**: `readyState >= 3 || !paused` before
+    `load()`. Calling `load()` on an element already holding data throws the
+    buffer away and refetches; on a PLAYING element it stops playback dead.
+  - **Page weight is unchanged.** `preload="none"` still means nothing fetches
+    until a card is within 800px; verified 0 media requests at the top of the
+    page. The extra clips load progressively as the reader goes round, not up
+    front. Verified after a full loop: 0 cold cards, next card warm at every
+    advance.
 - **The card now rests on the video's LAST FRAME.** Nothing runs on `ended` any
   more. `initScrollVideos` used to swap the poster back in, but that was a
   workaround for the upscale: the soft last frame was worse than the 2660×830
