@@ -37,8 +37,23 @@ more saturated and left visible colour under the bar and over Selected Work.
 ⚠️ **THE MASK IS 17 STOPS IN PX ON `.page-field`, AND IT ENDS ON THE NAV BAR'S
 TOP EDGE — not on the artwork's bottom.** So no gradient ever paints behind the
 nav, at rest or mid-scroll. It runs `--field-mask-start` → `--field-mask-end`,
-where `--field-mask-end: min(100%, --field-bar-top)` and
-`--field-bar-top: calc(100svh - 64px - --bar-tail)`.
+where `--field-mask-end: min(100%, 100svh)` — **the end of the landing
+viewport**.
+⚠️ **THIS USED TO BE THE NAV BAR'S TOP (`100svh - 80`) and was moved DOWN a whole
+bar-height, deliberately, to reveal more gradient.** The ramp keeps its length
+and simply sits 80px lower, so nothing is traded for the extra colour — and it
+pays twice: the bio ends up 80px CLEAR of the ramp instead of touching it, and
+red's core comes back out of the fade at short viewports (alpha 1.0 at 1440×900).
+⚠️ **THE CONSEQUENCE IS COLOUR BEHIND THE NAV** — measured alpha at the bar's top
+edge is ~0.16 at 1440×900 but **~0.52 at 1440×740**, because a short window packs
+the bio, the bar and the fold together. There is no way to move the ramp down and
+keep that strip clean; the nav is physically in the band. Put it back to
+`calc(100svh - 64px - --bar-tail)` for a clean strip and a shorter reveal.
+⚠️ **`--field-bar-top` IS DELETED**, along with the ≤680 tier's neutralising
+override. It existed only to anchor this. A token nothing reads is the exact
+hazard that took the field down once (the dead GLSL `LAYER`) and silently pinned
+the ramp another time (a stale `--field-fade`) — `100svh` needs no per-tier
+handling because it is true where there is no bar.
 ⚠️ **`100%`, NOT `--field-bottom` — they are the same number on desktop and
 DIFFERENT ONES at ≤480.** A mask resolves in the ELEMENT'S OWN BOX;
 `--field-bottom` is a PAGE coordinate, and the phone tier bakes its
@@ -239,6 +254,22 @@ layers (img, canvas, grain) carry `.page-field`, so one transform moves the lot.
   `scrollY` with no time term, so it cannot lag the page. The standing rule that
   **nothing scroll-linked may carry a CSS transition** is untouched.
 
+**THE HERO LOCKUP RIDES THE SAME `--field-scroll` (2026-09), AND "SAME" IS THE
+POINT.** `.intro-top` / `.intro-divider` / `.intro-band` add
+`- var(--field-scroll, 0px)` to their `--hero-lift` transform, so type and field
+move as ONE unit.
+- ⚠️ **DO NOT GIVE THE LOCKUP A RATE OF ITS OWN.** Moving together keeps the
+  composition RIGID — verified, the headline's offset from the field's top is a
+  constant **217px at every scroll position**. That is what makes the contrast
+  figures measured at `scrollY 0` valid all the way up. Give the lockup its own
+  multiplier and the two drift apart, the type slides onto colour nobody
+  measured, and the worst phase stops being knowable from a resting sample.
+  **The parallax is between the HERO and the PAGE, not within the hero.**
+- The `.intro-bar` deliberately does NOT move, so the lockup travels AWAY from
+  it rather than into it.
+- **Not added to the ≤480 rule** — `--field-scroll` is provably 0 wherever the
+  bar is `display: none`, so it would be inert config there.
+
 **`--field-gap`** — the measured room between the bio's last line and the bar's
 top, published by `measureFieldTuck` and read by hero.css to size the dissolve.
 ⚠️ **IT CANNOT BE A CONSTANT:** 229px at 1440×900, 179 at 800, 149 at 740, 119 at
@@ -263,6 +294,31 @@ frame.** Two numbers, both measured, no CSS constants restated:
   i.e. ≤680) and publishes `--field-scroll: 0`, which also clears any shift left
   over from a wider layout. Phones are untouched: they keep their own tier
   transform, which does not read the token.
+
+### The headline MORPHS between three statements (`initHeadlineMorph`)
+
+⚠️ **THE H1 IS NOT ONE STRING, AND EVERY HEADLINE CONTRAST FIGURE IN THIS
+DOCUMENT SHOULD BE READ WITH THAT IN MIND.** `initHeadlineMorph` (js/main.js)
+cycles `.intro-headline` between **three** statements — "Making products make
+sense." · "Finding the patterns others miss." · "Defining how products behave."
+— on a 5200ms dwell, rebuilt from motion-primitives' TextMorph in vanilla JS.
+Characters shared between the outgoing and incoming statement **keep the same DOM
+node** and FLIP from their old position to their new one; letters only in one
+side fade. Progressive enhancement: the H1 ships in the HTML with the first
+statement as plain text, so no-JS visitors and crawlers keep that and its
+SEO/JSON-LD value.
+- ⚠️ **A MID-MORPH SCREENSHOT LOOKS BROKEN AND IS NOT.** Caught between phrases
+  the H1 reads as interleaved gibberish (measured: `"MkucakFinding the patterns
+  others miss.dntepaeroem"`) with `.char-exit` spans at `opacity: 0` and
+  `blur(4px)` still in the DOM. Two screenshots were misread as a rendering bug
+  before this was traced. Wait out the 650ms fade before judging a capture.
+- ⚠️ **THE THREE PHRASES ARE DIFFERENT LENGTHS, so they occupy different bands of
+  the gradient and the headline's contrast is really THREE bands, not one.** A
+  measurement that does not say which phrase was showing is under-determined.
+  The figures recorded elsewhere here predate this being noticed.
+- `.intro-top` is bottom-anchored and overflow-clipped, so the statements'
+  differing line counts never move the divider below them.
+- Skipped entirely under `prefers-reduced-motion`.
 
 ### The animated field (`initHeroField`, 2026-09)
 **The gradient is RENDERED, not served** — a WebGL fragment shader on

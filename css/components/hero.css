@@ -286,25 +286,35 @@ html.is-field-live .page-field-grain { opacity: 0.15; }
   /* No up-shift any more, so this is just width / aspect. */
   --field-bottom: calc(var(--field-w) * 0.61061);
 
-  /* WHERE THE ARTWORK HAS TO BE GONE BY — the nav bar's top edge, in page px.
-     The bar is pulled up 80 (64 tall + --bar-tail below it), so its top is
-     100svh - 80. svh, not dvh, for the same reason .intro uses it: a dvh here
-     would move the mask mid-scroll on iOS the instant the URL bar collapses.
-     ⚠️ --field-mask-end takes the SMALLER of that and the field's own bottom, so
-     on a window tall enough that the artwork already stops short of the bar the
-     mask stays where it was and nothing is cut.
-     ⚠️ At <=680 the bar is display:none and this is neutralised there (see the
-     680 tier in responsive.css) so min() falls through to --field-bottom. */
-  --field-bar-top: calc(100svh - 64px - var(--bar-tail));
-  /* ⚠️ `100%`, NOT `--field-bottom` — they are the same number on desktop and
+  /* WHERE THE ARTWORK HAS TO BE GONE BY — the END OF THE LANDING VIEWPORT.
+     ⚠️ THIS USED TO BE THE NAV BAR'S TOP (100svh - 80) and was moved DOWN a
+     whole bar-height, deliberately, to reveal more gradient. The ramp keeps its
+     length and simply sits 80px lower, so nothing is traded for the extra
+     colour — see the two free wins on --field-fade below.
+     ⚠️ THE CONSEQUENCE IS COLOUR BEHIND THE NAV, and that is the thing to
+     re-read before touching this. The bar sits inside the ramp now: measured
+     alpha at the bar's top edge is ~0.16 at 1440x900 but ~0.52 at 1440x740,
+     because a short window packs the bio, the bar and the fold together. There
+     is no way to move the ramp down and keep the strip clean — the nav is
+     physically in that band. Put this back to `calc(100svh - 64px - --bar-tail)`
+     to get the clean strip and the shorter reveal back.
+     svh, not dvh, for the same reason .intro uses it: a dvh here would move the
+     mask mid-scroll on iOS the instant the URL bar collapses.
+     ⚠️ `100%`, NOT `--field-bottom` — they are the same number on desktop and
      DIFFERENT ONES at ≤480, which is a units bug waiting to happen. A mask
      resolves in the ELEMENT'S OWN BOX; `--field-bottom` is a PAGE coordinate,
      and the phone tier bakes its `+--field-nudge-y` transform into it. Measured
      at 375: `--field-bottom` is 792 against an element only 763 tall, so the
      ramp ran off the bottom of its own box and the artwork ended at alpha 0.16
      — a soft cut instead of a dissolve. `100%` is the artwork's bottom at every
-     tier, transform or no transform. */
-  --field-mask-end: min(100%, var(--field-bar-top));
+     tier, transform or no transform, and min() takes it on any window tall
+     enough that the artwork already stops short of the fold.
+     ⚠️ --field-bar-top IS GONE. It existed only to anchor this, and a token
+     nothing reads is the exact hazard that took the field down once today (the
+     dead GLSL `LAYER`) and silently pinned the ramp another time (a stale
+     `--field-fade`). The ≤680 tier's neutralising override went with it — this
+     needs no per-tier handling, because 100svh is true where there is no bar. */
+  --field-mask-end: min(100%, 100svh);
   /* HOW TALL THE DISSOLVE IS, as a fraction of the room between the bio's last
      line and the bar. --field-gap is that room, published by measureFieldTuck;
      112px is the no-JS floor.
@@ -518,11 +528,30 @@ html.is-field-live .page-field-grain { opacity: 0.15; }
 
 /* Headline, divider and bio all rise --hero-lift together. Mirrors the ≤480
    tier's drop; that tier overrides this rule (same selectors, responsive.css
-   imported last), so phones keep their own downward offset. */
+   imported last), so phones keep their own downward offset.
+
+   ⚠️ THE LOCKUP RIDES THE SAME --field-scroll AS THE ARTWORK (2026-09), AND
+   "SAME" IS THE WHOLE POINT — do not give it a rate of its own. Type and field
+   moving together keeps the composition RIGID: the headline and bio sit on
+   exactly the same band of gradient at every scroll position they did at rest,
+   so the contrast figures measured at scrollY 0 hold all the way up. Give the
+   lockup its own multiplier and the two drift apart, the type slides onto colour
+   nobody measured, and the worst phase stops being knowable from a resting
+   sample. The parallax is between the HERO and the PAGE, not within the hero.
+   ⚠️ It is a TRANSFORM, so .intro's box, the Work-card peek and the docking
+   bar's maths are all untouched — the bar is a sibling and deliberately stays
+   put, so the lockup moves AWAY from it rather than into it.
+   ⚠️ measureFieldTuck reads the bio with accumulated offsetTop, which ignores
+   transforms, so --field-gap keeps its RESTING value and the mask geometry does
+   not chase the scroll. Switch that to getBoundingClientRect and you get a
+   feedback loop: the mask would move the bio, which would resize the mask.
+   ⚠️ Not added to the ≤480 rule: --field-scroll is provably 0 wherever the
+   .intro-bar is display:none (measureFieldTuck returns early), so it would be
+   inert config there — and inert config is what bit this file twice today. */
 .intro-top,
 .intro-divider,
 .intro-band {
-  transform: translateY(calc(-1 * var(--hero-lift)));
+  transform: translateY(calc(-1 * var(--hero-lift) - var(--field-scroll, 0px)));
 }
 
 .intro-divider {

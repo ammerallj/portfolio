@@ -463,19 +463,6 @@
     display: none;
   }
 
-  /* ...and with no bar, there is no bar's-top for the field's dissolve to end
-     on. hero.css anchors the mask to --field-bar-top (100svh - 80) so the
-     gradient is gone before the nav begins; neutralise it to a value its min()
-     can never pick and the mask falls back to ending at the artwork's own
-     bottom, which is the behaviour every tier below this one was tuned against.
-     ⚠️ This belongs in the NAV tier and nowhere else — it states a nav fact
-     ("there is no bar here"), which is exactly this tier's charter. It is also
-     why the field needs no other responsive work: --field-gap goes unread once
-     min() stops choosing the bar. */
-  :root {
-    --field-bar-top: 100000px;
-  }
-
   /* The header floats OVER the hero here instead of stacking above it,
      so the field reaches the top of the screen: fixed takes it out of flow, and
      at rest it drops the cream glass entirely. `html.is-at-page-top` is the
@@ -655,11 +642,14 @@
     /* ⚠️ --field-clip: 0 / --field-fade: 0 USED TO BE HERE and are deleted, not
        moved. They neutralised a superseded token-driven mask; against the
        current rule --field-fade: 0 would collapse the dissolve to a HARD CUT
-       across the bottom of the phone's artwork. This tier needs no field-mask
-       rule at all now: the 680 tier already neutralises --field-bar-top (no bar
-       to end on), so the mask falls back to the artwork's own bottom, and
-       --field-fade resolves from its own no-JS fallback because
-       measureFieldTuck returns early where the bar is hidden. */
+       across the bottom of the phone's artwork.
+       ⚠️ THIS TIER NEEDS NO FIELD-MASK RULE AT ALL, and that is by construction
+       rather than by luck. hero.css ends the ramp at `min(100%, 100svh)`: the
+       `100%` is the artwork's own box, so it is right here even though this
+       tier's --field-bottom carries the --field-nudge-y transform, and the
+       100svh term is true whether or not there is a bar. --field-fade falls back
+       to its no-JS default because measureFieldTuck returns early where the bar
+       is hidden, so --field-gap is never published. */
     --field-bottom: calc(var(--field-w) * 0.53734 + var(--field-nudge-y));
 
     /* The hero's geometry at this tier, named once so the frost pane can be
