@@ -442,26 +442,56 @@ const FIELD = {
   // (0.19 -> 0.33 across that range) while the ceiling rises, so a mean or a
   // single sample looks fine right up to the point the worst phase is illegal.
   // Re-measure the bio's floor over a full cycle before raising this again.
-  // ⚠️ pulse RAISED 0.16 -> 0.35 (2026-09). At 0.35 the largest orb (red) swells
-  // 316px in radius and back over its 27-45s period, against 145px before.
+  // ⚠️ pulse RAISED 0.16 -> 0.30 (2026-09). At 0.30 the largest orb (red) swells
+  // 271px in radius and back over its 27-45s period, against 145px before.
+  // ⚠️ IT WENT TO 0.60 FIRST AND CAME BACK — THE LIMIT IS HUE, NOT CONTRAST.
+  // At 0.60 the field visibly "becomes purple at one point". The cause is NOT
+  // that the peak is more purple — measured, the purple maximum barely moves
+  // (40.4% -> 41.8% of the field across every setting tried, including the
+  // original). It is that the TROUGH GETS PALER: small orbs leave more cream, so
+  // the purple share falls 31.9% -> 17.9% and the field starts cycling between
+  // washed-out and purple. That EXCURSION is what the eye catches.
+  //   pulse  red grows  purple swing  purple floor
+  //   0.16   +145px     8.7 pts       31.9%
+  //   0.25   +226px     11.9          29.1%
+  //   0.30   +271px     13.7          27.5%   <- shipped
+  //   0.35   +316px     15.6          25.7%
+  //   0.60   +542px     24.0          17.9%   <- too much, reads as a colour cycle
+  // ⚠️ DRIFT IS NOT INVOLVED — check this before "fixing" the wrong dial, which
+  // is what was reached for first. Holding pulse and changing drift leaves the
+  // swing flat (15.9 -> 15.7 at pulse 0.35; 24.6 -> 24.0 at 0.60); holding drift
+  // and changing pulse nearly triples it.
   // ⚠️ PULSE HAS NO ACCESSIBILITY CEILING, AND THAT IS A PROPERTY OF THE
   // RECTIFIED WAVE, not luck. `(.5+.5*sin)` runs 0..1, so an orb's MINIMUM is
   // always its base radius whatever pulse is set to — raising it can only add
   // colour at the peak, never take any away. Contrast therefore improves
   // monotonically. Swept at 1440x900 over 20 exact phases, composited:
-  //   pulse  red grows  bio floor-ceiling   headline
-  //   0.16   +145px     3.02 - 3.24         2.43 - 2.63
-  //   0.35   +316px     3.13 - 3.32         2.55 - 2.78   <- shipped
-  //   0.45   +407px     3.18 - 3.38         2.56 - 2.89
-  //   0.60   +542px     3.24 - 3.51         2.60 - 3.23
-  // So the ONLY constraint here is taste — bigger is measurably safer, and at
-  // 0.60 even the headline's best phases clear 3:1. Contrast that with `drift`
-  // directly above, which fails at 0.062: the two dials are not alike, and the
-  // difference is entirely that one is rectified and the other is not.
+  //   pulse  red grows  bio floor  headline floor  mean sat  colour evenness
+  //   0.16   +145px     3.02       2.43            --        --
+  //   0.35   +316px     3.13       2.55            0.409     0.897
+  //   0.60   +542px     3.24       2.60  <- peak   0.395     0.893
+  //   0.75   +678px     3.29       2.59            0.381     0.907
+  //   0.90   +813px     3.32       2.52            0.365     0.921
+  // (Contrast keeps improving well past what is usable — see the HUE table above
+  //  for the constraint that actually binds.)
+  // Contrast that with `drift` directly above, which FAILS at 0.062: the two
+  // dials are not alike, and the difference is entirely that one is rectified
+  // and the other is not.
+  // ⚠️ 0.60 IS A MEASURED KNEE, NOT A LIMIT. Two things turn over there. The
+  // HEADLINE floor peaks at 0.60 and declines after; and MEAN SATURATION falls
+  // steadily as pulse rises (0.409 -> 0.365), because at the peak each orb's
+  // outer ramp — which lifts to WHITE — covers more of the field. So past 0.60
+  // the bio keeps improving while the field gets paler and the headline gets no
+  // better. That is the trade to weigh, not an accessibility wall.
+  // ⚠️ IT DOES NOT MUSH THE COLOURS, which was the thing worth checking before
+  // going big. Measured at the fullest phase, the four hues' share of the field
+  // stays even (Shannon evenness 0.89-0.92) and actually RISES with pulse: red's
+  // dominance drops .45 -> .40 while cyan gains .22 -> .32. Bigger orbs overlap
+  // more but they do not collapse into one wash.
   // ⚠️ Do NOT "restore" a bare sin to make it shrink below base. That was the
   // original form and the trough pulled every orb's reach in by 8% at once,
   // which is what put the bio's worst phases under threshold.
-  motion: { speed: 1.85, drift: 0.050, driftYRatio: 0.2, pulse: 0.35, warp: 0.55 },
+  motion: { speed: 1.85, drift: 0.050, driftYRatio: 0.2, pulse: 0.30, warp: 0.55 },
   // Buffer size vs CSS px. BELOW devicePixelRatio deliberately: a soft
   // gradient carries no per-pixel detail, so 1.0 on a 2x display is a 4x
   // fill-rate saving nobody can see. Grain is the one thing that does want

@@ -483,16 +483,28 @@ motion**. Judge it in a real browser window.
   never take any away, so contrast improves MONOTONICALLY. Swept at 1440×900 over
   20 exact phases, composited: **0.16 → red grows 145px, bio 3.02–3.24 · 0.35 →
   +316px, bio 3.13–3.32 · 0.45 → +407px, bio 3.18–3.38 · 0.60 → +542px, bio
-  3.24–3.51** — and at 0.60 even the headline's best phases reach 3.23. Shipped
-  at **0.35**; the only constraint is taste, and bigger is measurably safer.
+  3.24–3.51** — and at 0.60 even the headline's best phases reach 3.23.
+  ⚠️ **BUT THE BINDING CONSTRAINT IS HUE, NOT CONTRAST — shipped at 0.30.** Taken
+  to 0.60 the field visibly "becomes purple at one point". The cause is NOT a
+  more purple peak: the purple maximum barely moves (**40.4% → 41.8%** of the
+  field across every setting tried, the original included). It is that the
+  **TROUGH GETS PALER** — small orbs leave more cream, so the purple share falls
+  **31.9% → 17.9%** and the field cycles between washed-out and purple. That
+  EXCURSION is what the eye catches. Purple swing by pulse: **0.16 → 8.7pts ·
+  0.25 → 11.9 · 0.30 → 13.7 (shipped) · 0.35 → 15.6 · 0.60 → 24.0.**
+  ⚠️ **`drift` IS NOT INVOLVED IN THE PURPLE, and it was the first thing reached
+  for.** Hold pulse and change drift: the swing is flat (15.9 → 15.7 at pulse
+  0.35; 24.6 → 24.0 at 0.60). Hold drift and change pulse: it nearly triples.
+  **When the field's COLOUR misbehaves over time, measure pulse; when its
+  POSITION does, measure drift.**
   ⚠️ **Do NOT "restore" a bare sin so it shrinks below base.** That was the
   original form and the trough pulled every orb's reach in by 8% at once, which
   is what put the bio's worst phases under threshold.
 - **The motion is real but slow by design** — measured on the live site: ±72px
   horizontal over 16–44s per orb (two incommensurate sines, so the path never
-  repeats), ±9px vertical, and a +35% radius pulse over 27–45s. Raising drift
-  0.038→0.050 and pulse 0.16→0.35 took the share of the field moving more than
-  the dither floor from **5.8% → 10.7% → 21.6%.** ⚠️ Confirming it
+  repeats), ±9px vertical, and a +30% radius pulse over 27–45s. Raising drift
+  0.038→0.050 and pulse 0.16→0.30 took the share of the field moving more than
+  the dither floor from **5.8% → 10.7%** and up again. ⚠️ Confirming it
   runs is a MEASUREMENT, not a look: in the pane, rAF at 0.9Hz plus the 100ms
   `dt` cap means the field advances ~0.09s of animation per wall second, ~11×
   slow. Sample the canvas twice a few seconds apart and compare against the
