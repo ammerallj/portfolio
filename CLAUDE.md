@@ -34,11 +34,19 @@ the fold and dissolve into the cream on its own, which was true of the JPEG (its
 lower reaches are near-white) and NOT of the shader, whose blobs are larger and
 more saturated and left visible colour under the bar and over Selected Work.
 
-⚠️ **THE MASK IS 17 STOPS IN PX ON `.page-field`, AND IT ENDS ON THE NAV BAR'S
-TOP EDGE — not on the artwork's bottom.** So no gradient ever paints behind the
-nav, at rest or mid-scroll. It runs `--field-mask-start` → `--field-mask-end`,
-where `--field-mask-end: min(100%, calc(100svh + --field-rise))` — **the end of
-the landing viewport**.
+⚠️ **THE MASK IS 17 STOPS IN PX ON `.page-field`, AND IT ENDS AT THE FOLD — not
+on the artwork's bottom, and NOT on the nav bar's top.** It runs
+`--field-mask-start` → `--field-mask-end`, where
+`--field-mask-end: min(100%, calc(100svh + --field-rise))` — **the end of the
+landing viewport**.
+⚠️ **SO COLOUR DOES REACH THE NAV, DELIBERATELY.** An earlier version of this
+entry ended the ramp on the bar's TOP and claimed "no gradient ever paints behind
+the nav"; that was true then and is not now. The ramp was moved DOWN a whole
+bar-height to reveal more gradient — measured alpha at the bar's top edge is
+**~0.16 at 1440×900 and ~0.52 at 1440×740**, because a short window packs the
+bio, the bar and the fold together. See the `--field-rise` note below for the
+trade, and put `--field-mask-end` back to `calc(100svh - 64px - --bar-tail)` to
+restore the clean strip.
 
 ⚠️ **`--field-rise` (30px) MOVES THE ARTWORK WITHOUT MOVING THE SCRIM, and the
 `+ --field-rise` in the mask is what buys that.** The two live in different
@@ -474,6 +482,28 @@ it:** in any throttled context the cap makes the field run slow — at 1 rAF tic
 per second it advances at one-tenth speed. That is correct behaviour, and it is
 also why **the preview pane cannot judge this motion at all** (measured: the pane
 throttling rAF to ~1Hz, with pixel deltas indistinguishable from dither alone).
+⚠️ **THE REAL VARIABLE IS `document.visibilityState`, NOT "the pane" — and knowing
+that is the difference between hours of false readings and a working test.**
+Measured in one session: a HIDDEN pane reports `rafHz 0.9` and eventually stops
+rAF outright, blocks media playback, and deprioritises IntersectionObserver
+delivery; the SAME pane, visible, reports **`rafHz 60.3`** and behaves normally.
+So a hidden pane does not merely run slow — videos never load, observers never
+fire, animations freeze mid-flight, and every one of those looks exactly like a
+site bug. **Check `document.visibilityState` before trusting any timing,
+playback, animation or IntersectionObserver reading, and abort the measurement if
+it is `hidden`.**
+- **What still works while hidden:** layout. `getBoundingClientRect`,
+  `offsetWidth/Height`, computed styles and `scrollLeft` are all reliable, so
+  geometry bugs CAN be measured in a hidden pane. That is how the 0.17px rotation
+  bug and the blank posters were both found.
+- **What to do instead:** drive the user's own browser through the
+  `claude-in-chrome` tools. It is visible, runs at 60Hz, and is the environment
+  the reader actually has. Several bugs this file records were only reproducible
+  there, because they depend on the reader's real viewport width.
+- ⚠️ **A tab you have been injecting into is not a clean room.** Destroyed Lenis,
+  leftover globals and prior scroll state produced "nothing loads at all" twice,
+  both times mistaken for a regression. Use a fresh tab for any state-dependent
+  check.
 Same limitation as `DAMP.arrival` — see the note under **Damped horizontal
 motion**. Judge it in a real browser window.
 - ⚠️ **`motion.drift` IS THE DIAL FOR LIVELINESS — never the orbit rates.**
@@ -1860,9 +1890,16 @@ delta *magnitude* matters again, so a gentle scroll moves a little.
   PREVIOUS card hanging on the left with no next-card peek on the right. Mandatory
   snap then yanks the track on the next gesture, which is the "it harshly appears
   and pushes the card in view over" report.
+  The two tests are now symmetric: **forward `scrollLeft >= step * 2 - 1`,
+  backward `scrollLeft <= 1`.**
   ⚠️ **IT IS INVISIBLE AT 1440** — the design width makes the card exactly 1216 and
   every boundary a whole number. Reproducing this needs a width where the clamp
   produces a fraction; testing at 1440 will always pass.
+  ⚠️ **GENERALISE THIS BEFORE TESTING ANY CAROUSEL GEOMETRY: 1440 IS THE ONE WIDTH
+  WHERE THE ARITHMETIC IS EXACT.** `--width-right-column` is a clamp, so the card
+  width — and therefore `step`, every snap position and every boundary — is
+  fractional at most other widths. Anything comparing `scrollLeft` against a
+  multiple of `step` needs a tolerance, and will pass at 1440 regardless.
 - **Never move the FOCUSED card.** Moving a focused element resets the browser's
   sequential-focus starting point; measured, it sent Tab *backwards* through the
   projects. `flushFocusedCard` shuffles only the cards around it.
@@ -1955,6 +1992,16 @@ own version, separate from the `style.css?v=` / `@import` CSS bump below).
   removed again in 2026-08 when the insight band dropped italic (and the band was
   later removed entirely); don't leave an unused face behind if italic is dropped
   again.
+- ⚠️ **AFTER A DEPLOY, HARD-RELOAD BEFORE JUDGING ANYTHING.** `index.html` has no
+  cache-buster of its own (correctly — see the `?v=` entry below), so a browser
+  that already has the page keeps serving the OLD html, which still names the OLD
+  `main.js?v=…` and `style.css?v=…`. The new hashes only take effect once the
+  HTML naming them is re-fetched. This wasted a long debugging session: a fix was
+  verified live by `curl` and simultaneously "still broken" in the browser, purely
+  because the browser held a cached `index.html` pointing at the previous JS.
+  **Verify a deploy with the served HTML (`curl -H 'Cache-Control: no-cache'`),
+  and tell whoever is looking to hard-reload.** A `?anything=1` on the URL also
+  bypasses it, which is the quickest way to check.
 - The `?v=` cache-buster is **automatic** — a git `pre-commit` hook
   (`.githooks/pre-commit`) runs `scripts/bump-cache.sh` whenever a commit stages
   a change to a component stylesheet or `js/main.js`, re-stamping every `?v=`
@@ -2141,6 +2188,41 @@ finally describe the real frame rather than the poster's size.
   re-arms, which is the signal to abandon), and **re-arms on a rejected `play()`
   rather than swallowing it** — a spent flag with no playback is exactly the
   state that strands a card on its poster.
+- ⚠️ **THE POSTERS NEED WARMING TOO, AND FORGETTING THEM MADE A CARD "HARSHLY
+  APPEAR".** They are `loading="lazy"`, which is right for a vertical page and
+  wrong for this track: the two buffer cards sit ~1220px and ~2600px off-screen
+  SIDEWAYS, past the browser's own lazy threshold. **Measured at rest, both far
+  cards reported `poster.complete === false` and naturalWidth 0** — genuinely
+  BLANK boxes, with the image arriving fully formed and untransitioned as the
+  card slid in. Nothing was resizing: verified every card holds 1216×596 through
+  an advance with no size change anywhere.
+  - `warmPosters()` flips `loading` to eager on any poster that has not loaded.
+  - ⚠️ **It runs on IDLE, not on geometry.** Two gated versions were tried and
+    both were wrong. A **1200px** section margin was MEASURED USELESS — Selected
+    Work's top sits EXACTLY at the fold, so the gate was already satisfied at page
+    load. A **200px** margin deferred correctly and was still TOO LATE: three
+    ~400KB posters were arriving while the reader was already on the cards.
+    A poster has no fade of its own — whenever it decodes it simply paints — so
+    the only way it is not a pop is for it to be there first.
+  - The markup keeps `loading="lazy"` so no-JS and crawlers are unchanged, and
+    `preload="none"` still keeps the 10MB of VIDEO out of the initial load.
+- ⚠️ **`PLAY_AT` IS A NAMED CONSTANT AND MUST STAY ONE.** It is the intersection
+  ratio at which a card plays and crossfades (**0.4**), and it is read in TWO
+  places: the `intersectionRatio >=` comparison AND the observer's `threshold`
+  array. An IntersectionObserver only delivers a callback when a **listed**
+  threshold is crossed, so raising the comparison without raising the array means
+  the qualifying callback never arrives and **no card ever plays**. They were two
+  loose `0.4` literals; a single constant is what makes that unfixable.
+  - ⚠️ **It went to 0.6 and came back.** Raised chasing cards that "appeared with
+    no fade", which the ROTATION BUG below explained in full. Once that was fixed
+    0.6 was pure cost: ~45ms later on every advance (ratio 0.4 is crossed at
+    ~85ms, 0.6 at ~130ms) for nothing.
+- **The poster crossfade is `0.25s`, down from 0.45s** (`.work-card-poster` in
+  sections.css). It is a fraction of a **2.03s clip**, not a page transition: the
+  reveal only starts once `play()` resolves, itself ~350–400ms into the damped
+  advance, and at 0.45s the fade then ate 22% of the clip. ⚠️ **Do not take it to
+  0** — the poster and the first frame are close but not identical (mean channel
+  delta 12–16), so a hard cut flickers.
 - ⚠️ **THE PREBUFFER MUST KEEP OBSERVING — it used to `unobserve` after one hit
   ("buffer once; keep it") and that premise is FALSE IN A LOOP.** The track
   rotates, so a card that sat two steps away and was never reached has no route
