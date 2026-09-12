@@ -1031,8 +1031,17 @@
    scroll position; that is derived live from computed style, so it follows this
    automatically. Don't hard-code either number there. */
 #about {
-  padding-top: 0;
-  /* ⚠️ NO LONGER RESERVES THE SCRIM'S LENGTH. It used to be
+  /* ⚠️ THE SECTION'S OWN PADDING, BOTH SIDES. This was `padding-top: 0` — correct
+     only while About carried a `min-height` and filled its frame, where the top
+     padding was slack the centring absorbed anyway. With the min-height gone
+     (see below) that zero became real: About's heading sat hard against Work's
+     bottom padding with nothing of its own. */
+  padding-top: var(--gap-section);
+  /* THE CREAM TAIL — and it is deliberately LONGER than --gap-section, because it
+     is doing a second job: it is the space the ledge occupies at rest, so About's
+     copy still ends on clean cream while About is the thing being read. See
+     CONTACT.reach in js/main.js, whose `rest` length IS this token.
+     ⚠️ NO LONGER RESERVES THE SCRIM'S LENGTH. It used to be
      `calc(--about-tail + --contact-ledge-length)` so the dissolve had somewhere
      to go without touching content — but the scrim is now allowed to reach over
      About's copy, so reserving that space only pushed Contact further away.

@@ -268,6 +268,21 @@ const CONTACT = {
     // a long way clear of that floor if it ever wants to go further.
     ledgeShorten: 16,
   },
+
+  // ⚠️ THE LEDGE'S REACH IS SCROLL-LINKED — IT ONLY WASHES OVER ABOUT ON THE WAY
+  // DOWN TO CONTACT, AND AT ABOUT'S RESTING POSITION IT DOES NOT TOUCH THE COPY.
+  // `rest` is exactly --about-tail: the ledge fills About's bottom padding and
+  // stops, so the cream space under the copy is intact while About is the thing
+  // being read. It then grows to the full --contact-ledge-length as Contact
+  // arrives. ⚠️ Keep `rest` AT OR UNDER --about-tail — past it the ledge eats the
+  // cream gap at rest, which is the one thing this schedule exists to protect.
+  //
+  // ⚠️ THE WINDOW IS MEASURED, NOT A VIEWPORT FRACTION. It runs from ABOUT'S OWN
+  // resting edge to Contact's, both of which the page already computes, so it
+  // tracks whatever those sections actually do at this width instead of assuming
+  // a composition. `span` ends the growth before the panel docks, so the reach is
+  // finished rather than still arriving when the section settles.
+  reach: { rest: 160, span: 0.62 },
 };
 
 let lastContactEdge = -1;
@@ -402,6 +417,19 @@ const DARK_TEXT_ALPHA = 0.86;
 
 let contactLedge = 0;
 let contactRestEdge = 0;
+// Contact's edge at ABOUT's resting position — the top of the reach window.
+// ⚠️ Taken from sectionRestingScrollY (i.e. restingFor), never re-derived: a
+// second definition of "where About settles" is exactly the kind that drifts.
+let aboutRestEdge = 0;
+function measureAboutRest() {
+  aboutRestEdge = 0;
+  if (!contactSection || !aboutSection || !sectionRestingScrollY) return;
+  const rest = sectionRestingScrollY(aboutSection);
+  if (rest == null) return;   // ≤680 / reduced motion: nothing settles, so the
+  const pageTop = (el) => {    // reach falls back to full, i.e. today's ledge.
+    let y = 0; for (let n = el; n; n = n.offsetParent) y += n.offsetTop; return y; };
+  aboutRestEdge = Math.max(0, pageTop(contactSection) - rest);
+}
 let contactAccentRGB = '74, 69, 255';
 let contactGlyphMid = 32;
 let contactCopyOffset = 0;
@@ -442,6 +470,15 @@ function measureContactArrival() {
   // this whole change exists to remove, while the ledge itself still looked
   // right. The pseudo-element's own height IS the resolved value, and it is also
   // the thing the bar has to match — so this cannot disagree with what paints.
+  //
+  // ⚠️ AND ZERO THE LIFT FIRST. The painted height is
+  // `calc(--contact-ledge - --contact-ledge-lift)`, so measuring while a lift is
+  // published reads the ALREADY-SHORTENED ledge and the next frame subtracts the
+  // lift again — the reach would ratchet down on every resize mid-scroll. Latent
+  // while the lift was only ever 16px at the top of the page; not latent once it
+  // carries the whole reach.
+  document.documentElement.style.setProperty('--contact-ledge-lift', '0px');
+  lastLedgeLift = 0;
   contactLedge = contactSection
     ? parseFloat(getComputedStyle(contactSection, '::before').height) || 0
     : 0;
@@ -2672,9 +2709,24 @@ function updateScrollEffects() {
       // descends and the blue sits lower. Everything downstream takes this rather
       // than the token, or the bar's fill stops matching the ramp it is a window
       // onto and the seam comes back.
+      //
+      // THE REACH: how far the ledge is allowed to climb over About at this
+      // scroll position. 0 at About's resting edge (the ledge is exactly its
+      // bottom padding and the copy sits on clean cream), 1 once the reader has
+      // travelled `span` of the way to Contact's own resting edge.
+      // ⚠️ Smoothstep, so it is flat at BOTH ends — the growth neither starts nor
+      // stops with a kink, and About's resting composition is a stationary point
+      // rather than a corner the reader crosses.
+      const reachSpan = (aboutRestEdge - contactRestEdge) * CONTACT.reach.span;
+      const reachT = aboutRestEdge > 0 && reachSpan > 0
+        ? Math.max(0, Math.min(1, (aboutRestEdge - edge) / reachSpan))
+        : 1;                                   // unmeasurable -> today's full ledge
+      const reach = reachT * reachT * (3 - 2 * reachT);
+      const restLen = Math.min(CONTACT.reach.rest, ledge);
+      const reached = restLen + (ledge - restLen) * reach;
       const ledgeShorten = Math.max(0, peekDir) * CONTACT.peek.ledgeShorten;
-      const liveLedge = Math.max(1, ledge - ledgeShorten);
-      setLedgeLift(Math.round(ledgeShorten));
+      const liveLedge = Math.max(1, reached - ledgeShorten);
+      setLedgeLift(Math.round(ledge - liveLedge));
       setContactEdge(Math.round(edge * 100) / 100);
 
       const covered = blueBehindBar(contactRect.top, liveLedge, invertLine);
@@ -2822,9 +2874,11 @@ window.addEventListener('scroll', onScroll, { passive: true });
 // the ramp's slope has changed under the reader's current scroll position.
 measureFieldTuck();
 measureContactArrival();
+measureAboutRest();
 window.addEventListener('resize', () => {
   measureFieldTuck();
   measureContactArrival();
+  measureAboutRest();
   updateScrollEffects();
 });
 updateScrollEffects();
@@ -3021,6 +3075,7 @@ function initSectionGeometry(lenis) {
   }
 
   sectionRestingScrollY = (el) => (sections.includes(el) && wide.matches ? restingFor(el) : null);
+  measureAboutRest();   // the reach window's top anchor; needs the line above.
 
   // WHERE A CLICK LANDS, which is deliberately not always the resting position.
   //
