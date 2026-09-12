@@ -1,15 +1,15 @@
 /* style.css - Master Compiler */
-/* NOTE: keep the ?v= on each @import in sync with the style.css?v=466c031c in
+/* NOTE: keep the ?v= on each @import in sync with the style.css?v=eed55c9a in
    index.html. Browsers cache @import URLs independently, so bumping only the
    <link> does NOT refetch these component files — the version must be on the
    imports too. */
-@import url('css/components/global.css?v=466c031c');
-@import url('css/components/header.css?v=466c031c');
-@import url('css/components/hero.css?v=466c031c');
-@import url('css/components/sections.css?v=466c031c');
-@import url('css/components/footer.css?v=466c031c');
-@import url('css/components/project-overview.css?v=466c031c');
-@import url('css/components/mobile-menu.css?v=466c031c');
+@import url('css/components/global.css?v=eed55c9a');
+@import url('css/components/header.css?v=eed55c9a');
+@import url('css/components/hero.css?v=eed55c9a');
+@import url('css/components/sections.css?v=eed55c9a');
+@import url('css/components/footer.css?v=eed55c9a');
+@import url('css/components/project-overview.css?v=eed55c9a');
+@import url('css/components/mobile-menu.css?v=eed55c9a');
 
 /* ALWAYS LAST: Media breakpoints override desktop styles */
-@import url('css/components/responsive.css?v=466c031c');
+@import url('css/components/responsive.css?v=eed55c9a');

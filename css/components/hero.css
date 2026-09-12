@@ -775,8 +775,20 @@ html.is-field-live .page-field-grain { opacity: 0.15; }
      bleed is now variable. As it shrank, 42%/55%/68% marched up INTO the 64px
      bar and started fading the frost out behind the nav items themselves. In px
      the frost keeps its shape and the shrinking box simply clips its tail, which
-     is the whole intent. These four are the old percentages resolved at the full
-     164px box (64 bar + 100 bleed), so the rendering is unchanged there. */
+     is the whole intent.
+
+     ⚠️ THE FADE NOW STARTS AT THE LOWEST NAV ITEM (50px — the "Say hello" pill's
+     bottom, measured; the wordmark ends at 47 and the links at 44) AND RUNS TO 0
+     ACROSS THE WHOLE REMAINING BOX (166px at full bleed). It used to hold ~full
+     to 69px — 19px BELOW the type — and then drop 0.92 → 0 in 43px, which is
+     what read as the cream ending on a line: full strength level with nothing,
+     then a short steep ramp.
+
+     ⚠️ AND IT IS A SMOOTHSTEP IN 17 STOPS, not the old four. Those four were
+     piecewise LINEAR, so the profile had slope corners at 69 and 90 and the eye
+     reads a slope discontinuity as an edge — the same finding as the Contact
+     ledge's ramp and the mobile header's scrim. A smoothstep has zero slope at
+     both ends. */
   /* TWO layers, and the ORDER IS THE POINT. The first is the Contact panel's
      blue at a variable alpha — --dark-mix, published by updateScrollEffects —
      painted over the cream frost beneath it in the SAME element, so it covers it.
@@ -822,9 +834,23 @@ html.is-field-live .page-field-grain { opacity: 0.15; }
       rgba(var(--color-accent-rgb), var(--dark-mix, 0)) 100%)),
     linear-gradient(to bottom,
       rgba(251, 252, 248, 0.95) 0,
-      rgba(251, 252, 248, 0.92) 69px,
-      rgba(251, 252, 248, 0.4) 90px,
-      rgba(251, 252, 248, 0) 112px);
+      rgba(251, 252, 248, 0.9500) 50.0px,
+      rgba(251, 252, 248, 0.9393) 57.2px,
+      rgba(251, 252, 248, 0.9092) 64.5px,
+      rgba(251, 252, 248, 0.8623) 71.8px,
+      rgba(251, 252, 248, 0.8016) 79.0px,
+      rgba(251, 252, 248, 0.7297) 86.2px,
+      rgba(251, 252, 248, 0.6494) 93.5px,
+      rgba(251, 252, 248, 0.5636) 100.8px,
+      rgba(251, 252, 248, 0.4750) 108.0px,
+      rgba(251, 252, 248, 0.3864) 115.2px,
+      rgba(251, 252, 248, 0.3006) 122.5px,
+      rgba(251, 252, 248, 0.2203) 129.8px,
+      rgba(251, 252, 248, 0.1484) 137.0px,
+      rgba(251, 252, 248, 0.0877) 144.2px,
+      rgba(251, 252, 248, 0.0408) 151.5px,
+      rgba(251, 252, 248, 0.0107) 158.8px,
+      rgba(251, 252, 248, 0.0000) 166.0px);
   /* THE FROST FADES OUT AS THE STRIP GOES SOLID, and it has to.
      A blur samples a radius around each pixel, so at the element's bottom edge it
      reaches ABOVE Contact's top and pulls cream down into the blue — which is

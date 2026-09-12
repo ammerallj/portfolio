@@ -1073,6 +1073,38 @@ onto* this ramp; feed it the token while the ramp is a different length and the
   which throws every frame inside `updateScrollEffects` and silently strands
   `--dark-mix`, `--bar-bleed` and the rest at their last values.
 
+### The landing bar's cream fade (2026-09)
+
+`.intro-bar::before`'s cream now **holds full to the lowest nav item and eases to
+0 across the rest of the box** — 0.95 to **50px** (the "Say hello" pill's bottom,
+measured; the wordmark ends at 47 and the links at 44), then a smoothstep to 0 at
+**166** (64 bar + 100 bleed + 2).
+
+⚠️ **IT USED TO HOLD ~FULL TO 69px — NINETEEN PIXELS BELOW THE TYPE — then drop
+0.92 → 0 in 43px.** That is what read as the cream "ending on a line": full
+strength level with nothing, then a short steep ramp. The fix is where the fade
+STARTS, not how long it is.
+
+⚠️ **AND IT IS A SMOOTHSTEP IN 17 STOPS, not the old four.** Those four were
+piecewise LINEAR, so the profile had slope corners at 69 and 90, and the eye
+reads a slope discontinuity as an edge — the same finding as the Contact ledge's
+ramp and the mobile header's scrim. Three separate surfaces on this site have now
+hit it.
+
+⚠️ **`CONTACT.frost` IN js/main.js HAD TO MOVE WITH IT** — the bar's compensated
+fill repairs what the frost hides, so it needs the frost's real profile and a
+gradient cannot be read back out of CSS. It is a sampled version of the same
+curve.
+- ⚠️ **THE PLATEAU POINT AT 50 IS LOAD-BEARING.** Without it the first segment
+  interpolates straight from 0 to the first curve sample and skips the flat hold,
+  putting the JS **8 code values** under the CSS right at the nav item's bottom —
+  the one place the two must agree, since that is where the fill is repairing the
+  most opaque part of the frost. With it, worst disagreement is **2.6 code
+  values**, in the tail where the frost is at alpha 0.04 and the repair barely
+  matters.
+- **Check them against each other after any change** by parsing the computed
+  `background-image` and comparing to `contactFrostAt` — nothing enforces it.
+
 ### The mobile header's scrim (`--header-bleed`, 2026-09)
 
 `.site-header`'s frost now **bleeds to full transparency** instead of ending on a

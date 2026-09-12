@@ -196,10 +196,21 @@ function setFieldScroll(px) {
 const CONTACT = {
   // ⚠️ hero.css's frost gradient, TRANSCRIBED. The bar's fill has to know what
   // the frost hides in order to repair it, and a background gradient cannot be
-  // read back out of CSS. Keep these four pairs identical to the second
-  // background-image layer on .intro-bar::before — nothing enforces it, the same
-  // standing hazard as --color-accent / --color-accent-rgb.
-  frost: [[0, 0.95], [69, 0.92], [90, 0.40], [112, 0]],
+  // read back out of CSS. Keep these in step with the second background-image
+  // layer on .intro-bar::before — nothing enforces it, the same standing hazard
+  // as --color-accent / --color-accent-rgb.
+  //
+  // ⚠️ THIS IS A SAMPLED SMOOTHSTEP NOW, not the old four-stop piecewise line.
+  // The cream holds 0.95 to the lowest nav item (50px) and eases to 0 across the
+  // rest of the box (166px at full bleed). contactFrostAt interpolates linearly
+  // between these, so the count is how faithfully the curve is reproduced —
+  // eighths track it to well under a code value.
+  // ⚠️ THE PLATEAU POINT AT 50 IS LOAD-BEARING. Without it the first segment
+  // interpolates straight from 0 to the first curve sample and skips the flat
+  // hold, putting the JS 8 code values under the CSS right at the nav item's
+  // bottom — the one place the two must agree, since that is where the bar's
+  // fill is repairing the most opaque part of the frost.
+  frost: [[0, 0.95], [50, 0.95], [64.5, 0.9092], [79.0, 0.8016], [93.5, 0.6494], [108.0, 0.475], [122.5, 0.3006], [137.0, 0.1484], [151.5, 0.0408], [166.0, 0.0]],
   // How far past the bar the fill is built. The bar's ::before runs
   // --bar-bleed + 2px past its own box, and BAR_BLEED is its 100px maximum.
   fillDepth: 176,
