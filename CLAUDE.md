@@ -1145,6 +1145,24 @@ there animates something the reader has not scrolled past yet. `.intro-bar`
 announces that with `is-docked`; `.site-header` (≤680) is fixed from the first
 pixel and is gated by the `is-at-page-top` check instead.
 
+⚠️ **IT RUNS ON ITS OWN `window` SCROLL LISTENER, NOT INSIDE
+`updateScrollEffects`, AND DERIVES ITS STATE FROM GEOMETRY RATHER THAN CLASSES.**
+It started inside that function, which made it depend on three things that can
+each silently take it out:
+- **Lenis loading at all.** `updateScrollEffects` is bound to `lenis.on('scroll')`,
+  and the motion system is a CDN import that is explicitly ALLOWED to fail. With
+  no Lenis there is no scroll handling whatsoever — including this.
+- **The `is-loading` early return** above it.
+- **Its position relative to the `is-docked` toggle**, since it used to read that
+  class rather than measure.
+
+**A nav that hides on scroll must not need the smooth-scroll library to be
+alive.** Native `scroll` fires regardless, and `navBarInLimbo` / `navBarCanHide`
+now compute docking from `getBoundingClientRect().top <= 0` and page-top from
+`window.scrollY <= 0`, so they are correct wherever they are called from and in
+whatever order. Verified with Lenis **destroyed**, on native scroll, at 1400×620:
+21 scrolled frames, 0 visible, all 9 limbo frames hidden.
+
 ⚠️ **DIRECTION LATCHES THE INTENT; THE INTENT IS APPLIED EVERY FRAME.** These
 were the same step at first — `setNavHidden` was called only from inside the two
 direction branches — and that left a hole: **on a slow scroll every frame's delta

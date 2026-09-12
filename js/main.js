@@ -532,7 +532,7 @@ let navWantHidden = false;
 // the first pixel and is gated by the page-top check instead.
 function navBarCanHide(bar) {
   return bar.classList.contains('intro-bar')
-    ? bar.classList.contains('is-docked')
+    ? bar.getBoundingClientRect().top <= 0
     : true;
 }
 
@@ -546,10 +546,16 @@ function navBarCanHide(bar) {
 // This deliberately overrides the show-on-scroll-up rule. Scrolling up is what
 // puts the bar into that state in the first place, so deferring to direction
 // would guarantee it is visible exactly when it should not be.
+// ⚠️ MEASURED, NOT READ FROM CLASSES. This used to test is-docked and
+// is-at-page-top, both written elsewhere in updateScrollEffects — so it depended
+// on running after them, in the same pass, with nothing in between returning
+// early. Deriving both from the rect and scrollY makes it correct wherever it is
+// called from and in whatever order.
 function navBarInLimbo(bar) {
-  return bar.classList.contains('intro-bar')
-    && !bar.classList.contains('is-docked')
-    && !html.classList.contains('is-at-page-top');
+  if (!bar.classList.contains('intro-bar')) return false;
+  const docked = bar.getBoundingClientRect().top <= 0;
+  const atPageTop = window.scrollY <= 0;
+  return !docked && !atPageTop;
 }
 
 // ⚠️ FOCUS IS CHECKED PER BAR AND WINS OVER EVERYTHING, limbo included. Hiding a
@@ -563,6 +569,21 @@ function setNavHidden(on) {
     bar.classList.toggle('is-nav-hidden', hide);
   });
 }
+
+// ⚠️ ON ITS OWN LISTENER, NOT INSIDE updateScrollEffects. It used to be called
+// from there, which made it depend on three things that can each silently take
+// it out: Lenis loading at all (updateScrollEffects is bound to lenis's scroll
+// event, and the motion system is a CDN import that is allowed to fail), the
+// `is-loading` early return above it, and its position relative to the docking
+// toggle. A nav that hides on scroll should not need the smooth-scroll library
+// to be alive. Native scroll fires this regardless.
+let navHideQueued = false;
+function onNavHideScroll() {
+  if (navHideQueued) return;
+  navHideQueued = true;
+  requestAnimationFrame(() => { navHideQueued = false; updateNavHide(); });
+}
+window.addEventListener('scroll', onNavHideScroll, { passive: true });
 
 function updateNavHide() {
   const y = window.scrollY;
@@ -587,7 +608,7 @@ function updateNavHide() {
 
   // ⚠️ NOT AT THE TOP OF THE PAGE. The landing bar is part of the hero's
   // composition until it docks, and the ≤680 header is deliberately bare there.
-  if (html.classList.contains('is-at-page-top')) navWantHidden = false;
+  if (window.scrollY <= 0) navWantHidden = false;
 
   // ⚠️ AND NOT WITH THE FOOTER IN VIEW — the bottom is the OTHER end with no
   // travel left to spend. Reaching it on a downward scroll would otherwise leave
@@ -2532,14 +2553,7 @@ function updateScrollEffects() {
     introBar.classList.toggle('is-docked', introBar.getBoundingClientRect().top <= 0);
   }
 
-  // ⚠️ AFTER the docking toggle, and OUTSIDE its guard. updateNavHide reads
-  // is-docked to tell a pinned bar from one resting in the hero's composition
-  // from one in limbo between the two, so running it earlier in the frame reads
-  // the PREVIOUS frame's state and mis-classifies the bar on the exact frame it
-  // docks or releases — the frame that matters. And it must run even where
-  // there is no .intro-bar, or the hide/show would silently do nothing for
-  // whatever bar that page does have.
-  updateNavHide();
+
 
   // ...and the field lifts away as the reader moves. See measureFieldTuck above.
   // ⚠️ EASED OUT, AND ONLY BECAUSE THE MASK MADE IT FREE TO BE. While this was
