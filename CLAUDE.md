@@ -939,11 +939,15 @@ transition.
     next: the degenerate mask stop, the fill being painted over by its own frost,
     and the blur sampling across the seam — plus this sub-pixel gap underneath
     them all. If a line ever returns, check them in that order.
-    ⚠️ **IT IS FOUR NOW, and the fourth is the soft ledge's (2026-09): the bar's
-    accent layer and the page's ledge painting the SAME ramp on top of each
-    other.** The pattern is the point — this seam has produced a new line every
+    ⚠️ **IT IS FIVE NOW.** Fourth: the bar's accent layer and the page's ledge
+    painting the SAME ramp on top of each other. Fifth (2026-09): **the same
+    sub-pixel gap, at the LEDGE↔PANEL boundary rather than the bar's** — see
+    `--contact-ledge-overlap` below. The bar was taught to paint past its own box
+    and the ledge was not, so the identical defect simply moved down the page and
+    waited. **The pattern is the point** — this seam has produced a new line every
     single time something was added to it, and each fix exposed the next. Budget
-    for that before touching it again.
+    for that before touching it again, and when you fix a sub-pixel seam, ask
+    which OTHER edges share the same fractional origin.
 - ⚠️ **THE LABEL FLIP IS NO LONGER `mix >= DARK_TEXT_AT` — that test is now the
   FALLBACK for a hard edge (`--contact-ledge: 0`) only.** 0.85 was calibrated
   when `--dark-mix` meant "the fraction of the bar covered by OPAQUE blue"; with
@@ -1310,6 +1314,30 @@ then grows to the full `--contact-ledge-length` as Contact arrives. Measured at
   again — the reach ratchets down on every resize mid-scroll. Harmless while the
   lift was only ever 16px at the top of the page; not harmless once it carries
   360. The measurement zeroes the lift first.
+
+⚠️ **THE LEDGE PAINTS 2px PAST THE PANEL'S TOP (`--contact-ledge-overlap`,
+2026-09) — WITHOUT IT THERE IS A WHITE HAIRLINE, AND IT IS WIDTH-DEPENDENT.**
+Contact's top is the sum of everything above it and does not land on a whole
+pixel, so the boundary row is part-covered by the ledge and part-covered by the
+panel and **the cream page shows through the remainder**. Measured: the panel's
+top rests at **.3984 CSS px at 1024×768 (0.797 of a device pixel at dpr 2)** and
+**.7188 at 768** — nearly a whole device pixel of cream. Reported on tablet and
+invisible at 1440, which is exactly what a fractional-position artifact looks
+like: **do not conclude a seam is fixed because one width is clean.**
+- ⚠️ **THE HEIGHT ADDS THE SAME 2px, so the ledge's TOP does not move** — the ramp
+  is STRETCHED, not shifted, and still reaches alpha 1 at its own bottom. This is
+  why it is not a violation of the standing "never move the bottom below the
+  panel's top" rule: the alpha it has reached by the panel's top is **0.9987 at
+  the resting 160px length and 0.9998 at 520 — a step of 0.24 and 0.04 CODE
+  VALUES**, against the 40 that shifting without compensating produces, because
+  the curve is flat at that end by construction.
+- ⚠️ **`measureContactArrival` SUBTRACTS IT.** Every consumer in js/main.js means
+  "the ledge's length ABOVE the panel" — the bar's fill is anchored to the panel's
+  edge — so feeding it the painted height would slide the whole ramp down by the
+  overlap. Verified after: `contactLedge` reads 520 from a 522px painted box, and
+  the bar's fill is continuous at its own bottom edge (0.9972 against the page's
+  0.9978).
+- It is one token read by the CSS and the JS, not a `2` written in both places.
 
 ⚠️ **THE CREAM THE READER SEES IS `--about-tail` MINUS THE RESTING LEDGE, NOT THE
 TAIL.** Both were a flat 160px, so the ledge exactly filled About's padding and

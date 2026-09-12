@@ -487,8 +487,15 @@ function measureContactArrival() {
   // The ledge's RESTING length, off the same token --about-tail is derived from.
   const restTok = parseFloat(cs0.getPropertyValue('--contact-ledge-rest'));
   contactLedgeRest = Number.isFinite(restTok) ? restTok : CONTACT.reach.rest;
+  // ⚠️ AND SUBTRACT THE OVERLAP. The painted box now extends
+  // --contact-ledge-overlap PAST the panel's top (see global.css), but every
+  // consumer here means "the ledge's length ABOVE the panel" — the bar's fill is
+  // anchored to the panel's edge, so feeding it the painted height would slide
+  // the whole ramp down by that much.
+  const overTok = parseFloat(cs0.getPropertyValue('--contact-ledge-overlap'));
+  const ledgeOverlap = Number.isFinite(overTok) ? overTok : 0;
   contactLedge = contactSection
-    ? parseFloat(getComputedStyle(contactSection, '::before').height) || 0
+    ? Math.max(0, (parseFloat(getComputedStyle(contactSection, '::before').height) || 0) - ledgeOverlap)
     : 0;
 
   // HOW FAR THE COPY SITS BELOW THE PANEL'S TOP EDGE. The peek's window is

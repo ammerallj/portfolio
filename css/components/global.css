@@ -239,6 +239,18 @@
      together the geometry is IDENTICAL and all that happens is Contact is pushed
      further down the page for nothing. */
   --contact-ledge-rest: 160px;
+  /* ⚠️ THE LEDGE PAINTS PAST THE PANEL'S TOP EDGE BY THIS MUCH, and it is the
+     same fix the landing bar's ::before already carries for the same reason.
+     Contact's top does NOT land on a whole pixel — it is the sum of everything
+     above it, much of it fractional — so the boundary row is part-covered by the
+     ledge and part-covered by the panel, and the CREAM PAGE SHOWS THROUGH THE
+     REMAINDER as a white hairline. Measured at 1024×768: the panel's top rests at
+     .3984 CSS px, i.e. 0.797 of a device pixel at dpr 2 — nearly a whole device
+     pixel of cream. It is width-dependent, which is why it showed on tablet and
+     not at 1440.
+     ⚠️ THE HEIGHT ADDS THE SAME AMOUNT so the ledge's TOP does not move; only its
+     bottom crosses into the panel, where nothing can see it. */
+  --contact-ledge-overlap: 2px;
   --about-tail: calc(var(--contact-ledge-rest) + var(--gap-section));
 
   /* Height of the site footer. A DEFAULT, not the truth: initSectionGeometry
