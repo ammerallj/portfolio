@@ -1073,6 +1073,36 @@ onto* this ramp; feed it the token while the ramp is a different length and the
   which throws every frame inside `updateScrollEffects` and silently strands
   `--dark-mix`, `--bar-bleed` and the rest at their last values.
 
+### The mobile header's scrim (`--header-bleed`, 2026-09)
+
+`.site-header`'s frost now **bleeds to full transparency** instead of ending on a
+hard line. It was a flat `background-color: rgba(251,252,248,0.9)` plus
+`blur(4px)` ON THE ELEMENT — the landing's `.intro-bar` got the bleed treatment
+and this one never did, so its cream simply stopped.
+
+Same construction as `.intro-bar::before`: a `::before` that extends
+`--header-bleed` (48px) past the box, masked out across it so **the cream and the
+blur fade together**. A blur that stops abruptly is as visible as a fill that does.
+
+⚠️ **THE MASK IS A SMOOTHSTEP, NOT THE TWO-STOP LINEAR `.intro-bar` USES.** That
+bar can afford two stops because its cream is *also* a shaped gradient, so the two
+compose; here the fill is flat and the mask is the only thing shaping the falloff.
+A straight alpha line has a slope discontinuity at each end and the eye reads
+those corners as edges — the same finding as the ledge's ramp.
+
+⚠️ **THE ≤680 BARE-AT-TOP RULE HAD TO MOVE WITH IT.** It killed
+`background-color` and `backdrop-filter` on the ELEMENT; with the frost on
+`::before` that would silently do nothing and the bar would stay frosted at the
+top of the page — precisely what the rule exists to prevent. It targets
+`::before`'s **opacity** now, which takes the blur with it. `is-over-dark`'s
+accent fill moved for the same reason: on the element it would paint *under* the
+glass and never show.
+
+⚠️ **`.site-header` IS THE HOMEPAGE'S MOBILE NAV ONLY.** The project pages dropped
+it in 2026-08 for the shared `.intro-bar`, and `body:has(.intro) .site-header` is
+`display: none` above 680 — so this element is reachable at ≤680 on `index.html`
+and nowhere else. Verify changes there; a desktop project page shows nothing.
+
 ### Contact's panel: the grain, the trim, and the floor (2026-09)
 
 **THE PANEL CARRIES THE FIELD'S GRAIN.** It was the ONE coloured surface on the

@@ -143,6 +143,11 @@
      value so the CSS framing and the JS resting positions cannot drift apart. */
   --nav-offset: 64px;
 
+  /* How far .site-header's frost bleeds past its own bottom before reaching full
+     transparency (header.css). The landing's .intro-bar has --bar-bleed for the
+     same job; this is the mobile/project-page header's. */
+  --header-bleed: 48px;
+
   /* How much the Contact panel is trimmed below a full frame.
      ⚠️ SUPERSEDED CEILING: this was capped at ~54px to keep the nav inverted at
      rest. That constraint was lifted deliberately (2026-09) — the bar stays cream
