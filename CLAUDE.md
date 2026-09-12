@@ -1315,6 +1315,38 @@ then grows to the full `--contact-ledge-length` as Contact arrives. Measured at
   lift was only ever 16px at the top of the page; not harmless once it carries
   360. The measurement zeroes the lift first.
 
+⚠️ **THE ARRIVAL IS TIGHTENED AT ≤1024, AND THE REASON IS VIEWPORT HEIGHT, NOT
+WIDTH (2026-09).** Reported as "the gap is bigger on tablet". It is not — the page
+geometry is IDENTICAL at every width. Measured: About's last line to Contact's
+heading is **461px at 1440, 1024 and 834 alike**, the cream gap is **302px** at
+all of them, and the reach schedule matches as a function of Contact's edge.
+⚠️ **WHAT CHANGES IS HOW MUCH OF IT SHARES ONE SCREEN.** A 1366-tall tablet shows
+the 302px cream, the whole 520px ledge AND Contact's 160px top padding at once —
+~983px of transition in a single frame. A 900-tall desktop can never show more
+than 900px of it, so the same pixels are split across the scroll and never read
+as one empty stretch. **Desktop is not wrong; it is the same numbers seen a
+screenful at a time — so the fix belongs in the tier, never in a shared token.**
+Two values move, both in responsive.css's 1024 block:
+- **`--contact-ledge-length` 520 → 400.** At 520 the ledge's top sits **218px
+  ABOVE** About's last line, and the biased curve is under 0.23 alpha for its
+  first half by construction — so that lead-in is a long run of visible nothing.
+  400 puts the top 98px above the line: the wash over About survives, the empty
+  lead-in does not. ⚠️ **Contrast IMPROVES** — a shorter ramp is further along by
+  the time it reaches the copy — so this cannot regress the AA floor the tail
+  bought. Measured floor at 1024×1366: **13.5**, against desktop's 8.59.
+- **`--contact-pad-max` 96 → 48**, taking the heading from 160px below the
+  panel's edge to 112. ⚠️ **Only the CAP moves.** `--nav-offset`'s 64 is
+  structural (the panel runs up behind the bar, so the copy must clear it), and
+  the clamp's middle term still yields on short windows to keep the footer in
+  frame — which is why the cap became its own token rather than the tier
+  restating the whole `clamp()`. A second copy of that expression would drift.
+- **Net: About's last line to Contact's heading 461 → 413 at ≤1024**, desktop
+  unchanged at 462.
+- ⚠️ **NOT changed, and deliberately:** the empty blue BELOW the copy, which on a
+  tall fold is the larger void (Contact's `min-height` tracks the viewport, so at
+  1024×1366 there is **621px** of empty panel under 360px of content). That is a
+  separate decision about `--contact-trim` and was explicitly left alone.
+
 ⚠️ **THE LEDGE PAINTS 2px PAST THE PANEL'S TOP (`--contact-ledge-overlap`,
 2026-09) — WITHOUT IT THERE IS A WHITE HAIRLINE, AND IT IS WIDTH-DEPENDENT.**
 Contact's top is the sum of everything above it and does not land on a whole

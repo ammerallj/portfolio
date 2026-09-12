@@ -114,7 +114,24 @@
    Work / About stack into a single full-width column.
    ========================================================================== */
 @media (max-width: 1024px) {
+  /* ⚠️ CONTACT'S ARRIVAL IS TIGHTENED HERE, AND THE REASON IS VIEWPORT HEIGHT,
+     NOT WIDTH — the page geometry is IDENTICAL at every width (measured: About's
+     last line to Contact's heading is 461px at 1440, 1024 and 834 alike; the
+     cream gap is 302px at all of them; the reach schedule matches). What changes
+     is how much of it shares one screen. A 1366-tall tablet shows the 302px
+     cream, the whole ledge AND Contact's top padding at once — ~983px of
+     transition in one frame — where a 900-tall desktop can never show more than
+     900px of it and the stretch is split across the scroll instead.
+     ⚠️ SO DO NOT "FIX" THIS BY CHANGING A SHARED TOKEN. Desktop is not wrong;
+     it is the same numbers seen a screenful at a time. */
   :root {
+    /* The dissolve's reach. 520 leaves its top 218px ABOVE About's last line, so
+       a long pale run of near-zero alpha is visible before any blue reads — the
+       biased curve is under 0.23 alpha for its first half by design. 400 puts
+       that top 98px above the line instead: the wash over About survives, the
+       empty lead-in does not. Contrast IMPROVES (a shorter ramp is further along
+       at the copy), so this cannot regress the AA floor the tail bought. */
+    --contact-ledge-length: 400px;
     /* SPACING SCALE, tablet step (see the block at the top of this file).
        Group closes from the desktop 60 as the columns stack — side by side a
        60px column gap reads as one break, but stacked it becomes vertical
@@ -191,6 +208,17 @@
        do want them locked together, re-measure landscape before changing the
        floor; don't just copy the desktop number in. */
     --field-w: max(1688.69px, 220svh, 117.27vw);
+  }
+
+  .contact-section {
+    /* The heading sits --contact-pad + --nav-offset below the panel's top edge —
+       160px at desktop, and on a tall tablet that lands it a long way down a
+       panel the reader is already looking at in full. The nav's 64 is structural
+       (the panel runs up BEHIND the bar, so the copy must clear it); the cap is
+       the part that is composition, so only it moves: 96 -> 48, heading 160 ->
+       112 from the panel's edge. The clamp is untouched — it still yields on
+       short windows to keep the footer in frame. */
+    --contact-pad-max: 48px;
   }
 
   /* LANDING hero interim (no ≤1024 frames yet for the "Making products make
