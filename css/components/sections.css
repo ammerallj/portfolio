@@ -1010,12 +1010,12 @@
    automatically. Don't hard-code either number there. */
 #about {
   padding-top: 0;
-  /* ⚠️ RESERVES THE SCRIM'S LENGTH PLUS THE CREAM, rather than leaving the gap to
-     chance. The Contact ledge paints INTO this space, so without it the scrim
-     could only be as long as the room happened to be — 96px at narrow widths,
-     where it had no room for both a long dissolve and any clear cream before it.
-     Change either token and this follows. */
-  padding-bottom: calc(var(--about-tail) + var(--contact-ledge-length));
+  /* ⚠️ NO LONGER RESERVES THE SCRIM'S LENGTH. It used to be
+     `calc(--about-tail + --contact-ledge-length)` so the dissolve had somewhere
+     to go without touching content — but the scrim is now allowed to reach over
+     About's copy, so reserving that space only pushed Contact further away.
+     A plain tail is all that is left. */
+  padding-bottom: var(--about-tail);
   /* FILL the space under the nav. About's natural box is 571 against 736
      available at 1440x800 — 165px short — and a section shorter than its frame
      cannot both sit centred AND keep the next section out of shot. Centred, the
@@ -1028,7 +1028,17 @@
      min-height, not height: if the copy ever outgrows the viewport the section
      just grows, and short windows are unaffected. Reset at ≤480, where nothing
      settles and a viewport-tall About would only add dead space. */
-  min-height: calc(100dvh - var(--nav-offset));
+  /* ⚠️ THE MIN-HEIGHT IS GONE (2026-09), AND ITS REASON WENT WITH IT. It existed
+     so About filled its frame and Contact started exactly off-screen — "34px of
+     the blue Contact panel showed along the bottom edge, which read as About
+     being clipped". The blue arriving early is now the INTENT, so the thing this
+     was protecting against is the thing we want.
+     It was also the real distance to Contact: on a tall window it left ~350px of
+     slack below About's content that nothing could reclaim, and that slack, not
+     the padding, was what held Contact away.
+     ⚠️ initSectionGeometry centres About on its CONTENT span, not its box, so its
+     resting composition is unaffected by this. Reset at ≤480 was the only tier
+     that opted out; there is now nothing to opt out of. */
 }
 
 /* The About heading now uses .section-title for its type; this only restores

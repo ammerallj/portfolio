@@ -968,10 +968,9 @@
      so the page ends clean into the plain footer, like the Overview pages. */
   #about {
     border-bottom: none;
-    /* Desktop fills the frame so the blue panel stays off-screen when About
-       settles (see sections.css). Nothing settles at this tier, so that height
-       would only add dead space above the Contact panel. */
-    min-height: 0;
+    /* ⚠️ The desktop min-height this used to cancel is GONE (sections.css,
+       2026-09) — About no longer fills its frame, because keeping the blue panel
+       off-screen stopped being the goal. Nothing to reset. */
   }
   .site-footer:not(.site-footer--plain) {
     background-color: transparent;

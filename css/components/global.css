@@ -206,17 +206,18 @@
      as a long blue band.
      The dissolve wants a LENGTH of its own; the room only says how much it may
      take. min() expresses exactly that. */
-  --contact-ledge-length: 700px;
+  --contact-ledge-length: 300px;
   /* ⚠️ NO LONGER CAPPED BY THE ROOM — the scrim is ALLOWED to reach up over
      About's copy so Contact arrives earlier (deliberate, 2026-09). It used to be
      min(length, --contact-gap) precisely so it could never touch content; that
      constraint is lifted, and --contact-gap is now published for reference only.
-     ⚠️ THE LIMIT IS CONTRAST, AND IT IS FAR OFF. About's copy ends ~460px above
-     the panel, so the scrim only overlaps beyond that. Black on what its LAST
-     LINE then sits on: 16.6:1 at 600px, 12.1 at 750, 9.3 at 900, and still
-     6.5:1 at 1200. AA is not at risk until well past any length worth using —
-     re-measure if About's copy or --about-tail changes, since both move where
-     that last line falls. */
+     ⚠️ THE LIMIT IS CONTRAST, AND IT MOVED SHARPLY WHEN THE ROOM SHRANK. About's
+     copy now ends only --about-tail (160px) above the panel, so a scrim longer
+     than that overlaps it — and at 700px it put About's last line at 4.52:1,
+     right on the AA line. Measured at the current 160px room: 17.5:1 at 200px,
+     12.2 at 260, **9.9 at the shipped 300**, 9.0 at 320, 6.8 at 400, 4.5 at 700.
+     ⚠️ RE-MEASURE WHENEVER --about-tail OR ABOUT'S COPY CHANGES — they set the
+     room, and the room is what decides how much of the ramp lands on type. */
   --contact-ledge: var(--contact-ledge-length);
 
   /* CREAM AFTER ABOUT'S COPY, BEFORE THE SCRIM STARTS — authored, not left over.
