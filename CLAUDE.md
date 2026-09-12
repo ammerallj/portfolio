@@ -720,9 +720,28 @@ rather than being left declared and unread. Verified at 375×812:
   never within the hero.** Measured after: headline 3.42, bio 3.28 (worst case
   improved from 3.07), and the Work-card peek is still exactly **120px**.
   **Change one of these two and you must change the other.**
-- ⚠️ **GPU COST ON A REAL MID-RANGE PHONE IS UNVERIFIED** and cannot be measured
-  here — the pane cannot judge this motion at all. If it stutters, restoring the
-  bail plus the `display: none` is the whole revert.
+- ⚠️ **THE FIELD DOES NOT ANIMATE ON PHONES — it takes the REDUCED-MOTION PATH,
+  for GPU cost rather than preference (2026-09).** `draw(0)` runs, the class
+  lands, and the loop never starts, so the canvas becomes a static texture the
+  compositor leaves alone and per-frame shader work is **zero**. Verified at
+  375×812: **0 pixel change across 954 samples over 4 seconds.**
+  - ⚠️ **IT ALSO STOPS THE HEADER'S FROST RE-BLURRING**, which is the specific
+    unresolved cost recorded against this field. `.site-header`'s
+    `backdrop-filter` sits over the hero at ≤680; over a MOVING field the browser
+    recomputes it every frame, over a static one it blurs once and caches.
+  - **The trade is small by construction**: the motion is ±72px over 16–44s, and
+    the phone crops the field to ~30% of its width, so almost none of that drift
+    was visible there anyway.
+  - ⚠️ **The guard is a PAGE-LOAD decision, not a per-frame one.** A desktop
+    session resized down keeps animating until reload — deliberate; re-checking a
+    matchMedia every frame is the cost this removes. It is also a DIFFERENT
+    question from the deleted `FIELD_PHONE` bail (should it MOVE, not should it
+    EXIST), which is why `FIELD_STATIC` has its own name rather than reviving it.
+  - The headline morph still runs — it is FLIP transforms on spans, not GPU fill.
+- ⚠️ **GPU COST ON A REAL MID-RANGE PHONE IS STILL UNVERIFIED** and cannot be
+  measured here. The static path removes the per-frame cost, so what remains is
+  one shader compile and one 1250×763 draw at load. If it still misbehaves,
+  restoring the bail plus the `display: none` is the whole revert.
 
 The paragraph below is the superseded reasoning, kept for the pairing rule it
 states:

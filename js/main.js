@@ -1047,7 +1047,23 @@ function initHeroField() {
 
   // Reduced motion keeps the artwork and drops only the movement — the field
   // should not change character because someone asked the page to hold still.
-  if (reducedMotion.matches) return;
+  //
+  // ⚠️ PHONES TAKE THE SAME PATH, AND FOR GPU COST RATHER THAN PREFERENCE
+  // (2026-09). The orbs render; the loop never starts. One draw, then the canvas
+  // is a static texture the compositor can leave alone — per-frame shader work
+  // goes to zero, which is the entire cost of having enabled the field here.
+  // ⚠️ IT ALSO STOPS THE HEADER'S FROST RE-BLURRING. `.site-header`'s
+  // backdrop-filter sits over the hero at ≤680; over a MOVING field the browser
+  // must recompute it every frame, over a static one it blurs once and caches.
+  // That was the specific unresolved cost recorded against this field.
+  // ⚠️ THE TRADE IS SMALL HERE BY CONSTRUCTION: the motion is ±72px over 16–44s,
+  // so on a phone — where the hero is on screen briefly and the field is cropped
+  // to 30% of its width — almost none of that drift was ever visible anyway.
+  // ⚠️ Re-declared deliberately after the `FIELD_PHONE` bail was deleted; this is
+  // a different question (should it MOVE) from the one that bail answered
+  // (should it EXIST), so it gets its own name rather than reviving that one.
+  const FIELD_STATIC = matchMedia('(max-width: 480px)');
+  if (reducedMotion.matches || FIELD_STATIC.matches) return;
 
   // Only draw while the field is actually on screen. It bleeds well past the
   // fold, so this observes the CANVAS rather than .intro — stopping at the
@@ -1068,8 +1084,11 @@ function initHeroField() {
     // capped so a backgrounded tab resuming cannot jump the whole distance.
     const dt = Math.min(now - prev, 100) / 1000;
     prev = now;
-    // Also stops if a desktop session is resized/rotated into the phone
-    // tier, where the CSS has hidden the canvas — no point drawing it.
+    // ⚠️ Stops while off screen or backgrounded. It does NOT re-check the phone
+    // tier: a desktop session resized down keeps animating until reload, which is
+    // correct — the static path is a page-load decision about the DEVICE, not a
+    // per-frame one, and re-checking a matchMedia every frame is the kind of cost
+    // this change exists to remove.
     if (!onScreen || document.hidden) return;
     clock += dt * FIELD.motion.speed;
     draw(clock);
