@@ -1073,37 +1073,54 @@ onto* this ramp; feed it the token while the ramp is a different length and the
   which throws every frame inside `updateScrollEffects` and silently strands
   `--dark-mix`, `--bar-bleed` and the rest at their last values.
 
-### Contact's resting gap (`--contact-lift`, 2026-09)
+### Contact's panel: the grain, the trim, and the floor (2026-09)
 
-**The copy sat 232px below the panel's top at rest**, and that number decomposes
-as **64 nav + 96 padding + 72 of centring slack**. The panel is a full frame and
-the copy is short, so `justify-content: center` split the leftover evenly and put
-half of it above. `--contact-lift` (48px) claws that half back: slack above
-**72 → 24**, resting gap **244 → 198** (measured at 760×900).
+**THE PANEL CARRIES THE FIELD'S GRAIN.** It was the ONE coloured surface on the
+site without any — the hero field, the nav's frost and the ledge all have it, so
+the dissolve came out of a grained surface, through a grained ramp, and landed on
+bare flat colour.
 
-⚠️ **THE PEEK IS THE SMALL TERM IN THIS GAP AND THIS IS THE BIG ONE.** Three
-rounds were spent tuning the parallax against a "too wide" report that was ~87%
-composition; the peek's whole range is ±80 and most of it is spent off the
-resting position. **If "too wide" comes up again, come here first** — then
-`--contact-pad`. 160px (96 padding + the 64 the nav occupies) is the floor
-whatever this is set to.
+⚠️ **"IT FEELS TOO LONG" WAS A MATERIAL PROBLEM, NOT A LENGTH ONE, and four
+rounds were spent shortening things before that was measured.** At rest the HERO
+has MORE empty colour than Contact — **66% of the viewport against 44%**, and
+281px above its headline against 184px here. What differs is uniformity: the
+field varies everywhere and gives the eye something to read, while 819px of
+unvarying `rgb(74,69,255)` does not. **Measure both ends of a comparison before
+tuning either.**
 
-- **It is a bottom margin of 2× the lift, not `justify-content: flex-start`.**
-  Under `center`, a bottom margin of 2N shifts the item up by exactly N, because
-  the box centres the item PLUS its margin. `flex-start` was the obvious move and
-  hands the whole 144px to the bottom at once — visibly bottom-heavy, with the
-  copy stranded above a long empty run. A token keeps it a dial.
-- **The slack moves rather than disappearing**: copy-bottom to panel-bottom goes
-  168 → 216. The footer still sits fully in frame, which is the constraint that
-  matters there.
-- ⚠️ **IT MOVES THE SCROLL-SPY'S THRESHOLD, in the safe direction — but check
-  this if the lift changes.** `initSectionGeometry`'s `restingFor()` measures the
-  span of a section's CHILDREN, so lifting `.contact-inner` lifts `contentTop`
-  and the spy fires ~48px earlier. Contact's CLICK uses `topAlignedFor()` and
-  does not move, so the margin between them **grew 19px → 67px**. That ordering
-  must never reverse: a click landing SHORT of the spy's threshold is the bug
-  that once left Work highlighted after clicking About. ⚠️ **19px was thin** —
-  anything that lowers the copy inside the box eats that margin directly.
+⚠️ **THERE ARE TWO GRAINS ON THIS SITE AND THEY ARE NOT INTERCHANGEABLE** — an
+earlier note here claimed one. The nav's is `baseFrequency 0.55` with a smooth
+transfer, built for frosted cream. The field's is `1.3` with a **discrete**
+transfer (what makes it sharp speckle rather than fine mush) under `overlay`
+(modulates the colour instead of laying grey on it). The panel takes the FIELD's,
+because it is a large coloured surface. Baked into the rect's opacity rather than
+a layer, since both of this element's pseudo-elements are spent on the ledge.
+
+**`--contact-trim` (48px)** shortens the panel below a full frame. The footer is
+also `--color-accent`, so panel + footer fill the viewport exactly and trimming is
+the only thing that actually reduces blue on screen.
+
+⚠️ **THE PANEL IS AT ITS FLOOR: 771px against a 765px minimum. SIX PIXELS.** It
+rests with its top near y=0 *because* it is a full frame minus the footer; shorten
+it and its top rests lower, putting the nav over the LEDGE instead of solid
+accent. The label flip needs alpha ≥ 0.86 under the glyphs at y=32, which with a
+96px resting ledge caps the panel's top at ~54 and so floors the panel at
+`vh − footer − 54`. **Trimming further silently costs the inversion at rest** —
+the thing the whole progressive-inversion design is built to land.
+
+⚠️ **THE REMAINING 352px OF NON-CONTENT (160 above the copy, 192 below) CANNOT BE
+REDUCED, ONLY MOVED.** Panel 771 − content 419 = 352, and the panel cannot shrink.
+Taking it off the bottom puts it back on top. The next move is a design decision,
+not a tuning one: either the bar stops being inverted at rest, or the copy grows.
+
+**`--contact-lift` IS RETIRED** (it was a bottom margin of 2× itself, which under
+`center` shifts the item up by half). It was correct while the panel had slack;
+`--contact-trim` closed that slack, after which the margin moved nothing and only
+inflated the box — **96px of panel height and 96px of empty run below the copy,
+for no positional gain**. The panel is `justify-content: flex-start` now, which
+gives the identical position (gap above = padding-top = 160) with none of it.
+⚠️ **A mechanism that redistributes SLACK becomes dead weight the moment
+something else removes the slack.** Check the two together.
 
 ### Contact's soft leading edge (`--contact-ledge`, 2026-09)
 

@@ -721,6 +721,28 @@
      a +24 correction on the min-height to cancel it. Symmetric is the same
      picture with none of that. */
   background-color: var(--color-accent);
+  /* ⚠️ THE PANEL CARRIES THE FIELD'S GRAIN. It was the ONE coloured surface on the
+     site without any — the hero field, the nav's frost and the ledge all have it,
+     so the dissolve came out of a grained surface, through a grained ramp, and
+     landed on bare flat colour. A material change, read as a length problem.
+
+     Measured at rest: the panel is not actually the longer run of empty colour —
+     the HERO has more (66% of the viewport against 44%, and 281px above its
+     headline against 184px here). What differs is uniformity. The field varies
+     everywhere and gives the eye something to read; 819px of unvarying
+     rgb(74,69,255) does not.
+
+     ⚠️ THE FIELD'S GRAIN, NOT THE NAV'S — there are TWO on this site and they are
+     not interchangeable. The nav's is baseFrequency 0.55 with a smooth transfer,
+     built to sit on frosted cream. This one is the field's: 1.3 with a DISCRETE
+     transfer, which is what makes it sharp speckle instead of fine mush (see the
+     field's own note — raising frequency alone just gives finer mush), and
+     `overlay` so it modulates the blue rather than laying grey over it.
+
+     ⚠️ Baked into the rect's opacity rather than set on a layer, because both of
+     this element's pseudo-elements are already spent on the ledge. Tune there. */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='cg' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.3' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='discrete' tableValues='0 1'/%3E%3CfeFuncG type='discrete' tableValues='0 1'/%3E%3CfeFuncB type='discrete' tableValues='0 1'/%3E%3CfeFuncA type='linear' slope='0' intercept='1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23cg)' opacity='0.14'/%3E%3C/svg%3E");
+  background-blend-mode: overlay;
   color: #fff;
   padding-top: 96px;
   /* Pinned to 96 at EVERY tier, so it does not follow .page-section down to 64
@@ -767,10 +789,24 @@
      patching it — the bar is inside the section, over one continuous colour, and
      all three artifacts have nothing to act on.
      So the box is a full frame minus the footer, not minus the nav as well. */
-  min-height: calc(100dvh - var(--footer-height));
+  /* ⚠️ --contact-trim SHORTENS THE PANEL, AND IT HAS A HARD CEILING that is not
+     about taste. The panel rests with its top at y=0 precisely BECAUSE it is a
+     full frame minus the footer; trim it by X and its top rests X px down, which
+     puts the nav bar over the LEDGE instead of over solid accent. The label flip
+     needs alpha >= 0.86 under the glyphs, so past ~54px the bar stops inverting
+     at rest and the whole progressive-inversion design stops landing. Measured
+     ceiling below — do not raise this without re-checking it.
+     The footer is also --color-accent, so trimming is the only thing that
+     actually reduces blue on screen: panel + footer currently fill the viewport
+     exactly. */
+  min-height: calc(100dvh - var(--footer-height) - var(--contact-trim, 0px));
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  /* ⚠️ TOP-ALIGNED since --contact-trim. Centring only ever did something while
+     min-height exceeded the content; the trim closed that, so `center` now
+     resolves identically to `flex-start` and the old lift hack was paying 96px
+     of panel height for nothing. See .contact-inner. */
+  justify-content: flex-start;
   /* THE PADDING YIELDS SO THE FOOTER STAYS IN FRAME. min-height above is a floor,
      not a cap: at a short window the copy plus a fixed 96px either side outgrew
      it and the panel pushed the footer off the fold (measured at 1440x700:
@@ -805,29 +841,15 @@
 }
 
 .contact-inner {
-  /* ⚠️ REDUCE THE CENTRING SLACK. The panel is a full frame and the copy is
-     short, so `justify-content: center` splits the leftover evenly and put the
-     copy 232px below the panel's top at rest — 64 nav + 96 padding + 72 of that
-     slack. This claws back the slack ABOVE without abandoning the centring:
-     under `center`, a bottom margin of 2N shifts the item up by exactly N,
-     because the flex box centres the item PLUS its margin.
-
-     ⚠️ Not `justify-content: flex-start`, which was the obvious move. That hands
-     the whole 144px to the bottom at once and makes the panel visibly
-     bottom-heavy, with the copy stranded above a long empty run to the footer —
-     and the footer is deliberately part of this view. A token keeps it a dial.
-
-     ⚠️ 160px is the floor whatever this is set to (96 padding + the 64px the nav
-     occupies), so the remaining lever after this one is `--contact-pad`, not
-     more lift. At 48 the slack above goes 72 -> 24 and the resting gap 232 -> 184.
-
-     ⚠️ It moves the SPY's threshold, and in the safe direction. initSectionGeometry's
-     restingFor() measures the span of the section's CHILDREN, so lifting this
-     lifts contentTop and the spy fires ~48px earlier. Contact's CLICK uses
-     topAlignedFor() and does not move, so the click stays below the spy's
-     threshold — the ordering that must not reverse (a click landing short of it
-     is the bug that once left Work highlighted after clicking About). */
-  margin-bottom: calc(var(--contact-lift, 0px) * 2);
+  /* ⚠️ THE COPY IS TOP-ALIGNED, NOT CENTRED, and --contact-lift is retired.
+     The lift was a bottom margin of 2x itself, which under `center` shifts the
+     item up by exactly half — correct while the panel had slack to redistribute.
+     --contact-trim removed that slack (min-height now equals the content), so
+     the margin stopped moving anything and only inflated the box: it was adding
+     96px to the panel's height AND 96px to the empty run below the copy, for no
+     positional gain at all.
+     Top-aligning gets the identical position (gap above = padding-top = 160)
+     with none of that. */
 
   display: flex;
   flex-direction: column;

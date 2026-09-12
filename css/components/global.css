@@ -143,10 +143,11 @@
      value so the CSS framing and the JS resting positions cannot drift apart. */
   --nav-offset: 64px;
 
-  /* How far Contact's copy is lifted out of its centring slack (sections.css
-     `.contact-inner`). 0 restores the plain centred composition. The resting gap
-     above the copy is `96 + 64 + (slack/2 - this)`, and 160 is its floor. */
-  --contact-lift: 48px;
+  /* How much the Contact panel is trimmed below a full frame. ⚠️ Capped by the
+     nav's inversion, not by taste — see the note at .contact-section's
+     min-height. 48 is inside the measured ~54px ceiling. */
+  --contact-trim: 48px;
+
 
   /* CONTACT'S SOFT LEADING EDGE — how far the blue bleeds up out of the panel
      before the panel itself starts (sections.css `.contact-section::before`).
