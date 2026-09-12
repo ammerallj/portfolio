@@ -376,21 +376,24 @@
     /* ⚠️ THE FIELD IS PULLED IN AT PORTRAIT WIDTH SO MORE OF THE COMPOSITION IS
        VISIBLE. The ≤1024 tier's `220svh` resolves to 2253px in a 768px viewport —
        **only 34% of the artwork is on screen**, so the orbs read as one broad
-       wash rather than a composition. 195svh resolves to ~1997 and puts 38% on
+       wash rather than a composition. 160svh resolves to 1638 and puts 47% on
        screen.
        ⚠️ WIDTH AND HEIGHT ARE THE SAME KNOB (height = width / 1.6377), so
        "show more orbs" and "keep colour under the bio" pull against each other —
        narrowing the field also shortens it, and the dissolve then climbs into the
        bio. That is the whole constraint here, and it is why this cannot simply be
        taken further.
-       ⚠️ 195 IS THE MEASURED CEILING, NOT A PREFERENCE. Floors over 6 phases at
-       768×1024, composited through the mask — bio is 24px/500, so its wall is
-       3:1, same as the 64px headline:
+       ⚠️ 160svh IS THE SAME EXPRESSION DESKTOP USES, and it is only affordable
+       because the bio carries its own scrim (below). Floors over 3 phases at
+       768×1024, composited through the mask — both blocks are ≥24px so the wall
+       is 3:1:
          · 2253 (the ≤1024 value): headline 3.40, bio 3.50, 34% visible
-         · **1997 (195svh, shipped): headline 3.50, bio 3.21, 38% visible**
-         · 1800: headline 3.42, bio 3.01 — ON the wall, too thin to ship
-         · 1638: bio ~2.95 — FAILS
-       The headline IMPROVES on the way (3.40 → 3.50); it is the bio that binds.
+         · 1997: headline 3.50, bio 3.21, 38% visible
+         · **1638 (160svh, shipped) + scrim: headline 3.33, bio 3.25, 47%**
+         · 1638 with NO scrim: bio 2.90 — FAILS
+         · 1550: headline 3.16 — the HEADLINE binds past this, and it cannot be
+           scrimmed the same way (a wash behind 64px type is a plate).
+       The headline is what limits any further narrowing, not the bio.
        ⚠️ Scoped to ≤768 so LANDSCAPE tablet (1024×768) keeps the ≤1024 value it
        was measured against. */
     --field-w: max(100vw, 160svh);
@@ -459,8 +462,20 @@
   }
   .about-photo {
     /* Back into flow — stacked, there's no text column to cap the height,
-       so the desktop absolute-fill reverts and the aspect box returns. */
-    position: static;
+       so the desktop absolute-fill reverts and the aspect box returns.
+       ⚠️ `relative`, NOT `static`, AND THAT IS WHAT KEEPS THE CORNERS. The photo
+       is a CAROUSEL: its slides are `position: absolute; inset: 0`. With the box
+       static their containing block is the nearest positioned ancestor OUTSIDE it
+       (measured: `.about-left`), and **`overflow: hidden` does not clip a
+       descendant whose containing block is outside the clipping element** — so
+       the slides escaped both the clip and the 40px radius and the photo rendered
+       with square corners at every width ≤768. `relative` is still in flow, so the
+       aspect box is unaffected; it only restores the box as the slides'
+       containing block.
+       ⚠️ Do NOT "simplify" this back to static, and do not fix it by putting the
+       radius on the slides — there are three of them and the clip is what the
+       crossfade needs. */
+    position: relative;
     max-width: none;
     aspect-ratio: 858 / 600;
   }

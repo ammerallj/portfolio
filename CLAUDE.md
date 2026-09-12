@@ -262,6 +262,26 @@ a ~10% step in field width at the 1024/1025 seam on short viewports, visible onl
 while dragging a window across that exact boundary. Re-measure landscape before
 ever locking the two together.
 
+⚠️ **THE ABOUT PHOTO'S RADIUS WAS LOST AT EVERY WIDTH ≤768, AND THE CAUSE IS A
+CSS RULE WORTH KNOWING (fixed 2026-09).** `.about-photo` carries
+`border-radius: 40px` + `overflow: hidden` in sections.css and never lost either.
+What broke the corners was the ≤768 rule putting the box back in flow as
+`position: static`: the photo is a CAROUSEL whose slides are
+`position: absolute; inset: 0`, so with the box static their containing block
+became the nearest positioned ancestor OUTSIDE it — measured, `.about-left` — and
+**`overflow: hidden` does not clip a descendant whose containing block is outside
+the clipping element.** The slides escaped both the clip and the radius.
+- **The fix is `position: relative`**, which is still in flow (the
+  `aspect-ratio: 858/600` box is unaffected, verified 720×503 at 768 and 343×240
+  at 375) and only restores the box as the slides' containing block.
+- ⚠️ **`getComputedStyle` SHOWS NOTHING WRONG HERE** — the radius and the overflow
+  both read correctly the whole time. The diagnostic is `slide.offsetParent`: if
+  it is not the clipping element, the clip does not apply.
+- ⚠️ **Do NOT fix this by moving the radius onto the slides** — there are three
+  and the crossfade depends on the parent's clip.
+- Desktop was never affected (the box is `absolute` there, so it was always a
+  containing block). Verified after: clipped at 1440, 768 and 375.
+
 ⚠️ **≤768 PULLS THE FIELD IN TO `max(100vw, 160svh)` AND GIVES THE BIO A SCRIM —
 THE TWO ARE ONE DECISION (2026-09).** The ≤1024 tier's `220svh` resolves to 2253px
 in a 768px viewport, so **only 34% of the artwork is on screen** and the orbs read
