@@ -143,6 +143,16 @@
      value so the CSS framing and the JS resting positions cannot drift apart. */
   --nav-offset: 64px;
 
+  /* CONTACT'S SOFT LEADING EDGE — how far the blue bleeds up out of the panel
+     before the panel itself starts (sections.css `.contact-section::before`).
+     It is a length, not a fraction: the ledge has to read the same on a short
+     window as a tall one, and it is measured against the nav bar's own 64px
+     rather than against the viewport.
+     ⚠️ js/main.js reads this token to build the bar's matching fill and to time
+     the parallax peek, so it is the ONE place the ledge's height is written.
+     Changing it moves the dissolve, the bar's gradient and the peek together. */
+  --contact-ledge: 220px;
+
   /* Height of the site footer. A DEFAULT, not the truth: initSectionGeometry
      measures the real footer and rewrites this on load and resize, so the value
      here only has to be right enough for a no-JS render. Contact's min-height

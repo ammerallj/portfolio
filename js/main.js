@@ -186,6 +186,165 @@ function setFieldScroll(px) {
   lastFieldScroll = px;
   document.documentElement.style.setProperty('--field-scroll', px + 'px');
 }
+// ============================================================
+// CONTACT'S ARRIVAL — the ledge, the bar's matching fill, the parallax peek
+// ============================================================
+// Contact's top travels a FULL VIEWPORT from the fold to its resting place
+// (measured 1280x720: maxScroll and the panel's top coincide), and until 2026-09
+// nothing moved for 91% of it — the whole inversion was crammed into the last
+// 64px. These three published values spend that runway.
+const CONTACT = {
+  // ⚠️ hero.css's frost gradient, TRANSCRIBED. The bar's fill has to know what
+  // the frost hides in order to repair it, and a background gradient cannot be
+  // read back out of CSS. Keep these four pairs identical to the second
+  // background-image layer on .intro-bar::before — nothing enforces it, the same
+  // standing hazard as --color-accent / --color-accent-rgb.
+  frost: [[0, 0.95], [69, 0.92], [90, 0.40], [112, 0]],
+  // How far past the bar the fill is built. The bar's ::before runs
+  // --bar-bleed + 2px past its own box, and BAR_BLEED is its 100px maximum.
+  fillDepth: 176,
+  peek: {
+    // Parallax distance as a fraction of the window, and its ceiling in px.
+    rate: 0.5,
+    max: 80,
+    // WHERE THE WINDOW ENDS, as a fraction of the way from the scroll floor up
+    // to the point where the ledge's top touches the bar. Ending EARLY is what
+    // keeps the copy from still arriving while the panel already fills the
+    // screen; the panel then carries the settled copy the rest of the way up.
+    // ⚠️ Coupled to the curve — it is only safe to stop early because a cubic
+    // ease-out lands at zero velocity. Re-check if the curve changes.
+    endAt: 0.6,
+  },
+};
+
+let lastContactEdge = -1;
+function setContactEdge(px) {
+  // The bar's fill is built from this, so it is written on the ROOT and guarded
+  // like the rest: every scroll frame, and it repaints a backdrop-filtered layer.
+  if (px === lastContactEdge) return;
+  lastContactEdge = px;
+  document.documentElement.style.setProperty('--contact-edge', px + 'px');
+}
+let lastBarFill = '';
+function setBarFill(css) {
+  if (css === lastBarFill) return;
+  lastBarFill = css;
+  const root = document.documentElement.style;
+  if (css) root.setProperty('--bar-fill', css);
+  // Removing it (rather than setting a flat value) is what restores hero.css's
+  // own fallback verbatim — the pre-2026-09 bar, exactly.
+  else root.removeProperty('--bar-fill');
+}
+let lastContactPeek = -1;
+function setContactPeek(px) {
+  if (px === lastContactPeek) return;
+  lastContactPeek = px;
+  document.documentElement.style.setProperty('--contact-peek', px + 'px');
+}
+
+// The frost's alpha at a given y inside the bar's ::before box.
+function contactFrostAt(y) {
+  const f = CONTACT.frost;
+  if (y >= f[f.length - 1][0]) return 0;
+  for (let i = 1; i < f.length; i++) {
+    if (y <= f[i][0]) {
+      const [y0, a0] = f[i - 1], [y1, a1] = f[i];
+      return a0 + (a1 - a0) * (y - y0) / (y1 - y0);
+    }
+  }
+  return 0;
+}
+
+// THE BAR PAINTS CONTACT'S OWN RAMP, REPAIRED FOR THE FROST BENEATH IT.
+//
+// The ::before composites [accent over frost] over the page, and the page here
+// already carries the ledge. For the result to EQUAL the page we need the
+// layer's colour to equal the page's, which solves to
+//     a = r*f / (1 - r + r*f)
+// with r the ledge's alpha at that y and f the frost's. Painting a = r instead
+// double-coats the bleed (63 code values over-blue); confining a = r to the
+// bar's own height leaves the frost bleeding uncovered (a 186-value cliff at
+// the bar's edge). This is exact — measured deviation 0 at every position.
+//
+// ⚠️ Rebuilt per frame because r moves with scroll, and it cannot be a static
+// CSS gradient: the alphas depend non-linearly on the edge's position, and
+// calc() cannot express that. It is one property write, guarded, and it is only
+// ever built while Contact is within a ledge of the bar.
+// LAYOUT-ONLY, like measureFieldTuck: these three are constants between resizes,
+// and updateScrollEffects runs every scroll frame. --contact-ledge needs a
+// getComputedStyle and the resting edge needs scrollHeight, both of which force
+// layout — neither belongs in the hot path.
+// WHERE BLACK AND WHITE ARE EQUALLY LEGIBLE on accent-over-cream. Black and
+// white cross where (L+.05)/.05 == 1.05/(L+.05), i.e. L = sqrt(1.05*0.05)-0.05
+// = 0.1791; on this ramp that is alpha 0.86, where BOTH measure 4.58:1 and both
+// clear AA. Derived, not tuned — re-derive if --color-accent or --color-bg move.
+const DARK_TEXT_ALPHA = 0.86;
+
+let contactLedge = 0;
+let contactRestEdge = 0;
+let contactAccentRGB = '74, 69, 255';
+let contactGlyphMid = 32;
+function measureContactArrival() {
+  const cs = getComputedStyle(document.documentElement);
+  contactLedge = parseFloat(cs.getPropertyValue('--contact-ledge')) || 0;
+  contactAccentRGB = cs.getPropertyValue('--color-accent-rgb').trim() || '74, 69, 255';
+  // The glyphs' own mid-line inside the bar. The bar is a GRADIENT now, so
+  // "what the labels sit on" is a position, not the bar-wide average.
+  if (introBar && introBar.offsetParent) {
+    const link = introBar.querySelector('.intro-bar-links a');
+    if (link) {
+      const br = introBar.getBoundingClientRect(), lr = link.getBoundingClientRect();
+      contactGlyphMid = (lr.top + lr.bottom) / 2 - br.top;
+    }
+  }
+  if (!contactSection) return;
+  // Where the panel's top edge comes to rest once the page is scrolled out.
+  const docTop = contactSection.getBoundingClientRect().top + window.scrollY;
+  contactRestEdge = Math.max(0,
+    docTop - (document.documentElement.scrollHeight - window.innerHeight));
+}
+
+// Contact's fill alpha at a viewport y — the ledge's smoothstep above the
+// panel, solid below it. Shared by the bar's fill and by blueBehindBar.
+function contactAlphaAt(y, edge, ledge) {
+  if (y >= edge) return 1;
+  if (ledge <= 0 || y <= edge - ledge) return 0;
+  const t = (y - (edge - ledge)) / ledge;
+  return t * t * (3 - 2 * t);
+}
+
+// HOW MUCH BLUE IS ACTUALLY BEHIND THE BAR — the mean of the above over the
+// bar's own band. See the note at its call site for why this is the shipped
+// rule rather than a new one.
+function blueBehindBar(edge, ledge, barBand) {
+  if (barBand <= 0) return 0;
+  if (ledge <= 0) {
+    // The hard-edge case, in closed form — identical to the expression this
+    // generalises, with none of the sampling error.
+    return Math.max(0, Math.min(1, (barBand - edge) / barBand));
+  }
+  const SAMPLES = 32;
+  let sum = 0;
+  for (let i = 0; i < SAMPLES; i++) {
+    sum += contactAlphaAt((i + 0.5) / SAMPLES * barBand, edge, ledge);
+  }
+  return sum / SAMPLES;
+}
+
+function buildBarFill(edge, ledge) {
+  const ACC = contactAccentRGB;
+  const ys = new Set([69, 90, 112]);              // the frost bends at each
+  for (let i = 0; i <= 20; i++) ys.add(i / 20 * CONTACT.fillDepth);
+  const stops = [...ys].sort((a, b) => a - b).map(y => {
+    const r = contactAlphaAt(y, edge, ledge);
+    const f = contactFrostAt(y);
+    const d = 1 - r + r * f;
+    const a = d <= 0 ? 1 : (r * f) / d;
+    return `rgba(${ACC}, ${a.toFixed(4)}) ${y.toFixed(1)}px`;
+  });
+  return `linear-gradient(to bottom, ${stops.join(', ')})`;
+}
+
 const contactSection = darkPanel;
 const intro = document.querySelector('.intro');
 const introBar = document.querySelector('.intro-bar'); // landing nav bar (homepage only)
@@ -2234,6 +2393,8 @@ function updateScrollEffects() {
       stickyBars.forEach(bar => bar.classList.remove('is-over-dark'));
       setBarBleed(BAR_BLEED);
       setDarkMix(0);
+      setBarFill('');
+      setContactPeek(0);
     } else {
       const scrollAnchorTop = parseFloat(getComputedStyle(html).scrollPaddingTop) || 0;
       const barHeight = Math.max(...stickyBars.map(bar => bar.offsetHeight));
@@ -2267,11 +2428,44 @@ function updateScrollEffects() {
       // blue at DARK_FULL_AT of coverage puts the whole change in the first ~38px
       // of the 64px pass, so it is finished well before the section settles, and
       // the label switch lands on a strip that is dark enough to carry white.
-      const covered = (invertLine - contactRect.top) / invertLine;
+      // ⚠️ THE SAME RULE, GENERALISED FROM A HARD EDGE TO A SOFT ONE. The line
+      // this replaces read (invertLine - contact.top) / invertLine: the fraction
+      // of the bar's band the panel covers. That IS the mean alpha of Contact's
+      // fill over the band — but only because a hard edge is alpha 1 below the
+      // edge and 0 above it. With a ledge the same sentence still holds; the
+      // integral just has a ramp in it.
+      //
+      // So the bar starts tinting early NOT because a start point was picked,
+      // but because there is genuinely blue behind it — which is exactly what
+      // the shipped rule was written to guarantee. A soft edge satisfies it
+      // rather than breaking it.
+      //
+      // ⚠️ With contactLedge 0 this returns the old expression EXACTLY (verified
+      // to zero delta across the whole approach), so project pages, no-JS and
+      // any future hard-edged panel are untouched.
+      const covered = blueBehindBar(contactRect.top, contactLedge, invertLine);
       const mix = Math.max(0, Math.min(1, covered / DARK_FULL_AT));
       setDarkMix(mix);
-      // The labels switch once, near the end. See DARK_TEXT_AT.
-      stickyBars.forEach(bar => bar.classList.toggle('is-over-dark', mix >= DARK_TEXT_AT));
+      // THE LABELS SWITCH ONCE, AND ON WHAT THEY ACTUALLY SIT ON.
+      //
+      // ⚠️ `mix >= DARK_TEXT_AT` IS WRONG ONCE THERE IS A LEDGE, and it fails in
+      // the dangerous direction. 0.85 was calibrated when --dark-mix meant "the
+      // fraction of the bar covered by OPAQUE blue"; it now means "the mean alpha
+      // of a soft ramp", which is a different quantity. Measured on the shipped
+      // ledge, the flip landed at Contact's edge 140 where the backdrop under the
+      // glyphs is rgb(160,158,252) and WHITE READS 2.40:1 — well under AA, for
+      // ~75px of scroll.
+      //
+      // The bar is a gradient now, so the honest test is the alpha at the GLYPHS'
+      // own mid-line against the measured black/white crossover. At that point
+      // both are 4.58:1. No proxy, and nothing to re-tune if the ramp changes.
+      //
+      // The old test is kept for a hard edge (--contact-ledge: 0), where the
+      // gradient does not exist and 0.85 is still the measured answer.
+      const flipToWhite = contactLedge > 0
+        ? contactAlphaAt(contactGlyphMid, contactRect.top, contactLedge) >= DARK_TEXT_ALPHA
+        : mix >= DARK_TEXT_AT;
+      stickyBars.forEach(bar => bar.classList.toggle('is-over-dark', flipToWhite));
 
       // CLIP THE FROST TO CONTACT'S TOP EDGE. The bar's glass bleeds BAR_BLEED
       // past its own bottom so it melts into the page instead of ending on a
@@ -2282,6 +2476,47 @@ function updateScrollEffects() {
       // full bleed until the panel is within reach, then shrinking to 0 as the
       // two meet, so they butt together as solid strips.
       setBarBleed(Math.max(0, Math.min(BAR_BLEED, Math.round(gap))));
+
+      // ---- THE LEDGE, THE BAR'S FILL, AND THE PEEK ----------------------
+      const ledge = contactLedge;                    // measured, not read per frame
+      const edge = contactRect.top;
+      setContactEdge(Math.round(edge * 100) / 100);
+
+      // Build the bar's fill only while the ledge is anywhere near it. Outside
+      // that the flat fallback in hero.css is already correct — cream above,
+      // solid accent below — so this costs nothing for most of the page.
+      // ⚠️ AND ONLY WHERE THE BAR EXISTS. At ≤680 responsive.css sets
+      // .intro-bar { display: none } and the mobile header carries the nav, so
+      // there is no bar to paint a ramp into. The ledge itself still renders —
+      // it is the panel's own edge, not the bar's.
+      const barLive = introBar && introBar.offsetParent !== null;
+      if (barLive && ledge > 0 && edge > 0 && edge - ledge < barHeight + BAR_BLEED + 2) {
+        setBarFill(buildBarFill(edge, ledge));
+      } else {
+        setBarFill('');
+      }
+
+      // THE PARALLAX PEEK. The copy is offset downward and the offset shrinks as
+      // the panel rises, so it travels UP faster than the panel and is revealed
+      // into place. Same cubic ease-out as the hero's --field-scroll tuck — one
+      // curve for both parallaxes on the site.
+      //
+      // ⚠️ IT IS EXACTLY 0 AT REST, which is the design constraint: the settled
+      // composition has to be byte-identical to before this existed.
+      //
+      // The window runs from the panel entering the fold down to `endAt` of the
+      // way to the scroll floor. ⚠️ The floor is MEASURED (the panel's resting
+      // edge), not assumed to be 0: on a page short enough that Contact never
+      // reaches the top, a hard-coded 0 would leave the copy permanently offset.
+      const vh = window.innerHeight;
+      const meetEdge = ledge + barHeight;
+      const restEdge = contactRestEdge;              // measured, not read per frame
+      const endEdge = restEdge + CONTACT.peek.endAt * Math.max(0, meetEdge - restEdge);
+      const span = Math.max(1, vh - endEdge);
+      const travel = Math.min(Math.max(0, edge - endEdge), span);
+      const peakPeek = Math.min(CONTACT.peek.max, CONTACT.peek.rate * span);
+      const t = 1 - travel / span;                       // 0 at the fold, 1 at the end
+      setContactPeek(Math.round(peakPeek * Math.pow(1 - t, 3)));
     }
   }
 
@@ -2311,7 +2546,12 @@ window.addEventListener('scroll', onScroll, { passive: true });
 // field's own height follows its WIDTH. Re-measure, then republish immediately:
 // the ramp's slope has changed under the reader's current scroll position.
 measureFieldTuck();
-window.addEventListener('resize', () => { measureFieldTuck(); updateScrollEffects(); });
+measureContactArrival();
+window.addEventListener('resize', () => {
+  measureFieldTuck();
+  measureContactArrival();
+  updateScrollEffects();
+});
 updateScrollEffects();
 
 // ============================================================

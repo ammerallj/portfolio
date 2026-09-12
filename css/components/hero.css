@@ -791,10 +791,35 @@ html.is-field-live .page-field-grain { opacity: 0.15; }
      labels on a cream bar. Computed style is no test for this: the
      background-color was correctly rgb(74, 69, 255) the whole time, it was just
      painted over. */
+  /* ⚠️ THE ACCENT LAYER IS NO LONGER A FLAT TINT — it is Contact's own ledge
+     ramp, re-expressed in this box's coordinates, published as --bar-fill by
+     updateScrollEffects. The bar is sticky at top:0, so this box's top IS
+     viewport y=0, which is the same space the ledge paints in; the bar becomes
+     a WINDOW onto the ramp rather than an average of it. Measured: the step at
+     the bar's bottom edge goes 21.3% -> 0% at every scroll position.
+
+     ⚠️ AND IT IS NOT A COPY OF THE RAMP — it is the REPAIR for what the frost
+     below hides, which is a different function. Two wrong versions were
+     measured first:
+       · accent = the ramp, painted across the whole box. The ledge is painting
+         the same ramp BEHIND the frost, so the bleed got two coats — up to 63
+         code values over-blue.
+       · accent = the ramp, confined to the bar's own height. Kills the second
+         coat, but the cream frost still bleeds 112px past the bar with no blue
+         over it: a 186-code-value CLIFF at the bar's bottom edge, far worse
+         than the bulge it replaced.
+     The fill's alpha is therefore a = r*f / (1 - r + r*f), where f is the frost
+     alpha at that y and r the ledge's ramp there. It reduces correctly at every
+     corner — no frost (f=0) -> a=0, nothing to repair; opaque frost (f=1) ->
+     a=r; full blue (r=1) -> a=1. Measured deviation from the page: 0 everywhere.
+
+     ⚠️ THE FALLBACK IS THE OLD FLAT FILL AND MUST STAY EXACT. Project pages have
+     no #contact, so --bar-fill is never published there and this renders
+     byte-identically to before. Same for no-JS on the homepage. */
   background-image:
-    linear-gradient(to bottom,
+    var(--bar-fill, linear-gradient(to bottom,
       rgba(var(--color-accent-rgb), var(--dark-mix, 0)) 0,
-      rgba(var(--color-accent-rgb), var(--dark-mix, 0)) 100%),
+      rgba(var(--color-accent-rgb), var(--dark-mix, 0)) 100%)),
     linear-gradient(to bottom,
       rgba(251, 252, 248, 0.95) 0,
       rgba(251, 252, 248, 0.92) 69px,
