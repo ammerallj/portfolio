@@ -241,6 +241,26 @@
     --contact-pad-max: 48px;
   }
 
+  /* ⚠️ PORTRAIT: THE PANEL STOPS TRYING TO FILL THE FOLD.
+     Everywhere else `min-height: 100dvh - footer - trim` is right — the panel is
+     barely taller than its content, so filling the frame costs nothing and the
+     full-bleed colour is the point. On a portrait tablet the same rule asks ~344px
+     of content to fill 1141px (1024×1366): the content covers 23% of the panel
+     against 43% on desktop, and no distribution fixes that ratio — spreading it
+     was tried and blanked the approach (see the note above).
+     ⚠️ THE FIX IS TO STOP ASKING. With the floor removed the panel is its own
+     content, the footer follows it, and the page ends on a compact blue block with
+     About's tail above it rather than a screen of empty colour.
+     ⚠️ SCOPED TO PORTRAIT ON PURPOSE, NOT TO A WIDTH. The driver is the panel
+     being much taller than its content, which is an ASPECT problem — landscape
+     tablet at 1024×768 measures 48.6% content, HIGHER than desktop, and must keep
+     its floor. A width-only rule would strip it from both. */
+  @media (orientation: portrait) {
+    .contact-section {
+      min-height: 0;
+    }
+  }
+
   /* LANDING hero interim (no ≤1024 frames yet for the "Making products make
      sense." landing — Figma 339:3745 is desktop-only so far): the desktop
      composition holds with tighter insets and smaller type. The old blob-hero

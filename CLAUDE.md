@@ -1346,10 +1346,33 @@ desktop. No amount of redistribution changes that ratio.
   content across the panel's full height trades the approach for the destination.
   The same trap caught the peek's window (see "58% of the peek was spent before
   the heading appeared").
+**RESOLVED BY NOT ASKING THE PANEL TO FILL THE FOLD IN PORTRAIT (2026-09).**
+`.contact-section { min-height: 0 }` under `@media (orientation: portrait)`. The
+panel becomes its own content, the footer follows it, and the page ends on a
+compact blue block with About's tail and the ledge above it instead of a screen
+of empty colour. Measured at rest:
+
+| | portrait 1024×1366 | portrait 834×1112 | landscape 1024×768 | desktop 1440×900 |
+|---|---|---|---|---|
+| `min-height` | **0** | **0** | 543 (kept) | 675 (kept) |
+| panel height | 1141 → **520** | 887 → **570** | 543 | 703 |
+| content % of panel | 23.1 → **50.8** | 23.1 → **55.1** | 48.6 | 43.1 |
+
+- ⚠️ **SCOPED TO ORIENTATION, NOT TO A WIDTH, AND THAT IS THE WHOLE POINT.** The
+  driver is the panel being far taller than its content, which is an ASPECT
+  problem. **Landscape tablet at 1024×768 measures 48.6% content — HIGHER than
+  desktop — and must keep its floor**; a width-only rule at ≤1024 would have
+  stripped it from both and broken the case people actually use.
+- **The arrival is unaffected**: the reach still completes (402 of 400 at 834),
+  because its window is anchored to `contactRestEdge`, which is measured from the
+  live page height rather than assumed.
+- The footer stays in frame at every size above.
 - ⚠️ **AND `--display-size` IS A SHARED BOOKEND** — the landing's headline and
   Contact's heading are deliberately the same size. Raising it for Contact alone
   breaks that pairing, so it is a composition decision rather than a tweak, and
-  was NOT taken unilaterally.
+  was NOT taken unilaterally. **It is also moot now** — the panel no longer
+  stretches in portrait, so the ratio it was meant to fix is fixed. Don't reopen
+  it for this reason.
 
 ⚠️ **THE ARRIVAL IS TIGHTENED AT ≤1024, AND THE REASON IS VIEWPORT HEIGHT, NOT
 WIDTH (2026-09).** Reported as "the gap is bigger on tablet". It is not — the page
