@@ -16,7 +16,7 @@ shared by all of them.
   - `global.css` — reset, design tokens (`:root` custom properties), base typography, focus/skip-link, `.site-container` layout, `.page-section` structure, custom cursor, `.visually-hidden`, **motion reveal initial state** (`html.is-motion [data-reveal]`) + Lenis classes (`html.lenis`)
   - `header.css` — `.site-header`, `.site-nav-bar`, nav links, `.is-over-dark` inversion state. **Now the ≤480 homepage only** — it's `display:none` over the landing at desktop and the project pages dropped it (2026-08) for the shared `.intro-bar`. Don't build new nav on it.
   - `hero.css` — the **landing** (2026-08, Figma 339:3745): `.page-field` full-page gradient image **plus the WebGL field layered over it** (`.page-field-canvas` / `.page-field-grain`, 2026-09 — see **The animated field**), `.intro` stage (statement / divider / frosted band / `.intro-bar` bottom nav), the divider-mask load reveals, and the `is-loading` page hold. The previous blob hero is archived in `archive/blob-hero-2026-08/`.
-  - `sections.css` — `.page-section` content: Selected Work (the horizontal `.work-list` track — see **Horizontal Tracks**), Contact, About, case-study placeholder. It also still owns the **footprint link list** (`.footprint-group` / `.footprint-group-title` / `.footprint-list` + the `↗`), whose only consumer is now the project pages — see **Public Footprints** below.
+  - `sections.css` — `.page-section` content: Selected Work (the horizontal `.work-list` track — see **Horizontal Tracks**), Contact (including its **soft leading edge** and the parallax peek — see **Contact's soft leading edge**), About, case-study placeholder. It also still owns the **footprint link list** (`.footprint-group` / `.footprint-group-title` / `.footprint-list` + the `↗`), whose only consumer is now the project pages — see **Public Footprints** below.
   - `footer.css` — `.site-footer`
   - `project-overview.css` — the shared Project Overview template: §0 `.intro-bar--page` (the landing's nav bar pinned to the top of these pages), `.project-hero`, `.project-masthead` (title + metadata `<dl>`), `.project-block` (description / impact / role), §0a the section-seam rules, `.next-case` (§9) with its two treatments — `--image` (destination art, the pager) and `--outline` + `--locked` (the hairline Full-case-study card) — (`.project-locked` / `.invite-button` were deleted 2026-08), the `.project-carousel` masthead crossfade, and `.section-pills`. Imported after `sections.css` (it leans on `.section-label`, `.about-body`, `.contact-connect-links`) and before `responsive.css`.
   - `mobile-menu.css` — the ≤480 `.mobile-menu` overlay (the connect-only panel
@@ -836,6 +836,12 @@ The three `flex-basis` overrides and the bar's two per-tier `gap` overrides are 
 from responsive.css with it; the bar's `gap` is now the links→CTA seam alone.
 
 **The frost bleed is clipped to Contact's top edge (`--bar-bleed`, 2026-08-31).**
+⚠️ **"Contact's top edge" now means the PANEL's, not the ledge's — see
+**Contact's soft leading edge** below. Clipping it to the ledge instead was
+tried and drives the bleed to 0 exactly when the ledge arrives, cutting the
+frost and grain dead at the bar's bottom. The line below about "a hard-edged
+full-bleed blue panel" is history: the panel's leading edge is a dissolve now.
+The rule and the shipped line are both unchanged.**
 `.intro-bar::before` reaches 100px past the bar's own bottom so the glass melts
 into the page instead of ending on a line. That is right over cream content and
 wrong over Contact, which is a hard-edged full-bleed blue panel: for the ~100px
@@ -933,12 +939,35 @@ transition.
     next: the degenerate mask stop, the fill being painted over by its own frost,
     and the blur sampling across the seam — plus this sub-pixel gap underneath
     them all. If a line ever returns, check them in that order.
-- **The LABELS switch once, at `DARK_TEXT_AT` (0.85), and must not fade.** A
-  half-faded black-to-white label is grey, and grey is unreadable on both ends.
-  0.85 is where the two are equally legible on the part-mixed strip — measured,
-  white **4.51:1** and black **4.66:1**, crossing right there, both clearing AA.
-  Below it black wins, above it white does; at mix 1 black would be 3.59, so
-  switching earlier is what keeps black off the full blue.
+    ⚠️ **IT IS FOUR NOW, and the fourth is the soft ledge's (2026-09): the bar's
+    accent layer and the page's ledge painting the SAME ramp on top of each
+    other.** The pattern is the point — this seam has produced a new line every
+    single time something was added to it, and each fix exposed the next. Budget
+    for that before touching it again.
+- ⚠️ **THE LABEL FLIP IS NO LONGER `mix >= DARK_TEXT_AT` — that test is now the
+  FALLBACK for a hard edge (`--contact-ledge: 0`) only.** 0.85 was calibrated
+  when `--dark-mix` meant "the fraction of the bar covered by OPAQUE blue"; with
+  a ledge it means "the mean alpha of a soft ramp", which is a different
+  quantity. Same constant, different meaning, wrong moment — measured, the flip
+  fired at Contact's edge **140**, where the backdrop under the glyphs is
+  `rgb(160,158,252)` and **white reads 2.40:1**, under AA for ~75px of scroll.
+  ⚠️ **This is the trap to remember: a constant whose NAME still fits after the
+  thing it measures has changed underneath it.** The bar's fill is a gradient
+  now, so no single number describes "what the labels sit on".
+  The shipped test takes the alpha at the **glyphs' own mid-line** against the
+  derived black/white crossover — `L = sqrt(1.05 * 0.05) - 0.05 = 0.1791`, which
+  on this ramp is **alpha 0.86, where both colours measure 4.58:1**. Derived, not
+  tuned: re-derive only if `--color-accent` or `--color-bg` move.
+- **The LABELS switch once and must not fade** — the rule below still holds, and
+  the ledge gave it a number. A half-faded black-to-white label is grey, and at
+  the crossover **mid-grey measures 1.16:1**, four times worse than either
+  endpoint. **0.15s is the ceiling, not a starting point**; the 0.35s case is
+  what read as "the nav takes a second to transition". ⚠️ If the flip ever looks
+  abrupt, the fault is almost certainly its TIMING, not the fade's length — that
+  is exactly what the 2.40:1 regression above felt like from the outside.
+  The original measurement, on the pre-ledge flat strip: white **4.51:1** and
+  black **4.66:1**, crossing at 0.85, both clearing AA. At mix 1 black would be
+  3.59, so switching earlier is what keeps black off the full blue.
 - `is-over-dark` is now **the text state only**. It no longer paints the glass;
   its one remaining job on `::before` is forcing the glass visible in the case
   where the bar is over Contact without having docked.
@@ -968,6 +997,113 @@ transition.
   pages have no `#contact`, so neither is ever set and the CSS fallbacks (`0` and
   `100px`) give exactly the old bar.
 
+### Contact's soft leading edge (`--contact-ledge`, 2026-09)
+
+**THE PROBLEM WAS THE UNUSED RUNWAY, NOT THE EDGE.** Measured at 1280×720,
+Contact's top travels a FULL VIEWPORT from the fold to its resting place — and
+the panel comes to rest exactly at `maxScroll`, so that runway is real. Until
+this, **91% of the screen went blue before anything else moved**: the whole
+inversion was crammed into the last 64px. A viewport of approach, 9% of it used.
+Diagnose it that way — "the transition feels abrupt" is a TIMING report here, not
+a request for a longer fade.
+
+⚠️ **THIS REVERSES A DELIBERATE DECISION.** The hard edge was architecture, and
+`--bar-bleed` exists to stop the frost veiling it. Reverse it knowingly.
+
+**Three mechanisms, and they are not independent — each one broke the next.**
+
+**1. THE LEDGE** (`.contact-section::before`, sections.css). Blue bleeds up out
+of the panel over `--contact-ledge` (220px, global.css — the ONE place the height
+is written; js/main.js reads the token).
+- **A smoothstep in 17 stops**, for the three reasons the hero field's dissolve
+  already documents: a linear ramp reads as a BAND (slope discontinuity at each
+  end), an ease-in ramp compresses into a narrow strip however long it is, and
+  the stop COUNT is how faithfully the curve is drawn. At 220px they land 13.8px
+  apart. ⚠️ **More stops before more length.**
+- ⚠️ **Ramps accent-alpha-1 → accent-alpha-0, NEVER to `transparent`** — that is
+  `rgba(0,0,0,0)`, which drags every stop toward black and rings the ledge with a
+  grey halo. Same trap as the field.
+- **Grain (`::after`) is the nav's own feTurbulence, byte for byte.** One grain
+  on the site. ⚠️ **Its profile PEAKS MID-RAMP and is zero at both ends**
+  (`4a(1−a)`): the panel below has no grain and the cream above has none, so a
+  profile reaching full at either end trades the gradient seam for a MATERIAL
+  seam. It also dithers the curve's steepest point (~1.7 code values/px, just
+  above the visible floor).
+
+**2. THE BAR PAINTS THE SAME RAMP** (`--bar-fill`, hero.css + main.js). The bar
+is `position: sticky; top: 0`, so its `::before` box top **IS viewport 0** — the
+same space the ledge paints in. That is the whole trick: the bar becomes a WINDOW
+onto the ramp rather than an average of it. Step at its bottom edge: **21.3% →
+0%** at every scroll position.
+- ⚠️ **THE FILL IS NOT A COPY OF THE RAMP — it is the REPAIR for what the frost
+  hides, which is a different function.** `a = r·f / (1 − r + r·f)`, where `f` is
+  the frost's alpha at that y and `r` the ledge's. It reduces correctly at every
+  corner: no frost → `a=0`; opaque frost → `a=r`; full blue → `a=1`. **Measured
+  deviation from the page: 0 everywhere.**
+- ⚠️ **BOTH OBVIOUS VERSIONS ARE WORSE, and the second is much worse.**
+  `a = r` across the whole box double-coats the bleed (**63** code values
+  over-blue, a soft bulge). `a = r` confined to the bar's own height kills the
+  double-coat but leaves the cream frost bleeding 112px with no blue over it —
+  a **186**-value CLIFF at the bar's edge. Confining it looks like the tidy fix
+  and is the trap.
+- **Rebuilt per frame** (~24 stops) because `r` moves with scroll, and it cannot
+  be static CSS: the alphas depend non-linearly on the edge's position and
+  `calc()` cannot express that. Guarded, and only built while the ledge is within
+  reach of the bar.
+- ⚠️ **`CONTACT.frost` in main.js TRANSCRIBES hero.css's frost gradient**, because
+  a background gradient cannot be read back out of CSS. Keep the four pairs in
+  sync — nothing enforces it, same standing hazard as
+  `--color-accent` / `--color-accent-rgb`.
+
+**3. THE PARALLAX PEEK** (`--contact-peek`). The copy is offset downward and the
+offset shrinks as the panel rises, so it travels UP faster than the panel and is
+revealed into place.
+- **Same cubic ease-out as the hero's `--field-scroll` tuck** — one curve for both
+  parallaxes on the site.
+- ⚠️ **EXACTLY 0 AT REST**, so the settled composition is byte-identical.
+- ⚠️ **The window ENDS EARLY, and its floor is MEASURED.** Running it to the
+  scroll floor leaves the copy still arriving while the panel already fills the
+  screen; the floor is derived from the panel's resting edge rather than assumed
+  to be 0, because on a page where Contact never reaches the top a hard-coded 0
+  would strand the copy permanently offset.
+- ⚠️ **CURVE AND WINDOW ARE COUPLED.** Stopping early is only safe because a cubic
+  ease-out lands at zero velocity. An **ease-in** was tried at the user's request
+  and is a trap here: it holds the offset near its peak for most of its run, so
+  the copy sits pushed down exactly while the panel fills the screen — *it is what
+  creates the "too much empty panel" complaint*, not the peak. It also arrived at
+  **1.43** px of copy per px of scroll (outrunning the page as it stopped dead).
+
+**`--dark-mix` IS THE SHIPPED RULE, GENERALISED — NOT A NEW ONE.** The old
+expression `(invertLine − contact.top) / invertLine` IS the mean alpha of
+Contact's fill over the bar's band; that was only true because a hard edge is
+alpha 1 below and 0 above. With a ledge the same sentence holds and the integral
+just has a ramp in it. So the bar tints early **because there is genuinely blue
+behind it** — which is exactly what the shipped rule was written to guarantee.
+⚠️ **Verified to reduce to the old expression with ZERO delta at `--contact-ledge:
+0`.** Generalise, don't replace.
+
+**Untouched, all verified:** project pages (no `#contact`, so nothing is
+published and every CSS fallback is the previous bar), no-JS, reduced motion (the
+ledge stays — it is a dissolve, not motion; only the parallax goes), and ≤480,
+where Contact is `display: none` and the existing zero-height branch clears
+everything.
+
+⚠️ **OPEN, AND NOT MEASURED: a faint edge at the bar's `::before` box bottom
+(y = 166 at the shipped bleed).** The ramp there is 0.86 code values per pixel —
+below the dither floor — and the compensation is exact for COLOUR, but it does
+not model the `backdrop-filter` blur, still ~13px at that point. That is cause
+three of the hairline story all over again. Needs real pixels; if it is visible,
+fade the blur on the ledge's alpha rather than on `--dark-mix`.
+
+**`lab/contact-morph.html`** is the tuning harness (excluded from the build, on
+the `lab/field-shader.html` precedent): live controls for the ledge height, grain
+profile, bar-fill mode, nav rule and every peek parameter, with contrast and
+seam-step readouts. ⚠️ **It loads the REAL `.intro-bar` in its docked state, and
+that is deliberate** — an earlier hand-rolled stand-in drifted far enough to stop
+being evidence. ⚠️ **Below 680 the bar is `display: none`, so the harness reports
+`offsetHeight 0` and every bar measurement silently degenerates while still
+returning plausible numbers.** It prints a red warning; heed it.
+
 ## Where each page area lives
 | Area on page | CSS file | HTML location |
 |---|---|---|
@@ -976,7 +1112,7 @@ transition.
 | Selected Work | `sections.css` | `#work-section` |
 | About | `sections.css` | `#about` |
 | Public footprints (per project; **not on the homepage** — see below) | `sections.css` (link list) + `project-overview.css` (its one spacing rule) | end of `#impact` in each `work/*.html` |
-| Contact | `sections.css` | `#contact` |
+| Contact (panel, soft leading edge, parallax peek) | `sections.css` | `#contact` |
 | Footer / copyright | `footer.css` | `<footer class="site-footer">` |
 | Any interaction/animation | `js/main.js` | — |
 | Colors, spacing, fonts (tokens) | `global.css` (`:root`) | — |
@@ -1942,7 +2078,7 @@ depends on JS succeeding.
 | When a reveal fires / resets (scroll thresholds) | `setupReveals` → `update()` (~line 2432) | reveal at `top < vh*0.85 && bottom > vh*0.15`; **reset only when fully off-screen** (`bottom<=0 || top>=vh`) — this is the anti-cut-out rule, keep the reset off-screen |
 | Per-item order within a group / the stagger animation | `setupReveals` → `setVisible()` (~line 2394) | reads `data-reveal-order`, calls Motion `animate` |
 | Smooth-scroll feel (weight, wheel, easing) | `setupLenis` (~line 2176) | Lenis `duration`, `easing`, `smoothWheel`; also routes `a[href^="#"]` clicks through `lenis.scrollTo` |
-| Scroll-spy, header inversion/tint, bar bleed, the field tuck | `updateScrollEffects` (~line 1906) | these are **scroll-linked** (not reveals); separate system. ⚠️ The hero scroll-fade and the contact fade named here previously are both **retired** — the hero's went with the blob landing, and Contact now fades via the shared reveal system. Don't reintroduce either; a scroll-linked opacity would fight the reveal. Properties published here: `--dark-mix`, `--bar-bleed`, `--field-scroll`, `--field-gap`, plus `is-at-page-top` / `is-tucked` / `is-docked`. |
+| Scroll-spy, header inversion/tint, bar bleed, the field tuck | `updateScrollEffects` (~line 1906) | these are **scroll-linked** (not reveals); separate system. ⚠️ The hero scroll-fade and the contact fade named here previously are both **retired** — the hero's went with the blob landing, and Contact now fades via the shared reveal system. Don't reintroduce either; a scroll-linked opacity would fight the reveal. Properties published here: `--dark-mix`, `--bar-bleed`, `--field-scroll`, `--field-gap`, `--contact-edge`, `--bar-fill`, `--contact-peek`, plus `is-at-page-top` / `is-tucked` / `is-docked`. The last three are Contact's arrival — see **Contact's soft leading edge**; `--bar-fill` is a per-frame GRADIENT rather than a number, and its layout-only inputs are measured in `measureContactArrival` (beside `measureFieldTuck`) precisely so the hot path stays free of `getComputedStyle` and `scrollHeight`. |
 | Scribble load reveal sequence | `revealSite`/`revealRestOfSite` (~line 119) + `hero.css` keyframes | separate from viewport reveals |
 | Pre-paint hidden state (initial opacity/translate) | `global.css` → `html.is-motion [data-reveal]` | keep its `translateY` roughly in sync with `REVEAL.distance` |
 
