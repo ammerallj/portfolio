@@ -227,28 +227,30 @@ const CONTACT = {
     // forbids — it would lag the page. Blending per pixel scrolled keeps it a
     // function of the reader's own motion with no clock in it.
     flipOver: 250,   // px of scroll to fully reverse the sign
-    // ⚠️ THE LEDGE STRETCHES ON THE WAY UP — its bottom is welded to the panel
-    // and follows it down, while its top holds, so the dissolve LENGTHENS and
-    // reads as being dragged down. 96 -> 160 at the cap.
+    // ⚠️ THE LEDGE'S TOP DESCENDS ON THE WAY UP — its bottom stays welded to the
+    // panel and the height shortens, so the blue's leading edge sits LOWER as
+    // the reader scrolls up. 96 -> 80 at the cap.
     //
-    // ⚠️ IT WAS BUILT SHORTENING FIRST AND THAT WAS BACKWARDS. Moving the top
-    // DOWN also makes the ledge travel, but it compresses the ramp — a harder
-    // edge, when the whole point of the gesture is a softer one. Stretching gets
-    // the same travel and more dissolve instead of less.
+    // ⚠️ "PULL IT DOWN" AND "MAKE IT SOFTER" ARE OPPOSITE INSTRUCTIONS HERE, and
+    // this was built both ways before that was clear. The bottom is welded, so
+    // the only thing that can move is the top, and the height is the only thing
+    // that can carry it:
+    //   · shorten -> the top DESCENDS (lower blue) and the ramp compresses
+    //   · stretch -> the ramp lengthens (softer) and the top RISES, which washes
+    //     up over About's photo and copy
+    // There is no setting that does both. "Lower" won, so this shortens.
     //
-    // ⚠️ STILL NEVER A TRANSLATE. The gradient reaches alpha 1 at its own bottom,
-    // so shifting that bottom below the panel's top leaves the ramp part-way
-    // when it meets solid blue — a step of 40 code values at 24px and 66 at 32,
-    // against the 54-value seam this whole change exists to remove. Weld the
-    // bottom and let the HEIGHT carry it, in either direction.
+    // ⚠️ NEVER A TRANSLATE, whichever way the height goes. The gradient reaches
+    // alpha 1 at its own bottom, so moving that bottom below the panel's top
+    // leaves the ramp part-way when it meets solid blue — 40 code values of step
+    // at 24px, 66 at 32, against the 54-value seam this change exists to remove.
     //
-    // ⚠️ THE CAP IS BOUNDED BY WHAT IT WASHES, NOT BY BANDING. Growing upward
-    // pushes the ramp INTO About's copy — the ledge paints over the section
-    // above — so the limit is that copy's contrast, measured below. Stops go
-    // from 4.0px to 6.7px apart at full stretch, which is still finer than the
-    // 8px that read as faint Mach banding on the hero field, and the grain
-    // dithers it.
-    ledgeStretch: 64,
+    // ⚠️ THE CAP IS BOUNDED BY ABRUPTNESS, NOT BANDING. 25 stops hold the spacing
+    // under 4px at every length here, so the ramp is never under-sampled; what
+    // fails is the dissolve starting to read as a cut, somewhere below ~56px.
+    // 16 keeps the ramp at 80 — a visible descent with the dissolve intact, and
+    // a long way clear of that floor if it ever wants to go further.
+    ledgeShorten: 16,
   },
 };
 
@@ -2638,13 +2640,13 @@ function updateScrollEffects() {
       // read the LIVE ledge, so it has to exist before them. ----
       const ledge = contactLedge;                    // measured, not read per frame
       const edge = contactRect.top;
-      // The ledge's live height, STRETCHED as the reader scrolls up: the bottom
-      // is welded to the panel and follows it down while the top holds, so the
-      // dissolve lengthens. Everything downstream takes this rather than the
-      // token, or the bar's fill stops matching the ramp it is a window onto.
-      const ledgeStretch = Math.max(0, peekDir) * CONTACT.peek.ledgeStretch;
-      const liveLedge = Math.max(1, ledge + ledgeStretch);
-      setLedgeLift(Math.round(ledgeStretch));
+      // The ledge's live height, SHORTENED as the reader scrolls up so its top
+      // descends and the blue sits lower. Everything downstream takes this rather
+      // than the token, or the bar's fill stops matching the ramp it is a window
+      // onto and the seam comes back.
+      const ledgeShorten = Math.max(0, peekDir) * CONTACT.peek.ledgeShorten;
+      const liveLedge = Math.max(1, ledge - ledgeShorten);
+      setLedgeLift(Math.round(ledgeShorten));
       setContactEdge(Math.round(edge * 100) / 100);
 
       const covered = blueBehindBar(contactRect.top, liveLedge, invertLine);

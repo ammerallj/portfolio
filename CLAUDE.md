@@ -1036,39 +1036,38 @@ anywhere, the same property that makes Contact's peek symmetric.
   undo a measured spacing decision in its neighbour**, because measurements taken
   from offsets do not see transforms. Check the seam, not just the section.
 
-### The ledge stretches on the way up (`--contact-ledge-lift`, 2026-09)
+### The ledge travels on the way up (`--contact-ledge-lift`, 2026-09)
 
-Scrolling up, the ledge's **bottom follows the descending panel while its top
-holds**, so the dissolve LENGTHENS and reads as being pulled down: ledge
-**96 → 160**, eased in over ~250px of the reader's own travel by the same
-`peekDir` blend, and back to 96 on the way down.
+Scrolling up, the ledge's **top descends** — its bottom stays welded to the panel
+and the height shortens, so the blue's leading edge sits lower: **96 → 80**, eased
+in over ~250px of the reader's own travel by the same `peekDir` blend, and back to
+96 on the way down.
 
-⚠️ **IT WAS BUILT SHORTENING FIRST AND THAT WAS BACKWARDS.** Moving the top DOWN
-also makes the ledge travel, but it COMPRESSES the ramp — a harder edge, when the
-whole point of the gesture is a softer one. Stretching gets the same travel and
-more dissolve instead of less. **If a "softer" edge is asked for, check which
-direction the height is moving before reaching for anything else.**
+⚠️ **"PULL IT DOWN" AND "MAKE IT SOFTER" ARE OPPOSITE INSTRUCTIONS HERE, and this
+was built both ways before that was clear.** The bottom is welded, so the only
+thing that can move is the TOP, and the height is the only thing that can carry
+it. That gives exactly two options and no third:
+- **shorten** → the top DESCENDS (blue lower) and the ramp compresses (harder edge)
+- **stretch** → the ramp LENGTHENS (softer) and the top RISES, washing up over
+  About's photo and copy
 
-⚠️ **THE CAP IS BOUNDED BY WHAT IT WASHES, NOT BY BANDING.** Growing upward pushes
-the ramp INTO About's copy, since the ledge paints over the section above.
-Measured worst case **11.22:1** for black — and it is at stretch ZERO, because the
-stretch and About's push are anti-correlated: by the time the ledge is fully
-stretched, About's peek has relaxed to a lag and pulled its copy UP away from the
-ramp (41–55px in, 13–16:1). They never compound. Stops go 4.0px → 6.7px apart at
-full stretch, still finer than the 8px that read as faint Mach banding on the
-hero field, and the grain dithers it.
+**There is no setting that does both.** If both are asked for, say so rather than
+alternating — this flipped three times before the trade was named.
 
-⚠️ **NEVER A TRANSLATE, IN EITHER DIRECTION.** The gradient reaches alpha 1 at its own bottom, so
-moving that bottom below the panel's top leaves the ramp part-way where it meets
-solid blue — **a step of 40 code values at 24px and 66 at 32**, against the
-54-value seam this entire change exists to remove. The bottom stays welded and
-the HEIGHT absorbs the shift, so the ramp always lands on 1 exactly at the panel.
-- Capped well short of the length; 25 stops over the shortened ramp are still
-  ~2.9px apart, so the limit is **abruptness, not banding**.
-- ⚠️ **EVERYTHING DOWNSTREAM MUST TAKE THE LIVE LEDGE, NOT THE TOKEN** — the bar's
-  fill, the coverage rule and the label flip all do. The bar's fill is a *window
-  onto* this ramp; feed it the token while the ramp is shorter and the 21% seam
-  comes straight back.
+⚠️ **NEVER A TRANSLATE, whichever way the height goes.** The gradient reaches
+alpha 1 at its own bottom, so moving that bottom below the panel's top leaves the
+ramp part-way when it meets solid blue — **40 code values of step at 24px, 66 at
+32**, against the 54-value seam this whole change exists to remove.
+
+⚠️ **THE CAP IS BOUNDED BY ABRUPTNESS, NOT BANDING.** 25 stops hold the spacing
+under 4px at every length in range, so the ramp is never under-sampled; what
+fails is the dissolve starting to read as a cut, somewhere below ~56px. At 16 the
+ramp holds 80px with About's copy 39px clear of its top.
+
+⚠️ **EVERYTHING DOWNSTREAM MUST TAKE THE LIVE LEDGE, NOT THE TOKEN** — the bar's
+fill, the coverage rule and the label flip all do. The bar's fill is a *window
+onto* this ramp; feed it the token while the ramp is a different length and the
+21% seam comes straight back.
 - ⚠️ **The ledge geometry is HOISTED above the coverage rule for that reason**, and
   it was a TDZ error first (`Cannot access 'liveLedge' before initialization`) —
   which throws every frame inside `updateScrollEffects` and silently strands

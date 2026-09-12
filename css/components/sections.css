@@ -579,13 +579,13 @@
      bottom — i.e. exactly on the panel's top. */
   bottom: 100%;
   /* ⚠️ THE BOTTOM IS WELDED AND THE HEIGHT CARRIES THE MOTION.
-     --contact-ledge-lift STRETCHES the dissolve as the reader scrolls up: the
-     bottom follows the descending panel, the top holds, so the ramp lengthens
-     and reads as being pulled down. It must never become a translate — the
+     --contact-ledge-lift SHORTENS the dissolve as the reader scrolls up: the
+     bottom stays welded to the panel and the top descends, so the blue's leading
+     edge sits lower. It must never become a translate — the
      gradient reaches alpha 1 at its own bottom, so moving that bottom below the
      panel's top leaves the ramp part-way where it meets solid blue (40 code
      values of step at 24px, 66 at 32). */
-  height: calc(var(--contact-ledge) + var(--contact-ledge-lift, 0px));
+  height: calc(var(--contact-ledge) - var(--contact-ledge-lift, 0px));
   pointer-events: none;
 }
 
