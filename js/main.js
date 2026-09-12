@@ -217,7 +217,12 @@ const CONTACT = {
   peek: {
     // Parallax distance as a fraction of the window, and its ceiling in px.
     rate: 0.5,
-    max: 80,
+    // ⚠️ THIS IS WHAT MAKES THE COPY APPEAR EARLY. The peek is NEGATIVE on the
+    // way in — the copy is pulled UP out of its composed position and settles
+    // back down — so raising this brings it into view sooner, on top of the
+    // 232px it already sits below the panel's top at rest. It is also subtracted
+    // from the window's anchor, so the window opens earlier to match.
+    max: 140,
     // THE WINDOW ENDS WHERE THE NAV MEETS THE SECTION'S TOP — the copy keeps
     // rising for the whole approach and lands exactly as the panel docks.
     // ⚠️ It used to stop early (0.6 of the way from the scroll floor to the
@@ -2563,7 +2568,13 @@ function updateScrollEffects() {
     const span = Math.max(1, vh * ABOUT_PEEK.span);
     const n = Math.min(1, Math.abs(d) / span);
 
-    let peek = Math.sign(d) * ABOUT_PEEK.max * n * n * (3 - 2 * n);
+    // ⚠️ NEGATED: the copy is pulled UP on the approach and settles DOWN into
+    // place, so it arrives EARLIER rather than lagging behind the section. It
+    // used to lag downward, which delayed the content exactly while the reader
+    // was coming to it — the same sign error Contact's peek had, and fixed the
+    // same way. Leaving upward it still pushes down, which is what the
+    // ledge-proximity blend below wants.
+    let peek = -Math.sign(d) * ABOUT_PEEK.max * n * n * (3 - 2 * n);
 
     // ⚠️ AS CONTACT ARRIVES, ABOUT'S COPY IS PUSHED TOWARD THE LEDGE rather than
     // left to its own lag. Its lag is NEGATIVE while it leaves upward — exactly
@@ -2922,6 +2933,10 @@ function setupLenis(Lenis) {
 // scroll the page normally. No state, nothing to escape from, nothing to re-arm.
 //
 // If a hold is ever wanted again, read the four failures above first.
+// Fraction of a section's leftover space placed ABOVE its content when it
+// settles. 0.5 is a true centre; lower lifts the content.
+const SECTION_BIAS = { about: 0.34 };
+
 function initSectionGeometry(lenis) {
   const sections = ['work-section', 'about', 'contact']
     .map(id => document.getElementById(id))
@@ -2944,21 +2959,40 @@ function initSectionGeometry(lenis) {
   // BESIDE the heading, so the span is 475 not 531) while Work and Contact have
   // one. And not a card: the Work cards rotate as the loop runs and their heights
   // are not guaranteed equal once a title wraps to another line.
+  // ⚠️ OFFSETS, NOT getBoundingClientRect — the children can be TRANSFORMED.
+  // About's parallax translates its two .site-container children, and a rect
+  // reports that translation, so the target was computed from wherever the peek
+  // happened to have the content at the moment of the click. Measured: About
+  // settled with its heading at -104, off the top of the screen, because the
+  // peek was at -60 when the target was taken. Offsets ignore transforms, so
+  // this is the section's real position whatever the parallax is doing.
+  // Same rule as measureFieldTuck and measureContactArrival.
+  const pageTopOf = (el) => { let y = 0; for (let n = el; n; n = n.offsetParent) y += n.offsetTop; return y; };
   function restingFor(el) {
     const kids = el.children;
-    const box = el.getBoundingClientRect();
-    let contentTop = box.top;
-    let contentHeight = box.height;
+    let contentDocTop = pageTopOf(el);
+    let contentHeight = el.offsetHeight;
     if (kids.length) {
-      const first = kids[0].getBoundingClientRect();
-      const last = kids[kids.length - 1].getBoundingClientRect();
-      contentTop = first.top;
-      contentHeight = Math.max(0, last.bottom - first.top);
+      const firstTop = pageTopOf(kids[0]);
+      const lastEl = kids[kids.length - 1];
+      contentDocTop = firstTop;
+      contentHeight = Math.max(0, (pageTopOf(lastEl) + lastEl.offsetHeight) - firstTop);
     }
     const available = window.innerHeight - NAV_OFFSET;
-    // Taller than the space it gets: nothing to centre, sit it under the nav.
-    const wantedTop = NAV_OFFSET + Math.max(0, (available - contentHeight) / 2);
-    const target = window.scrollY + contentTop - wantedTop;
+    // ⚠️ THE LEFTOVER IS NOT ALWAYS SPLIT EVENLY. A true centre (0.5) put About
+    // 98px under the nav with 153px below it — visibly low, because the eye reads
+    // a block as centred when it sits slightly ABOVE the geometric middle, and
+    // because About's content is top-heavy (a 56px heading over body copy).
+    // SECTION_BIAS is the fraction of the leftover placed ABOVE the content.
+    // Work and Contact keep 0.5; only About is lifted.
+    // ⚠️ A smaller bias means a LARGER resting scrollY, which moves the scroll
+    // spy's threshold LATER — and Contact's click target (topAlignedFor) does not
+    // move with it. Those two must not cross: re-measure the margin after
+    // changing this. See the note on --contact-lift.
+    const bias = SECTION_BIAS[el.id] ?? 0.5;
+    const wantedTop = NAV_OFFSET + Math.max(0, (available - contentHeight) * bias);
+    // contentDocTop is already a DOCUMENT coordinate, so no scrollY term here.
+    const target = contentDocTop - wantedTop;
     // Clamp, or the last section asks for a position the page cannot reach.
     const max = document.documentElement.scrollHeight - window.innerHeight;
     return Math.min(Math.max(target, 0), Math.max(max, 0));
