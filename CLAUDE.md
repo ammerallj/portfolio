@@ -1036,6 +1036,30 @@ anywhere, the same property that makes Contact's peek symmetric.
   undo a measured spacing decision in its neighbour**, because measurements taken
   from offsets do not see transforms. Check the seam, not just the section.
 
+### The ledge travels on the way up (`--contact-ledge-lift`, 2026-09)
+
+Scrolling up, the dissolve's **top descends toward the panel** so the ledge moves
+with the copy instead of staying welded in place: ledge **96 → 72**, eased in over
+~250px of the reader's own travel by the same `peekDir` blend, and locked back to
+96 on the way down.
+
+⚠️ **ONLY ITS TOP MOVES. TRANSLATING THE BOX IS THE OBVIOUS IMPLEMENTATION AND IS
+THE ONE THAT CANNOT WORK.** The gradient reaches alpha 1 at its own bottom, so
+moving that bottom below the panel's top leaves the ramp part-way where it meets
+solid blue — **a step of 40 code values at 24px and 66 at 32**, against the
+54-value seam this entire change exists to remove. The bottom stays welded and
+the HEIGHT absorbs the shift, so the ramp always lands on 1 exactly at the panel.
+- Capped well short of the length; 25 stops over the shortened ramp are still
+  ~2.9px apart, so the limit is **abruptness, not banding**.
+- ⚠️ **EVERYTHING DOWNSTREAM MUST TAKE THE LIVE LEDGE, NOT THE TOKEN** — the bar's
+  fill, the coverage rule and the label flip all do. The bar's fill is a *window
+  onto* this ramp; feed it the token while the ramp is shorter and the 21% seam
+  comes straight back.
+- ⚠️ **The ledge geometry is HOISTED above the coverage rule for that reason**, and
+  it was a TDZ error first (`Cannot access 'liveLedge' before initialization`) —
+  which throws every frame inside `updateScrollEffects` and silently strands
+  `--dark-mix`, `--bar-bleed` and the rest at their last values.
+
 ### Contact's resting gap (`--contact-lift`, 2026-09)
 
 **The copy sat 232px below the panel's top at rest**, and that number decomposes

@@ -227,6 +227,18 @@ const CONTACT = {
     // forbids — it would lag the page. Blending per pixel scrolled keeps it a
     // function of the reader's own motion with no clock in it.
     flipOver: 250,   // px of scroll to fully reverse the sign
+    // ⚠️ THE LEDGE'S TOP FOLLOWS THE SAME DIRECTION BLEND — scrolling up, the
+    // dissolve's start descends toward the panel so the ledge travels with the
+    // copy instead of staying welded in place.
+    // ⚠️ ONLY ITS TOP. TRANSLATING THE BOX IS THE OBVIOUS MOVE AND IS WRONG:
+    // the gradient reaches alpha 1 at its own bottom, so shifting that bottom
+    // BELOW the panel's top leaves the ramp part-way when it meets solid blue —
+    // a step of 40 code values at 24px and 66 at 32px, against the 54-value seam
+    // this entire change exists to remove. The bottom stays welded; the height
+    // absorbs the shift, so the ramp always lands on 1 exactly at the panel.
+    // Capped well short of the length: 25 stops over the shortened ramp are
+    // still ~2.9px apart, so the limit is abruptness, not banding.
+    ledgeLift: 24,
   },
 };
 
@@ -306,6 +318,13 @@ function updatePeekDir() {
   const step = Math.abs(delta) / CONTACT.peek.flipOver;
   peekDir += Math.max(-step, Math.min(step, target - peekDir));
   peekDir = Math.max(-1, Math.min(1, peekDir));
+}
+
+let lastLedgeLift = -1;
+function setLedgeLift(px) {
+  if (px === lastLedgeLift) return;
+  lastLedgeLift = px;
+  document.documentElement.style.setProperty('--contact-ledge-lift', px + 'px');
 }
 
 let lastContactPeek = -1;
@@ -2605,7 +2624,19 @@ function updateScrollEffects() {
       // ⚠️ With contactLedge 0 this returns the old expression EXACTLY (verified
       // to zero delta across the whole approach), so project pages, no-JS and
       // any future hard-edged panel are untouched.
-      const covered = blueBehindBar(contactRect.top, contactLedge, invertLine);
+      // ---- LEDGE GEOMETRY, hoisted: the coverage rule and the label flip both
+      // read the LIVE ledge, so it has to exist before them. ----
+      const ledge = contactLedge;                    // measured, not read per frame
+      const edge = contactRect.top;
+      // The ledge's live height, shortened as the reader scrolls up so its TOP
+      // descends with the copy. Everything downstream takes this rather than the
+      // token, or the bar's fill stops matching the ramp it is a window onto.
+      const ledgeLift = Math.max(0, peekDir) * CONTACT.peek.ledgeLift;
+      const liveLedge = Math.max(1, ledge - ledgeLift);
+      setLedgeLift(Math.round(ledgeLift));
+      setContactEdge(Math.round(edge * 100) / 100);
+
+      const covered = blueBehindBar(contactRect.top, liveLedge, invertLine);
       const mix = Math.max(0, Math.min(1, covered / DARK_FULL_AT));
       setDarkMix(mix);
       // THE LABELS SWITCH ONCE, AND ON WHAT THEY ACTUALLY SIT ON.
@@ -2624,8 +2655,8 @@ function updateScrollEffects() {
       //
       // The old test is kept for a hard edge (--contact-ledge: 0), where the
       // gradient does not exist and 0.85 is still the measured answer.
-      const flipToWhite = contactLedge > 0
-        ? contactAlphaAt(contactGlyphMid, contactRect.top, contactLedge) >= DARK_TEXT_ALPHA
+      const flipToWhite = liveLedge > 0
+        ? contactAlphaAt(contactGlyphMid, contactRect.top, liveLedge) >= DARK_TEXT_ALPHA
         : mix >= DARK_TEXT_AT;
       stickyBars.forEach(bar => bar.classList.toggle('is-over-dark', flipToWhite));
 
@@ -2640,10 +2671,6 @@ function updateScrollEffects() {
       setBarBleed(Math.max(0, Math.min(BAR_BLEED, Math.round(gap))));
 
       // ---- THE LEDGE, THE BAR'S FILL, AND THE PEEK ----------------------
-      const ledge = contactLedge;                    // measured, not read per frame
-      const edge = contactRect.top;
-      setContactEdge(Math.round(edge * 100) / 100);
-
       // Build the bar's fill only while the ledge is anywhere near it. Outside
       // that the flat fallback in hero.css is already correct — cream above,
       // solid accent below — so this costs nothing for most of the page.
@@ -2652,8 +2679,8 @@ function updateScrollEffects() {
       // there is no bar to paint a ramp into. The ledge itself still renders —
       // it is the panel's own edge, not the bar's.
       const barLive = introBar && introBar.offsetParent !== null;
-      if (barLive && ledge > 0 && edge > 0 && edge - ledge < barHeight + BAR_BLEED + 2) {
-        setBarFill(buildBarFill(edge, ledge));
+      if (barLive && ledge > 0 && edge > 0 && edge - liveLedge < barHeight + BAR_BLEED + 2) {
+        setBarFill(buildBarFill(edge, liveLedge));
       } else {
         setBarFill('');
       }
