@@ -1279,8 +1279,9 @@ at 17.6:1 or better. Static figures at rest, every tier: **7.9 at 1440, 8.4 at
 
 ⚠️ **THE REACH IS SCROLL-LINKED — THE LEDGE ONLY WASHES OVER ABOUT ON THE WAY
 DOWN (`CONTACT.reach`, 2026-09).** At About's own resting position the ledge is
-exactly **160px = `--about-tail`**: it fills About's bottom padding and stops, so
-the copy ends on clean cream (20.4:1) while About is the thing being read. It
+**`--contact-ledge-rest` (160px)**, which is a section gap SHORT of About's
+padding — so the copy ends on clean cream (20.4:1, 101px of it) while About is
+the thing being read. It
 then grows to the full `--contact-ledge-length` as Contact arrives. Measured at
 1440×900, by Contact's edge: **1275→875 hold at 160 · 775 → 171 · 675 → 254 ·
 575 → 375 · 475 → 480 · 375 and below → 520.**
@@ -1291,8 +1292,9 @@ then grows to the full `--contact-ledge-length` as Contact arrives. Measured at
   (0.62) finishes the growth before the panel docks.
 - ⚠️ **Smoothstep on the reach too**, so About's resting composition is a
   stationary point rather than a corner the reader crosses.
-- ⚠️ **Keep `reach.rest` AT OR UNDER `--about-tail`.** Past it the ledge eats the
-  cream gap at rest, which is the one thing the schedule exists to protect.
+- ⚠️ **The ledge at rest can never exceed the tail** — the tail is DERIVED from it
+  (`rest + --gap-section`), so that guarantee is structural now, not a rule to
+  remember. Change the resting length and the cream follows it.
 - **It rides `--contact-ledge-lift`**, which used to carry only the 16px up-scroll
   shortening and now carries the whole difference from the token. Everything
   downstream already took `liveLedge` rather than the token, so nothing else moved.
@@ -1303,35 +1305,48 @@ then grows to the full `--contact-ledge-length` as Contact arrives. Measured at
   lift was only ever 16px at the top of the page; not harmless once it carries
   360. The measurement zeroes the lift first.
 
-⚠️ **THE RESTING FIGURE IS NOT THE BINDING ONE — AND AN EARLIER VERSION OF THIS
-ENTRY PUBLISHED A TABLE OF RESTING NUMBERS AS IF IT WERE.** About's parallax
-`push` drives its copy INTO the ledge during the approach: the last line's
-clearance above the panel collapses **197 → 106px**, deep in the ramp whatever
-its length. Swept at 1440×900, worst ON-SCREEN ink:
+⚠️ **THE CREAM THE READER SEES IS `--about-tail` MINUS THE RESTING LEDGE, NOT THE
+TAIL.** Both were a flat 160px, so the ledge exactly filled About's padding and
+the clear cream between the last line and any blue measured **46px** — which read
+as no gap at all. The tail is now authored as the relationship:
+`--about-tail: calc(--contact-ledge-rest + --gap-section)` = **256px**, so a full
+section gap of clear cream is guaranteed by construction rather than by two
+numbers agreeing. Measured after: **101px** of clear cream at About's rest, and
+`contactLedgeRest` is READ from that token in `measureContactArrival` rather than
+restated in `CONTACT.reach` (the literal there is the no-JS fallback only).
+⚠️ **RAISE THE TAIL, NOT THE RESTING LEDGE.** If both move together the geometry
+is IDENTICAL and all that happens is Contact is pushed further down for nothing.
+⚠️ At ≤480 `--gap-section` is 64, so the tail resolves to 224 and Contact is
+`display: none` — the reservation is inert there, just trailing cream before the
+footer. Left as is; it was already 160.
 
-| Contact's edge | 875 | 675 | 575 | 475 | 375 | 175 |
+⚠️ **THAT ALSO RESOLVED THE APPROACH'S AA FAILURE, WITHOUT TOUCHING THE PUSH OR
+THE PAINT ORDER.** The last line now starts 96px further from the panel, so it
+sits higher in the ramp at every scroll position. Swept at 1440×900, worst
+ON-SCREEN ink — and note the floor is no longer at full reach:
+
+| Contact's edge | 971 | 771 | 671 | 571 | 471 | 371 |
 |---|---|---|---|---|---|---|
-| ledge | 160 | 254 | 375 | 480 | 520 | 520 |
-| **shipped** (ledge over the copy) | 20.4 | 12.7 | 4.76 | 2.72 | **2.45** | 2.66 |
-| *if the copy painted above it* | 20.4 | 14.6 | 8.28 | 6.11 | *5.78* | 6.04 |
+| ledge | 160 | 236 | 338 | 441 | 510 | 520 |
+| worst About ink | 20.4 | 20.4 | 18.2 | 12.0 | 8.77 | **8.59** |
 
-⚠️ **THE SHIPPED FLOOR (2.45) FAILS AA, AND IT IS PRE-EXISTING — the static 300px
-ledge floored at 2.65.** The schedule moved the failure later (it now begins at
-edge ~500 rather than ~640) without removing it. Two measured levers, neither
-applied:
-- **`ABOUT_PEEK.push` (40px)** — without it the line holds ~7.9 throughout. Its
-  stated reason is gone (it was added when the ledge was 96px and there was bare
-  cream above it to close; a 520px ledge closes that seam itself), but it was
-  asked for as a motion, so it stays until that is revisited.
-- **Paint About's copy ABOVE the ledge** — `#about .about-right, #about-heading
-  { position: relative; z-index: 1 }`. The wash then tints the photo and the
-  ground while the type stays unattenuated black, taking the floor to **5.78**.
-  ⚠️ **This is what "a ledge layer on top of both sections" actually resolves to,
-  and the ordering is the opposite of the obvious one:** the ledge ALREADY paints
-  over both (Contact is positioned; About is not), so a shared layer buys nothing
-  — what is missing is the copy being lifted above it. Verified layout-identical
-  with and without (About's rect unchanged to 0.1px), and the nav bar is
-  `z-index: 90`, so a `1` here cannot reach it.
+**Floor 8.59:1 against AA's 4.5.** It was **2.45** with the 160px tail, and
+**2.65** with the static 300px ledge before that — so the failure this document
+recorded as pre-existing is gone, and the fix was spacing rather than either
+lever that had been written down for it.
+⚠️ **THE TWO LEVERS ARE THEREFORE NOT NEEDED, and both are recorded here only so
+they are not re-derived from scratch:**
+- **`ABOUT_PEEK.push` (40px)** still drives the copy toward the ledge, and its
+  stated reason is still gone (it was added when the ledge was 96px and there was
+  bare cream above it to close). It is now affordable, so it stays.
+- **Painting About's copy ABOVE the ledge** — `#about .about-right, #about-heading
+  { position: relative; z-index: 1 }` — measured **5.78** against the old 2.45, so
+  it was the fix before the tail was. ⚠️ **This is what "a ledge layer on top of
+  both sections" actually resolves to, and the ordering is the opposite of the
+  obvious one:** the ledge ALREADY paints over both (Contact is positioned, About
+  is not), so a shared layer buys nothing — what would be missing is the copy
+  being lifted above it. Verified layout-identical with and without (About's rect
+  unchanged to 0.1px); the nav is `z-index: 90`, so a `1` cannot reach it.
 **Measure the SWEEP, never `scrollY 0`, before judging any of this.**
 
 ⚠️ **THREE SUPERSEDED DESIGNS LIVED HERE, and the sequence is worth knowing

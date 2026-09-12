@@ -282,6 +282,10 @@ const CONTACT = {
   // tracks whatever those sections actually do at this width instead of assuming
   // a composition. `span` ends the growth before the panel docks, so the reach is
   // finished rather than still arriving when the section settles.
+  // ⚠️ `rest` IS READ FROM --contact-ledge-rest, NOT SET HERE — this is only the
+  // no-JS-token fallback. --about-tail is authored as `rest + --gap-section`, so
+  // the cream the reader sees at rest is a section gap by construction; a second
+  // copy of the length here would let that guarantee rot silently.
   reach: { rest: 160, span: 0.62 },
 };
 
@@ -421,6 +425,7 @@ let contactRestEdge = 0;
 // ⚠️ Taken from sectionRestingScrollY (i.e. restingFor), never re-derived: a
 // second definition of "where About settles" is exactly the kind that drifts.
 let aboutRestEdge = 0;
+let contactLedgeRest = 160;
 function measureAboutRest() {
   aboutRestEdge = 0;
   if (!contactSection || !aboutSection || !sectionRestingScrollY) return;
@@ -458,8 +463,8 @@ function measureContactArrival() {
     }
   }
 
-  const cs = getComputedStyle(document.documentElement);
-  contactAccentRGB = cs.getPropertyValue('--color-accent-rgb').trim() || '74, 69, 255';
+  const cs0 = getComputedStyle(document.documentElement);
+  contactAccentRGB = cs0.getPropertyValue('--color-accent-rgb').trim() || '74, 69, 255';
 
   // ⚠️ READ THE LEDGE'S PAINTED HEIGHT, NOT THE TOKEN. --contact-ledge is a
   // clamp(), and an unregistered custom property computes to its TOKEN STREAM,
@@ -479,6 +484,9 @@ function measureContactArrival() {
   // carries the whole reach.
   document.documentElement.style.setProperty('--contact-ledge-lift', '0px');
   lastLedgeLift = 0;
+  // The ledge's RESTING length, off the same token --about-tail is derived from.
+  const restTok = parseFloat(cs0.getPropertyValue('--contact-ledge-rest'));
+  contactLedgeRest = Number.isFinite(restTok) ? restTok : CONTACT.reach.rest;
   contactLedge = contactSection
     ? parseFloat(getComputedStyle(contactSection, '::before').height) || 0
     : 0;
@@ -2722,7 +2730,7 @@ function updateScrollEffects() {
         ? Math.max(0, Math.min(1, (aboutRestEdge - edge) / reachSpan))
         : 1;                                   // unmeasurable -> today's full ledge
       const reach = reachT * reachT * (3 - 2 * reachT);
-      const restLen = Math.min(CONTACT.reach.rest, ledge);
+      const restLen = Math.min(contactLedgeRest, ledge);
       const reached = restLen + (ledge - restLen) * reach;
       const ledgeShorten = Math.max(0, peekDir) * CONTACT.peek.ledgeShorten;
       const liveLedge = Math.max(1, reached - ledgeShorten);
