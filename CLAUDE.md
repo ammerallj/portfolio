@@ -1238,9 +1238,18 @@ a request for a longer fade.
 **1. THE LEDGE** (`.contact-section::before`, sections.css). Blue bleeds up out
 of the panel over `--contact-ledge`.
 
-⚠️ **THE LEDGE IS THE MEASURED ROOM ABOVE THE PANEL, NEVER A CONSTANT** —
-`clamp(90px, var(--contact-gap), 300px)`, exactly the rule `--field-fade` lives
-under. **It shipped at a flat 220px and that was wrong**: the room is only ~96,
+⚠️ **THE ROOM IS A CEILING, NOT A TARGET** — `min(var(--contact-ledge-length),
+var(--contact-gap))`. It was `clamp(90px, var(--contact-gap), 300px)`, which made
+the ledge GROW to fill whatever space happened to sit above the panel. That space
+is not a constant and is not just section padding: **About carries its own
+min-height, so on a tall window its internal slack lands in the gap.** Measured
+room: 96px at 768, 103 at 1024, and **461 at 1800×1000** — where the ledge pinned
+to its 300px ceiling and read as a long blue band.
+The dissolve wants a LENGTH of its own (120px); the room only says how much it
+may take. Verified across forced gaps of 461/235/120/96/64: the ledge is 120
+wherever there is room and clamps to the room when there is not, never
+overlapping. ⚠️ **This is a different rule from `--field-fade`'s**, which really
+does spend its whole gap — do not "restore the symmetry". **It shipped at a flat 220px and that was wrong**: the room is only ~96,
 so the ramp ran 124px INTO About and washed blue across the photo and the last
 lines of copy. **The ledge paints OVER the section above** (Contact is
 positioned, so its pseudo-elements sit above a non-positioned sibling), so every

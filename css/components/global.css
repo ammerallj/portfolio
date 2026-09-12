@@ -197,7 +197,17 @@
      ⚠️ js/main.js reads the RESOLVED token to build the bar's matching fill and
      to time the parallax peek, so this is still the ONE place the height is
      decided — it just answers to layout now. */
-  --contact-ledge: clamp(90px, var(--contact-gap, 96px), 300px);
+  /* ⚠️ THE ROOM IS A CEILING, NOT A TARGET. This was
+     `clamp(90px, var(--contact-gap), 300px)`, which made the ledge GROW to fill
+     whatever space happened to be above the panel — and that space is not a
+     constant: About carries a min-height, so on a tall window its own internal
+     slack lands in the gap. Measured room: 96px at 768, 103 at 1024, and
+     **461 at 1800×1000**, where the ledge pinned to its 300px ceiling and read
+     as a long blue band.
+     The dissolve wants a LENGTH of its own; the room only says how much it may
+     take. min() expresses exactly that. */
+  --contact-ledge-length: 120px;
+  --contact-ledge: min(var(--contact-ledge-length), var(--contact-gap, 96px));
 
   /* Height of the site footer. A DEFAULT, not the truth: initSectionGeometry
      measures the real footer and rewrites this on load and resize, so the value
