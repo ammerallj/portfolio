@@ -1083,10 +1083,29 @@ onto* this ramp; feed it the token while the ramp is a different length and the
 
 ### The nav hides while scrolling down (`is-nav-hidden`, 2026-09)
 
-Scrolling **down** hides the bar; **stopping** brings it back, and so does
-scrolling **up**. `NAV_HIDE` in js/main.js — `delta: 4` (px in one frame, above a
-trackpad tail's noise floor so a drifting finger cannot flicker it) and
-`idle: 180` (ms of scroll silence that counts as stopped).
+Scrolling **down** hides the bar; scrolling **up** brings it back. `NAV_HIDE.delta`
+(4px in one frame) is above a trackpad tail's noise floor, so a drifting finger
+cannot flicker it.
+
+⚠️ **IT RETURNS ON SCROLL-UP, NOT ON IDLE, and an idle timer was built first and
+MEASURED FLICKERING.** At 180ms, a realistic reading pattern — scroll burst, pause
+to read, repeat — produced **six transitions over five bursts**, hiding on every
+burst and reappearing on every pause. A reading pause is not a request for
+navigation, so summoning the bar there undoes the reason for hiding it.
+Scroll-up is the signal that actually means "I am looking for something", which
+is what a nav is for. Same pattern after the change: **two** transitions, both
+deliberate.
+
+⚠️ **WHICH DIRECTION HIDES IS NOT ARBITRARY.** Down means reading, moving
+forward — get out of the way. Up correlates with *seeking*, and the nav is the
+seeking tool, so hiding it there removes it exactly when someone is reaching for
+it. Hiding on up would be backwards.
+
+⚠️ **THE CONSEQUENCE: stop mid-page and the bar stays hidden until the reader
+scrolls up.** Intended. It is also why the page-top guard exists — the top is the
+one place with no upward travel left to spend. At the page BOTTOM the bar does
+rest hidden; scrolling up by any amount returns it, and Contact carries its own
+connect links, so there is no dead end.
 
 ⚠️ **A STATE, SO IT MAY CARRY A TRANSITION.** The standing ban is on scroll-linked
 VALUES; this class flips once per gesture rather than tracking position.

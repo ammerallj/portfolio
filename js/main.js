@@ -520,12 +520,9 @@ const NAV_HIDE = {
   // px of downward travel in one frame before hiding. Above the noise floor of a
   // trackpad's tail, so a drifting finger does not flicker the bar.
   delta: 4,
-  // ms of scroll silence that counts as "stopped".
-  idle: 180,
 };
 const stickyBars = [siteHeader, introBar].filter(Boolean);
 let navHideLastY = null;
-let navIdleTimer = null;
 
 // ⚠️ A BAR MAY ONLY HIDE ONCE IT IS PINNED. Before that the landing bar is part
 // of the hero's composition — it sits in the flow at the bottom of the stage —
@@ -549,10 +546,17 @@ function updateNavHide() {
   const d = y - navHideLastY;
   navHideLastY = y;
 
-  // Every scroll event restarts the idle countdown; when it fires, the reader
-  // has stopped and the bar comes back.
-  if (navIdleTimer) clearTimeout(navIdleTimer);
-  navIdleTimer = setTimeout(() => setNavHidden(false), NAV_HIDE.idle);
+  // ⚠️ IT COMES BACK ON SCROLL-UP, NOT ON IDLE, and that difference is the whole
+  // feel of it. An idle timer was built first (180ms) and MEASURED FLICKERING:
+  // over five reading bursts — scroll, pause to read, repeat — it produced six
+  // transitions, hiding on every burst and reappearing on every pause. A reading
+  // pause is not a request for navigation, so summoning the bar there undoes the
+  // reason for hiding it. Scroll-up is the signal that actually means "I am
+  // looking for something", which is what a nav is for.
+  //
+  // ⚠️ THE CONSEQUENCE: stop mid-page and the bar STAYS hidden until the reader
+  // scrolls up. That is intended. It is also why the page-top guard below
+  // matters — the top is the one place with no upward travel left to spend.
 
   // ⚠️ NEVER HIDE A BAR THAT HOLDS FOCUS. Hiding it would strand the keyboard on
   // an off-screen, pointer-events:none element with no way back — the reader
