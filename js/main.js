@@ -207,13 +207,12 @@ const CONTACT = {
     // Parallax distance as a fraction of the window, and its ceiling in px.
     rate: 0.5,
     max: 80,
-    // WHERE THE WINDOW ENDS, as a fraction of the way from the scroll floor up
-    // to the point where the ledge's top touches the bar. Ending EARLY is what
-    // keeps the copy from still arriving while the panel already fills the
-    // screen; the panel then carries the settled copy the rest of the way up.
-    // ⚠️ Coupled to the curve — it is only safe to stop early because a cubic
-    // ease-out lands at zero velocity. Re-check if the curve changes.
-    endAt: 0.6,
+    // THE WINDOW ENDS WHERE THE NAV MEETS THE SECTION'S TOP — the copy keeps
+    // rising for the whole approach and lands exactly as the panel docks.
+    // ⚠️ It used to stop early (0.6 of the way from the scroll floor to the
+    // ledge/bar meeting point) so the panel carried settled copy the rest of the
+    // way. Ending at the bar line is the deliberate replacement.
+    endAtNavLine: true,
   },
 };
 
@@ -235,6 +234,40 @@ function setBarFill(css) {
   // own fallback verbatim — the pre-2026-09 bar, exactly.
   else root.removeProperty('--bar-fill');
 }
+// ABOUT'S PARALLAX (2026-09). Contact's peek is anchored to a panel ARRIVING;
+// About has no arriving edge — it is cream on cream and it is reached from both
+// directions — so the anchor is its own resting position instead.
+//
+// ⚠️ THE OFFSET FLIPS SIGN, and that is what makes one rule serve both
+// directions. Scrolling down, About sits below centre and its content lags
+// DOWNWARD; scrolling up from Contact it sits above centre and lags UPWARD.
+// Both settle to 0 as it centres, so there is no direction term anywhere — the
+// same property that made Contact's peek symmetric.
+//
+// ⚠️ SMOOTHSTEP, NOT CONTACT'S CUBIC — the geometry is different, so the curve
+// is too, and pretending they match would be wrong. Contact's window is built so
+// its EXTREME coincides with the copy's first sight, which is exactly where an
+// ease-out should be fastest. About's extremes are where it is off-screen, so a
+// cubic spends the motion in the wrong place: measured at cap 60, it gives 7.5px
+// at half the span where smoothstep gives 30, and it sat pinned at the cap for
+// more than half the traverse.
+// Smoothstep is also flat at BOTH ends, so it eases into rest AND into the
+// clamp; a cubic reaches the cap at full slope and kinks there.
+// ⚠️ `max` IS BOUNDED BY THE SECTION'S OWN PADDING (--gap-section, 96px). The
+// transform moves the CONTENT while the section's box stays put, so the content
+// eats into its own padding: at +60 About's copy sits 36px above Contact's top
+// instead of 96, and at -60 its heading sits 36px below Work instead of 96. Take
+// this past 96 and the content crosses into a neighbouring section. 60 leaves
+// 36px of margin at both seams — re-check both if --gap-section ever changes.
+const ABOUT_PEEK = { max: 60, span: 0.5 };   // span as a fraction of the viewport
+
+let lastAboutPeek = -1;
+function setAboutPeek(px) {
+  if (px === lastAboutPeek) return;
+  lastAboutPeek = px;
+  document.documentElement.style.setProperty('--about-peek', px + 'px');
+}
+
 let lastContactPeek = -1;
 function setContactPeek(px) {
   if (px === lastContactPeek) return;
@@ -396,6 +429,7 @@ function buildBarFill(edge, ledge) {
 }
 
 const contactSection = darkPanel;
+const aboutSection = document.getElementById('about');
 const intro = document.querySelector('.intro');
 const introBar = document.querySelector('.intro-bar'); // landing nav bar (homepage only)
 const pageField = document.querySelector('img.page-field');
@@ -2434,6 +2468,39 @@ function updateScrollEffects() {
   // homepage tier) and the docked .intro-bar (the homepage's own nav on
   // desktop, where the header is display:none). Whichever is hidden reports
   // offsetHeight 0, so the max below reads the visible one.
+  // About's parallax. Guarded: project pages have no #about, so nothing is ever
+  // published and the CSS fallback (0px) leaves them exactly as they were.
+  if (aboutSection) {
+    const vh = window.innerHeight;
+    const r = aboutSection.getBoundingClientRect();
+    // Distance of the section's centre from the viewport's — 0 where it settles,
+    // signed, so the lag flips with the approach direction on its own.
+    const d = (r.top + r.height / 2) - vh / 2;
+    const span = Math.max(1, vh * ABOUT_PEEK.span);
+    const n = Math.min(1, Math.abs(d) / span);
+
+    // ⚠️ ABOUT'S PARALLAX YIELDS TO CONTACT'S ARRIVAL, and without this it is an
+    // active regression rather than an addition. About leaves upward, so its
+    // offset is NEGATIVE exactly while Contact is approaching — which lifts
+    // About's copy away from the panel and opens bare cream above the ledge.
+    // Measured at Contact's edge 300: the visible gap went 96 -> 156, widened by
+    // the whole peek. The ledge cannot absorb it, because it is sized from
+    // OFFSETS (transform-blind) and stays 96 while the gap grows.
+    //
+    // The taper is the fix and it is a real rule, not a patch: the gap only
+    // matters once the ledge is in play, which is precisely when About's peek
+    // should already be spent. Full parallax while Contact is off-screen, zero
+    // by the time it is half a viewport up. Going the other way — scrolling up
+    // to About — Contact recedes first, so the parallax engages behind it.
+    let yieldToContact = 1;
+    if (contactSection) {
+      const ce = contactSection.getBoundingClientRect().top;
+      yieldToContact = Math.max(0, Math.min(1, (ce - vh * 0.5) / (vh * 0.5)));
+    }
+    setAboutPeek(Math.round(
+      Math.sign(d) * ABOUT_PEEK.max * n * n * (3 - 2 * n) * yieldToContact));
+  }
+
   const stickyBars = [siteHeader, introBar].filter(Boolean);
   if (contactSection && stickyBars.length) {
     const contactRect = contactSection.getBoundingClientRect();
@@ -2561,7 +2628,9 @@ function updateScrollEffects() {
       const vh = window.innerHeight;
       const meetEdge = ledge + barHeight;
       const restEdge = contactRestEdge;              // measured, not read per frame
-      const endEdge = restEdge + CONTACT.peek.endAt * Math.max(0, meetEdge - restEdge);
+      // The nav line, floored at the panel's own resting edge so a short page
+      // cannot ask for a position it can never reach.
+      const endEdge = Math.max(restEdge, barHeight);
 
       // ⚠️ THE WINDOW IS ANCHORED TO THE COPY, NOT TO THE PANEL'S EDGE, and that
       // is the whole reason the peek is visible at all. The copy sits
@@ -2581,8 +2650,19 @@ function updateScrollEffects() {
       const span = Math.max(1, startEdge - endEdge);
       const travel = Math.min(Math.max(0, edge - endEdge), span);
       const peakPeek = Math.min(CONTACT.peek.max, CONTACT.peek.rate * span);
-      const t = 1 - travel / span;                    // 0 where the copy lands, 1 at the end
-      setContactPeek(Math.round(peakPeek * Math.pow(1 - t, 3)));
+      // ⚠️ SMOOTHSTEP, NOT THE HERO TUCK'S CUBIC — and the two requirements are
+      // genuinely incompatible, so this is a trade rather than a correction. A
+      // cubic ease-out is FLAT by two-thirds of its window by construction: it
+      // was measured at 80 -> 19 over the first third and ~0 for the rest, so
+      // "keep moving until the nav meets the section" cannot be expressed with
+      // it at any window length. Smoothstep spends the travel evenly across the
+      // middle and is still flat at BOTH ends, so it leaves the hold and lands
+      // at the dock without a corner.
+      // The cost is that the peek no longer shares a curve with --field-scroll;
+      // the hero tuck's front-loading is right there because its window starts
+      // at the reader's first gesture, and wrong here for the same reason.
+      const x = travel / span;                        // 1 at first sight, 0 at the nav line
+      setContactPeek(Math.round(peakPeek * x * x * (3 - 2 * x)));
     }
   }
 

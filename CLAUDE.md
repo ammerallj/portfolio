@@ -997,6 +997,36 @@ transition.
   pages have no `#contact`, so neither is ever set and the CSS fallbacks (`0` and
   `100px`) give exactly the old bar.
 
+### About's parallax (`--about-peek`, 2026-09)
+
+About's content lags the section and settles to 0 as it centres. **The anchor is
+its own resting position, not an arriving edge** — About is cream on cream and is
+reached from both directions, so there is no panel edge to hang it on.
+⚠️ **THE OFFSET FLIPS SIGN, which is what lets one position-only rule serve both
+directions** — down, it lags downward; up from Contact, upward. No direction term
+anywhere, the same property that makes Contact's peek symmetric.
+- **Smoothstep, and NOT Contact's curve** — the geometry differs, so the curve
+  does. Contact's window is built so its extreme coincides with first sight; About's
+  extremes are where it is OFF-screen, so a cubic spends the motion in the wrong
+  place (7.5px at half the span where smoothstep gives 30, and pinned at the cap
+  for over half the traverse). Smoothstep is also flat at both ends, so it eases
+  into rest *and* into the clamp; a cubic reaches the cap at full slope and kinks.
+- ⚠️ **`max` IS BOUNDED BY `--gap-section`.** The transform moves the CONTENT while
+  the section's box stays put, so the content eats its own padding. Past 96px it
+  crosses into a neighbouring section.
+- ⚠️ **IT MUST YIELD TO CONTACT'S ARRIVAL, and without that it is a REGRESSION
+  rather than an addition.** About leaves upward, so its offset is negative exactly
+  while Contact approaches — which lifts About's copy off the panel and opens bare
+  cream above the ledge. Measured at Contact's edge 300: the visible gap went
+  **96 → 156**, widened by the whole peek, and **the ledge cannot absorb it**
+  because it is sized from OFFSETS (transform-blind) and stays 96 while the gap
+  grows. The taper is full parallax while Contact is off-screen, zero by the time
+  it is half a viewport up. Scrolling the other way, Contact recedes first, so the
+  parallax engages behind it.
+- ⚠️ **GENERAL LESSON: a transform-driven parallax on one section can silently
+  undo a measured spacing decision in its neighbour**, because measurements taken
+  from offsets do not see transforms. Check the seam, not just the section.
+
 ### Contact's soft leading edge (`--contact-ledge`, 2026-09)
 
 **THE PROBLEM WAS THE UNUSED RUNWAY, NOT THE EDGE.** Measured at 1280×720,
@@ -1087,8 +1117,15 @@ onto the ramp rather than an average of it. Step at its bottom edge: **21.3% →
 **3. THE PARALLAX PEEK** (`--contact-peek`). The copy is offset downward and the
 offset shrinks as the panel rises, so it travels UP faster than the panel and is
 revealed into place.
-- **Same cubic ease-out as the hero's `--field-scroll` tuck** — one curve for both
-  parallaxes on the site.
+- ⚠️ **SMOOTHSTEP, NOT the hero tuck's cubic — and that departure is forced.**
+  It was the hero's curve (deliberately, for one motion system), until the brief
+  became "keep moving the copy up until the nav meets the section's top". A cubic
+  ease-out is **flat by two-thirds of its window by construction** — measured
+  80 → 19 over the first third and ~0 after — so that requirement cannot be
+  expressed with it at ANY window length. Smoothstep spends the travel evenly and
+  is still flat at both ends. The hero tuck's front-loading is right THERE because
+  its window opens on the reader's first gesture, and wrong here for the same
+  reason. **The two parallaxes no longer share a curve; that is the trade.**
 - ⚠️ **EXACTLY 0 AT REST**, so the settled composition is byte-identical.
 - ⚠️ **THE WINDOW IS ANCHORED TO THE COPY, NOT TO THE PANEL'S EDGE.** The copy
   sits `contactCopyOffset` (**232px** at 1440×900) BELOW the panel's top, so a
@@ -1103,7 +1140,12 @@ revealed into place.
   anchor, not a bug in the curve.** Anchored to the copy (and subtracting the
   peak, since the copy is displaced by it), only **16%** is spent before it is on
   screen: first sight at peek 67 of 80.
-- ⚠️ **The window ENDS EARLY, and its floor is MEASURED.** Running it to the
+- ⚠️ **THE WINDOW ENDS AT THE NAV LINE** (floored at the panel's own resting edge,
+  so a short page cannot ask for a position it can never reach). The copy rises
+  for the whole approach and lands exactly as the panel docks. It previously
+  stopped early so the panel carried settled copy the rest of the way up; that is
+  superseded, and the paragraph below is kept for the floor rule it states.
+- ⚠️ **The window used to END EARLY, and its floor is MEASURED.** Running it to the
   scroll floor leaves the copy still arriving while the panel already fills the
   screen; the floor is derived from the panel's resting edge rather than assumed
   to be 0, because on a page where Contact never reaches the top a hard-coded 0

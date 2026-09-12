@@ -516,6 +516,32 @@
    CONTACT SECTION
    ============================================================ */
 
+/* ABOUT'S PARALLAX (2026-09). Its content lags the section as it travels and
+   settles to 0 when the section centres — the same idea as Contact's peek, with
+   the anchor moved because About has no arriving edge to hang it on.
+
+   ⚠️ BOTH CHILDREN, NOT THE SECTION. Transforming `#about` itself would move its
+   box relative to its neighbours and open a gap (or an overlap) at the seam with
+   Contact — transforms do not affect layout, so the section's own edges must
+   stay put. Both children happen to carry `.site-container`, so one selector
+   reaches them.
+
+   ⚠️ It composes with the reveal system rather than fighting it: `data-reveal`
+   sits on the GRANDchildren (`.about-left` / `.about-right`), and Motion writes
+   its transforms there, so nothing is overwritten in either direction.
+
+   --about-peek is published by updateScrollEffects; the 0px fallback is
+   load-bearing for project pages (no #about) and for no-JS. */
+#about > .site-container {
+  transform: translateY(var(--about-peek, 0px));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #about > .site-container {
+    transform: none;
+  }
+}
+
 /* ============================================================
    CONTACT'S SOFT LEADING EDGE (2026-09)
    ============================================================
