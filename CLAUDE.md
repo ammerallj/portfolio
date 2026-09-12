@@ -1100,18 +1100,28 @@ a layer, since both of this element's pseudo-elements are spent on the ledge.
 also `--color-accent`, so panel + footer fill the viewport exactly and trimming is
 the only thing that actually reduces blue on screen.
 
-⚠️ **THE PANEL IS AT ITS FLOOR: 771px against a 765px minimum. SIX PIXELS.** It
-rests with its top near y=0 *because* it is a full frame minus the footer; shorten
-it and its top rests lower, putting the nav over the LEDGE instead of solid
-accent. The label flip needs alpha ≥ 0.86 under the glyphs at y=32, which with a
-96px resting ledge caps the panel's top at ~54 and so floors the panel at
-`vh − footer − 54`. **Trimming further silently costs the inversion at rest** —
-the thing the whole progressive-inversion design is built to land.
+⚠️ **THE NAV'S INVERSION WAS TRADED FOR THE SHORTER PANEL (2026-09, deliberate),
+AND THE TRADE IS TOTAL RATHER THAN PARTIAL.** The panel used to rest with its top
+at y=0 because it was a full frame minus the footer, which is what put solid
+accent behind the docked bar. `--contact-trim: 144px` takes it to its content
+height (819 → 675) and its top now rests at 145.
 
-⚠️ **THE REMAINING 352px OF NON-CONTENT (160 above the copy, 192 below) CANNOT BE
-REDUCED, ONLY MOVED.** Panel 771 − content 419 = 352, and the panel cannot shrink.
-Taking it off the bottom puts it back on top. The next move is a design decision,
-not a tuning one: either the bar stops being inverted at rest, or the copy grows.
+**The consequence is the thing to understand before touching this.** A section's
+RESTING top is its HIGHEST position — the page has no more scroll — so a bar that
+is not inverted at rest is **never inverted at any scroll position**. Measured
+across the whole approach: `--dark-mix` peaks at **0.01**, the labels never flip,
+and `is-over-dark` is unreachable on the homepage. `DARK_TEXT_AT`,
+`DARK_TEXT_ALPHA` and the whole label-flip rule are now dead code there — kept
+because the project pages and any future full-frame panel still need them.
+- **What still earns its place:** the ledge's dissolve, and the bar's compensated
+  fill, which keeps painting the ramp behind the docked bar (the gate is
+  `edge − ledge < barHeight + BAR_BLEED + 2`, satisfied at rest). Only the END
+  STATE changed.
+- **Measured at rest, the viewport is** 49 cream + 96 ledge + 675 panel + 81
+  footer. About's copy sits 40px into the ramp at **11.22:1** for black, clear of
+  the bar. Gap below the copy halved, 192 → 96.
+- **The floor is now the content**: 160 padding-top + 419 copy + 96
+  padding-bottom. Past `--contact-trim: 144` the trim does nothing.
 
 **`--contact-lift` IS RETIRED** (it was a bottom margin of 2× itself, which under
 `center` shifts the item up by half). It was correct while the panel had slack;

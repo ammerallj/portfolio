@@ -143,10 +143,13 @@
      value so the CSS framing and the JS resting positions cannot drift apart. */
   --nav-offset: 64px;
 
-  /* How much the Contact panel is trimmed below a full frame. ⚠️ Capped by the
-     nav's inversion, not by taste — see the note at .contact-section's
-     min-height. 48 is inside the measured ~54px ceiling. */
-  --contact-trim: 48px;
+  /* How much the Contact panel is trimmed below a full frame.
+     ⚠️ SUPERSEDED CEILING: this was capped at ~54px to keep the nav inverted at
+     rest. That constraint was lifted deliberately (2026-09) — the bar stays cream
+     now — so the only floor left is the panel's own content. 144 is exactly
+     where min-height stops binding and the content takes over; past that it does
+     nothing. See .contact-section's min-height for what was traded. */
+  --contact-trim: 144px;
 
 
   /* CONTACT'S SOFT LEADING EDGE — how far the blue bleeds up out of the panel

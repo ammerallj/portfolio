@@ -789,16 +789,23 @@
      patching it — the bar is inside the section, over one continuous colour, and
      all three artifacts have nothing to act on.
      So the box is a full frame minus the footer, not minus the nav as well. */
-  /* ⚠️ --contact-trim SHORTENS THE PANEL, AND IT HAS A HARD CEILING that is not
-     about taste. The panel rests with its top at y=0 precisely BECAUSE it is a
-     full frame minus the footer; trim it by X and its top rests X px down, which
-     puts the nav bar over the LEDGE instead of over solid accent. The label flip
-     needs alpha >= 0.86 under the glyphs, so past ~54px the bar stops inverting
-     at rest and the whole progressive-inversion design stops landing. Measured
-     ceiling below — do not raise this without re-checking it.
-     The footer is also --color-accent, so trimming is the only thing that
-     actually reduces blue on screen: panel + footer currently fill the viewport
-     exactly. */
+  /* ⚠️ --contact-trim SHORTENS THE PANEL, AND THE NAV'S INVERSION WAS TRADED FOR
+     IT (2026-09, deliberate). The panel used to rest with its top at y=0 because
+     it was a full frame minus the footer, which is what put solid accent behind
+     the docked bar. Trimmed, its top rests lower and the bar sits over the ledge
+     and cream instead.
+
+     ⚠️ THE CONSEQUENCE IS TOTAL, NOT PARTIAL, and it is the thing to understand
+     before changing this back or further. The panel's RESTING top is its HIGHEST
+     position — the page has no more scroll — so a bar that is not inverted at
+     rest is never inverted at any scroll position. --dark-mix no longer reaches
+     1, the labels never flip to white, and the `is-over-dark` treatment is
+     unreachable on the homepage. The ledge's own dissolve and the bar's matching
+     fill still do their work across the approach; only the END STATE changed.
+
+     The floor is now the panel's own content. The footer is also
+     --color-accent, so panel + footer used to fill the viewport exactly and
+     trimming is the only thing that actually reduces blue on screen. */
   min-height: calc(100dvh - var(--footer-height) - var(--contact-trim, 0px));
   display: flex;
   flex-direction: column;
