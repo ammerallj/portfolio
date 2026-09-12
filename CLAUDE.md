@@ -1238,6 +1238,24 @@ a request for a longer fade.
 **1. THE LEDGE** (`.contact-section::before`, sections.css). Blue bleeds up out
 of the panel over `--contact-ledge`.
 
+**THE COMPOSITION IS AUTHORED: `--about-tail` (160px) of cream, then a
+`--contact-ledge-length` (300px) scrim.** `#about`'s `padding-bottom` is
+`calc(--about-tail + --contact-ledge-length)`, so it RESERVES the scrim's length
+plus the cream rather than leaving the gap to chance.
+
+⚠️ **IT HAD TO BE AUTHORED BECAUSE THE ROOM IS NOT DESIGNABLE.** The room above
+Contact is `About's padding-bottom + whatever its min-height leaves over`, and
+that leftover was **0 at narrow widths but 365px at 1800×1000** (two columns,
+shorter content). So the same tokens produced 96px of room in one place and 461
+in another — a long scrim simply had nowhere to go at the narrow end.
+
+⚠️ **THE CREAM IS A FLOOR, NOT A FIXED VALUE.** The authored padding pushes About
+past its `min-height` at most sizes, so the leftover vanishes and the cream lands
+on its 160 — measured **160 at 780×900 and 161 at 1800×1000**. But on a genuinely
+tall window the min-height binds again and its slack lands on top: **561px of
+cream at 1400×1400**. That is About filling its frame, which is a separate and
+deliberate requirement; the scrim still gets its full 300 everywhere.
+
 ⚠️ **THE ROOM IS A CEILING, NOT A TARGET** — `min(var(--contact-ledge-length),
 var(--contact-gap))`. It was `clamp(90px, var(--contact-gap), 300px)`, which made
 the ledge GROW to fill whatever space happened to sit above the panel. That space

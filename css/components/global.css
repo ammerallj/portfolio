@@ -206,8 +206,18 @@
      as a long blue band.
      The dissolve wants a LENGTH of its own; the room only says how much it may
      take. min() expresses exactly that. */
-  --contact-ledge-length: 120px;
+  --contact-ledge-length: 300px;
   --contact-ledge: min(var(--contact-ledge-length), var(--contact-gap, 96px));
+
+  /* CREAM AFTER ABOUT'S COPY, BEFORE THE SCRIM STARTS — authored, not left over.
+     ⚠️ It has to be authored because the room above Contact is
+     `About's padding-bottom + whatever its min-height leaves over`, and that
+     leftover is 0 at narrow widths but 365px at 1800×1000 (two columns, shorter
+     content). So About reserves `--about-tail + --contact-ledge-length` outright:
+     the scrim always gets its full length and the cream is never less than this.
+     Any min-height slack lands on top of it as extra cream — About filling its
+     frame is a separate, deliberate requirement and this does not fight it. */
+  --about-tail: 160px;
 
   /* Height of the site footer. A DEFAULT, not the truth: initSectionGeometry
      measures the real footer and rewrites this on load and resize, so the value

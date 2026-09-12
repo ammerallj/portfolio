@@ -1010,6 +1010,12 @@
    automatically. Don't hard-code either number there. */
 #about {
   padding-top: 0;
+  /* ⚠️ RESERVES THE SCRIM'S LENGTH PLUS THE CREAM, rather than leaving the gap to
+     chance. The Contact ledge paints INTO this space, so without it the scrim
+     could only be as long as the room happened to be — 96px at narrow widths,
+     where it had no room for both a long dissolve and any clear cream before it.
+     Change either token and this follows. */
+  padding-bottom: calc(var(--about-tail) + var(--contact-ledge-length));
   /* FILL the space under the nav. About's natural box is 571 against 736
      available at 1440x800 — 165px short — and a section shorter than its frame
      cannot both sit centred AND keep the next section out of shot. Centred, the
