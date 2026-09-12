@@ -514,6 +514,61 @@ const contactSection = darkPanel;
 const aboutSection = document.getElementById('about');
 const intro = document.querySelector('.intro');
 const introBar = document.querySelector('.intro-bar'); // landing nav bar (homepage only)
+
+// HIDE THE NAV WHILE SCROLLING DOWN, BRING IT BACK WHEN THE READER STOPS.
+const NAV_HIDE = {
+  // px of downward travel in one frame before hiding. Above the noise floor of a
+  // trackpad's tail, so a drifting finger does not flicker the bar.
+  delta: 4,
+  // ms of scroll silence that counts as "stopped".
+  idle: 180,
+};
+const stickyBars = [siteHeader, introBar].filter(Boolean);
+let navHideLastY = null;
+let navIdleTimer = null;
+
+// ⚠️ A BAR MAY ONLY HIDE ONCE IT IS PINNED. Before that the landing bar is part
+// of the hero's composition — it sits in the flow at the bottom of the stage —
+// so hiding it there animates something the reader has not scrolled past yet.
+// .intro-bar announces that with is-docked; .site-header (≤680) is fixed from
+// the first pixel and is gated by the page-top check instead.
+function navBarCanHide(bar) {
+  return bar.classList.contains('intro-bar')
+    ? bar.classList.contains('is-docked')
+    : true;
+}
+
+function setNavHidden(on) {
+  stickyBars.forEach(bar =>
+    bar.classList.toggle('is-nav-hidden', on && navBarCanHide(bar)));
+}
+
+function updateNavHide() {
+  const y = window.scrollY;
+  if (navHideLastY === null) { navHideLastY = y; return; }
+  const d = y - navHideLastY;
+  navHideLastY = y;
+
+  // Every scroll event restarts the idle countdown; when it fires, the reader
+  // has stopped and the bar comes back.
+  if (navIdleTimer) clearTimeout(navIdleTimer);
+  navIdleTimer = setTimeout(() => setNavHidden(false), NAV_HIDE.idle);
+
+  // ⚠️ NEVER HIDE A BAR THAT HOLDS FOCUS. Hiding it would strand the keyboard on
+  // an off-screen, pointer-events:none element with no way back — the reader
+  // would be tabbing through a nav they cannot see.
+  const focused = document.activeElement;
+  if (focused && stickyBars.some(bar => bar.contains(focused))) return;
+
+  // ⚠️ AND NOT AT THE TOP OF THE PAGE. The landing bar is part of the hero's
+  // composition until it docks, and the ≤680 header is deliberately bare there;
+  // hiding either would animate something the reader has not scrolled past yet.
+  if (html.classList.contains('is-at-page-top')) { setNavHidden(false); return; }
+
+  if (d > NAV_HIDE.delta) setNavHidden(true);
+  else if (d < 0) setNavHidden(false);   // scrolling up brings it straight back
+}
+
 const pageField = document.querySelector('img.page-field');
 
 // ⚠️ THE FIELD TUCKS BEHIND THE DOCKING BAR (2026-09) — and the bleed it closes
@@ -2551,6 +2606,7 @@ function updateScrollEffects() {
   // desktop, where the header is display:none). Whichever is hidden reports
   // offsetHeight 0, so the max below reads the visible one.
   updatePeekDir();
+  updateNavHide();
 
   // About's parallax. Guarded: project pages have no #about, so nothing is ever
   // published and the CSS fallback (0px) leaves them exactly as they were.
@@ -2588,7 +2644,6 @@ function updateScrollEffects() {
     setAboutPeek(Math.round(peek));
   }
 
-  const stickyBars = [siteHeader, introBar].filter(Boolean);
   if (contactSection && stickyBars.length) {
     const contactRect = contactSection.getBoundingClientRect();
     if (contactRect.height === 0) {

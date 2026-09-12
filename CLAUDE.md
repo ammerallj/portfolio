@@ -1081,6 +1081,36 @@ onto* this ramp; feed it the token while the ramp is a different length and the
   which throws every frame inside `updateScrollEffects` and silently strands
   `--dark-mix`, `--bar-bleed` and the rest at their last values.
 
+### The nav hides while scrolling down (`is-nav-hidden`, 2026-09)
+
+Scrolling **down** hides the bar; **stopping** brings it back, and so does
+scrolling **up**. `NAV_HIDE` in js/main.js — `delta: 4` (px in one frame, above a
+trackpad tail's noise floor so a drifting finger cannot flicker it) and
+`idle: 180` (ms of scroll silence that counts as stopped).
+
+⚠️ **A STATE, SO IT MAY CARRY A TRANSITION.** The standing ban is on scroll-linked
+VALUES; this class flips once per gesture rather than tracking position.
+
+⚠️ **ONLY ONCE THE BAR IS PINNED.** Before that the landing bar is part of the
+hero's composition — it sits in the flow at the bottom of the stage — so hiding it
+there animates something the reader has not scrolled past yet. `.intro-bar`
+announces that with `is-docked`; `.site-header` (≤680) is fixed from the first
+pixel and is gated by the `is-at-page-top` check instead.
+
+⚠️ **NEVER HIDE A BAR THAT HOLDS FOCUS.** It would strand the keyboard on an
+off-screen, `pointer-events: none` element with no way back — the reader tabbing
+through a nav they cannot see. Verified: with a nav link focused the bar stays put
+under a downward scroll, and hides normally once focus leaves.
+
+⚠️ **opacity AND transform, not either alone.** The bar's `::before` bleeds
+`--bar-bleed` past its own box, so `translateY(-100%)` still leaves ~100px of
+frost on screen. Opacity is what clears it; the translate is the motion.
+
+⚠️ **`stickyBars` had to move BELOW `introBar`'s declaration** — it was hoisted
+above it and threw a TDZ error at module top level, which kills the entire script
+(no Lenis, every `[data-reveal]` stuck at opacity 0). `main.js` is shared by every
+page, so a top-level throw is the one failure mode that blanks the site.
+
 ### The landing bar's cream fade (2026-09)
 
 `.intro-bar::before`'s cream now **holds full to the lowest nav item and eases to

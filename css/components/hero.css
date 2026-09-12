@@ -726,6 +726,9 @@ html.is-field-live .page-field-grain { opacity: 0.15; }
   gap: var(--gap-group);
   /* Enters LAST: the divider reveals settle, then the bar fades in. */
   animation: intro-bar-fade 0.6s ease-out 0.95s both;
+  /* For .is-nav-hidden above. The entrance animation owns opacity for its first
+     1.55s and finishes long before any scroll, so the two do not overlap. */
+  transition: transform 0.3s ease, opacity 0.3s ease;
 }
 
 /* The glass, on its own layer so it can fade: invisible while the bar rests
@@ -873,6 +876,25 @@ html.is-field-live .page-field-grain { opacity: 0.15; }
      background LAYER driven by --dark-mix, and a transition on a scroll-linked
      value is exactly what makes a nav feel like it is catching up. */
   transition: opacity 0.35s ease;
+}
+
+/* ⚠️ HIDE ON SCROLL-DOWN, RETURN ON IDLE (2026-09). A STATE, so it may carry a
+   transition — the standing ban is on scroll-linked VALUES, and this is not one:
+   the class flips once per gesture rather than tracking position.
+
+   ⚠️ opacity AND transform, not either alone. The bar's ::before bleeds
+   --bar-bleed past its own box, so translating by -100% still leaves ~100px of
+   frost on screen; opacity is what actually clears it, and the translate is the
+   motion. pointer-events go too, or a hidden bar still eats clicks.
+
+   ⚠️ Applied to BOTH sticky bars: .intro-bar is the desktop landing nav and
+   .site-header the ≤680 one, and js/main.js drives them through the same
+   stickyBars list. */
+.intro-bar.is-nav-hidden,
+.site-header.is-nav-hidden {
+  transform: translateY(-100%);
+  opacity: 0;
+  pointer-events: none;
 }
 
 .intro-bar.is-docked::before {
