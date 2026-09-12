@@ -1238,41 +1238,42 @@ a request for a longer fade.
 **1. THE LEDGE** (`.contact-section::before`, sections.css). Blue bleeds up out
 of the panel over `--contact-ledge`.
 
-**THE COMPOSITION IS AUTHORED: `--about-tail` (160px) of cream, then a
-`--contact-ledge-length` (300px) scrim.** `#about`'s `padding-bottom` is
-`calc(--about-tail + --contact-ledge-length)`, so it RESERVES the scrim's length
-plus the cream rather than leaving the gap to chance.
+**THE COMPOSITION: `--about-tail` (160px) after About's copy, then a
+`--contact-ledge-length` (300px) scrim that OVERLAPS the last 140px of it.** The
+scrim paints over the section above — Contact is positioned, so its
+pseudo-elements sit above a non-positioned sibling — and that overlap is now
+deliberate: it is what lets Contact sit close instead of behind a reservation.
 
-⚠️ **IT HAD TO BE AUTHORED BECAUSE THE ROOM IS NOT DESIGNABLE.** The room above
-Contact is `About's padding-bottom + whatever its min-height leaves over`, and
-that leftover was **0 at narrow widths but 365px at 1800×1000** (two columns,
-shorter content). So the same tokens produced 96px of room in one place and 461
-in another — a long scrim simply had nowhere to go at the narrow end.
+⚠️ **ABOUT'S `min-height` IS GONE, AND THAT — NOT THE PADDING — IS WHAT BROUGHT
+CONTACT CLOSER.** It existed so About filled its frame and Contact started
+exactly off-screen ("34px of the blue panel showed along the bottom edge, which
+read as About being clipped"). **The blue arriving early is now the intent, so
+the thing it protected against is the thing we want**, and it was leaving ~350px
+of slack below About's content that nothing could reclaim. Removing it plus
+dropping the scrim reservation from About's `padding-bottom` pulled Contact
+**700px closer** — room 860 → 160, page 3882 → 3182 at 780×900.
+- `initSectionGeometry` centres About on its CONTENT span, not its box, so its
+  resting composition is unaffected. Verified: heading still lands at ~140.
+- The ≤480 `min-height: 0` reset went with it; there is nothing left to reset.
 
-⚠️ **THE CREAM IS A FLOOR, NOT A FIXED VALUE.** The authored padding pushes About
-past its `min-height` at most sizes, so the leftover vanishes and the cream lands
-on its 160 — measured **160 at 780×900 and 161 at 1800×1000**. But on a genuinely
-tall window the min-height binds again and its slack lands on top: **561px of
-cream at 1400×1400**. That is About filling its frame, which is a separate and
-deliberate requirement; the scrim still gets its full 300 everywhere.
+⚠️ **THE SCRIM'S LENGTH AND THE ROOM MOVE TOGETHER — shrink one and re-measure
+the other.** The scrim only overlaps type beyond `--about-tail`, so the room
+decides how much of the ramp lands on About's last line. At 700px over a 160px
+room that line sat at **4.52:1**, right on the AA threshold. Measured at the
+current room: **17.5:1 at 200px, 12.2 at 260, 9.9 at the shipped 300, 9.0 at 320,
+6.8 at 400, 4.5 at 700.** Re-measure whenever `--about-tail` or About's copy
+changes.
 
-⚠️ **THE ROOM IS A CEILING, NOT A TARGET** — `min(var(--contact-ledge-length),
-var(--contact-gap))`. It was `clamp(90px, var(--contact-gap), 300px)`, which made
-the ledge GROW to fill whatever space happened to sit above the panel. That space
-is not a constant and is not just section padding: **About carries its own
-min-height, so on a tall window its internal slack lands in the gap.** Measured
-room: 96px at 768, 103 at 1024, and **461 at 1800×1000** — where the ledge pinned
-to its 300px ceiling and read as a long blue band.
-The dissolve wants a LENGTH of its own (120px); the room only says how much it
-may take. Verified across forced gaps of 461/235/120/96/64: the ledge is 120
-wherever there is room and clamps to the room when there is not, never
-overlapping. ⚠️ **This is a different rule from `--field-fade`'s**, which really
-does spend its whole gap — do not "restore the symmetry". **It shipped at a flat 220px and that was wrong**: the room is only ~96,
-so the ramp ran 124px INTO About and washed blue across the photo and the last
-lines of copy. **The ledge paints OVER the section above** (Contact is
-positioned, so its pseudo-elements sit above a non-positioned sibling), so every
-pixel it overshoots is a pixel of someone else's content obscured.
-`--contact-gap` is published by `measureContactArrival`.
+⚠️ **THREE SUPERSEDED DESIGNS LIVED HERE, and the sequence is worth knowing
+because each fix caused the next.** A flat 220px ran 124px into About and washed
+its photo. Clamping to the measured room (`clamp(90, gap, 300)`) fixed that but
+made the ledge GROW to fill whatever space existed — 461px of room at 1800×1000
+pinned it to its ceiling and read as a long blue band. `min(length, gap)` fixed
+*that* by treating the room as a ceiling rather than a target. Then the overlap
+was authorised outright and the cap came off. ⚠️ **This is NOT `--field-fade`'s
+rule**, which really does spend its whole measured gap — do not "restore the
+symmetry". `--contact-gap` is still published by `measureContactArrival`, for
+reference only.
 - **It is not just `--gap-section` in disguise** — measured 96px at 768 and
   **103px at 1024**, because About's last block lays out differently there. A
   hard-coded 96 would overshoot by 7px at the landscape-tablet tier.
