@@ -1200,15 +1200,41 @@ height (819 → 675) and its top now rests at 145.
 
 **The consequence is the thing to understand before touching this.** A section's
 RESTING top is its HIGHEST position — the page has no more scroll — so a bar that
-is not inverted at rest is **never inverted at any scroll position**. Measured
-across the whole approach: `--dark-mix` peaks at **0.01**, the labels never flip,
-and `is-over-dark` is unreachable on the homepage.
-⚠️ **CONFIRMED ACCEPTED ON A REAL DISPLAY (2026-09) — the bar staying cream over
-the ledge is the intended end state, not an unnoticed regression.** Worth stating
-because the code still carries the whole inversion apparatus and it reads like
-something that ought to be firing. It is not dead by accident; it is dead because
-the panel was trimmed, and the ledge plus the bar's compensated fill are what
-carry the arrival now. `DARK_TEXT_AT`,
+is not inverted at rest is **never inverted at any scroll position**.
+
+⚠️ **THE "NAV NEVER INVERTS" CLAIM IS DEAD — IT WAS TRUE FOR ONE COMMIT AND THIS
+ENTRY REPEATED IT FOR SEVERAL MORE.** It said `--dark-mix` peaks at 0.01, the
+labels never flip, and `DARK_TEXT_AT` / `DARK_TEXT_ALPHA` are dead code. All
+false now: `--dark-mix` measures **1** at every height tested, and the labels DO
+flip. The ledge growing to 400–520px is what changed it — the bar's whole band
+now has blue behind it long before the panel arrives.
+
+⚠️ **AND THE VARIABLE IS VIEWPORT HEIGHT, NOT WIDTH.** Reported as "1392px vs
+1393px"; the widths measure byte-identical (`restEdge` 145.12 at both). The
+mechanism is
+
+    restEdge = vh − max(minHeight, content) − footerHeight,  minHeight = vh − footer − trim
+
+so **while `min-height` binds, `restEdge` is exactly `--contact-trim` (144) and is
+independent of height.** Once Contact's CONTENT (696px) outgrows it — below
+**vh ≈ 921** — the content binds instead and `restEdge` falls away linearly.
+Measured at 1393 wide:
+
+| viewport height | 922 | 890 | 884 | 860 | 800 | 760 |
+|---|---|---|---|---|---|---|
+| `restEdge` | 145 | 113 | 107 | 83 | 23 | 0 |
+| labels | black | black | **white** | white | white | white |
+| shown colour's contrast | — | 4.73 | 4.60 | — | — | 5.86 |
+
+⚠️ **THE FLIP LANDS WHERE IT SHOULD, AND BOTH SIDES CLEAR AA AT THE CROSSOVER** —
+at vh 890 black reads 4.73 where white would read 4.44; six pixels shorter, white
+reads 4.60 where black would read 4.56. That is the derived `DARK_TEXT_ALPHA`
+(0.86) doing exactly its job. At vh 760 white reads 5.86 and black would be 3.59.
+**So this is correct behaviour, not a bug** — two readers on windows 40px apart
+in height legitimately see different end states, and both are legible.
+⚠️ **Do not "fix" it by pinning the inversion on or off.** The rule is a pure
+function of what is actually behind the bar; hard-coding either state re-creates
+the guessed-window problem this replaced. `DARK_TEXT_AT`,
 `DARK_TEXT_ALPHA` and the whole label-flip rule are now dead code there — kept
 because the project pages and any future full-frame panel still need them.
 - **What still earns its place:** the ledge's dissolve, and the bar's compensated
@@ -1638,6 +1664,13 @@ published and every CSS fallback is the previous bar), no-JS, reduced motion (th
 ledge stays — it is a dissolve, not motion; only the parallax goes), and ≤480,
 where Contact is `display: none` and the existing zero-height branch clears
 everything.
+
+⚠️ **THE SECOND ITEM CLOSED WITH IT ("the nav never inverting is accepted") WAS
+CLOSED ON A FALSE PREMISE — see the inversion note above.** The nav does invert,
+on windows under ~885px tall. Nothing was wrong with the behaviour; the
+description of it was stale, and it was confirmed against that description rather
+than against the page. **When closing an item, re-measure the claim, not just the
+symptom.**
 
 **CLOSED — NO VISIBLE EDGE AT THE BAR'S `::before` BOX BOTTOM (y = 166 at the
 shipped bleed), CHECKED ON A REAL DISPLAY (2026-09).** This was carried as open
