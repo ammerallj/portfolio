@@ -145,8 +145,18 @@
 
   /* How far .site-header's frost bleeds past its own bottom before reaching full
      transparency (header.css). The landing's .intro-bar has --bar-bleed for the
-     same job; this is the mobile/project-page header's. */
-  --header-bleed: 48px;
+     same job; this is the homepage mobile header's.
+
+     ⚠️ 48 WAS TOO SHORT AND READ AS A BAND even though the mask was feathering
+     correctly. Verified by raising this to 200 and watching the whole scrim move
+     with it — the mask does feather the backdrop-filter, so the boundary was
+     simply the fade being too abrupt to hide over a photo. The real total is
+     this + --space-sm (the ramp starts at the nav item, not the box), so 96
+     gives 112px.
+     ⚠️ The ceiling is veiling, not smoothness: at 128 the wash reaches the Work
+     card's title, and at 200 it washes the title and metadata outright. 96
+     clears inside the card image's own area. */
+  --header-bleed: 96px;
 
   /* How much the Contact panel is trimmed below a full frame.
      ⚠️ SUPERSEDED CEILING: this was capped at ~54px to keep the nav inverted at

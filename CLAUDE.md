@@ -1081,7 +1081,7 @@ hard line. It was a flat `background-color: rgba(251,252,248,0.9)` plus
 and this one never did, so its cream simply stopped.
 
 Same construction as `.intro-bar::before`: a `::before` that extends
-`--header-bleed` (48px) past the box, masked out across it so **the cream and the
+`--header-bleed` (96px) past the box, masked out across it so **the cream and the
 blur fade together**. A blur that stops abruptly is as visible as a fill that does.
 
 ⚠️ **THE SOLID RUN ENDS AT THE NAV ITEM, NOT AT THE HEADER'S BOX — and getting
@@ -1090,8 +1090,17 @@ the wordmark plus `--space-sm` of padding top and bottom, so masking from
 `100% - --header-bleed` holds the cream at full strength for 16px BELOW the
 wordmark and only then starts to fade; the cream appears to end on a line level
 with nothing. The ramp starts on the type's own bottom edge instead, spanning
-`--header-bleed + --space-sm` (64px). Measured at 390: fade starts at 52 against
-the wordmark's bottom at 49, the 3px being line-height leading.
+`--header-bleed + --space-sm` (112px). Measured at 390: fade runs 52 → 164, and
+the wordmark's bottom is 49 — the 3px being line-height leading.
+
+⚠️ **48px WAS TOO SHORT AND STILL READ AS A BAND, even though the mask was
+feathering correctly.** Don't assume a visible boundary means the mask is broken:
+verified by raising the bleed to 200 and watching the ENTIRE scrim move with it,
+which proves the mask does feather the `backdrop-filter` too. The boundary was
+just the fade being too abrupt to disappear over a photo.
+⚠️ **The ceiling is VEILING, not smoothness.** At 128 the wash reaches the Work
+card's title; at 200 it washes the title and metadata outright. 96 clears inside
+the card image's own area. Longer is not automatically better here.
 
 ⚠️ **THE MASK IS A SMOOTHSTEP, NOT THE TWO-STOP LINEAR `.intro-bar` USES.** That
 bar can afford two stops because its cream is *also* a shaped gradient, so the two
