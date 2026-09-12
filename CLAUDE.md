@@ -1239,10 +1239,16 @@ a request for a longer fade.
 of the panel over `--contact-ledge`.
 
 **THE COMPOSITION: `--about-tail` (160px) after About's copy, then a
-`--contact-ledge-length` (300px) scrim that OVERLAPS the last 140px of it.** The
+`--contact-ledge-length` (520px) scrim that OVERLAPS the last 360px of it.** The
 scrim paints over the section above — Contact is positioned, so its
-pseudo-elements sit above a non-positioned sibling — and that overlap is now
-deliberate: it is what lets Contact sit close instead of behind a reservation.
+pseudo-elements sit above a non-positioned sibling — and that overlap is the
+POINT, not a side effect: the brief was "a more aggressive blue ledge extending
+over the About Me as it scrolls down to Contact". At 1440×900 it reaches to 115px
+below About's own top, washing the photo and both paragraphs.
+- **It never reaches Selected Work at any width.** Clearance above About's top,
+  measured: **131px at 1920 · 115 at 1440 · 257 at 1024 · 724 at 768.** 1920 is
+  the binding case (About is shortest there) — re-measure it, not 1440, if the
+  length grows again.
 
 ⚠️ **ABOUT'S `min-height` IS GONE, AND THAT — NOT THE PADDING — IS WHAT BROUGHT
 CONTACT CLOSER.** It existed so About filled its frame and Contact started
@@ -1256,13 +1262,35 @@ dropping the scrim reservation from About's `padding-bottom` pulled Contact
   resting composition is unaffected. Verified: heading still lands at ~140.
 - The ≤480 `min-height: 0` reset went with it; there is nothing left to reset.
 
-⚠️ **THE SCRIM'S LENGTH AND THE ROOM MOVE TOGETHER — shrink one and re-measure
-the other.** The scrim only overlaps type beyond `--about-tail`, so the room
-decides how much of the ramp lands on About's last line. At 700px over a 160px
-room that line sat at **4.52:1**, right on the AA threshold. Measured at the
-current room: **17.5:1 at 200px, 12.2 at 260, 9.9 at the shipped 300, 9.0 at 320,
-6.8 at 400, 4.5 at 700.** Re-measure whenever `--about-tail` or About's copy
-changes.
+⚠️ **THE LENGTH IS BOUGHT BY THE CURVE'S BIAS, NOT BY SPENDING CONTRAST.** A PLAIN
+smoothstep caps out at **400px** — beyond that About's last line (206px above the
+panel at rest) falls under 5.9:1, and 440 is the AA line at 4.71. `ss(t^1.7)`
+holds the ramp light exactly where that line crosses it, so **520px measures 7.9:1
+where a plain 400 measures 5.95** and every block above the last paragraph stays
+at 17.6:1 or better. Static figures at rest, every tier: **7.9 at 1440, 8.4 at
+1024, 8.5 at 768, 8.5 at 1920.**
+
+⚠️ **BUT THE RESTING FIGURE IS NOT THE BINDING ONE — AND AN EARLIER VERSION OF
+THIS ENTRY PUBLISHED A TABLE OF RESTING NUMBERS AS IF IT WERE.** About's parallax
+`push` drives its copy INTO the ledge during Contact's approach: measured, the
+last line's clearance above the panel collapses **197 → 106px**, which is deep in
+the ramp whatever its length. Swept over the last 900px of scroll at 1440×900,
+worst on-screen ink:
+
+| Contact's edge | 1017 | 867 | 717 | 567 | 417 | 117 (rest) |
+|---|---|---|---|---|---|---|
+| plain 300 (was) | 11.01 | 7.26 | 5.53 | 3.95 | 3.22 | 2.65 |
+| **biased 520 (now)** | 7.21 | 5.07 | 4.07 | 3.12 | **2.66** | **2.28** |
+
+⚠️ **BOTH CONFIGURATIONS FAIL AA ON THAT PASS — this is PRE-EXISTING, and the
+length deepened it by ~0.4 rather than causing it.** The lever is
+`ABOUT_PEEK.push` (40px), not `--contact-ledge-length`: without the push the line
+holds ~7.9 the whole way. ⚠️ **The push was added when the ledge was 96px and
+there was bare cream above it to close; a 520px ledge closes that seam on its
+own, so the push's stated reason no longer holds.** It is kept because it was
+asked for as a motion ("can it push or peek over the section closer to the
+ledge"), not because the seam still needs it — remove it and the floor goes back
+over AA. **Measure the SWEEP, never `scrollY 0`, before judging this.**
 
 ⚠️ **THREE SUPERSEDED DESIGNS LIVED HERE, and the sequence is worth knowing
 because each fix caused the next.** A flat 220px ran 124px into About and washed
@@ -1281,15 +1309,30 @@ reference only.
   the content ends and never touches it. The "a smoothstep is near alpha 0 for
   its first eighth, so it could start higher for free" argument is a measured
   REGRESSION on the field. Don't reclaim it here either.
-- **A smoothstep in 25 stops**, for the three reasons the hero field's dissolve
-  already documents: a linear ramp reads as a BAND (slope discontinuity at each
-  end), an ease-in ramp compresses into a narrow strip however long it is, and
-  the stop COUNT is how faithfully the curve is drawn.
-  ⚠️ **It went 17 → 25 BECAUSE the ledge got shorter, which is the field's rule
-  applied in the direction that actually comes up**: the room is a hard ceiling,
-  so length is not available and resampling is the only lever. At 96px, 17 stops
-  land 6.0px apart (largest alpha step 0.093); 25 stops land **4.0px** apart
-  (0.062), matching the field's target. ⚠️ **More stops before more length.**
+- **A BIASED smoothstep — `ss(t^1.7)` — in 33 stops.** The three reasons the hero
+  field's dissolve documents still hold: a linear ramp reads as a BAND (slope
+  discontinuity at each end), the stop COUNT is how faithfully the curve is drawn,
+  and both ends must have zero slope — which `ss(t^p)` keeps, since `ss'(0)` and
+  `ss'(1)` are 0 and the chain rule preserves them.
+  ⚠️ **THIS IS NOT THE EASE-IN THE FIELD REJECTED, and the difference is that the
+  bias BUYS length rather than being applied within a fixed one.** That failure
+  was "half the alpha drop compressed into a narrow strip however long the ramp
+  was" — on a 170px ramp, half the drop in ~57px. Here half the drop lands in the
+  last 190px of a 520px ramp, and **the biased 520 is GENTLER at its steepest
+  point than the plain 300 it replaced: 0.71 code values per pixel against ~1.7.**
+  Longer and softer at once, which is only possible because the length went up.
+  ⚠️ **STOP COUNT SCALES WITH LENGTH — this is the field's rule in the direction
+  that keeps coming up.** The count is set by the largest ALPHA STEP, not by the
+  ramp's identity, so lengthening the ledge without resampling silently
+  under-draws the curve. 25 stops at 300px land 12.5px apart; the same 25 at 520
+  would land 21.7px apart for a 0.083 step. **33 stops at 520px land 16.2px apart
+  for 0.062** — the same figure 25 gave at 300, and the field's target.
+  ⚠️ **`contactAlphaAt` in js/main.js IS THIS CURVE and must move with it**
+  (`LEDGE_BIAS`). It is the single definition the bar's fill, `blueBehindBar` and
+  the label flip all read; feed the bar a plain smoothstep while the page paints a
+  biased one and the 21% seam this whole system exists to remove comes straight
+  back. Verified after the change: CSS and JS agree to **0.003**, which is the
+  browser rounding `getComputedStyle` alpha to three places.
 - ⚠️ **Ramps accent-alpha-1 → accent-alpha-0, NEVER to `transparent`** — that is
   `rgba(0,0,0,0)`, which drags every stop toward black and rings the ledge with a
   grey halo. Same trap as the field.

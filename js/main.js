@@ -474,12 +474,18 @@ function measureContactArrival() {
     docTop - (document.documentElement.scrollHeight - window.innerHeight));
 }
 
+const LEDGE_BIAS = 1.7;
+
 // Contact's fill alpha at a viewport y — the ledge's smoothstep above the
 // panel, solid below it. Shared by the bar's fill and by blueBehindBar.
 function contactAlphaAt(y, edge, ledge) {
   if (y >= edge) return 1;
   if (ledge <= 0 || y <= edge - ledge) return 0;
-  const t = (y - (edge - ledge)) / ledge;
+  // ⚠️ BIASED SMOOTHSTEP — ss(t^LEDGE_BIAS), and it MUST match the gradient in
+  // sections.css stop for stop. The bias holds the blue light over About's last
+  // line so the ledge can be long; feed the bar a plain smoothstep while the
+  // page paints a biased one and the 21% seam this whole system removes is back.
+  const t = Math.pow((y - (edge - ledge)) / ledge, LEDGE_BIAS);
   return t * t * (3 - 2 * t);
 }
 

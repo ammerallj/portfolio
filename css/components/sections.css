@@ -597,9 +597,23 @@
      · an EASE-IN ramp compresses the transition into a narrow strip however
        long it is, because half the alpha drop lands in the last third;
      · a smoothstep has ZERO SLOPE AT BOTH ENDS, so neither corner exists.
-   17 stops because browsers interpolate LINEARLY between stops, so the count is
-   how faithfully the curve is actually drawn. At --contact-ledge 220px these
-   land 13.8px apart. ⚠️ If a band ever shows, add STOPS before adding LENGTH.
+   33 stops because browsers interpolate LINEARLY between stops, so the count is
+   how faithfully the curve is actually drawn. At --contact-ledge 520px these
+   land 16.2px apart, largest alpha step 0.062 — the same figure 25 stops gave at
+   300px. ⚠️ STOPS SCALE WITH LENGTH: the count is set by the alpha step, not by
+   the ramp, so lengthening the ledge without resampling under-draws the curve.
+
+   ⚠️ THE PARAMETER IS BIASED — `smoothstep(t^1.7)`, NOT plain `smoothstep(t)`,
+   AND THIS IS NOT THE EASE-IN THE HERO FIELD REJECTED. That one failed because
+   it had to fit a FIXED short ramp, so half the alpha drop compressed into a
+   narrow strip however long the ramp got. Here the bias BUYS the length: it
+   holds the blue light where it crosses About's last line (206px above the
+   panel) so the ledge can reach 520px instead of the 400px a plain smoothstep
+   allows at the same contrast. Measured, the biased 520 is GENTLER at its
+   steepest point than the plain 300 it replaced — 0.71 code values per pixel
+   against ~1.7. Both ends still have zero slope, because ss'(0)=ss'(1)=0
+   survives the chain rule.
+   ⚠️ `contactAlphaAt` IN js/main.js IS THE SAME CURVE AND MUST MOVE WITH IT.
 
    ⚠️ It ramps accent-alpha-1 -> accent-alpha-0, NEVER to `transparent`.
    `transparent` is rgba(0,0,0,0), which drags every stop toward black and rings
@@ -608,29 +622,37 @@
 .contact-section::before {
   background-image: linear-gradient(to bottom,
     rgba(var(--color-accent-rgb), 0.0000) 0.00%,
-    rgba(var(--color-accent-rgb), 0.0051) 4.17%,
-    rgba(var(--color-accent-rgb), 0.0197) 8.33%,
-    rgba(var(--color-accent-rgb), 0.0430) 12.50%,
-    rgba(var(--color-accent-rgb), 0.0741) 16.67%,
-    rgba(var(--color-accent-rgb), 0.1121) 20.83%,
-    rgba(var(--color-accent-rgb), 0.1562) 25.00%,
-    rgba(var(--color-accent-rgb), 0.2056) 29.17%,
-    rgba(var(--color-accent-rgb), 0.2593) 33.33%,
-    rgba(var(--color-accent-rgb), 0.3164) 37.50%,
-    rgba(var(--color-accent-rgb), 0.3762) 41.67%,
-    rgba(var(--color-accent-rgb), 0.4376) 45.83%,
-    rgba(var(--color-accent-rgb), 0.5000) 50.00%,
-    rgba(var(--color-accent-rgb), 0.5624) 54.17%,
-    rgba(var(--color-accent-rgb), 0.6238) 58.33%,
-    rgba(var(--color-accent-rgb), 0.6836) 62.50%,
-    rgba(var(--color-accent-rgb), 0.7407) 66.67%,
-    rgba(var(--color-accent-rgb), 0.7944) 70.83%,
-    rgba(var(--color-accent-rgb), 0.8438) 75.00%,
-    rgba(var(--color-accent-rgb), 0.8879) 79.17%,
-    rgba(var(--color-accent-rgb), 0.9259) 83.33%,
-    rgba(var(--color-accent-rgb), 0.9570) 87.50%,
-    rgba(var(--color-accent-rgb), 0.9803) 91.67%,
-    rgba(var(--color-accent-rgb), 0.9949) 95.83%,
+    rgba(var(--color-accent-rgb), 0.0000) 3.12%,
+    rgba(var(--color-accent-rgb), 0.0002) 6.25%,
+    rgba(var(--color-accent-rgb), 0.0009) 9.38%,
+    rgba(var(--color-accent-rgb), 0.0025) 12.50%,
+    rgba(var(--color-accent-rgb), 0.0053) 15.62%,
+    rgba(var(--color-accent-rgb), 0.0097) 18.75%,
+    rgba(var(--color-accent-rgb), 0.0162) 21.88%,
+    rgba(var(--color-accent-rgb), 0.0252) 25.00%,
+    rgba(var(--color-accent-rgb), 0.0371) 28.12%,
+    rgba(var(--color-accent-rgb), 0.0522) 31.25%,
+    rgba(var(--color-accent-rgb), 0.0709) 34.38%,
+    rgba(var(--color-accent-rgb), 0.0934) 37.50%,
+    rgba(var(--color-accent-rgb), 0.1201) 40.62%,
+    rgba(var(--color-accent-rgb), 0.1510) 43.75%,
+    rgba(var(--color-accent-rgb), 0.1862) 46.88%,
+    rgba(var(--color-accent-rgb), 0.2259) 50.00%,
+    rgba(var(--color-accent-rgb), 0.2698) 53.12%,
+    rgba(var(--color-accent-rgb), 0.3178) 56.25%,
+    rgba(var(--color-accent-rgb), 0.3697) 59.38%,
+    rgba(var(--color-accent-rgb), 0.4249) 62.50%,
+    rgba(var(--color-accent-rgb), 0.4830) 65.62%,
+    rgba(var(--color-accent-rgb), 0.5433) 68.75%,
+    rgba(var(--color-accent-rgb), 0.6049) 71.88%,
+    rgba(var(--color-accent-rgb), 0.6669) 75.00%,
+    rgba(var(--color-accent-rgb), 0.7281) 78.12%,
+    rgba(var(--color-accent-rgb), 0.7873) 81.25%,
+    rgba(var(--color-accent-rgb), 0.8428) 84.38%,
+    rgba(var(--color-accent-rgb), 0.8930) 87.50%,
+    rgba(var(--color-accent-rgb), 0.9361) 90.62%,
+    rgba(var(--color-accent-rgb), 0.9699) 93.75%,
+    rgba(var(--color-accent-rgb), 0.9920) 96.88%,
     rgba(var(--color-accent-rgb), 1.0000) 100.00%);
 }
 
