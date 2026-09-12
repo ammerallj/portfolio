@@ -1535,6 +1535,27 @@ alongside `--footer-height`.
   re-measures on resize. The `0px` fallback yields `--gap-section`, so no-JS is
   today's value.
 
+⚠️ **`restingFor` MEASURES WITH OFFSETS, NOT `getBoundingClientRect` — a
+section's children can be TRANSFORMED.** About's parallax translates its two
+`.site-container` children, and a rect reports that translation, so the resting
+target was computed from wherever the peek happened to have the content at the
+moment of the click. **Measured: About settled with its heading at −104, off the
+top of the screen**, and the landing position varied with where the click
+started. Latent since the About parallax was added. Same rule as
+`measureFieldTuck` and `measureContactArrival` — **third place it has bitten**:
+anything measuring a position that something else transforms must use offsets.
+
+⚠️ **THE LEFTOVER IS NOT ALWAYS SPLIT EVENLY (`SECTION_BIAS`, 2026-09).** A true
+centre put About 98px under the nav with 153 below — visibly low, because the eye
+reads a block as centred when it sits slightly ABOVE the geometric middle, and
+About's content is top-heavy (a 56px heading over body copy). `SECTION_BIAS` is
+the fraction of the leftover placed ABOVE the content; About uses **0.34** (air
+above 98 → 53), Work and Contact keep 0.5.
+⚠️ **A smaller bias means a LARGER resting scrollY, which moves the spy's
+threshold LATER — and Contact's click target (`topAlignedFor`) does not move with
+it.** Those two must not cross. Measured after: margin 68, unchanged, because
+Contact keeps 0.5 — but re-measure if its bias is ever touched.
+
 **The scroll-spy reads the SAME resting positions** (`updateScrollEffects`): the
 active section is the last one whose resting position the page has reached. It
 compared section TOPS against the nav line until sections began settling centred
