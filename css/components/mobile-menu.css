@@ -159,14 +159,30 @@
   --menu-inset: 32px;
 }
 
-/* "Jenna Ammerall." — matches the header logo but white (Figma 123:3770) */
+/* "Jenna Ammerall." — matches the header logo but white (Figma 123:3770).
+
+   ⚠️ SAME PIXEL AS THE HEADER'S .site-name, ON PURPOSE. The overlay opens over
+   the fixed header, so if this wordmark sits anywhere else the name visibly
+   jumps as the panel lands. The header row is: --space-sm of padding-block
+   (header.css) + a 36px row (the "Say hello" pill sets the height) with the
+   20px/1.5 wordmark centred in it + --page-gutter on the sides (global.css).
+   Rebuilt here as the same box rather than a hand-tuned inset, so the two can't
+   drift: 16 + (36 − 30)/2 = 19px to the line box on both.
+   Bottom edge lands at 16 + 36 = 52px — exactly where the old
+   `--menu-inset` (32) + 20px line box ended, so the connect block below it
+   is untouched. --page-gutter (not a bare 16) also keeps it on the header's
+   x at 481–680, where the gutter is 24. */
 .mobile-menu-name {
-  padding: var(--menu-inset) 16px 0;
+  display: flex;
+  align-items: center;
+  box-sizing: content-box; /* the reset is border-box; the 36 must EXCLUDE the padding */
+  min-height: 36px; /* the header row's height — the pill */
+  padding: var(--space-sm) var(--page-gutter) 0;
   font-family: var(--font-heading);
   font-size: 1.25rem; /* 20px */
   font-weight: 700;
   letter-spacing: -0.02em;
-  line-height: 1;
+  line-height: 1.5; /* the body rhythm .site-name inherits — not 1 */
 }
 
 /* --- "On My Mind" — reflective note below the connect block, mirroring the
