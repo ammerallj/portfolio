@@ -1233,6 +1233,37 @@ the clamp exists for is strengthened, not traded.
 **Verified on FRESH LOADS at 1920×1080, 1440×900/850/780/760, 1280×850,
 1100×880, 1024×820 — `restEdge` 144–145 and the bar stays cream at every one**,
 with the footer in frame and Contact fully in frame throughout.
+⚠️ **`--contact-trim` IS THE DIAL BETWEEN THE TWO END STATES, AND 144 IS A
+DECISION — `0` WAS EVALUATED AND DECLINED (2026-09).** Measured at 1440×900, the
+resting edge tracks the token exactly:
+
+| `--contact-trim` | panel | `restEdge` | nav |
+|---|---|---|---|
+| **144 (shipped)** | 675 | 145 | cream, ledge visible above the panel |
+| 96 | 723 | 97 | inverts |
+| 64 | 755 | 65 | inverts |
+| 0 | 819 | 1 | inverts, panel fills the frame |
+
+- **`0` really would remove the height flip in landscape, more completely than 144
+  does** — `restEdge` clamps to 0 whether `min-height` or the content binds, so
+  there is no threshold at all (verified `restEdge` 1 / inverted at 1080, 900 and
+  780). That is the honest case FOR it.
+- ⚠️ **AND IT STILL WOULD NOT BE UNIFORM, because `--contact-trim` IS INERT IN
+  PORTRAIT.** The portrait rule already sets `min-height: 0`, so the panel is its
+  own content and rests far down the page. Verified at 834×1112 and 1024×1366:
+  trim 144 and trim 0 measure **identically** (`restEdge` 461 and 766, cream at
+  both). Portrait never inverts either way. So `0` trades a height threshold
+  inside landscape for a split by orientation — it does not buy one state
+  everywhere, and nothing can while portrait deliberately stops filling the fold.
+- **Declined because the cost is the composition**: `0` gives up the
+  ledge-above-the-panel arrival at every landscape size, and grows the panel
+  675 → 819, putting back ~144px of empty blue below the copy — which is the exact
+  thing `--contact-trim` was introduced to remove. The residual case it fixes is a
+  landscape window under ~747px tall, where the inversion is legible anyway.
+- **If the short-window flip ever does need closing, the lever is the content, not
+  the trim** — shrinking `--gap-heading` at short heights buys ~56px and drops the
+  floor to ~690.
+
 ⚠️ **THE RESIDUAL FLOOR IS ~747px TALL**, and it is the content, not the rule:
 below it `--contact-pad` is already at its 24px floor, the panel cannot shrink
 further (559px at 1440), and `restEdge` falls away. It still inverts there, and
