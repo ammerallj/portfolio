@@ -514,117 +514,6 @@ const contactSection = darkPanel;
 const aboutSection = document.getElementById('about');
 const intro = document.querySelector('.intro');
 const introBar = document.querySelector('.intro-bar'); // landing nav bar (homepage only)
-
-// HIDE THE NAV WHILE SCROLLING DOWN, BRING IT BACK WHEN THE READER STOPS.
-const NAV_HIDE = {
-  // px of downward travel in one frame before hiding. Above the noise floor of a
-  // trackpad's tail, so a drifting finger does not flicker the bar.
-  delta: 4,
-};
-const stickyBars = [siteHeader, introBar].filter(Boolean);
-let navHideLastY = null;
-let navWantHidden = false;
-
-// ⚠️ A BAR MAY ONLY HIDE ONCE IT IS PINNED. Before that the landing bar is part
-// of the hero's composition — it sits in the flow at the bottom of the stage —
-// so hiding it there animates something the reader has not scrolled past yet.
-// .intro-bar announces that with is-docked; .site-header (≤680) is fixed from
-// the first pixel and is gated by the page-top check instead.
-function navBarCanHide(bar) {
-  return bar.classList.contains('intro-bar')
-    ? bar.getBoundingClientRect().top <= 0
-    : true;
-}
-
-// ⚠️ AND A BAR IN LIMBO IS HIDDEN OUTRIGHT, whatever the scroll direction says.
-// .intro-bar is sticky: it is either pinned at top:0 or sitting in the flow at
-// the bottom of the hero stage, never between. At the page top the flow position
-// IS the landing's composition and it belongs there. Scrolled past that but not
-// yet docked, it is neither — just a nav floating mid-page over Selected Work,
-// which is what it looked like when un-docking on an upward scroll.
-//
-// This deliberately overrides the show-on-scroll-up rule. Scrolling up is what
-// puts the bar into that state in the first place, so deferring to direction
-// would guarantee it is visible exactly when it should not be.
-// ⚠️ MEASURED, NOT READ FROM CLASSES. This used to test is-docked and
-// is-at-page-top, both written elsewhere in updateScrollEffects — so it depended
-// on running after them, in the same pass, with nothing in between returning
-// early. Deriving both from the rect and scrollY makes it correct wherever it is
-// called from and in whatever order.
-function navBarInLimbo(bar) {
-  if (!bar.classList.contains('intro-bar')) return false;
-  const docked = bar.getBoundingClientRect().top <= 0;
-  const atPageTop = window.scrollY <= 0;
-  return !docked && !atPageTop;
-}
-
-// ⚠️ FOCUS IS CHECKED PER BAR AND WINS OVER EVERYTHING, limbo included. Hiding a
-// bar that holds the keyboard strands it on an off-screen, pointer-events:none
-// element with no way back.
-function setNavHidden(on) {
-  const focused = document.activeElement;
-  stickyBars.forEach(bar => {
-    const holdsFocus = !!focused && bar.contains(focused);
-    const hide = !holdsFocus && (navBarInLimbo(bar) || (on && navBarCanHide(bar)));
-    bar.classList.toggle('is-nav-hidden', hide);
-  });
-}
-
-// ⚠️ ON ITS OWN LISTENER, NOT INSIDE updateScrollEffects. It used to be called
-// from there, which made it depend on three things that can each silently take
-// it out: Lenis loading at all (updateScrollEffects is bound to lenis's scroll
-// event, and the motion system is a CDN import that is allowed to fail), the
-// `is-loading` early return above it, and its position relative to the docking
-// toggle. A nav that hides on scroll should not need the smooth-scroll library
-// to be alive. Native scroll fires this regardless.
-let navHideQueued = false;
-function onNavHideScroll() {
-  if (navHideQueued) return;
-  navHideQueued = true;
-  requestAnimationFrame(() => { navHideQueued = false; updateNavHide(); });
-}
-window.addEventListener('scroll', onNavHideScroll, { passive: true });
-
-function updateNavHide() {
-  const y = window.scrollY;
-  if (navHideLastY === null) navHideLastY = y;
-  const d = y - navHideLastY;
-  navHideLastY = y;
-
-  // ⚠️ DIRECTION LATCHES THE INTENT; THE INTENT IS APPLIED EVERY FRAME. These
-  // used to be the same step — setNavHidden was called only from inside the two
-  // direction branches — and that left a hole: on a slow scroll every frame's
-  // delta sits between 0 and NAV_HIDE.delta, neither branch fires, and the class
-  // is never written at all. Measured at 3px per frame, the bar stayed visible
-  // through the whole hero; at 30px it hid correctly. The limbo rule lives
-  // inside setNavHidden, so it was being skipped along with everything else.
-  //
-  // ⚠️ A THRESHOLD MUST ONLY GATE THE DECISION, NEVER THE APPLICATION. Anything
-  // that can change state for reasons other than the delta — limbo, focus, the
-  // page-top and footer guards — has to be re-evaluated on frames the threshold
-  // rejects, or it silently does nothing below the threshold.
-  if (d > NAV_HIDE.delta) navWantHidden = true;
-  else if (d < 0) navWantHidden = false;         // scrolling up brings it back
-
-  // ⚠️ NOT AT THE TOP OF THE PAGE. The landing bar is part of the hero's
-  // composition until it docks, and the ≤680 header is deliberately bare there.
-  if (window.scrollY <= 0) navWantHidden = false;
-
-  // ⚠️ AND NOT WITH THE FOOTER IN VIEW — the bottom is the OTHER end with no
-  // travel left to spend. Reaching it on a downward scroll would otherwise leave
-  // the bar hidden at the reader's final resting position, where the only way
-  // back is a scroll-up against a floor they have already hit. The footer is the
-  // right anchor rather than a scroll threshold: it is the last thing on the
-  // page at every tier and viewport height, so it needs no constant and cannot
-  // drift when Contact's height changes — which it has, repeatedly.
-  if (siteFooter && siteFooter.getBoundingClientRect().top < window.innerHeight) {
-    navWantHidden = false;
-  }
-
-  setNavHidden(navWantHidden);
-}
-
-
 const pageField = document.querySelector('img.page-field');
 
 // ⚠️ THE FIELD TUCKS BEHIND THE DOCKING BAR (2026-09) — and the bleed it closes
@@ -2553,8 +2442,6 @@ function updateScrollEffects() {
     introBar.classList.toggle('is-docked', introBar.getBoundingClientRect().top <= 0);
   }
 
-
-
   // ...and the field lifts away as the reader moves. See measureFieldTuck above.
   // ⚠️ EASED OUT, AND ONLY BECAUSE THE MASK MADE IT FREE TO BE. While this was
   // the thing keeping colour off the bar it had to be LINEAR — it was reporting
@@ -2701,6 +2588,7 @@ function updateScrollEffects() {
     setAboutPeek(Math.round(peek));
   }
 
+  const stickyBars = [siteHeader, introBar].filter(Boolean);
   if (contactSection && stickyBars.length) {
     const contactRect = contactSection.getBoundingClientRect();
     if (contactRect.height === 0) {

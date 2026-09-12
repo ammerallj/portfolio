@@ -7,7 +7,7 @@
   top: 0;
   z-index: 100;
   padding-block: var(--space-sm);
-  transition: transform 0.3s ease, opacity 0.3s ease;
+  transition: transform 0.4s ease;
   /* The frost lives on ::before so it can bleed past this box — see below. */
   isolation: isolate;
 }
