@@ -159,12 +159,21 @@
   --header-bleed: 96px;
 
   /* How much the Contact panel is trimmed below a full frame.
-     ⚠️ SUPERSEDED CEILING: this was capped at ~54px to keep the nav inverted at
-     rest. That constraint was lifted deliberately (2026-09) — the bar stays cream
-     now — so the only floor left is the panel's own content. 144 is exactly
-     where min-height stops binding and the content takes over; past that it does
-     nothing. See .contact-section's min-height for what was traded. */
-  --contact-trim: 144px;
+     ⚠️ 0 — AND THE ZERO IS THE POINT: IT IS WHAT INVERTS THE NAV. At 0 the panel
+     is a full frame minus the footer, so its top comes to rest at y=0, the bar
+     sits on solid blue, --dark-mix reaches 1 and the labels flip to white. Any
+     value above ~107 parks the panel's top below the bar, the bar only ever sees
+     the ledge's unfinished ramp, and black stays the more legible choice — so the
+     flip never fires. **The inversion and a trimmed panel are the same decision.**
+     ⚠️ IT WAS 144 FOR A WHILE, AND THE REASON NO LONGER HOLDS. The trim was added
+     because the panel "felt too long" — but that was MEASURED to be a material
+     problem, not a length one, and the fix was giving the panel the field's GRAIN
+     (see .contact-section). The trim was a second lever pulled at the same time
+     for the same complaint, and it was the one that cost the transition.
+     ⚠️ THE COST OF 0 IS REAL: it grows the panel and puts empty blue back below
+     the copy. If that ever needs reducing again, reach for the CONTENT or the
+     grain — not this, unless the inverting nav is genuinely being traded away. */
+  --contact-trim: 0px;
 
 
   /* CONTACT'S SOFT LEADING EDGE — how far the blue bleeds up out of the panel

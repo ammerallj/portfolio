@@ -1192,11 +1192,15 @@ a layer, since both of this element's pseudo-elements are spent on the ledge.
 also `--color-accent`, so panel + footer fill the viewport exactly and trimming is
 the only thing that actually reduces blue on screen.
 
-⚠️ **THE NAV'S INVERSION WAS TRADED FOR THE SHORTER PANEL (2026-09, deliberate),
-AND THE TRADE IS TOTAL RATHER THAN PARTIAL.** The panel used to rest with its top
-at y=0 because it was a full frame minus the footer, which is what put solid
-accent behind the docked bar. `--contact-trim: 144px` takes it to its content
-height (819 → 675) and its top now rests at 145.
+⚠️ **THE NAV'S INVERSION WAS TRADED FOR A SHORTER PANEL AND THEN TRADED BACK
+(2026-09).** For part of that month `--contact-trim: 144px` took the panel to its
+content height (819 → 675), resting its top at 145 — which is what stopped the
+bar ever sitting on solid blue. **That is reverted: the trim is 0 and the panel is
+a full frame minus the footer again**, because the inversion was the arrival's
+best moment and the "too long" complaint it was paying for had already been fixed
+by the panel's grain. The paragraph below describes the trimmed state and is kept
+because the MECHANISM it explains is exactly why the trim and the inversion are
+one decision.
 
 **The consequence is the thing to understand before touching this.** A section's
 RESTING top is its HIGHEST position — the page has no more scroll — so a bar that
@@ -1233,36 +1237,38 @@ the clamp exists for is strengthened, not traded.
 **Verified on FRESH LOADS at 1920×1080, 1440×900/850/780/760, 1280×850,
 1100×880, 1024×820 — `restEdge` 144–145 and the bar stays cream at every one**,
 with the footer in frame and Contact fully in frame throughout.
-⚠️ **`--contact-trim` IS THE DIAL BETWEEN THE TWO END STATES, AND 144 IS A
-DECISION — `0` WAS EVALUATED AND DECLINED (2026-09).** Measured at 1440×900, the
-resting edge tracks the token exactly:
+⚠️ **`--contact-trim` IS `0`, AND THE ZERO IS WHAT INVERTS THE NAV.** At 0 the
+panel is a full frame minus the footer, its top comes to rest at y=0, the bar sits
+on solid blue, `--dark-mix` reaches 1 and the labels flip to white. **The inverting
+nav and a trimmed panel are the same decision** — any trim above ~107 parks the
+panel below the bar, the bar only ever sees the ledge's unfinished ramp, and black
+stays the more legible choice, so the flip never fires. Measured at 1440×900:
 
 | `--contact-trim` | panel | `restEdge` | nav |
 |---|---|---|---|
-| **144 (shipped)** | 675 | 145 | cream, ledge visible above the panel |
-| 96 | 723 | 97 | inverts |
-| 64 | 755 | 65 | inverts |
-| 0 | 819 | 1 | inverts, panel fills the frame |
+| **0 (shipped)** | 819 | 1 | **white on blue, 5.86:1** |
+| 64 | 755 | 65 | white |
+| 96 | 723 | 97 | white |
+| 144 | 675 | 145 | black on the ramp, 5.86:1 |
 
-- **`0` really would remove the height flip in landscape, more completely than 144
-  does** — `restEdge` clamps to 0 whether `min-height` or the content binds, so
-  there is no threshold at all (verified `restEdge` 1 / inverted at 1080, 900 and
-  780). That is the honest case FOR it.
-- ⚠️ **AND IT STILL WOULD NOT BE UNIFORM, because `--contact-trim` IS INERT IN
-  PORTRAIT.** The portrait rule already sets `min-height: 0`, so the panel is its
-  own content and rests far down the page. Verified at 834×1112 and 1024×1366:
-  trim 144 and trim 0 measure **identically** (`restEdge` 461 and 766, cream at
-  both). Portrait never inverts either way. So `0` trades a height threshold
-  inside landscape for a split by orientation — it does not buy one state
-  everywhere, and nothing can while portrait deliberately stops filling the fold.
-- **Declined because the cost is the composition**: `0` gives up the
-  ledge-above-the-panel arrival at every landscape size, and grows the panel
-  675 → 819, putting back ~144px of empty blue below the copy — which is the exact
-  thing `--contact-trim` was introduced to remove. The residual case it fixes is a
-  landscape window under ~747px tall, where the inversion is legible anyway.
-- **If the short-window flip ever does need closing, the lever is the content, not
-  the trim** — shrinking `--gap-heading` at short heights buys ~56px and drops the
-  floor to ~690.
+⚠️ **IT WAS 144 FOR PART OF 2026-09 AND THE REASON DID NOT HOLD.** The trim was
+added because the panel "felt too long" — but that was MEASURED to be a MATERIAL
+problem, not a length one, and the fix was giving the panel the field's grain. The
+trim was a second lever pulled at the same time for the same complaint, and it was
+the one that silently cost the arrival its best moment. **Verified settled** at
+1440×900/780/1080 and 1024×768: `restEdge` 0–1, inverted, footer in frame at all.
+⚠️ **THE COST IS REAL AND IS THE THING TO WATCH**: the panel grows 675 → 819 at
+1440×900, which is **212px of empty blue below the copy** against 42 at trim 144.
+If that needs reducing, reach for the CONTENT or the grain — **not this token**,
+unless the inverting nav is being deliberately traded away again.
+⚠️ **PORTRAIT DOES NOT INVERT, AND CANNOT.** Its `min-height: 0` rule makes the
+trim inert (verified identical at trim 0 and 144), so the panel stays compact and
+rests far down the page. Portrait deliberately does not fill the fold; the
+inversion needs a full frame. The two cannot both be had.
+⚠️ **THE PADDING'S TRIM RESERVATION IS NOW DORMANT, NOT DEAD.** `--contact-pad`
+subtracts `--contact-trim`, which at 0 subtracts nothing. Keep it: it is what made
+the resting edge stable at any viewport height when the trim was non-zero, and
+without it a future non-zero trim silently reintroduces the height-dependent flip.
 
 ⚠️ **THE RESIDUAL FLOOR IS ~747px TALL**, and it is the content, not the rule:
 below it `--contact-pad` is already at its 24px floor, the panel cannot shrink
