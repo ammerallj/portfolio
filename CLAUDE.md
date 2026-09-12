@@ -1014,6 +1014,15 @@ anywhere, the same property that makes Contact's peek symmetric.
 - ⚠️ **`max` IS BOUNDED BY `--gap-section`.** The transform moves the CONTENT while
   the section's box stays put, so the content eats its own padding. Past 96px it
   crosses into a neighbouring section.
+- ⚠️ **AS CONTACT ARRIVES, ABOUT'S COPY IS PUSHED TOWARD THE LEDGE** (`push`,
+  40px) rather than left to its own lag — it leans INTO the top of the dissolve,
+  which is what closes that seam. Bounded by contrast and there is room: the copy
+  lands on the ledge's first third, **black 11.2:1 at 40px** (20.4 on bare cream,
+  still 9.0 at 48). The binding constraint is taste, not legibility. The blend
+  runs on Contact's own approach, so it is symmetric — scrolling up to About,
+  Contact recedes and the push relaxes back into the lag.
+- ⚠️ **TAPERING THE LAG TO ZERO WAS THE FIRST FIX AND ONLY GOT BACK TO 96.**
+  The push is what goes further. Kept below because the failure it names is real:
 - ⚠️ **IT MUST YIELD TO CONTACT'S ARRIVAL, and without that it is a REGRESSION
   rather than an addition.** About leaves upward, so its offset is negative exactly
   while Contact approaches — which lifts About's copy off the panel and opens bare
@@ -1127,6 +1136,27 @@ revealed into place.
   its window opens on the reader's first gesture, and wrong here for the same
   reason. **The two parallaxes no longer share a curve; that is the trade.**
 - ⚠️ **EXACTLY 0 AT REST**, so the settled composition is byte-identical.
+- ⚠️ **THE OFFSET IS NEGATIVE ON THE WAY IN — the copy is pulled UP and settles
+  DOWN.** It lagged downward at first, which is backwards for this section: the
+  copy already sits **232px** below the panel's top at rest (64 nav + 96 padding
+  + 72 centring slack), so a downward lag ADDED to the emptiest part of the
+  arrival. Measured at Contact's edge 300, the gap above the copy was 266 — 232
+  of composition plus 34 of peek working against it; now 218.
+  ⚠️ **The peek is the SMALL term in that gap.** If "too wide" comes up again the
+  lever is the 232 — `--contact-pad` and the centring slack — not this.
+  It still reveals upward: the panel rises faster than the copy settles.
+- ⚠️ **THIS IS THE ONLY DIRECTION-DEPENDENT MOTION ON THE SITE (2026-09), and it
+  is a deliberate exception.** Everything else — `--field-scroll`, `--dark-mix`,
+  `--about-peek`, the ledge — is a pure function of POSITION, which is what makes
+  them symmetric and reproducible from one sample. Here the copy **lags going
+  down** (pulled up, closing the gap) and **leads going up** (pushed down,
+  dropping away). Measured over 700px of panel travel: copy 632 down, 791 up.
+  ⚠️ **THE SIGN BLENDS OVER SCROLL DISTANCE, NOT TIME** (`flipOver`, 250px), and
+  that distinction is load-bearing. Flipping outright snaps the copy by twice the
+  peek the instant the reader reverses; a time-based ease fixes that and is
+  exactly the transition on a scroll-linked value the standing rule forbids.
+  Blending per pixel scrolled keeps it a function of the reader's own motion with
+  no clock in it. Magnitude is 0 at rest, so the sign can never snap there.
 - ⚠️ **THE WINDOW IS ANCHORED TO THE COPY, NOT TO THE PANEL'S EDGE.** The copy
   sits `contactCopyOffset` (**232px** at 1440×900) BELOW the panel's top, so a
   window that starts when the EDGE crosses the fold starts it while the copy is

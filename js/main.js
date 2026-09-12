@@ -213,6 +213,20 @@ const CONTACT = {
     // ledge/bar meeting point) so the panel carried settled copy the rest of the
     // way. Ending at the bar line is the deliberate replacement.
     endAtNavLine: true,
+    // ⚠️ THE ONLY DIRECTION-DEPENDENT MOTION ON THE SITE (2026-09), and it is a
+    // deliberate exception. Everything else here — --field-scroll, --dark-mix,
+    // --about-peek, the ledge — is a pure function of POSITION, which is what
+    // makes them symmetric and reproducible from a single sample. This one is
+    // not: scrolling down the copy LAGS (pulled up, closing the gap above it),
+    // scrolling up it LEADS (pushed down, dropping away from the nav).
+    //
+    // ⚠️ THE SIGN BLENDS OVER SCROLL DISTANCE, NOT TIME, and that distinction is
+    // load-bearing. Flipping it outright snaps the copy by 2x the peek the
+    // instant the reader reverses. A time-based ease would fix that and would be
+    // exactly the transition on a scroll-linked value that the standing rule
+    // forbids — it would lag the page. Blending per pixel scrolled keeps it a
+    // function of the reader's own motion with no clock in it.
+    flipOver: 250,   // px of scroll to fully reverse the sign
   },
 };
 
@@ -259,13 +273,39 @@ function setBarFill(css) {
 // instead of 96, and at -60 its heading sits 36px below Work instead of 96. Take
 // this past 96 and the content crosses into a neighbouring section. 60 leaves
 // 36px of margin at both seams — re-check both if --gap-section ever changes.
-const ABOUT_PEEK = { max: 60, span: 0.5 };   // span as a fraction of the viewport
+const ABOUT_PEEK = {
+  max: 60,       // lag while About is travelling
+  span: 0.5,     // as a fraction of the viewport
+  // ⚠️ PUSH TOWARD THE LEDGE as Contact arrives — About's copy leans INTO the
+  // dissolve instead of lifting away from it, which is what tightens that seam.
+  // Bounded by contrast, and there is room: the copy lands on the ledge's first
+  // third, where black measures 11.2:1 at 40px (20.4:1 on bare cream, and still
+  // 9.0:1 at 48). The binding constraint is taste, not legibility.
+  push: 40,
+};
 
 let lastAboutPeek = -1;
 function setAboutPeek(px) {
   if (px === lastAboutPeek) return;
   lastAboutPeek = px;
   document.documentElement.style.setProperty('--about-peek', px + 'px');
+}
+
+// Blended scroll direction for the peek's sign: -1 down, +1 up. Moves by the
+// fraction of CONTACT.peek.flipOver actually scrolled, so a reversal eases
+// across a quarter-screen of the reader's own travel rather than snapping.
+let peekDir = -1;
+let peekLastY = null;
+function updatePeekDir() {
+  const y = window.scrollY;
+  if (peekLastY === null) { peekLastY = y; return; }
+  const delta = y - peekLastY;
+  peekLastY = y;
+  if (delta === 0) return;
+  const target = delta > 0 ? -1 : 1;
+  const step = Math.abs(delta) / CONTACT.peek.flipOver;
+  peekDir += Math.max(-step, Math.min(step, target - peekDir));
+  peekDir = Math.max(-1, Math.min(1, peekDir));
 }
 
 let lastContactPeek = -1;
@@ -2468,6 +2508,8 @@ function updateScrollEffects() {
   // homepage tier) and the docked .intro-bar (the homepage's own nav on
   // desktop, where the header is display:none). Whichever is hidden reports
   // offsetHeight 0, so the max below reads the visible one.
+  updatePeekDir();
+
   // About's parallax. Guarded: project pages have no #about, so nothing is ever
   // published and the CSS fallback (0px) leaves them exactly as they were.
   if (aboutSection) {
@@ -2479,26 +2521,29 @@ function updateScrollEffects() {
     const span = Math.max(1, vh * ABOUT_PEEK.span);
     const n = Math.min(1, Math.abs(d) / span);
 
-    // ⚠️ ABOUT'S PARALLAX YIELDS TO CONTACT'S ARRIVAL, and without this it is an
-    // active regression rather than an addition. About leaves upward, so its
-    // offset is NEGATIVE exactly while Contact is approaching — which lifts
-    // About's copy away from the panel and opens bare cream above the ledge.
-    // Measured at Contact's edge 300: the visible gap went 96 -> 156, widened by
-    // the whole peek. The ledge cannot absorb it, because it is sized from
-    // OFFSETS (transform-blind) and stays 96 while the gap grows.
+    let peek = Math.sign(d) * ABOUT_PEEK.max * n * n * (3 - 2 * n);
+
+    // ⚠️ AS CONTACT ARRIVES, ABOUT'S COPY IS PUSHED TOWARD THE LEDGE rather than
+    // left to its own lag. Its lag is NEGATIVE while it leaves upward — exactly
+    // while Contact approaches — which lifts the copy AWAY from the panel and
+    // opens bare cream above the dissolve. Measured before this: the visible gap
+    // went 96 -> 156, widened by the whole peek, and the ledge cannot absorb it
+    // because it is sized from OFFSETS (transform-blind) and stays 96 while the
+    // gap grows.
     //
-    // The taper is the fix and it is a real rule, not a patch: the gap only
-    // matters once the ledge is in play, which is precisely when About's peek
-    // should already be spent. Full parallax while Contact is off-screen, zero
-    // by the time it is half a viewport up. Going the other way — scrolling up
-    // to About — Contact recedes first, so the parallax engages behind it.
-    let yieldToContact = 1;
+    // Tapering the lag to zero fixes that but only gets back to 96. Blending it
+    // to a positive PUSH goes further and closes the seam: the copy leans into
+    // the top of the dissolve, where the ramp's alpha is still low enough to
+    // cost it nothing (11.2:1 at the shipped 40px).
+    //
+    // The blend runs on Contact's own approach, so it is symmetric: scrolling up
+    // to About, Contact recedes and the push relaxes back into the lag.
     if (contactSection) {
       const ce = contactSection.getBoundingClientRect().top;
-      yieldToContact = Math.max(0, Math.min(1, (ce - vh * 0.5) / (vh * 0.5)));
+      const near = Math.max(0, Math.min(1, (vh - ce) / (vh * 0.75)));
+      peek = peek * (1 - near) + ABOUT_PEEK.push * near;
     }
-    setAboutPeek(Math.round(
-      Math.sign(d) * ABOUT_PEEK.max * n * n * (3 - 2 * n) * yieldToContact));
+    setAboutPeek(Math.round(peek));
   }
 
   const stickyBars = [siteHeader, introBar].filter(Boolean);
@@ -2646,7 +2691,9 @@ function updateScrollEffects() {
       // The peak is subtracted too: the copy is offset downward by it, so the
       // anchor has to account for its own displacement or the copy still starts
       // below the fold.
-      const startEdge = Math.max(endEdge + 1, vh - contactCopyOffset - CONTACT.peek.max);
+      // +max, not -max: the copy is pulled UP by the peek now, so it reaches the
+      // fold EARLIER than its resting offset would put it.
+      const startEdge = Math.max(endEdge + 1, vh - contactCopyOffset + CONTACT.peek.max);
       const span = Math.max(1, startEdge - endEdge);
       const travel = Math.min(Math.max(0, edge - endEdge), span);
       const peakPeek = Math.min(CONTACT.peek.max, CONTACT.peek.rate * span);
@@ -2661,8 +2708,22 @@ function updateScrollEffects() {
       // The cost is that the peek no longer shares a curve with --field-scroll;
       // the hero tuck's front-loading is right there because its window starts
       // at the reader's first gesture, and wrong here for the same reason.
+      // ⚠️ THE OFFSET IS NEGATIVE — the copy is pulled UP during the approach and
+      // settles DOWN into its composed position. It lagged downward until 2026-09,
+      // which was backwards for this section: the copy already sits 232px below
+      // the panel's top at rest (64 nav + 96 padding + 72 centring slack), so a
+      // downward lag ADDED to the emptiest part of the arrival. Measured at
+      // Contact's edge 300 the gap above the copy was 266 — 232 of composition
+      // plus 34 of peek working against it.
+      // ⚠️ IT STILL REVEALS UPWARD. The panel rises faster than the copy settles,
+      // so the copy's net screen travel is still upward (452 -> 296 at cap 80);
+      // only the gap above it closes instead of opening.
+      // The resting value is 0 either way, so the composed layout is untouched.
       const x = travel / span;                        // 1 at first sight, 0 at the nav line
-      setContactPeek(Math.round(peakPeek * x * x * (3 - 2 * x)));
+      const magnitude = peakPeek * x * x * (3 - 2 * x);
+      // -1 scrolling down (lag, gap closes), +1 scrolling up (lead, drops away).
+      // Magnitude is 0 at the resting position, so the sign can never snap there.
+      setContactPeek(Math.round(magnitude * peekDir));
     }
   }
 
