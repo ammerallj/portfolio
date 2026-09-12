@@ -1102,10 +1102,20 @@ seeking tool, so hiding it there removes it exactly when someone is reaching for
 it. Hiding on up would be backwards.
 
 ⚠️ **THE CONSEQUENCE: stop mid-page and the bar stays hidden until the reader
-scrolls up.** Intended. It is also why the page-top guard exists — the top is the
-one place with no upward travel left to spend. At the page BOTTOM the bar does
-rest hidden; scrolling up by any amount returns it, and Contact carries its own
-connect links, so there is no dead end.
+scrolls up.** Intended, and correct everywhere EXCEPT the two ends of the page,
+which is why both are guarded:
+- **Page top** (`is-at-page-top`) — no upward travel left to spend.
+- **Footer in view** — the same problem at the other end. Reaching the bottom on
+  a downward scroll used to leave the bar hidden at the reader's final resting
+  position, where the only way back was a deliberate scroll-up against a floor
+  they had already hit.
+
+**The footer is the right anchor rather than a scroll threshold**: it is the last
+thing on the page at every tier and every viewport height, so it needs no
+constant and cannot drift when Contact's height changes — which it has,
+repeatedly, in this very session. Measured at 780×900: hidden at footerTop 1027,
+shown at 877, shown at rest, and **zero** transitions during a mid-page reading
+pattern that stays clear of it.
 
 ⚠️ **A STATE, SO IT MAY CARRY A TRANSITION.** The standing ban is on scroll-linked
 VALUES; this class flips once per gesture rather than tracking position.

@@ -569,6 +569,21 @@ function updateNavHide() {
   // hiding either would animate something the reader has not scrolled past yet.
   if (html.classList.contains('is-at-page-top')) { setNavHidden(false); return; }
 
+  // ⚠️ AND NOT WITH THE FOOTER IN VIEW — the bottom is the OTHER place with no
+  // travel left to spend. Reaching the end of the page on a downward scroll
+  // leaves the bar hidden at the reader's final resting position, where the only
+  // way back is a deliberate scroll-up against a floor they have already hit.
+  // The page top is guarded above for exactly the same reason; this is its pair.
+  //
+  // The footer is the right anchor rather than a scroll-position threshold: it is
+  // the last thing on the page at every tier and every viewport height, so it
+  // needs no constant and cannot drift if Contact's height changes — which it
+  // has, repeatedly.
+  if (siteFooter && siteFooter.getBoundingClientRect().top < window.innerHeight) {
+    setNavHidden(false);
+    return;
+  }
+
   if (d > NAV_HIDE.delta) setNavHidden(true);
   else if (d < 0) setNavHidden(false);   // scrolling up brings it straight back
 }
