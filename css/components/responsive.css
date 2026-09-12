@@ -768,8 +768,21 @@
        so it is the only value that is safe for both. The shader's optimum is not
        worth a fallback that fails.
        ⚠️ The two pull against each other in the documented way (~+0.3 bio /
-       −0.25 headline per 70px of nudge) — re-measure BOTH, on BOTH paths. */
-    --field-nudge-y: 120px;
+       −0.25 headline per 70px of nudge) — re-measure BOTH, on BOTH paths.
+       ⚠️ 90, NOT 120 (2026-09) — 120 LEFT A CREAM GAP ALONG THE TOP OF THE
+       SCREEN. The tier's transform is `-12% + nudge`, so the field's top sat at
+       −0.12 × 763 + 120 = **+28.4px** and the artwork simply began below the
+       viewport's top edge. It was always that way; the JPEG's upper reaches are
+       near-white so the gap blended, and the SHADER paints saturated colour to
+       its own edge, which is what made it visible. 90 puts the top at −1.6.
+       ⚠️ `--hero-drop` MOVED WITH IT (70 → 40), AND THAT IS THE WHOLE TRICK.
+       Moving the field alone changes where the orbs sit under the type and would
+       have cost the bio ~0.12 — it is already the thin one at 3.07. Moving the
+       LOCKUP by the same 30px keeps type and artwork rigid, so every contrast
+       figure above still holds. Same principle as `--field-scroll` carrying the
+       desktop lockup: the parallax is between the hero and the page, never
+       within the hero. **Change one and you must change the other.** */
+    --field-nudge-y: 90px;
 
     /* ⚠️ --field-clip: 0 / --field-fade: 0 USED TO BE HERE and are deleted, not
        moved. They neutralised a superseded token-driven mask; against the
@@ -794,7 +807,10 @@
        ⚠️ --hero-drop is the ONE number to change to move the lockup: the
        transform, the pane's start, and the pane's reach all read from it. */
     --hero-h: calc(100dvh - 184px);
-    --hero-drop: 70px;
+    /* ⚠️ 40, NOT 70 — it moved down by the same 30px --field-nudge-y moved up,
+       so the lockup and the artwork stay rigid relative to each other. See the
+       nudge's note above; these two are one decision. */
+    --hero-drop: 40px;
     --divider-y: calc(var(--hero-h) / 2 + var(--hero-drop));
   }
 

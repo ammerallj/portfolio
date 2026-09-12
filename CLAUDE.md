@@ -706,6 +706,20 @@ rather than being left declared and unread. Verified at 375×812:
   1.52**, and the JPEG is still what no-JS, no-WebGL and a failed compile land
   on. 120 is the only value safe on BOTH paths. **Re-measure both paths, not just
   the shader.**
+- ⚠️ **TURNING THE SHADER ON EXPOSED A CREAM GAP ALONG THE TOP OF THE SCREEN, AND
+  IT WAS ALWAYS THERE.** The tier's transform is `-12% + --field-nudge-y`, so at
+  nudge 120 the field's top sat at `−0.12 × 763 + 120 = +28.4px` — the artwork
+  simply began below the viewport's top edge. **The JPEG's upper reaches are
+  near-white so the gap blended; the shader paints saturated colour to its own
+  edge, which is what made it visible.** Nudge is **90** now (top at −1.6).
+- ⚠️ **`--hero-drop` MOVED WITH IT, 70 → 40, AND THAT PAIRING IS THE POINT.**
+  Moving the field alone would have slid the orbs 30px under the type and cost
+  the bio ~0.12, which was already the thin one. Moving the LOCKUP by the same
+  30px keeps type and artwork rigid — the same principle as `--field-scroll`
+  carrying the desktop lockup: **the parallax is between the hero and the page,
+  never within the hero.** Measured after: headline 3.42, bio 3.28 (worst case
+  improved from 3.07), and the Work-card peek is still exactly **120px**.
+  **Change one of these two and you must change the other.**
 - ⚠️ **GPU COST ON A REAL MID-RANGE PHONE IS UNVERIFIED** and cannot be measured
   here — the pane cannot judge this motion at all. If it stutters, restoring the
   bail plus the `display: none` is the whole revert.
