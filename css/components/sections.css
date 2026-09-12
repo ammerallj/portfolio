@@ -516,6 +516,202 @@
    CONTACT SECTION
    ============================================================ */
 
+/* ABOUT'S PARALLAX (2026-09). Its content lags the section as it travels and
+   settles to 0 when the section centres — the same idea as Contact's peek, with
+   the anchor moved because About has no arriving edge to hang it on.
+
+   ⚠️ BOTH CHILDREN, NOT THE SECTION. Transforming `#about` itself would move its
+   box relative to its neighbours and open a gap (or an overlap) at the seam with
+   Contact — transforms do not affect layout, so the section's own edges must
+   stay put. Both children happen to carry `.site-container`, so one selector
+   reaches them.
+
+   ⚠️ It composes with the reveal system rather than fighting it: `data-reveal`
+   sits on the GRANDchildren (`.about-left` / `.about-right`), and Motion writes
+   its transforms there, so nothing is overwritten in either direction.
+
+   --about-peek is published by updateScrollEffects; the 0px fallback is
+   load-bearing for project pages (no #about) and for no-JS. */
+#about > .site-container {
+  transform: translateY(var(--about-peek, 0px));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #about > .site-container {
+    transform: none;
+  }
+}
+
+/* ============================================================
+   CONTACT'S SOFT LEADING EDGE (2026-09)
+   ============================================================
+   The panel used to arrive on a hard line. Measured at 1280x720, Contact's top
+   travels a FULL VIEWPORT from the fold to its resting place, and for 91% of
+   that nothing else on the page moved — the whole nav inversion was crammed
+   into the last 64px. A viewport of runway, 9% of it used.
+
+   This is the first of the two things that fixes: blue bleeds upward out of the
+   panel over --contact-ledge, so the colour arrives before the edge does. The
+   second is that the docked nav paints the SAME ramp (hero.css) instead of a
+   flat tint, so the bar and the page are one continuous wash.
+
+   ⚠️ THE HARD EDGE WAS DELIBERATE AND THIS REVERSES IT. --bar-bleed's whole
+   existence is to stop the bar's cream frost veiling "an architectural edge".
+   That edge is now a dissolve. --bar-bleed is UNCHANGED and still correct:
+   what it protects against is the opaque PANEL, and it clips against the
+   panel's top, not the ledge's. Clipping it to the ledge instead was tried and
+   drives it to 0 exactly when the ledge arrives — the frost and grain then cut
+   dead at the bar's bottom, which is the very line this removes.
+   ------------------------------------------------------------ */
+
+.contact-section {
+  /* Positioning context for the ledge pseudo-elements below. */
+  position: relative;
+}
+
+.contact-section::before,
+.contact-section::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  /* The element's BOTTOM edge sits 100% of its own height above the panel's
+     bottom — i.e. exactly on the panel's top. */
+  bottom: 100%;
+  /* ⚠️ THE BOTTOM IS WELDED AND THE HEIGHT CARRIES THE MOTION.
+     --contact-ledge-lift SHORTENS the dissolve as the reader scrolls up: the
+     bottom stays welded to the panel and the top descends, so the blue's leading
+     edge sits lower. It must never become a translate — the
+     gradient reaches alpha 1 at its own bottom, so moving that bottom below the
+     panel's top leaves the ramp part-way where it meets solid blue (40 code
+     values of step at 24px, 66 at 32). */
+  height: calc(var(--contact-ledge) - var(--contact-ledge-lift, 0px));
+  pointer-events: none;
+}
+
+/* THE RAMP. A SMOOTHSTEP IN 17 STOPS, and all three of those words were learned
+   on the hero field's dissolve (see CLAUDE.md) rather than rediscovered here:
+     · a LINEAR ramp reads as a horizontal BAND — a straight alpha line has a
+       slope discontinuity at each END and the eye reads those two corners as
+       edges even when no single pixel is a step;
+     · an EASE-IN ramp compresses the transition into a narrow strip however
+       long it is, because half the alpha drop lands in the last third;
+     · a smoothstep has ZERO SLOPE AT BOTH ENDS, so neither corner exists.
+   17 stops because browsers interpolate LINEARLY between stops, so the count is
+   how faithfully the curve is actually drawn. At --contact-ledge 220px these
+   land 13.8px apart. ⚠️ If a band ever shows, add STOPS before adding LENGTH.
+
+   ⚠️ It ramps accent-alpha-1 -> accent-alpha-0, NEVER to `transparent`.
+   `transparent` is rgba(0,0,0,0), which drags every stop toward black and rings
+   the ledge with a grey halo. Holding the hue and moving only alpha is what
+   keeps it clean. */
+.contact-section::before {
+  background-image: linear-gradient(to bottom,
+    rgba(var(--color-accent-rgb), 0.0000) 0.00%,
+    rgba(var(--color-accent-rgb), 0.0051) 4.17%,
+    rgba(var(--color-accent-rgb), 0.0197) 8.33%,
+    rgba(var(--color-accent-rgb), 0.0430) 12.50%,
+    rgba(var(--color-accent-rgb), 0.0741) 16.67%,
+    rgba(var(--color-accent-rgb), 0.1121) 20.83%,
+    rgba(var(--color-accent-rgb), 0.1562) 25.00%,
+    rgba(var(--color-accent-rgb), 0.2056) 29.17%,
+    rgba(var(--color-accent-rgb), 0.2593) 33.33%,
+    rgba(var(--color-accent-rgb), 0.3164) 37.50%,
+    rgba(var(--color-accent-rgb), 0.3762) 41.67%,
+    rgba(var(--color-accent-rgb), 0.4376) 45.83%,
+    rgba(var(--color-accent-rgb), 0.5000) 50.00%,
+    rgba(var(--color-accent-rgb), 0.5624) 54.17%,
+    rgba(var(--color-accent-rgb), 0.6238) 58.33%,
+    rgba(var(--color-accent-rgb), 0.6836) 62.50%,
+    rgba(var(--color-accent-rgb), 0.7407) 66.67%,
+    rgba(var(--color-accent-rgb), 0.7944) 70.83%,
+    rgba(var(--color-accent-rgb), 0.8438) 75.00%,
+    rgba(var(--color-accent-rgb), 0.8879) 79.17%,
+    rgba(var(--color-accent-rgb), 0.9259) 83.33%,
+    rgba(var(--color-accent-rgb), 0.9570) 87.50%,
+    rgba(var(--color-accent-rgb), 0.9803) 91.67%,
+    rgba(var(--color-accent-rgb), 0.9949) 95.83%,
+    rgba(var(--color-accent-rgb), 1.0000) 100.00%);
+}
+
+/* GRAIN ON THE LEDGE — the SAME feTurbulence the nav's frost carries
+   (hero.css .intro-bar::after), byte for byte: baseFrequency 0.55, numOctaves 2,
+   saturate 0, rect opacity 0.3. One grain on the site. Without it the ledge is
+   the only clean gradient between two grained surfaces and reads as a different
+   material.
+
+   It also dithers. The 17 stops above still leave the steepest part of the
+   smoothstep at ~1.7 code values per pixel — just above the ±1 floor — and
+   grain is exactly what breaks that up.
+
+   ⚠️ THE PROFILE PEAKS MID-RAMP AND IS ZERO AT BOTH ENDS (4a(1-a), scaled 0.9).
+   The panel below has no grain and the cream above has none, so a profile that
+   reached full where the panel starts would end the texture on a line — trading
+   the gradient seam for a material seam. Peaking mid-ramp also puts the dither
+   where the curve is steepest, which is where banding actually shows.
+
+   ⚠️ STATIC, like the nav's and the field's. It translates rigidly with the
+   panel; it is never redrawn. Grain that regenerates per frame crawls. */
+.contact-section::after {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='ledgegrain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.55' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23ledgegrain)' opacity='0.3'/%3E%3C/svg%3E");
+  -webkit-mask-image: linear-gradient(to bottom,
+    rgba(0, 0, 0, 0.0000) 0.00%,
+    rgba(0, 0, 0, 0.0181) 4.17%,
+    rgba(0, 0, 0, 0.0694) 8.33%,
+    rgba(0, 0, 0, 0.1480) 12.50%,
+    rgba(0, 0, 0, 0.2469) 16.67%,
+    rgba(0, 0, 0, 0.3584) 20.83%,
+    rgba(0, 0, 0, 0.4746) 25.00%,
+    rgba(0, 0, 0, 0.5880) 29.17%,
+    rgba(0, 0, 0, 0.6914) 33.33%,
+    rgba(0, 0, 0, 0.7787) 37.50%,
+    rgba(0, 0, 0, 0.8448) 41.67%,
+    rgba(0, 0, 0, 0.8860) 45.83%,
+    rgba(0, 0, 0, 0.9000) 50.00%,
+    rgba(0, 0, 0, 0.8860) 54.17%,
+    rgba(0, 0, 0, 0.8448) 58.33%,
+    rgba(0, 0, 0, 0.7787) 62.50%,
+    rgba(0, 0, 0, 0.6914) 66.67%,
+    rgba(0, 0, 0, 0.5880) 70.83%,
+    rgba(0, 0, 0, 0.4746) 75.00%,
+    rgba(0, 0, 0, 0.3584) 79.17%,
+    rgba(0, 0, 0, 0.2469) 83.33%,
+    rgba(0, 0, 0, 0.1480) 87.50%,
+    rgba(0, 0, 0, 0.0694) 91.67%,
+    rgba(0, 0, 0, 0.0181) 95.83%,
+    rgba(0, 0, 0, 0.0000) 100.00%);
+  mask-image: linear-gradient(to bottom,
+    rgba(0, 0, 0, 0.0000) 0.00%, rgba(0, 0, 0, 0.0400) 6.25%,
+    rgba(0, 0, 0, 0.1480) 12.50%, rgba(0, 0, 0, 0.3016) 18.75%,
+    rgba(0, 0, 0, 0.4746) 25.00%, rgba(0, 0, 0, 0.6413) 31.25%,
+    rgba(0, 0, 0, 0.7787) 37.50%, rgba(0, 0, 0, 0.8687) 43.75%,
+    rgba(0, 0, 0, 0.9000) 50.00%, rgba(0, 0, 0, 0.8687) 56.25%,
+    rgba(0, 0, 0, 0.7787) 62.50%, rgba(0, 0, 0, 0.6413) 68.75%,
+    rgba(0, 0, 0, 0.4746) 75.00%, rgba(0, 0, 0, 0.3016) 81.25%,
+    rgba(0, 0, 0, 0.1480) 87.50%, rgba(0, 0, 0, 0.0400) 93.75%,
+    rgba(0, 0, 0, 0.0000) 100.00%);
+}
+
+/* THE PARALLAX PEEK. The copy is offset downward and the offset shrinks as the
+   panel rises, so it travels UP faster than the panel and is revealed into
+   place. --contact-peek is published by updateScrollEffects and is exactly 0
+   at rest, so the settled composition is byte-identical to before.
+
+   ⚠️ 0px fallback is load-bearing: project pages have no #contact, so the JS
+   block never runs and nothing is ever published. This must be inert then. */
+.contact-inner {
+  transform: translateY(var(--contact-peek, 0px));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* The LEDGE stays — it is a dissolve, not motion, and the panel should not
+     change character because someone asked the page to hold still. Only the
+     parallax goes. */
+  .contact-inner {
+    transform: none;
+  }
+}
+
 .contact-section {
   /* Full-bleed blue panel with white text (Figma). The 480 tier closes the top
      to 64.
@@ -525,6 +721,28 @@
      a +24 correction on the min-height to cancel it. Symmetric is the same
      picture with none of that. */
   background-color: var(--color-accent);
+  /* ⚠️ THE PANEL CARRIES THE FIELD'S GRAIN. It was the ONE coloured surface on the
+     site without any — the hero field, the nav's frost and the ledge all have it,
+     so the dissolve came out of a grained surface, through a grained ramp, and
+     landed on bare flat colour. A material change, read as a length problem.
+
+     Measured at rest: the panel is not actually the longer run of empty colour —
+     the HERO has more (66% of the viewport against 44%, and 281px above its
+     headline against 184px here). What differs is uniformity. The field varies
+     everywhere and gives the eye something to read; 819px of unvarying
+     rgb(74,69,255) does not.
+
+     ⚠️ THE FIELD'S GRAIN, NOT THE NAV'S — there are TWO on this site and they are
+     not interchangeable. The nav's is baseFrequency 0.55 with a smooth transfer,
+     built to sit on frosted cream. This one is the field's: 1.3 with a DISCRETE
+     transfer, which is what makes it sharp speckle instead of fine mush (see the
+     field's own note — raising frequency alone just gives finer mush), and
+     `overlay` so it modulates the blue rather than laying grey over it.
+
+     ⚠️ Baked into the rect's opacity rather than set on a layer, because both of
+     this element's pseudo-elements are already spent on the ledge. Tune there. */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='cg' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.3' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='discrete' tableValues='0 1'/%3E%3CfeFuncG type='discrete' tableValues='0 1'/%3E%3CfeFuncB type='discrete' tableValues='0 1'/%3E%3CfeFuncA type='linear' slope='0' intercept='1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23cg)' opacity='0.14'/%3E%3C/svg%3E");
+  background-blend-mode: overlay;
   color: #fff;
   padding-top: 96px;
   /* Pinned to 96 at EVERY tier, so it does not follow .page-section down to 64
@@ -571,10 +789,31 @@
      patching it — the bar is inside the section, over one continuous colour, and
      all three artifacts have nothing to act on.
      So the box is a full frame minus the footer, not minus the nav as well. */
-  min-height: calc(100dvh - var(--footer-height));
+  /* ⚠️ --contact-trim SHORTENS THE PANEL, AND THE NAV'S INVERSION WAS TRADED FOR
+     IT (2026-09, deliberate). The panel used to rest with its top at y=0 because
+     it was a full frame minus the footer, which is what put solid accent behind
+     the docked bar. Trimmed, its top rests lower and the bar sits over the ledge
+     and cream instead.
+
+     ⚠️ THE CONSEQUENCE IS TOTAL, NOT PARTIAL, and it is the thing to understand
+     before changing this back or further. The panel's RESTING top is its HIGHEST
+     position — the page has no more scroll — so a bar that is not inverted at
+     rest is never inverted at any scroll position. --dark-mix no longer reaches
+     1, the labels never flip to white, and the `is-over-dark` treatment is
+     unreachable on the homepage. The ledge's own dissolve and the bar's matching
+     fill still do their work across the approach; only the END STATE changed.
+
+     The floor is now the panel's own content. The footer is also
+     --color-accent, so panel + footer used to fill the viewport exactly and
+     trimming is the only thing that actually reduces blue on screen. */
+  min-height: calc(100dvh - var(--footer-height) - var(--contact-trim, 0px));
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  /* ⚠️ TOP-ALIGNED since --contact-trim. Centring only ever did something while
+     min-height exceeded the content; the trim closed that, so `center` now
+     resolves identically to `flex-start` and the old lift hack was paying 96px
+     of panel height for nothing. See .contact-inner. */
+  justify-content: flex-start;
   /* THE PADDING YIELDS SO THE FOOTER STAYS IN FRAME. min-height above is a floor,
      not a cap: at a short window the copy plus a fixed 96px either side outgrew
      it and the panel pushed the footer off the fold (measured at 1440x700:
@@ -609,6 +848,16 @@
 }
 
 .contact-inner {
+  /* ⚠️ THE COPY IS TOP-ALIGNED, NOT CENTRED, and --contact-lift is retired.
+     The lift was a bottom margin of 2x itself, which under `center` shifts the
+     item up by exactly half — correct while the panel had slack to redistribute.
+     --contact-trim removed that slack (min-height now equals the content), so
+     the margin stopped moving anything and only inflated the box: it was adding
+     96px to the panel's height AND 96px to the empty run below the copy, for no
+     positional gain at all.
+     Top-aligning gets the identical position (gap above = padding-top = 160)
+     with none of that. */
+
   display: flex;
   flex-direction: column;
   /* Under the big "let's connect." title before the meta columns — the same

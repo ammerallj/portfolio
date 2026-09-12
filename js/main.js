@@ -186,7 +186,332 @@ function setFieldScroll(px) {
   lastFieldScroll = px;
   document.documentElement.style.setProperty('--field-scroll', px + 'px');
 }
+// ============================================================
+// CONTACT'S ARRIVAL — the ledge, the bar's matching fill, the parallax peek
+// ============================================================
+// Contact's top travels a FULL VIEWPORT from the fold to its resting place
+// (measured 1280x720: maxScroll and the panel's top coincide), and until 2026-09
+// nothing moved for 91% of it — the whole inversion was crammed into the last
+// 64px. These three published values spend that runway.
+const CONTACT = {
+  // ⚠️ hero.css's frost gradient, TRANSCRIBED. The bar's fill has to know what
+  // the frost hides in order to repair it, and a background gradient cannot be
+  // read back out of CSS. Keep these in step with the second background-image
+  // layer on .intro-bar::before — nothing enforces it, the same standing hazard
+  // as --color-accent / --color-accent-rgb.
+  //
+  // ⚠️ THIS IS A SAMPLED SMOOTHSTEP NOW, not the old four-stop piecewise line.
+  // The cream holds 0.95 to the lowest nav item (50px) and eases to 0 across the
+  // rest of the box (166px at full bleed). contactFrostAt interpolates linearly
+  // between these, so the count is how faithfully the curve is reproduced —
+  // eighths track it to well under a code value.
+  // ⚠️ THE PLATEAU POINT AT 50 IS LOAD-BEARING. Without it the first segment
+  // interpolates straight from 0 to the first curve sample and skips the flat
+  // hold, putting the JS 8 code values under the CSS right at the nav item's
+  // bottom — the one place the two must agree, since that is where the bar's
+  // fill is repairing the most opaque part of the frost.
+  frost: [[0, 0.95], [50, 0.95], [64.5, 0.9092], [79.0, 0.8016], [93.5, 0.6494], [108.0, 0.475], [122.5, 0.3006], [137.0, 0.1484], [151.5, 0.0408], [166.0, 0.0]],
+  // How far past the bar the fill is built. The bar's ::before runs
+  // --bar-bleed + 2px past its own box, and BAR_BLEED is its 100px maximum.
+  fillDepth: 176,
+  peek: {
+    // Parallax distance as a fraction of the window, and its ceiling in px.
+    rate: 0.5,
+    max: 80,
+    // THE WINDOW ENDS WHERE THE NAV MEETS THE SECTION'S TOP — the copy keeps
+    // rising for the whole approach and lands exactly as the panel docks.
+    // ⚠️ It used to stop early (0.6 of the way from the scroll floor to the
+    // ledge/bar meeting point) so the panel carried settled copy the rest of the
+    // way. Ending at the bar line is the deliberate replacement.
+    endAtNavLine: true,
+    // ⚠️ THE ONLY DIRECTION-DEPENDENT MOTION ON THE SITE (2026-09), and it is a
+    // deliberate exception. Everything else here — --field-scroll, --dark-mix,
+    // --about-peek, the ledge — is a pure function of POSITION, which is what
+    // makes them symmetric and reproducible from a single sample. This one is
+    // not: scrolling down the copy LAGS (pulled up, closing the gap above it),
+    // scrolling up it LEADS (pushed down, dropping away from the nav).
+    //
+    // ⚠️ THE SIGN BLENDS OVER SCROLL DISTANCE, NOT TIME, and that distinction is
+    // load-bearing. Flipping it outright snaps the copy by 2x the peek the
+    // instant the reader reverses. A time-based ease would fix that and would be
+    // exactly the transition on a scroll-linked value that the standing rule
+    // forbids — it would lag the page. Blending per pixel scrolled keeps it a
+    // function of the reader's own motion with no clock in it.
+    flipOver: 250,   // px of scroll to fully reverse the sign
+    // ⚠️ THE LEDGE'S TOP DESCENDS ON THE WAY UP — its bottom stays welded to the
+    // panel and the height shortens, so the blue's leading edge sits LOWER as
+    // the reader scrolls up. 96 -> 80 at the cap.
+    //
+    // ⚠️ "PULL IT DOWN" AND "MAKE IT SOFTER" ARE OPPOSITE INSTRUCTIONS HERE, and
+    // this was built both ways before that was clear. The bottom is welded, so
+    // the only thing that can move is the top, and the height is the only thing
+    // that can carry it:
+    //   · shorten -> the top DESCENDS (lower blue) and the ramp compresses
+    //   · stretch -> the ramp lengthens (softer) and the top RISES, which washes
+    //     up over About's photo and copy
+    // There is no setting that does both. "Lower" won, so this shortens.
+    //
+    // ⚠️ NEVER A TRANSLATE, whichever way the height goes. The gradient reaches
+    // alpha 1 at its own bottom, so moving that bottom below the panel's top
+    // leaves the ramp part-way when it meets solid blue — 40 code values of step
+    // at 24px, 66 at 32, against the 54-value seam this change exists to remove.
+    //
+    // ⚠️ THE CAP IS BOUNDED BY ABRUPTNESS, NOT BANDING. 25 stops hold the spacing
+    // under 4px at every length here, so the ramp is never under-sampled; what
+    // fails is the dissolve starting to read as a cut, somewhere below ~56px.
+    // 16 keeps the ramp at 80 — a visible descent with the dissolve intact, and
+    // a long way clear of that floor if it ever wants to go further.
+    ledgeShorten: 16,
+  },
+};
+
+let lastContactEdge = -1;
+function setContactEdge(px) {
+  // The bar's fill is built from this, so it is written on the ROOT and guarded
+  // like the rest: every scroll frame, and it repaints a backdrop-filtered layer.
+  if (px === lastContactEdge) return;
+  lastContactEdge = px;
+  document.documentElement.style.setProperty('--contact-edge', px + 'px');
+}
+let lastBarFill = '';
+function setBarFill(css) {
+  if (css === lastBarFill) return;
+  lastBarFill = css;
+  const root = document.documentElement.style;
+  if (css) root.setProperty('--bar-fill', css);
+  // Removing it (rather than setting a flat value) is what restores hero.css's
+  // own fallback verbatim — the pre-2026-09 bar, exactly.
+  else root.removeProperty('--bar-fill');
+}
+// ABOUT'S PARALLAX (2026-09). Contact's peek is anchored to a panel ARRIVING;
+// About has no arriving edge — it is cream on cream and it is reached from both
+// directions — so the anchor is its own resting position instead.
+//
+// ⚠️ THE OFFSET FLIPS SIGN, and that is what makes one rule serve both
+// directions. Scrolling down, About sits below centre and its content lags
+// DOWNWARD; scrolling up from Contact it sits above centre and lags UPWARD.
+// Both settle to 0 as it centres, so there is no direction term anywhere — the
+// same property that made Contact's peek symmetric.
+//
+// ⚠️ SMOOTHSTEP, NOT CONTACT'S CUBIC — the geometry is different, so the curve
+// is too, and pretending they match would be wrong. Contact's window is built so
+// its EXTREME coincides with the copy's first sight, which is exactly where an
+// ease-out should be fastest. About's extremes are where it is off-screen, so a
+// cubic spends the motion in the wrong place: measured at cap 60, it gives 7.5px
+// at half the span where smoothstep gives 30, and it sat pinned at the cap for
+// more than half the traverse.
+// Smoothstep is also flat at BOTH ends, so it eases into rest AND into the
+// clamp; a cubic reaches the cap at full slope and kinks there.
+// ⚠️ `max` IS BOUNDED BY THE SECTION'S OWN PADDING (--gap-section, 96px). The
+// transform moves the CONTENT while the section's box stays put, so the content
+// eats into its own padding: at +60 About's copy sits 36px above Contact's top
+// instead of 96, and at -60 its heading sits 36px below Work instead of 96. Take
+// this past 96 and the content crosses into a neighbouring section. 60 leaves
+// 36px of margin at both seams — re-check both if --gap-section ever changes.
+const ABOUT_PEEK = {
+  max: 60,       // lag while About is travelling
+  span: 0.5,     // as a fraction of the viewport
+  // ⚠️ PUSH TOWARD THE LEDGE as Contact arrives — About's copy leans INTO the
+  // dissolve instead of lifting away from it, which is what tightens that seam.
+  // Bounded by contrast, and there is room: the copy lands on the ledge's first
+  // third, where black measures 11.2:1 at 40px (20.4:1 on bare cream, and still
+  // 9.0:1 at 48). The binding constraint is taste, not legibility.
+  push: 40,
+};
+
+let lastAboutPeek = -1;
+function setAboutPeek(px) {
+  if (px === lastAboutPeek) return;
+  lastAboutPeek = px;
+  document.documentElement.style.setProperty('--about-peek', px + 'px');
+}
+
+// Blended scroll direction for the peek's sign: -1 down, +1 up. Moves by the
+// fraction of CONTACT.peek.flipOver actually scrolled, so a reversal eases
+// across a quarter-screen of the reader's own travel rather than snapping.
+let peekDir = -1;
+let peekLastY = null;
+function updatePeekDir() {
+  const y = window.scrollY;
+  if (peekLastY === null) { peekLastY = y; return; }
+  const delta = y - peekLastY;
+  peekLastY = y;
+  if (delta === 0) return;
+  const target = delta > 0 ? -1 : 1;
+  const step = Math.abs(delta) / CONTACT.peek.flipOver;
+  peekDir += Math.max(-step, Math.min(step, target - peekDir));
+  peekDir = Math.max(-1, Math.min(1, peekDir));
+}
+
+let lastLedgeLift = -1;
+function setLedgeLift(px) {
+  if (px === lastLedgeLift) return;
+  lastLedgeLift = px;
+  document.documentElement.style.setProperty('--contact-ledge-lift', px + 'px');
+}
+
+let lastContactPeek = -1;
+function setContactPeek(px) {
+  if (px === lastContactPeek) return;
+  lastContactPeek = px;
+  document.documentElement.style.setProperty('--contact-peek', px + 'px');
+}
+
+// The frost's alpha at a given y inside the bar's ::before box.
+function contactFrostAt(y) {
+  const f = CONTACT.frost;
+  if (y >= f[f.length - 1][0]) return 0;
+  for (let i = 1; i < f.length; i++) {
+    if (y <= f[i][0]) {
+      const [y0, a0] = f[i - 1], [y1, a1] = f[i];
+      return a0 + (a1 - a0) * (y - y0) / (y1 - y0);
+    }
+  }
+  return 0;
+}
+
+// THE BAR PAINTS CONTACT'S OWN RAMP, REPAIRED FOR THE FROST BENEATH IT.
+//
+// The ::before composites [accent over frost] over the page, and the page here
+// already carries the ledge. For the result to EQUAL the page we need the
+// layer's colour to equal the page's, which solves to
+//     a = r*f / (1 - r + r*f)
+// with r the ledge's alpha at that y and f the frost's. Painting a = r instead
+// double-coats the bleed (63 code values over-blue); confining a = r to the
+// bar's own height leaves the frost bleeding uncovered (a 186-value cliff at
+// the bar's edge). This is exact — measured deviation 0 at every position.
+//
+// ⚠️ Rebuilt per frame because r moves with scroll, and it cannot be a static
+// CSS gradient: the alphas depend non-linearly on the edge's position, and
+// calc() cannot express that. It is one property write, guarded, and it is only
+// ever built while Contact is within a ledge of the bar.
+// LAYOUT-ONLY, like measureFieldTuck: these three are constants between resizes,
+// and updateScrollEffects runs every scroll frame. --contact-ledge needs a
+// getComputedStyle and the resting edge needs scrollHeight, both of which force
+// layout — neither belongs in the hot path.
+// WHERE BLACK AND WHITE ARE EQUALLY LEGIBLE on accent-over-cream. Black and
+// white cross where (L+.05)/.05 == 1.05/(L+.05), i.e. L = sqrt(1.05*0.05)-0.05
+// = 0.1791; on this ramp that is alpha 0.86, where BOTH measure 4.58:1 and both
+// clear AA. Derived, not tuned — re-derive if --color-accent or --color-bg move.
+const DARK_TEXT_ALPHA = 0.86;
+
+let contactLedge = 0;
+let contactRestEdge = 0;
+let contactAccentRGB = '74, 69, 255';
+let contactGlyphMid = 32;
+let contactCopyOffset = 0;
+function measureContactArrival() {
+  // ⚠️ PUBLISH THE ROOM FIRST, THEN READ THE LEDGE — --contact-ledge clamps
+  // against --contact-gap, so reading it before this is written gets the
+  // fallback rather than the measured answer.
+  //
+  // THE ROOM IS THE DISTANCE FROM THE PRECEDING SECTION'S CONTENT TO CONTACT'S
+  // TOP EDGE, and the ledge can never exceed it. The ledge paints OVER the
+  // section above (Contact is positioned, so its pseudo-elements sit above a
+  // non-positioned sibling), so every pixel it overshoots is a pixel of someone
+  // else's content washed blue. Shipped at a flat 220px against a 96px room, it
+  // ran 124px into About and tinted the photo and the last lines of the copy.
+  // Same rule and same failure mode as the hero field's --field-gap.
+  if (contactSection) {
+    const pageTop = (el) => { let y = 0; for (let n = el; n; n = n.offsetParent) y += n.offsetTop; return y; };
+    const prev = contactSection.previousElementSibling;
+    // offsets, NOT getBoundingClientRect: the blocks above carry the reveal
+    // system's translateY while this runs, and a rect would report mid-flight.
+    // Same rule as measureFieldTuck.
+    const last = prev && (prev.lastElementChild || prev);
+    if (last) {
+      const room = pageTop(contactSection) - (pageTop(last) + last.offsetHeight);
+      if (room > 0) document.documentElement.style.setProperty('--contact-gap', Math.round(room) + 'px');
+    }
+  }
+
+  const cs = getComputedStyle(document.documentElement);
+  contactAccentRGB = cs.getPropertyValue('--color-accent-rgb').trim() || '74, 69, 255';
+
+  // ⚠️ READ THE LEDGE'S PAINTED HEIGHT, NOT THE TOKEN. --contact-ledge is a
+  // clamp(), and an unregistered custom property computes to its TOKEN STREAM,
+  // not to a length — getPropertyValue returns the literal string
+  // "clamp(90px, 96px, 300px)" and parseFloat gives NaN. That fails silently and
+  // expensively: contactLedge would be 0, so buildBarFill would never run and
+  // the bar would drop back to the flat tint, quietly restoring the 21% step
+  // this whole change exists to remove, while the ledge itself still looked
+  // right. The pseudo-element's own height IS the resolved value, and it is also
+  // the thing the bar has to match — so this cannot disagree with what paints.
+  contactLedge = contactSection
+    ? parseFloat(getComputedStyle(contactSection, '::before').height) || 0
+    : 0;
+
+  // HOW FAR THE COPY SITS BELOW THE PANEL'S TOP EDGE. The peek's window is
+  // anchored to THIS, not to the panel's edge — see the note at its call site.
+  // offsets, not getBoundingClientRect: .contact-inner carries the peek's own
+  // transform, and a rect would feed the output back into the input.
+  contactCopyOffset = 0;
+  if (contactSection) {
+    const copy = contactSection.querySelector('.contact-email');
+    if (copy) {
+      const pageTop = (el) => { let y = 0; for (let n = el; n; n = n.offsetParent) y += n.offsetTop; return y; };
+      contactCopyOffset = Math.max(0, pageTop(copy) - pageTop(contactSection));
+    }
+  }
+  // The glyphs' own mid-line inside the bar. The bar is a GRADIENT now, so
+  // "what the labels sit on" is a position, not the bar-wide average.
+  if (introBar && introBar.offsetParent) {
+    const link = introBar.querySelector('.intro-bar-links a');
+    if (link) {
+      const br = introBar.getBoundingClientRect(), lr = link.getBoundingClientRect();
+      contactGlyphMid = (lr.top + lr.bottom) / 2 - br.top;
+    }
+  }
+  if (!contactSection) return;
+  // Where the panel's top edge comes to rest once the page is scrolled out.
+  const docTop = contactSection.getBoundingClientRect().top + window.scrollY;
+  contactRestEdge = Math.max(0,
+    docTop - (document.documentElement.scrollHeight - window.innerHeight));
+}
+
+// Contact's fill alpha at a viewport y — the ledge's smoothstep above the
+// panel, solid below it. Shared by the bar's fill and by blueBehindBar.
+function contactAlphaAt(y, edge, ledge) {
+  if (y >= edge) return 1;
+  if (ledge <= 0 || y <= edge - ledge) return 0;
+  const t = (y - (edge - ledge)) / ledge;
+  return t * t * (3 - 2 * t);
+}
+
+// HOW MUCH BLUE IS ACTUALLY BEHIND THE BAR — the mean of the above over the
+// bar's own band. See the note at its call site for why this is the shipped
+// rule rather than a new one.
+function blueBehindBar(edge, ledge, barBand) {
+  if (barBand <= 0) return 0;
+  if (ledge <= 0) {
+    // The hard-edge case, in closed form — identical to the expression this
+    // generalises, with none of the sampling error.
+    return Math.max(0, Math.min(1, (barBand - edge) / barBand));
+  }
+  const SAMPLES = 32;
+  let sum = 0;
+  for (let i = 0; i < SAMPLES; i++) {
+    sum += contactAlphaAt((i + 0.5) / SAMPLES * barBand, edge, ledge);
+  }
+  return sum / SAMPLES;
+}
+
+function buildBarFill(edge, ledge) {
+  const ACC = contactAccentRGB;
+  const ys = new Set([69, 90, 112]);              // the frost bends at each
+  for (let i = 0; i <= 20; i++) ys.add(i / 20 * CONTACT.fillDepth);
+  const stops = [...ys].sort((a, b) => a - b).map(y => {
+    const r = contactAlphaAt(y, edge, ledge);
+    const f = contactFrostAt(y);
+    const d = 1 - r + r * f;
+    const a = d <= 0 ? 1 : (r * f) / d;
+    return `rgba(${ACC}, ${a.toFixed(4)}) ${y.toFixed(1)}px`;
+  });
+  return `linear-gradient(to bottom, ${stops.join(', ')})`;
+}
+
 const contactSection = darkPanel;
+const aboutSection = document.getElementById('about');
 const intro = document.querySelector('.intro');
 const introBar = document.querySelector('.intro-bar'); // landing nav bar (homepage only)
 const pageField = document.querySelector('img.page-field');
@@ -2225,6 +2550,44 @@ function updateScrollEffects() {
   // homepage tier) and the docked .intro-bar (the homepage's own nav on
   // desktop, where the header is display:none). Whichever is hidden reports
   // offsetHeight 0, so the max below reads the visible one.
+  updatePeekDir();
+
+  // About's parallax. Guarded: project pages have no #about, so nothing is ever
+  // published and the CSS fallback (0px) leaves them exactly as they were.
+  if (aboutSection) {
+    const vh = window.innerHeight;
+    const r = aboutSection.getBoundingClientRect();
+    // Distance of the section's centre from the viewport's — 0 where it settles,
+    // signed, so the lag flips with the approach direction on its own.
+    const d = (r.top + r.height / 2) - vh / 2;
+    const span = Math.max(1, vh * ABOUT_PEEK.span);
+    const n = Math.min(1, Math.abs(d) / span);
+
+    let peek = Math.sign(d) * ABOUT_PEEK.max * n * n * (3 - 2 * n);
+
+    // ⚠️ AS CONTACT ARRIVES, ABOUT'S COPY IS PUSHED TOWARD THE LEDGE rather than
+    // left to its own lag. Its lag is NEGATIVE while it leaves upward — exactly
+    // while Contact approaches — which lifts the copy AWAY from the panel and
+    // opens bare cream above the dissolve. Measured before this: the visible gap
+    // went 96 -> 156, widened by the whole peek, and the ledge cannot absorb it
+    // because it is sized from OFFSETS (transform-blind) and stays 96 while the
+    // gap grows.
+    //
+    // Tapering the lag to zero fixes that but only gets back to 96. Blending it
+    // to a positive PUSH goes further and closes the seam: the copy leans into
+    // the top of the dissolve, where the ramp's alpha is still low enough to
+    // cost it nothing (11.2:1 at the shipped 40px).
+    //
+    // The blend runs on Contact's own approach, so it is symmetric: scrolling up
+    // to About, Contact recedes and the push relaxes back into the lag.
+    if (contactSection) {
+      const ce = contactSection.getBoundingClientRect().top;
+      const near = Math.max(0, Math.min(1, (vh - ce) / (vh * 0.75)));
+      peek = peek * (1 - near) + ABOUT_PEEK.push * near;
+    }
+    setAboutPeek(Math.round(peek));
+  }
+
   const stickyBars = [siteHeader, introBar].filter(Boolean);
   if (contactSection && stickyBars.length) {
     const contactRect = contactSection.getBoundingClientRect();
@@ -2234,6 +2597,8 @@ function updateScrollEffects() {
       stickyBars.forEach(bar => bar.classList.remove('is-over-dark'));
       setBarBleed(BAR_BLEED);
       setDarkMix(0);
+      setBarFill('');
+      setContactPeek(0);
     } else {
       const scrollAnchorTop = parseFloat(getComputedStyle(html).scrollPaddingTop) || 0;
       const barHeight = Math.max(...stickyBars.map(bar => bar.offsetHeight));
@@ -2267,11 +2632,57 @@ function updateScrollEffects() {
       // blue at DARK_FULL_AT of coverage puts the whole change in the first ~38px
       // of the 64px pass, so it is finished well before the section settles, and
       // the label switch lands on a strip that is dark enough to carry white.
-      const covered = (invertLine - contactRect.top) / invertLine;
+      // ⚠️ THE SAME RULE, GENERALISED FROM A HARD EDGE TO A SOFT ONE. The line
+      // this replaces read (invertLine - contact.top) / invertLine: the fraction
+      // of the bar's band the panel covers. That IS the mean alpha of Contact's
+      // fill over the band — but only because a hard edge is alpha 1 below the
+      // edge and 0 above it. With a ledge the same sentence still holds; the
+      // integral just has a ramp in it.
+      //
+      // So the bar starts tinting early NOT because a start point was picked,
+      // but because there is genuinely blue behind it — which is exactly what
+      // the shipped rule was written to guarantee. A soft edge satisfies it
+      // rather than breaking it.
+      //
+      // ⚠️ With contactLedge 0 this returns the old expression EXACTLY (verified
+      // to zero delta across the whole approach), so project pages, no-JS and
+      // any future hard-edged panel are untouched.
+      // ---- LEDGE GEOMETRY, hoisted: the coverage rule and the label flip both
+      // read the LIVE ledge, so it has to exist before them. ----
+      const ledge = contactLedge;                    // measured, not read per frame
+      const edge = contactRect.top;
+      // The ledge's live height, SHORTENED as the reader scrolls up so its top
+      // descends and the blue sits lower. Everything downstream takes this rather
+      // than the token, or the bar's fill stops matching the ramp it is a window
+      // onto and the seam comes back.
+      const ledgeShorten = Math.max(0, peekDir) * CONTACT.peek.ledgeShorten;
+      const liveLedge = Math.max(1, ledge - ledgeShorten);
+      setLedgeLift(Math.round(ledgeShorten));
+      setContactEdge(Math.round(edge * 100) / 100);
+
+      const covered = blueBehindBar(contactRect.top, liveLedge, invertLine);
       const mix = Math.max(0, Math.min(1, covered / DARK_FULL_AT));
       setDarkMix(mix);
-      // The labels switch once, near the end. See DARK_TEXT_AT.
-      stickyBars.forEach(bar => bar.classList.toggle('is-over-dark', mix >= DARK_TEXT_AT));
+      // THE LABELS SWITCH ONCE, AND ON WHAT THEY ACTUALLY SIT ON.
+      //
+      // ⚠️ `mix >= DARK_TEXT_AT` IS WRONG ONCE THERE IS A LEDGE, and it fails in
+      // the dangerous direction. 0.85 was calibrated when --dark-mix meant "the
+      // fraction of the bar covered by OPAQUE blue"; it now means "the mean alpha
+      // of a soft ramp", which is a different quantity. Measured on the shipped
+      // ledge, the flip landed at Contact's edge 140 where the backdrop under the
+      // glyphs is rgb(160,158,252) and WHITE READS 2.40:1 — well under AA, for
+      // ~75px of scroll.
+      //
+      // The bar is a gradient now, so the honest test is the alpha at the GLYPHS'
+      // own mid-line against the measured black/white crossover. At that point
+      // both are 4.58:1. No proxy, and nothing to re-tune if the ramp changes.
+      //
+      // The old test is kept for a hard edge (--contact-ledge: 0), where the
+      // gradient does not exist and 0.85 is still the measured answer.
+      const flipToWhite = liveLedge > 0
+        ? contactAlphaAt(contactGlyphMid, contactRect.top, liveLedge) >= DARK_TEXT_ALPHA
+        : mix >= DARK_TEXT_AT;
+      stickyBars.forEach(bar => bar.classList.toggle('is-over-dark', flipToWhite));
 
       // CLIP THE FROST TO CONTACT'S TOP EDGE. The bar's glass bleeds BAR_BLEED
       // past its own bottom so it melts into the page instead of ending on a
@@ -2282,6 +2693,88 @@ function updateScrollEffects() {
       // full bleed until the panel is within reach, then shrinking to 0 as the
       // two meet, so they butt together as solid strips.
       setBarBleed(Math.max(0, Math.min(BAR_BLEED, Math.round(gap))));
+
+      // ---- THE LEDGE, THE BAR'S FILL, AND THE PEEK ----------------------
+      // Build the bar's fill only while the ledge is anywhere near it. Outside
+      // that the flat fallback in hero.css is already correct — cream above,
+      // solid accent below — so this costs nothing for most of the page.
+      // ⚠️ AND ONLY WHERE THE BAR EXISTS. At ≤680 responsive.css sets
+      // .intro-bar { display: none } and the mobile header carries the nav, so
+      // there is no bar to paint a ramp into. The ledge itself still renders —
+      // it is the panel's own edge, not the bar's.
+      const barLive = introBar && introBar.offsetParent !== null;
+      if (barLive && ledge > 0 && edge > 0 && edge - liveLedge < barHeight + BAR_BLEED + 2) {
+        setBarFill(buildBarFill(edge, liveLedge));
+      } else {
+        setBarFill('');
+      }
+
+      // THE PARALLAX PEEK. The copy is offset downward and the offset shrinks as
+      // the panel rises, so it travels UP faster than the panel and is revealed
+      // into place. Same cubic ease-out as the hero's --field-scroll tuck — one
+      // curve for both parallaxes on the site.
+      //
+      // ⚠️ IT IS EXACTLY 0 AT REST, which is the design constraint: the settled
+      // composition has to be byte-identical to before this existed.
+      //
+      // The window runs from the panel entering the fold down to `endAt` of the
+      // way to the scroll floor. ⚠️ The floor is MEASURED (the panel's resting
+      // edge), not assumed to be 0: on a page short enough that Contact never
+      // reaches the top, a hard-coded 0 would leave the copy permanently offset.
+      const vh = window.innerHeight;
+      const meetEdge = ledge + barHeight;
+      const restEdge = contactRestEdge;              // measured, not read per frame
+      // The nav line, floored at the panel's own resting edge so a short page
+      // cannot ask for a position it can never reach.
+      const endEdge = Math.max(restEdge, barHeight);
+
+      // ⚠️ THE WINDOW IS ANCHORED TO THE COPY, NOT TO THE PANEL'S EDGE, and that
+      // is the whole reason the peek is visible at all. The copy sits
+      // contactCopyOffset (~327px) BELOW the panel's top, so starting the window
+      // when the EDGE crosses the fold starts it while the copy is still a third
+      // of a screen below it. Measured at 900 tall: 58% of the peek was spent
+      // before the heading appeared (80 -> 34 with it still off-screen), and it
+      // was down to 20 by the time it crossed. Scrolling down you saw the last
+      // 20px; scrolling up you watched the copy pushed away, which reads clearly
+      // — a real asymmetry in VISIBILITY from a function with no direction term.
+      //
+      // Starting where the COPY meets the fold puts the whole travel on screen.
+      // The peak is subtracted too: the copy is offset downward by it, so the
+      // anchor has to account for its own displacement or the copy still starts
+      // below the fold.
+      // +max, not -max: the copy is pulled UP by the peek now, so it reaches the
+      // fold EARLIER than its resting offset would put it.
+      const startEdge = Math.max(endEdge + 1, vh - contactCopyOffset + CONTACT.peek.max);
+      const span = Math.max(1, startEdge - endEdge);
+      const travel = Math.min(Math.max(0, edge - endEdge), span);
+      const peakPeek = Math.min(CONTACT.peek.max, CONTACT.peek.rate * span);
+      // ⚠️ SMOOTHSTEP, NOT THE HERO TUCK'S CUBIC — and the two requirements are
+      // genuinely incompatible, so this is a trade rather than a correction. A
+      // cubic ease-out is FLAT by two-thirds of its window by construction: it
+      // was measured at 80 -> 19 over the first third and ~0 for the rest, so
+      // "keep moving until the nav meets the section" cannot be expressed with
+      // it at any window length. Smoothstep spends the travel evenly across the
+      // middle and is still flat at BOTH ends, so it leaves the hold and lands
+      // at the dock without a corner.
+      // The cost is that the peek no longer shares a curve with --field-scroll;
+      // the hero tuck's front-loading is right there because its window starts
+      // at the reader's first gesture, and wrong here for the same reason.
+      // ⚠️ THE OFFSET IS NEGATIVE — the copy is pulled UP during the approach and
+      // settles DOWN into its composed position. It lagged downward until 2026-09,
+      // which was backwards for this section: the copy already sits 232px below
+      // the panel's top at rest (64 nav + 96 padding + 72 centring slack), so a
+      // downward lag ADDED to the emptiest part of the arrival. Measured at
+      // Contact's edge 300 the gap above the copy was 266 — 232 of composition
+      // plus 34 of peek working against it.
+      // ⚠️ IT STILL REVEALS UPWARD. The panel rises faster than the copy settles,
+      // so the copy's net screen travel is still upward (452 -> 296 at cap 80);
+      // only the gap above it closes instead of opening.
+      // The resting value is 0 either way, so the composed layout is untouched.
+      const x = travel / span;                        // 1 at first sight, 0 at the nav line
+      const magnitude = peakPeek * x * x * (3 - 2 * x);
+      // -1 scrolling down (lag, gap closes), +1 scrolling up (lead, drops away).
+      // Magnitude is 0 at the resting position, so the sign can never snap there.
+      setContactPeek(Math.round(magnitude * peekDir));
     }
   }
 
@@ -2311,7 +2804,12 @@ window.addEventListener('scroll', onScroll, { passive: true });
 // field's own height follows its WIDTH. Re-measure, then republish immediately:
 // the ramp's slope has changed under the reader's current scroll position.
 measureFieldTuck();
-window.addEventListener('resize', () => { measureFieldTuck(); updateScrollEffects(); });
+measureContactArrival();
+window.addEventListener('resize', () => {
+  measureFieldTuck();
+  measureContactArrival();
+  updateScrollEffects();
+});
 updateScrollEffects();
 
 // ============================================================

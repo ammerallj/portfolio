@@ -775,8 +775,20 @@ html.is-field-live .page-field-grain { opacity: 0.15; }
      bleed is now variable. As it shrank, 42%/55%/68% marched up INTO the 64px
      bar and started fading the frost out behind the nav items themselves. In px
      the frost keeps its shape and the shrinking box simply clips its tail, which
-     is the whole intent. These four are the old percentages resolved at the full
-     164px box (64 bar + 100 bleed), so the rendering is unchanged there. */
+     is the whole intent.
+
+     ⚠️ THE FADE NOW STARTS AT THE LOWEST NAV ITEM (50px — the "Say hello" pill's
+     bottom, measured; the wordmark ends at 47 and the links at 44) AND RUNS TO 0
+     ACROSS THE WHOLE REMAINING BOX (166px at full bleed). It used to hold ~full
+     to 69px — 19px BELOW the type — and then drop 0.92 → 0 in 43px, which is
+     what read as the cream ending on a line: full strength level with nothing,
+     then a short steep ramp.
+
+     ⚠️ AND IT IS A SMOOTHSTEP IN 17 STOPS, not the old four. Those four were
+     piecewise LINEAR, so the profile had slope corners at 69 and 90 and the eye
+     reads a slope discontinuity as an edge — the same finding as the Contact
+     ledge's ramp and the mobile header's scrim. A smoothstep has zero slope at
+     both ends. */
   /* TWO layers, and the ORDER IS THE POINT. The first is the Contact panel's
      blue at a variable alpha — --dark-mix, published by updateScrollEffects —
      painted over the cream frost beneath it in the SAME element, so it covers it.
@@ -791,15 +803,54 @@ html.is-field-live .page-field-grain { opacity: 0.15; }
      labels on a cream bar. Computed style is no test for this: the
      background-color was correctly rgb(74, 69, 255) the whole time, it was just
      painted over. */
+  /* ⚠️ THE ACCENT LAYER IS NO LONGER A FLAT TINT — it is Contact's own ledge
+     ramp, re-expressed in this box's coordinates, published as --bar-fill by
+     updateScrollEffects. The bar is sticky at top:0, so this box's top IS
+     viewport y=0, which is the same space the ledge paints in; the bar becomes
+     a WINDOW onto the ramp rather than an average of it. Measured: the step at
+     the bar's bottom edge goes 21.3% -> 0% at every scroll position.
+
+     ⚠️ AND IT IS NOT A COPY OF THE RAMP — it is the REPAIR for what the frost
+     below hides, which is a different function. Two wrong versions were
+     measured first:
+       · accent = the ramp, painted across the whole box. The ledge is painting
+         the same ramp BEHIND the frost, so the bleed got two coats — up to 63
+         code values over-blue.
+       · accent = the ramp, confined to the bar's own height. Kills the second
+         coat, but the cream frost still bleeds 112px past the bar with no blue
+         over it: a 186-code-value CLIFF at the bar's bottom edge, far worse
+         than the bulge it replaced.
+     The fill's alpha is therefore a = r*f / (1 - r + r*f), where f is the frost
+     alpha at that y and r the ledge's ramp there. It reduces correctly at every
+     corner — no frost (f=0) -> a=0, nothing to repair; opaque frost (f=1) ->
+     a=r; full blue (r=1) -> a=1. Measured deviation from the page: 0 everywhere.
+
+     ⚠️ THE FALLBACK IS THE OLD FLAT FILL AND MUST STAY EXACT. Project pages have
+     no #contact, so --bar-fill is never published there and this renders
+     byte-identically to before. Same for no-JS on the homepage. */
   background-image:
-    linear-gradient(to bottom,
+    var(--bar-fill, linear-gradient(to bottom,
       rgba(var(--color-accent-rgb), var(--dark-mix, 0)) 0,
-      rgba(var(--color-accent-rgb), var(--dark-mix, 0)) 100%),
+      rgba(var(--color-accent-rgb), var(--dark-mix, 0)) 100%)),
     linear-gradient(to bottom,
       rgba(251, 252, 248, 0.95) 0,
-      rgba(251, 252, 248, 0.92) 69px,
-      rgba(251, 252, 248, 0.4) 90px,
-      rgba(251, 252, 248, 0) 112px);
+      rgba(251, 252, 248, 0.9500) 50.0px,
+      rgba(251, 252, 248, 0.9393) 57.2px,
+      rgba(251, 252, 248, 0.9092) 64.5px,
+      rgba(251, 252, 248, 0.8623) 71.8px,
+      rgba(251, 252, 248, 0.8016) 79.0px,
+      rgba(251, 252, 248, 0.7297) 86.2px,
+      rgba(251, 252, 248, 0.6494) 93.5px,
+      rgba(251, 252, 248, 0.5636) 100.8px,
+      rgba(251, 252, 248, 0.4750) 108.0px,
+      rgba(251, 252, 248, 0.3864) 115.2px,
+      rgba(251, 252, 248, 0.3006) 122.5px,
+      rgba(251, 252, 248, 0.2203) 129.8px,
+      rgba(251, 252, 248, 0.1484) 137.0px,
+      rgba(251, 252, 248, 0.0877) 144.2px,
+      rgba(251, 252, 248, 0.0408) 151.5px,
+      rgba(251, 252, 248, 0.0107) 158.8px,
+      rgba(251, 252, 248, 0.0000) 166.0px);
   /* THE FROST FADES OUT AS THE STRIP GOES SOLID, and it has to.
      A blur samples a radius around each pixel, so at the element's bottom edge it
      reaches ABOVE Contact's top and pulls cream down into the blue — which is
@@ -843,14 +894,30 @@ html.is-field-live .page-field-grain { opacity: 0.15; }
   bottom: calc(min(40px, var(--bar-bleed, 100px)) * -1);
   z-index: -1;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='navgrain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.55' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23navgrain)' opacity='0.3'/%3E%3C/svg%3E");
-  -webkit-mask-image: linear-gradient(to bottom, #000 0, #000 calc(100% - min(40px, var(--bar-bleed, 100px))), transparent 100%);
-  mask-image: linear-gradient(to bottom, #000 0, #000 calc(100% - min(40px, var(--bar-bleed, 100px))), transparent 100%);
+  /* TWO MASK LAYERS, INTERSECTED, and the split is the point. The first is the
+     bleed tail (unchanged). The second carries the --dark-mix thinning, which
+     used to live on `opacity` alongside the docking state.
+     ⚠️ THOSE TWO THINGS WANT OPPOSITE TRANSITIONS and could not both have one:
+     --dark-mix is scroll-linked, so it must not be eased (a long transition made
+     the grain trail the page by a third of a second), while the docking fade is
+     a state change that SHOULD ease — and at 0.15s it snapped, out of step with
+     ::before's 0.35s glass. On a mask layer the thinning is untransitioned by
+     construction, which frees `opacity` to be the docking fade alone. */
+  -webkit-mask-image:
+    linear-gradient(to bottom, #000 0, #000 calc(100% - min(40px, var(--bar-bleed, 100px))), transparent 100%),
+    linear-gradient(rgba(0, 0, 0, calc(1 - var(--dark-mix, 0))), rgba(0, 0, 0, calc(1 - var(--dark-mix, 0))));
+  mask-image:
+    linear-gradient(to bottom, #000 0, #000 calc(100% - min(40px, var(--bar-bleed, 100px))), transparent 100%),
+    linear-gradient(rgba(0, 0, 0, calc(1 - var(--dark-mix, 0))), rgba(0, 0, 0, calc(1 - var(--dark-mix, 0))));
+  /* webkit spells `intersect` as `source-in`; both are needed. */
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
   opacity: 0;
   /* 0.15s, not 0.35: this opacity is now calc(1 - var(--dark-mix)), which is
      driven by scroll position, and a long transition made the grain trail the
      page by a third of a second. Short enough to track the scroll, and still
      faster than ::before's docking fade — which is the grain's job anyway. */
-  transition: opacity 0.15s ease;
+  transition: opacity 0.35s ease;
   pointer-events: none;
 }
 
@@ -858,7 +925,8 @@ html.is-field-live .page-field-grain { opacity: 0.15; }
    by the time the strip is the panel's colour. Replaces the old binary
    `is-over-dark::after { opacity: 0 }`. */
 .intro-bar.is-docked::after {
-  opacity: calc(1 - var(--dark-mix, 0));
+  /* The DOCKING state only. The --dark-mix thinning is a mask layer now. */
+  opacity: 1;
 }
 
 /* ---- Over the blue Contact panel: the bar inverts ----

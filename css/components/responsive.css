@@ -476,10 +476,13 @@
     left: 0;
     right: 0;
   }
-  html.is-at-page-top .site-header:not(.is-over-dark) {
-    background-color: transparent;
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
+  /* ⚠️ TARGETS ::before, NOT THE ELEMENT. The frost moved there so it could bleed
+     to transparency (header.css); killing the element's own background here
+     would now do nothing, and the bar would stay frosted at the top of the page
+     — the exact thing this rule exists to prevent. Opacity rather than
+     background-color: it takes the blur with it. */
+  html.is-at-page-top .site-header:not(.is-over-dark)::before {
+    opacity: 0;
   }
 
   /* The homepage header comes BACK here — it carries the mobile nav

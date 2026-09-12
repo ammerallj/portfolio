@@ -6,14 +6,79 @@
   position: sticky;
   top: 0;
   z-index: 100;
-  /* Frosted glass (Figma node 181:1210): a translucent tint of the site bg
-     (--color-bg #FBFCF8) with a 4px backdrop blur, so it stays seamless with the
-     page at the top and softens content scrolling under the sticky bar. */
+  padding-block: var(--space-sm);
+  transition: transform 0.4s ease;
+  /* The frost lives on ::before so it can bleed past this box — see below. */
+  isolation: isolate;
+}
+
+/* ⚠️ THE FROST BLEEDS TO FULL TRANSPARENCY (2026-09). It used to be a flat
+   `background-color: rgba(251,252,248,0.9)` plus `blur(4px)` ON THE ELEMENT,
+   which means it ended on a hard line at the bar's bottom edge — the landing's
+   own .intro-bar got the bleed treatment and this one never did.
+
+   Same construction as .intro-bar::before: a layer that extends --header-bleed
+   past the box and is masked out across it, so the cream AND the blur fade
+   together. A blur that stops abruptly is as visible as a fill that does.
+
+   ⚠️ THE MASK IS A SMOOTHSTEP, NOT THE TWO-STOP LINEAR the intro-bar uses. That
+   bar can afford two stops because its cream is ALSO a shaped gradient, so the
+   two compose; here the fill is flat and the mask is the only thing shaping the
+   falloff. A straight alpha line has a slope discontinuity at each end and the
+   eye reads those corners as edges — the same finding as the ledge's ramp. */
+.site-header::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  bottom: calc(var(--header-bleed) * -1);
+  z-index: -1;
   background-color: rgba(251, 252, 248, 0.9);
   -webkit-backdrop-filter: blur(4px);
   backdrop-filter: blur(4px);
-  padding-block: var(--space-sm);
-  transition: background-color 0.35s ease, transform 0.4s ease;
+  /* ⚠️ THE SOLID RUN ENDS AT THE NAV ITEM, NOT AT THE HEADER'S BOX. The box is
+     the wordmark plus --space-sm of padding top and bottom, so masking from
+     `100% - --header-bleed` held the cream at full strength for 16px BELOW the
+     wordmark before starting to fade — the cream then appeared to end on a line
+     level with nothing, which is what still read as a demarcation after the
+     bleed was added. The ramp starts on the type's own bottom edge instead, so
+     it spans --header-bleed + --space-sm. */
+  -webkit-mask-image: linear-gradient(to bottom,
+    rgba(0, 0, 0, 1.0000) calc(100% - (var(--header-bleed) + var(--space-sm)) + ((var(--header-bleed) + var(--space-sm)) * 0.0000)),
+    rgba(0, 0, 0, 0.9888) calc(100% - (var(--header-bleed) + var(--space-sm)) + ((var(--header-bleed) + var(--space-sm)) * 0.0625)),
+    rgba(0, 0, 0, 0.9570) calc(100% - (var(--header-bleed) + var(--space-sm)) + ((var(--header-bleed) + var(--space-sm)) * 0.1250)),
+    rgba(0, 0, 0, 0.9077) calc(100% - (var(--header-bleed) + var(--space-sm)) + ((var(--header-bleed) + var(--space-sm)) * 0.1875)),
+    rgba(0, 0, 0, 0.8438) calc(100% - (var(--header-bleed) + var(--space-sm)) + ((var(--header-bleed) + var(--space-sm)) * 0.2500)),
+    rgba(0, 0, 0, 0.7681) calc(100% - (var(--header-bleed) + var(--space-sm)) + ((var(--header-bleed) + var(--space-sm)) * 0.3125)),
+    rgba(0, 0, 0, 0.6836) calc(100% - (var(--header-bleed) + var(--space-sm)) + ((var(--header-bleed) + var(--space-sm)) * 0.3750)),
+    rgba(0, 0, 0, 0.5933) calc(100% - (var(--header-bleed) + var(--space-sm)) + ((var(--header-bleed) + var(--space-sm)) * 0.4375)),
+    rgba(0, 0, 0, 0.5000) calc(100% - (var(--header-bleed) + var(--space-sm)) + ((var(--header-bleed) + var(--space-sm)) * 0.5000)),
+    rgba(0, 0, 0, 0.4067) calc(100% - (var(--header-bleed) + var(--space-sm)) + ((var(--header-bleed) + var(--space-sm)) * 0.5625)),
+    rgba(0, 0, 0, 0.3164) calc(100% - (var(--header-bleed) + var(--space-sm)) + ((var(--header-bleed) + var(--space-sm)) * 0.6250)),
+    rgba(0, 0, 0, 0.2319) calc(100% - (var(--header-bleed) + var(--space-sm)) + ((var(--header-bleed) + var(--space-sm)) * 0.6875)),
+    rgba(0, 0, 0, 0.1562) calc(100% - (var(--header-bleed) + var(--space-sm)) + ((var(--header-bleed) + var(--space-sm)) * 0.7500)),
+    rgba(0, 0, 0, 0.0923) calc(100% - (var(--header-bleed) + var(--space-sm)) + ((var(--header-bleed) + var(--space-sm)) * 0.8125)),
+    rgba(0, 0, 0, 0.0430) calc(100% - (var(--header-bleed) + var(--space-sm)) + ((var(--header-bleed) + var(--space-sm)) * 0.8750)),
+    rgba(0, 0, 0, 0.0112) calc(100% - (var(--header-bleed) + var(--space-sm)) + ((var(--header-bleed) + var(--space-sm)) * 0.9375)),
+    rgba(0, 0, 0, 0.0000) calc(100% - (var(--header-bleed) + var(--space-sm)) + ((var(--header-bleed) + var(--space-sm)) * 1.0000)));
+  mask-image: linear-gradient(to bottom,
+    rgba(0, 0, 0, 1.0000) calc(100% - (var(--header-bleed) + var(--space-sm)) + ((var(--header-bleed) + var(--space-sm)) * 0.0000)),
+    rgba(0, 0, 0, 0.9888) calc(100% - (var(--header-bleed) + var(--space-sm)) + ((var(--header-bleed) + var(--space-sm)) * 0.0625)),
+    rgba(0, 0, 0, 0.9570) calc(100% - (var(--header-bleed) + var(--space-sm)) + ((var(--header-bleed) + var(--space-sm)) * 0.1250)),
+    rgba(0, 0, 0, 0.9077) calc(100% - (var(--header-bleed) + var(--space-sm)) + ((var(--header-bleed) + var(--space-sm)) * 0.1875)),
+    rgba(0, 0, 0, 0.8438) calc(100% - (var(--header-bleed) + var(--space-sm)) + ((var(--header-bleed) + var(--space-sm)) * 0.2500)),
+    rgba(0, 0, 0, 0.7681) calc(100% - (var(--header-bleed) + var(--space-sm)) + ((var(--header-bleed) + var(--space-sm)) * 0.3125)),
+    rgba(0, 0, 0, 0.6836) calc(100% - (var(--header-bleed) + var(--space-sm)) + ((var(--header-bleed) + var(--space-sm)) * 0.3750)),
+    rgba(0, 0, 0, 0.5933) calc(100% - (var(--header-bleed) + var(--space-sm)) + ((var(--header-bleed) + var(--space-sm)) * 0.4375)),
+    rgba(0, 0, 0, 0.5000) calc(100% - (var(--header-bleed) + var(--space-sm)) + ((var(--header-bleed) + var(--space-sm)) * 0.5000)),
+    rgba(0, 0, 0, 0.4067) calc(100% - (var(--header-bleed) + var(--space-sm)) + ((var(--header-bleed) + var(--space-sm)) * 0.5625)),
+    rgba(0, 0, 0, 0.3164) calc(100% - (var(--header-bleed) + var(--space-sm)) + ((var(--header-bleed) + var(--space-sm)) * 0.6250)),
+    rgba(0, 0, 0, 0.2319) calc(100% - (var(--header-bleed) + var(--space-sm)) + ((var(--header-bleed) + var(--space-sm)) * 0.6875)),
+    rgba(0, 0, 0, 0.1562) calc(100% - (var(--header-bleed) + var(--space-sm)) + ((var(--header-bleed) + var(--space-sm)) * 0.7500)),
+    rgba(0, 0, 0, 0.0923) calc(100% - (var(--header-bleed) + var(--space-sm)) + ((var(--header-bleed) + var(--space-sm)) * 0.8125)),
+    rgba(0, 0, 0, 0.0430) calc(100% - (var(--header-bleed) + var(--space-sm)) + ((var(--header-bleed) + var(--space-sm)) * 0.8750)),
+    rgba(0, 0, 0, 0.0112) calc(100% - (var(--header-bleed) + var(--space-sm)) + ((var(--header-bleed) + var(--space-sm)) * 0.9375)),
+    rgba(0, 0, 0, 0.0000) calc(100% - (var(--header-bleed) + var(--space-sm)) + ((var(--header-bleed) + var(--space-sm)) * 1.0000)));
+  transition: opacity 0.35s ease, background-color 0.35s ease;
 }
 
 /* On the landing (homepage, identified by its hero) the docking .intro-bar IS
@@ -32,7 +97,9 @@ body:has(.intro) .site-header {
 
 /* Over the blue Contact panel the bar inverts to blue with white text.
    Colors transition (see .site-name / nav link rules) for a smooth fade. */
-.site-header.is-over-dark {
+/* Over the blue panel the frost becomes the panel's own colour. On ::before with
+   the rest of the glass, or it would paint UNDER it and never show. */
+.site-header.is-over-dark::before {
   background-color: var(--color-accent);
 }
 
