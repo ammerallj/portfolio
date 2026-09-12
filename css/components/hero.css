@@ -894,14 +894,30 @@ html.is-field-live .page-field-grain { opacity: 0.15; }
   bottom: calc(min(40px, var(--bar-bleed, 100px)) * -1);
   z-index: -1;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='navgrain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.55' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23navgrain)' opacity='0.3'/%3E%3C/svg%3E");
-  -webkit-mask-image: linear-gradient(to bottom, #000 0, #000 calc(100% - min(40px, var(--bar-bleed, 100px))), transparent 100%);
-  mask-image: linear-gradient(to bottom, #000 0, #000 calc(100% - min(40px, var(--bar-bleed, 100px))), transparent 100%);
+  /* TWO MASK LAYERS, INTERSECTED, and the split is the point. The first is the
+     bleed tail (unchanged). The second carries the --dark-mix thinning, which
+     used to live on `opacity` alongside the docking state.
+     ⚠️ THOSE TWO THINGS WANT OPPOSITE TRANSITIONS and could not both have one:
+     --dark-mix is scroll-linked, so it must not be eased (a long transition made
+     the grain trail the page by a third of a second), while the docking fade is
+     a state change that SHOULD ease — and at 0.15s it snapped, out of step with
+     ::before's 0.35s glass. On a mask layer the thinning is untransitioned by
+     construction, which frees `opacity` to be the docking fade alone. */
+  -webkit-mask-image:
+    linear-gradient(to bottom, #000 0, #000 calc(100% - min(40px, var(--bar-bleed, 100px))), transparent 100%),
+    linear-gradient(rgba(0, 0, 0, calc(1 - var(--dark-mix, 0))), rgba(0, 0, 0, calc(1 - var(--dark-mix, 0))));
+  mask-image:
+    linear-gradient(to bottom, #000 0, #000 calc(100% - min(40px, var(--bar-bleed, 100px))), transparent 100%),
+    linear-gradient(rgba(0, 0, 0, calc(1 - var(--dark-mix, 0))), rgba(0, 0, 0, calc(1 - var(--dark-mix, 0))));
+  /* webkit spells `intersect` as `source-in`; both are needed. */
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
   opacity: 0;
   /* 0.15s, not 0.35: this opacity is now calc(1 - var(--dark-mix)), which is
      driven by scroll position, and a long transition made the grain trail the
      page by a third of a second. Short enough to track the scroll, and still
      faster than ::before's docking fade — which is the grain's job anyway. */
-  transition: opacity 0.15s ease;
+  transition: opacity 0.35s ease;
   pointer-events: none;
 }
 
@@ -909,7 +925,8 @@ html.is-field-live .page-field-grain { opacity: 0.15; }
    by the time the strip is the panel's colour. Replaces the old binary
    `is-over-dark::after { opacity: 0 }`. */
 .intro-bar.is-docked::after {
-  opacity: calc(1 - var(--dark-mix, 0));
+  /* The DOCKING state only. The --dark-mix thinning is a mask layer now. */
+  opacity: 1;
 }
 
 /* ---- Over the blue Contact panel: the bar inverts ----

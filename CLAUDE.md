@@ -973,14 +973,22 @@ transition.
   where the bar is over Contact without having docked.
 - Grain thins on the same curve (`opacity: calc(1 - var(--dark-mix))`), replacing
   the old binary `is-over-dark::after { opacity: 0 }`.
-- ⚠️ **NOTHING SCROLL-LINKED MAY CARRY A TRANSITION — with ONE deliberate,
-  shipped exception, so read this before "fixing" it.** `.intro-bar::after`'s
-  grain is `opacity: calc(1 - var(--dark-mix))`, which IS scroll-linked, and it
-  still carries `transition: opacity 0.15s ease`. That is intentional: 0.15s is
-  short enough to track the scroll without reading as lag, and the same
-  declaration also serves the grain's docking fade, which is a genuine state
-  change. The rule's target is the **0.35s** case — that length made the grain
-  trail the page by a third of a second. `--field-scroll` carries no transition
+- ⚠️ **NOTHING SCROLL-LINKED MAY CARRY A TRANSITION — and the ONE exception is
+  GONE (2026-09), which is better than the compromise it replaced.**
+  `.intro-bar::after`'s grain used to put the `--dark-mix` thinning and the
+  docking fade on the SAME `opacity`, so one transition had to serve both. Those
+  two want opposite things: the thinning is scroll-linked and must not ease (at
+  0.35s the grain trailed the page by a third of a second), while the docking
+  fade is a state change that SHOULD ease — and at the 0.15s compromise it
+  snapped, out of step with `::before`'s 0.35s glass. **Grain and glass arriving
+  on different clocks is what made the pin read as a snap.**
+  **The thinning moved to a second MASK LAYER** (`mask-composite: intersect`;
+  webkit spells it `source-in`, both are needed), where it is untransitioned by
+  construction, which frees `opacity` to be the docking fade alone at 0.35s.
+  Verified: the two now fade frame-for-frame together, and a `--dark-mix` change
+  moves the mask within 2 frames while `opacity` does not move at all.
+  ⚠️ **If you ever need a scroll-linked value on a layer that also has a state
+  transition, this is the move** — put the scroll-linked one on a mask. `--field-scroll` carries no transition
   at all and must not gain one. The tint is a background
   LAYER, so it was never in a transition list and always tracked the scroll — but
   the grain's opacity became scroll-linked when it started reading `--dark-mix`,
