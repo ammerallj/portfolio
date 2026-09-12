@@ -523,6 +523,7 @@ const NAV_HIDE = {
 };
 const stickyBars = [siteHeader, introBar].filter(Boolean);
 let navHideLastY = null;
+let navWantHidden = false;
 
 // ⚠️ A BAR MAY ONLY HIDE ONCE IT IS PINNED. Before that the landing bar is part
 // of the hero's composition — it sits in the flow at the bottom of the stage —
@@ -551,59 +552,57 @@ function navBarInLimbo(bar) {
     && !html.classList.contains('is-at-page-top');
 }
 
+// ⚠️ FOCUS IS CHECKED PER BAR AND WINS OVER EVERYTHING, limbo included. Hiding a
+// bar that holds the keyboard strands it on an off-screen, pointer-events:none
+// element with no way back.
 function setNavHidden(on) {
-  stickyBars.forEach(bar =>
-    bar.classList.toggle('is-nav-hidden',
-      navBarInLimbo(bar) || (on && navBarCanHide(bar))));
+  const focused = document.activeElement;
+  stickyBars.forEach(bar => {
+    const holdsFocus = !!focused && bar.contains(focused);
+    const hide = !holdsFocus && (navBarInLimbo(bar) || (on && navBarCanHide(bar)));
+    bar.classList.toggle('is-nav-hidden', hide);
+  });
 }
 
 function updateNavHide() {
   const y = window.scrollY;
-  if (navHideLastY === null) { navHideLastY = y; return; }
+  if (navHideLastY === null) navHideLastY = y;
   const d = y - navHideLastY;
   navHideLastY = y;
 
-  // ⚠️ IT COMES BACK ON SCROLL-UP, NOT ON IDLE, and that difference is the whole
-  // feel of it. An idle timer was built first (180ms) and MEASURED FLICKERING:
-  // over five reading bursts — scroll, pause to read, repeat — it produced six
-  // transitions, hiding on every burst and reappearing on every pause. A reading
-  // pause is not a request for navigation, so summoning the bar there undoes the
-  // reason for hiding it. Scroll-up is the signal that actually means "I am
-  // looking for something", which is what a nav is for.
+  // ⚠️ DIRECTION LATCHES THE INTENT; THE INTENT IS APPLIED EVERY FRAME. These
+  // used to be the same step — setNavHidden was called only from inside the two
+  // direction branches — and that left a hole: on a slow scroll every frame's
+  // delta sits between 0 and NAV_HIDE.delta, neither branch fires, and the class
+  // is never written at all. Measured at 3px per frame, the bar stayed visible
+  // through the whole hero; at 30px it hid correctly. The limbo rule lives
+  // inside setNavHidden, so it was being skipped along with everything else.
   //
-  // ⚠️ THE CONSEQUENCE: stop mid-page and the bar STAYS hidden until the reader
-  // scrolls up. That is intended. It is also why the page-top guard below
-  // matters — the top is the one place with no upward travel left to spend.
+  // ⚠️ A THRESHOLD MUST ONLY GATE THE DECISION, NEVER THE APPLICATION. Anything
+  // that can change state for reasons other than the delta — limbo, focus, the
+  // page-top and footer guards — has to be re-evaluated on frames the threshold
+  // rejects, or it silently does nothing below the threshold.
+  if (d > NAV_HIDE.delta) navWantHidden = true;
+  else if (d < 0) navWantHidden = false;         // scrolling up brings it back
 
-  // ⚠️ NEVER HIDE A BAR THAT HOLDS FOCUS. Hiding it would strand the keyboard on
-  // an off-screen, pointer-events:none element with no way back — the reader
-  // would be tabbing through a nav they cannot see.
-  const focused = document.activeElement;
-  if (focused && stickyBars.some(bar => bar.contains(focused))) return;
+  // ⚠️ NOT AT THE TOP OF THE PAGE. The landing bar is part of the hero's
+  // composition until it docks, and the ≤680 header is deliberately bare there.
+  if (html.classList.contains('is-at-page-top')) navWantHidden = false;
 
-  // ⚠️ AND NOT AT THE TOP OF THE PAGE. The landing bar is part of the hero's
-  // composition until it docks, and the ≤680 header is deliberately bare there;
-  // hiding either would animate something the reader has not scrolled past yet.
-  if (html.classList.contains('is-at-page-top')) { setNavHidden(false); return; }
-
-  // ⚠️ AND NOT WITH THE FOOTER IN VIEW — the bottom is the OTHER place with no
-  // travel left to spend. Reaching the end of the page on a downward scroll
-  // leaves the bar hidden at the reader's final resting position, where the only
-  // way back is a deliberate scroll-up against a floor they have already hit.
-  // The page top is guarded above for exactly the same reason; this is its pair.
-  //
-  // The footer is the right anchor rather than a scroll-position threshold: it is
-  // the last thing on the page at every tier and every viewport height, so it
-  // needs no constant and cannot drift if Contact's height changes — which it
-  // has, repeatedly.
+  // ⚠️ AND NOT WITH THE FOOTER IN VIEW — the bottom is the OTHER end with no
+  // travel left to spend. Reaching it on a downward scroll would otherwise leave
+  // the bar hidden at the reader's final resting position, where the only way
+  // back is a scroll-up against a floor they have already hit. The footer is the
+  // right anchor rather than a scroll threshold: it is the last thing on the
+  // page at every tier and viewport height, so it needs no constant and cannot
+  // drift when Contact's height changes — which it has, repeatedly.
   if (siteFooter && siteFooter.getBoundingClientRect().top < window.innerHeight) {
-    setNavHidden(false);
-    return;
+    navWantHidden = false;
   }
 
-  if (d > NAV_HIDE.delta) setNavHidden(true);
-  else if (d < 0) setNavHidden(false);   // scrolling up brings it straight back
+  setNavHidden(navWantHidden);
 }
+
 
 const pageField = document.querySelector('img.page-field');
 

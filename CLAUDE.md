@@ -1145,10 +1145,27 @@ there animates something the reader has not scrolled past yet. `.intro-bar`
 announces that with `is-docked`; `.site-header` (≤680) is fixed from the first
 pixel and is gated by the `is-at-page-top` check instead.
 
+⚠️ **DIRECTION LATCHES THE INTENT; THE INTENT IS APPLIED EVERY FRAME.** These
+were the same step at first — `setNavHidden` was called only from inside the two
+direction branches — and that left a hole: **on a slow scroll every frame's delta
+sits between 0 and `NAV_HIDE.delta`, neither branch fires, and the class is never
+written at all.** Measured at **3px per frame the bar stayed visible through the
+whole hero; at 30px it hid correctly.** The limbo rule lives inside
+`setNavHidden`, so it was being skipped along with everything else — which is why
+the bar kept appearing mid-hero no matter how the limbo condition was written.
+
+⚠️ **THE GENERAL RULE: a threshold may gate the DECISION, never the
+APPLICATION.** Anything that can change state for reasons other than the delta —
+limbo, focus, the page-top and footer guards — has to be re-evaluated on frames
+the threshold rejects, or it silently does nothing below the threshold. This is
+easy to miss because it only shows up at low scroll speeds, and every test that
+jumps the scroll position passes.
+
 ⚠️ **NEVER HIDE A BAR THAT HOLDS FOCUS.** It would strand the keyboard on an
 off-screen, `pointer-events: none` element with no way back — the reader tabbing
-through a nav they cannot see. Verified: with a nav link focused the bar stays put
-under a downward scroll, and hides normally once focus leaves.
+through a nav they cannot see. Checked per bar, and it wins over
+everything including limbo. Verified: with a nav link focused the bar stays put
+under a downward scroll AND in limbo, and hides normally once focus leaves.
 
 ⚠️ **opacity AND transform, not either alone.** The bar's `::before` bleeds
 `--bar-bleed` past its own box, so `translateY(-100%)` still leaves ~100px of
