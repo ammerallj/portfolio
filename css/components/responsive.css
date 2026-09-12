@@ -753,6 +753,22 @@
        puts both worst-pixel readings over 1.6; 120 is where the JPEG's two
        averages land equal (2.33 / 2.33) and neither block is starved.
        Measure both before changing it — moving it for one will move the other. */
+    /* ⚠️ 120 IS HELD DELIBERATELY NOW THAT THE SHADER RUNS HERE (2026-09), AND
+       IT IS THE FALLBACK THAT DECIDES IT. This pair was tuned for the JPEG when
+       phones had no canvas; with the shader live the SHADER's own optimum is 180
+       — measured floors over 3 phases at 375, bio including its 0.06 scrim:
+         · 120: headline 3.58, bio 3.07
+         · 150: headline 3.31, bio 3.21
+         · 180: headline 3.25, bio 3.30  ← best worst-case FOR THE SHADER
+         · 210: headline 3.15, bio 3.41
+       Every one of them clears the 3:1 wall (headline 44px/700, bio 24px/500).
+       ⚠️ BUT 180 IS THE VALUE THAT RENDERS THE JPEG'S HEADLINE AT 1.52, and the
+       JPEG is still what no-JS, no-WebGL and a failed compile all land on. 120
+       keeps the fallback at 2.02 / 2.89 AND clears the wall on the shader path,
+       so it is the only value that is safe for both. The shader's optimum is not
+       worth a fallback that fails.
+       ⚠️ The two pull against each other in the documented way (~+0.3 bio /
+       −0.25 headline per 70px of nudge) — re-measure BOTH, on BOTH paths. */
     --field-nudge-y: 120px;
 
     /* ⚠️ --field-clip: 0 / --field-fade: 0 USED TO BE HERE and are deleted, not
@@ -832,10 +848,11 @@
      that `overlay` caused over a mostly-pale field. That is all moot with no
      canvas to grain — but the finding is recorded in CLAUDE.md, because it
      applies to any future grain over a pale backdrop. */
-  .page-field-canvas,
-  .page-field-grain {
-    display: none;
-  }
+  /* ⚠️ THE CANVAS AND GRAIN ARE NO LONGER HIDDEN HERE (2026-09) — phones get the
+     shader like every other tier. This rule and the `FIELD_PHONE` bail in
+     js/main.js were PAIRED; both are gone. The `<img>` underneath stays exactly
+     as it was: still the LCP paint, still the fallback for no-JS/no-WebGL, and
+     still what shows until `html.is-field-live` lands. */
 
   /* Headline, divider and bio all drop --hero-drop together — a TRANSFORM, so
      the hero's own box, the card peek below it and the header math are all

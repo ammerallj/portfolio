@@ -689,8 +689,32 @@ it — and the tint was subtracting contrast from the white bio sitting on it.
 Bio 2.24–2.75 → **2.48–2.89**. ⚠️ If this is tuned again, **drop the alpha, keep
 the blur** — glass reads as glass because of the blur.
 
-⚠️ **PHONES (≤480) GET THE JPEG ONLY — NO SHADER (2026-09).** `initHeroField`
-bails on a `(max-width: 480px)` match and the 480 tier sets the canvas and grain
+⚠️ **SUPERSEDED — PHONES GET THE SHADER TOO (2026-09).** The bail and the
+`display: none` were PAIRED and both are gone; `FIELD_PHONE` went with them
+rather than being left declared and unread. Verified at 375×812:
+`is-field-live` lands, canvas and grain paint, buffer 1250×763 at renderScale 1.0.
+- **The original cost argument no longer describes this tier.** It cited "the
+  per-frame backdrop-filter work the two glass layers would do over a moving
+  field" — but `.intro::after`'s frost is commented out site-wide and the other
+  layer is `.intro-bar`, which is `display: none` below 680. The phone's
+  moving-field blur cost is the header's frost alone.
+- ⚠️ **`--field-nudge-y` STAYS AT 120, AND THE FALLBACK IS WHY.** The pair was
+  tuned for the JPEG; the SHADER's own optimum is 180. Floors over 3 phases at
+  375 (bio includes its 0.06 scrim; both blocks ≥24px so the wall is 3:1):
+  **120 → 3.58 / 3.07 · 150 → 3.31 / 3.21 · 180 → 3.25 / 3.30 · 210 → 3.15 /
+  3.41.** All clear. But **180 is the value that renders the JPEG's headline at
+  1.52**, and the JPEG is still what no-JS, no-WebGL and a failed compile land
+  on. 120 is the only value safe on BOTH paths. **Re-measure both paths, not just
+  the shader.**
+- ⚠️ **GPU COST ON A REAL MID-RANGE PHONE IS UNVERIFIED** and cannot be measured
+  here — the pane cannot judge this motion at all. If it stutters, restoring the
+  bail plus the `display: none` is the whole revert.
+
+The paragraph below is the superseded reasoning, kept for the pairing rule it
+states:
+
+⚠️ **PHONES (≤480) GOT THE JPEG ONLY (2026-09, reversed above).** `initHeroField`
+bailed on a `(max-width: 480px)` match and the 480 tier set the canvas and grain
 to `display: none`. Bailing in JS is the point: no WebGL context, no shader
 compile, no render loop, and none of the per-frame `backdrop-filter` work the two
 glass layers would otherwise do over a moving field — `display: none` alone would

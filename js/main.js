@@ -887,18 +887,28 @@ const FIELD = {
   renderScale: 1.0,
 };
 
-/* Phones get the static JPEG, full stop — see the matching block in
-   responsive.css. Bailing here (rather than only hiding the canvas in CSS) is
-   the point: no WebGL context, no shader compile, no render loop, and none of
-   the per-frame backdrop-filter work the two glass layers would otherwise do
-   over a moving field. ⚠️ PAIRED WITH THE 480 TIER IN responsive.css — move one
-   and you must move the other, as initWorkCarousel is paired with that tier. */
-const FIELD_PHONE = matchMedia('(max-width: 480px)');
+/* ⚠️ PHONES NOW GET THE SHADER TOO (2026-09) — this used to bail here and hide
+   the canvas in responsive.css, so ≤480 rendered the static JPEG only. Both
+   halves are gone; they were PAIRED and had to move together.
+   The original reason was cost: no WebGL context, no compile, no render loop,
+   and none of the per-frame backdrop-filter work "the two glass layers" would do
+   over a moving field. That last clause no longer describes this tier — one of
+   those layers (`.intro::after`'s frost) is commented out site-wide, and the
+   other is `.intro-bar`, which is `display: none` below 680. So the phone's
+   moving-field blur cost is the header's frost alone.
+   ⚠️ WHAT IS STILL UNVERIFIED IS GPU COST ON A REAL MID-RANGE PHONE. It cannot be
+   measured here, and the pane cannot judge this motion at all (see CLAUDE.md on
+   `document.visibilityState`). The canvas is 1250×763 at renderScale 1.0 — one
+   fragment shader over four circles — but if it stutters, restoring the bail
+   plus the `display: none` is the whole revert.
+   ⚠️ The `FIELD_PHONE = matchMedia('(max-width: 480px)')` binding went with them.
+   A declared-but-unread value is the exact hazard that took this field down once
+   before (the dead GLSL `LAYER` constant) — if the bail comes back, re-declare
+   it rather than leaving it parked here. */
 
 function initHeroField() {
   const canvas = document.getElementById('hero-field');
   if (!canvas) return;        // project pages have no field
-  if (FIELD_PHONE.matches) return;   // phones: the <img> underneath is the hero
 
   const gl = canvas.getContext('webgl', { antialias: false, alpha: true, powerPreference: 'low-power' })
           || canvas.getContext('experimental-webgl');
@@ -1060,7 +1070,7 @@ function initHeroField() {
     prev = now;
     // Also stops if a desktop session is resized/rotated into the phone
     // tier, where the CSS has hidden the canvas — no point drawing it.
-    if (!onScreen || document.hidden || FIELD_PHONE.matches) return;
+    if (!onScreen || document.hidden) return;
     clock += dt * FIELD.motion.speed;
     draw(clock);
   })(prev);
