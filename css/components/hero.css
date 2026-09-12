@@ -654,6 +654,56 @@ html.is-field-live .page-field-grain { opacity: 0.15; }
   animation: intro-bio-drop 1s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both;
 }
 
+/* ⚠️ THE BIO CAN CARRY ITS OWN SCRIM, AND IT IS INERT UNLESS A TIER ASKS FOR IT.
+   `--bio-scrim` is 0 everywhere by default, so this paints nothing on desktop —
+   only the ≤768 tier turns it on (see responsive.css).
+
+   WHY IT EXISTS: the field's WIDTH and HEIGHT are one knob (height = width /
+   1.6377), so narrowing it to show more of the composition also shortens it and
+   the dissolve climbs into the bio. The scrim breaks that coupling for the bio
+   ONLY, which is what buys the narrowing. Measured at 768×1024, 3-phase floors:
+   field 1997 -> 1638 takes the visible artwork 38% -> 47% and the bio 3.21 ->
+   2.90 without a scrim, 3.25 WITH this one at 0.06.
+
+   ⚠️ `isolation: isolate` IS LOAD-BEARING, NOT TIDINESS. Without it this
+   `::before` at z-index -1 joins `main`'s negative-z layer — the same one the
+   field itself is on — and paints BEHIND the artwork. Verified the wrong way
+   first: a 0.85-alpha RED scrim was completely invisible. The isolate gives the
+   bio its own stacking context so -1 means "below this element's text" rather
+   than "below the page".
+
+   ⚠️ THE MASK FEATHERS THE EDGES BUT NOT THE TYPE. The inset is larger than the
+   feather on every side, so the scrim is at FULL alpha across the whole text box
+   and only fades in the margin around it — which is what makes the measured
+   figure exact rather than optimistic, and what stops it reading as a plate.
+
+   ⚠️ THE CEILING IS TASTE, AND IT IS LOW. At 0.09 the scrim visibly mutes the
+   artwork's strongest band (the red/pink run under the divider) — measured bio
+   3.46, but the dulling reads. 0.06 clears 3:1 with margin and the band keeps
+   its colour. Do not raise it to buy more narrowing: past 1638 it is the
+   HEADLINE that binds (3.33 at 1638, 3.16 at 1550) and a headline scrim would be
+   a visible plate rather than a wash. */
+.intro-bio {
+  position: relative;
+  isolation: isolate;
+}
+.intro-bio::before {
+  content: "";
+  position: absolute;
+  inset: -44px -40px;
+  z-index: -1;
+  pointer-events: none;
+  background: rgba(0, 0, 0, var(--bio-scrim, 0));
+  -webkit-mask-image:
+    linear-gradient(to bottom, transparent 0, #000 44px, #000 calc(100% - 44px), transparent 100%),
+    linear-gradient(to right, transparent 0, #000 40px, #000 calc(100% - 40px), transparent 100%);
+  mask-image:
+    linear-gradient(to bottom, transparent 0, #000 44px, #000 calc(100% - 44px), transparent 100%),
+    linear-gradient(to right, transparent 0, #000 40px, #000 calc(100% - 40px), transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+}
+
 .intro-bio {
   /* Body copy, on the token — the same size, tracking and leading as
      .about-body p, .work-card-description and .project-dek. It was a 24px dek

@@ -262,29 +262,39 @@ a ~10% step in field width at the 1024/1025 seam on short viewports, visible onl
 while dragging a window across that exact boundary. Re-measure landscape before
 ever locking the two together.
 
-⚠️ **≤768 PULLS THE FIELD IN AGAIN — `max(1688.69px, 195svh, 117.27vw)` (2026-09).**
-The ≤1024 tier's `220svh` resolves to **2253px in a 768px viewport, so only 34% of
-the artwork is on screen** and the orbs read as one broad wash instead of a
-composition. 195svh resolves to ~1997 and puts **38%** on screen.
-⚠️ **WIDTH AND HEIGHT ARE THE SAME KNOB HERE (height = width / 1.6377), so "show
-more orbs" and "keep colour under the bio" pull directly against each other** —
-narrowing the field also shortens it, and the dissolve then climbs into the bio.
-That coupling is the whole constraint and it is why this cannot be taken further.
-Floors over 6 phases at 768×1024, composited through the mask (bio is 24px/500 →
-its wall is 3:1, same as the 64px headline):
+⚠️ **≤768 PULLS THE FIELD IN TO `max(100vw, 160svh)` AND GIVES THE BIO A SCRIM —
+THE TWO ARE ONE DECISION (2026-09).** The ≤1024 tier's `220svh` resolves to 2253px
+in a 768px viewport, so **only 34% of the artwork is on screen** and the orbs read
+as one broad wash rather than a composition. 160svh resolves to 1638 and puts
+**47%** on screen — the same expression desktop uses.
+⚠️ **WIDTH AND HEIGHT ARE THE SAME KNOB (height = width / 1.6377), so "show more
+orbs" and "keep colour under the bio" pull directly against each other** —
+narrowing the field also shortens it and the dissolve climbs into the bio. **The
+scrim is what breaks that coupling**, for the bio only. Floors over 3 phases at
+768×1024, composited through the mask; both blocks are ≥24px so the wall is 3:1:
 
-| `--field-w` | visible | headline floor | bio floor |
-|---|---|---|---|
-| 2253 (the ≤1024 value) | 34% | 3.40 | 3.50 |
-| **1997 = 195svh (shipped)** | **38%** | **3.50** | **3.21** |
-| 1800 | 43% | 3.42 | 3.01 — ON the wall |
-| 1638 | 47% | 3.22 | ~2.95 FAILS |
+| `--field-w` | visible | headline (never scrimmed) | bio, no scrim | bio @ 0.06 | bio @ 0.09 |
+|---|---|---|---|---|---|
+| 1997 (the interim value) | 38% | 3.50 | 3.21 | — | — |
+| **1638 = 160svh (shipped)** | **47%** | **3.33** | 2.90 | **3.25** | 3.46 |
+| 1550 | 50% | **3.16** | 2.80 | — | 3.35 |
 
-- **The headline IMPROVES on the way in** (3.40 → 3.50); the BIO is what binds.
-  If this is ever pushed again, that is the number to watch, not the headline.
-- ⚠️ **Scoped to ≤768 so LANDSCAPE tablet keeps the value it was measured
-  against** — 1024×768 still resolves to 1690 (61% visible) and is untouched, as
-  is desktop (1440×879).
+- ⚠️ **0.06 IS A TASTE CEILING, NOT A CONTRAST ONE.** 0.09 measures better (3.46)
+  and visibly MUTES the artwork's strongest band — the red/pink run under the
+  divider. 0.06 clears 3:1 with margin and the band keeps its colour. Judged on
+  an A/B at the same field width, not from the number.
+- ⚠️ **DO NOT RAISE THE SCRIM TO BUY MORE NARROWING. Past 1638 the HEADLINE
+  binds** (3.33 at 1638, 3.16 at 1550), and it cannot take the same treatment —
+  a scrim behind 64px type is a visible plate, not a wash.
+- ⚠️ **`isolation: isolate` ON `.intro-bio` IS LOAD-BEARING.** Without it the
+  scrim's `z-index: -1` joins `main`'s negative-z layer — the one the FIELD is on
+  — and paints behind the artwork. Verified the wrong way first: a 0.85-alpha RED
+  scrim was completely invisible.
+- The scrim is **inert everywhere else** (`--bio-scrim` defaults to 0; verified
+  `rgba(0,0,0,0)` at 1440×900 and 1024×768). Desktop is not cropped hard enough to
+  need it, and muting the artwork with nothing to buy is pure cost.
+- ⚠️ **Landscape tablet still keeps the ≤1024 value** — 1024×768 resolves to 1690
+  (61% visible) and is untouched, as is desktop (1440×879).
 
 **The hero is sized in `svh`, never `dvh` (2026-08-31).** `.intro`'s height,
 the frost pane's two `50svh` terms and the tablet `--field-w` all use it, and

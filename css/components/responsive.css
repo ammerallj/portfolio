@@ -393,7 +393,15 @@
        The headline IMPROVES on the way (3.40 → 3.50); it is the bio that binds.
        ⚠️ Scoped to ≤768 so LANDSCAPE tablet (1024×768) keeps the ≤1024 value it
        was measured against. */
-    --field-w: max(1688.69px, 195svh, 117.27vw);
+    --field-w: max(100vw, 160svh);
+
+    /* ⚠️ THE BIO'S SCRIM IS WHAT PAYS FOR THE NARROWER FIELD ABOVE — the two are
+       one decision. Without it 160svh puts the bio at 2.90, under its 3:1 wall;
+       with it the bio reads 3.25 and the field shows 47% of the artwork instead
+       of 38%. Mechanism and the reason 0.06 is the ceiling: hero.css .intro-bio.
+       ⚠️ 0 EVERYWHERE ELSE. Desktop is not cropped hard enough to need it, and a
+       scrim that mutes the artwork with nothing to buy is pure cost. */
+    --bio-scrim: 0.06;
 
     /* The next-case card's corner DOES differ at portrait: the pager is still
        full-width, so as the box narrows the 48px corner starts eating the
