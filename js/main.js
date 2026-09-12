@@ -535,9 +535,26 @@ function navBarCanHide(bar) {
     : true;
 }
 
+// ⚠️ AND A BAR IN LIMBO IS HIDDEN OUTRIGHT, whatever the scroll direction says.
+// .intro-bar is sticky: it is either pinned at top:0 or sitting in the flow at
+// the bottom of the hero stage, never between. At the page top the flow position
+// IS the landing's composition and it belongs there. Scrolled past that but not
+// yet docked, it is neither — just a nav floating mid-page over Selected Work,
+// which is what it looked like when un-docking on an upward scroll.
+//
+// This deliberately overrides the show-on-scroll-up rule. Scrolling up is what
+// puts the bar into that state in the first place, so deferring to direction
+// would guarantee it is visible exactly when it should not be.
+function navBarInLimbo(bar) {
+  return bar.classList.contains('intro-bar')
+    && !bar.classList.contains('is-docked')
+    && !html.classList.contains('is-at-page-top');
+}
+
 function setNavHidden(on) {
   stickyBars.forEach(bar =>
-    bar.classList.toggle('is-nav-hidden', on && navBarCanHide(bar)));
+    bar.classList.toggle('is-nav-hidden',
+      navBarInLimbo(bar) || (on && navBarCanHide(bar))));
 }
 
 function updateNavHide() {
@@ -2516,6 +2533,15 @@ function updateScrollEffects() {
     introBar.classList.toggle('is-docked', introBar.getBoundingClientRect().top <= 0);
   }
 
+  // ⚠️ AFTER the docking toggle, and OUTSIDE its guard. updateNavHide reads
+  // is-docked to tell a pinned bar from one resting in the hero's composition
+  // from one in limbo between the two, so running it earlier in the frame reads
+  // the PREVIOUS frame's state and mis-classifies the bar on the exact frame it
+  // docks or releases — the frame that matters. And it must run even where
+  // there is no .intro-bar, or the hide/show would silently do nothing for
+  // whatever bar that page does have.
+  updateNavHide();
+
   // ...and the field lifts away as the reader moves. See measureFieldTuck above.
   // ⚠️ EASED OUT, AND ONLY BECAUSE THE MASK MADE IT FREE TO BE. While this was
   // the thing keeping colour off the bar it had to be LINEAR — it was reporting
@@ -2625,7 +2651,6 @@ function updateScrollEffects() {
   // desktop, where the header is display:none). Whichever is hidden reports
   // offsetHeight 0, so the max below reads the visible one.
   updatePeekDir();
-  updateNavHide();
 
   // About's parallax. Guarded: project pages have no #about, so nothing is ever
   // published and the CSS fallback (0px) leaves them exactly as they were.

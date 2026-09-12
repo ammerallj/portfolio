@@ -1120,6 +1120,25 @@ pattern that stays clear of it.
 ⚠️ **A STATE, SO IT MAY CARRY A TRANSITION.** The standing ban is on scroll-linked
 VALUES; this class flips once per gesture rather than tracking position.
 
+⚠️ **A BAR IN LIMBO IS HIDDEN OUTRIGHT, whatever the direction says.**
+`.intro-bar` is sticky: it is either pinned at `top: 0` or sitting in the flow at
+the bottom of the hero stage, never between. **At the page top that flow position
+IS the landing's composition** and it belongs there. Scrolled past that but not
+yet docked, it is neither — just a nav floating mid-page over Selected Work,
+which is how it looked while releasing on an upward scroll.
+- **It deliberately overrides show-on-scroll-up.** Scrolling up is what puts the
+  bar into that state, so deferring to direction would guarantee it is visible
+  exactly when it should not be.
+- Measured scrolling up from Work to the top: 7 limbo frames, **all hidden**; every
+  docked frame visible; visible again at the top with the bar back at its flow
+  position.
+- ⚠️ **`updateNavHide()` RUNS AFTER THE `is-docked` TOGGLE, AND OUTSIDE ITS
+  GUARD.** It reads `is-docked` to tell those three states apart, so running it
+  earlier in the frame reads the PREVIOUS frame's value and mis-classifies the
+  bar on the exact frame it docks or releases — the frame that matters. And it
+  must run even where there is no `.intro-bar`, or the hide/show silently does
+  nothing for whatever bar that page does have.
+
 ⚠️ **ONLY ONCE THE BAR IS PINNED.** Before that the landing bar is part of the
 hero's composition — it sits in the flow at the bottom of the stage — so hiding it
 there animates something the reader has not scrolled past yet. `.intro-bar`
