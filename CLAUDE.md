@@ -1198,7 +1198,13 @@ height (819 → 675) and its top now rests at 145.
 RESTING top is its HIGHEST position — the page has no more scroll — so a bar that
 is not inverted at rest is **never inverted at any scroll position**. Measured
 across the whole approach: `--dark-mix` peaks at **0.01**, the labels never flip,
-and `is-over-dark` is unreachable on the homepage. `DARK_TEXT_AT`,
+and `is-over-dark` is unreachable on the homepage.
+⚠️ **CONFIRMED ACCEPTED ON A REAL DISPLAY (2026-09) — the bar staying cream over
+the ledge is the intended end state, not an unnoticed regression.** Worth stating
+because the code still carries the whole inversion apparatus and it reads like
+something that ought to be firing. It is not dead by accident; it is dead because
+the panel was trimmed, and the ledge plus the bar's compensated fill are what
+carry the arrival now. `DARK_TEXT_AT`,
 `DARK_TEXT_ALPHA` and the whole label-flip rule are now dead code there — kept
 because the project pages and any future full-frame panel still need them.
 - **What still earns its place:** the ledge's dissolve, and the bar's compensated
@@ -1514,12 +1520,17 @@ ledge stays — it is a dissolve, not motion; only the parallax goes), and ≤48
 where Contact is `display: none` and the existing zero-height branch clears
 everything.
 
-⚠️ **OPEN, AND NOT MEASURED: a faint edge at the bar's `::before` box bottom
-(y = 166 at the shipped bleed).** The ramp there is 0.86 code values per pixel —
-below the dither floor — and the compensation is exact for COLOUR, but it does
-not model the `backdrop-filter` blur, still ~13px at that point. That is cause
-three of the hairline story all over again. Needs real pixels; if it is visible,
-fade the blur on the ledge's alpha rather than on `--dark-mix`.
+**CLOSED — NO VISIBLE EDGE AT THE BAR'S `::before` BOX BOTTOM (y = 166 at the
+shipped bleed), CHECKED ON A REAL DISPLAY (2026-09).** This was carried as open
+for a while: the ramp there is 0.86 code values per pixel (below the dither
+floor) and the compensation is exact for COLOUR, but it does not model the
+`backdrop-filter` blur, still ~13px at that point — which is cause three of the
+hairline story all over again, and not something pixel maths can settle.
+⚠️ **It was closed by LOOKING, not by measuring, and that was the only way** —
+the question was whether a sub-dither-floor gradient reads as an edge through a
+live blur, and neither `getComputedStyle` nor a sampled canvas answers that. If
+it ever does return, the fix is to fade the blur on the LEDGE'S alpha rather than
+on `--dark-mix`.
 
 **`lab/contact-morph.html`** is the tuning harness (excluded from the build, on
 the `lab/field-shader.html` precedent): live controls for the ledge height, grain
