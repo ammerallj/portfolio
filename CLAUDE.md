@@ -1315,6 +1315,37 @@ then grows to the full `--contact-ledge-length` as Contact arrives. Measured at
   lift was only ever 16px at the top of the page; not harmless once it carries
   360. The measurement zeroes the lift first.
 
+⚠️ **CONTACT READS BARE ON A PORTRAIT TABLET, AND THE CAUSE IS THE TYPE SCALE,
+NOT THE LAYOUT (2026-09).** The panel is SUPPOSED to fill the fold — that is the
+requirement — so the question is only what fills it. Measured:
+
+| | desktop 1440×900 | tablet 1024×1366 |
+|---|---|---|
+| `--display-size` | 96px | **64px** |
+| `.contact-email` height | 192 | 128 |
+| heading as % of viewport | 21.3% | **9.4%** |
+| hero + meta as % of panel | 43.1% | **23.1%** |
+
+⚠️ **THE TWO EFFECTS COMPOUND IN THE SAME DIRECTION**: the display size steps DOWN
+at ≤1024 (correct — it is sized to the narrower column) while the viewport gets
+TALLER, so the content covers less than half the share of the panel it does on
+desktop. No amount of redistribution changes that ratio.
+- **What IS fixed (responsive.css, 1024):** `.contact-inner` grows
+  (`flex: 1 1 auto`) and spaces its two children apart, so the heading pins to the
+  top and the meta row sits above the footer instead of the whole block clustering
+  at the top with **621px of empty blue under it**. The section's `min-height` and
+  `flex-start` are untouched — the panel still fills the screen; only what is
+  inside it is distributed. `gap` stays the floor, so a short window collapses
+  back to today's layout.
+- ⚠️ **THAT ANCHORS BOTH EDGES; IT DOES NOT ADD CONTENT.** The void moves from
+  below the block to between the heading and the meta row (717px at 1024×1366).
+  It reads as an editorial spread rather than an unfinished page, and the footer
+  edge resolves — but if "bare" is still the complaint, the lever is the 64px.
+- ⚠️ **AND `--display-size` IS A SHARED BOOKEND** — the landing's headline and
+  Contact's heading are deliberately the same size. Raising it for Contact alone
+  breaks that pairing, so it is a composition decision rather than a tweak, and
+  was NOT taken unilaterally.
+
 ⚠️ **THE ARRIVAL IS TIGHTENED AT ≤1024, AND THE REASON IS VIEWPORT HEIGHT, NOT
 WIDTH (2026-09).** Reported as "the gap is bigger on tablet". It is not — the page
 geometry is IDENTICAL at every width. Measured: About's last line to Contact's

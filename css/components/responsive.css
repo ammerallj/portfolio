@@ -210,6 +210,25 @@
     --field-w: max(1688.69px, 220svh, 117.27vw);
   }
 
+  .contact-inner {
+    /* ⚠️ THE PANEL FILLS A TALL FOLD, SO THE CONTENT HAS TO SPAN IT — otherwise it
+       clusters at the top and the rest is bare. `justify-content: flex-start` on
+       the section is right where the panel is barely taller than its content
+       (desktop 1440×900: panel 703, content 447, 96px spare — nothing to
+       distribute). On a portrait tablet the same rule leaves **621px of empty
+       blue under 360px of content** at 1024×1366, all of it dumped below.
+       Growing the inner and spacing it apart pins the heading to the top and the
+       meta row above the footer — which is the rhythm desktop already has by
+       accident of its proportions, restated so it survives any height.
+       ⚠️ The section's `min-height` and `flex-start` are UNTOUCHED: the panel
+       still fills the screen, which is the requirement. Only the distribution of
+       what is inside it changes.
+       ⚠️ `gap` stays the FLOOR — space-between collapses to it when the content
+       outgrows the panel, so a short window degrades to today's layout. */
+    flex: 1 1 auto;
+    justify-content: space-between;
+  }
+
   .contact-section {
     /* The heading sits --contact-pad + --nav-offset below the panel's top edge —
        160px at desktop, and on a tall tablet that lands it a long way down a
