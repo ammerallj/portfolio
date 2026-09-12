@@ -1013,13 +1013,32 @@ a request for a longer fade.
 **Three mechanisms, and they are not independent — each one broke the next.**
 
 **1. THE LEDGE** (`.contact-section::before`, sections.css). Blue bleeds up out
-of the panel over `--contact-ledge` (220px, global.css — the ONE place the height
-is written; js/main.js reads the token).
-- **A smoothstep in 17 stops**, for the three reasons the hero field's dissolve
+of the panel over `--contact-ledge`.
+
+⚠️ **THE LEDGE IS THE MEASURED ROOM ABOVE THE PANEL, NEVER A CONSTANT** —
+`clamp(90px, var(--contact-gap), 300px)`, exactly the rule `--field-fade` lives
+under. **It shipped at a flat 220px and that was wrong**: the room is only ~96,
+so the ramp ran 124px INTO About and washed blue across the photo and the last
+lines of copy. **The ledge paints OVER the section above** (Contact is
+positioned, so its pseudo-elements sit above a non-positioned sibling), so every
+pixel it overshoots is a pixel of someone else's content obscured.
+`--contact-gap` is published by `measureContactArrival`.
+- **It is not just `--gap-section` in disguise** — measured 96px at 768 and
+  **103px at 1024**, because About's last block lays out differently there. A
+  hard-coded 96 would overshoot by 7px at the landscape-tablet tier.
+- ⚠️ **A FACTOR OF 1.0 IS THE CEILING**, same as the field: the ramp starts where
+  the content ends and never touches it. The "a smoothstep is near alpha 0 for
+  its first eighth, so it could start higher for free" argument is a measured
+  REGRESSION on the field. Don't reclaim it here either.
+- **A smoothstep in 25 stops**, for the three reasons the hero field's dissolve
   already documents: a linear ramp reads as a BAND (slope discontinuity at each
   end), an ease-in ramp compresses into a narrow strip however long it is, and
-  the stop COUNT is how faithfully the curve is drawn. At 220px they land 13.8px
-  apart. ⚠️ **More stops before more length.**
+  the stop COUNT is how faithfully the curve is drawn.
+  ⚠️ **It went 17 → 25 BECAUSE the ledge got shorter, which is the field's rule
+  applied in the direction that actually comes up**: the room is a hard ceiling,
+  so length is not available and resampling is the only lever. At 96px, 17 stops
+  land 6.0px apart (largest alpha step 0.093); 25 stops land **4.0px** apart
+  (0.062), matching the field's target. ⚠️ **More stops before more length.**
 - ⚠️ **Ramps accent-alpha-1 → accent-alpha-0, NEVER to `transparent`** — that is
   `rgba(0,0,0,0)`, which drags every stop toward black and rings the ledge with a
   grey halo. Same trap as the field.
@@ -1050,6 +1069,16 @@ onto the ramp rather than an average of it. Step at its bottom edge: **21.3% →
   be static CSS: the alphas depend non-linearly on the edge's position and
   `calc()` cannot express that. Guarded, and only built while the ledge is within
   reach of the bar.
+- ⚠️ **js/main.js READS THE LEDGE'S PAINTED HEIGHT, NOT THE TOKEN, and it must.**
+  `--contact-ledge` is a `clamp()`, and an unregistered custom property computes
+  to its TOKEN STREAM rather than to a length: `getPropertyValue` returns the
+  literal string `"clamp(90px, 96px, 300px)"` and `parseFloat` gives **NaN**.
+  That fails silently and expensively — `contactLedge` falls to 0, `buildBarFill`
+  never runs, and the bar drops back to the flat tint, quietly restoring the 21%
+  step this whole change exists to remove **while the ledge itself still looks
+  right**. Reading `getComputedStyle(contactSection, '::before').height` gets the
+  resolved value and is also the very thing the bar must match, so the two cannot
+  disagree. Caught in review, not in the browser.
 - ⚠️ **`CONTACT.frost` in main.js TRANSCRIBES hero.css's frost gradient**, because
   a background gradient cannot be read back out of CSS. Keep the four pairs in
   sync — nothing enforces it, same standing hazard as

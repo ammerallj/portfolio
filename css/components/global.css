@@ -145,13 +145,35 @@
 
   /* CONTACT'S SOFT LEADING EDGE — how far the blue bleeds up out of the panel
      before the panel itself starts (sections.css `.contact-section::before`).
-     It is a length, not a fraction: the ledge has to read the same on a short
-     window as a tall one, and it is measured against the nav bar's own 64px
-     rather than against the viewport.
-     ⚠️ js/main.js reads this token to build the bar's matching fill and to time
-     the parallax peek, so it is the ONE place the ledge's height is written.
-     Changing it moves the dissolve, the bar's gradient and the peek together. */
-  --contact-ledge: 220px;
+
+     ⚠️ IT IS THE MEASURED ROOM ABOVE THE PANEL, NEVER A CONSTANT — the same rule
+     the hero field's dissolve lives under (`--field-fade: clamp(90px,
+     var(--field-gap), 300px)`), and for the same reason. It shipped at a flat
+     220px and the room is only 96, so the ramp ran 124px INTO the section above
+     and washed blue across About's photo and its last lines of copy. The ledge
+     paints OVER the previous section, so anything it overshoots, it obscures.
+
+     `--contact-gap` is published by measureContactArrival (js/main.js): the
+     distance from the bottom of the preceding section's content to Contact's top
+     edge. Today that resolves to `--gap-section` (96px at every tier where
+     Contact exists — it only drops to 64 at ≤480, where Contact is display:none),
+     but measuring means it cannot go stale if that spacing or About's content
+     changes.
+
+     ⚠️ A FACTOR OF 1.0 IS THE CEILING. The ramp starts exactly where the content
+     ends and never touches it. The tempting argument — that a smoothstep is
+     still near alpha 0 for its first eighth, so it could start that much higher
+     for free — was measured on the hero field and is a REGRESSION there; a ramp
+     that touches type costs more than its alpha figure suggests, because it
+     moves the WORST pixel. Don't reclaim it here either.
+
+     The clamp's bounds are guards, not tuning: 90px is the field's measured
+     banding floor, 300px its ceiling. Neither binds at any current tier.
+
+     ⚠️ js/main.js reads the RESOLVED token to build the bar's matching fill and
+     to time the parallax peek, so this is still the ONE place the height is
+     decided — it just answers to layout now. */
+  --contact-ledge: clamp(90px, var(--contact-gap, 96px), 300px);
 
   /* Height of the site footer. A DEFAULT, not the truth: initSectionGeometry
      measures the real footer and rewrites this on load and resize, so the value

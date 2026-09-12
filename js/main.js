@@ -285,9 +285,45 @@ let contactRestEdge = 0;
 let contactAccentRGB = '74, 69, 255';
 let contactGlyphMid = 32;
 function measureContactArrival() {
+  // ⚠️ PUBLISH THE ROOM FIRST, THEN READ THE LEDGE — --contact-ledge clamps
+  // against --contact-gap, so reading it before this is written gets the
+  // fallback rather than the measured answer.
+  //
+  // THE ROOM IS THE DISTANCE FROM THE PRECEDING SECTION'S CONTENT TO CONTACT'S
+  // TOP EDGE, and the ledge can never exceed it. The ledge paints OVER the
+  // section above (Contact is positioned, so its pseudo-elements sit above a
+  // non-positioned sibling), so every pixel it overshoots is a pixel of someone
+  // else's content washed blue. Shipped at a flat 220px against a 96px room, it
+  // ran 124px into About and tinted the photo and the last lines of the copy.
+  // Same rule and same failure mode as the hero field's --field-gap.
+  if (contactSection) {
+    const pageTop = (el) => { let y = 0; for (let n = el; n; n = n.offsetParent) y += n.offsetTop; return y; };
+    const prev = contactSection.previousElementSibling;
+    // offsets, NOT getBoundingClientRect: the blocks above carry the reveal
+    // system's translateY while this runs, and a rect would report mid-flight.
+    // Same rule as measureFieldTuck.
+    const last = prev && (prev.lastElementChild || prev);
+    if (last) {
+      const room = pageTop(contactSection) - (pageTop(last) + last.offsetHeight);
+      if (room > 0) document.documentElement.style.setProperty('--contact-gap', Math.round(room) + 'px');
+    }
+  }
+
   const cs = getComputedStyle(document.documentElement);
-  contactLedge = parseFloat(cs.getPropertyValue('--contact-ledge')) || 0;
   contactAccentRGB = cs.getPropertyValue('--color-accent-rgb').trim() || '74, 69, 255';
+
+  // ⚠️ READ THE LEDGE'S PAINTED HEIGHT, NOT THE TOKEN. --contact-ledge is a
+  // clamp(), and an unregistered custom property computes to its TOKEN STREAM,
+  // not to a length — getPropertyValue returns the literal string
+  // "clamp(90px, 96px, 300px)" and parseFloat gives NaN. That fails silently and
+  // expensively: contactLedge would be 0, so buildBarFill would never run and
+  // the bar would drop back to the flat tint, quietly restoring the 21% step
+  // this whole change exists to remove, while the ledge itself still looked
+  // right. The pseudo-element's own height IS the resolved value, and it is also
+  // the thing the bar has to match — so this cannot disagree with what paints.
+  contactLedge = contactSection
+    ? parseFloat(getComputedStyle(contactSection, '::before').height) || 0
+    : 0;
   // The glyphs' own mid-line inside the bar. The bar is a GRADIENT now, so
   // "what the labels sit on" is a position, not the bar-wide average.
   if (introBar && introBar.offsetParent) {
