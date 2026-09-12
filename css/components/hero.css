@@ -279,10 +279,29 @@ html.is-field-live .page-field-grain { opacity: 0.15; }
      in a 1440x800 frame that IS the viewport) could never land where it was
      drawn. At 100vw the box is 1440x879 in a 1440x900 fold: all of the width and
      98% of the height visible before any scroll.
-     ⚠️ Orb x/y in FIELD.blobs are now direct frame fractions — the field box and
-     the Figma frame are the same rectangle, so no offset maths is needed. If
-     this width ever changes, every position has to be re-derived. */
-  --field-w: 100vw;
+     ⚠️ Orb x/y in FIELD.blobs are direct frame fractions while 100vw binds — the
+     field box and the Figma frame are then the same rectangle, so no offset maths
+     is needed.
+
+     ⚠️ THE `160svh` TERM IS NOT A SECOND OPINION ABOUT THE WIDTH — IT IS THE
+     HEIGHT REQUIREMENT WRITTEN AS ONE. The artwork's height follows the window's
+     WIDTH (height = width / 1.6377) while the FOLD follows its HEIGHT, so on any
+     window taller than 16:10 the artwork simply runs out before the fold and the
+     cream scrim climbs up the frame. Measured at 1366x1024: the field's bottom
+     landed at 81.4% of the fold against 97.7% at 1440x900, and the dissolve ran
+     53-79% of the frame instead of 69-94%.
+     ⚠️ AND IT WAS A CONTRAST BUG, NOT JUST A COMPOSITION ONE. The bio sat INSIDE
+     the dissolve (mask started at 576, bio spanned 582-716) and measured a worst
+     pixel of **1.59:1**. With the field sized to the height it is **3.01**, and
+     the headline goes 2.64 -> 2.90. Same orbit phase, composited through the mask.
+     ⚠️ 160 IS EXACT, NOT TUNED: 1440/900 is 16:10, so `160svh` EQUALS `100vw` at
+     the design ratio and this is a byte-identical no-op at 1440x900, 1920x1080
+     and 1280x800. It engages only where the window is taller than 16:10.
+     ⚠️ THE COST IS A CROP: above that ratio the box is wider than the viewport
+     (272px, 17%, at 1366x1024) so the orbs spread outward relative to the frame
+     and the positions stop being direct frame fractions. That is the same trade
+     the <=1024 tier already makes with its own `220svh` term. */
+  --field-w: max(100vw, 160svh);
   /* No up-shift any more, so this is just width / aspect. */
   --field-bottom: calc(var(--field-w) * 0.61061);
 

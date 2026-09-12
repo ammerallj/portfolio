@@ -214,6 +214,39 @@ which does NOT clear a 900px fold — it stops 21px short of it, and the dissolv
 below is what closes that. ⚠️ **Orb x/y are now direct frame fractions** because
 the field box and the Figma frame are the same rectangle; change this width and
 every position must be re-derived.
+⚠️ **DESKTOP `--field-w` IS `max(100vw, 160svh)` (2026-09) — THE SECOND TERM IS A
+HEIGHT REQUIREMENT, NOT A SECOND OPINION ABOUT WIDTH.** The artwork's height
+follows the window's WIDTH (`width / 1.6377`) while the FOLD follows its HEIGHT,
+so on any window taller than 16:10 the artwork runs out before the fold and the
+cream scrim climbs up the frame. Reported as "1366 tablet vs 1440 desktop — the
+cream scrim should be in the same spot", and it was measurably not:
+
+| | field bottom, % of fold | dissolve spans |
+|---|---|---|
+| 1440×900 | 97.7% | 69–94% of the frame |
+| 1366×1024 *(before)* | **81.4%** | **53–79%** |
+| 1366×1024 *(after)* | 97.7% | — |
+
+⚠️ **AND IT WAS A CONTRAST BUG, NOT ONLY A COMPOSITION ONE.** The bio sat INSIDE
+the dissolve there — mask start 576, bio spanning 582–716 — and measured a worst
+pixel of **1.59:1**, far under the 3:1 the hero treats as its wall. Sized to the
+height it measures **3.01**, and the headline goes **2.64 → 2.90**. Same orbit
+phase, composited through the mask.
+- ⚠️ **160 IS EXACT, NOT TUNED.** 1440/900 is 16:10, so `160svh` EQUALS `100vw` at
+  the design ratio: verified byte-identical no-ops at **1440×900 (1440×879)** and
+  **1920×1080 (1920×1172)**, and it engages only above that ratio.
+- ⚠️ **THE COST IS A CROP, and it retires an invariant**: above 16:10 the box is
+  wider than the viewport (272px, 17%, at 1366×1024), so the orbs spread outward
+  relative to the frame and **`FIELD.blobs` x/y stop being direct frame fractions
+  there**. Same trade the ≤1024 tier already makes with its own `220svh`.
+- ⚠️ **`svh`, NEVER `dvh`** — same reason as everything else in the hero.
+- ⚠️ **MEASURING THIS NEEDS TWO TRAPS AVOIDED, both hit here first.** The mask
+  tokens compute to a TOKEN STREAM (`min(100%, calc(100svh + 30px))`), so
+  `parseFloat` gives NaN and a silent mask of the wrong length; and
+  `drawImage(canvas)` returns an EMPTY buffer unless it is called inside a
+  `requestAnimationFrame`, which reads as a uniform 21:1 (a black backdrop) rather
+  than as an error. Both produced confident, wrong numbers before being caught.
+
 ⚠️ **The 1024/1025 seam is now a LARGE step, not ~10%.** Desktop resolves to the
 window width (1025px at the seam) while the tablet side holds its 1688.69px
 floor — a ~65% jump. Only visible while dragging a window across that exact
