@@ -284,6 +284,7 @@ let contactLedge = 0;
 let contactRestEdge = 0;
 let contactAccentRGB = '74, 69, 255';
 let contactGlyphMid = 32;
+let contactCopyOffset = 0;
 function measureContactArrival() {
   // ⚠️ PUBLISH THE ROOM FIRST, THEN READ THE LEDGE — --contact-ledge clamps
   // against --contact-gap, so reading it before this is written gets the
@@ -324,6 +325,19 @@ function measureContactArrival() {
   contactLedge = contactSection
     ? parseFloat(getComputedStyle(contactSection, '::before').height) || 0
     : 0;
+
+  // HOW FAR THE COPY SITS BELOW THE PANEL'S TOP EDGE. The peek's window is
+  // anchored to THIS, not to the panel's edge — see the note at its call site.
+  // offsets, not getBoundingClientRect: .contact-inner carries the peek's own
+  // transform, and a rect would feed the output back into the input.
+  contactCopyOffset = 0;
+  if (contactSection) {
+    const copy = contactSection.querySelector('.contact-email');
+    if (copy) {
+      const pageTop = (el) => { let y = 0; for (let n = el; n; n = n.offsetParent) y += n.offsetTop; return y; };
+      contactCopyOffset = Math.max(0, pageTop(copy) - pageTop(contactSection));
+    }
+  }
   // The glyphs' own mid-line inside the bar. The bar is a GRADIENT now, so
   // "what the labels sit on" is a position, not the bar-wide average.
   if (introBar && introBar.offsetParent) {
@@ -2548,10 +2562,26 @@ function updateScrollEffects() {
       const meetEdge = ledge + barHeight;
       const restEdge = contactRestEdge;              // measured, not read per frame
       const endEdge = restEdge + CONTACT.peek.endAt * Math.max(0, meetEdge - restEdge);
-      const span = Math.max(1, vh - endEdge);
+
+      // ⚠️ THE WINDOW IS ANCHORED TO THE COPY, NOT TO THE PANEL'S EDGE, and that
+      // is the whole reason the peek is visible at all. The copy sits
+      // contactCopyOffset (~327px) BELOW the panel's top, so starting the window
+      // when the EDGE crosses the fold starts it while the copy is still a third
+      // of a screen below it. Measured at 900 tall: 58% of the peek was spent
+      // before the heading appeared (80 -> 34 with it still off-screen), and it
+      // was down to 20 by the time it crossed. Scrolling down you saw the last
+      // 20px; scrolling up you watched the copy pushed away, which reads clearly
+      // — a real asymmetry in VISIBILITY from a function with no direction term.
+      //
+      // Starting where the COPY meets the fold puts the whole travel on screen.
+      // The peak is subtracted too: the copy is offset downward by it, so the
+      // anchor has to account for its own displacement or the copy still starts
+      // below the fold.
+      const startEdge = Math.max(endEdge + 1, vh - contactCopyOffset - CONTACT.peek.max);
+      const span = Math.max(1, startEdge - endEdge);
       const travel = Math.min(Math.max(0, edge - endEdge), span);
       const peakPeek = Math.min(CONTACT.peek.max, CONTACT.peek.rate * span);
-      const t = 1 - travel / span;                       // 0 at the fold, 1 at the end
+      const t = 1 - travel / span;                    // 0 where the copy lands, 1 at the end
       setContactPeek(Math.round(peakPeek * Math.pow(1 - t, 3)));
     }
   }

@@ -1090,6 +1090,19 @@ revealed into place.
 - **Same cubic ease-out as the hero's `--field-scroll` tuck** — one curve for both
   parallaxes on the site.
 - ⚠️ **EXACTLY 0 AT REST**, so the settled composition is byte-identical.
+- ⚠️ **THE WINDOW IS ANCHORED TO THE COPY, NOT TO THE PANEL'S EDGE.** The copy
+  sits `contactCopyOffset` (**232px** at 1440×900) BELOW the panel's top, so a
+  window that starts when the EDGE crosses the fold starts it while the copy is
+  still a quarter-screen below. Measured: **58% of the peek was spent before the
+  heading appeared** (80 → 34 with it still off-screen), down to 20 by the time
+  it crossed. **This reads as a direction asymmetry and is not one** — the peek
+  has no direction term, so up and down are identical at the same position; what
+  differs is that scrolling UP you are watching the copy be pushed away, which is
+  legible, while scrolling DOWN the motion has already finished off-screen.
+  ⚠️ **So "I only see it in one direction" is a VISIBILITY report about the
+  anchor, not a bug in the curve.** Anchored to the copy (and subtracting the
+  peak, since the copy is displaced by it), only **16%** is spent before it is on
+  screen: first sight at peek 67 of 80.
 - ⚠️ **The window ENDS EARLY, and its floor is MEASURED.** Running it to the
   scroll floor leaves the copy still arriving while the panel already fills the
   screen; the floor is derived from the panel's resting edge rather than assumed
