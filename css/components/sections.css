@@ -861,9 +861,21 @@
      clamp — the middle term is the whole point of this rule and a second copy of
      it would drift. ≤1024 lowers it; see responsive.css. */
   --contact-pad-max: var(--gap-section);
+  /* ⚠️ THE TRIM IS SUBTRACTED HERE TOO, AND THAT IS WHAT KEEPS THE NAV FROM
+     INVERTING. --contact-trim was reserved by `min-height` only, so on a short
+     window the CONTENT outgrew the min-height and the panel came to rest at the
+     top of the viewport instead of --contact-trim below it — putting solid blue
+     behind the bar and flipping the labels to white. Measured at 1440: not
+     inverted at 900 (restEdge 117), inverted at 850 (67), 780 (1) and 700 (1).
+     Reserving the trim in the PADDING as well caps the panel at
+     `100dvh - footer - trim` from both directions, so the resting edge holds at
+     --contact-trim and the bar stays cream.
+     ⚠️ It can only shrink the padding, never grow it, so the footer-in-frame
+     guarantee this clamp exists for is strengthened rather than traded. */
   --contact-pad: clamp(
     24px,
-    calc((100dvh - var(--nav-offset) - var(--footer-height) - var(--contact-content, 0px)) / 2),
+    calc((100dvh - var(--nav-offset) - var(--footer-height)
+          - var(--contact-content, 0px) - var(--contact-trim, 0px)) / 2),
     var(--contact-pad-max));
   padding-block: var(--contact-pad);
   /* The nav's height on TOP of that, so the copy still begins a full --contact-pad

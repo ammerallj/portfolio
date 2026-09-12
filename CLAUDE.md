@@ -1215,26 +1215,39 @@ mechanism is
 
     restEdge = vh − max(minHeight, content) − footerHeight,  minHeight = vh − footer − trim
 
-so **while `min-height` binds, `restEdge` is exactly `--contact-trim` (144) and is
-independent of height.** Once Contact's CONTENT (696px) outgrows it — below
-**vh ≈ 921** — the content binds instead and `restEdge` falls away linearly.
-Measured at 1393 wide:
+⚠️ **THE BUG WAS THAT `--contact-trim` WAS RESERVED BY `min-height` AND NOT BY THE
+PADDING (fixed 2026-09).** Below **vh ≈ 890** Contact's CONTENT outgrew the
+min-height, the content bound instead, and the panel came to rest at the top of
+the viewport rather than `--contact-trim` below it — putting solid blue behind the
+bar and flipping the labels white. **The clamp on `--contact-pad` now subtracts
+the trim as well**, capping the panel at `100dvh − footer − trim` from both
+directions. It can only ever SHRINK the padding, so the footer-in-frame guarantee
+the clamp exists for is strengthened, not traded.
 
-| viewport height | 922 | 890 | 884 | 860 | 800 | 760 |
+| 1440 × height | 900 | 850 | 780 | 760 | 735 | 700 |
 |---|---|---|---|---|---|---|
-| `restEdge` | 145 | 113 | 107 | 83 | 23 | 0 |
-| labels | black | black | **white** | white | white | white |
-| shown colour's contrast | — | 4.73 | 4.60 | — | — | 5.86 |
+| `restEdge` before | 117 | 67 | 1 | — | — | 1 |
+| **`restEdge` after** | **145** | **145** | **141** | **121** | 96 | 61 |
+| labels after | black | black | black | black | *white* | *white* |
 
-⚠️ **THE FLIP LANDS WHERE IT SHOULD, AND BOTH SIDES CLEAR AA AT THE CROSSOVER** —
-at vh 890 black reads 4.73 where white would read 4.44; six pixels shorter, white
-reads 4.60 where black would read 4.56. That is the derived `DARK_TEXT_ALPHA`
-(0.86) doing exactly its job. At vh 760 white reads 5.86 and black would be 3.59.
-**So this is correct behaviour, not a bug** — two readers on windows 40px apart
-in height legitimately see different end states, and both are legible.
-⚠️ **Do not "fix" it by pinning the inversion on or off.** The rule is a pure
-function of what is actually behind the bar; hard-coding either state re-creates
-the guessed-window problem this replaced. `DARK_TEXT_AT`,
+**Verified on FRESH LOADS at 1920×1080, 1440×900/850/780/760, 1280×850,
+1100×880, 1024×820 — `restEdge` 144–145 and the bar stays cream at every one**,
+with the footer in frame and Contact fully in frame throughout.
+⚠️ **THE RESIDUAL FLOOR IS ~747px TALL**, and it is the content, not the rule:
+below it `--contact-pad` is already at its 24px floor, the panel cannot shrink
+further (559px at 1440), and `restEdge` falls away. It still inverts there, and
+**that is correct** — at vh 700 white reads 5.86 where black would read 3.59.
+⚠️ **MEASURE THIS ON A FRESH LOAD, NEVER BY RESIZING.** Rapid resizes leave
+`--contact-content` / `--footer-height` stale and the readings are plausible and
+wrong — one sweep reported `restEdge` 169 and the footer below the fold at
+1100×880, where a fresh load measures 144 and the footer in frame.
+
+**The flip rule itself was never wrong** — it is a pure function of what is
+actually behind the bar, and it picked correctly at every height. What was wrong
+was letting the panel arrive at the top in the first place.
+⚠️ **Do not "fix" the remaining short-window case by pinning the inversion on or
+off.** Hard-coding either state re-creates the guessed-window problem this
+replaced; the lever is the panel's height, which is what the clamp now controls. `DARK_TEXT_AT`,
 `DARK_TEXT_ALPHA` and the whole label-flip rule are now dead code there — kept
 because the project pages and any future full-frame panel still need them.
 - **What still earns its place:** the ledge's dissolve, and the bar's compensated
