@@ -798,6 +798,30 @@
 }
 
 .contact-inner {
+  /* ⚠️ REDUCE THE CENTRING SLACK. The panel is a full frame and the copy is
+     short, so `justify-content: center` splits the leftover evenly and put the
+     copy 232px below the panel's top at rest — 64 nav + 96 padding + 72 of that
+     slack. This claws back the slack ABOVE without abandoning the centring:
+     under `center`, a bottom margin of 2N shifts the item up by exactly N,
+     because the flex box centres the item PLUS its margin.
+
+     ⚠️ Not `justify-content: flex-start`, which was the obvious move. That hands
+     the whole 144px to the bottom at once and makes the panel visibly
+     bottom-heavy, with the copy stranded above a long empty run to the footer —
+     and the footer is deliberately part of this view. A token keeps it a dial.
+
+     ⚠️ 160px is the floor whatever this is set to (96 padding + the 64px the nav
+     occupies), so the remaining lever after this one is `--contact-pad`, not
+     more lift. At 48 the slack above goes 72 -> 24 and the resting gap 232 -> 184.
+
+     ⚠️ It moves the SPY's threshold, and in the safe direction. initSectionGeometry's
+     restingFor() measures the span of the section's CHILDREN, so lifting this
+     lifts contentTop and the spy fires ~48px earlier. Contact's CLICK uses
+     topAlignedFor() and does not move, so the click stays below the spy's
+     threshold — the ordering that must not reverse (a click landing short of it
+     is the bug that once left Work highlighted after clicking About). */
+  margin-bottom: calc(var(--contact-lift, 0px) * 2);
+
   display: flex;
   flex-direction: column;
   /* Under the big "let's connect." title before the meta columns — the same

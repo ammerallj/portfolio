@@ -1036,6 +1036,38 @@ anywhere, the same property that makes Contact's peek symmetric.
   undo a measured spacing decision in its neighbour**, because measurements taken
   from offsets do not see transforms. Check the seam, not just the section.
 
+### Contact's resting gap (`--contact-lift`, 2026-09)
+
+**The copy sat 232px below the panel's top at rest**, and that number decomposes
+as **64 nav + 96 padding + 72 of centring slack**. The panel is a full frame and
+the copy is short, so `justify-content: center` split the leftover evenly and put
+half of it above. `--contact-lift` (48px) claws that half back: slack above
+**72 → 24**, resting gap **244 → 198** (measured at 760×900).
+
+⚠️ **THE PEEK IS THE SMALL TERM IN THIS GAP AND THIS IS THE BIG ONE.** Three
+rounds were spent tuning the parallax against a "too wide" report that was ~87%
+composition; the peek's whole range is ±80 and most of it is spent off the
+resting position. **If "too wide" comes up again, come here first** — then
+`--contact-pad`. 160px (96 padding + the 64 the nav occupies) is the floor
+whatever this is set to.
+
+- **It is a bottom margin of 2× the lift, not `justify-content: flex-start`.**
+  Under `center`, a bottom margin of 2N shifts the item up by exactly N, because
+  the box centres the item PLUS its margin. `flex-start` was the obvious move and
+  hands the whole 144px to the bottom at once — visibly bottom-heavy, with the
+  copy stranded above a long empty run. A token keeps it a dial.
+- **The slack moves rather than disappearing**: copy-bottom to panel-bottom goes
+  168 → 216. The footer still sits fully in frame, which is the constraint that
+  matters there.
+- ⚠️ **IT MOVES THE SCROLL-SPY'S THRESHOLD, in the safe direction — but check
+  this if the lift changes.** `initSectionGeometry`'s `restingFor()` measures the
+  span of a section's CHILDREN, so lifting `.contact-inner` lifts `contentTop`
+  and the spy fires ~48px earlier. Contact's CLICK uses `topAlignedFor()` and
+  does not move, so the margin between them **grew 19px → 67px**. That ordering
+  must never reverse: a click landing SHORT of the spy's threshold is the bug
+  that once left Work highlighted after clicking About. ⚠️ **19px was thin** —
+  anything that lowers the copy inside the box eats that margin directly.
+
 ### Contact's soft leading edge (`--contact-ledge`, 2026-09)
 
 **THE PROBLEM WAS THE UNUSED RUNWAY, NOT THE EDGE.** Measured at 1280×720,
