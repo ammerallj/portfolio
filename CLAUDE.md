@@ -1330,17 +1330,22 @@ requirement — so the question is only what fills it. Measured:
 at ≤1024 (correct — it is sized to the narrower column) while the viewport gets
 TALLER, so the content covers less than half the share of the panel it does on
 desktop. No amount of redistribution changes that ratio.
-- **What IS fixed (responsive.css, 1024):** `.contact-inner` grows
-  (`flex: 1 1 auto`) and spaces its two children apart, so the heading pins to the
-  top and the meta row sits above the footer instead of the whole block clustering
-  at the top with **621px of empty blue under it**. The section's `min-height` and
-  `flex-start` are untouched — the panel still fills the screen; only what is
-  inside it is distributed. `gap` stays the floor, so a short window collapses
-  back to today's layout.
-- ⚠️ **THAT ANCHORS BOTH EDGES; IT DOES NOT ADD CONTENT.** The void moves from
-  below the block to between the heading and the meta row (717px at 1024×1366).
-  It reads as an editorial spread rather than an unfinished page, and the footer
-  edge resolves — but if "bare" is still the complaint, the lever is the 64px.
+- ⚠️ **DISTRIBUTING THE CONTENT WAS TRIED AND REVERTED — DO NOT REBUILD IT.**
+  `.contact-inner { flex: 1 1 auto; justify-content: space-between }` at ≤1024
+  pinned the heading to the panel's top and the meta row above the footer. **At
+  maxScroll it measured well**: both edges anchored, the 621px void broken up, the
+  footer resolved.
+  ⚠️ **AND IT WAS MUCH WORSE EVERYWHERE ELSE.** It moved the meta row ~700px down,
+  so through the whole APPROACH — the panel's top just under the nav, which is
+  most of the arrival — the frame was the heading and then a screen of nothing.
+  Reported as "it is blank on portrait", and correctly.
+  ⚠️ **THE GENERAL RULE THIS ESTABLISHES: JUDGE THIS PANEL AT THE SCROLL POSITIONS
+  THE READER PASSES THROUGH, NOT AT `maxScroll`.** Contact is the last section, so
+  its settled state is the easiest to test and the LEAST representative — the
+  reader spends the arrival looking at the panel's top half. Anything that spreads
+  content across the panel's full height trades the approach for the destination.
+  The same trap caught the peek's window (see "58% of the peek was spent before
+  the heading appeared").
 - ⚠️ **AND `--display-size` IS A SHARED BOOKEND** — the landing's headline and
   Contact's heading are deliberately the same size. Raising it for Contact alone
   breaks that pairing, so it is a composition decision rather than a tweak, and
