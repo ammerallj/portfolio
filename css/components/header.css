@@ -35,34 +35,49 @@
   background-color: rgba(251, 252, 248, 0.9);
   -webkit-backdrop-filter: blur(4px);
   backdrop-filter: blur(4px);
+  /* ⚠️ THE SOLID RUN ENDS AT THE NAV ITEM, NOT AT THE HEADER'S BOX. The box is
+     the wordmark plus --space-sm of padding top and bottom, so masking from
+     `100% - --header-bleed` held the cream at full strength for 16px BELOW the
+     wordmark before starting to fade — the cream then appeared to end on a line
+     level with nothing, which is what still read as a demarcation after the
+     bleed was added. The ramp starts on the type's own bottom edge instead, so
+     it spans --header-bleed + --space-sm. */
   -webkit-mask-image: linear-gradient(to bottom,
-    rgba(0, 0, 0, 1.0000) calc(100% - var(--header-bleed) + (var(--header-bleed) * 0.0000)),
-    rgba(0, 0, 0, 0.9803) calc(100% - var(--header-bleed) + (var(--header-bleed) * 0.0833)),
-    rgba(0, 0, 0, 0.9259) calc(100% - var(--header-bleed) + (var(--header-bleed) * 0.1667)),
-    rgba(0, 0, 0, 0.8438) calc(100% - var(--header-bleed) + (var(--header-bleed) * 0.2500)),
-    rgba(0, 0, 0, 0.7407) calc(100% - var(--header-bleed) + (var(--header-bleed) * 0.3333)),
-    rgba(0, 0, 0, 0.6238) calc(100% - var(--header-bleed) + (var(--header-bleed) * 0.4167)),
-    rgba(0, 0, 0, 0.5000) calc(100% - var(--header-bleed) + (var(--header-bleed) * 0.5000)),
-    rgba(0, 0, 0, 0.3762) calc(100% - var(--header-bleed) + (var(--header-bleed) * 0.5833)),
-    rgba(0, 0, 0, 0.2593) calc(100% - var(--header-bleed) + (var(--header-bleed) * 0.6667)),
-    rgba(0, 0, 0, 0.1562) calc(100% - var(--header-bleed) + (var(--header-bleed) * 0.7500)),
-    rgba(0, 0, 0, 0.0741) calc(100% - var(--header-bleed) + (var(--header-bleed) * 0.8333)),
-    rgba(0, 0, 0, 0.0197) calc(100% - var(--header-bleed) + (var(--header-bleed) * 0.9167)),
-    rgba(0, 0, 0, 0.0000) calc(100% - var(--header-bleed) + (var(--header-bleed) * 1.0000)));
+    rgba(0, 0, 0, 1.0000) calc(100% - (var(--header-bleed) + var(--space-sm)) + ((var(--header-bleed) + var(--space-sm)) * 0.0000)),
+    rgba(0, 0, 0, 0.9888) calc(100% - (var(--header-bleed) + var(--space-sm)) + ((var(--header-bleed) + var(--space-sm)) * 0.0625)),
+    rgba(0, 0, 0, 0.9570) calc(100% - (var(--header-bleed) + var(--space-sm)) + ((var(--header-bleed) + var(--space-sm)) * 0.1250)),
+    rgba(0, 0, 0, 0.9077) calc(100% - (var(--header-bleed) + var(--space-sm)) + ((var(--header-bleed) + var(--space-sm)) * 0.1875)),
+    rgba(0, 0, 0, 0.8438) calc(100% - (var(--header-bleed) + var(--space-sm)) + ((var(--header-bleed) + var(--space-sm)) * 0.2500)),
+    rgba(0, 0, 0, 0.7681) calc(100% - (var(--header-bleed) + var(--space-sm)) + ((var(--header-bleed) + var(--space-sm)) * 0.3125)),
+    rgba(0, 0, 0, 0.6836) calc(100% - (var(--header-bleed) + var(--space-sm)) + ((var(--header-bleed) + var(--space-sm)) * 0.3750)),
+    rgba(0, 0, 0, 0.5933) calc(100% - (var(--header-bleed) + var(--space-sm)) + ((var(--header-bleed) + var(--space-sm)) * 0.4375)),
+    rgba(0, 0, 0, 0.5000) calc(100% - (var(--header-bleed) + var(--space-sm)) + ((var(--header-bleed) + var(--space-sm)) * 0.5000)),
+    rgba(0, 0, 0, 0.4067) calc(100% - (var(--header-bleed) + var(--space-sm)) + ((var(--header-bleed) + var(--space-sm)) * 0.5625)),
+    rgba(0, 0, 0, 0.3164) calc(100% - (var(--header-bleed) + var(--space-sm)) + ((var(--header-bleed) + var(--space-sm)) * 0.6250)),
+    rgba(0, 0, 0, 0.2319) calc(100% - (var(--header-bleed) + var(--space-sm)) + ((var(--header-bleed) + var(--space-sm)) * 0.6875)),
+    rgba(0, 0, 0, 0.1562) calc(100% - (var(--header-bleed) + var(--space-sm)) + ((var(--header-bleed) + var(--space-sm)) * 0.7500)),
+    rgba(0, 0, 0, 0.0923) calc(100% - (var(--header-bleed) + var(--space-sm)) + ((var(--header-bleed) + var(--space-sm)) * 0.8125)),
+    rgba(0, 0, 0, 0.0430) calc(100% - (var(--header-bleed) + var(--space-sm)) + ((var(--header-bleed) + var(--space-sm)) * 0.8750)),
+    rgba(0, 0, 0, 0.0112) calc(100% - (var(--header-bleed) + var(--space-sm)) + ((var(--header-bleed) + var(--space-sm)) * 0.9375)),
+    rgba(0, 0, 0, 0.0000) calc(100% - (var(--header-bleed) + var(--space-sm)) + ((var(--header-bleed) + var(--space-sm)) * 1.0000)));
   mask-image: linear-gradient(to bottom,
-    rgba(0, 0, 0, 1.0000) calc(100% - var(--header-bleed) + (var(--header-bleed) * 0.0000)),
-    rgba(0, 0, 0, 0.9803) calc(100% - var(--header-bleed) + (var(--header-bleed) * 0.0833)),
-    rgba(0, 0, 0, 0.9259) calc(100% - var(--header-bleed) + (var(--header-bleed) * 0.1667)),
-    rgba(0, 0, 0, 0.8438) calc(100% - var(--header-bleed) + (var(--header-bleed) * 0.2500)),
-    rgba(0, 0, 0, 0.7407) calc(100% - var(--header-bleed) + (var(--header-bleed) * 0.3333)),
-    rgba(0, 0, 0, 0.6238) calc(100% - var(--header-bleed) + (var(--header-bleed) * 0.4167)),
-    rgba(0, 0, 0, 0.5000) calc(100% - var(--header-bleed) + (var(--header-bleed) * 0.5000)),
-    rgba(0, 0, 0, 0.3762) calc(100% - var(--header-bleed) + (var(--header-bleed) * 0.5833)),
-    rgba(0, 0, 0, 0.2593) calc(100% - var(--header-bleed) + (var(--header-bleed) * 0.6667)),
-    rgba(0, 0, 0, 0.1562) calc(100% - var(--header-bleed) + (var(--header-bleed) * 0.7500)),
-    rgba(0, 0, 0, 0.0741) calc(100% - var(--header-bleed) + (var(--header-bleed) * 0.8333)),
-    rgba(0, 0, 0, 0.0197) calc(100% - var(--header-bleed) + (var(--header-bleed) * 0.9167)),
-    rgba(0, 0, 0, 0.0000) calc(100% - var(--header-bleed) + (var(--header-bleed) * 1.0000)));
+    rgba(0, 0, 0, 1.0000) calc(100% - (var(--header-bleed) + var(--space-sm)) + ((var(--header-bleed) + var(--space-sm)) * 0.0000)),
+    rgba(0, 0, 0, 0.9888) calc(100% - (var(--header-bleed) + var(--space-sm)) + ((var(--header-bleed) + var(--space-sm)) * 0.0625)),
+    rgba(0, 0, 0, 0.9570) calc(100% - (var(--header-bleed) + var(--space-sm)) + ((var(--header-bleed) + var(--space-sm)) * 0.1250)),
+    rgba(0, 0, 0, 0.9077) calc(100% - (var(--header-bleed) + var(--space-sm)) + ((var(--header-bleed) + var(--space-sm)) * 0.1875)),
+    rgba(0, 0, 0, 0.8438) calc(100% - (var(--header-bleed) + var(--space-sm)) + ((var(--header-bleed) + var(--space-sm)) * 0.2500)),
+    rgba(0, 0, 0, 0.7681) calc(100% - (var(--header-bleed) + var(--space-sm)) + ((var(--header-bleed) + var(--space-sm)) * 0.3125)),
+    rgba(0, 0, 0, 0.6836) calc(100% - (var(--header-bleed) + var(--space-sm)) + ((var(--header-bleed) + var(--space-sm)) * 0.3750)),
+    rgba(0, 0, 0, 0.5933) calc(100% - (var(--header-bleed) + var(--space-sm)) + ((var(--header-bleed) + var(--space-sm)) * 0.4375)),
+    rgba(0, 0, 0, 0.5000) calc(100% - (var(--header-bleed) + var(--space-sm)) + ((var(--header-bleed) + var(--space-sm)) * 0.5000)),
+    rgba(0, 0, 0, 0.4067) calc(100% - (var(--header-bleed) + var(--space-sm)) + ((var(--header-bleed) + var(--space-sm)) * 0.5625)),
+    rgba(0, 0, 0, 0.3164) calc(100% - (var(--header-bleed) + var(--space-sm)) + ((var(--header-bleed) + var(--space-sm)) * 0.6250)),
+    rgba(0, 0, 0, 0.2319) calc(100% - (var(--header-bleed) + var(--space-sm)) + ((var(--header-bleed) + var(--space-sm)) * 0.6875)),
+    rgba(0, 0, 0, 0.1562) calc(100% - (var(--header-bleed) + var(--space-sm)) + ((var(--header-bleed) + var(--space-sm)) * 0.7500)),
+    rgba(0, 0, 0, 0.0923) calc(100% - (var(--header-bleed) + var(--space-sm)) + ((var(--header-bleed) + var(--space-sm)) * 0.8125)),
+    rgba(0, 0, 0, 0.0430) calc(100% - (var(--header-bleed) + var(--space-sm)) + ((var(--header-bleed) + var(--space-sm)) * 0.8750)),
+    rgba(0, 0, 0, 0.0112) calc(100% - (var(--header-bleed) + var(--space-sm)) + ((var(--header-bleed) + var(--space-sm)) * 0.9375)),
+    rgba(0, 0, 0, 0.0000) calc(100% - (var(--header-bleed) + var(--space-sm)) + ((var(--header-bleed) + var(--space-sm)) * 1.0000)));
   transition: opacity 0.35s ease, background-color 0.35s ease;
 }
 

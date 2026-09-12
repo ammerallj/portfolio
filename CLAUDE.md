@@ -1084,6 +1084,15 @@ Same construction as `.intro-bar::before`: a `::before` that extends
 `--header-bleed` (48px) past the box, masked out across it so **the cream and the
 blur fade together**. A blur that stops abruptly is as visible as a fill that does.
 
+⚠️ **THE SOLID RUN ENDS AT THE NAV ITEM, NOT AT THE HEADER'S BOX — and getting
+that wrong still reads as a demarcation even with the bleed in place.** The box is
+the wordmark plus `--space-sm` of padding top and bottom, so masking from
+`100% - --header-bleed` holds the cream at full strength for 16px BELOW the
+wordmark and only then starts to fade; the cream appears to end on a line level
+with nothing. The ramp starts on the type's own bottom edge instead, spanning
+`--header-bleed + --space-sm` (64px). Measured at 390: fade starts at 52 against
+the wordmark's bottom at 49, the 3px being line-height leading.
+
 ⚠️ **THE MASK IS A SMOOTHSTEP, NOT THE TWO-STOP LINEAR `.intro-bar` USES.** That
 bar can afford two stops because its cream is *also* a shaped gradient, so the two
 compose; here the fill is flat and the mask is the only thing shaping the falloff.
