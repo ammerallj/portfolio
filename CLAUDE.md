@@ -1036,15 +1036,29 @@ anywhere, the same property that makes Contact's peek symmetric.
   undo a measured spacing decision in its neighbour**, because measurements taken
   from offsets do not see transforms. Check the seam, not just the section.
 
-### The ledge travels on the way up (`--contact-ledge-lift`, 2026-09)
+### The ledge stretches on the way up (`--contact-ledge-lift`, 2026-09)
 
-Scrolling up, the dissolve's **top descends toward the panel** so the ledge moves
-with the copy instead of staying welded in place: ledge **96 → 72**, eased in over
-~250px of the reader's own travel by the same `peekDir` blend, and locked back to
-96 on the way down.
+Scrolling up, the ledge's **bottom follows the descending panel while its top
+holds**, so the dissolve LENGTHENS and reads as being pulled down: ledge
+**96 → 160**, eased in over ~250px of the reader's own travel by the same
+`peekDir` blend, and back to 96 on the way down.
 
-⚠️ **ONLY ITS TOP MOVES. TRANSLATING THE BOX IS THE OBVIOUS IMPLEMENTATION AND IS
-THE ONE THAT CANNOT WORK.** The gradient reaches alpha 1 at its own bottom, so
+⚠️ **IT WAS BUILT SHORTENING FIRST AND THAT WAS BACKWARDS.** Moving the top DOWN
+also makes the ledge travel, but it COMPRESSES the ramp — a harder edge, when the
+whole point of the gesture is a softer one. Stretching gets the same travel and
+more dissolve instead of less. **If a "softer" edge is asked for, check which
+direction the height is moving before reaching for anything else.**
+
+⚠️ **THE CAP IS BOUNDED BY WHAT IT WASHES, NOT BY BANDING.** Growing upward pushes
+the ramp INTO About's copy, since the ledge paints over the section above.
+Measured worst case **11.22:1** for black — and it is at stretch ZERO, because the
+stretch and About's push are anti-correlated: by the time the ledge is fully
+stretched, About's peek has relaxed to a lag and pulled its copy UP away from the
+ramp (41–55px in, 13–16:1). They never compound. Stops go 4.0px → 6.7px apart at
+full stretch, still finer than the 8px that read as faint Mach banding on the
+hero field, and the grain dithers it.
+
+⚠️ **NEVER A TRANSLATE, IN EITHER DIRECTION.** The gradient reaches alpha 1 at its own bottom, so
 moving that bottom below the panel's top leaves the ramp part-way where it meets
 solid blue — **a step of 40 code values at 24px and 66 at 32**, against the
 54-value seam this entire change exists to remove. The bottom stays welded and
