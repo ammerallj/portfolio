@@ -373,6 +373,28 @@
      This tier only carries what genuinely differs at portrait width. */
 
   :root {
+    /* ⚠️ THE FIELD IS PULLED IN AT PORTRAIT WIDTH SO MORE OF THE COMPOSITION IS
+       VISIBLE. The ≤1024 tier's `220svh` resolves to 2253px in a 768px viewport —
+       **only 34% of the artwork is on screen**, so the orbs read as one broad
+       wash rather than a composition. 195svh resolves to ~1997 and puts 38% on
+       screen.
+       ⚠️ WIDTH AND HEIGHT ARE THE SAME KNOB (height = width / 1.6377), so
+       "show more orbs" and "keep colour under the bio" pull against each other —
+       narrowing the field also shortens it, and the dissolve then climbs into the
+       bio. That is the whole constraint here, and it is why this cannot simply be
+       taken further.
+       ⚠️ 195 IS THE MEASURED CEILING, NOT A PREFERENCE. Floors over 6 phases at
+       768×1024, composited through the mask — bio is 24px/500, so its wall is
+       3:1, same as the 64px headline:
+         · 2253 (the ≤1024 value): headline 3.40, bio 3.50, 34% visible
+         · **1997 (195svh, shipped): headline 3.50, bio 3.21, 38% visible**
+         · 1800: headline 3.42, bio 3.01 — ON the wall, too thin to ship
+         · 1638: bio ~2.95 — FAILS
+       The headline IMPROVES on the way (3.40 → 3.50); it is the bio that binds.
+       ⚠️ Scoped to ≤768 so LANDSCAPE tablet (1024×768) keeps the ≤1024 value it
+       was measured against. */
+    --field-w: max(1688.69px, 195svh, 117.27vw);
+
     /* The next-case card's corner DOES differ at portrait: the pager is still
        full-width, so as the box narrows the 48px corner starts eating the
        padding it sits behind. The type doesn't step here (the title holds 36

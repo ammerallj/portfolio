@@ -262,6 +262,30 @@ a ~10% step in field width at the 1024/1025 seam on short viewports, visible onl
 while dragging a window across that exact boundary. Re-measure landscape before
 ever locking the two together.
 
+⚠️ **≤768 PULLS THE FIELD IN AGAIN — `max(1688.69px, 195svh, 117.27vw)` (2026-09).**
+The ≤1024 tier's `220svh` resolves to **2253px in a 768px viewport, so only 34% of
+the artwork is on screen** and the orbs read as one broad wash instead of a
+composition. 195svh resolves to ~1997 and puts **38%** on screen.
+⚠️ **WIDTH AND HEIGHT ARE THE SAME KNOB HERE (height = width / 1.6377), so "show
+more orbs" and "keep colour under the bio" pull directly against each other** —
+narrowing the field also shortens it, and the dissolve then climbs into the bio.
+That coupling is the whole constraint and it is why this cannot be taken further.
+Floors over 6 phases at 768×1024, composited through the mask (bio is 24px/500 →
+its wall is 3:1, same as the 64px headline):
+
+| `--field-w` | visible | headline floor | bio floor |
+|---|---|---|---|
+| 2253 (the ≤1024 value) | 34% | 3.40 | 3.50 |
+| **1997 = 195svh (shipped)** | **38%** | **3.50** | **3.21** |
+| 1800 | 43% | 3.42 | 3.01 — ON the wall |
+| 1638 | 47% | 3.22 | ~2.95 FAILS |
+
+- **The headline IMPROVES on the way in** (3.40 → 3.50); the BIO is what binds.
+  If this is ever pushed again, that is the number to watch, not the headline.
+- ⚠️ **Scoped to ≤768 so LANDSCAPE tablet keeps the value it was measured
+  against** — 1024×768 still resolves to 1690 (61% visible) and is untouched, as
+  is desktop (1440×879).
+
 **The hero is sized in `svh`, never `dvh` (2026-08-31).** `.intro`'s height,
 the frost pane's two `50svh` terms and the tablet `--field-w` all use it, and
 they must move together — anything sized as a fraction of the hero that stays on
