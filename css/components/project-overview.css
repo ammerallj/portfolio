@@ -196,24 +196,6 @@ a.intro-bar-name {
    that card enlarged and one token governs every section title site-wide. (It was
    a page-local .project-title at 40px/700 before that reclassification.) */
 
-/* Dek — the one-line description under the title. Not a heading and not a
-   section: a standfirst that says what the project was before any block does.
-
-   Body size (matches .about-body p exactly). It was 40px, but once the title
-   came down to Tier 2 the two were the same size — and since the dek runs to two
-   lines while the title runs to one, the SUBTITLE became the heaviest mass in
-   the masthead. At body size the hierarchy is unambiguous and it needs no
-   per-tier overrides: body type doesn't scale on this site. */
-.project-dek {
-  margin-top: var(--gap-content);
-  font-family: var(--font-body);
-  font-size: var(--size-lg);
-  font-weight: 400;
-  letter-spacing: -0.02em;
-  line-height: 1.4;
-  color: var(--color-text);
-}
-
 /* (.project-locked, .project-locked-* and .invite-button were DELETED 2026-08.
    Every "go somewhere" block on the project pages is now a .next-case card:
    --image for the Next-case pager, --outline (+ --locked) for the gated case
@@ -281,8 +263,7 @@ a.intro-bar-name {
    on the same measure as prose everywhere else on the site. */
 
 /* Inside the left column each piece is a separate thing, so they take the
-   between-things gap. (.project-dek keeps its own --gap-content: it belongs to
-   the title, not beside it.) */
+   between-things gap. */
 .project-masthead--split .project-meta-list,
 .project-masthead--split .project-overview-text {
   margin-top: var(--gap-group);
