@@ -1932,11 +1932,12 @@ shift rather than a set of rules.
 (`shaped-heading` → `approach-heading`). `#impact` is unchanged everywhere despite
 the heading reading "What changed" — shared idiom plus inbound anchors.
 
-**Never put an `<a>` inside `.impact-row-summary`.** A link there both navigates and
-toggles the row, because the click bubbles to the summary's activation behaviour.
-Loop is the page this bites: its four evidence links live in the expanded copy, and
-"US Patent 12,277,305" is plain text in the evidence line while the patent link sits
-on "patented model for shared dynamic objects" below it.
+**Evidence links live inline in the What changed explanations** (2026-09, since the
+accordion went): Loop's patent sits on "patented model", Fluid Framework on "first
+components", Microsoft Learn on "public developer guidance". If a `<details>`
+accordion ever returns, never put an `<a>` inside its `<summary>` — a link there
+both navigates and toggles the row, because the click bubbles to the summary's
+activation behaviour.
 
 **A project page is ONE document, not stitched pages (2026-08).** This is the
 governing idea, and two things enforce it. The homepage's sections are peer
@@ -2271,80 +2272,28 @@ nav.** Two different jobs — don't merge them.
   including "reasonable" filler for a missing timeline or team.
 - **Omit, don't fabricate.** If a metadata row (Timeline / Role / Area / Scope)
   or a detail block has no information, delete it. Never leave it blank or guess.
-- **Impact rows can expand (`.project-impact-list--expandable`, all four pages,
-  2026-08).** Each row is a native `<details>`: the `<summary>` carries the
-  outcome (18px/**500**, full black) **and an evidence line** (13px/400 at
-  **`--color-text-70`**), and only the explanation collapses.
-  - **Never move a metric into the collapsed half.** The whole reason the split
-    exists is that the numbers are the strongest proof on the page — an accordion
-    that hides them trades the page's evidence for tidiness. Summary = outcome +
-    proof; detail = why.
-  - **The claim's weight and the evidence's colour are ONE decision — change them
-    together.** The outcome was 600 (inherited from `.project-impact-list strong`)
-    with the evidence at full black. That works on the plain lists, where the
-    emphasis is a lead clause *inside* a sentence; here the whole line is the claim,
-    so 600 applied to every word of four stacked 18px lines and read as a wall of
-    bold. Dropping to 500 fixed that but left two full-black elements with no focal
-    point, so the evidence went to 70%. **Undo in that order:** if the numbers ever
-    need to fight for attention again, put the claim back to 600 *before* putting
-    the evidence back to full black — two blacks was the problem, not the mute.
-  - The evidence line still takes **`.project-meta-row dd`'s size and tracking**
-    (13px, normal tracking) — same material as the masthead's Timeline / Role / Team
-    values. Only the colour departs, and only because there is no muted `dt` label
-    beside it here to do the contrast work. At 70% it is 8.4:1 — not fine print.
-  - **500 is the floor for the claim.** At 400 it would be identical to the 18px/400
-    explanation that opens underneath, and an expanded row would collapse into one
-    undifferentiated block of body copy.
-  - **`.impact-row-detail` declares NO type at all** — only padding. It inherits
-    the 18px/-0.02em/1.4 full black from `.project-impact-list li`, which is what
-    these paragraphs were before they became collapsible and the same body text
-    the Approach statement uses. **Expanding a row reveals the site's body copy,
-    not a smaller quieter variant of it.** Don't add a font-size here; a component
-    that invents its own reading size is the bug this rule exists to prevent.
-  - **One open at a time** comes from the shared `name="impact-row"` — the
-    platform's exclusive-accordion behaviour, **not** a script. Keep the name
-    identical across all four; a typo silently un-groups that row. Browsers
-    without it (pre-2024) simply allow several open, which is the old behaviour
-    rather than a broken one.
-  - **No JavaScript, deliberately** — the browser owns the toggle. `js/main.js` is
-    shared by every page (a TypeError there blanks one), and the "readable with JS
-    off" rule means a scripted accordion would hide all four explanations from the
-    AI crawlers that don't run JS. `<details>` also gives keyboard, focus, and the
-    expanded/collapsed announcement for free. Keep it that way. **This is why
-    one-at-a-time used `name` rather than a click handler** — the obvious reach
-    for JS, avoided.
-  - Rules are scoped to the modifier; the plain `.project-impact-list` is
-    untouched. Loop and Groups have one under Approach (their three named
-    principles), and every page's What changed became a plain list too (2026-09, Groups last) —
-    the accordion was dropped there, so its three outcomes are `<strong>` lead +
-    explanation, the same shape as the principles lists.
-  - **The open/close motion is Motion Primitives' accordion, rebuilt in CSS
-    (2026-09).** That library's `<AccordionContent>` animates one motion.div
-    between `{height: 0, opacity: 0}` and `{height: 'auto', opacity: 1}` inside an
-    overflow-hidden item, under `AnimatePresence` — so the CLOSE animates too. Its
-    chevron demo runs that at `{duration: 0.2, ease: 'easeInOut'}` with the icon
-    rotating 180° over 200ms, which is the preset adopted here **because this row
-    already had that chevron verbatim**; the only missing half was the box itself
-    growing. `::details-content` is the native equivalent of its motion.div: the
-    browser still owns the state, the CSS owns the curve, and **the no-JS rule
-    above is untouched** — the library is React + Motion and none of it is loaded.
-    - It needs `interpolate-size: allow-keywords` (`height: auto` is otherwise not
-      an interpolable endpoint, and the row just snaps). Scoped to
-      `.project-impact-list--expandable`, **not `:root`** — it changes how `auto`
-      behaves in every transition it reaches.
-    - `content-visibility` is in the transition list with
-      `transition-behavior: allow-discrete`, or the closing half never renders.
-    - **The old text-only fade is the FALLBACK and must stay.** The whole block
-      sits behind `@supports (interpolate-size: allow-keywords) and
-      selector(::details-content)`, which switches the `impact-row-open` keyframe
-      off; a browser missing either feature keeps exactly the previous behaviour
-      (snap open, text fades). Both conditions are required — with
-      `::details-content` but no `interpolate-size` the height would snap while
-      clipped, which is worse than either.
-    - The docs page's other preset, `{type: 'spring', stiffness: 120, damping: 20}`,
-      is **not** used: that spring is underdamped (ratio 0.91) and overshoots, so it
-      needs a `linear()` approximation rather than a bezier, and it would bounce
-      the page below the row.
+- **Impact rows are a PLAIN STACKED LIST on all four pages (2026-09) — the
+  accordion is GONE.** Each What changed row is `<li><strong>outcome</strong>
+  explanation</li>` on `.project-impact-list.project-impact-list--stacked`, where
+  `--stacked` puts the bold outcome on its own line (`display: block` +
+  `--space-xs` below). Evidence links (Loop's patent / Fluid Framework /
+  Microsoft Learn, Accessibility's public-work link) sit INLINE in the
+  explanation on a natural phrase.
+  - **The accordion (`--expandable`, native `<details>` rows with an evidence
+    line, chevron and `::details-content` motion) shipped 2026-08 and was
+    removed page by page in 2026-09 — Messaging, Accessibility, Loop, then
+    Groups — and its CSS was deleted from project-overview.css and global.css
+    once nothing rendered it.** Two lessons from it survive and still apply:
+    - **Never hide a metric behind a click.** The numbers are the strongest
+      proof on the page; the accordion only worked because outcome + evidence
+      stayed in the always-visible summary. A plain list can't get this wrong.
+    - **No JavaScript for content structure.** `js/main.js` is shared by every
+      page and the "readable with JS off" rule means AI crawlers must see every
+      explanation in raw HTML. Any future collapse must be native `<details>`
+      again, never a scripted one.
+  - Loop and Groups also carry a plain (non-stacked) `.project-impact-list`
+    under Approach for their three named principles — run-in `<strong>` lead,
+    same sentence. Two lists, one component, one modifier between them.
 - **Gating states that the work can't be shown publicly and points to the locked
   case study.** No AI conversation. **Two treatments exist — pick by whether the
   page has an Approach statement to carry:**
@@ -2478,8 +2427,8 @@ nav.** Two different jobs — don't merge them.
     / `.footprint-list` survive in `sections.css` (imported first), so the block
     is the homepage's own material. The ONLY project-page rule is
     `.project-impact-list + .footprint-group { margin-top: var(--gap-group) }` in
-    project-overview.css — written as a sibling relationship, matching both the
-    plain and `--expandable` lists.
+    project-overview.css — written as a sibling relationship, so it matches the
+    list whatever modifier it carries.
   - **No `data-reveal` on the block.** It sits inside `.project-block-right`,
     which already carries one; a nested target would be hidden by a group it
     isn't in.
