@@ -40,11 +40,11 @@
         "headline": "Helping People Navigate Communities",
         "url": "https://ammerallj.design/work/facebook-groups.html",
         "description": "A sense of place across many communities.",
-        "abstract": "Most people on Facebook belong to at least 15 active groups, and more than 100 million join one every day, so people needed clearer ways to navigate between communities and understand where they were without losing context. What changed: people could move through Groups with clearer orientation and context, worth a 0.26% engagement lift on a mature consumer surface, after navigation, transitions and key entry points across Community Home were redesigned. Core Groups experiences became more consistent across platforms, with design-system adoption reaching roughly 82% as reusable panels, invitation patterns and states replaced one-off solutions across iOS and Android. And implementation quality improved across core surfaces: 17 implementation reviews with engineering and more than 200 UI issues resolved.",
+        "abstract": "Group Home had become crowded before members reached the content. Simplifying the landing experience meant preserving the cues people still needed to orient. What changed: Members reached the group faster without losing orientation. I simplified the top of Group Home while preserving the identity cues members relied on to know where they were. The landing experience could respond to how someone arrived. I explored different states for returning members so stronger content intent could bring the feed forward without treating every visit the same. Featured content only kept its space when it was useful. I designed freshness-based behavior so new content stayed visible and seen content collapsed, increasing engagement.",
         "image": "https://ammerallj.design/images/work-communities.jpg?v=3",
         "inLanguage": "en-US",
         "temporalCoverage": "2022-03/2023-04",
-        "creditText": "Product Designer · Interaction Design · Design Systems · Design Quality",
+        "creditText": "Product Designer",
         "keywords": "Facebook Groups, online communities, interaction design, design systems, design quality, iOS, Android, mobile design",
         "author": { "@id": "https://ammerallj.design/#jenna" },
         "sourceOrganization": { "@type": "Organization", "name": "Meta", "url": "https://about.meta.com" },
@@ -198,18 +198,22 @@
               </div>
               <div class="project-meta-row">
               <dt>Role</dt>
-              <dd>Product Designer &middot; Interaction Design &middot; Design Systems &middot; Design Quality</dd>
+              <dd>Product Designer</dd>
+              </div>
+              <div class="project-meta-row">
+              <dt>Scope</dt>
+              <dd>Designed key Group Home behaviors for returning members, including top-of-home, contextual landing states, and Featured content.</dd>
               </div>
               <div class="project-meta-row">
               <dt>Team</dt>
-              <dd>2 Product Designers &middot; Content Design &middot; Product Management &middot; Engineering &middot; Research</dd>
+              <dd>Product Design &middot; Content Design &middot; Product Management &middot; Engineering &middot; Research</dd>
               </div>
               </dl>
 
               <!-- The Overview prose lives here now, under the metadata — this page
                    has no separate Overview section any more. -->
               <div class="project-overview-text about-body" data-reveal data-reveal-order="3">
-                <p>Most people on Facebook belong to at least 15 active groups, and more than 100 million join one every day. People needed clearer ways to navigate between communities and understand where they were without losing context.</p>
+                <p>Group Home had become crowded before members reached the content. Simplifying the landing experience meant preserving the cues people still needed to orient.</p>
               </div>
             </div>
           </div>
@@ -269,12 +273,12 @@
           </div>
           <div class="project-block-right" data-reveal data-reveal-order="2">
             <div class="about-body">
-              <p>Groups had grown into a collection of entry points, states, and community experiences that didn't always behave as one system. I focused on restoring orientation: clarifying how people moved through Community Home, defining reusable interaction patterns across key entry points, and bringing the experience closer to a shared design language across iOS and Android.</p>
+              <p>I focused on the returning member experience: what had to stay visible, what could collapse, and what should adapt based on how someone arrived.</p>
             </div>
             <ul class="project-impact-list" role="list">
-              <li><strong>Restore orientation first.</strong> Refine Community Home, navigation, and transitions so people could move between Groups experiences with a clearer sense of where they were and what came next.</li>
-              <li><strong>Reuse patterns across entry points.</strong> Define shared panels, invitation experiences, and states that could work consistently across iOS and Android instead of solving each surface independently.</li>
-              <li><strong>Treat quality as a system problem.</strong> Use cross-surface audits, prototypes, and implementation reviews to catch inconsistencies and bring core Groups experiences closer to the Facebook Design System.</li>
+              <li><strong>Preserve the cues that help people orient.</strong> Keep the group identity visible enough for members to know where they are.</li>
+              <li><strong>Let arrival context shape the landing state.</strong> Treat someone coming from a notification differently from someone opening the group directly.</li>
+              <li><strong>Let freshness decide what deserves space.</strong> Keep important new content visible, then collapse it once it has been seen.</li>
             </ul>
           </div>
         </div>
@@ -284,14 +288,12 @@
 
     <!-- ========================================================
          WHAT CHANGED — renamed from "Impact." (2026-08), matching the other three
-         pages. Expandable rows: outcome + evidence in the <summary> (always
-         visible), explanation inside. No JavaScript; one open at a time via the
-         shared name="impact-row". Never put an <a> in .impact-row-summary — a link
-         there both navigates and toggles the row.
+         pages. PLAIN STACKED ROWS (2026-09): the accordion was dropped here last,
+         so no page uses it any more. Each row is a <strong> outcome on its own
+         line with its explanation below (.project-impact-list--stacked).
 
-         The figures are now stated precisely (+0.26%, ~82%) where the old bullets
-         hedged ("roughly a quarter-percent", "past 80%"). The JSON-LD abstract and
-         llms.txt restate these, so change all three together.
+         The JSON-LD abstract and llms.txt restate these rows, so change all
+         three together.
          ======================================================== -->
     <section class="page-section" id="impact" aria-labelledby="impact-heading">
       <div class="site-container">
@@ -301,43 +303,10 @@
             <h2 class="section-title" id="impact-heading" data-reveal data-reveal-order="0">What changed</h2>
           </div>
           <div class="project-block-right" data-reveal data-reveal-order="2">
-            <ul class="project-impact-list project-impact-list--expandable" role="list">
-              <li>
-                <details class="impact-row" name="impact-row">
-                  <summary class="impact-row-summary">
-                    <span class="impact-row-text">
-                      <span class="impact-row-outcome">People could move through Groups with clearer orientation and context.</span>
-                      <span class="impact-row-evidence">+0.26% engagement</span>
-                    </span>
-                    <svg class="impact-row-chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                  </summary>
-                  <p class="impact-row-detail">I redesigned navigation, transitions, and key entry points across Community Home so people could move between Groups experiences with a clearer sense of where they were and what came next.</p>
-                </details>
-              </li>
-              <li>
-                <details class="impact-row" name="impact-row">
-                  <summary class="impact-row-summary">
-                    <span class="impact-row-text">
-                      <span class="impact-row-outcome">Core Groups experiences became more consistent across platforms.</span>
-                      <span class="impact-row-evidence">~82% design-system adoption</span>
-                    </span>
-                    <svg class="impact-row-chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                  </summary>
-                  <p class="impact-row-detail">I defined reusable panels, invitation patterns, and states across iOS and Android, replacing one-off solutions with shared patterns and bringing more of Groups onto the Facebook Design System.</p>
-                </details>
-              </li>
-              <li>
-                <details class="impact-row" name="impact-row">
-                  <summary class="impact-row-summary">
-                    <span class="impact-row-text">
-                      <span class="impact-row-outcome">Implementation quality improved across core surfaces.</span>
-                      <span class="impact-row-evidence">17 reviews &middot; 200+ UI issues resolved</span>
-                    </span>
-                    <svg class="impact-row-chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                  </summary>
-                  <p class="impact-row-detail">Cross-surface audits and prototypes exposed inconsistencies that weren't visible when features were reviewed independently. I worked closely with engineering through implementation to resolve more than 200 UI issues and raise the quality bar across the experience.</p>
-                </details>
-              </li>
+            <ul class="project-impact-list project-impact-list--stacked" role="list">
+              <li><strong>Members reached the group faster without losing orientation.</strong> I simplified the top of Group Home while preserving the identity cues members relied on to know where they were.</li>
+              <li><strong>The landing experience could respond to how someone arrived.</strong> I explored different states for returning members so stronger content intent could bring the feed forward without treating every visit the same.</li>
+              <li><strong>Featured content only kept its space when it was useful.</strong> I designed freshness-based behavior so new content stayed visible and seen content collapsed, increasing engagement.</li>
             </ul>
 
             <!-- PUBLIC FOOTPRINTS — third-party coverage of THIS project. Moved
