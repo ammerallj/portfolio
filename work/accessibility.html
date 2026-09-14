@@ -43,11 +43,11 @@
         "headline": "Shaping Accessibility Across Products",
         "url": "https://ammerallj.design/work/accessibility.html",
         "description": "How accessibility gets built into products across Meta.",
-        "abstract": "Accessibility had relied on specialists catching issues late in development. The European Accessibility Act made it business-critical, and as AI accelerated how teams built, reviewing after the fact couldn't keep up. The deeper problem was that a standard only becomes real when people can find it, apply it, verify it, and trust it—and at Meta's scale, none of that happened on its own. What changed: product teams could apply the accessibility standard during design and build, with a playbook that translated 29 requirements into 23 practical topics organized around the decisions teams were already making. Accessibility review stopped being a manual bottleneck, as shared workflows reduced the manual coordination required across program managers, reviewers, and product teams, while automated checks cut a recurring 3-5 hour review to effectively zero per wave and a separate submission workflow saved 1,711 hours. AI could find and ground teams in the guidance that applied, without searching through 200+ pages, reducing deprecated results from 25% to zero. And people could find accessibility support in one place for the first time, as a needs-based model became a customer-facing experience bringing 30+ features and 45 Help Center articles into a single path on meta.com.",
+        "abstract": "Accessibility issues were often caught late, after teams had already made product decisions. As the stakes increased, having standards wasn’t enough. Teams needed to know what applied, when to act, and what to do next. What changed: Start the issue where it happens. I designed a lightweight capture flow that carried product context into the existing review workflow. The broader review and submission workflows saved over 1,700 hours of manual work. Turn requirements into decisions. I translated accessibility requirements into practical guidance for the decisions teams were making in design and build. Make AI-assisted guidance more reliable. I organized product questions around what people were trying to do, connected each one to authoritative guidance, and restructured the underlying content around that, eliminating deprecated retrieval results. Start with the need, then the product. I launched Meta’s first centralized public accessibility destination, organizing 30+ features and 45 support articles around people’s needs first.",
         "image": "https://ammerallj.design/images/work-accessibility.jpg?v=4",
         "inLanguage": "en-US",
         "temporalCoverage": "2023-12/2026-07",
-        "creditText": "Product Designer · Product Systems · Interaction Design · AI Strategy",
+        "creditText": "Product Designer",
         "keywords": "accessibility, product systems, interaction design, AI strategy, European Accessibility Act, WCAG, design systems",
         "author": { "@id": "https://ammerallj.design/#jenna" },
         "sourceOrganization": { "@type": "Organization", "name": "Meta", "url": "https://about.meta.com" },
@@ -57,8 +57,7 @@
         ],
         "citation": [
           { "@type": "WebPage", "name": "Accessibility at Meta", "url": "https://www.meta.com/accessibility/" },
-          { "@type": "WebPage", "name": "Advancing Accessibility at Meta", "url": "https://about.fb.com/news/2025/05/advancing-accessibility-meta/" },
-          { "@type": "WebPage", "name": "European Accessibility Act", "url": "https://commission.europa.eu/strategy-and-policy/policies/justice-and-fundamental-rights/disability/european-accessibility-act-eaa_en" }
+          { "@type": "WebPage", "name": "Advancing Accessibility at Meta", "url": "https://about.fb.com/news/2025/05/advancing-accessibility-meta/" }
         ],
         "isPartOf": { "@id": "https://ammerallj.design/#website" },
         "mainEntityOfPage": "https://ammerallj.design/work/accessibility.html",
@@ -218,21 +217,25 @@
             <div class="project-masthead-foot">
               <dl class="project-meta-list" data-reveal data-reveal-order="2">
               <div class="project-meta-row">
-              <dt>Timeline</dt>
+              <dt>Duration</dt>
               <dd>December 2023&ndash;July 2026</dd>
               </div>
               <div class="project-meta-row">
               <dt>Role</dt>
-              <dd>Product Designer &middot; Product Systems &middot; Interaction Design &middot; AI Strategy</dd>
+              <dd>Product Designer</dd>
+              </div>
+              <div class="project-meta-row">
+              <dt>Scope</dt>
+              <dd>Designed review workflows, product guidance, AI retrieval models, and Meta&rsquo;s end-to-end public accessibility website.</dd>
               </div>
               <div class="project-meta-row">
               <dt>Team</dt>
-              <dd>Engineering &middot; Product Management &middot; Product Design &middot; Content Design &middot; Research &middot; Marketing &middot; Learning Program &middot; Legal</dd>
+              <dd>Engineering &middot; Product &middot; Research &middot; Content Design &middot; Marketing</dd>
               </div>
               </dl>
 
               <div class="project-overview-text about-body" data-reveal data-reveal-order="3">
-              <p>Accessibility had relied on specialists catching issues late in development. The <a href="https://commission.europa.eu/strategy-and-policy/policies/justice-and-fundamental-rights/disability/european-accessibility-act-eaa_en" target="_blank" rel="noopener noreferrer">European Accessibility Act<span class="visually-hidden"> (opens in new tab)</span></a> made it business-critical, and as AI accelerated how teams built, reviewing after the fact couldn't keep up. The deeper problem was that a standard only becomes real when people can find it, apply it, verify it, and trust it—and at Meta's scale, none of that happened on its own.</p>
+              <p>Accessibility issues were often caught late, after teams had already made product decisions. As the stakes increased, having standards wasn’t enough. Teams needed to know what applied, when to act, and what to do next.</p>
               </div>
             </div>
           </div>
@@ -292,7 +295,7 @@
           </div>
           <div class="project-block-right" data-reveal data-reveal-order="2">
             <div class="about-body">
-              <p>Accessibility started as something specialists upheld. I shifted more of that responsibility into the product itself: how people find support, teams evaluate quality, and guidance gets surfaced.</p>
+              <p>I focused on how accessibility guidance should change with the moment: when someone finds an issue, makes a product decision, asks for guidance, or looks for support.</p>
             </div>
           </div>
         </div>
@@ -312,83 +315,23 @@
              shared right column: the same .project-block idiom as every other
              page. (The card-grid experiment is gone; per-item headlines with it.)
 
-             EXPANDABLE ROWS (--expandable modifier, accessibility only). Each row
-             is a native <details>: outcome + evidence in the <summary> (always
-             visible), the explanation inside. NO JAVASCRIPT — the browser owns the
-             toggle, so this works with js/main.js absent or broken, keyboard and
-             screen-reader behaviour is the platform's, and the explanations are
-             real DOM that crawlers read (see the "content must stay readable with
-             JS off" rule in CLAUDE.md — a JS accordion would have hidden all four
-             from them).
+             PLAIN STACKED ROWS (2026-09): the accordion was dropped here, as on
+             Messaging. Each row is a <strong> outcome on its own line with its
+             explanation and evidence below (.project-impact-list--stacked). The
+             public-work link stays at the end of the fourth row, with the outcome
+             it evidences. Loop and Groups keep their expandable rows.
 
-             The metrics deliberately sit in the SUMMARY, not the detail: collapsing
-             the numbers would hide the strongest proof on the page behind a click.
-
-             ONE OPEN AT A TIME comes from the shared name="impact-row" — the
-             platform's exclusive-accordion behaviour, still zero JS. Browsers
-             without it (pre-2024) just allow several open, which is the old
-             behaviour, not a broken one. Keep the name identical across all four;
-             a typo silently un-groups that row.
              ======================================================== -->
         <div class="project-block" data-reveal-group>
           <div class="project-block-left">
             <h2 class="section-title" id="impact-heading" data-reveal data-reveal-order="0">What changed</h2>
           </div>
           <div class="project-block-right" data-reveal data-reveal-order="2">
-            <ul class="project-impact-list project-impact-list--expandable" role="list">
-              <li>
-                <details class="impact-row" name="impact-row">
-                  <summary class="impact-row-summary">
-                    <span class="impact-row-text">
-                      <span class="impact-row-outcome">Product teams could apply the accessibility standard during design and build.</span>
-                      <span class="impact-row-evidence">29 requirements &rarr; 23 decision-oriented topics</span>
-                    </span>
-                    <svg class="impact-row-chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                  </summary>
-                  <p class="impact-row-detail">The Playbook translated accessibility requirements into practical guidance organized around decisions teams were already making, with patterns, examples, and implementation guidance they could use during design and build.</p>
-                </details>
-              </li>
-              <li>
-                <details class="impact-row" name="impact-row">
-                  <summary class="impact-row-summary">
-                    <span class="impact-row-text">
-                      <span class="impact-row-outcome">Accessibility review stopped being a manual bottleneck.</span>
-                      <span class="impact-row-evidence">3&ndash;5 hour review eliminated &middot; 1,711 hours saved</span>
-                    </span>
-                    <svg class="impact-row-chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                  </summary>
-                  <p class="impact-row-detail">Shared tooling reduced the manual coordination required across program managers, reviewers, and product teams. Automated validation eliminated a recurring 3&ndash;5 hour review per wave, while a separate submission workflow saved 1,711 hours.</p>
-                </details>
-              </li>
-              <li>
-                <details class="impact-row" name="impact-row">
-                  <summary class="impact-row-summary">
-                    <span class="impact-row-text">
-                      <span class="impact-row-outcome">AI could find and ground teams in the guidance that applied.</span>
-                      <span class="impact-row-evidence">200+ pages &middot; deprecated results 25% &rarr; 0</span>
-                    </span>
-                    <svg class="impact-row-chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                  </summary>
-                  <p class="impact-row-detail">Instead of searching across 200+ pages, teams could start with an accessibility question. The system interpreted what they were trying to do, routed them to the authoritative source, and surfaced guidance scoped to that task, reducing deprecated results from 25% to zero.</p>
-                </details>
-              </li>
-              <li>
-                <details class="impact-row" name="impact-row">
-                  <summary class="impact-row-summary">
-                    <span class="impact-row-text">
-                      <span class="impact-row-outcome">People could find accessibility support in one place for the first time.</span>
-                      <span class="impact-row-evidence">30+ features &middot; 45 Help Center articles</span>
-                    </span>
-                    <svg class="impact-row-chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                  </summary>
-                  <p class="impact-row-detail">A needs-based model became a customer-facing experience on meta.com, organizing accessibility around what people needed rather than which product they were using and creating a direct path from feature discovery to Help Center support.</p>
-                  <!-- Second .impact-row-detail rather than a new class: the two
-                       paragraphs' 20px bottom + 12px top padding already make the
-                       32px break, so the link needs no CSS of its own and stays
-                       in the row's body text. -->
-                  <p class="impact-row-detail"><a href="https://www.meta.com/accessibility/" target="_blank" rel="noopener noreferrer">View public accessibility work<span class="visually-hidden"> (opens in new tab)</span><span aria-hidden="true"> &#8599;</span></a></p>
-                </details>
-              </li>
+            <ul class="project-impact-list project-impact-list--stacked" role="list">
+              <li><strong>Start the issue where it happens.</strong> I designed a lightweight capture flow that carried product context into the existing review workflow. The broader review and submission workflows saved over 1,700 hours of manual work.</li>
+              <li><strong>Turn requirements into decisions.</strong> I translated accessibility requirements into practical guidance for the decisions teams were making in design and build.</li>
+              <li><strong>Make AI-assisted guidance more reliable.</strong> I organized product questions around what people were trying to do, connected each one to authoritative guidance, and restructured the underlying content around that, eliminating deprecated retrieval results.</li>
+              <li><strong>Start with the need, then the product.</strong> I launched Meta’s first centralized public accessibility destination, organizing 30+ features and 45 support articles around people’s needs first. <a href="https://www.meta.com/accessibility/" target="_blank" rel="noopener noreferrer">View public accessibility work<span class="visually-hidden"> (opens in new tab)</span><span aria-hidden="true"> &#8599;</span></a></li>
             </ul>
 
             <!-- PUBLIC FOOTPRINTS — third-party coverage of THIS project. Moved
