@@ -1918,7 +1918,7 @@ performance review) rather than after the reader's takeaway.
 |---|---|---|---|
 | Accessibility | one statement | **4** plain rows (no accordion, 2026-09) | Full case study card |
 | Messaging | one statement | **3** plain rows (no accordion, 2026-09) | Full case study card |
-| Loop | a statement **+ 3 named principles** (plain list, via `.about-body + .project-impact-list`) | **3** expandable rows | — nothing gated; the live product is an inline link in the Overview |
+| Loop | a statement **+ 3 named principles** (plain list, via `.about-body + .project-impact-list`) | **3** plain rows (no accordion, 2026-09) | — nothing gated; the live product is an inline link in the Overview |
 | Groups | a statement **+ 3 named principles** (same shape as Loop) | **3** expandable rows | — nothing gated |
 
 **The cadence is shared; the row count and the Approach shape are not.** Never
@@ -2315,7 +2315,7 @@ nav.** Two different jobs — don't merge them.
     for JS, avoided.
   - Rules are scoped to the modifier; the plain `.project-impact-list` is
     untouched. Loop and Groups have one under Approach (their three named
-    principles), and Messaging's and Accessibility's What changed became plain lists too (2026-09) —
+    principles), and Messaging's, Accessibility's and Loop's What changed became plain lists too (2026-09) —
     the accordion was dropped there, so its three outcomes are `<strong>` lead +
     explanation, the same shape as the principles lists.
   - **The open/close motion is Motion Primitives' accordion, rebuilt in CSS
