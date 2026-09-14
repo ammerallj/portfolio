@@ -42,7 +42,7 @@
         "headline": "Creating Continuity Across Messaging",
         "url": "https://ammerallj.design/work/messaging.html",
         "description": "Designing the interaction model for messaging across Facebook’s fragmented entry points.",
-        "abstract": "Private sharing was creating more messaging moments inside Facebook, but those entry points had been designed independently. Depending on where a conversation started, what happened after send, and whether someone stayed in Facebook or moved to Messenger could change. What changed: in-app messaging had a shared interaction model across Facebook — a reusable model covering 11 entry points on iOS and Android for how conversations begin, confirm and continue, clarifying when messaging should stay in context, expand into a full conversation, or hand off to Messenger. Large-scale switching between Facebook and Messenger was addressed, with 100 million-plus monthly app switches in scope, by reframing repeated Facebook–Messenger handoffs as a shared interaction problem and defining when messaging should stay in Facebook and when Messenger remained the right destination. And the post-send experience increased conversation continuation: testing validated the selected treatment, raising thread opens 21.9% on iOS and 27.1% on Android while keeping topline metrics neutral.",
+        "abstract": "Private sharing was creating more messaging moments inside Facebook, but those entry points had been designed independently. Depending on where a conversation started, what happened after send, and whether someone stayed in Facebook or moved to Messenger could change. What changed: Give different messaging moments the right amount of conversation. I defined a model for when an entry point should end with confirmation, open a lightweight thread, or continue into a full conversation. Keep more conversations in context. By allowing more messaging moments to continue inside Facebook, the work addressed 100M+ switches to Messenger. Make it easier to return to the conversation. The shipped post-send treatment increased thread opens by ~22% on iOS and ~27% on Android.",
         "image": "https://ammerallj.design/images/work-messaging.jpg?v=3",
         "inLanguage": "en-US",
         "temporalCoverage": "2023-07/2023-11",
@@ -74,7 +74,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@200;500;700&family=Inter:wght@400..700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../style.css?v=f45f8a60" />
+  <link rel="stylesheet" href="../style.css?v=d23d7e7e" />
   <!-- Pre-paint flag, set only when JS runs:
        • is-motion — hides reveal targets so they can fade in without a flash
          (skipped for reduced-motion visitors, who see everything).
@@ -298,17 +298,13 @@
          then how the design caused it. The old framing (Standardized / Informed /
          Validated) read as accomplishments rather than outcomes.
 
-         EXPANDABLE ROWS, same as Accessibility: native <details>, outcome +
-         evidence in the <summary> (always visible), explanation inside. No
-         JavaScript — the browser owns the toggle, so it survives js/main.js being
-         absent and the explanations stay real DOM for crawlers. One open at a time
-         via the shared name="impact-row".
+         PLAIN ROWS (2026-09): the accordion was dropped on this page. Each row is
+         a <strong> lead (the outcome) followed by its explanation and evidence in
+         one sentence — the same .project-impact-list shape as Loop's and Groups'
+         principles lists. The other three pages keep their expandable rows.
 
          THREE rows, not four. The cadence matches Accessibility; the quantity
          doesn't have to, and a fourth would have to be manufactured.
-
-         The metrics sit in the SUMMARY, never the detail — collapsing them would
-         hide the strongest proof on the page behind a click.
          ======================================================== -->
     <section class="page-section" id="impact" aria-labelledby="impact-heading">
       <div class="site-container">
@@ -318,43 +314,10 @@
             <h2 class="section-title" id="impact-heading" data-reveal data-reveal-order="0">What changed</h2>
           </div>
           <div class="project-block-right" data-reveal data-reveal-order="2">
-            <ul class="project-impact-list project-impact-list--expandable" role="list">
-              <li>
-                <details class="impact-row" name="impact-row">
-                  <summary class="impact-row-summary">
-                    <span class="impact-row-text">
-                      <span class="impact-row-outcome">In-app messaging had a shared interaction model across Facebook.</span>
-                      <span class="impact-row-evidence">11 entry points &middot; iOS + Android</span>
-                    </span>
-                    <svg class="impact-row-chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                  </summary>
-                  <p class="impact-row-detail">I defined a reusable model for how conversations begin, confirm, and continue across Facebook—clarifying when messaging should stay in context, expand into a full conversation, or hand off to Messenger.</p>
-                </details>
-              </li>
-              <li>
-                <details class="impact-row" name="impact-row">
-                  <summary class="impact-row-summary">
-                    <span class="impact-row-text">
-                      <span class="impact-row-outcome">Addressed large-scale switching between Facebook and Messenger.</span>
-                      <span class="impact-row-evidence">100M+ monthly app switches in scope</span>
-                    </span>
-                    <svg class="impact-row-chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                  </summary>
-                  <p class="impact-row-detail">The work reframed repeated Facebook–Messenger handoffs as a shared interaction problem, defining when messaging should stay in Facebook and when Messenger remained the right destination.</p>
-                </details>
-              </li>
-              <li>
-                <details class="impact-row" name="impact-row">
-                  <summary class="impact-row-summary">
-                    <span class="impact-row-text">
-                      <span class="impact-row-outcome">The post-send experience increased conversation continuation.</span>
-                      <span class="impact-row-evidence">+21.9% thread opens on iOS &middot; +27.1% on Android</span>
-                    </span>
-                    <svg class="impact-row-chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                  </summary>
-                  <p class="impact-row-detail">Testing validated the selected post-send treatment, increasing thread opens on both platforms while keeping topline metrics neutral.</p>
-                </details>
-              </li>
+            <ul class="project-impact-list project-impact-list--stacked" role="list">
+              <li><strong>Give different messaging moments the right amount of conversation.</strong> I defined a model for when an entry point should end with confirmation, open a lightweight thread, or continue into a full conversation.</li>
+              <li><strong>Keep more conversations in context.</strong> By allowing more messaging moments to continue inside Facebook, the work addressed 100M+ switches to Messenger.</li>
+              <li><strong>Make it easier to return to the conversation.</strong> The shipped post-send treatment increased thread opens by ~22% on iOS and ~27% on Android.</li>
             </ul>
 
             <!-- PUBLIC FOOTPRINTS — third-party coverage of THIS project. Moved

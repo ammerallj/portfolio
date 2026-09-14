@@ -544,6 +544,16 @@ a.intro-bar-name {
   font-weight: 600;
 }
 
+/* --stacked: the outcome sits on its own line above its explanation (Messaging's
+   What changed, 2026-09, after its accordion was dropped). Scoped as a modifier
+   so the Loop / Groups principles lists keep their run-in lead. --space-xs is a
+   within-item gap, one step under the list's own --gap-content between items, so
+   the lead still reads as belonging to the sentence below it. */
+.project-impact-list--stacked strong {
+  display: block;
+  margin-bottom: var(--space-xs);
+}
+
 .project-impact-list li:last-child {
   border-bottom: none;
   padding-bottom: 0;

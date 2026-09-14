@@ -1917,7 +1917,7 @@ performance review) rather than after the reader's takeaway.
 | | Approach holds | What changed | Closes on |
 |---|---|---|---|
 | Accessibility | one statement | **4** expandable rows | Full case study card |
-| Messaging | one statement | **3** expandable rows | Full case study card |
+| Messaging | one statement | **3** plain rows (no accordion, 2026-09) | Full case study card |
 | Loop | a statement **+ 3 named principles** (plain list, via `.about-body + .project-impact-list`) | **3** expandable rows | — nothing gated; the live product is an inline link in the Overview |
 | Groups | a statement **+ 3 named principles** (same shape as Loop) | **3** expandable rows | — nothing gated |
 
@@ -2314,8 +2314,10 @@ nav.** Two different jobs — don't merge them.
     one-at-a-time used `name` rather than a click handler** — the obvious reach
     for JS, avoided.
   - Rules are scoped to the modifier; the plain `.project-impact-list` is
-    untouched. Only Loop and Groups still have one — it holds their three named
-    principles under Approach, not their outcomes. Messaging has no plain list.
+    untouched. Loop and Groups have one under Approach (their three named
+    principles), and Messaging's What changed became a plain list too (2026-09) —
+    the accordion was dropped there, so its three outcomes are `<strong>` lead +
+    explanation, the same shape as the principles lists.
   - **The open/close motion is Motion Primitives' accordion, rebuilt in CSS
     (2026-09).** That library's `<AccordionContent>` animates one motion.div
     between `{height: 0, opacity: 0}` and `{height: 'auto', opacity: 1}` inside an
