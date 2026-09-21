@@ -835,6 +835,30 @@
      (hero.css) plus --field-nudge-y — the % rides the artwork's own height so
      it already shrank with the narrower field above; the nudge is a fixed
      offset on top of wherever that lands. */
+  /* No orb entrance at this tier (the JPEG is still underneath, so the field
+     draws fully formed), which means there is nothing for the lockup to wait
+     for. Back to the short lead-in hero.css used before the entrance existed. */
+  .intro-headline,
+  .intro-band-right,
+  .intro-bar {
+    animation-delay: 0.15s;
+  }
+
+  /* Phones KEEP the JPEG (the <picture> in index.html falls through to the
+     <img> here), so there is always artwork behind the lockup and the white
+     treatment still applies. This undoes hero.css's no-field fallback, which
+     is written for the widths that no longer have an image.
+     ⚠️ Moves with the JPEG's breakpoint — see the <source media> in index.html
+     and the preload's media attribute. Three places, one decision. */
+  html:not(.is-field-live) .intro-headline,
+  html:not(.is-field-live) .intro-bio {
+    color: #fff;
+    -webkit-text-stroke: 0.25px rgba(0, 0, 0, 0.18);
+  }
+  html:not(.is-field-live) .intro-divider {
+    background: rgba(255, 255, 255, 0.65);
+  }
+
   .page-field {
     transform: translateX(calc(-50% + 50px))
                translateY(calc(-12% + var(--field-nudge-y)));

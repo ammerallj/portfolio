@@ -52,11 +52,31 @@ main {
 /* An <img> derives its aspect from width/height (3600×2198); a canvas and a
    div cannot, so state it. 1.6377 is the same constant --field-bottom is
    built from — re-derive BOTH together if the artwork is ever re-exported. */
+/* ⚠️ THE <img> NEEDS THIS STATED TOO, since the JPEG became phones-only. Above
+   480 the <picture> selects a 1x1 transparent GIF, and a SELECTED <source>'s
+   resource ratio beats the <img>'s width/height attributes — so the box
+   resolved to 1:1 and measured 1440x1440 instead of 1440x879. width/height on
+   the <source> does not reliably fix it; stating the ratio here does. */
+img.page-field {
+  aspect-ratio: 1.6377;
+}
+
 .page-field-canvas,
 .page-field-grain {
   aspect-ratio: 1.6377;
   opacity: 0;
-  transition: opacity 0.45s ease;
+  /* ⚠️ NO TRANSITION HERE, DELIBERATELY (2026-09). This carried
+     `transition: opacity 0.45s ease`, which CROSS-FADED the shader in over the
+     JPEG — and the two are not the same artwork. The shader's blobs are larger
+     and more saturated, and its ramp lifts to WHITE-at-alpha-0, so a half-faded
+     canvas composites whitish over the photo and the hero visibly BLOOMS and
+     settles. Reported as the orbs "flashing over the image placeholder", and it
+     is worst on a warm cache, where the JPEG is already painted when the first
+     shader frame lands.
+     The state here is binary — the canvas either has not drawn (JPEG, the
+     fallback) or has (shader) — so there is no meaningful in-between to animate
+     through. `is-field-live` is only added AFTER a frame is genuinely drawn, so
+     switching with no transition swaps a complete image for a complete image. */
 }
 html.is-field-live .page-field-canvas { opacity: 1; }
 
@@ -85,16 +105,14 @@ html.is-field-live .page-field-canvas { opacity: 1; }
 }
 html.is-field-live .page-field-grain { opacity: 0.15; }
 
-/* Reduced motion still gets the shader — one static frame, drawn and left
-   alone (initHeroField never starts its loop). The artwork should not change
-   character just because someone asked the page to hold still; only the
-   movement goes. The fade goes too, or the reveal is itself an animation. */
-@media (prefers-reduced-motion: reduce) {
-  .page-field-canvas,
-  .page-field-grain {
-    transition: none;
-  }
-}
+/* Reduced motion still gets the shader — one static frame, drawn and left alone
+   (initHeroField never starts its loop). The artwork should not change character
+   just because someone asked the page to hold still; only the movement goes.
+   ⚠️ THE `transition: none` OVERRIDE THAT LIVED HERE IS GONE, because the
+   transition it cancelled is gone (see .page-field-canvas above). It is not an
+   oversight and must not be "restored" — a rule that cancels something no longer
+   declared is exactly the inert config this file has been bitten by before. If a
+   fade is ever reintroduced on that canvas, this block has to come back with it. */
 
 .page-field {
   position: absolute;
@@ -538,14 +556,42 @@ html.is-field-live .page-field-grain { opacity: 0.15; }
   max-width: 9.375em;
   margin: 0;
   /* Rise from behind the divider: --rise > the 40px divider gap engages the
-     clip (24px dip at 64). Ease = the motion system's REVEAL.ease. */
+     clip (24px dip at 64). Ease = the motion system's REVEAL.ease.
+
+     THE WHOLE LOAD SEQUENCE IS THIS ONE CUE, and it is stated only here:
+         0.90s  headline + bio  (1s)    ┐ all three together, from opacity 0
+         0.90s  bar fades in    (0.6s)  ┘
+
+     ⚠️ 0.90s WAITS FOR THE ORBS, and above 480 that is not optional. The field
+     animates in over ~1080ms from an EMPTY canvas (FIELD.entrance in
+     js/main.js), and there is no JPEG under it at these widths — so type that
+     arrives at 0.15s is white on bare cream at 1.03:1, invisible, for most of
+     a second. The text lands as the last orb does.
+     ⚠️ ≤480 PUTS THIS BACK TO 0.15s. Phones keep the JPEG, so there is never an
+     empty field to wait for and the hold would be dead time. If FIELD.entrance
+     changes length, this and that override both move.
+
+     ⚠️ THE THREE 0.15s DELAYS ARE ONE DECISION WRITTEN IN THREE PLACES
+     (.intro-headline, .intro-band-right, .intro-bar). The bar trailed the text
+     by 0.8s for a while and read as a separate beat — the nav arriving as its
+     own event rather than as part of the page settling. Move one, move all.
+     ⚠️ They were 0.9s while the divider drew itself in, derived from that draw's
+     end so the line finished before anything else moved. The draw is gone, so
+     the wait goes with it: 0.9s of a still page is a stall, not a beat.
+     ⚠️ THE TEXT STARTS AT opacity 0 AND FADES UP. It used to be revealed by its
+     region's `overflow: hidden` alone — sliding out from behind the line at full
+     opacity, which is a wipe, not a fade. The opacity rides the SAME keyframes
+     as the rise rather than a second animation, so the two cannot drift apart.
+     ⚠️ The masks are still load-bearing and the fade does NOT replace them: drop
+     the overflow and the text fades in OVER the divider instead of out from
+     behind it. */
   --rise: 64px;
-  animation: intro-headline-rise 1s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both;
+  animation: intro-headline-rise 1s cubic-bezier(0.16, 1, 0.3, 1) 0.9s both;
 }
 
 @keyframes intro-headline-rise {
-  from { transform: translateY(var(--rise, 64px)); }
-  to { transform: translateY(0); }
+  from { transform: translateY(var(--rise, 64px)); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }
 
 /* Text-morph: the headline cycles between three statements, each character
@@ -603,6 +649,49 @@ html.is-field-live .page-field-grain { opacity: 0.15; }
   background: rgba(255, 255, 255, 0.65); /* full viewport width */
 }
 
+/* ⚠️ THE DIVIDER DOES NOT ANIMATE, AND THAT IS A DECISION (2026-09). It briefly
+   drew itself from the centre out and was dropped as one motion too many: the
+   hero already fades in a headline, a bio and a nav bar, and a fourth moving
+   part made the load read as choreography rather than as a page arriving. The
+   hero now has exactly ONE entrance, on one cue.
+   ⚠️ IF IT EVER COMES BACK, THE LINE MUST MOVE TO A PSEUDO-ELEMENT FIRST. The
+   draw is a scaleX, and this element's own `transform` belongs to the lockup
+   rule above — which is scroll-linked (--field-scroll) on desktop and a
+   different formula again at ≤480 (--hero-drop). An animation on `transform`
+   here would have to restate both, in both tiers, and `fill-mode: both` would
+   then own the property for the rest of the page, freezing the lockup out of
+   its own scroll link. */
+
+/* ============================================================
+   THE NO-FIELD FALLBACK                              2026-09
+   ⚠️ LOAD-BEARING SINCE THE JPEG BECAME PHONES-ONLY. Above 480 there is no
+   <img> behind the lockup any more (see the <picture> in index.html), so a
+   visitor with JS off, without WebGL, or hitting a shader compile failure has
+   NOTHING back there — `is-field-live` never lands, the canvas stays at
+   opacity 0, and the white lockup sits on bare cream at 1.03:1. Invisible,
+   not merely low-contrast.
+   Flipping the type to the page's own ink is what keeps that case readable:
+   black on cream measures ~20:1.
+   ⚠️ KEYED ON THE ABSENCE OF THE CLASS, so this is the DEFAULT and the coloured
+   treatment is the enhancement — same direction as is-motion. A crawler or a
+   no-JS visitor lands here, which is correct, and nothing waits on a class
+   arriving to become legible.
+   ⚠️ ≤480 OVERRIDES ALL OF THIS BACK TO WHITE, because phones still get the
+   JPEG and so always have artwork behind the type. The two are one decision:
+   if the JPEG's breakpoint moves, move that override with it.
+   ============================================================ */
+html:not(.is-field-live) .intro-headline,
+html:not(.is-field-live) .intro-bio {
+  color: var(--color-text);
+  /* The 0.25px stroke exists to separate white glyphs from a LIGHT gradient.
+     Over cream with black type it only muddies the letterform. */
+  -webkit-text-stroke: 0px;
+}
+
+html:not(.is-field-live) .intro-divider {
+  background: var(--color-border-light);
+}
+
 /* ---- Lower region: the bio's layout box ----
    (Its GLASS lives on the .intro::after frost pane above, which spans from
    the divider past the fold — one sheet, no band/pane seam. This element
@@ -649,9 +738,10 @@ html.is-field-live .page-field-grain { opacity: 0.15; }
      token's full width. */
   flex: 0 1 var(--width-right-column);
   min-width: 0;
-  /* Mirror of the headline: descend from behind the divider. */
+  /* Mirror of the headline, and its delay must MATCH the headline's — the two
+     are one gesture emitted from one line. */
   --rise: 64px;
-  animation: intro-bio-drop 1s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both;
+  animation: intro-bio-drop 1s cubic-bezier(0.16, 1, 0.3, 1) 0.9s both;
 }
 
 /* ⚠️ THE BIO CAN CARRY ITS OWN SCRIM, AND IT IS INERT UNLESS A TIER ASKS FOR IT.
@@ -762,8 +852,8 @@ html.is-field-live .page-field-grain { opacity: 0.15; }
 }
 
 @keyframes intro-bio-drop {
-  from { transform: translateY(calc(-1 * var(--rise, 64px))); }
-  to { transform: translateY(0); }
+  from { transform: translateY(calc(-1 * var(--rise, 64px))); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }
 
 /* ---- The site nav: the hero's bottom bar, sticky ----
@@ -793,8 +883,9 @@ html.is-field-live .page-field-grain { opacity: 0.15; }
      group. It steps 60 → 48 on its own, which is why the two per-tier gap
      overrides in responsive.css are gone. */
   gap: var(--gap-group);
-  /* Enters LAST: the divider reveals settle, then the bar fades in. */
-  animation: intro-bar-fade 0.6s ease-out 0.95s both;
+  /* Enters WITH the text, not after it — delay must match .intro-headline's
+     and .intro-band-right's. See the sequence on .intro-headline. */
+  animation: intro-bar-fade 0.6s ease-out 0.9s both;
 }
 
 /* The glass, on its own layer so it can fade: invisible while the bar rests
@@ -1215,10 +1306,15 @@ html.is-field-live .page-field-grain { opacity: 0.15; }
   display: inline-block;
 }
 
-/* Reduced motion: no entrance choreography, everything simply shows. */
+/* Reduced motion: no entrance choreography, everything simply shows.
+   ⚠️ `.intro-band-right`, NOT `.intro-bio`. The bio's drop moved up to the
+   band's right column when the meta line joined it, and this list was not moved
+   with it — so for a while `.intro-bio` was reset here (it has no animation to
+   reset) while the element that actually animates was left running under
+   reduced motion. If the drop ever moves again, move this too. */
 @media (prefers-reduced-motion: reduce) {
   .intro-headline,
-  .intro-bio,
+  .intro-band-right,
   .intro-bar {
     animation: none;
   }

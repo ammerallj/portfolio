@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="noindex" />
+<title>Lab — orbs over cream</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@200;500;700&family=Inter:wght@400..700&display=swap" rel="stylesheet" />
+<style>
+/* ============================================================
+   LAB — ORBS OVER CREAM                              2026-09
+
+   TWO QUESTIONS AT ONCE, and they are related:
+
+   1. WHAT IF THE JPEG IS GONE? The live hero paints the shader
+      OVER images/hero-bkg.jpg, which exists purely as the
+      fallback for no-JS / no-WebGL / a failed compile. This page
+      has no <img> at all — the canvas sits on the cream page and
+      nothing is underneath it.
+
+      ⚠️ THAT CHANGES NOTHING ONCE THE SHADER IS LIVE, and the
+      reason is worth knowing before judging this page: the
+      fragment shader starts from `vec3 col=CREAM` and writes
+      `gl_FragColor=vec4(col,1.)` — alpha 1 everywhere. The canvas
+      is fully OPAQUE, so on the real site the JPEG is already
+      invisible the moment the canvas reveals. Removing it costs
+      nothing visually and saves a 1.4MB preloaded LCP image; what
+      it costs is the fallback, which is a separate decision and
+      the reason this is a lab page rather than a commit.
+
+   2. CAN THE ORBS ARRIVE ONE AT A TIME? The entrance is done
+      ENTIRELY IN JS by rewriting the uBlob uniform per frame —
+      no shader change. uBlob[i] is (x, y, radius, alpha), so an
+      orb can grow from a point (radius), fade up (alpha), or
+      both. The shader already has `if(a<=0.)continue;`, so an
+      orb that has not entered yet costs nothing.
+
+   ⚠️ NOT A COPY OF THE PRODUCTION SHADER'S CONSTANTS. MID, MIDA,
+   PULSE and CREAM are UNIFORMS here, where js/main.js bakes them
+   into the GLSL source as literals. That is deliberate: it makes
+   them live-tunable without a recompile, and it sidesteps the
+   documented hazard that took the field down once — a value
+   interpolated into a shader string must be a GLSL-valid float
+   literal, and JS stringifies 1.0 as "1", which is an int.
+   `Export config` emits the production shape regardless.
+   ============================================================ */
+:root {
+  --color-bg: #FBFCF8;
+  --color-text: #000000;
+  --field-w: max(100vw, 160svh);
+  --field-bottom: calc(var(--field-w) * 0.61061);
+  --page-gutter: 56px;
+  --work-peek: 152px;
+  --gap-group: 60px;
+}
+* { box-sizing: border-box; }
+/* ⚠️ MUST COME BEFORE any author `display` on an element that uses [hidden].
+   The UA stylesheet's `[hidden]{display:none}` loses to ANY author display
+   declaration, so `.sheet{display:grid}` left the export panel permanently
+   over the page — it rendered as a blank white sheet with a Close button and
+   looked like a broken canvas. */
+[hidden] { display: none !important; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: Inter, system-ui, sans-serif;
+  overflow-x: hidden;
+}
+main { position: relative; isolation: isolate; }
+
+/* ---- The field: canvas + grain, no image beneath ---- */
+.field-stack {
+  position: absolute;
+  top: 0; left: 50%;
+  transform: translateX(-50%);
+  width: var(--field-w);
+  aspect-ratio: 1.6377;
+  z-index: -1;
+  pointer-events: none;
+}
+.field-stack > * { position: absolute; inset: 0; width: 100%; height: 100%; }
+#field { display: block; }
+/* The field's own grain — baseFrequency 1.3, discrete transfer, overlay.
+   Byte-identical to the production layer; see hero.css for why each part
+   of the filter matters (discrete = sharp speckle, saturate 0 = no coloured
+   noise, alpha forced to 1 = no blotching). */
+.field-grain {
+  mix-blend-mode: overlay;
+  opacity: 0.15;
+  background-repeat: repeat;
+  background-size: 160px 160px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.3' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='discrete' tableValues='0 1'/%3E%3CfeFuncG type='discrete' tableValues='0 1'/%3E%3CfeFuncB type='discrete' tableValues='0 1'/%3E%3CfeFuncA type='linear' slope='0' intercept='1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23g)'/%3E%3C/svg%3E");
+}
+body.no-grain .field-grain { display: none; }
+
+/* ---- The hero lockup, for judging the orbs against real type ---- */
+.intro {
+  position: relative;
+  height: 100svh;
+  display: flex;
+  flex-direction: column;
+}
+.intro-top {
+  flex: 0 0 50%;
+  display: flex;
+  align-items: flex-end;
+  padding: 0 var(--page-gutter);
+  overflow: hidden;
+}
+.intro-headline {
+  margin: 0;
+  font-family: 'Hanken Grotesk', sans-serif;
+  font-weight: 700;
+  font-size: 96px;
+  line-height: 1.0;
+  letter-spacing: -0.03em;
+  color: #fff;
+  max-width: 9.375em;
+  -webkit-text-stroke: 0.25px rgba(0, 0, 0, 0.18);
+  paint-order: stroke fill;
+}
+.intro-divider { height: 1px; }
+.intro-divider::after {
+  content: "";
+  display: block;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.65);
+}
+.intro-band {
+  flex: 0 0 50%;
+  padding: 40px calc(var(--page-gutter) + var(--work-peek)) 0 var(--page-gutter);
+  display: flex;
+  gap: 1.25rem;
+  align-items: flex-start;
+  overflow: hidden;
+}
+.intro-band-spacer { flex: 0 1 654px; margin-right: auto; }
+.intro-band-right { flex: 0 1 541.67px; min-width: 0; }
+.intro-bio {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: #fff;
+}
+.intro-bar {
+  position: sticky;
+  top: 0;
+  z-index: 90;
+  margin-top: -80px;
+  margin-bottom: 16px;
+  padding: 14px var(--page-gutter);
+  display: flex;
+  align-items: center;
+  gap: var(--gap-group);
+  font-size: 16px;
+}
+.intro-bar-name { margin: 0; margin-right: auto; font-weight: 700; font-size: 24px; font-family: 'Hanken Grotesk', sans-serif; }
+.intro-bar-links { display: flex; gap: 48px; }
+.intro-bar-links a { color: rgba(0, 0, 0, 0.8); text-decoration: none; }
+.intro-bar-cta {
+  background: #000; color: #fff; text-decoration: none;
+  padding: 8px 20px; border-radius: 999px; display: inline-block;
+}
+body.no-lockup .intro-top,
+body.no-lockup .intro-divider,
+body.no-lockup .intro-band,
+body.no-lockup .intro-bar { visibility: hidden; }
+
+.after-fold { padding: 96px var(--page-gutter) 240px; }
+.after-fold h2 { font-family: 'Hanken Grotesk', sans-serif; font-size: 56px; margin: 0 0 16px; }
+.after-fold p { max-width: 541px; margin: 0; line-height: 1.5; color: rgba(0,0,0,0.7); }
+
+/* ---- Control panel ---- */
+.panel {
+  position: fixed; top: 16px; right: 16px; z-index: 200;
+  width: 302px; max-height: calc(100vh - 32px); overflow-y: auto;
+  padding: 14px; border-radius: 12px;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  font: 12px/1.45 ui-monospace, Menlo, monospace;
+}
+.panel h2 { font: 600 12px/1.4 ui-monospace, monospace; margin: 14px 0 6px; text-transform: uppercase; letter-spacing: 0.06em; color: rgba(0,0,0,0.55); }
+.panel h2:first-child { margin-top: 0; }
+.panel label { display: block; margin: 5px 0; cursor: pointer; }
+.panel input[type=range] { width: 100%; margin: 2px 0 6px; }
+.panel select, .panel button { width: 100%; font: inherit; padding: 6px; margin: 3px 0; border-radius: 6px; border: 1px solid rgba(0,0,0,0.2); background: #fff; cursor: pointer; }
+.panel button.primary { background: #000; color: #fff; border-color: #000; }
+.row { display: flex; justify-content: space-between; gap: 8px; }
+.row code { color: rgba(0,0,0,0.6); }
+.orbrow { display: flex; align-items: center; gap: 5px; margin: 3px 0; }
+.orbrow button { width: 22px; flex: 0 0 auto; padding: 2px 0; margin: 0; line-height: 1; }
+.orbrow button:disabled { opacity: 0.25; cursor: default; }
+.sw { width: 12px; height: 12px; border-radius: 50%; flex: 0 0 auto; }
+.bar { flex: 1; height: 5px; border-radius: 3px; background: rgba(0,0,0,0.1); overflow: hidden; }
+.bar i { display: block; height: 100%; width: 0; background: #000; }
+.warn { margin-top: 10px; padding: 8px; border-radius: 6px; background: #ffe8e8; color: #a00; }
+.note { margin-top: 10px; color: rgba(0,0,0,0.55); }
+.sheet { position: fixed; inset: 0; z-index: 300; background: rgba(0,0,0,0.45); display: grid; place-items: center; padding: 24px; }
+.sheet textarea { width: min(760px, 90vw); height: min(60vh, 520px); font: 12px/1.5 ui-monospace, monospace; padding: 14px; border-radius: 10px; border: 0; }
+.sheet button { margin-top: 10px; font: inherit; padding: 8px 14px; border-radius: 8px; border: 0; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<main>
+  <div class="field-stack" aria-hidden="true">
+    <canvas id="field"></canvas>
+    <div class="field-grain" id="grain"></div>
+  </div>
+
+  <section class="intro">
+    <div class="intro-top"><h1 class="intro-headline">Making products make sense.</h1></div>
+    <div class="intro-divider" aria-hidden="true"></div>
+    <div class="intro-band">
+      <div class="intro-band-spacer" aria-hidden="true"></div>
+      <div class="intro-band-right">
+        <p class="intro-bio">I design how products behave, moving between early ideas and mature systems to create more connected experiences across products.</p>
+      </div>
+    </div>
+  </section>
+
+  <nav class="intro-bar" aria-label="Site navigation">
+    <p class="intro-bar-name">Jenna Ammerall.</p>
+    <div class="intro-bar-links"><a href="#">Selected work</a><a href="#">About me</a></div>
+    <div class="intro-bar-cta-wrap"><a class="intro-bar-cta" href="#">Say hello</a></div>
+  </nav>
+
+  <section class="after-fold">
+    <h2>Creating Continuity Across Messaging</h2>
+    <p>Stand-in for Selected Work — here to show the field bleeding past the fold and
+       dissolving into the cream. With no JPEG underneath, everything outside the orbs
+       is the page's own background colour.</p>
+  </section>
+</main>
+
+<div class="panel">
+  <h2>Entrance</h2>
+  <button id="btn-replay" class="primary">Replay ⟲</button>
+  <label><input type="checkbox" id="t-autoloop" /> Loop (holds, fades out, repeats)</label>
+  <label><input type="checkbox" id="t-scrub" /> Scrub by hand</label>
+  <div>
+    <div class="row"><span>Position</span><code id="v-scrub">0ms</code></div>
+    <input type="range" id="r-scrub" min="0" max="1080" step="10" value="0" disabled />
+  </div>
+  <!-- The FIRST orb gets its own gap, separate from the interval among the
+       rest. Without this the lead orb is just the first of four evenly-spaced
+       events; with it, one orb establishes the field and the other three
+       answer. Set it equal to the stagger for the old even spacing. -->
+  <div>
+    <div class="row"><span>Lead orb holds</span><code id="v-lead">280ms</code></div>
+    <input type="range" id="r-lead" min="0" max="2500" step="10" value="280" />
+  </div>
+  <div>
+    <div class="row"><span>Stagger for the rest</span><code id="v-stagger">240ms</code></div>
+    <input type="range" id="r-stagger" min="0" max="1200" step="10" value="240" />
+  </div>
+  <div>
+    <div class="row"><span>Each orb takes</span><code id="v-dur">320ms</code></div>
+    <input type="range" id="r-dur" min="60" max="3000" step="10" value="320" />
+  </div>
+  <div>
+    <div class="row"><span>First orb waits</span><code id="v-delay">0ms</code></div>
+    <input type="range" id="r-delay" min="0" max="2000" step="50" value="0" />
+  </div>
+  <!-- Derived, not a control. Overlap is the thing you actually perceive:
+       stagger and duration only matter as a RATIO. 0% = each orb finishes
+       before the next starts (four separate events, which reads as flashy);
+       100% = they all move together (no sequence at all). The interesting
+       range is roughly 60-85%, where the order is legible but the four read
+       as one gesture. -->
+  <div class="row"><span>Overlap</span><code id="v-overlap">—</code></div>
+  <!-- ⚠️ THE METRIC THAT ACTUALLY PREDICTS "one at a time". Overlap % is
+       misleading on its own: at 74% every orb is still mid-ramp at the same
+       moment, which reads as ONE event no matter how the starts are spaced.
+       This counts how many orbs are simultaneously between 2% and 98%. 1 is a
+       strict sequence, 2 reads as a sequence, 4 reads as everything at once. -->
+  <div class="row"><span>Moving at once</span><code id="v-concurrent">—</code></div>
+  <label><input type="checkbox" id="t-fade" checked /> Fade opacity up</label>
+  <!-- ⚠️ THE ANTI-FLASH DIAL. A pure alpha ramp cannot help looking like a
+       flash: the orb's saturated CORE is present in the first frame and merely
+       gets brighter, so nothing arrives, it just turns up. Radius changes what
+       the orb IS during the entrance, because this artwork's ramp collapses
+       over a FRACTION of the radius — an oversized orb spreads the same colour
+       over more area and is therefore paler everywhere. Start above 1 and the
+       orb begins as a wide faint wash and CONDENSES into itself, building
+       saturation gradually instead of switching it on.
+         0.0  grow out of a point (pops outward — the first thing we tried)
+         1.0  no size change at all (pure fade — the flash)
+         1.4+ contract from a wash (the soft one) -->
+  <div>
+    <div class="row"><span>Start size</span><code id="v-startsize">1.00×</code></div>
+    <input type="range" id="r-startsize" min="0" max="2.5" step="0.05" value="1.0" />
+  </div>
+  <select id="sel-ease">
+    <option value="outCubic">Ease-out cubic — the site's REVEAL.ease</option>
+    <option value="inout">Ease in-out</option>
+    <option value="smooth">Smoothstep — gentle both ends</option>
+    <option value="expo">Expo out — the site's REVEAL.ease</option>
+    <option value="linear" selected>Linear — lowest peak rate, least flashy</option>
+  </select>
+  <select id="sel-order">
+    <option value="paint">Paint order — magenta, violet, red, cyan</option>
+    <option value="reverse" selected>Reverse — cyan, red, violet, magenta</option>
+    <option value="none">All together (no stagger)</option>
+  </select>
+
+  <h2>Paint order</h2>
+  <div class="note" style="margin:0 0 6px">Top of the stack first. ↑ paints an orb higher, so it covers the ones below it.</div>
+  <div id="orbs"></div>
+  <button id="btn-po-tuned">Tuned — violet, magenta, red, cyan</button>
+  <button id="btn-po-shipped">Shipped — magenta, violet, red, cyan</button>
+  <button id="btn-po-figma">Figma — magenta, red, violet, cyan</button>
+  <button id="btn-po-reverse">Flip the stack</button>
+
+  <h2>Single orb</h2>
+  <!-- ⚠️ An orb's WHITENED OUTER RAMP is as consequential as its core. Past
+       `mid` (52.4% of the radius) the gradient lerps toward WHITE while its
+       alpha falls, so an orb whose edge reaches a block of text lays a pale
+       veil over whatever is underneath — it DESATURATES rather than colours.
+       That is why an orb can be hurting a region it is nowhere near the centre
+       of, and why shrinking one is sometimes what adds colour. -->
+  <select id="sel-orb"></select>
+  <div>
+    <div class="row"><span>x</span><code id="v-bx">—</code></div>
+    <input type="range" id="r-bx" min="-0.3" max="1.3" step="0.005" value="0.5" />
+  </div>
+  <div>
+    <div class="row"><span>y</span><code id="v-by">—</code></div>
+    <input type="range" id="r-by" min="-0.5" max="1.5" step="0.005" value="0.5" />
+  </div>
+  <div>
+    <div class="row"><span>radius</span><code id="v-br">—</code></div>
+    <input type="range" id="r-br" min="0.05" max="1.2" step="0.005" value="0.5" />
+  </div>
+  <div class="row"><span>reaches the bio at</span><code id="v-reach">—</code></div>
+  <button id="btn-orb-reset">Reset this orb</button>
+
+  <h2>Field</h2>
+  <label><input type="checkbox" id="t-pause" /> Pause drift</label>
+  <label><input type="checkbox" id="t-grain" checked /> Grain</label>
+  <label><input type="checkbox" id="t-lockup" checked /> Show hero lockup</label>
+  <div>
+    <div class="row"><span>Motion</span><code id="v-speed">1.85</code></div>
+    <input type="range" id="r-speed" min="0" max="4" step="0.05" value="1.85" />
+  </div>
+  <div>
+    <div class="row"><span>midAlpha</span><code id="v-mida">0.50</code></div>
+    <input type="range" id="r-mida" min="0.1" max="0.9" step="0.01" value="0.5" />
+  </div>
+  <!-- Moves the whole group. Negative pushes cyan off the top and brings
+       magenta and red up into the frame. -->
+  <!-- ⚠️ WITHOUT THIS THE FIELD ENDS ON A HARD LINE, and the lab misrepresents
+       the real hero at exactly the place people look. The artwork's HEIGHT
+       follows the viewport's WIDTH (width / 1.6377) while the fold follows its
+       HEIGHT, so on any window wider than 16:10 the field is taller than the
+       fold and overhangs it — 199px at 1865x940. The live site dissolves that
+       overhang into the cream with a 17-stop smoothstep ending at the fold.
+       ⚠️ SMOOTHSTEP IN MANY STOPS, not a 2-stop linear ramp: browsers
+       interpolate linearly BETWEEN stops, and a straight alpha line has a slope
+       discontinuity at each end that the eye reads as a band. -->
+  <div>
+    <div class="row"><span>Dissolve into cream</span><code id="v-fade">230px</code></div>
+    <input type="range" id="r-fade" min="0" max="600" step="10" value="230" />
+  </div>
+  <div>
+    <div class="row"><span>Group Y (− is up)</span><code id="v-offsety">-0.25</code></div>
+    <input type="range" id="r-offsety" min="-0.9" max="0.3" step="0.01" value="-0.25" />
+  </div>
+
+  <h2>Readout</h2>
+  <div class="row"><span>Frame rate</span><code id="v-fps">—</code></div>
+  <div class="row"><span>Buffer</span><code id="v-size">—</code></div>
+  <div class="row"><span>Entrance ends</span><code id="v-total">—</code></div>
+  <button id="btn-copy">Export config</button>
+  <div id="err" class="warn" hidden></div>
+  <div class="note">No &lt;img&gt; on this page. With WebGL off you get bare cream — that is the trade this experiment is testing.</div>
+  <div class="warn" style="background:#fff6e5;color:#7a4a00">⚠️ The headline and bio are WHITE. On bare cream that is <b>1.03:1</b> — invisible. They only become legible as orbs arrive behind them, so scrub to 0ms to see what a no-WebGL visitor gets, and what the first ~½ second of the entrance looks like.</div>
+</div>
+
+<div class="sheet" id="sheet" hidden>
+  <div>
+    <textarea id="sheet-text" readonly></textarea>
+    <div><button id="sheet-close">Close</button></div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// CONFIG — blobs, ramp and motion transcribed from js/main.js's
+// FIELD object so this page is judging the real artwork. The
+// entrance block is the only thing here that production has no
+// equivalent for yet.
+// ============================================================
+const FIELD = {
+  ramp:  { mid: 0.524038, midAlpha: 0.5 },
+  cream: [0.984, 0.988, 0.973],
+  blobs: [
+    { name: 'magenta', hex: '#D64DCE', col: [0.8392, 0.3020, 0.8078], r: 0.652,  x: 0.107, y: 0.375, a: 1.0 }, // 0.5669 base, x1.15 — see paintOrder note
+    { name: 'violet',  hex: '#9238E3', col: [0.5725, 0.2196, 0.8902], r: 0.5054, x: 0.942, y: 0.499, a: 1.0 },
+    { name: 'red',     hex: '#F93F3F', col: [0.9765, 0.2471, 0.2471], r: 0.6275, x: 0.590, y: 0.640, a: 1.0 },
+    { name: 'cyan',    hex: '#019FD8', col: [0.0039, 0.6235, 0.8471], r: 0.4738, x: 0.547, y: -0.016, a: 1.0 },
+  ],
+  // Indices into `blobs`, BOTTOM first. [1,0,2,3] = violet, magenta, red, cyan.
+  //
+  // ⚠️ TUNED, NOT INHERITED (2026-09). The site ships [0,1,2,3] (magenta,
+  // violet, red, cyan). This came out of an exhaustive sweep of all 24
+  // permutations, scored on the worst pixel under the actual glyph lines across
+  // 12 orbit phases, composited through the dissolve, with a constraint that
+  // the blue had to survive. Against the shipped order, measured here:
+  //
+  //     shipped  bio 2.96-3.36  (2 of 12 phases under 3:1)  headline 2.31
+  //     THIS     bio 3.16-3.34  (0 of 12)                   headline 2.59
+  //
+  // ⚠️ THE BLUE CONSTRAINT IS WHAT PICKED THIS ONE. The unconstrained winner is
+  // [0,3,1,2] (bio floor 3.26) and it gets there by burying cyan — blue share
+  // collapses 16.3% -> 1.2%. It scores best by deleting the blue. Any future
+  // re-tune must keep that constraint or it will rediscover the same cheat.
+  // ⚠️ PROMINENCE IS PAINT ORDER, not radius and not position. Lifting magenta
+  // above violet is the whole gain; a radius sweep of every orb over x0.75-1.35
+  // wanted nothing else changed. Reorder before you resize.
+  // ⚠️ MAGENTA'S RADIUS IS THEN NEARLY FREE: the bio holds 0/12 under 3:1 at
+  // every magenta size from x1.0 to x1.5, so 0.652 is an aesthetic choice (its
+  // tail was running too far across the frame at x1.5 / r 0.850), not a
+  // legibility one. It costs 0.07 of bio and 0.16 of headline versus x1.5.
+  // ⚠️ Tuned against offsetY -0.25 and midAlpha 0.5. Change either and re-run.
+  paintOrder: [1, 0, 2, 3],
+  // Shifts ALL FOUR orbs together, as one group. Negative is up.
+  // ⚠️ UNITS: y is normalised to the field's HEIGHT here (uv.y runs 0..1 over
+  // the canvas), so -0.10 is a tenth of the field's height, not of its width.
+  // The shader divides dy by uAspect when measuring distance, which is why a
+  // given radius reaches further vertically than horizontally — moving the
+  // group is cheap, but an orb's REACH past the bottom edge is not symmetric
+  // with its reach sideways.
+  offsetY: -0.25,
+  motion: { speed: 1.85, drift: 0.050, driftYRatio: 0.2, pulse: 0.30, warp: 0.55 },
+  renderScale: 1.0,
+  entrance: { delay: 0, lead: 280, stagger: 240, duration: 320, fade: true, startSize: 1.0, ease: 'linear', order: 'reverse' },
+};
+
+const $ = id => document.getElementById(id);
+
+// The field's dissolve, rebuilt whenever its length or the viewport changes.
+// Stops are PX because the field's height tracks the viewport's WIDTH while the
+// fold tracks its HEIGHT — no percentage of the element is the fold at more
+// than one window size.
+let fadeLen = 230;
+function buildFieldMask() {
+  const fs = document.querySelector('.field-stack');
+  if (!fs) return;
+  const h = fs.getBoundingClientRect().height;
+  const end = Math.min(h, window.innerHeight);   // dissolve finishes at the fold
+  const start = Math.max(0, end - fadeLen);
+  let stops;
+  if (fadeLen <= 0) {
+    stops = 'black 0, black 100%';
+  } else {
+    const N = 16;
+    const parts = ['black 0', `black ${start.toFixed(1)}px`];
+    for (let i = 1; i <= N; i++) {
+      const t = i / N;
+      const a = 1 - (3 * t * t - 2 * t * t * t);   // smoothstep, 1 -> 0
+      parts.push(`rgba(0,0,0,${a.toFixed(4)}) ${(start + fadeLen * t).toFixed(1)}px`);
+    }
+    stops = parts.join(', ');
+  }
+  const g = `linear-gradient(to bottom, ${stops})`;
+  fs.style.maskImage = g;
+  fs.style.webkitMaskImage = g;
+}
+addEventListener('resize', buildFieldMask);
+const canvas = $('field');
+const fail = msg => { const e = $('err'); e.hidden = false; e.textContent = msg; };
+
+const gl = canvas.getContext('webgl', { antialias: false, alpha: true, powerPreference: 'low-power' })
+        || canvas.getContext('experimental-webgl');
+if (!gl) fail('No WebGL context. On the real site this is where the JPEG takes over — this page has none, so you are looking at bare cream.');
+
+// ---- Shader. Identical maths to js/main.js; MID/MIDA/PULSE/CREAM are
+// uniforms here rather than baked literals, so they are live-tunable and
+// there is no GLSL literal to get wrong. ----
+const VERT = 'attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}';
+const FRAG = [
+  'precision highp float;',
+  'uniform vec2 uRes,uAmp;uniform float uAspect,uTime,uWarp,uMid,uMidA,uPulse;',
+  'uniform vec3 uCream;uniform vec4 uBlob[4];uniform vec3 uCol[4];',
+  'float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453123);}',
+  'float noise(vec2 p){vec2 i=floor(p),f=fract(p);vec2 u=f*f*(3.-2.*f);',
+  ' return mix(mix(hash(i),hash(i+vec2(1,0)),u.x),mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),u.x),u.y);}',
+  'float fbm(vec2 p){float v=0.,a=.5;for(int i=0;i<4;i++){v+=a*noise(p);p*=2.;a*=.5;}return v;}',
+  'vec2 ramp(float t){if(t>=1.)return vec2(0.,1.);',
+  ' if(t<=uMid)return vec2(1.+(uMidA-1.)*(t/uMid),0.);',
+  ' float u=(t-uMid)/(1.-uMid);return vec2(uMidA*(1.-u),u);}',
+  'void main(){vec2 uv=gl_FragCoord.xy/uRes;uv.y=1.-uv.y;',
+  ' vec2 q=vec2(fbm(uv*2.4+vec2(0.,uTime*.16)),fbm(uv*2.4+vec2(5.2,1.3-uTime*.13)));',
+  ' vec2 w=uv+uWarp*.22*(q-.5);',
+  ' vec3 col=uCream;',
+  ' for(int i=0;i<4;i++){float fi=float(i);',
+  '  float ax=uAmp.x*(.62*sin(uTime*(.130+fi*.028)+fi*1.7)+.38*sin(uTime*(.077+fi*.019)+fi*4.1));',
+  '  float ay=uAmp.y*cos(uTime*(.110+fi*.024)+fi*2.3);',
+  '  vec2 c=uBlob[i].xy+vec2(ax,ay);',
+  '  float rad=uBlob[i].z*(1.+uPulse*(.5+.5*sin(uTime*(.075+fi*.017)+fi)));',
+  // Guard against the entrance driving radius to exactly 0: length(d)/0 is
+  // inf (harmless, ramp returns alpha 0) but 0/0 at the centre is NaN, which
+  // paints a black speck. Clamp well below anything visible.
+  '  rad=max(rad,1e-4);',
+  '  vec2 d=vec2(w.x-c.x,(w.y-c.y)/uAspect);',
+  '  vec2 ra=ramp(length(d)/rad);float a=ra.x*uBlob[i].w;',
+  '  if(a<=0.)continue;',
+  '  col=col*(1.-a)+mix(uCol[i],vec3(1.),ra.y)*a;}',
+  ' col+=(hash(gl_FragCoord.xy+fract(uTime)*71.3)-.5)/255.;',
+  ' gl_FragColor=vec4(col,1.);}',
+].join('\n');
+
+let prog, U;
+if (gl) {
+  const compile = (type, src) => {
+    const sh = gl.createShader(type);
+    gl.shaderSource(sh, src); gl.compileShader(sh);
+    if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(sh));
+    return sh;
+  };
+  try {
+    prog = gl.createProgram();
+    gl.attachShader(prog, compile(gl.VERTEX_SHADER, VERT));
+    gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, FRAG));
+    gl.linkProgram(prog);
+    if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(prog));
+    gl.useProgram(prog);
+    const buf = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+    const loc = gl.getAttribLocation(prog, 'p');
+    gl.enableVertexAttribArray(loc);
+    gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+    U = {};
+    for (const n of ['uRes','uAmp','uAspect','uTime','uWarp','uMid','uMidA','uPulse','uCream','uBlob','uCol']) {
+      U[n] = gl.getUniformLocation(prog, n);
+    }
+    gl.uniform3fv(U.uCol, new Float32Array(FIELD.blobs.flatMap(b => b.col)));
+    gl.uniform3f(U.uCream, ...FIELD.cream);
+  } catch (e) {
+    fail('Shader failed: ' + e.message);
+    prog = null;
+  }
+}
+
+// ============================================================
+// THE ENTRANCE
+// Per-orb progress 0..1, then the uBlob uniform is rewritten each
+// frame. Nothing in the shader knows this is happening.
+// ============================================================
+// ⚠️ THE CURVE MATTERS MORE HERE THAN ANYWHERE ELSE ON THE PAGE, because an
+// orb's opacity IS its presence. An ease-OUT is at maximum velocity at t=0, so
+// the orb is already most of the way visible in the first moments and then
+// crawls — which reads as a POP followed by nothing, not as a fade. That is
+// what expo does here (70% of the way in 17% of its duration) and it is the
+// wrong shape for an arrival even though it is right for the hero's reveals,
+// where the thing is already visible and only MOVING.
+// The others start at zero velocity, so the orb genuinely eases into existence.
+const EASE = {
+  linear: t => t,
+  smooth: t => t * t * (3 - 2 * t),
+  inout:  t => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2),
+  // The site's actual REVEAL.ease, cubic-bezier(0.33, 1, 0.68, 1) ~= easeOutCubic.
+  // js/main.js softened TO this from expo-out in 2026-08 for the same reason we
+  // hit here: "near-instant first frames read as an abrupt pop".
+  outCubic: t => 1 - Math.pow(1 - t, 3),
+  // The cubic-bezier(0.16, 1, 0.3, 1) the site uses, closely approximated.
+  expo:   t => (t >= 1 ? 1 : 1 - Math.pow(2, -10 * t)),
+};
+
+// Which orb goes when. Returns an array of start times in ms, indexed by the
+// blob's PAINT index — so reordering the entrance never reorders compositing.
+// ⚠️ Paint order is load-bearing on this artwork (red sits above violet
+// deliberately), so the entrance must never be implemented by swapping blobs.
+// ⚠️ RETURNS START TIMES INDEXED BY BLOB, NOT BY PAINT SLOT. The two came
+// apart the moment paint order became editable: the entrance sequences ALONG
+// whatever the paint order currently is, so an orb's identity and its position
+// in the stack are different things. Indexing this by slot would silently
+// re-time the entrance every time the stack was reordered.
+function schedule() {
+  const e = FIELD.entrance;
+  const starts = FIELD.blobs.map(() => e.delay);
+  if (e.order === 'none') return starts;
+  const seq = e.order === 'reverse' ? [...FIELD.paintOrder].reverse() : [...FIELD.paintOrder];
+  seq.forEach((blobIdx, slot) => {
+    // slot 0 leads; slot 1 waits out `lead`; everything after is `stagger`
+    // apart. Setting lead === stagger reproduces even spacing exactly.
+    starts[blobIdx] = e.delay + (slot === 0 ? 0 : e.lead + (slot - 1) * e.stagger);
+  });
+  return starts;
+}
+
+let starts = schedule();
+const progressOf = (i, tMs) => {
+  const e = FIELD.entrance;
+  if (e.duration <= 0) return tMs >= starts[i] ? 1 : 0;
+  const p = (tMs - starts[i]) / e.duration;
+  return EASE[e.ease](Math.max(0, Math.min(1, p)));
+};
+const entranceTotal = () => Math.max(...starts) + FIELD.entrance.duration;
+
+let entranceT = 0;   // ms since the last replay
+let clock = 0;       // orbit time, independent of the entrance
+let paused = false;
+let autoloop = false;
+let scrubbing = false;   // when true the slider owns entranceT, not the clock
+
+// ⚠️ THE LOOP MUST FADE OUT BEFORE IT RESTARTS. Resetting entranceT to 0 drops
+// every orb from full to zero in ONE FRAME, and what is underneath is the bare
+// cream page — so the loop produced a hard WHITE FLASH on every cycle. That is
+// an artifact of looping something designed to run once, not a property of the
+// entrance, but it is indistinguishable from one while you are watching, and it
+// cost a round of tuning chasing the wrong thing.
+const LOOP = { hold: 1400, exit: 600 };
+// ⚠️ Deliberately NOT guarded on `scrubbing`. The exit only starts after
+// total + hold, which is past the scrub slider's range, so excluding it bought
+// nothing — and it made the exit invisible to any measurement driven through
+// LAB.at(), which reported a flat profile and a clean bill of health for a
+// fade that was not being applied at all.
+function globalFade(tMs) {
+  if (!autoloop) return 1;
+  const t0 = entranceTotal() + LOOP.hold;
+  if (tMs <= t0) return 1;
+  return Math.max(0, 1 - (tMs - t0) / LOOP.exit);
+}
+
+function replay() { entranceT = 0; clock = 0; }
+
+// ---- Render ----
+function resize() {
+  const r = canvas.getBoundingClientRect();
+  const w = Math.max(1, Math.round(r.width * FIELD.renderScale));
+  const h = Math.max(1, Math.round(r.height * FIELD.renderScale));
+  if (canvas.width !== w || canvas.height !== h) {
+    canvas.width = w; canvas.height = h;
+    gl.viewport(0, 0, w, h);
+    $('v-size').textContent = w + '×' + h;
+  }
+}
+
+const orbRows = FIELD.blobs.map((b, i) => {
+  const row = document.createElement('div');
+  row.className = 'orbrow';
+  row.innerHTML = '<span class="sw" style="background:' + b.hex + '"></span>' +
+                  '<span style="width:46px">' + b.name + '</span>' +
+                  '<span class="bar"><i></i></span><code style="width:30px;text-align:right">0%</code>' +
+                  '<button data-dir="1" title="paint higher">\u2191</button>' +
+                  '<button data-dir="-1" title="paint lower">\u2193</button>';
+  row.querySelectorAll('button').forEach(btn =>
+    btn.addEventListener('click', () => movePaint(i, +btn.dataset.dir)));
+  return { row, fill: row.querySelector('i'), pct: row.querySelector('code') };
+});
+
+// Rendered TOP of the stack first, which is the REVERSE of FIELD.paintOrder —
+// the shader paints index 0 first, i.e. underneath everything else.
+function renderPaintOrder() {
+  const host = $('orbs');
+  host.innerHTML = '';
+  const po = FIELD.paintOrder;
+  [...po].reverse().forEach((blobIdx, listPos) => {
+    const { row } = orbRows[blobIdx];
+    const btns = row.querySelectorAll('button');
+    btns[0].disabled = listPos === 0;                 // already on top
+    btns[1].disabled = listPos === po.length - 1;     // already at the bottom
+    host.appendChild(row);
+  });
+  syncTotal();
+}
+function movePaint(blobIdx, dir) {
+  const po = FIELD.paintOrder;
+  const at = po.indexOf(blobIdx), to = at + dir;
+  if (to < 0 || to >= po.length) return;
+  [po[at], po[to]] = [po[to], po[at]];
+  renderPaintOrder();
+  replay();
+}
+function setPaintOrder(next) { FIELD.paintOrder = next.slice(); renderPaintOrder(); replay(); }
+
+let frames = 0, fpsAt = performance.now();
+function draw(tMs) {
+  if (!prog) return;
+  resize();
+  const blobData = new Float32Array(16);
+  const colData = new Float32Array(12);
+  const e = FIELD.entrance;
+  const gf = globalFade(tMs);
+  // ⚠️ SLOT, NOT BLOB INDEX. The shader composites uBlob[0] first and uBlob[3]
+  // last, so the uniform slot IS the position in the stack. uCol has to be
+  // permuted with it — upload one and not the other and every orb paints in
+  // its neighbour's colour.
+  FIELD.paintOrder.forEach((blobIdx, slot) => {
+    const b = FIELD.blobs[blobIdx];
+    const p = progressOf(blobIdx, tMs);
+    const scale = e.startSize + (1 - e.startSize) * p;
+    blobData[slot * 4 + 0] = b.x;
+    blobData[slot * 4 + 1] = b.y + FIELD.offsetY;
+    blobData[slot * 4 + 2] = b.r * scale;
+    blobData[slot * 4 + 3] = b.a * (e.fade ? p : 1) * gf;
+    colData[slot * 3 + 0] = b.col[0];
+    colData[slot * 3 + 1] = b.col[1];
+    colData[slot * 3 + 2] = b.col[2];
+    orbRows[blobIdx].fill.style.width = (p * 100).toFixed(0) + '%';
+    orbRows[blobIdx].pct.textContent = (p * 100).toFixed(0) + '%';
+  });
+  gl.uniform3fv(U.uCol, colData);
+  gl.uniform4fv(U.uBlob, blobData);
+  gl.uniform2f(U.uRes, canvas.width, canvas.height);
+  gl.uniform1f(U.uAspect, canvas.width / canvas.height);
+  gl.uniform1f(U.uTime, clock);
+  gl.uniform1f(U.uWarp, FIELD.motion.warp);
+  gl.uniform1f(U.uMid, FIELD.ramp.mid);
+  gl.uniform1f(U.uMidA, FIELD.ramp.midAlpha);
+  gl.uniform1f(U.uPulse, FIELD.motion.pulse);
+  gl.uniform2f(U.uAmp, FIELD.motion.drift, FIELD.motion.drift * FIELD.motion.driftYRatio);
+  gl.drawArrays(gl.TRIANGLES, 0, 3);
+}
+
+let prev = performance.now();
+(function frame(now) {
+  requestAnimationFrame(frame);
+  const dt = Math.min(now - prev, 100);
+  prev = now;
+  if (!paused) clock += (dt / 1000) * FIELD.motion.speed;
+  if (!scrubbing) entranceT += dt;
+  if (autoloop && !scrubbing && entranceT > entranceTotal() + LOOP.hold + LOOP.exit) replay();
+  draw(entranceT);
+  if (++frames >= 30) {
+    $('v-fps').textContent = (frames * 1000 / (now - fpsAt)).toFixed(0) + ' fps';
+    frames = 0; fpsAt = now;
+  }
+})(prev);
+
+// ---- Controls ----
+const bindRange = (id, vid, fmt, set) => {
+  const r = $(id);
+  r.addEventListener('input', () => { set(parseFloat(r.value)); $(vid).textContent = fmt(parseFloat(r.value)); syncTotal(); });
+};
+const syncTotal = () => {
+  starts = schedule();
+  const total = entranceTotal();
+  const e = FIELD.entrance;
+  $('v-total').textContent = total + 'ms';
+  $('r-scrub').max = total;
+  const pct = gap => e.duration <= 0 ? 0 : Math.max(0, Math.min(1, 1 - gap / e.duration));
+  if (e.order === 'none') {
+    $('v-overlap').textContent = '100% (all together)';
+  } else {
+    const lead = pct(e.lead), rest = pct(e.stagger);
+    $('v-overlap').textContent = (lead * 100).toFixed(0) + '% after lead · '
+                               + (rest * 100).toFixed(0) + '% among the rest';
+  }
+  let most = 0;
+  for (let ms = 0; ms <= total; ms += 10) {
+    let n = 0;
+    for (let i = 0; i < FIELD.blobs.length; i++) {
+      const p = progressOf(i, ms);
+      if (p > 0.02 && p < 0.98) n++;
+    }
+    if (n > most) most = n;
+  }
+  $('v-concurrent').textContent = most + ' of 4'
+    + (most >= 4 ? ' — reads as one event' : most <= 2 ? ' — reads as a sequence' : '');
+};
+
+bindRange('r-lead', 'v-lead', v => v + 'ms', v => { FIELD.entrance.lead = v; });
+bindRange('r-stagger', 'v-stagger', v => v + 'ms', v => { FIELD.entrance.stagger = v; });
+bindRange('r-dur', 'v-dur', v => v + 'ms', v => { FIELD.entrance.duration = v; });
+bindRange('r-delay', 'v-delay', v => v + 'ms', v => { FIELD.entrance.delay = v; });
+bindRange('r-speed', 'v-speed', v => v.toFixed(2), v => { FIELD.motion.speed = v; });
+bindRange('r-mida', 'v-mida', v => v.toFixed(2), v => { FIELD.ramp.midAlpha = v; });
+bindRange('r-offsety', 'v-offsety', v => v.toFixed(2), v => { FIELD.offsetY = v; });
+
+$('t-fade').addEventListener('change', e => { FIELD.entrance.fade = e.target.checked; replay(); });
+bindRange('r-startsize', 'v-startsize', v => v.toFixed(2) + '\u00d7', v => { FIELD.entrance.startSize = v; });
+$('sel-ease').addEventListener('change', e => { FIELD.entrance.ease = e.target.value; replay(); });
+$('sel-order').addEventListener('change', e => { FIELD.entrance.order = e.target.value; syncTotal(); replay(); });
+$('r-fade').addEventListener('input', e => {
+  fadeLen = parseFloat(e.target.value);
+  $('v-fade').textContent = fadeLen + 'px';
+  buildFieldMask();
+});
+$('btn-replay').addEventListener('click', replay);
+// ---- Per-orb geometry ----
+const ORB_BASE = FIELD.blobs.map(b => ({ x: b.x, y: b.y, r: b.r }));
+const orbSel = $('sel-orb');
+FIELD.blobs.forEach((b, i) => orbSel.add(new Option(b.name, String(i))));
+function syncOrb() {
+  const b = FIELD.blobs[+orbSel.value];
+  $('r-bx').value = b.x; $('v-bx').textContent = b.x.toFixed(3);
+  $('r-by').value = b.y; $('v-by').textContent = b.y.toFixed(3);
+  $('r-br').value = b.r; $('v-br').textContent = b.r.toFixed(3);
+  syncReach();
+}
+// How far into this orb's ramp the bio sits, as a fraction of its radius.
+// < 0.52 is inside the solid core; > 1.0 is outside it entirely; the band
+// between is the whitening tail that veils whatever is underneath.
+function syncReach() {
+  const b = FIELD.blobs[+orbSel.value];
+  const cv2 = $('field'), cr = cv2.getBoundingClientRect();
+  const el = document.querySelector('.intro-bio');
+  if (!el) { $('v-reach').textContent = '—'; return; }
+  const br = el.getBoundingClientRect();
+  const uvx = (br.left + br.width/2 - cr.left) / cr.width;
+  const uvy = (br.top + br.height/2 - cr.top) / cr.height;
+  const aspect = cv2.width / cv2.height;
+  const d = Math.hypot(uvx - b.x, (uvy - (b.y + FIELD.offsetY)) / aspect);
+  const ratio = d / b.r;
+  $('v-reach').textContent = ratio.toFixed(2) +
+    (ratio > 1 ? ' — outside' : ratio > FIELD.ramp.mid ? ' — whitening tail' : ' — solid core');
+}
+orbSel.addEventListener('change', syncOrb);
+[['r-bx','v-bx','x'], ['r-by','v-by','y'], ['r-br','v-br','r']].forEach(([rid, vid, key]) => {
+  $(rid).addEventListener('input', () => {
+    const v = parseFloat($(rid).value);
+    FIELD.blobs[+orbSel.value][key] = v;
+    $(vid).textContent = v.toFixed(3);
+    syncReach();
+  });
+});
+$('btn-orb-reset').addEventListener('click', () => {
+  const i = +orbSel.value;
+  Object.assign(FIELD.blobs[i], ORB_BASE[i]);
+  syncOrb();
+});
+
+$('btn-po-tuned').addEventListener('click',   () => setPaintOrder([1, 0, 2, 3]));
+$('btn-po-shipped').addEventListener('click', () => setPaintOrder([0, 1, 2, 3]));
+$('btn-po-figma').addEventListener('click',   () => setPaintOrder([0, 2, 1, 3]));
+$('btn-po-reverse').addEventListener('click', () => setPaintOrder([...FIELD.paintOrder].reverse()));
+$('t-scrub').addEventListener('change', e => {
+  scrubbing = e.target.checked;
+  $('r-scrub').disabled = !scrubbing;
+  if (scrubbing) { entranceT = +$('r-scrub').value; }
+});
+$('r-scrub').addEventListener('input', e => {
+  entranceT = +e.target.value;
+  $('v-scrub').textContent = entranceT + 'ms';
+});
+
+// Debug hook. A harness you cannot drive to an exact moment can only be
+// judged by watching, and watching is what this page exists to improve on.
+window.LAB = {
+  FIELD,
+  replay,
+  setPaintOrder,
+  syncOrb,
+  schedule: () => starts.slice(),
+  // ⚠️ DRIVE THE ORBIT CLOCK DIRECTLY when measuring contrast. The orbit's
+  // components have periods of ~30-50 units at speed 1.85, so sampling a full
+  // cycle by WAITING takes the better part of a minute and lands on whatever
+  // phases the wall clock happened to give you. Set it here instead: the phases
+  // are exact and the measurement is reproducible.
+  setClock(t) { clock = t; draw(entranceT); return clock; },
+  // Jump the entrance to an exact ms and return each orb's progress there.
+  at(ms) {
+    scrubbing = true; $('t-scrub').checked = true; $('r-scrub').disabled = false;
+    $('r-scrub').value = ms; $('v-scrub').textContent = ms + 'ms';
+    entranceT = ms;
+    draw(ms);
+    return FIELD.blobs.map((b, i) => ({ orb: b.name, progress: +progressOf(i, ms).toFixed(3) }));
+  },
+};
+$('t-autoloop').addEventListener('change', e => { autoloop = e.target.checked; if (autoloop) replay(); });
+$('t-pause').addEventListener('change', e => { paused = e.target.checked; });
+$('t-grain').addEventListener('change', e => { document.body.classList.toggle('no-grain', !e.target.checked); });
+$('t-lockup').addEventListener('change', e => { document.body.classList.toggle('no-lockup', !e.target.checked); });
+
+$('btn-copy').addEventListener('click', () => {
+  const e = FIELD.entrance;
+  const txt =
+'// Paste into the FIELD object in js/main.js, then drive uBlob per frame.\n' +
+'entrance: {\n' +
+'  delay:    ' + e.delay + ',      // ms before the lead orb\n' +
+'  lead:     ' + e.lead + ',     // ms the lead orb holds alone\n' +
+'  stagger:  ' + e.stagger + ',    // ms between the remaining orbs\n' +
+'  duration: ' + e.duration + ',   // ms each orb takes\n' +
+'  fade:     ' + e.fade + ',   // ramp opacity 0 -> 1\n' +
+'  startSize:' + e.startSize.toFixed(2) + ', // radius multiplier at t=0; >1 contracts from a wash\n' +
+"  ease:     '" + e.ease + "',     // linear | smooth | inout | outCubic | expo\n" +
+"  order:    '" + e.order + "',    // paint | reverse | none\n" +
+'},\n' +
+'// paintOrder is bottom -> top, as indices into FIELD.blobs\n' +
+'paintOrder: [' + FIELD.paintOrder.join(', ') + '],  // ' +
+  FIELD.paintOrder.map(i => FIELD.blobs[i].name).join(' -> ') + '\n' +
+'// offsetY: ' + FIELD.offsetY.toFixed(2) + '  (added to every blob.y)\n' +
+'blobs: [\n' + FIELD.blobs.map(b =>
+  "  { col: [" + b.col.join(', ') + "], r: " + b.r.toFixed(4) +
+  ", x: " + b.x.toFixed(3) + ", y: " + b.y.toFixed(3) + ", a: " + b.a.toFixed(2) +
+  " }, // " + b.name).join('\n') + '\n],\n' +
+'// total: ' + entranceTotal() + 'ms\n' +
+'// midAlpha: ' + FIELD.ramp.midAlpha.toFixed(2) + '   speed: ' + FIELD.motion.speed.toFixed(2) + '\n';
+  $('sheet-text').value = txt;
+  $('sheet').hidden = false;
+  $('sheet-text').select();
+});
+$('sheet-close').addEventListener('click', () => { $('sheet').hidden = true; });
+
+renderPaintOrder();
+syncOrb();
+syncTotal();
+buildFieldMask();
+replay();
+</script>
+</body>
+</html>

@@ -159,9 +159,13 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@200;500;700&family=Inter:wght@400..700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=5b3fe141" />
-  <!-- The landing field is the LCP element — start fetching it immediately. -->
-  <link rel="preload" as="image" href="images/hero-bkg.jpg?v=4" fetchpriority="high" />
+  <link rel="stylesheet" href="style.css?v=4743844a" />
+  <!-- The landing field's JPEG fallback — PHONES ONLY since 2026-09, so the
+       preload is gated to match the <picture> in <main>. Without the media
+       attribute this fetches 1.4MB on every desktop and tablet visit for an
+       image that viewport will never display. The two conditions are one
+       decision written twice; change both together. -->
+  <link rel="preload" as="image" href="images/hero-bkg.jpg?v=4" media="(max-width: 480px)" fetchpriority="high" />
   <!-- Pre-paint flags, set only when JS runs:
        • is-motion — hides reveal targets so they can fade in without a flash
          (skipped for reduced-motion visitors, who see everything).
@@ -280,7 +284,22 @@
          nothing clips it, so whatever extends past the hero fold bleeds on
          behind Selected Work — its lower reaches are near-white, so it
          dissolves into the cream page on its own. Scrolls with the page. -->
-    <img class="page-field" src="images/hero-bkg.jpg?v=4" width="3600" height="2198" alt="" fetchpriority="high" />
+    <picture>
+      <!-- ⚠️ ABOVE 480 THIS RESOLVES TO A 1x1 TRANSPARENT GIF AND THE JPEG IS
+           NEVER FETCHED. `display: none` would NOT do this — a hidden <img>
+           still downloads — so the gate has to be in resource selection, which
+           is what <source media> gives us. Phones fall through to the <img> and
+           get the real file, unchanged.
+           ⚠️ THE <source> NEEDS ITS OWN width/height. The <img>'s attributes do
+           NOT govern when a <source> is selected — the chosen resource's own
+           intrinsic ratio wins, so without these the box resolved to the 1x1
+           GIF's 1:1 and measured 1440x1440 instead of 1440x879. Harmless (the
+           image is transparent and absolutely positioned, and the canvas has
+           its own aspect-ratio) but wrong, and it would mislead anyone
+           measuring the field's box from this element. -->
+      <source media="(min-width: 481px)" srcset="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" width="3600" height="2198" />
+      <img class="page-field" src="images/hero-bkg.jpg?v=4" width="3600" height="2198" alt="" fetchpriority="high" />
+    </picture>
 
     <!-- ANIMATED FIELD (2026-09) — the same artwork as a live WebGL gradient,
          layered OVER the JPEG above rather than replacing it. Both carry
@@ -301,9 +320,12 @@
          edge (wordmark / Work·About / "Say hello" pill). The sticky
          site header stays in the DOM but is tucked above the viewport while
          the hero is on screen (js/main.js) and slides in past the fold; with
-         no JS it is simply always visible. Load choreography: the divider
-         "emits" the headline upward and the bio downward (masked at the
-         divider), then the bar fades in — all CSS, reduced-motion exempt. -->
+         no JS it is simply always visible. Load choreography is ONE cue: the
+         divider is simply there, and the headline (rising, masked at the
+         divider), the bio (descending) and the bar all fade up from opacity 0
+         together — all CSS. The divider's own centre-out draw was built and
+         dropped as one motion too many. Timings live on .intro-headline in
+         hero.css; reduced motion drops the sequence. -->
     <section class="intro" aria-labelledby="intro-heading">
       <div class="intro-top">
         <h1 class="intro-headline" id="intro-heading">Making products make sense.</h1>
@@ -574,6 +596,6 @@
   </div>
   <div class="wave-cursor" id="wave-cursor" aria-hidden="true">👋</div>
 
-  <script src="js/main.js?v=df7c8005" defer></script>
+  <script src="js/main.js?v=dd53cf44" defer></script>
 </body>
 </html>

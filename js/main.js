@@ -798,7 +798,7 @@ const FIELD = {
   // the Figma original's 2.72-3.11, while red's visible area goes 41.5% -> 52.3%.
   // Measured over 14 orbit phases per variant, worst pixel under the line boxes.
   blobs: [
-    { col: [0.8392, 0.3020, 0.8078], r: 0.5669, x: 0.107, y: 0.375, a: 1.00 }, // magenta #D64DCE
+    { col: [0.8392, 0.3020, 0.8078], r: 0.652,  x: 0.107, y: 0.375, a: 1.00 }, // magenta #D64DCE (0.5669 base, x1.15)
     { col: [0.5725, 0.2196, 0.8902], r: 0.5054, x: 0.942, y: 0.499, a: 1.00 }, // violet  #9238E3
     { col: [0.9765, 0.2471, 0.2471], r: 0.6275, x: 0.590, y: 0.640, a: 1.00 }, // red     #F93F3F
     { col: [0.0039, 0.6235, 0.8471], r: 0.4738, x: 0.547, y: -0.016, a: 1.00 }, // cyan   #019FD8
@@ -879,6 +879,33 @@ const FIELD = {
   // ⚠️ Do NOT "restore" a bare sin to make it shrink below base. That was the
   // original form and the trough pulled every orb's reach in by 8% at once,
   // which is what put the bio's worst phases under threshold.
+  // PAINT ORDER — indices into `blobs`, BOTTOM first. Tuned in
+  // lab/field-orbs.html against an exhaustive sweep of all 24 permutations,
+  // scored on the worst pixel under the glyph lines across 12 orbit phases and
+  // constrained to keep the blue. Was [0,1,2,3] (magenta, violet, red, cyan).
+  //   before  bio 2.96-3.36 (2 of 12 phases under 3:1)   headline 2.31
+  //   now     bio 3.16-3.34 (0 of 12)                    headline 2.59
+  // ⚠️ THE BLUE CONSTRAINT IS WHAT PICKED THIS. The unconstrained winner
+  // ([0,3,1,2], bio 3.26) gets there by burying cyan — blue share collapses
+  // 16.3% -> 1.2%. Re-tune without that constraint and it finds the same cheat.
+  // ⚠️ uCol MUST be permuted with uBlob. The shader composites slot 0 first, so
+  // the uniform slot IS the stack position; upload one reordered and not the
+  // other and every orb paints in its neighbour's colour.
+  paintOrder: [1, 0, 2, 3],
+  // Shifts all four orbs together; negative is up. y is normalised to the
+  // field's HEIGHT, so -0.25 is a quarter of it.
+  offsetY: -0.25,
+  // ENTRANCE — orbs arrive one at a time rather than all at once.
+  // ⚠️ DESKTOP AND TABLET ONLY, and that is forced rather than chosen: the
+  // shader writes alpha 1 from a CREAM base, so the canvas is OPAQUE. Above 480
+  // there is no longer a JPEG under it (see the <picture> in index.html) so it
+  // animates onto the page's own background; at <=480 the JPEG is still there
+  // and an entrance would cover the photo with flat cream and then fade orbs up
+  // over it — strictly worse than no entrance. Phones draw fully formed.
+  // ⚠️ ORDER SEQUENCES ALONG paintOrder, so `reverse` means cyan (top) first.
+  // Timings are indexed by ORB, not by stack slot — reordering the stack must
+  // not silently re-time the entrance.
+  entrance: { lead: 280, stagger: 240, duration: 320 },
   motion: { speed: 1.85, drift: 0.050, driftYRatio: 0.2, pulse: 0.30, warp: 0.55 },
   // Buffer size vs CSS px. BELOW devicePixelRatio deliberately: a soft
   // gradient carries no per-pixel detail, so 1.0 on a 2x display is a 4x
@@ -1017,8 +1044,6 @@ function initHeroField() {
   ['uRes', 'uAspect', 'uTime', 'uWarp', 'uAmp', 'uBlob', 'uCol']
     .forEach(n => { U[n] = gl.getUniformLocation(prog, n); });
 
-  gl.uniform3fv(U.uCol,  new Float32Array(FIELD.blobs.flatMap(b => b.col)));
-  gl.uniform4fv(U.uBlob, new Float32Array(FIELD.blobs.flatMap(b => [b.x, b.y, b.r, b.a])));
   gl.uniform1f(U.uWarp, FIELD.motion.warp);
   gl.uniform2f(U.uAmp,  FIELD.motion.drift, FIELD.motion.drift * FIELD.motion.driftYRatio);
 
@@ -1033,16 +1058,64 @@ function initHeroField() {
     }
   }
 
-  function draw(t) {
+  // When each orb starts, indexed by BLOB (not by stack slot) — the entrance
+  // runs along the paint order, so the two are different things.
+  const entranceStarts = (() => {
+    const e = FIELD.entrance;
+    const starts = FIELD.blobs.map(() => 0);
+    [...FIELD.paintOrder].reverse().forEach((blobIdx, slot) => {
+      starts[blobIdx] = slot === 0 ? 0 : e.lead + (slot - 1) * e.stagger;
+    });
+    return starts;
+  })();
+  const ENTRANCE_MS = Math.max(...entranceStarts) + FIELD.entrance.duration;
+
+  // ⚠️ LINEAR, DELIBERATELY. An ease-out is at maximum velocity at t=0, so an
+  // orb is most of the way visible in its first frames and then crawls — which
+  // reads as a POP, not a fade. For a fixed duration linear has the lowest
+  // possible peak rate of change; measured, easeOutCubic is 77% flashier here.
+  // Right for the hero's reveals (already-visible things that MOVE), wrong for
+  // something whose opacity IS its presence.
+  const blobData = new Float32Array(16);
+  const colData  = new Float32Array(12);
+
+  function draw(t, entranceMs) {
     resize();
+    const e = FIELD.entrance;
+    FIELD.paintOrder.forEach((blobIdx, slot) => {
+      const b = FIELD.blobs[blobIdx];
+      const p = entranceMs == null ? 1
+        : Math.max(0, Math.min(1, (entranceMs - entranceStarts[blobIdx]) / e.duration));
+      blobData[slot * 4 + 0] = b.x;
+      blobData[slot * 4 + 1] = b.y + FIELD.offsetY;
+      blobData[slot * 4 + 2] = b.r;
+      blobData[slot * 4 + 3] = b.a * p;
+      colData[slot * 3 + 0] = b.col[0];
+      colData[slot * 3 + 1] = b.col[1];
+      colData[slot * 3 + 2] = b.col[2];
+    });
+    gl.uniform4fv(U.uBlob, blobData);
+    gl.uniform3fv(U.uCol, colData);
     gl.uniform2f(U.uRes, canvas.width, canvas.height);
     gl.uniform1f(U.uAspect, canvas.width / canvas.height);
     gl.uniform1f(U.uTime, t);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
   }
 
-  // First frame BEFORE the reveal, so the class never uncovers an empty canvas.
-  draw(0);
+  const FIELD_STATIC = matchMedia('(max-width: 480px)');
+  const staticField = reducedMotion.matches || FIELD_STATIC.matches;
+  // ⚠️ TWO SEPARATE CONDITIONS THAT COINCIDE TODAY. The entrance needs the
+  // field to animate at all (not reduced motion, not the phone's static path)
+  // AND needs no JPEG underneath (>480). The second is currently implied by the
+  // first, but they are different reasons — if phones ever start animating, the
+  // width gate must still hold or the entrance will cover the photo with flat
+  // cream and fade orbs up over it.
+  const runEntrance = !staticField && !FIELD_STATIC.matches;
+
+  // First frame BEFORE the reveal. With an entrance that frame is deliberately
+  // EMPTY (bare cream): above 480 there is no image under the canvas any more,
+  // so there is nothing for it to cover. Without one it is the finished field.
+  draw(0, runEntrance ? 0 : null);
   html.classList.add('is-field-live');
 
   // Reduced motion keeps the artwork and drops only the movement — the field
@@ -1062,8 +1135,7 @@ function initHeroField() {
   // ⚠️ Re-declared deliberately after the `FIELD_PHONE` bail was deleted; this is
   // a different question (should it MOVE) from the one that bail answered
   // (should it EXIST), so it gets its own name rather than reviving that one.
-  const FIELD_STATIC = matchMedia('(max-width: 480px)');
-  if (reducedMotion.matches || FIELD_STATIC.matches) return;
+  if (staticField) return;
 
   // Only draw while the field is actually on screen. It bleeds well past the
   // fold, so this observes the CANVAS rather than .intro — stopping at the
@@ -1077,12 +1149,14 @@ function initHeroField() {
   }
 
   let clock = 0;
+  let entranceT = runEntrance ? 0 : null;
   let prev = performance.now();
   (function frame(now) {
     requestAnimationFrame(frame);
     // dt-based, not frame-counted, so the speed is identical at 60 and 120Hz;
     // capped so a backgrounded tab resuming cannot jump the whole distance.
-    const dt = Math.min(now - prev, 100) / 1000;
+    const dtMs = Math.min(now - prev, 100);
+    const dt = dtMs / 1000;
     prev = now;
     // ⚠️ Stops while off screen or backgrounded. It does NOT re-check the phone
     // tier: a desktop session resized down keeps animating until reload, which is
@@ -1091,7 +1165,12 @@ function initHeroField() {
     // this change exists to remove.
     if (!onScreen || document.hidden) return;
     clock += dt * FIELD.motion.speed;
-    draw(clock);
+    // Shares the same capped dt, so a resuming background tab cannot jump the
+    // entrance either — it picks up where it left off rather than snapping.
+    if (entranceT !== null && entranceT < ENTRANCE_MS) {
+      entranceT = Math.min(ENTRANCE_MS, entranceT + dtMs);
+    }
+    draw(clock, entranceT);
   })(prev);
 }
 
