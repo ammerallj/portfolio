@@ -1,0 +1,51 @@
+# Staging preview — builds the site at https://ammerallj.github.io/portfolio-staging/
+#
+# This file lives in the main repo but ONLY RUNS in ammerallj/portfolio-staging
+# (the `if:` below). scripts/preview.sh pushes `staging` there; this builds it the
+# same way Pages builds the live site (Jekyll, honouring _config.yml's excludes),
+# then makes two changes so the copy can never pose as the real site:
+#   - removes CNAME, so it never claims ammerallj.design
+#   - replaces robots.txt with Disallow-all, so search engines skip it
+# The live site (ammerallj/portfolio) deploys by its own legacy Pages build and
+# is untouched by this workflow.
+name: Staging preview
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    if: github.repository == 'ammerallj/portfolio-staging'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/jekyll-build-pages@v1
+        with:
+          source: ./
+          destination: ./_site
+      - name: Mark as staging (no custom domain, no indexing)
+        run: |
+          sudo rm -f _site/CNAME
+          printf 'User-agent: *\nDisallow: /\n' | sudo tee _site/robots.txt >/dev/null
+      - uses: actions/upload-pages-artifact@v3
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

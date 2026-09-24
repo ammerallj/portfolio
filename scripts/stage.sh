@@ -9,8 +9,9 @@
 # Usage:
 #   ./scripts/stage.sh mobile-header
 #
-# Nothing here touches the live site. After it runs, preview staging locally
-# (desktop + phone on the same Wi-Fi), then ship it with ./scripts/ship.sh.
+# Nothing here touches the live site. After merging it publishes staging to the
+# hosted preview (scripts/preview.sh) and prints local URLs too; check it, then
+# ship it with ./scripts/ship.sh.
 #
 # ?v= CONFLICTS ARE EXPECTED when two branches both edited CSS or js/main.js —
 # each stamped its own content hash. Resolve by keeping either side, then
@@ -42,10 +43,14 @@ fi
 
 git merge --no-ff "$branch" -m "Stage $branch"
 
+echo
+echo "staged '$branch'."
+./scripts/preview.sh
+
 port=3456
 lan=$(ipconfig getifaddr en0 2>/dev/null || ipconfig getifaddr en1 2>/dev/null || true)
 echo
-echo "staged '$branch'. Preview it (python3 -m http.server $port, or the 'portfolio' preview):"
+echo "or locally (python3 -m http.server $port, or the 'portfolio' preview):"
 echo "  desktop:  http://localhost:$port"
 [ -n "$lan" ] && echo "  phone:    http://$lan:$port   (same Wi-Fi)"
 echo "happy with it?  ./scripts/ship.sh"

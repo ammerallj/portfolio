@@ -2916,13 +2916,23 @@ own version, separate from the `style.css?v=` / `@import` CSS bump below).
   | Step | Command | Touches the live site? |
   |---|---|---|
   | Start an experiment | `./scripts/new-worktree.sh <name>` → `../portfolio-<name>/`, branched from staging | no |
-  | Small refinement | commit straight on `staging` in the main folder | no |
-  | Test an experiment | `./scripts/stage.sh <name>` (merges it into staging, prints desktop + phone preview URLs) | no |
+  | Small refinement | commit straight on `staging` in the main folder, then `./scripts/preview.sh` | no |
+  | Test an experiment | `./scripts/stage.sh <name>` (merges it into staging, publishes the hosted preview, prints local URLs) | no |
   | Go live | `./scripts/ship.sh` (lists what ships, confirms, fast-forwards main, pushes) | **yes** |
   - **Never commit on `main`** — the pre-commit hook refuses it
     (`ALLOW_MAIN_COMMIT=1` for a genuine hotfix; then `git merge main` on staging).
   - **Ship is a fast-forward**, so what goes live is byte-for-byte the commit you
     previewed. `ship.sh` refuses if staging is dirty or behind `origin/main`.
+  - **Hosted preview: https://ammerallj.github.io/portfolio-staging/** — always
+    shows `staging`. It's a SEPARATE public repo (`ammerallj/portfolio-staging`,
+    git remote `preview`) because Pages serves one site per repo; `preview.sh`
+    force-pushes staging to its `main`. Built by
+    `.github/workflows/staging-preview.yml`, which lives in this repo but is
+    guarded to run only there: same Jekyll build as live, CNAME stripped (so it
+    never claims ammerallj.design), robots.txt replaced with Disallow-all.
+    ⚠️ **Public, not private** — unindexed, but anyone with the URL sees
+    unreleased work. It's served under `/portfolio-staging/`, so any future
+    root-absolute path (`href="/…"`) will break there — keep paths relative.
   - **Phone testing:** `python3 -m http.server` binds all interfaces, so the LAN
     URL `stage.sh` prints works on a phone on the same Wi-Fi — the only way to
     check `svh`/iOS behaviour before it's live.
