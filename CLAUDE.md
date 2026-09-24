@@ -2910,11 +2910,28 @@ own version, separate from the `style.css?v=` / `@import` CSS bump below).
     `git config core.hooksPath .githooks` (already set in this working copy, and
     shared across its worktrees). A *fresh* `git clone` must re-run that one line
     to arm the hook.
-- **Cross-chat workflow:** one chat per **git worktree** so parallel sessions
-  can't stomp each other's files. `./scripts/new-worktree.sh <name>` creates
-  `../portfolio-<name>/` on its own branch; point a fresh chat there, merge to
-  `main` when done, then `git worktree remove`. Overlapping edits then surface as
-  merge conflicts, not silent overwrites.
+- **Branch workflow (2026-09): experiment → `staging` → `main`.**
+  `main` IS the live site (Pages deploys it), so it only ever moves by
+  fast-forward to a tested `staging`. The repo's main folder lives on `staging`.
+  | Step | Command | Touches the live site? |
+  |---|---|---|
+  | Start an experiment | `./scripts/new-worktree.sh <name>` → `../portfolio-<name>/`, branched from staging | no |
+  | Small refinement | commit straight on `staging` in the main folder | no |
+  | Test an experiment | `./scripts/stage.sh <name>` (merges it into staging, prints desktop + phone preview URLs) | no |
+  | Go live | `./scripts/ship.sh` (lists what ships, confirms, fast-forwards main, pushes) | **yes** |
+  - **Never commit on `main`** — the pre-commit hook refuses it
+    (`ALLOW_MAIN_COMMIT=1` for a genuine hotfix; then `git merge main` on staging).
+  - **Ship is a fast-forward**, so what goes live is byte-for-byte the commit you
+    previewed. `ship.sh` refuses if staging is dirty or behind `origin/main`.
+  - **Phone testing:** `python3 -m http.server` binds all interfaces, so the LAN
+    URL `stage.sh` prints works on a phone on the same Wi-Fi — the only way to
+    check `svh`/iOS behaviour before it's live.
+  - **`?v=` conflicts are expected** when two branches both touched CSS or
+    `js/main.js` (each stamped its own hash): keep either side, run
+    `./scripts/bump-cache.sh`, re-add the stamp files, commit.
+  - One chat per worktree still holds, so parallel sessions can't stomp each
+    other's files; clean up with `git worktree remove ../portfolio-<name>` and
+    `git branch -d <name>` once shipped.
 - **Deploy exposure — the repo root IS the public site.** GitHub Pages deploys
   from the branch root (custom domain via `CNAME`), so every tracked file is
   served at `ammerallj.design/<path>` **unless `_config.yml` excludes it**. When

@@ -18,6 +18,18 @@
 set -euo pipefail
 
 # ---------------------------------------------------------------------------
+# Guard: no direct commits on `main`. main IS the live site (GitHub Pages), and
+# it only moves by ./scripts/ship.sh fast-forwarding it to a tested `staging`.
+# Work on staging or an experiment branch (CLAUDE.md "Branch workflow").
+# Hotfix escape hatch:  ALLOW_MAIN_COMMIT=1 git commit ...
+if [ "$(git branch --show-current)" = "main" ] && [ "${ALLOW_MAIN_COMMIT:-}" != "1" ]; then
+  echo "pre-commit: you're on 'main', which is the live site." >&2
+  echo "Commit on staging instead:  git switch staging   (or ./scripts/new-worktree.sh <name>)" >&2
+  echo "For a genuine hotfix:        ALLOW_MAIN_COMMIT=1 git commit ..." >&2
+  exit 1
+fi
+
+# ---------------------------------------------------------------------------
 # Guard: refuse to silently commit a DELETED asset (any PDF, anything in images/).
 #
 # Why this exists: 2026-08-16, Jenna-Ammerall-Resume.pdf was dropped by commit
