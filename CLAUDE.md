@@ -44,7 +44,7 @@ how they overwrite each other's work. `.claude/settings.json` sets
   - `project-overview.css` — the shared Project Overview template: §0 `.intro-bar--page` (the landing's nav bar pinned to the top of these pages), `.project-hero`, `.project-masthead` (title + metadata `<dl>`), `.project-block` (description / impact / role), §0a the section-seam rules, `.next-case` (§9) with its two treatments — `--image` (destination art, the pager) and `--outline` + `--locked` (the hairline Full-case-study card) — (`.project-locked` / `.invite-button` were deleted 2026-08), the `.project-carousel` masthead crossfade, and `.section-pills`. Imported after `sections.css` (it leans on `.section-label`, `.about-body`, `.contact-connect-links`) and before `responsive.css`.
   - `mobile-menu.css` — the ≤480 `.mobile-menu` overlay (the connect-only panel
     behind the header's "Say hello" trigger) on every page.
-  - `responsive.css` — **ALL width breakpoints, site-wide.** Organized by screen size (1440 → 1024 → 768 → **680** → 480px). Imported last so it overrides desktop styles. The 680 tier is a NAV-ONLY tier — see **The nav hand-off at 680** below.
+  - `responsive.css` — **ALL width breakpoints, site-wide.** Organized by screen size (1440 → 1024 → 768 → **680** → 480 → **374**px). Imported last so it overrides desktop styles. The 680 tier is a NAV-ONLY tier — see **The nav hand-off at 680** below. The 374 tier holds ONE rule, the narrow-phone hero fade — see **Phones: the shader's own box**.
 
 ## Landing (2026-08) — "Making products make sense."
 The homepage hero is the Figma 339:3745 landing: `images/hero-bkg.jpg` laid as
@@ -181,12 +181,13 @@ sticky header stays in the DOM, tucked above the viewport over the hero
 (js/main.js) and sliding in past the fold; at **≤680** the tuck is neutralized,
 the `.intro-bar` is hidden, and the floatie pill + header Contact trigger
 carry mobile nav. **At ≤680 the header is `position: fixed` and FLOATS over the
-hero** so the field reaches the top of the screen — it is bare while the page
-rests at the top (`html.is-at-page-top`, a third pre-paint flag set in
-index.html's inline script beside `is-motion`/`is-loading` and maintained in
-`updateScrollEffects` ABOVE its `is-loading` return) and takes back the frosted
-cream glass on scroll. The BARE state is the added one, so no-JS keeps the
-legible bar. Because the header left the flow there, `.intro`'s phone height is
+hero** so the field reaches the top of the screen. ⚠️ **It keeps its frosted
+cream wash AT REST TOO (2026-09-25)** — it used to go bare while the page sat at
+the top and take the glass back on scroll; that rule
+(`html.is-at-page-top .site-header::before { opacity: 0 }`) is deleted, across
+the whole ≤680 tier. `html.is-at-page-top` (a pre-paint flag set in index.html's
+inline script and maintained in `updateScrollEffects` ABOVE its `is-loading`
+return) is still set and now styles nothing. Because the header left the flow there, `.intro`'s phone height is
 `100dvh - 184px`, not `- 246px` — the 62px it used to eat came back off; both
 numbers preserve the same ~120px Work-card peek. The phone tier also
 art-directs the field (**2026-09: `--field-w` 1250px and nudged +50px right /
@@ -359,7 +360,107 @@ and About/Contact's `min-height`s in sections.css. The previous
 blob-hero landing is archived, fully self-contained, in
 `archive/blob-hero-2026-08/`.
 
+### The hero scroll: three speeds and a shorter hero (2026-09-25, shipped)
+
+**This is the authoritative description of how the desktop/tablet hero moves as
+the reader scrolls away. It supersedes the tuck/lockup rules in the next
+section wherever they disagree** — most importantly, the lockup NO LONGER rides
+`--field-scroll` rigidly, and `--field-scroll` is no longer a forward lift.
+Everything here is `>680` only (it needs the `.intro-bar`); every token is 0 at
+≤680 and phones are covered under **Phones: the shader's own box** below.
+
+**Three layers at three speeds, all pure functions of `scrollY`:**
+
+| Layer | Speed vs. scroll | Mechanism |
+|---|---|---|
+| Headline, divider, bio | `1 + HERO_TEXT.speed` (0.5) | `--hero-text-lift` on the lockup's transform |
+| The artwork (img/canvas/grain) | `1 − FIELD_LAG.k` (0.3) — it LAGS | `--field-scroll` is NEGATIVE: `.page-field` subtracts it, so the field sinks |
+| White dissolve + nav + Selected Work onward | faster than 1 early, exactly 1 at the pin | the shorter hero + `--hero-push` (below) |
+
+**The white dissolve is glued to the nav's top by construction** — no measuring
+of the gap per frame. `--field-cream` shifts the MASK's end up (hero.css,
+`--field-mask-end: calc(min(...) - var(--field-cream))`; the fade keeps its full
+length and slides), and it is solved each frame as
+`cream = fieldVisibleEnd + lag − navTop − fieldOverhang × (1 − tuck)`:
+the artwork sank by `lag`, the nav's visual top is its shortened layout top plus
+the push, and the resting overhang (the tail behind the bar at rest, 29px at
+1440×900) closes on the tuck's cubic ease over `FIELD_TUCK.span` (0.6) of the
+scroll to the pin. At rest it is exactly 0, so every resting figure stands.
+
+**The hero is laid out SHORTER and pushed back (`HERO_SHORTEN`, `--hero-shorten`
+/ `--hero-push`).** The bar's `margin-top` is `-80px - --hero-shorten` (240px), so
+the nav and everything after it genuinely sit higher and the bar pins after less
+scroll (1440×900: **580px instead of 820**). `.intro-bar, .intro-bar ~ *` carry
+`translate: 0 var(--hero-push)`, which is `--hero-shorten` at rest (landing
+byte-identical) and unwinds to 0 **exactly as the bar pins** on a BIASED
+SMOOTHSTEP, `1 − ss(p^bias)` with bias 1.5.
+- ⚠️ **The pin is why it must reach 0 there.** Any push left at the dock makes
+  sticky jump. Verified: 0px push, `is-docked` at the same frame.
+- ⚠️ **The individual `translate` property, never `transform`** — it composes with
+  the transforms these elements already carry (reveals, About's parallax,
+  Contact's peek). Nothing else on the site uses `translate`; keep it that way.
+- ⚠️ **It is a LAYOUT change, so it is JS-only.** `measureFieldTuck` sets
+  `--hero-shorten` only once it can push things back; no JS → plain `-80px`.
+  It sets it to 0 FIRST on every measure, then measures, then shortens.
+- ⚠️ **TWO BAR POSITIONS NOW EXIST AND THEY MEAN DIFFERENT THINGS.** `barRest`
+  (unshortened, what the reader SEES at rest) feeds `--field-gap` and the
+  overhang; `fieldDockScroll = barRest − heroShorten` (the LAYOUT top) is where
+  the bar pins. Mixing them up shrinks the resting dissolve by 240px.
+- The cap is half the bar's resting top, so a short window still has scroll to
+  unwind over. Section resting positions / scroll-spy / nav clicks all read the
+  shortened layout and were verified to land (Work at 640 with push 0).
+
+⚠️ **"TENSION" IS THE BINDING CONSTRAINT, AND IT MEANS THE NAV'S SPEED.** Jenna
+reads the nav/Work speed relative to her finger: starting near 1× and never
+dropping below it is "tension"; any leg slower than the scroll reads as
+"loose / slide-y", and a large constant multiple reads as "too free". Measured
+nav/Work px per 100px of scroll at 1440×900, shipped: **102 107 121 136 153 166
+176 172 157 129 → 100 at the pin.** `HERO_SHORTEN.px` is the speed dial
+(180 → 1.28× imperceptible · 240 shipped · 300 → 1.58× · cap 410 → 2.0× "too
+free"); `bias` places the peak (1 → 50% · 1.5 → ~70% · 2 → 78%).
+Keep `HERO_TEXT.speed` a little above (nav peak − 1) so the text stays the
+fastest layer and the nav cannot catch the bio.
+
+⚠️ **THE LOCKUP-RIGIDITY RULE IS DELIBERATELY BROKEN.** The text now moves
+relative to the artwork, so the "contrast measured at `scrollY 0` holds all the
+way up" guarantee is gone for the lockup — it holds at REST only. Accepted
+because the text moves UP (away from the white) and is leaving the screen.
+
+**Rejected on the way, in order — each is recorded in `git log` and none should
+be rebuilt without reading why:**
+1. **Compressing the fade** (start held, end climbing to ~57px) — "less white
+   fade band"; a squeezed dissolve stops reading as a soft band.
+2. **Band slides then SETTLES BACK** so no gap opens at the pin — the white
+   visibly reversed.
+3. **Rigid hero lift + `--work-glide` lifting the nav/Work by the open gap** — no
+   gap, but the nav ran 1.25× → 0.75× (0.39× at first) and read as LOOSE, and
+   locking nav to artwork cancelled the hero's only visible parallax.
+4. **Nav glass "hood"** growing up to fill the gap — built as an experiment,
+   passed on (tall frosted slab mid-scroll, extra backdrop blur over the field).
+5. **Linear push** (constant 1.28×) — imperceptible; **cap** (2.0×) — too free;
+   **ease-in p²** — builds nicely but drops 1.8× → 1× at the pin, a change of
+   pace under Work. The biased smoothstep is ease-in with that end rounded.
+
+**Work cards reveal as they clear the fold** (`WORK_REVEAL` in js/main.js,
+in 0.97 / out 0.995 of the viewport, was 0.85 / 0.95) — the shortened hero
+carries them up fast and at 85% they were well on screen before appearing. The
+fade-OUT on scrolling back up is now nearly instant; that was accepted.
+
+⚠️ **Previewing a worktree needs its `?v=` stamps re-run.** The stamper only runs
+on commit, so an uncommitted CSS edit is served under the OLD hash and the
+browser keeps the cached file — one "the gradient isn't lagging" reading was
+exactly this. Run `./scripts/bump-cache.sh` in the worktree before reloading.
+The preview server serves the MAIN folder; worktrees are reachable at
+`http://localhost:<port>/.claude/worktrees/<name>/index.html`.
+
 ### The field tuck (`--field-scroll` / `--field-gap`, 2026-09)
+
+⚠️ **PARTLY SUPERSEDED (2026-09-25) — read the section above first.**
+`--field-scroll` is now the artwork's NEGATIVE lag, not the eased forward lift
+described here, and the lockup no longer reads it at all (it has its own
+`--hero-text-lift`). What still holds: the diagnosis below, `--field-gap`, and
+every `measureFieldTuck` rule — which now also records `fieldVisibleEnd` and
+applies `--hero-shorten`.
 
 **Two mechanisms keep the artwork off the nav and off Selected Work, and they
 split the job by scroll state.** The MASK (above) handles rest; the TUCK handles
@@ -374,7 +475,8 @@ bar finishes at 884 and nothing shows; at 1440×740 it finishes at 724 and **155
 of gradient stood below the docked bar, over Selected Work**. The first report of
 this looked like a scroll bug and is not one.
 
-**`--field-scroll`** — published by `updateScrollEffects`, read by `.page-field`'s
+**`--field-scroll`** — ⚠️ now the NEGATIVE lag (2026-09-25); the bullets below
+describe the old forward lift. Published by `updateScrollEffects`, read by `.page-field`'s
 `transform: translate(-50%, calc(-1 * var(--field-scroll, 0px)))`. All three
 layers (img, canvas, grain) carry `.page-field`, so one transform moves the lot.
 - **It is ZERO AT REST, and that is the whole design constraint.** Every contrast
@@ -393,7 +495,9 @@ layers (img, canvas, grain) carry `.page-field`, so one transform moves the lot.
   `scrollY` with no time term, so it cannot lag the page. The standing rule that
   **nothing scroll-linked may carry a CSS transition** is untouched.
 
-**THE HERO LOCKUP RIDES THE SAME `--field-scroll` (2026-09), AND "SAME" IS THE
+⚠️ **SUPERSEDED 2026-09-25 — the lockup now has its OWN speed (`--hero-text-lift`);
+see "The hero scroll" above. Kept as the record of why rigidity was once the rule.**
+**THE HERO LOCKUP RODE THE SAME `--field-scroll` (2026-09), AND "SAME" WAS THE
 POINT.** `.intro-top` / `.intro-divider` / `.intro-band` add
 `- var(--field-scroll, 0px)` to their `--hero-lift` transform, so type and field
 move as ONE unit.
@@ -800,6 +904,69 @@ halved while `blur(7px)` stayed. The blur is the effect; the tint only colours
 it — and the tint was subtracting contrast from the white bio sitting on it.
 Bio 2.24–2.75 → **2.48–2.89**. ⚠️ If this is tuned again, **drop the alpha, keep
 the blur** — glass reads as glass because of the blur.
+
+### Phones: the shader's own box and orb layout (2026-09-25, shipped)
+
+**At ≤480 the SHADER no longer shares the JPEG's box.** `.page-field-canvas` /
+`.page-field-grain` get their own narrow portrait box in the 480 tier:
+`width: calc(100vw + 85px)`, `height: calc(var(--hero-h) + 132px)`,
+`aspect-ratio: auto`, `transform: translateX(-50%)`. At the old 1250px crop only
+~30% of the artwork was on screen and no orb read as a shape.
+- **The orbs stay round in a portrait box** because the shader reads the
+  canvas's real aspect (`uAspect = canvas.width / canvas.height`) — the
+  width/height coupling (`height = width / 1.6377`) only ever bound the JPEG.
+- ⚠️ **The `<img>` fallback keeps its tuned `--field-w: 1250` / `--field-nudge-y`
+  crop.** Everything below about those two numbers now describes the FALLBACK
+  only — the JPEG is still what no-JS / no-WebGL phones see.
+- ⚠️ **The box tracks the PHONE, never fixed px.** A fixed 460×760 box left the
+  bio low in the box on a tall phone (430×932: 2.63:1) because `--hero-h` grows
+  with the viewport and the box did not. Resolved at 375×812 the expressions
+  give 460×760, the size the layout was tuned on.
+
+**`FIELD.phone` is a separate orb layout** (js/main.js), chosen at PAGE LOAD with
+`FIELD_STATIC` (the same `(max-width: 480px)` match that puts phones on the
+static single-frame path). It replaces only `x` / `y` / `r` per blob; colours,
+ramps, pulse and paint order are shared, and `FIELD.phone.offsetY` is 0.
+- A blob's vertical reach is `r × aspect`, so in a portrait box every orb reaches
+  LESS far vertically than across — the phone radii (0.60–1.00) are larger than
+  desktop's for that reason.
+- Red is the lever for the bio (it sits under it, `y 0.68, r 1.00`) — pushed that
+  far for the 360-class phone, where the bio wraps to 5 lines.
+- ⚠️ **Not the deleted `FIELD_PHONE`.** That was a BAIL (no shader on phones);
+  this is a LAYOUT. Don't conflate them in either direction.
+
+Worst pixel under the text, **all three headline phrases** (they wrap
+differently and a one-phrase reading was 0.4 out), bio including its 0.06
+scrim, composited through the mask:
+
+| Phone | Headline | Bio |
+|---|---|---|
+| 360×780 | 3.45 | 3.09 |
+| 375×812 | 3.43 | 3.33 |
+| 390×844 | 3.43 | 3.35 |
+| 430×932 | 3.38 | 3.37 |
+
+**The white fade ends 8px ABOVE the first Work card**, not at the box's bottom.
+The card's image starts at `--hero-h + 64` on every phone (measured 360 / 375 /
+390 / 430), and the box ran 68px past it, dissolving across the card. The 480
+tier sets `--field-mask-end: calc(var(--hero-h) + 56px)` ON the canvas/grain.
+- ⚠️ **Move the MASK, not the box** — the box carries the orbs, so moving it
+  moves every contrast figure; the mask moves only the fade.
+- ⚠️ **`--field-mask-start` is restated beside it.** `:root` resolved the start
+  against `:root`'s end; overriding the end on the element alone does not move it.
+- **112px fade, matching the header's own wash** (`--header-bleed` 96 +
+  `--space-sm`), so the hero dissolves alike top and bottom. The room between
+  the bio and the card is 130 / 146 / 190 at 375 / 390 / 430 — no overlap.
+- ⚠️ **A NEW `≤374` TIER (end of responsive.css) drops it to 80px.** At 360×780
+  the bio wraps to 5 lines with only 80px left; 112 started the fade inside the
+  bio (**2.42:1**). 80 holds 3.09. That tier holds this one rule.
+
+⚠️ **MEASURING THE PHONE FIELD NEEDS TWO TEMPORARY HOOKS**, because phones draw
+ONE frame at load and nothing redraws it: pass `preserveDrawingBuffer: true` to
+`getContext` (or `drawImage(canvas)` reads an empty buffer) and expose
+`window.__fieldRedraw = () => draw(0)` to sweep `FIELD.phone.blobs` live (FIELD
+is a global). Mark both `TEMP-MEASURE` and remove them before committing. Each
+phone size needs a FRESH LOAD — resizing does not redraw the static frame.
 
 ⚠️ **SUPERSEDED — PHONES GET THE SHADER TOO (2026-09).** The bail and the
 `display: none` were PAIRED and both are gone; `FIELD_PHONE` went with them
@@ -1408,6 +1575,8 @@ compose; here the fill is flat and the mask is the only thing shaping the fallof
 A straight alpha line has a slope discontinuity at each end and the eye reads
 those corners as edges — the same finding as the ledge's ramp.
 
+⚠️ **(2026-09-25: the bare-at-top rule described here is DELETED — the header keeps
+its wash at rest. Kept for the `::before` lesson it records.)**
 ⚠️ **THE ≤680 BARE-AT-TOP RULE HAD TO MOVE WITH IT.** It killed
 `background-color` and `backdrop-filter` on the ELEMENT; with the frost on
 `::before` that would silently do nothing and the bar would stay frosted at the
@@ -2588,7 +2757,10 @@ When the request is about how the site looks/behaves at a **smaller screen size*
   put nothing else here, see "The nav hand-off at 680")** ·
   `768px` (portrait tablet — Work card images, hero/intro full width) ·
   `480px` (large phone — nav gap, work grid → 1 col, connect links wrap, footer
-  stack, **and the only tier where `.section-pills` exists on any page**).
+  stack, **and the only tier where `.section-pills` exists on any page**; also
+  the shader's own portrait box and the phone hero fade) ·
+  **`374px` (narrow phone — ONE rule: the hero's white fade drops 112 → 80px,
+  because the 360-class bio leaves only 80px above the first Work card).**
 - To tweak an existing responsive rule, edit inside the matching `@media` block.
   To add a new one, put it in the correct block (create a new `@media` in
   largest→smallest order if the breakpoint doesn't exist yet).
@@ -2942,10 +3114,10 @@ depends on JS succeeding.
 | To change… | Open `js/main.js` at… | Edit |
 |---|---|---|
 | Reveal feel (rise distance, duration, stagger, easing) | `const REVEAL` (~line 2146) | `distance` px · `duration` s · `stagger` s (per item, 80ms) · `ease` cubic-bezier |
-| When a reveal fires / resets (scroll thresholds) | `setupReveals` → `update()` (~line 2432) | reveal at `top < vh*0.85 && bottom > vh*0.15`; **reset only when fully off-screen** (`bottom<=0 || top>=vh`) — this is the anti-cut-out rule, keep the reset off-screen |
+| When a reveal fires / resets (scroll thresholds) | `setupReveals` → `update()` (~line 2432) | reveal at `top < vh*0.9 && bottom > vh*0.15` (Work cards: `WORK_REVEAL` 0.97 in / 0.995 out — see **The hero scroll**); **reset only when fully off-screen** (`bottom<=0 || top>=vh`) — this is the anti-cut-out rule, keep the reset off-screen |
 | Per-item order within a group / the stagger animation | `setupReveals` → `setVisible()` (~line 2394) | reads `data-reveal-order`, calls Motion `animate` |
 | Smooth-scroll feel (weight, wheel, easing) | `setupLenis` (~line 2176) | Lenis `duration`, `easing`, `smoothWheel`; also routes `a[href^="#"]` clicks through `lenis.scrollTo` |
-| Scroll-spy, header inversion/tint, bar bleed, the field tuck | `updateScrollEffects` (~line 1906) | these are **scroll-linked** (not reveals); separate system. ⚠️ The hero scroll-fade and the contact fade named here previously are both **retired** — the hero's went with the blob landing, and Contact now fades via the shared reveal system. Don't reintroduce either; a scroll-linked opacity would fight the reveal. Properties published here: `--dark-mix`, `--bar-bleed`, `--field-scroll`, `--field-gap`, `--contact-edge`, `--bar-fill`, `--contact-peek`, plus `is-at-page-top` / `is-tucked` / `is-docked`. The last three are Contact's arrival — see **Contact's soft leading edge**; `--bar-fill` is a per-frame GRADIENT rather than a number, and its layout-only inputs are measured in `measureContactArrival` (beside `measureFieldTuck`) precisely so the hot path stays free of `getComputedStyle` and `scrollHeight`. |
+| Scroll-spy, header inversion/tint, bar bleed, the field tuck | `updateScrollEffects` (~line 1906) | these are **scroll-linked** (not reveals); separate system. ⚠️ The hero scroll-fade and the contact fade named here previously are both **retired** — the hero's went with the blob landing, and Contact now fades via the shared reveal system. Don't reintroduce either; a scroll-linked opacity would fight the reveal. Properties published here: `--dark-mix`, `--bar-bleed`, `--field-scroll` (the artwork's NEGATIVE lag), `--field-cream`, `--hero-push`, `--hero-text-lift` (see **The hero scroll**; `--field-gap` and `--hero-shorten` are layout-only, set by `measureFieldTuck`), `--contact-edge`, `--bar-fill`, `--contact-peek`, plus `is-at-page-top` / `is-tucked` / `is-docked`. The last three are Contact's arrival — see **Contact's soft leading edge**; `--bar-fill` is a per-frame GRADIENT rather than a number, and its layout-only inputs are measured in `measureContactArrival` (beside `measureFieldTuck`) precisely so the hot path stays free of `getComputedStyle` and `scrollHeight`. |
 | Scribble load reveal sequence | `revealSite`/`revealRestOfSite` (~line 119) + `hero.css` keyframes | separate from viewport reveals |
 | Pre-paint hidden state (initial opacity/translate) | `global.css` → `html.is-motion [data-reveal]` | keep its `translateY` roughly in sync with `REVEAL.distance` |
 
@@ -2971,7 +3143,7 @@ own version, separate from the `style.css?v=` / `@import` CSS bump below).
 
 ## Cascade Rules (do not break)
 - `@import` order in `style.css` is: **global → header → hero → sections → footer → project-overview → mobile-menu → responsive.** `global.css` must stay first (tokens + reset); `responsive.css` must stay **last** so its media queries override the desktop base styles.
-- **All width breakpoints live in `responsive.css`**, ordered largest → smallest max-width (1440 → 1024 → 768 → 680 → 480). Do not scatter width media queries back into the component files. Motion queries (`prefers-reduced-motion`) are the exception — they stay beside their animations in `global.css` / `hero.css`.
+- **All width breakpoints live in `responsive.css`**, ordered largest → smallest max-width (1440 → 1024 → 768 → 680 → 480 → 374). Do not scatter width media queries back into the component files. Motion queries (`prefers-reduced-motion`) are the exception — they stay beside their animations in `global.css` / `hero.css`.
 
 ## Conventions
 - **Titles carry no terminal period (2026-08).** Homepage Work-card titles, About
