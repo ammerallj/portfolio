@@ -881,8 +881,10 @@ html:not(.is-field-live) .intro-divider {
      third of the bar. --gap-group instead, the same token the links use, so
      Work · About · Say hello sit at ONE repeating interval and read as a single
      group. It steps 60 → 48 on its own, which is why the two per-tier gap
-     overrides in responsive.css are gone. */
-  gap: var(--gap-group);
+     overrides in responsive.css are gone.
+     ⚠️ Now 0 (2026-09): the wordmark is grid-anchored and the pill auto-margined,
+     so every seam in the bar is owned by an item — see .intro-bar-name. */
+  gap: 0;
   /* Enters WITH the text, not after it — delay must match .intro-headline's
      and .intro-band-right's. See the sequence on .intro-headline. */
   animation: intro-bar-fade 0.6s ease-out 0.9s both;
@@ -1146,20 +1148,26 @@ html:not(.is-field-live) .intro-divider {
    `justify-content: space-between` so the gap above still governs the right-hand
    group's interval; space-between would stretch it back out. */
 /* ⚠️ GRID-ANCHORED (2026-09): the wordmark takes EVERYTHING LEFT OF THE SHARED
-   RIGHT COLUMN, so "Selected work" starts on column 8 — the same edge About's and
-   Contact's copy start on (--width-right-column is 5 of the 12). It was
-   `margin-right: auto`, which pushed a content-width cluster to the right edge
-   and left the links ~120px (a column + gutter) right of the copy below them.
-   The pill keeps the right edge via its own `margin-left: auto`.
+   RIGHT COLUMN, so "Selected work" starts exactly where About's and Contact's
+   copy start (--width-right-column: 5 of the 12, right-aligned to the gutter).
+   It was `margin-right: auto`, which pushed a content-width cluster to the right
+   edge and left the links ~120px (a column + gutter) right of the copy.
    - `%` in flex-basis resolves against the bar's CONTENT box (viewport minus the
-     56px padding), which is the grid's width — so this IS the grid line.
-   - Shrinkable on purpose: the right group (links + pill + 2 gaps) needs ~422px
-     and the column is narrower than that below ~1153px wide, so there the name
-     gives way and the links drift left of column 8 rather than overflowing.
-   - ≤1024 reverts to the content-width cluster (responsive.css), since About
-     and Contact stack there and there is no right column to align to. */
+     gutter), so this IS the column's left edge at every width.
+   - ⚠️ `max-width: none` IS LOAD-BEARING. On the homepage the wordmark is a
+     <p>, and global.css caps every p at --measure (728px) — which froze the
+     links at 844px above 1440 while the column kept moving right (158px out at
+     1600). Project pages never showed it: their wordmark is an <a>.
+   - The bar's own gap is 0 so the basis needs no gap term; the links keep their
+     --gap-group between them, and the pill takes the right edge with an auto
+     margin over a 16px minimum. That minimum (not a --gap-group) is what lets
+     the group (~366–378px) fit the column's 368.75px floor — at 60px it needed
+     422 and drifted up to 53px left of the column below ~1153 wide.
+   - ≤768 reverts to the content-width cluster (responsive.css): About and
+     Contact stack there, so there is no right column to align to. */
 .intro-bar-name {
-  flex: 0 1 calc(100% - var(--width-right-column) - var(--gap-group));
+  flex: 0 1 calc(100% - var(--width-right-column));
+  max-width: none;
   font-family: var(--font-heading);
   font-size: 1.25rem;
   font-weight: 700;
@@ -1258,6 +1266,7 @@ html:not(.is-field-live) .intro-divider {
 .intro-bar-cta-wrap {
   display: flex;
   margin-left: auto; /* holds the right edge now the wordmark no longer pushes */
+  padding-left: var(--space-sm); /* the About → pill minimum; see .intro-bar-name */
 }
 
 /* Solid black pill, white label. */

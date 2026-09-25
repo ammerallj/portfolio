@@ -277,16 +277,16 @@
   .intro-bar {
     padding-inline: 24px; /* sticky bar: gutter is padding now, not offsets */
   }
-  /* Undo the desktop grid anchor: About and Contact stack here, so there is no
-     right column for the links to start on. Back to the content-width cluster
-     pushed to the right edge. Both halves must go — the name's basis AND the
-     pill's auto margin, or the two auto/flex spaces split the bar. */
-  .intro-bar-name {
+  /* Project pages stack .project-block at this tier (the homepage's About holds
+     two columns down to 768), so there is no right column for the nav's grid
+     anchor to meet here. Same revert as the 768 tier, scoped to --page. */
+  .intro-bar--page .intro-bar-name {
     flex: 0 1 auto;
     margin-right: auto;
   }
-  .intro-bar-cta-wrap {
+  .intro-bar--page .intro-bar-cta-wrap {
     margin-left: 0;
+    padding-left: var(--gap-group);
   }
   .site-header-row {
     gap: 2rem;
@@ -382,6 +382,20 @@
   /* SPACING SCALE, portrait-tablet step: identical to the 1024 tier (gutter 24,
      group 48), so nothing is re-declared here — the tokens above cascade down.
      This tier only carries what genuinely differs at portrait width. */
+
+  /* Undo the desktop grid anchor on the nav bar: About and Contact stack here,
+     so there is no right column for the links to start on. Back to the
+     content-width cluster pushed to the right edge, with the old --gap-group
+     seam before the pill. Both halves must go — the name's basis AND the pill's
+     auto margin, or the two free spaces split the bar. */
+  .intro-bar-name {
+    flex: 0 1 auto;
+    margin-right: auto;
+  }
+  .intro-bar-cta-wrap {
+    margin-left: 0;
+    padding-left: var(--gap-group);
+  }
 
   :root {
     /* ⚠️ THE FIELD IS PULLED IN AT PORTRAIT WIDTH SO MORE OF THE COMPOSITION IS
