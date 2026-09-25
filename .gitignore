@@ -18,3 +18,7 @@ images/IMG_*.jpg
 # disk for reference; lab/field-shader.html is the one that matters and stays
 # tracked, since the live FIELD values were exported from it.
 lab/field-css.html
+
+# Session worktrees Claude Code creates (one folder per chat). Each is a full
+# checkout on its own branch — never commit them into this repo.
+.claude/worktrees/

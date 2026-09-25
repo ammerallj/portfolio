@@ -2939,8 +2939,14 @@ own version, separate from the `style.css?v=` / `@import` CSS bump below).
   - **`?v=` conflicts are expected** when two branches both touched CSS or
     `js/main.js` (each stamped its own hash): keep either side, run
     `./scripts/bump-cache.sh`, re-add the stamp files, commit.
-  - One chat per worktree still holds, so parallel sessions can't stomp each
-    other's files; clean up with `git worktree remove ../portfolio-<name>` and
+  - **One chat per worktree**, so parallel sessions can't stomp each other's
+    files. Chats started with the app's worktree option land in
+    `.claude/worktrees/<name>/` (gitignored) on a branch `worktree-<name>`, and
+    `.claude/settings.json` sets `worktree.baseRef: "head"` so they branch from
+    the main folder's checked-out branch — **staging** — not from `origin/main`.
+    ⚠️ That only holds while the main folder stays on staging. Stage them the
+    same way: `./scripts/stage.sh worktree-<name>`. Script-made ones
+    (`../portfolio-<name>/`) clean up with `git worktree remove` +
     `git branch -d <name>` once shipped.
 - **Deploy exposure — the repo root IS the public site.** GitHub Pages deploys
   from the branch root (custom domain via `CNAME`), so every tracked file is
