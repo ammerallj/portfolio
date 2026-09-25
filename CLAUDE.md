@@ -1064,18 +1064,23 @@ follows and wins where they overlap).
   bar's width, and stays ≤480 along with its phone pill sizing.
 
 ### The landing nav bar (`.intro-bar`)
-**The links start on COLUMN 8 — the right column's edge (2026-09).** Above 1024,
-`.intro-bar-name` takes `flex: 0 1 calc(100% - --width-right-column - --gap-group)`,
-so "Selected work" starts exactly where About's and Contact's copy start (842.3 at
-1440, 749 at 1280, verified on the project pages too). The pill holds the right
-edge with its own `margin-left: auto`. It was a content-width cluster pushed right,
-which put the links ~120px (a column + gutter) right of the copy.
-- ⚠️ **It stops fitting below ~1153px wide**: the group needs ~422px and the column
-  is narrower there, so the shrinkable name gives way and the links drift left of
-  the column (22px at 1100) rather than overflowing.
-- **≤1024 reverts to the content-width cluster** (responsive.css) — About and
-  Contact stack there, so there is no right column. Both halves are reset: the
-  name's basis AND the pill's auto margin.
+**The links start on the RIGHT COLUMN's left edge (2026-09).** `.intro-bar-name`
+takes `flex: 0 1 calc(100% - --width-right-column)`, so "Selected work" starts
+exactly where About's and Contact's copy start. The bar's own `gap` is 0; the
+links keep `--gap-group` between them and the pill holds the right edge with an
+auto margin over a 16px floor. Verified Δ0 at every width 1050–2560 and 769–1024
+on the homepage and project pages; 9px short only at the 1025 seam.
+- ⚠️ **`max-width: none` on the wordmark is load-bearing.** It is a `<p>` on the
+  homepage and global.css caps every `p` at `--measure` (728px) — that froze the
+  links at 844px above 1440 (158px out at 1600). The first pass shipped with this
+  and was verified only at ≤1440, where the cap never binds. **Sweep past 1440.**
+- ⚠️ **The 16px floor is what makes it fit.** The group is ~366–378px against the
+  column's 368.75 floor; with the old `--gap-group` seam it needed 422 and drifted
+  up to 53px left of the column.
+- **Reverts to the content-width cluster where the content stacks** — ≤768 on the
+  homepage, ≤1024 on project pages (`.intro-bar--page`, whose `.project-block`
+  stacks a tier earlier than About). Both halves: the name's basis AND the pill's
+  auto margin.
 
 ⚠️ **THE LINK COLOUR IS `rgba(0, 0, 0, 0.8)`, SCOPED TO `.intro-bar-links a`, AND
 IT IS A MEASURED FLOOR — not a style choice.** It is deliberately NOT
