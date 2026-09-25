@@ -1021,6 +1021,24 @@ const FIELD = {
   // the uniform slot IS the stack position; upload one reordered and not the
   // other and every orb paints in its neighbour's colour.
   paintOrder: [1, 0, 2, 3],
+  // PHONE LAYOUT (≤480, chosen at page load with FIELD_STATIC). The phone draws
+  // the field into its own narrow PORTRAIT box (responsive.css, .page-field-canvas
+  // at the 480 tier), and the desktop layout — composed for a 16:10 frame, sized
+  // against its WIDTH — left the lower half of that box pale, exactly where the
+  // phone's headline and bio sit. These x / y / r replace the blobs' own (same
+  // order as `blobs`; colours, ramps, pulse and paint order are shared). y is a
+  // fraction of the box's HEIGHT, r of its WIDTH, and a blob's vertical reach is
+  // r × aspect, so in a portrait box every orb reaches LESS far up and down than
+  // it does across — which is why these are larger than the desktop radii.
+  phone: {
+    offsetY: 0,
+    blobs: [
+      { x: 0.12, y: 0.30, r: 0.76 }, // magenta — left, behind the headline
+      { x: 0.92, y: 0.44, r: 0.66 }, // violet  — right, headline's line ends to divider
+      { x: 0.45, y: 0.68, r: 1.00 }, // red     — centre, under the bio (and its 5-line wrap at 360)
+      { x: 0.60, y: 0.02, r: 0.60 }, // cyan    — top, behind the header
+    ],
+  },
   // Shifts all four orbs together; negative is up. y is normalised to the
   // field's HEIGHT, so -0.25 is a quarter of it.
   offsetY: -0.25,
@@ -1216,11 +1234,13 @@ function initHeroField() {
     resize();
     const e = FIELD.entrance;
     FIELD.paintOrder.forEach((blobIdx, slot) => {
-      const b = FIELD.blobs[blobIdx];
+      const b = FIELD_STATIC.matches
+        ? Object.assign({}, FIELD.blobs[blobIdx], FIELD.phone.blobs[blobIdx])
+        : FIELD.blobs[blobIdx];
       const p = entranceMs == null ? 1
         : Math.max(0, Math.min(1, (entranceMs - entranceStarts[blobIdx]) / e.duration));
       blobData[slot * 4 + 0] = b.x;
-      blobData[slot * 4 + 1] = b.y + FIELD.offsetY;
+      blobData[slot * 4 + 1] = b.y + (FIELD_STATIC.matches ? FIELD.phone.offsetY : FIELD.offsetY);
       blobData[slot * 4 + 2] = b.r;
       blobData[slot * 4 + 3] = b.a * p;
       colData[slot * 3 + 0] = b.col[0];

@@ -864,6 +864,23 @@
                translateY(calc(-12% + var(--field-nudge-y)));
   }
 
+  /* THE SHADER GETS ITS OWN NARROW, TALL BOX ON PHONES (2026-09).
+     At 1250px wide only ~30% of the artwork was on screen and no orb read as a
+     shape. The shader reads the canvas's real aspect (uAspect), so the orbs stay
+     round in a portrait box — the width/height coupling only ever bound the
+     JPEG. The <img> fallback keeps the tuned 1250 crop above. */
+  .page-field-canvas,
+  .page-field-grain {
+    /* Both track the PHONE, not fixed px: a fixed 460x760 box left the bio low
+       in the box on a tall phone (430x932: bio 2.63:1) because the hero grows
+       with the viewport (--hero-h, this tier) and the box did not. Resolved at
+       375x812 these are 460 x 760 — the size the orb layout was tuned on. */
+    width: calc(100vw + 85px);
+    height: calc(var(--hero-h) + 132px);
+    aspect-ratio: auto;
+    transform: translateX(-50%);
+  }
+
   /* NO ANIMATED FIELD ON PHONES (2026-09). The static hero-bkg.jpg is the
      whole hero here — the shader canvas and its grain layer are switched off.
      Two reasons, both about the device rather than the look: a full-viewport
