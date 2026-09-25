@@ -966,10 +966,11 @@
      padding. The bottom keeps the desktop's deliberate asymmetry (see
      #work-section in sections.css) — was 96, which with About's own 64 top
      left 160px of cream between the last card and "About Me" on a phone.
-     32 + 64 = 96 total, the same gap the page ends on below About. */
+     Now 0: About's own 64 top is the whole gap, the same 64 the cards sit
+     apart, so About reads as the next item in the stack rather than adrift. */
   #work-section {
     padding-top: var(--gap-section);
-    padding-bottom: 32px;
+    padding-bottom: 0;
   }
 
   /* Remaining 40px→32px step-downs on phones. (.section-title now steps via
