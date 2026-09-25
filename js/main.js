@@ -201,6 +201,21 @@ function setFieldCream(px) {
 // splits the swing evenly between the two legs, so neither is the steep one.
 const FIELD_CREAM = { ratio: 0.3, peak: 0.5 };
 let fieldCreamMax = 0;
+// EXPERIMENT (work-glide): the hero TEXT's own parallax. --work-glide locks the
+// nav and Work to the artwork, which closes the gap but also cancels the only
+// relative motion the hero had — everything became one block and stopped
+// reading as parallax. This puts it back INSIDE the hero: the headline, divider
+// and bio rise `speed` faster than the scroll, over an artwork that does not.
+// LINEAR in scroll (a constant 1 + speed), because a changing speed is exactly
+// what read as loose in the glide. Held once the bar pins; the text is off
+// screen by then.
+const HERO_TEXT = { speed: 0.3 };
+let lastHeroTextLift = -1;
+function setHeroTextLift(px) {
+  if (px === lastHeroTextLift) return;
+  lastHeroTextLift = px;
+  document.documentElement.style.setProperty('--hero-text-lift', px + 'px');
+}
 let lastWorkGlide = -1;
 function setWorkGlide(px) {
   // Same contract as setFieldScroll: root, rounded, guarded — per scroll frame.
@@ -2769,6 +2784,8 @@ function updateScrollEffects() {
     glide = Math.min(Math.max(0, barTopVp), Math.max(0, barTopVp - gradEnd));
   }
   setWorkGlide(Math.round(glide));
+  setHeroTextLift(fieldDockScroll > 0
+    ? Math.round(HERO_TEXT.speed * Math.min(window.scrollY, fieldDockScroll)) : 0);
 
   // Scroll-spy: the active section is the LAST one whose RESTING POSITION the
   // page has reached. Highlight every link that targets it (and mark it for

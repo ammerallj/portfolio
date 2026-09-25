@@ -649,7 +649,11 @@ html.is-field-live .page-field-grain { opacity: 0.15; }
 .intro-band {
   /* + --field-cream: the lockup rides the same extra lift as the artwork, so
      the two stay rigid (EXPERIMENT work-glide). */
-  transform: translateY(calc(-1 * var(--hero-lift) - var(--field-scroll, 0px) - var(--field-cream, 0px)));
+  /* + --hero-text-lift: the text's own parallax over the artwork (HERO_TEXT in
+     js/main.js). ⚠️ This DOES break the lockup's rigidity with the field, on
+     purpose — the text leaves the colour it was measured on as it scrolls away.
+     It moves UP, so the bio pulls away from the white band, not into it. */
+  transform: translateY(calc(-1 * var(--hero-lift) - var(--field-scroll, 0px) - var(--field-cream, 0px) - var(--hero-text-lift, 0px)));
 }
 
 .intro-divider {
