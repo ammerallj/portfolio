@@ -188,10 +188,11 @@ function setFieldCream(px) {
 // and its length), so this only SHORTENS the ramp from below. `ratio` is the
 // share of the resting ramp that survives; `min` is the shortest the ramp may
 // get — the 17-stop smoothstep lands its stops ~3.5px apart at 56px, so go no
-// lower without adding stops (see the banding notes on --field-fade). `span` is
-// the fraction of the scroll to the dock over which the climb completes — under
-// 1 so the cream has finished rising while the hero is still on screen.
-const FIELD_CREAM = { ratio: 0.25, min: 56, span: 0.6 };
+// lower without adding stops (see the banding notes on --field-fade).
+// ⚠️ NO TIMING OF ITS OWN. The climb reads the tuck's own eased progress, so the
+// cream glides up WITH the parallax. A separate span (0.6 was tried) finished the
+// climb early and left the hero lifting on its own — two motions, not one.
+const FIELD_CREAM = { ratio: 0.25, min: 56 };
 let fieldCreamMax = 0;
 let lastFieldScroll = -1;
 function setFieldScroll(px) {
@@ -2726,12 +2727,11 @@ function updateScrollEffects() {
   // that nothing scroll-linked may carry a CSS transition.
   const t = fieldDockScroll > 0
     ? Math.min(1, Math.max(0, window.scrollY / fieldDockScroll)) : 0;
-  setFieldScroll(fieldOverhang === 0 ? 0
-    : Math.round(fieldOverhang * (1 - Math.pow(1 - t, 3))));
-  // The cream climbs on the same eased curve, so the ramp shortens as the
+  const tuck = 1 - Math.pow(1 - t, 3);
+  setFieldScroll(fieldOverhang === 0 ? 0 : Math.round(fieldOverhang * tuck));
+  // The cream rides the SAME eased progress, so the ramp shortens exactly as the
   // artwork lifts — one motion, not two. See FIELD_CREAM.
-  const tc = Math.min(1, t / FIELD_CREAM.span);
-  setFieldCream(Math.round(fieldCreamMax * (1 - Math.pow(1 - tc, 3))));
+  setFieldCream(Math.round(fieldCreamMax * tuck));
 
   // Scroll-spy: the active section is the LAST one whose RESTING POSITION the
   // page has reached. Highlight every link that targets it (and mark it for
