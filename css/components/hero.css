@@ -134,7 +134,7 @@ html.is-field-live .page-field-grain { opacity: 0.15; }
      ⚠️ The ≤480 tier REPLACES this transform outright and deliberately does not
      read the token: the .intro-bar is display:none there, so there is no pinned
      bar to tuck behind, and the JS skips the whole block for the same reason. */
-  transform: translate(-50%, calc(-1 * var(--field-rise, 0px) - var(--field-scroll, 0px)));
+  transform: translate(-50%, calc(-1 * var(--field-rise, 0px) - var(--field-scroll, 0px) - var(--field-cream, 0px)));
   /* images/hero-bkg.jpg, centered. FROZEN at its 1440 size (1639.44px = the
      113.85vw composition) for any narrower window: below the design width the
      field keeps its size and position and the viewport simply crops more of
@@ -376,6 +376,12 @@ html.is-field-live .page-field-grain { opacity: 0.15; }
      1440x740 is looser (bio 3.22 -> 3.16 at rise 30) so it does not bind. Going
      higher needs something else to give first — the bio's 3:1 is the wall. */
   --field-rise: 30px;
+  /* ⚠️ --field-cream is NOT a mask term any more (EXPERIMENT work-glide). It
+     slid the white band up INSIDE the artwork, so the band moved while the hero
+     text did not — two motions, and the band's top crossed the bio. It is now
+     an extra LIFT on .page-field and the lockup together (see their
+     transforms), so artwork, band and text rise as ONE rigid piece and every
+     contrast figure measured at rest holds at every scroll position. */
   --field-mask-end: min(100%, calc(100svh + var(--field-rise)));
   /* HOW TALL THE DISSOLVE IS, as a fraction of the room between the bio's last
      line and the bar. --field-gap is that room, published by measureFieldTuck;
@@ -641,7 +647,13 @@ html.is-field-live .page-field-grain { opacity: 0.15; }
 .intro-top,
 .intro-divider,
 .intro-band {
-  transform: translateY(calc(-1 * var(--hero-lift) - var(--field-scroll, 0px)));
+  /* + --field-cream: the lockup rides the same extra lift as the artwork, so
+     the two stay rigid (EXPERIMENT work-glide). */
+  /* + --hero-text-lift: the text's own parallax over the artwork (HERO_TEXT in
+     js/main.js). ⚠️ This DOES break the lockup's rigidity with the field, on
+     purpose — the text leaves the colour it was measured on as it scrolls away.
+     It moves UP, so the bio pulls away from the white band, not into it. */
+  transform: translateY(calc(-1 * var(--hero-lift) - var(--field-scroll, 0px) - var(--field-cream, 0px) - var(--hero-text-lift, 0px)));
 }
 
 .intro-divider {
@@ -1136,6 +1148,20 @@ html:not(.is-field-live) .intro-divider {
 @keyframes intro-bar-fade {
   from { opacity: 0; }
   to { opacity: 1; }
+}
+
+/* EXPERIMENT (work-glide): the bar and everything after it in <main> glide up
+   with the hero while it leaves, by --work-glide (updateScrollEffects) — the gap
+   that would otherwise open between the gradient's end and the bar. 0 at rest
+   and 0 the instant the bar docks, so sticky takes over without a jump.
+   ⚠️ The INDIVIDUAL `translate` property, not `transform`: it composes with
+   every transform already on these elements (reveals, About's parallax,
+   Contact's peek) instead of replacing them. Scroll-linked, so no transition.
+   Nothing past Selected Work is on screen while this is non-zero; the rest
+   rides along only so the page stays one continuous surface. */
+.intro-bar,
+.intro-bar ~ * {
+  translate: 0 calc(-1 * var(--work-glide, 0px));
 }
 
 /* The wordmark holds the left edge alone; `margin-right: auto` eats all the free

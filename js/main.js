@@ -176,6 +176,53 @@ function setFieldGap(px) {
   lastFieldGap = px;
   document.documentElement.style.setProperty('--field-gap', px + 'px');
 }
+let lastFieldCream = -1;
+function setFieldCream(px) {
+  // Same contract as setFieldScroll: root, rounded, guarded — per scroll frame.
+  if (px === lastFieldCream) return;
+  lastFieldCream = px;
+  document.documentElement.style.setProperty('--field-cream', px + 'px');
+}
+// An extra lift on the WHOLE hero — artwork, white band and text together
+// (hero.css adds --field-cream to .page-field's and the lockup's transforms) —
+// as a fraction of the band's length. It used to slide the band inside the
+// artwork, which moved the band without the text; rigid, they move as one.
+// ⚠️ IT RISES AND THEN SETTLES BACK. The slide peaks at `peak` of the scroll to
+// the dock and eases back to 0 by the dock itself, so the gradient's end lands on
+// the bar's top as it pins (measureFieldTuck's target). Left at full slide, the
+// band pulled away from the nav by its own travel — ~210px of bare cream above
+// the docked bar at 1440x900. Smoothstep on both legs: no corner at rest, at the
+// peak or at the dock.
+// ⚠️ `ratio` IS THE TENSION DIAL. Because the nav and Work are lifted by this same
+// curve (--work-glide), they run FASTER than the scroll on the way up and SLOWER
+// on the way back — and the slow leg is what reads as loose. Nav speed vs.
+// scroll, 1440x900: 0.8/0.45 → 1.74x then 0.39x ("slide-y") · 0.6/0.5 →
+// 1.50/0.50 · 0.4/0.5 → 1.34/0.66 · 0.3/0.5 → 1.25/0.75 (shipped). peak 0.5
+// splits the swing evenly between the two legs, so neither is the steep one.
+const FIELD_CREAM = { ratio: 0.3, peak: 0.5 };
+let fieldCreamMax = 0;
+// EXPERIMENT (work-glide): the hero TEXT's own parallax. --work-glide locks the
+// nav and Work to the artwork, which closes the gap but also cancels the only
+// relative motion the hero had — everything became one block and stopped
+// reading as parallax. This puts it back INSIDE the hero: the headline, divider
+// and bio rise `speed` faster than the scroll, over an artwork that does not.
+// LINEAR in scroll (a constant 1 + speed), because a changing speed is exactly
+// what read as loose in the glide. Held once the bar pins; the text is off
+// screen by then.
+const HERO_TEXT = { speed: 0.4 };
+let lastHeroTextLift = -1;
+function setHeroTextLift(px) {
+  if (px === lastHeroTextLift) return;
+  lastHeroTextLift = px;
+  document.documentElement.style.setProperty('--hero-text-lift', px + 'px');
+}
+let lastWorkGlide = -1;
+function setWorkGlide(px) {
+  // Same contract as setFieldScroll: root, rounded, guarded — per scroll frame.
+  if (px === lastWorkGlide) return;
+  lastWorkGlide = px;
+  document.documentElement.style.setProperty('--work-glide', px + 'px');
+}
 let lastFieldScroll = -1;
 function setFieldScroll(px) {
   // Same contract as setBarBleed: written on the ROOT (all three .page-field
@@ -601,9 +648,13 @@ const pageField = document.querySelector('img.page-field');
 // point — and the clamp past it keeps the field from ever re-emerging.
 let fieldOverhang = 0;
 let fieldDockScroll = 0;
+// EXPERIMENT (work-glide): the artwork's visible end at rest, page px.
+let fieldVisibleEnd = 0;
 function measureFieldTuck() {
   fieldOverhang = 0;
   fieldDockScroll = 0;
+  fieldVisibleEnd = 0;
+  fieldCreamMax = 0;
   // offsetParent is null when the bar is display:none — the ≤680 tier, where
   // there is no pinned bar to tuck behind and the phone tier owns the field's
   // transform outright. Nothing to do, and setFieldScroll(0) below clears any
@@ -630,7 +681,13 @@ function measureFieldTuck() {
     + parseFloat(getComputedStyle(introBar).marginTop || '0');
   if (barTop <= 0) return;
   const bio = document.querySelector('.intro-bio');
-  if (bio) setFieldGap(Math.max(0, Math.round(barTop - (pageTop(bio) + bio.offsetHeight))));
+  if (bio) {
+    const gap = Math.max(0, Math.round(barTop - (pageTop(bio) + bio.offsetHeight)));
+    setFieldGap(gap);
+    // hero.css's --field-fade, restated: clamp(90px, gap, 300px).
+    const fade = Math.min(300, Math.max(90, gap));
+    fieldCreamMax = Math.round(fade * FIELD_CREAM.ratio);
+  }
   // ⚠️ THE TARGET IS THE BAR'S TOP, NOT ITS BOTTOM. Aiming at the bottom is the
   // obvious reading of "don't bleed past the bar" and it leaves the artwork
   // visible: the mask's last 40% is a fade, so landing its zero-alpha edge on the
@@ -638,7 +695,22 @@ function measureFieldTuck() {
   // bar, and the bar's own frost is translucent. Measured at 1440x740 that tail
   // still read as a coral wash across the strip. Landing it on the bar's TOP
   // instead means the field has ended before the bar begins.
-  fieldOverhang = Math.max(0, Math.round(fieldBottom - barTop));
+  // ⚠️ AND THE TARGET IS THE ARTWORK'S *VISIBLE* END, NOT ITS BOX. Two things end
+  // it above the box bottom: --field-rise has already lifted the field (offsets
+  // don't see that transform), and the mask dissolves it at the FOLD
+  // (min(100%, 100svh + rise) — hero.css). Aiming the box bottom at the bar
+  // over-lifted by both: measured 30px of bare cream between the dissolve and
+  // the docked bar at 1440x900, and 139px at 1440x740, where the fold binds.
+  const rise = parseFloat(getComputedStyle(document.documentElement)
+    .getPropertyValue('--field-rise')) || 0;
+  const svhProbe = document.createElement('div');
+  svhProbe.style.cssText = 'position:absolute;top:0;height:100svh;visibility:hidden';
+  document.body.appendChild(svhProbe);
+  const svh = svhProbe.offsetHeight;
+  svhProbe.remove();
+  const visibleEnd = Math.min(fieldBottom - rise, mainTop + pageField.offsetTop + svh);
+  fieldOverhang = Math.max(0, Math.round(visibleEnd - barTop));
+  fieldVisibleEnd = visibleEnd;
   fieldDockScroll = barTop;
 }
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -2688,8 +2760,32 @@ function updateScrollEffects() {
   // that nothing scroll-linked may carry a CSS transition.
   const t = fieldDockScroll > 0
     ? Math.min(1, Math.max(0, window.scrollY / fieldDockScroll)) : 0;
-  setFieldScroll(fieldOverhang === 0 ? 0
-    : Math.round(fieldOverhang * (1 - Math.pow(1 - t, 3))));
+  const tuck = 1 - Math.pow(1 - t, 3);
+  setFieldScroll(fieldOverhang === 0 ? 0 : Math.round(fieldOverhang * tuck));
+  // The fade band glides up with the parallax, then settles back onto the bar as
+  // it docks. See FIELD_CREAM.
+  const ss = (x) => x * x * (3 - 2 * x);
+  const { peak } = FIELD_CREAM;
+  const creamT = t < peak ? ss(t / peak) : 1 - ss((t - peak) / (1 - peak));
+  setFieldCream(Math.round(fieldCreamMax * creamT));
+
+  // EXPERIMENT (work-glide): the nav and everything below it glide up WITH the
+  // hero, lifted by exactly the gap that would otherwise open between the
+  // gradient's end and the bar — so none ever does. Early on they outrun the
+  // page, keeping pace with the parallax; as the band settles they ease back,
+  // and the lift is 0 the instant the bar pins (the tuck lands the gradient's
+  // end on the bar's top there, and the cream is back to 0). That zero is what
+  // keeps sticky from jumping. Clamped so the bar can never be lifted above the
+  // viewport before it docks.
+  let glide = 0;
+  if (fieldDockScroll > 0 && fieldVisibleEnd > 0) {
+    const barTopVp = fieldDockScroll - window.scrollY;
+    const gradEnd = fieldVisibleEnd - fieldOverhang * tuck - fieldCreamMax * creamT - window.scrollY;
+    glide = Math.min(Math.max(0, barTopVp), Math.max(0, barTopVp - gradEnd));
+  }
+  setWorkGlide(Math.round(glide));
+  setHeroTextLift(fieldDockScroll > 0
+    ? Math.round(HERO_TEXT.speed * Math.min(window.scrollY, fieldDockScroll)) : 0);
 
   // Scroll-spy: the active section is the LAST one whose RESTING POSITION the
   // page has reached. Highlight every link that targets it (and mark it for
@@ -3332,6 +3428,9 @@ function initSectionGeometry(lenis) {
 // resets to hidden, so scrolling back up (or down) fades it in again rather
 // than leaving it statically visible. Driven by getBoundingClientRect on scroll
 // (robust across browsers, unlike an observer); Motion.dev runs the fade + rise.
+// Where a Work card fades in / back out, as fractions of the viewport height
+// measured on the card's top. Was 0.85 / 0.95.
+const WORK_REVEAL = { in: 0.97, out: 0.995 };
 function setupReveals(motion) {
   const { animate } = motion;
   const groups = Array.from(document.querySelectorAll('[data-reveal-group]'));
@@ -3401,9 +3500,13 @@ function setupReveals(motion) {
         // leaves the bottom, symmetric with how it arrived. The 85→95% gap is
         // hysteresis against flicker. (Leaving through the TOP while scrolling
         // down still just resets once off-screen, above — no harsh cut-out there.)
-        if (firstPass || (r.top < vh * 0.85 && r.bottom > vh * 0.15)) {
+        // EXPERIMENT (work-glide): the cards now ride --work-glide up out of the
+        // hero, so they reached 85% (135px into a 900px fold) already moving
+        // fast and appeared late. They reveal as soon as they clear the fold
+        // (WORK_REVEAL.in); the out line sits just past it to keep hysteresis.
+        if (firstPass || (r.top < vh * WORK_REVEAL.in && r.bottom > vh * 0.15)) {
           setVisible(group, true);
-        } else if (r.top > vh * 0.95) {
+        } else if (r.top > vh * WORK_REVEAL.out) {
           setVisible(group, false, true);
         }
       } else if (firstPass || (r.top < vh * 0.9 && r.bottom > vh * 0.15)) {
