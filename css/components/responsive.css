@@ -279,13 +279,17 @@
   }
   /* Project pages stack .project-block at this tier (the homepage's About holds
      two columns down to 768), so there is no right column for the nav's grid
-     anchor to meet here. Same revert as the 768 tier, scoped to --page. */
+     anchor to meet here. Same flex revert as the 768 tier, scoped to --page. */
+  .intro-bar--page {
+    display: flex;
+  }
+  .intro-bar--page .intro-bar-links {
+    display: flex;
+  }
   .intro-bar--page .intro-bar-name {
-    flex: 0 1 auto;
     margin-right: auto;
   }
   .intro-bar--page .intro-bar-cta-wrap {
-    margin-left: 0;
     padding-left: var(--gap-group);
   }
   .site-header-row {
@@ -384,16 +388,20 @@
      This tier only carries what genuinely differs at portrait width. */
 
   /* Undo the desktop grid anchor on the nav bar: About and Contact stack here,
-     so there is no right column for the links to start on. Back to the
-     content-width cluster pushed to the right edge, with the old --gap-group
-     seam before the pill. Both halves must go — the name's basis AND the pill's
-     auto margin, or the two free spaces split the bar. */
+     so there is no right column to align to. Back to the content-width flex
+     cluster pushed to the right edge, with the old --gap-group seam before the
+     pill. ⚠️ The 680 tier below hides this bar (homepage) and re-shows the
+     project pages' as flex — both come later in the file, so they still win. */
+  .intro-bar {
+    display: flex;
+  }
+  .intro-bar-links {
+    display: flex;
+  }
   .intro-bar-name {
-    flex: 0 1 auto;
     margin-right: auto;
   }
   .intro-bar-cta-wrap {
-    margin-left: 0;
     padding-left: var(--gap-group);
   }
 
