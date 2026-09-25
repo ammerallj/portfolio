@@ -817,11 +817,19 @@ const FIELD = {
   //   .7/.7           27.9%       0.71     2.52   2.18
   // Pushing `mid` out spreads the blue further for less contrast than raising
   // midAlpha does; midAlpha is what makes it more SATURATED. Both cost the bio.
+  // ⚠️ THEN y CAME BACK UP 0.12 -> 0.08, to let red show under the blue. With
+  // the .62/.6 ramp, y trades cyan for red almost one-for-one and contrast
+  // IMPROVES slightly as it rises (1440x900, same 12 phases):
+  //   y      cyan    red     bio    headline
+  //   0.12   17.5%    9.3%   2.57   2.22
+  //   0.08   15.1%   11.8%   2.59   2.25   <- shipped
+  //   0.04   12.8%   14.6%   2.60   2.29
+  // This is the balance dial between the two — not a contrast lever.
   blobs: [
     { col: [0.8392, 0.3020, 0.8078], r: 0.652,  x: 0.107, y: 0.375, a: 1.00 }, // magenta #D64DCE (0.5669 base, x1.15)
     { col: [0.5725, 0.2196, 0.8902], r: 0.5054, x: 0.942, y: 0.499, a: 1.00 }, // violet  #9238E3
     { col: [0.9765, 0.2471, 0.2471], r: 0.6275, x: 0.590, y: 0.640, a: 1.00 }, // red     #F93F3F
-    { col: [0.0039, 0.6235, 0.8471], r: 0.4738, x: 0.547, y: 0.12,   a: 1.00, ramp: { mid: 0.62, midAlpha: 0.6 } }, // cyan #019FD8 (y was -0.016)
+    { col: [0.0039, 0.6235, 0.8471], r: 0.4738, x: 0.547, y: 0.08,   a: 1.00, ramp: { mid: 0.62, midAlpha: 0.6 } }, // cyan #019FD8 (y was -0.016)
   ],
   // Calmed 2026-09 (speed 2.05 -> 1.7, drift 0.05 -> 0.032). Drift carries
   // most of the reduction on purpose: amplitude reads as restraint,
