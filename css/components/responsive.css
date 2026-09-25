@@ -876,11 +876,16 @@
        360/375/390/430), and the box runs 68px past that, so the fade was
        dissolving across the card. Moving the MASK rather than the box leaves
        the orbs — and every contrast figure — exactly where they were measured.
-       ⚠️ 80px, not the shared 112: at 360x780 only 80px separates the bio's last
-       line from the card, so a longer fade would start inside the bio.
+       112px, the same stretch as the header's own wash (--header-bleed 96 +
+       --space-sm), so the top and bottom of the hero dissolve alike. Measured
+       room between the bio's last line and the card: 130 at 375, 146 at 390,
+       190 at 430 — bio contrast unchanged at all three (3.33 at 375).
+       ⚠️ NOT BELOW 375 — see the 374 tier at the end of this file, which drops
+       it to 80: at 360x780 the bio wraps to 5 lines and only 80px is left, and
+       112 there started the fade inside the bio (measured 2.42:1).
        ⚠️ --field-mask-start is restated because :root resolved it against
        :root's --field-mask-end; overriding the end here alone would not move it. */
-    --field-fade: 80px;
+    --field-fade: 112px;
     --field-mask-end: calc(var(--hero-h) + 56px);
     --field-mask-start: calc(var(--field-mask-end) - var(--field-fade));
     aspect-ratio: auto;
@@ -1171,5 +1176,20 @@
   }
   .site-footer:not(.site-footer--plain) p {
     color: var(--color-text);
+  }
+}
+
+/* ============================================================
+   ≤374px — NARROW PHONES (360-class). One rule, and it exists only
+   because the hero's white fade and the bio run out of room here.
+   ============================================================ */
+@media (max-width: 374px) {
+  /* The bio wraps to 5 lines at 360 and ends 80px above the first Work card,
+     so the 112px phone fade (480 tier) would start 32px inside it — measured
+     2.42:1 against the 3:1 it needs. 80px starts on the bio's last line:
+     3.09:1. */
+  .page-field-canvas,
+  .page-field-grain {
+    --field-fade: 80px;
   }
 }
