@@ -187,10 +187,13 @@ function setFieldCream(px) {
 // away, as a fraction of the band's own length. The band moves WHOLE — hero.css
 // subtracts --field-cream from the mask's end only — so it keeps its full soft
 // length; a version that compressed it instead read as too little fade.
-// ⚠️ NO TIMING OF ITS OWN. The climb reads the tuck's own eased progress, so the
-// cream glides up WITH the parallax. A separate span (0.6 was tried) finished the
-// climb early and left the hero lifting on its own — two motions, not one.
-const FIELD_CREAM = { ratio: 0.8 };
+// ⚠️ IT RISES AND THEN SETTLES BACK. The slide peaks at `peak` of the scroll to
+// the dock and eases back to 0 by the dock itself, so the gradient's end lands on
+// the bar's top as it pins (measureFieldTuck's target). Left at full slide, the
+// band pulled away from the nav by its own travel — ~210px of bare cream above
+// the docked bar at 1440x900. Smoothstep on both legs: no corner at rest, at the
+// peak or at the dock.
+const FIELD_CREAM = { ratio: 0.8, peak: 0.45 };
 let fieldCreamMax = 0;
 let lastFieldScroll = -1;
 function setFieldScroll(px) {
@@ -2727,9 +2730,12 @@ function updateScrollEffects() {
     ? Math.min(1, Math.max(0, window.scrollY / fieldDockScroll)) : 0;
   const tuck = 1 - Math.pow(1 - t, 3);
   setFieldScroll(fieldOverhang === 0 ? 0 : Math.round(fieldOverhang * tuck));
-  // The cream rides the SAME eased progress, so the ramp shortens exactly as the
-  // artwork lifts — one motion, not two. See FIELD_CREAM.
-  setFieldCream(Math.round(fieldCreamMax * tuck));
+  // The fade band glides up with the parallax, then settles back onto the bar as
+  // it docks. See FIELD_CREAM.
+  const ss = (x) => x * x * (3 - 2 * x);
+  const { peak } = FIELD_CREAM;
+  const creamT = t < peak ? ss(t / peak) : 1 - ss((t - peak) / (1 - peak));
+  setFieldCream(Math.round(fieldCreamMax * creamT));
 
   // Scroll-spy: the active section is the LAST one whose RESTING POSITION the
   // page has reached. Highlight every link that targets it (and mark it for
