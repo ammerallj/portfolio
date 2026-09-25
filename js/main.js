@@ -797,11 +797,20 @@ const FIELD = {
   // source-over keeps violet underneath, so the bio reads 2.86-3.24, better than
   // the Figma original's 2.72-3.11, while red's visible area goes 41.5% -> 52.3%.
   // Measured over 14 orbit phases per variant, worst pixel under the line boxes.
+  // ⚠️ CYAN'S y WENT -0.016 -> 0.12 (2026-09) — THE ONE CASE WHERE THE CENTRE
+  // *IS* THE LEVER, because cyan is already on top of the stack. With offsetY it
+  // sat at -0.27 of the field, core OFF the canvas, so only its faded fringe
+  // showed — and a half-alpha cyan over red averages to grey mauve, which is the
+  // "muddy" middle. At 0.12 the core reaches the top of the fold. Measured over
+  // 12 exact phases, rendered shader pixels, worst pixel under the glyph boxes:
+  //   1440x900  cyan share 1.7% -> 6.3%   bio 2.86 -> 2.79 floor   headline flat
+  //   1440x740  cyan share 2.1% -> 7.6%   bio 3.00 -> 3.03 floor   headline -0.10
+  // Past ~0.16 the gain keeps coming but the headline floor keeps slipping.
   blobs: [
     { col: [0.8392, 0.3020, 0.8078], r: 0.652,  x: 0.107, y: 0.375, a: 1.00 }, // magenta #D64DCE (0.5669 base, x1.15)
     { col: [0.5725, 0.2196, 0.8902], r: 0.5054, x: 0.942, y: 0.499, a: 1.00 }, // violet  #9238E3
     { col: [0.9765, 0.2471, 0.2471], r: 0.6275, x: 0.590, y: 0.640, a: 1.00 }, // red     #F93F3F
-    { col: [0.0039, 0.6235, 0.8471], r: 0.4738, x: 0.547, y: -0.016, a: 1.00 }, // cyan   #019FD8
+    { col: [0.0039, 0.6235, 0.8471], r: 0.4738, x: 0.547, y: 0.12,   a: 1.00 }, // cyan   #019FD8 (y was -0.016)
   ],
   // Calmed 2026-09 (speed 2.05 -> 1.7, drift 0.05 -> 0.032). Drift carries
   // most of the reduction on purpose: amplitude reads as restraint,
