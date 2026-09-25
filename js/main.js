@@ -199,7 +199,12 @@ function setFieldCream(px) {
 // scroll, 1440x900: 0.8/0.45 → 1.74x then 0.39x ("slide-y") · 0.6/0.5 →
 // 1.50/0.50 · 0.4/0.5 → 1.34/0.66 · 0.3/0.5 → 1.25/0.75 (shipped). peak 0.5
 // splits the swing evenly between the two legs, so neither is the steep one.
-const FIELD_CREAM = { ratio: 0.3, peak: 0.5 };
+// ⚠️ SPAN AND RATIO ARE COUPLED — shortening the span at the same ratio packs
+// the same lift into less scroll and brings the looseness back (0.3 at span 0.6
+// is 1.42x → 0.58x). Holding ratio × (1 / span) constant holds the tension:
+// 0.3 at span 1 and 0.18 at span 0.6 both run 1.25x → 0.75x.
+const FIELD_TUCK = { span: 0.6 };
+const FIELD_CREAM = { ratio: 0.18, peak: 0.5 };
 let fieldCreamMax = 0;
 // EXPERIMENT (work-glide): the hero TEXT's own parallax. --work-glide locks the
 // nav and Work to the artwork, which closes the gap but also cancels the only
@@ -2758,8 +2763,12 @@ function updateScrollEffects() {
   // ⚠️ Easing the MAPPING is not a transition. This stays a pure function of
   // scrollY with no time term, so it cannot lag the page — see the standing rule
   // that nothing scroll-linked may carry a CSS transition.
+  // FIELD_TUCK.span: the whole sequence (tuck, cream lift, glide) completes over
+  // this fraction of the scroll to the dock, then everything runs at page speed
+  // until the bar pins. The gap stays closed after it, because a finished tuck
+  // lands the gradient's end on the bar's top and the cream is back to 0.
   const t = fieldDockScroll > 0
-    ? Math.min(1, Math.max(0, window.scrollY / fieldDockScroll)) : 0;
+    ? Math.min(1, Math.max(0, window.scrollY / (fieldDockScroll * FIELD_TUCK.span))) : 0;
   const tuck = 1 - Math.pow(1 - t, 3);
   setFieldScroll(fieldOverhang === 0 ? 0 : Math.round(fieldOverhang * tuck));
   // The fade band glides up with the parallax, then settles back onto the bar as
