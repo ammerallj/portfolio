@@ -150,17 +150,15 @@ body:has(.intro) .site-header {
   font-size: 1.25rem;
   font-weight: 700;
   letter-spacing: -0.02em;
-  color: var(--color-text-70);
+  /* FULL BLACK (2026-09-25), matching the desktop .intro-bar-name. It rested at
+     --color-text-70 and darkened on hover; over the frosted cream it read as
+     faint grey, and on a phone there is no hover to reach full black. The
+     transition stays for the blue Contact inversion (.is-over-dark → #fff). */
+  color: var(--color-text);
   text-decoration: none;
   flex: 1;
   min-width: 0;
   transition: color 0.35s ease;
-}
-
-@media (hover: hover) {
-  .site-name:hover {
-    color: var(--color-text);
-  }
 }
 
 .site-nav-bar {
