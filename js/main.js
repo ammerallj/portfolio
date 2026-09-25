@@ -183,10 +183,10 @@ function setFieldCream(px) {
   lastFieldCream = px;
   document.documentElement.style.setProperty('--field-cream', px + 'px');
 }
-// How far the white fade band slides up toward the bio as the reader scrolls
-// away, as a fraction of the band's own length. The band moves WHOLE — hero.css
-// subtracts --field-cream from the mask's end only — so it keeps its full soft
-// length; a version that compressed it instead read as too little fade.
+// An extra lift on the WHOLE hero — artwork, white band and text together
+// (hero.css adds --field-cream to .page-field's and the lockup's transforms) —
+// as a fraction of the band's length. It used to slide the band inside the
+// artwork, which moved the band without the text; rigid, they move as one.
 // ⚠️ IT RISES AND THEN SETTLES BACK. The slide peaks at `peak` of the scroll to
 // the dock and eases back to 0 by the dock itself, so the gradient's end lands on
 // the bar's top as it pins (measureFieldTuck's target). Left at full slide, the
