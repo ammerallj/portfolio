@@ -638,7 +638,7 @@ let fieldDockScroll = 0;
 // ⚠️ px IS THE SPEED DIAL: nav/Work run at 1 + px / (bar's resting top − px) of
 // the scroll. At 1440x900: 180 → 1.28x (imperceptible) · 240 → 1.41x (current) ·
 // 300 → 1.58x · the 410 cap → 2.0x ("too free", lost the scroll's tension).
-const HERO_SHORTEN = { px: 240, ease: 2 };
+const HERO_SHORTEN = { px: 240, bias: 1.5 };
 let heroShorten = 0;
 let fieldVisibleEnd = 0;
 let lastHeroShorten = -1;
@@ -2782,12 +2782,17 @@ function updateScrollEffects() {
   const travel = fieldDockScroll > 0 ? Math.min(window.scrollY, fieldDockScroll) : 0;
   const lag = Math.round(FIELD_LAG.k * travel);
   // The push that undoes the shortening: heroShorten at rest, 0 at the pin.
-  // EASED IN (HERO_SHORTEN.ease): the push unwinds slowly at first and faster as
-  // the reader goes, so the nav starts at the scroll's own speed — the tension —
-  // and the shortening builds: speed = 1 + ease·(L/R)·p^(ease−1). At 1440x900
-  // with 240px and ease 2: 1.0x at rest → 1.83x as the bar pins.
+  // A BIASED SMOOTHSTEP, ss(p^bias): zero slope at BOTH ends, so the nav leaves
+  // rest at the scroll's own speed (the tension), the shortening builds, and it
+  // eases back to exactly 1x as the bar pins — no change of pace under Selected
+  // Work there. `bias` > 1 pushes the fast part late. At 1440x900, 240px:
+  //   bias 1   → peak 1.62x at 50% (symmetric)
+  //   bias 1.5 → peak 1.76x at 69% (shipped): 1.04 1.14 1.28 1.44 1.60 1.72 1.76 1.68 1.44 1.00
+  //   bias 2   → peak 1.92x at 78%
+  // The plain ease-in p^2 it replaced ended at 1.8x and dropped to 1x at the pin.
   const pinP = fieldDockScroll > 0 ? travel / fieldDockScroll : 0;
-  const push = fieldDockScroll > 0 ? heroShorten * (1 - Math.pow(pinP, HERO_SHORTEN.ease)) : 0;
+  const pinE = Math.pow(pinP, HERO_SHORTEN.bias);
+  const push = fieldDockScroll > 0 ? heroShorten * (1 - pinE * pinE * (3 - 2 * pinE)) : 0;
   setHeroPush(Math.round(push));
   // Negative: .page-field's transform subtracts it, so the artwork moves DOWN
   // relative to the page, i.e. slower than the scroll.
