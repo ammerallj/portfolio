@@ -1559,6 +1559,10 @@ curve.
 
 ### The mobile header's scrim (`--header-bleed`, 2026-09)
 
+⚠️ **IT CARRIES THE NAV GRAIN TOO (2026-09-25)** — `.site-header::after`, the same
+`navgrain` noise as `.intro-bar::after`, on its own 40px fade (not the frost's
+112px mask; grain down a long bleed reads as a band). Hidden under `is-over-dark`.
+
 `.site-header`'s frost now **bleeds to full transparency** instead of ending on a
 hard line. It was a flat `background-color: rgba(251,252,248,0.9)` plus
 `blur(4px)` ON THE ELEMENT — the landing's `.intro-bar` got the bleed treatment
