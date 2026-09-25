@@ -7,6 +7,29 @@ The homepage is one page; each project also has a **Project Overview page** in
 `work/` (see **Project Overview Pages** below). `js/main.js` and `style.css` are
 shared by all of them.
 
+## ⚠️ Every editing session works in its own worktree — do this FIRST
+
+**Before the first edit to any site file, call `EnterWorktree`** with a short
+kebab-case name for the task (e.g. `mobile-hero`, `loop-copy`). Several chats
+run in parallel on this repo, and the main folder is shared: editing there is
+how they overwrite each other's work. `.claude/settings.json` sets
+`worktree.baseRef: "head"`, so the worktree branches from the main folder's
+`staging` — never from the live `main`.
+- **Skip it only when** the session is already in a worktree (the path contains
+  `.claude/worktrees/`, or it's a `../portfolio-<name>/` folder), the task is
+  read-only (a question, a review, a measurement), or the task is the release
+  flow itself — staging, previewing, shipping, branch cleanup. Those run in the
+  main folder on `staging`; see **Branch workflow** under Conventions.
+- **Never edit site files in the main folder**, even for a one-line fix. The
+  exception is a merge-conflict resolution during `stage.sh`, which only exists
+  on staging.
+- **Commit in the worktree when the work is done**, then tell the user to stage
+  it from a main-folder chat: "stage `worktree-<name>`". Don't remove the
+  worktree yourself.
+- ⚠️ **When the chat ends, the app offers to keep or remove the worktree —
+  remove deletes the branch.** Until it has been staged, the answer is KEEP.
+  Say so in your last message.
+
 ## File Map
 - **Project overview pages:** `work/*.html` (4) — see **Project Overview Pages** below.
 - **Main HTML:** `index.html` — structure/content only. A tiny inline `<script>` in `<head>` sets `is-motion` + `is-loading` pre-paint (both only when JS runs, so no-JS visitors aren't left on a blank page); ends with a single `<script src="js/main.js" defer>`.
