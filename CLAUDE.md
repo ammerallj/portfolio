@@ -464,7 +464,14 @@ SEO/JSON-LD value.
 `.page-field-canvas`, drawn **over** the JPEG rather than instead of it. Config
 lives in the `FIELD` object at the top of `initHeroField` in js/main.js; the
 tuning harness is `lab/field-shader.html` (excluded from the build), whose
-**Export config** button emits a paste-ready `FIELD`.
+**Export config** button emits paste-ready `FIELD` keys (`ramp`, `blobs` with
+their per-orb overrides, `paintOrder`, `offsetY`, `motion`, `renderScale`).
+⚠️ **THE LAB IS A HAND-KEPT COPY OF `FIELD`, AND IT HAD DRIFTED BADLY** — until
+2026-09 it had different radii, no paint order or `offsetY`, a ±6% pulse and
+Figma's 0.9 layer opacity applied, so what it showed was not the site. It was
+re-synced with the per-orb work below. **Nothing enforces the sync**: change
+`FIELD` or the shader in js/main.js and change the lab's `TUNED` / `RAMP` /
+`MOTION` / `PAINT_ORDER` / `OFFSET_Y` and its shader to match.
 
 **The values come from the FIGMA SOURCE (521:3788), never from sampling the
 JPEG** — and this is the trap, because sampling the JPEG is the obvious move and
@@ -473,8 +480,10 @@ OVERLAP PRODUCTS and presents them as sources. A first pass did exactly that and
 produced seven blobs, three of which (periwinkle, sky, pink) do not exist in the
 file at all — they are where blue meets violet and red meets magenta. Baking
 mixes in as ingredients and then mixing again is why it read muddy.
-- **FOUR circles**, painted bottom to top: magenta `#D64DCE` · violet `#9238E3`
-  · red `#F93F3F` · cyan `#019FD8`.
+- **FOUR circles**, painted bottom to top: violet `#9238E3` · magenta `#D64DCE`
+  · red `#F93F3F` · cyan `#019FD8` (`paintOrder: [1, 0, 2, 3]` — indices into
+  `blobs`, which is listed magenta, violet, red, cyan. This entry used to give
+  magenta first; the constrained permutation sweep put violet under it.)
   ⚠️ **THAT ORDER IS NOT FIGMA'S, AND THE DEPARTURE IS THE POINT.** Figma paints
   magenta, red, violet, cyan — red third from the top, under violet. **Red was
   lifted ABOVE violet (2026-09) and it is the single change that made red
@@ -499,8 +508,12 @@ mixes in as ingredients and then mixing again is why it read muddy.
   emission is gone. **Anything interpolated into the shader string must be a
   GLSL-valid literal.** Do not "fix" this by wiring 0.9 into the composite: every
   radius, `midAlpha` and both contrast bands were tuned with it absent.
-- **One ramp, shared by all four:** colour at alpha 1 → **`midAlpha` at offset
-  0.524038** → **WHITE at alpha 0**.
+- **One shared ramp, which each orb may override:** colour at alpha 1 →
+  **`midAlpha` at offset 0.524038** → **alpha 0, in the orb's OWN hue**
+  (`FIELD.ramp.white: 0`). ⚠️ **It used to lift to WHITE there, as Figma's does**
+  — see **The in-hue fade and the cyan orb** below for why that changed and the
+  warning at the end of this bullet for what it does NOT reintroduce. Only cyan
+  overrides the shared values (`ramp` and `pulse` on its blob).
   ⚠️ **`midAlpha` IS 0.5, NOT FIGMA'S 0.3 — and it is the most useful number in
   the object.** The ramp collapses each orb to `midAlpha` by 52.4% of its radius,
   so at 0.3 the GAPS BETWEEN ORBS — exactly where the headline and bio sit — fall
@@ -508,15 +521,19 @@ mixes in as ingredients and then mixing again is why it read muddy.
   headline 2.56, bio 2.74 · 0.40 → 0.447 / 2.82 / 2.99 · **0.50 → 0.486 / 3.04 /
   3.22** · 0.60 → 0.522 / 3.17 / 3.42. Figma's own export means 0.465, so 0.50 is
   MORE saturated than the source *and* the first setting where both blocks clear
-  3:1. It is the one lever found that improves look and accessibility together. ⚠️ **That last stop lifts to WHITE, not to
-  transparent** — it is what dissolves the artwork into the cream page instead of
-  greying out at the edges. Ramping to `transparent` (i.e. `rgba(0,0,0,0)`) drags
-  every stop toward black and rings each blob with a grey halo.
+  3:1. It is the one lever found that improves look and accessibility together.
+  (Those figures predate the in-hue fade, which raised both blocks again.)
+  ⚠️ **NEVER RAMP TO `transparent`** (i.e. `rgba(0,0,0,0)`) — that drags every
+  stop toward BLACK and rings each blob with a grey halo. Fading in the orb's own
+  hue is a different thing: the colour never moves toward black, only its alpha
+  falls, so there is nothing to grey. This entry used to say the white lift was
+  what prevented the halo; it was avoiding black that did.
 - Compositing is **source-over, bottom to top**, matching Figma. Not a weighted
   average — the overlaps have to stack or the mixed hues come out wrong.
 - Blob **placement is transcribed from Figma `TeNe3E4y6xGRTFC1CrEPuX` / `37:23`**
-  — a 1440×800 frame (the fold, not a page) holding a 2747×2309 group — with one
-  exception: red's x/y, which the paint-order work above moved to (0.590, 0.640).
+  — a 1440×800 frame (the fold, not a page) holding a 2747×2309 group — with two
+  exceptions: red's x/y, which the paint-order work above moved to (0.590, 0.640),
+  and cyan's y, moved −0.016 → 0.08 (see **The in-hue fade and the cyan orb**).
   ⚠️ **THE GROUP OFFSET IS FITTED, NOT ASSUMED.** Figma gives the group's box but
   not where it sits in the frame, and "centred" was wrong once already (55px out).
   A grid search against the downsampled export lands at (−662, −696), RMS 0.065.
@@ -524,9 +541,10 @@ mixes in as ingredients and then mixing again is why it read muddy.
   different frame size, orb count and paint order. The conversion is in the
   `blobs` comment in js/main.js; superseded values live in `lab/field-shader.html`'s
   `FIGMA.source`.
-  ⚠️ **RADII ARE NOT THE FILE'S** — they are 0.5669 / 0.5054 / 0.6275 / 0.4738
+  ⚠️ **RADII ARE NOT THE FILE'S** — they are 0.652 / 0.5054 / 0.6275 / 0.4738
   (magenta / violet / red / cyan), roughly 1.7–2.5× the file's, grown to back the
-  text. An older entry here quoted .300→.325-scale numbers; those are long gone.
+  text. Magenta is its 0.5669 base ×1.15 (this entry quoted the base). An older
+  entry here quoted .300→.325-scale numbers; those are long gone.
 
 **FAILURE IS ALWAYS THE JPEG, and nothing may change that.** The `<img>` stays,
 keeps `fetchpriority="high"`, and its URL stays byte-identical to the
@@ -661,6 +679,13 @@ motion**. Judge it in a real browser window.
   ⚠️ **Do NOT "restore" a bare sin so it shrinks below base.** That was the
   original form and the trough pulled every orb's reach in by 8% at once, which
   is what put the bio's worst phases under threshold.
+  ⚠️ **PULSE IS PER ORB NOW (2026-09) — CYAN RUNS AT 0.15, THE REST AT 0.30.**
+  It is `uRamp[i].z` in the shader (the `PULSE` constant is gone), taken from a
+  blob's own `pulse` if it has one, else `motion.pulse`. **The "no accessibility
+  ceiling" above describes pulse in general, not cyan's in particular:** cyan is
+  top of the stack, so its swell COVERS the orbs beneath — at 0.30 red's share of
+  the fold fell to **1%** at cyan's peak. The other three pulse under something,
+  so theirs mostly adds colour. See **The in-hue fade and the cyan orb**.
 - **The motion is real but slow by design** — measured on the live site: ±72px
   horizontal over 16–44s per orb (two incommensurate sines, so the path never
   repeats), ±9px vertical, and a +30% radius pulse over 27–45s. Raising drift
@@ -670,6 +695,70 @@ motion**. Judge it in a real browser window.
   `dt` cap means the field advances ~0.09s of animation per wall second, ~11×
   slow. Sample the canvas twice a few seconds apart and compare against the
   dither floor (±1 code value); a max delta of ~10 is the loop running.
+
+### The in-hue fade and the cyan orb (2026-09)
+
+Three reports in a row, and each fix exposed the next: the blue was "muddy", then
+it needed "a little more red", then the whole field "went lighter and muddy" as
+the orbs pulsed while cyan alone stayed intense. **All three had the same root:
+the stack order.** Measurements below are 1440×900 unless stated, worst pixel
+under the glyph boxes over 12–16 EXACT phases (`uTime` driven directly — see
+the orbit note above), read off the real shader.
+
+**1. Cyan's core was OFF THE CANVAS.** `y −0.016` plus `offsetY −0.25` put its
+centre at −0.27 of the field, so only its faded fringe ever showed — and
+half-alpha cyan over red averages to grey mauve (`rgb(125,111,140)`), which was
+the mud. Moved down, then back up a little for red: **y 0.08**.
+⚠️ **This is the one case where the CENTRE is the lever** — the standing rule is
+that prominence is paint order, and cyan is already on top. With cyan's ramp
+override in place, `y` trades cyan for red almost one-for-one and contrast
+IMPROVES slightly as it rises: 0.12 → cyan 17.5% / red 9.3% · **0.08 → 15.1% /
+11.8%** · 0.04 → 12.8% / 14.6%. It is the balance dial between the two.
+
+**2. Cyan holds its colour longer** — a per-orb `ramp: { mid: 0.62, midAlpha:
+0.6 }` merged over `FIELD.ramp` in `draw()`. Cyan share 6.3% → 17.5% for ~0.06
+off each text floor. **Pushing `mid` out SPREADS the blue for less contrast than
+raising `midAlpha`; `midAlpha` is what makes it more SATURATED.**
+
+**3. The fade no longer lifts to white (`FIELD.ramp.white: 0`) and cyan pulses at
+half (0.15).** Why the field went pale as it pulsed: each orb's outer half was a
+PASTEL RING (the lerp to white), and when an orb swells that ring spreads over
+everything painted beneath it. **Cyan never suffered because nothing is painted
+above it — and it was the worst offender**, because the ring it spread was over
+red. Diagnosed by switching pieces off:
+
+| | muddy share of the fold |
+|---|---|
+| as it was | 12–26% |
+| drift off | 12–25% — **drift is not involved** |
+| pulse off | 16–18% (steady) |
+| only cyan pulsing | **17–30%** |
+
+Shipped result: muddy share **11–14%**, red holds 12–24% through cyan's cycle
+(was down to 1%), field saturation up at every phase.
+⚠️ **THE IN-HUE FADE IS ALSO THE LARGEST CONTRAST GAIN THIS FIELD HAS FOUND** —
+the white rings were lightening exactly the gaps the text sits in. Worst case,
+white-lerp 1 → 0 (cyan pulse 0.15 both sides; raw shader, no CSS mask, and at
+≤768 without the bio's scrim, so real figures there are higher):
+
+| | bio | headline |
+|---|---|---|
+| 1440×900 | 2.75 → **3.04** | 2.42 → **2.89** |
+| 1440×740 | 2.81 → **3.32** | 2.48 → **3.09** |
+| 1024×768 | 2.87 → **3.42** | 2.61 → **3.28** |
+| 768×1024 | 2.65 → **2.75** | 2.73 → **3.09** |
+| 375×812 | 2.48 → **2.65** | 2.81 → **3.51** |
+
+**Many contrast figures elsewhere in this document predate this** and read low
+against the field as it now ships. The headline at 1440×900 is the one block
+still under 3:1 at desktop.
+
+**Implementation:** `uRamp[4]` is a `vec4` per orb — `mid, midAlpha, pulse,
+white` — replacing the `MID`/`MIDA`/`PULSE` constants. As uniforms they cannot
+hit the int-literal compile trap recorded under `FIELD.layer`. ⚠️ **It is
+permuted by `paintOrder` with `uBlob` and `uCol`** — the slot IS the stack
+position; permute one array and not the others and every orb paints in its
+neighbour's colour or ramp.
 
 ⚠️ **`--hero-lift` IS `0px` (2026-09) — the section below describes a 60px lift
 that is no longer applied.** It was zeroed because the Figma lockup mock
