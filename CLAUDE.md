@@ -174,7 +174,9 @@ full-width hairline divider (**at the exact centre MINUS `--hero-lift`** since
 backdrop-blur) with the bio in its right column → `.intro-bar` along the
 bottom (wordmark hard left; Work·About with the header's chip hover states +
 the solid-black "Say hello" pill grouped hard right, one `--gap-group` apart;
-⚠️ its frosted glass shows AT REST since 2026-09-25, not only once docked —
+⚠️ its frosted glass shows AT REST since 2026-09-25, not only once docked, and
+`.intro-bar-feather` (a span in the nav, hero.css) carries it UP 96px on a
+smoothstep so the resting glass has no hard top edge —
 see **The landing nav bar** below). Load: the divider "emits" headline up + bio
 down (masked by each region's overflow, 64px travel over a 40px gap,
 REVEAL.ease), then the bar fades in — all CSS, reduced-motion exempt. The
