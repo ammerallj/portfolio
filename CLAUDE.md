@@ -1764,6 +1764,13 @@ something else removes the slack.** Check the two together.
 
 ### Contact's soft leading edge (`--contact-ledge`, 2026-09)
 
+> 📌 **OPEN ITEM (Jenna, 2026-09-25): address the DISTANCE of Contact's blue
+> scrim** — the blue ledge that bleeds up out of the panel over About. Not yet
+> specified further; ask Jenna what she wants changed before tuning. The dials are
+> recorded below: `--contact-ledge-length` (520 desktop / 400 at ≤1024),
+> `--contact-ledge-rest` (160), `--about-tail`, and the scroll-linked reach
+> (`CONTACT.reach`). Remove this note once it is resolved.
+
 **THE PROBLEM WAS THE UNUSED RUNWAY, NOT THE EDGE.** Measured at 1280×720,
 Contact's top travels a FULL VIEWPORT from the fold to its resting place — and
 the panel comes to rest exactly at `maxScroll`, so that runway is real. Until
