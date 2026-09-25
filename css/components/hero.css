@@ -380,7 +380,7 @@ html.is-field-live .page-field-grain { opacity: 0.15; }
      0 at rest, growing as the reader scrolls away. It is subtracted from the
      mask's END ONLY, and --field-mask-start follows it (end − fade), so the whole
      dissolve SLIDES UP at its full length — the band keeps its softness and
-     glides toward the text along with the parallax.
+     glides toward the text along with the parallax (0.8 of its length at the dock).
      ⚠️ A COMPRESSING version (subtracting from --field-fade too, holding the
      start) was built and rejected: squeezed to ~57px the band stopped reading as
      a soft white fade. Sliding costs the bio contrast mid-scroll instead — the

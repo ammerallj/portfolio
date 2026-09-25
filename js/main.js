@@ -190,7 +190,7 @@ function setFieldCream(px) {
 // ⚠️ NO TIMING OF ITS OWN. The climb reads the tuck's own eased progress, so the
 // cream glides up WITH the parallax. A separate span (0.6 was tried) finished the
 // climb early and left the hero lifting on its own — two motions, not one.
-const FIELD_CREAM = { ratio: 0.5 };
+const FIELD_CREAM = { ratio: 0.8 };
 let fieldCreamMax = 0;
 let lastFieldScroll = -1;
 function setFieldScroll(px) {
