@@ -209,7 +209,7 @@ let fieldCreamMax = 0;
 // LINEAR in scroll (a constant 1 + speed), because a changing speed is exactly
 // what read as loose in the glide. Held once the bar pins; the text is off
 // screen by then.
-const HERO_TEXT = { speed: 0.3 };
+const HERO_TEXT = { speed: 0.4 };
 let lastHeroTextLift = -1;
 function setHeroTextLift(px) {
   if (px === lastHeroTextLift) return;
