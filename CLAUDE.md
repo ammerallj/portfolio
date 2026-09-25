@@ -173,7 +173,10 @@ full-width hairline divider (**at the exact centre MINUS `--hero-lift`** since
 2026-09 — see below) → frosted band (bottom half,
 backdrop-blur) with the bio in its right column → `.intro-bar` along the
 bottom (wordmark hard left; Work·About with the header's chip hover states +
-the solid-black "Say hello" pill grouped hard right, one `--gap-group` apart —
+the solid-black "Say hello" pill grouped hard right, one `--gap-group` apart;
+⚠️ its frosted glass shows AT REST since 2026-09-25, not only once docked, and
+`.intro-bar-feather` (a span in the nav, hero.css) carries it UP 96px on a
+smoothstep so the resting glass has no hard top edge —
 see **The landing nav bar** below). Load: the divider "emits" headline up + bio
 down (masked by each region's overflow, 64px travel over a 40px gap,
 REVEAL.ease), then the bar fades in — all CSS, reduced-motion exempt. The
@@ -1557,6 +1560,18 @@ curve.
   `background-image` and comparing to `contactFrostAt` — nothing enforces it.
 
 ### The mobile header's scrim (`--header-bleed`, 2026-09)
+
+⚠️ **IT CARRIES THE NAV GRAIN TOO (2026-09-25)** — `.site-header::after`, the same
+grain as `.intro-bar::after`, on its own 40px fade (not the frost's 112px mask;
+grain down a long bleed reads as a band). Hidden under `is-over-dark`.
+⚠️ **THE NAV GRAIN IS NOW CREAM, AT THE ORB GRAIN'S SIZE — `--nav-grain` in
+global.css**, shared by `.intro-bar::after`, `.intro-bar-feather` and
+`.site-header::after`. It was a 0.55-frequency, smooth, saturate-0 GREY noise at
+0.3, 2.4x coarser than the field's and a grey film over the cream. Now
+`baseFrequency 1.3` with a DISCRETE two-level transfer like `.page-field-grain`,
+but the two levels are warm cream rgb(231,225,208) and near-white. The Contact
+ledge's grain (sections.css) still uses the OLD grey noise — it sits over blue,
+where cream specks would read as dust; change it deliberately if at all.
 
 `.site-header`'s frost now **bleeds to full transparency** instead of ending on a
 hard line. It was a flat `background-color: rgba(251,252,248,0.9)` plus

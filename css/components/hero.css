@@ -909,9 +909,10 @@ html:not(.is-field-live) .intro-divider {
   animation: intro-bar-fade 0.6s ease-out 0.9s both;
 }
 
-/* The glass, on its own layer so it can fade: invisible while the bar rests
-   in the hero (the frame's bar is bare there), frosting in when docked.
-   opacity:0 skips painting entirely, so the blur costs nothing at rest. */
+/* The glass, on its own layer. ⚠️ It was invisible while the bar rested in the
+   hero and frosted in when docked; since 2026-09-25 it shows at rest too (see
+   the override after this block), so the blur now DOES cost something at rest —
+   one backdrop-filter over the field's already-faded tail. */
 .intro-bar::before {
   content: '';
   position: absolute;
@@ -1056,6 +1057,13 @@ html:not(.is-field-live) .intro-divider {
   transition: opacity 0.35s ease;
 }
 
+/* ⚠️ THE GLASS SHOWS AT REST TOO (2026-09-25) — it used to wait for is-docked
+   and sit bare over the hero. Same decision as the phone header's wash at rest:
+   the nav reads the same in the hero as it does pinned. The base opacity: 0
+   above is now overridden for every state; the 0.35s transition is inert. The
+   frost bleeds down over Selected Work's top (cream on cream) and up over
+   nothing — at rest the bar sits on the field's white fade. */
+.intro-bar::before,
 .intro-bar.is-docked::before {
   opacity: 1;
 }
@@ -1074,7 +1082,8 @@ html:not(.is-field-live) .intro-divider {
      shrinks with it. Nothing to publish separately. */
   bottom: calc(min(40px, var(--bar-bleed, 100px)) * -1);
   z-index: -1;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='navgrain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.55' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23navgrain)' opacity='0.3'/%3E%3C/svg%3E");
+  background-image: var(--nav-grain);
+  background-size: 160px 160px;
   /* TWO MASK LAYERS, INTERSECTED, and the split is the point. The first is the
      bleed tail (unchanged). The second carries the --dark-mix thinning, which
      used to live on `opacity` alongside the docking state.
@@ -1105,9 +1114,84 @@ html:not(.is-field-live) .intro-divider {
 /* Grain thins out on the same curve the blue comes up on: full over cream, gone
    by the time the strip is the panel's colour. Replaces the old binary
    `is-over-dark::after { opacity: 0 }`. */
+.intro-bar::after,
 .intro-bar.is-docked::after {
-  /* The DOCKING state only. The --dark-mix thinning is a mask layer now. */
+  /* At rest too (see ::before above). The --dark-mix thinning is a mask layer. */
   opacity: 1;
+}
+
+/* ⚠️ THE GLASS FEATHERS UPWARD AT REST (2026-09-25). Once the glass showed at
+   rest (above), its TOP became visible: pinned, the bar's top IS the viewport's
+   top edge, but resting mid-page it started on a hard line, and the grain made
+   that strip read grey against the cream. This layer continues the same frost,
+   blur and grain UP from the bar's top over --bar-feather, fading in from
+   transparent on a smoothstep (17 stops, same curve as the header's mask).
+   ⚠️ A SEPARATE ELEMENT, NOT ::before GROWN UPWARD: js/main.js builds
+   --bar-fill on the premise that ::before's box top IS the bar's top (viewport 0
+   once docked) — moving that top would slide the whole Contact ramp.
+   ⚠️ NOTHING TO UNDO WHEN PINNED: docked, this sits entirely above the viewport.
+   Over the blue it hides with the rest of the cream glass. */
+.intro-bar-feather {
+  position: absolute;
+  left: 0;
+  right: 0;
+  /* 2px INTO the bar: two backdrop-filtered layers butting on one row leave a
+     seam where the field's tail shows through (seen as a pink hairline). Same
+     overlap fix as the ledge/panel seam; the doubled cream across 2px is below
+     visibility. */
+  bottom: calc(100% - 2px);
+  height: calc(var(--bar-feather, 96px) + 2px);
+  z-index: -1;
+  pointer-events: none;
+  background-color: rgba(251, 252, 248, 0.95);
+  background-image: var(--nav-grain);
+  background-size: 160px 160px;
+  -webkit-backdrop-filter:
+    blur(calc(16px * (1 - var(--dark-mix, 0))))
+    saturate(calc(1 + 0.15 * (1 - var(--dark-mix, 0))));
+  backdrop-filter:
+    blur(calc(16px * (1 - var(--dark-mix, 0))))
+    saturate(calc(1 + 0.15 * (1 - var(--dark-mix, 0))));
+  -webkit-mask-image: linear-gradient(to bottom,
+    rgba(0,0,0,0.0000) 0.0%,
+    rgba(0,0,0,0.0112) 6.25%,
+    rgba(0,0,0,0.0430) 12.5%,
+    rgba(0,0,0,0.0923) 18.75%,
+    rgba(0,0,0,0.1562) 25.0%,
+    rgba(0,0,0,0.2319) 31.25%,
+    rgba(0,0,0,0.3164) 37.5%,
+    rgba(0,0,0,0.4067) 43.75%,
+    rgba(0,0,0,0.5000) 50.0%,
+    rgba(0,0,0,0.5933) 56.25%,
+    rgba(0,0,0,0.6836) 62.5%,
+    rgba(0,0,0,0.7681) 68.75%,
+    rgba(0,0,0,0.8438) 75.0%,
+    rgba(0,0,0,0.9077) 81.25%,
+    rgba(0,0,0,0.9570) 87.5%,
+    rgba(0,0,0,0.9888) 93.75%,
+    rgba(0,0,0,1.0000) 100.0%);
+  mask-image: linear-gradient(to bottom,
+    rgba(0,0,0,0.0000) 0.0%,
+    rgba(0,0,0,0.0112) 6.25%,
+    rgba(0,0,0,0.0430) 12.5%,
+    rgba(0,0,0,0.0923) 18.75%,
+    rgba(0,0,0,0.1562) 25.0%,
+    rgba(0,0,0,0.2319) 31.25%,
+    rgba(0,0,0,0.3164) 37.5%,
+    rgba(0,0,0,0.4067) 43.75%,
+    rgba(0,0,0,0.5000) 50.0%,
+    rgba(0,0,0,0.5933) 56.25%,
+    rgba(0,0,0,0.6836) 62.5%,
+    rgba(0,0,0,0.7681) 68.75%,
+    rgba(0,0,0,0.8438) 75.0%,
+    rgba(0,0,0,0.9077) 81.25%,
+    rgba(0,0,0,0.9570) 87.5%,
+    rgba(0,0,0,0.9888) 93.75%,
+    rgba(0,0,0,1.0000) 100.0%);
+}
+.intro-bar.is-over-dark .intro-bar-feather,
+.intro-bar--page .intro-bar-feather {
+  display: none;
 }
 
 /* ---- Over the blue Contact panel: the bar inverts ----

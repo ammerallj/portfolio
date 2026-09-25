@@ -81,6 +81,34 @@
   transition: opacity 0.35s ease, background-color 0.35s ease;
 }
 
+/* GRAIN, on its OWN layer (2026-09-25) — the desktop .intro-bar has always had it
+   (::after in hero.css) and this header never did, so the phone nav read as flat
+   cream beside the grained field. It is the SAME grain, `--nav-grain`
+   (global.css) — cream, at the orb grain's speck size.
+   ⚠️ ITS OWN, SHORTER FADE, NOT THE FROST'S MASK. The desktop bar learned this:
+   grain carried down the whole bleed "lingered as a visible band". So it holds
+   across the header box and is gone 40px below it, while the frost keeps
+   bleeding. Smoothstep in five stops, same reason as the frost's. */
+.site-header::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  bottom: -40px;
+  z-index: -1;
+  background-image: var(--nav-grain);
+  background-size: 160px 160px;
+  -webkit-mask-image: linear-gradient(to bottom,
+    #000 calc(100% - 40px), rgba(0,0,0,0.844) calc(100% - 30px),
+    rgba(0,0,0,0.5) calc(100% - 20px), rgba(0,0,0,0.156) calc(100% - 10px),
+    transparent 100%);
+  mask-image: linear-gradient(to bottom,
+    #000 calc(100% - 40px), rgba(0,0,0,0.844) calc(100% - 30px),
+    rgba(0,0,0,0.5) calc(100% - 20px), rgba(0,0,0,0.156) calc(100% - 10px),
+    transparent 100%);
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+}
+
 /* On the landing (homepage, identified by its hero) the docking .intro-bar IS
    the site nav on desktop — the sticky top header stands down entirely. The
    project pages have no .intro, so they keep this header; the ≤480 tier
@@ -102,6 +130,10 @@ body:has(.intro) .site-header {
 .site-header.is-over-dark::before {
   background-color: var(--color-accent);
 }
+/* No grain over the blue — the desktop bar's grain thins to 0 there too. */
+.site-header.is-over-dark::after {
+  opacity: 0;
+}
 
 .site-header.is-over-dark .site-name {
   color: #fff;
@@ -118,17 +150,15 @@ body:has(.intro) .site-header {
   font-size: 1.25rem;
   font-weight: 700;
   letter-spacing: -0.02em;
-  color: var(--color-text-70);
+  /* FULL BLACK (2026-09-25), matching the desktop .intro-bar-name. It rested at
+     --color-text-70 and darkened on hover; over the frosted cream it read as
+     faint grey, and on a phone there is no hover to reach full black. The
+     transition stays for the blue Contact inversion (.is-over-dark → #fff). */
+  color: var(--color-text);
   text-decoration: none;
   flex: 1;
   min-width: 0;
   transition: color 0.35s ease;
-}
-
-@media (hover: hover) {
-  .site-name:hover {
-    color: var(--color-text);
-  }
 }
 
 .site-nav-bar {
