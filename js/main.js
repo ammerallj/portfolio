@@ -186,10 +186,12 @@ function setFieldCream(px) {
 // How far the cream climbs toward the bio as the reader scrolls away. The
 // dissolve's START is held (hero.css subtracts --field-cream from both its end
 // and its length), so this only SHORTENS the ramp from below. `ratio` is the
-// share of the resting ramp that survives at the dock; `min` is the shortest the
-// ramp may get — the 17-stop smoothstep lands its stops ~4.5px apart at 72px, so
-// go no lower without adding stops (see the banding notes on --field-fade).
-const FIELD_CREAM = { ratio: 0.4, min: 72 };
+// share of the resting ramp that survives; `min` is the shortest the ramp may
+// get — the 17-stop smoothstep lands its stops ~3.5px apart at 56px, so go no
+// lower without adding stops (see the banding notes on --field-fade). `span` is
+// the fraction of the scroll to the dock over which the climb completes — under
+// 1 so the cream has finished rising while the hero is still on screen.
+const FIELD_CREAM = { ratio: 0.25, min: 56, span: 0.6 };
 let fieldCreamMax = 0;
 let lastFieldScroll = -1;
 function setFieldScroll(px) {
@@ -2728,7 +2730,8 @@ function updateScrollEffects() {
     : Math.round(fieldOverhang * (1 - Math.pow(1 - t, 3))));
   // The cream climbs on the same eased curve, so the ramp shortens as the
   // artwork lifts — one motion, not two. See FIELD_CREAM.
-  setFieldCream(Math.round(fieldCreamMax * (1 - Math.pow(1 - t, 3))));
+  const tc = Math.min(1, t / FIELD_CREAM.span);
+  setFieldCream(Math.round(fieldCreamMax * (1 - Math.pow(1 - tc, 3))));
 
   // Scroll-spy: the active section is the LAST one whose RESTING POSITION the
   // page has reached. Highlight every link that targets it (and mark it for
