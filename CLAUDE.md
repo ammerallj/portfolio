@@ -1064,23 +1064,25 @@ follows and wins where they overlap).
   bar's width, and stays ≤480 along with its phone pill sizing.
 
 ### The landing nav bar (`.intro-bar`)
-**The links start on the RIGHT COLUMN's left edge (2026-09).** `.intro-bar-name`
-takes `flex: 0 1 calc(100% - --width-right-column)`, so "Selected work" starts
-exactly where About's and Contact's copy start. The bar's own `gap` is 0; the
-links keep `--gap-group` between them and the pill holds the right edge with an
-auto margin over a 16px floor. Verified Δ0 at every width 1050–2560 and 769–1024
-on the homepage and project pages; 9px short only at the 1025 seam.
-- ⚠️ **`max-width: none` on the wordmark is load-bearing.** It is a `<p>` on the
-  homepage and global.css caps every `p` at `--measure` (728px) — that froze the
-  links at 844px above 1440 (158px out at 1600). The first pass shipped with this
-  and was verified only at ≤1440, where the cap never binds. **Sweep past 1440.**
-- ⚠️ **The 16px floor is what makes it fit.** The group is ~366–378px against the
-  column's 368.75 floor; with the old `--gap-group` seam it needed 422 and drifted
-  up to 53px left of the column.
-- **Reverts to the content-width cluster where the content stacks** — ≤768 on the
-  homepage, ≤1024 on project pages (`.intro-bar--page`, whose `.project-block`
-  stacks a tier earlier than About). Both halves: the name's basis AND the pill's
-  auto margin.
+**The links are laid out ON THE RIGHT COLUMN (2026-09).** Above the revert tiers
+`.intro-bar` is a GRID: `minmax(0,1fr)` for the wordmark, then the shared right
+column cut into three equal tracks. "Selected work" starts on the column's left
+edge (where About's and Contact's copy start), **"About me" sits on the column's
+centre**, and the pill ends on the gutter. `.intro-bar-links` is `display:
+contents` so its groups are grid items. Verified exact (Δ0 on all three) at every
+two-column width 769–2560, homepage and project pages.
+- ⚠️ **The tracks assume two links + the pill.** Add a link and the track count,
+  the `:first-child` rule and the `justify-self`s must change with it — the same
+  weakness the retired three-column rig had, now anchored to a real column.
+- It fits at the column's 368.75 floor (gaps ~39 / ~28 around "About me").
+- ⚠️ **The homepage wordmark is a `<p>`, capped at `--measure` (728px).**
+  Harmless in the grid, but a flex-basis version froze the links at 844px above
+  1440 (158px out at 1600), verified only at ≤1440 where the cap never binds.
+  **Sweep past 1440.**
+- **Reverts to the content-width FLEX cluster where the content stacks** — ≤768 on
+  the homepage, ≤1024 on project pages (`.intro-bar--page`, whose `.project-block`
+  stacks a tier earlier than About). The 680 tier's hide / `--page` re-show come
+  later in the file and still win.
 
 ⚠️ **THE LINK COLOUR IS `rgba(0, 0, 0, 0.8)`, SCOPED TO `.intro-bar-links a`, AND
 IT IS A MEASURED FLOOR — not a style choice.** It is deliberately NOT
