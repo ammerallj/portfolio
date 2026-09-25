@@ -195,7 +195,7 @@ const FIELD_LAG = { k: 0.3 };
 // 1 + speed of the scroll — the fastest of the three layers. LINEAR, because a
 // changing speed is what read as loose. Held once the bar pins; the text is off
 // screen by then.
-const HERO_TEXT = { speed: 0.4 };
+const HERO_TEXT = { speed: 0.6 };
 let lastHeroTextLift = -1;
 function setHeroTextLift(px) {
   if (px === lastHeroTextLift) return;
@@ -635,7 +635,7 @@ let fieldDockScroll = 0;
 // and constant, so none of the glide's speed-up-then-slow-down.
 // ⚠️ It is a LAYOUT change (the bar's margin-top reads --hero-shorten), so it is
 // only applied while this script can push things back: no JS, no shortening.
-const HERO_SHORTEN = { px: 180 };
+const HERO_SHORTEN = { px: 300 };
 let heroShorten = 0;
 let fieldVisibleEnd = 0;
 let lastHeroShorten = -1;
