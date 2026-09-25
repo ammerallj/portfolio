@@ -2766,8 +2766,8 @@ function updateScrollEffects() {
   }
 
   // The intro-bar docks: sticky pins it at the viewport top once the scroll
-  // carries it there — frost it (is-docked → the ::before glass fades in)
-  // while pinned, bare while it rests in the hero. Guarded: project pages
+  // carries it there. is-docked no longer switches the glass on (it shows at
+  // rest too, hero.css) — it still marks the pinned state. Guarded: project pages
   // have no .intro-bar.
   if (introBar) {
     introBar.classList.toggle('is-docked', introBar.getBoundingClientRect().top <= 0);

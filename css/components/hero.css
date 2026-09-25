@@ -909,9 +909,10 @@ html:not(.is-field-live) .intro-divider {
   animation: intro-bar-fade 0.6s ease-out 0.9s both;
 }
 
-/* The glass, on its own layer so it can fade: invisible while the bar rests
-   in the hero (the frame's bar is bare there), frosting in when docked.
-   opacity:0 skips painting entirely, so the blur costs nothing at rest. */
+/* The glass, on its own layer. ⚠️ It was invisible while the bar rested in the
+   hero and frosted in when docked; since 2026-09-25 it shows at rest too (see
+   the override after this block), so the blur now DOES cost something at rest —
+   one backdrop-filter over the field's already-faded tail. */
 .intro-bar::before {
   content: '';
   position: absolute;
@@ -1056,6 +1057,13 @@ html:not(.is-field-live) .intro-divider {
   transition: opacity 0.35s ease;
 }
 
+/* ⚠️ THE GLASS SHOWS AT REST TOO (2026-09-25) — it used to wait for is-docked
+   and sit bare over the hero. Same decision as the phone header's wash at rest:
+   the nav reads the same in the hero as it does pinned. The base opacity: 0
+   above is now overridden for every state; the 0.35s transition is inert. The
+   frost bleeds down over Selected Work's top (cream on cream) and up over
+   nothing — at rest the bar sits on the field's white fade. */
+.intro-bar::before,
 .intro-bar.is-docked::before {
   opacity: 1;
 }
@@ -1105,8 +1113,9 @@ html:not(.is-field-live) .intro-divider {
 /* Grain thins out on the same curve the blue comes up on: full over cream, gone
    by the time the strip is the panel's colour. Replaces the old binary
    `is-over-dark::after { opacity: 0 }`. */
+.intro-bar::after,
 .intro-bar.is-docked::after {
-  /* The DOCKING state only. The --dark-mix thinning is a mask layer now. */
+  /* At rest too (see ::before above). The --dark-mix thinning is a mask layer. */
   opacity: 1;
 }
 
