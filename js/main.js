@@ -197,9 +197,9 @@ function setFieldCream(px) {
 // curve (--work-glide), they run FASTER than the scroll on the way up and SLOWER
 // on the way back — and the slow leg is what reads as loose. Nav speed vs.
 // scroll, 1440x900: 0.8/0.45 → 1.74x then 0.39x ("slide-y") · 0.6/0.5 →
-// 1.50/0.50 · 0.4/0.5 → 1.34/0.66 (shipped) · 0.3/0.5 → 1.25/0.75. peak 0.5
+// 1.50/0.50 · 0.4/0.5 → 1.34/0.66 · 0.3/0.5 → 1.25/0.75 (shipped). peak 0.5
 // splits the swing evenly between the two legs, so neither is the steep one.
-const FIELD_CREAM = { ratio: 0.4, peak: 0.5 };
+const FIELD_CREAM = { ratio: 0.3, peak: 0.5 };
 let fieldCreamMax = 0;
 let lastWorkGlide = -1;
 function setWorkGlide(px) {
