@@ -706,6 +706,9 @@ initHero();
 //     1        WHITE,  alpha 0
 // That last stop lifting to WHITE is why the artwork dissolves
 // into the cream page instead of greying out at its edges.
+// ⚠️ THE FIELD NO LONGER DOES THIS (FIELD.ramp.white 0, 2026-09) — see the
+// note on `ramp` below. It fades each orb in its OWN hue instead, which is
+// also not grey: the halo came from ramping to rgba(0,0,0,0), i.e. to black.
 // The colours are saturated (#9238E3 #019FD8 #D64DCE #F93F3F);
 // the pastels in the JPEG are what they become after the ramp.
 //
@@ -732,7 +735,22 @@ const FIELD = {
   // while also being the first setting where both text blocks clear 3:1. This
   // is the one lever found that improves the look and the accessibility
   // together; everything else in this field trades one against the other.
-  ramp:  { mid: 0.524038, midAlpha: 0.5 },
+  // ⚠️ `white` IS 0 — THE ORBS FADE OUT IN THEIR OWN HUE, NOT TOWARD WHITE
+  // (2026-09). How far the outer half lerps to white: 1 is Figma's ramp.
+  // The white lerp is what made the field go pale and muddy as it PULSED: an
+  // orb's outer half is a pastel ring, and when the orb swells that ring
+  // spreads over everything painted beneath it — pale blue over red averages
+  // to grey mauve. Cyan never suffered because nothing paints above it.
+  // Measured at 1440x900 over 16 exact phases (cyan pulse 0.15), floors:
+  //   white  muddy share  field sat   bio    headline
+  //   1      11–20%       0.46–0.52   2.75   2.42
+  //   0.5    12–17%       0.48–0.53   2.93   2.64
+  //   0      11–14%       0.49–0.54   3.04   2.89   <- shipped
+  // ⚠️ IT IS ALSO THE BIGGEST CONTRAST GAIN THIS FIELD HAS FOUND: the white
+  // rings were lightening the gaps the text sits in. The bio clears 3:1 at
+  // every phase measured. Fading in-hue is NOT the black-halo trap noted on
+  // the ramp elsewhere — that came from lerping to rgba(0,0,0,0).
+  ramp:  { mid: 0.524038, midAlpha: 0.5, white: 0 },
   // ⚠️ DOCUMENTATION ONLY — NOTHING READS THIS. It records Figma's layer opacity;
   // it is not applied to the render and never has been. It used to be interpolated
   // into the shader as a constant the shader body ignored, which made it a live
@@ -825,11 +843,15 @@ const FIELD = {
   //   0.08   15.1%   11.8%   2.59   2.25   <- shipped
   //   0.04   12.8%   14.6%   2.60   2.29
   // This is the balance dial between the two — not a contrast lever.
+  // ⚠️ CYAN PULSES AT 0.15, HALF THE OTHERS (`pulse`, 2026-09). It is top of the
+  // stack, so its swelling covers red outright: at 0.30 red's share of the fold
+  // fell to 1% at cyan's peak. At 0.15 red holds 12–24% through the cycle.
+  // Blobs may set `pulse`; the rest take FIELD.motion.pulse.
   blobs: [
     { col: [0.8392, 0.3020, 0.8078], r: 0.652,  x: 0.107, y: 0.375, a: 1.00 }, // magenta #D64DCE (0.5669 base, x1.15)
     { col: [0.5725, 0.2196, 0.8902], r: 0.5054, x: 0.942, y: 0.499, a: 1.00 }, // violet  #9238E3
     { col: [0.9765, 0.2471, 0.2471], r: 0.6275, x: 0.590, y: 0.640, a: 1.00 }, // red     #F93F3F
-    { col: [0.0039, 0.6235, 0.8471], r: 0.4738, x: 0.547, y: 0.08,   a: 1.00, ramp: { mid: 0.62, midAlpha: 0.6 } }, // cyan #019FD8 (y was -0.016)
+    { col: [0.0039, 0.6235, 0.8471], r: 0.4738, x: 0.547, y: 0.08,   a: 1.00, ramp: { mid: 0.62, midAlpha: 0.6 }, pulse: 0.15 }, // cyan #019FD8 (y was -0.016)
   ],
   // Calmed 2026-09 (speed 2.05 -> 1.7, drift 0.05 -> 0.032). Drift carries
   // most of the reduction on purpose: amplitude reads as restraint,
@@ -973,7 +995,7 @@ function initHeroField() {
   const FRAG = [
     'precision highp float;',
     'uniform vec2 uRes,uAmp;uniform float uAspect,uTime,uWarp;',
-    'uniform vec4 uBlob[4];uniform vec3 uCol[4];uniform vec2 uRamp[4];',
+    'uniform vec4 uBlob[4];uniform vec3 uCol[4];uniform vec4 uRamp[4];',
     // ⚠️ FIELD.layer is deliberately NOT emitted here. It was, as a dead constant
     // `LAYER` that no line of the shader body ever read — and being dead did not
     // make it harmless: the value is interpolated into GLSL source, so setting it
@@ -982,16 +1004,16 @@ function initHeroField() {
     // it, and the page silently fell back to the JPEG — a config-only edit taking
     // the entire field down. Anything interpolated into this string must be a
     // GLSL-valid literal; JS stringifies 1.0 as "1", 0.9 as "0.9".
-    // The ramp's mid stop is PER ORB now (uRamp[i] = mid, midAlpha), uploaded
+    // The ramp's mid stop is PER ORB now (uRamp[i] = mid, midAlpha, pulse, white), uploaded
     // from FIELD.ramp unless a blob overrides it — see `ramp` on the cyan blob.
     // As uniforms rather than interpolated constants, so they cannot hit the
     // int-literal trap described above.
     'const vec3 CREAM=vec3(' + FIELD.cream.join(',') + ');',
-    // Each blob breathes — radius +/- PULSE on its own slow cycle. Cheap
-    // life: it changes how far a blob REACHES without moving its centre,
-    // so unlike drift it does not slide colour off the text. Rates are
-    // per-blob and unequal, so they never swell in unison.
-    'const float PULSE=' + FIELD.motion.pulse + ';',
+    // Each blob breathes — radius grows by up to its pulse (uRamp[i].z) on its
+    // own slow cycle. Cheap life: it changes how far a blob REACHES without
+    // moving its centre, so unlike drift it does not slide colour off the text.
+    // Rates are per-blob and unequal, so they never swell in unison. The amount
+    // is FIELD.motion.pulse unless a blob sets its own `pulse`.
     'float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453123);}',
     'float noise(vec2 p){vec2 i=floor(p),f=fract(p);vec2 u=f*f*(3.-2.*f);',
     ' return mix(mix(hash(i),hash(i+vec2(1,0)),u.x),mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),u.x),u.y);}',
@@ -1037,11 +1059,11 @@ function initHeroField() {
     // below. It used to be a bare sin, i.e. +/-PULSE, and the shrink half was
     // costing contrast: the trough pulled every orb's reach in by 8% at once,
     // which is what put the bio's worst phases under its threshold.
-    '  float rad=uBlob[i].z*(1.+PULSE*(.5+.5*sin(uTime*(.075+fi*.017)+fi)));',
+    '  float rad=uBlob[i].z*(1.+uRamp[i].z*(.5+.5*sin(uTime*(.075+fi*.017)+fi)));',
     '  vec2 d=vec2(w.x-c.x,(w.y-c.y)/uAspect);',
-    '  vec2 ra=ramp(length(d)/rad,uRamp[i]);float a=ra.x*uBlob[i].w;',
+    '  vec2 ra=ramp(length(d)/rad,uRamp[i].xy);float a=ra.x*uBlob[i].w;',
     '  if(a<=0.)continue;',
-    '  col=col*(1.-a)+mix(uCol[i],vec3(1.),ra.y)*a;cov=max(cov,a);}',
+    '  col=col*(1.-a)+mix(uCol[i],vec3(1.),ra.y*uRamp[i].w)*a;cov=max(cov,a);}',
     // DITHER — one code value of noise before the 8-bit quantisation turns a
     // banding step into imperceptible grain. Neither a JPEG ramp nor a video
     // encode can do this; it is the technical case for rendering the field.
@@ -1109,7 +1131,7 @@ function initHeroField() {
   // something whose opacity IS its presence.
   const blobData = new Float32Array(16);
   const colData  = new Float32Array(12);
-  const rampData = new Float32Array(8);
+  const rampData = new Float32Array(16);
 
   function draw(t, entranceMs) {
     resize();
@@ -1127,12 +1149,14 @@ function initHeroField() {
       colData[slot * 3 + 2] = b.col[2];
       // Permuted with uBlob like uCol — the slot IS the stack position.
       const rp = Object.assign({}, FIELD.ramp, b.ramp);
-      rampData[slot * 2 + 0] = rp.mid;
-      rampData[slot * 2 + 1] = rp.midAlpha;
+      rampData[slot * 4 + 0] = rp.mid;
+      rampData[slot * 4 + 1] = rp.midAlpha;
+      rampData[slot * 4 + 2] = b.pulse ?? FIELD.motion.pulse;
+      rampData[slot * 4 + 3] = rp.white ?? 1;
     });
     gl.uniform4fv(U.uBlob, blobData);
     gl.uniform3fv(U.uCol, colData);
-    gl.uniform2fv(U.uRamp, rampData);
+    gl.uniform4fv(U.uRamp, rampData);
     gl.uniform2f(U.uRes, canvas.width, canvas.height);
     gl.uniform1f(U.uAspect, canvas.width / canvas.height);
     gl.uniform1f(U.uTime, t);
