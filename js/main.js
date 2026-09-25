@@ -195,6 +195,13 @@ function setFieldCream(px) {
 // peak or at the dock.
 const FIELD_CREAM = { ratio: 0.8, peak: 0.45 };
 let fieldCreamMax = 0;
+let lastWorkGlide = -1;
+function setWorkGlide(px) {
+  // Same contract as setFieldScroll: root, rounded, guarded — per scroll frame.
+  if (px === lastWorkGlide) return;
+  lastWorkGlide = px;
+  document.documentElement.style.setProperty('--work-glide', px + 'px');
+}
 let lastFieldScroll = -1;
 function setFieldScroll(px) {
   // Same contract as setBarBleed: written on the ROOT (all three .page-field
@@ -620,9 +627,12 @@ const pageField = document.querySelector('img.page-field');
 // point — and the clamp past it keeps the field from ever re-emerging.
 let fieldOverhang = 0;
 let fieldDockScroll = 0;
+// EXPERIMENT (work-glide): the artwork's visible end at rest, page px.
+let fieldVisibleEnd = 0;
 function measureFieldTuck() {
   fieldOverhang = 0;
   fieldDockScroll = 0;
+  fieldVisibleEnd = 0;
   fieldCreamMax = 0;
   // offsetParent is null when the bar is display:none — the ≤680 tier, where
   // there is no pinned bar to tuck behind and the phone tier owns the field's
@@ -679,6 +689,7 @@ function measureFieldTuck() {
   svhProbe.remove();
   const visibleEnd = Math.min(fieldBottom - rise, mainTop + pageField.offsetTop + svh);
   fieldOverhang = Math.max(0, Math.round(visibleEnd - barTop));
+  fieldVisibleEnd = visibleEnd;
   fieldDockScroll = barTop;
 }
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -2736,6 +2747,22 @@ function updateScrollEffects() {
   const { peak } = FIELD_CREAM;
   const creamT = t < peak ? ss(t / peak) : 1 - ss((t - peak) / (1 - peak));
   setFieldCream(Math.round(fieldCreamMax * creamT));
+
+  // EXPERIMENT (work-glide): the nav and everything below it glide up WITH the
+  // hero, lifted by exactly the gap that would otherwise open between the
+  // gradient's end and the bar — so none ever does. Early on they outrun the
+  // page, keeping pace with the parallax; as the band settles they ease back,
+  // and the lift is 0 the instant the bar pins (the tuck lands the gradient's
+  // end on the bar's top there, and the cream is back to 0). That zero is what
+  // keeps sticky from jumping. Clamped so the bar can never be lifted above the
+  // viewport before it docks.
+  let glide = 0;
+  if (fieldDockScroll > 0 && fieldVisibleEnd > 0) {
+    const barTopVp = fieldDockScroll - window.scrollY;
+    const gradEnd = fieldVisibleEnd - fieldOverhang * tuck - fieldCreamMax * creamT - window.scrollY;
+    glide = Math.min(Math.max(0, barTopVp), Math.max(0, barTopVp - gradEnd));
+  }
+  setWorkGlide(Math.round(glide));
 
   // Scroll-spy: the active section is the LAST one whose RESTING POSITION the
   // page has reached. Highlight every link that targets it (and mark it for

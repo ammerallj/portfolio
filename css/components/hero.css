@@ -1149,6 +1149,20 @@ html:not(.is-field-live) .intro-divider {
   to { opacity: 1; }
 }
 
+/* EXPERIMENT (work-glide): the bar and everything after it in <main> glide up
+   with the hero while it leaves, by --work-glide (updateScrollEffects) — the gap
+   that would otherwise open between the gradient's end and the bar. 0 at rest
+   and 0 the instant the bar docks, so sticky takes over without a jump.
+   ⚠️ The INDIVIDUAL `translate` property, not `transform`: it composes with
+   every transform already on these elements (reveals, About's parallax,
+   Contact's peek) instead of replacing them. Scroll-linked, so no transition.
+   Nothing past Selected Work is on screen while this is non-zero; the rest
+   rides along only so the page stays one continuous surface. */
+.intro-bar,
+.intro-bar ~ * {
+  translate: 0 calc(-1 * var(--work-glide, 0px));
+}
+
 /* The wordmark holds the left edge alone; `margin-right: auto` eats all the free
    space and drives the links + CTA to the right as one block. It was `flex: 1 1 0`
    (an equal third, matched by the same on .intro-bar-cta-wrap) — that rig centred
