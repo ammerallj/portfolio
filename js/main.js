@@ -627,9 +627,37 @@ const pageField = document.querySelector('img.page-field');
 // point — and the clamp past it keeps the field from ever re-emerging.
 let fieldOverhang = 0;
 let fieldDockScroll = 0;
+// EXPERIMENT (hero-shorten): the hero is laid out SHORTER by `px`, so the nav
+// and Selected Work genuinely sit higher and the bar pins after less scroll —
+// then --hero-push translates them back DOWN by the same amount at rest, so the
+// landing is unchanged, and unwinds LINEARLY to 0 exactly as the bar pins. The
+// nav and Work therefore move at a constant 1 + px / dock of the scroll: faster,
+// and constant, so none of the glide's speed-up-then-slow-down.
+// ⚠️ It is a LAYOUT change (the bar's margin-top reads --hero-shorten), so it is
+// only applied while this script can push things back: no JS, no shortening.
+const HERO_SHORTEN = { px: 180 };
+let heroShorten = 0;
+let fieldVisibleEnd = 0;
+let lastHeroShorten = -1;
+function setHeroShorten(px) {
+  if (px === lastHeroShorten) return;
+  lastHeroShorten = px;
+  document.documentElement.style.setProperty('--hero-shorten', px + 'px');
+}
+let lastHeroPush = -1;
+function setHeroPush(px) {
+  if (px === lastHeroPush) return;
+  lastHeroPush = px;
+  document.documentElement.style.setProperty('--hero-push', px + 'px');
+}
 function measureFieldTuck() {
   fieldOverhang = 0;
   fieldDockScroll = 0;
+  fieldVisibleEnd = 0;
+  heroShorten = 0;
+  // Unshorten first: the tier or the window may have changed, and every number
+  // below is measured against the layout this leaves.
+  setHeroShorten(0);
   // offsetParent is null when the bar is display:none — the ≤680 tier, where
   // there is no pinned bar to tuck behind and the phone tier owns the field's
   // transform outright. Nothing to do, and setFieldScroll(0) below clears any
@@ -652,11 +680,13 @@ function measureFieldTuck() {
   // animation's mid-flight position. Same rule as initWorkCarousel's photo
   // measurement — offsets ignore transforms.
   const pageTop = (el) => { let y = 0; for (let n = el; n; n = n.offsetParent) y += n.offsetTop; return y; };
-  const barTop = pageTop(intro) + intro.offsetHeight
+  // Measured UNSHORTENED: this is where the bar sits at rest on screen, and
+  // every visual target (the gap, the overhang) is about what the reader sees.
+  const barRest = pageTop(intro) + intro.offsetHeight
     + parseFloat(getComputedStyle(introBar).marginTop || '0');
-  if (barTop <= 0) return;
+  if (barRest <= 0) return;
   const bio = document.querySelector('.intro-bio');
-  if (bio) setFieldGap(Math.max(0, Math.round(barTop - (pageTop(bio) + bio.offsetHeight))));
+  if (bio) setFieldGap(Math.max(0, Math.round(barRest - (pageTop(bio) + bio.offsetHeight))));
   // ⚠️ THE TARGET IS THE BAR'S TOP, NOT ITS BOTTOM. Aiming at the bottom is the
   // obvious reading of "don't bleed past the bar" and it leaves the artwork
   // visible: the mask's last 40% is a fade, so landing its zero-alpha edge on the
@@ -678,8 +708,14 @@ function measureFieldTuck() {
   const svh = svhProbe.offsetHeight;
   svhProbe.remove();
   const visibleEnd = Math.min(fieldBottom - rise, mainTop + pageField.offsetTop + svh);
-  fieldOverhang = Math.max(0, Math.round(visibleEnd - barTop));
-  fieldDockScroll = barTop;
+  fieldOverhang = Math.max(0, Math.round(visibleEnd - barRest));
+  fieldVisibleEnd = visibleEnd;
+  // Now shorten. Capped at half the bar's resting top so a short window still
+  // has scroll left to unwind the push over.
+  heroShorten = Math.round(Math.min(HERO_SHORTEN.px, barRest * 0.5));
+  setHeroShorten(heroShorten);
+  // The bar pins when its LAYOUT top reaches the viewport's — the shortened one.
+  fieldDockScroll = barRest - heroShorten;
 }
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
@@ -2742,10 +2778,20 @@ function updateScrollEffects() {
   const tuck = 1 - Math.pow(1 - t, 3);
   const travel = fieldDockScroll > 0 ? Math.min(window.scrollY, fieldDockScroll) : 0;
   const lag = Math.round(FIELD_LAG.k * travel);
+  // The push that undoes the shortening: heroShorten at rest, 0 at the pin.
+  const push = fieldDockScroll > 0 ? heroShorten * (1 - travel / fieldDockScroll) : 0;
+  setHeroPush(Math.round(push));
   // Negative: .page-field's transform subtracts it, so the artwork moves DOWN
   // relative to the page, i.e. slower than the scroll.
   setFieldScroll(-lag);
-  setFieldCream(lag + Math.round(fieldOverhang * tuck));
+  // The white's end, on the page, is fieldVisibleEnd + lag − cream (the artwork
+  // sank by lag; the mask pulls its end up by cream). It must sit on the nav's
+  // VISUAL top — the shortened layout top plus the push — with the resting
+  // overhang closing on the tuck's curve. At rest this is exactly 0.
+  const navTop = (fieldDockScroll) + push;
+  const cream = fieldDockScroll > 0
+    ? fieldVisibleEnd + lag - navTop - fieldOverhang * (1 - tuck) : 0;
+  setFieldCream(Math.max(0, Math.round(cream)));
   setHeroTextLift(Math.round(HERO_TEXT.speed * travel));
 
   // Scroll-spy: the active section is the LAST one whose RESTING POSITION the

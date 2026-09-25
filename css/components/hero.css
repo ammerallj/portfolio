@@ -883,7 +883,10 @@ html:not(.is-field-live) .intro-divider {
   position: sticky;
   top: 0;
   z-index: 90; /* above section content; the ≤480 overlay tiers sit higher */
-  margin-top: -80px;
+  /* − --hero-shorten (EXPERIMENT hero-shorten): the layout sits higher by that
+     much, so the bar pins sooner; --hero-push (below) puts it back at rest. Set
+     only by js/main.js, so with JS off this is the plain −80px. */
+  margin-top: calc(-80px - var(--hero-shorten, 0px));
   /* nets the flow delta to zero (-80 + 64 + 16). Shared with --field-clip,
      which needs this same gap to find the bar's bottom edge. */
   margin-bottom: var(--bar-tail);
@@ -1151,6 +1154,17 @@ html:not(.is-field-live) .intro-divider {
 @keyframes intro-bar-fade {
   from { opacity: 0; }
   to { opacity: 1; }
+}
+
+/* EXPERIMENT (hero-shorten): the bar and everything after it in <main> are
+   pushed back DOWN by --hero-push, which undoes the shortened layout at rest and
+   unwinds linearly to 0 as the bar pins — so they move at a constant speed above
+   the scroll's and arrive sooner. The INDIVIDUAL `translate` property, so it
+   composes with the transforms these elements already carry (reveals, About's
+   parallax, Contact's peek). Scroll-linked: no transition. */
+.intro-bar,
+.intro-bar ~ * {
+  translate: 0 var(--hero-push, 0px);
 }
 
 /* The wordmark holds the left edge alone; `margin-right: auto` eats all the free
