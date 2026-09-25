@@ -806,11 +806,22 @@ const FIELD = {
   //   1440x900  cyan share 1.7% -> 6.3%   bio 2.86 -> 2.79 floor   headline flat
   //   1440x740  cyan share 2.1% -> 7.6%   bio 3.00 -> 3.03 floor   headline -0.10
   // Past ~0.16 the gain keeps coming but the headline floor keeps slipping.
+  // ⚠️ CYAN ALSO HOLDS ITS COLOUR LONGER (`ramp`, 2026-09) — a per-orb override
+  // of FIELD.ramp, merged over it in draw(), so the other three are unchanged.
+  // Same sweep, 1440x900, 12 phases, y 0.12 (bio/headline FLOORS):
+  //   mid/midAlpha   cyan share  cyan sat  bio    headline
+  //   shared .524/.5   6.3%       0.59     2.63   2.28
+  //   .62/.6          17.5%       0.62     2.57   2.22   <- shipped
+  //   .524/.7         14.8%       0.68     2.55   2.21
+  //   .62/.7          21.5%       0.70     2.52   2.20
+  //   .7/.7           27.9%       0.71     2.52   2.18
+  // Pushing `mid` out spreads the blue further for less contrast than raising
+  // midAlpha does; midAlpha is what makes it more SATURATED. Both cost the bio.
   blobs: [
     { col: [0.8392, 0.3020, 0.8078], r: 0.652,  x: 0.107, y: 0.375, a: 1.00 }, // magenta #D64DCE (0.5669 base, x1.15)
     { col: [0.5725, 0.2196, 0.8902], r: 0.5054, x: 0.942, y: 0.499, a: 1.00 }, // violet  #9238E3
     { col: [0.9765, 0.2471, 0.2471], r: 0.6275, x: 0.590, y: 0.640, a: 1.00 }, // red     #F93F3F
-    { col: [0.0039, 0.6235, 0.8471], r: 0.4738, x: 0.547, y: 0.12,   a: 1.00 }, // cyan   #019FD8 (y was -0.016)
+    { col: [0.0039, 0.6235, 0.8471], r: 0.4738, x: 0.547, y: 0.12,   a: 1.00, ramp: { mid: 0.62, midAlpha: 0.6 } }, // cyan #019FD8 (y was -0.016)
   ],
   // Calmed 2026-09 (speed 2.05 -> 1.7, drift 0.05 -> 0.032). Drift carries
   // most of the reduction on purpose: amplitude reads as restraint,
@@ -954,7 +965,7 @@ function initHeroField() {
   const FRAG = [
     'precision highp float;',
     'uniform vec2 uRes,uAmp;uniform float uAspect,uTime,uWarp;',
-    'uniform vec4 uBlob[4];uniform vec3 uCol[4];',
+    'uniform vec4 uBlob[4];uniform vec3 uCol[4];uniform vec2 uRamp[4];',
     // ⚠️ FIELD.layer is deliberately NOT emitted here. It was, as a dead constant
     // `LAYER` that no line of the shader body ever read — and being dead did not
     // make it harmless: the value is interpolated into GLSL source, so setting it
@@ -963,7 +974,10 @@ function initHeroField() {
     // it, and the page silently fell back to the JPEG — a config-only edit taking
     // the entire field down. Anything interpolated into this string must be a
     // GLSL-valid literal; JS stringifies 1.0 as "1", 0.9 as "0.9".
-    'const float MID=' + FIELD.ramp.mid + ',MIDA=' + FIELD.ramp.midAlpha + ';',
+    // The ramp's mid stop is PER ORB now (uRamp[i] = mid, midAlpha), uploaded
+    // from FIELD.ramp unless a blob overrides it — see `ramp` on the cyan blob.
+    // As uniforms rather than interpolated constants, so they cannot hit the
+    // int-literal trap described above.
     'const vec3 CREAM=vec3(' + FIELD.cream.join(',') + ');',
     // Each blob breathes — radius +/- PULSE on its own slow cycle. Cheap
     // life: it changes how far a blob REACHES without moving its centre,
@@ -976,9 +990,9 @@ function initHeroField() {
     'float fbm(vec2 p){float v=0.,a=.5;for(int i=0;i<4;i++){v+=a*noise(p);p*=2.;a*=.5;}return v;}',
     // Figma's three-stop ramp: alpha 1 -> MIDA over the first half, then
     // MIDA -> 0 while the colour lerps to white.
-    'vec2 ramp(float t){if(t>=1.)return vec2(0.,1.);',
-    ' if(t<=MID)return vec2(1.+(MIDA-1.)*(t/MID),0.);',
-    ' float u=(t-MID)/(1.-MID);return vec2(MIDA*(1.-u),u);}',
+    'vec2 ramp(float t,vec2 m){if(t>=1.)return vec2(0.,1.);',
+    ' if(t<=m.x)return vec2(1.+(m.y-1.)*(t/m.x),0.);',
+    ' float u=(t-m.x)/(1.-m.x);return vec2(m.y*(1.-u),u);}',
     'void main(){vec2 uv=gl_FragCoord.xy/uRes;uv.y=1.-uv.y;',
     // Domain warp — the one liberty over the source. Figma's circles are
     // exact; displacing the sample point makes the boundaries curl as they
@@ -1017,7 +1031,7 @@ function initHeroField() {
     // which is what put the bio's worst phases under its threshold.
     '  float rad=uBlob[i].z*(1.+PULSE*(.5+.5*sin(uTime*(.075+fi*.017)+fi)));',
     '  vec2 d=vec2(w.x-c.x,(w.y-c.y)/uAspect);',
-    '  vec2 ra=ramp(length(d)/rad);float a=ra.x*uBlob[i].w;',
+    '  vec2 ra=ramp(length(d)/rad,uRamp[i]);float a=ra.x*uBlob[i].w;',
     '  if(a<=0.)continue;',
     '  col=col*(1.-a)+mix(uCol[i],vec3(1.),ra.y)*a;cov=max(cov,a);}',
     // DITHER — one code value of noise before the 8-bit quantisation turns a
@@ -1050,7 +1064,7 @@ function initHeroField() {
   gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
 
   const U = {};
-  ['uRes', 'uAspect', 'uTime', 'uWarp', 'uAmp', 'uBlob', 'uCol']
+  ['uRes', 'uAspect', 'uTime', 'uWarp', 'uAmp', 'uBlob', 'uCol', 'uRamp']
     .forEach(n => { U[n] = gl.getUniformLocation(prog, n); });
 
   gl.uniform1f(U.uWarp, FIELD.motion.warp);
@@ -1087,6 +1101,7 @@ function initHeroField() {
   // something whose opacity IS its presence.
   const blobData = new Float32Array(16);
   const colData  = new Float32Array(12);
+  const rampData = new Float32Array(8);
 
   function draw(t, entranceMs) {
     resize();
@@ -1102,9 +1117,14 @@ function initHeroField() {
       colData[slot * 3 + 0] = b.col[0];
       colData[slot * 3 + 1] = b.col[1];
       colData[slot * 3 + 2] = b.col[2];
+      // Permuted with uBlob like uCol — the slot IS the stack position.
+      const rp = Object.assign({}, FIELD.ramp, b.ramp);
+      rampData[slot * 2 + 0] = rp.mid;
+      rampData[slot * 2 + 1] = rp.midAlpha;
     });
     gl.uniform4fv(U.uBlob, blobData);
     gl.uniform3fv(U.uCol, colData);
+    gl.uniform2fv(U.uRamp, rampData);
     gl.uniform2f(U.uRes, canvas.width, canvas.height);
     gl.uniform1f(U.uAspect, canvas.width / canvas.height);
     gl.uniform1f(U.uTime, t);
