@@ -3428,6 +3428,9 @@ function initSectionGeometry(lenis) {
 // resets to hidden, so scrolling back up (or down) fades it in again rather
 // than leaving it statically visible. Driven by getBoundingClientRect on scroll
 // (robust across browsers, unlike an observer); Motion.dev runs the fade + rise.
+// Where a Work card fades in / back out, as fractions of the viewport height
+// measured on the card's top. Was 0.85 / 0.95.
+const WORK_REVEAL = { in: 0.97, out: 0.995 };
 function setupReveals(motion) {
   const { animate } = motion;
   const groups = Array.from(document.querySelectorAll('[data-reveal-group]'));
@@ -3497,9 +3500,13 @@ function setupReveals(motion) {
         // leaves the bottom, symmetric with how it arrived. The 85→95% gap is
         // hysteresis against flicker. (Leaving through the TOP while scrolling
         // down still just resets once off-screen, above — no harsh cut-out there.)
-        if (firstPass || (r.top < vh * 0.85 && r.bottom > vh * 0.15)) {
+        // EXPERIMENT (work-glide): the cards now ride --work-glide up out of the
+        // hero, so they reached 85% (135px into a 900px fold) already moving
+        // fast and appeared late. They reveal as soon as they clear the fold
+        // (WORK_REVEAL.in); the out line sits just past it to keep hysteresis.
+        if (firstPass || (r.top < vh * WORK_REVEAL.in && r.bottom > vh * 0.15)) {
           setVisible(group, true);
-        } else if (r.top > vh * 0.95) {
+        } else if (r.top > vh * WORK_REVEAL.out) {
           setVisible(group, false, true);
         }
       } else if (firstPass || (r.top < vh * 0.9 && r.bottom > vh * 0.15)) {
