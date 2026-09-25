@@ -638,7 +638,21 @@ function measureFieldTuck() {
   // bar, and the bar's own frost is translucent. Measured at 1440x740 that tail
   // still read as a coral wash across the strip. Landing it on the bar's TOP
   // instead means the field has ended before the bar begins.
-  fieldOverhang = Math.max(0, Math.round(fieldBottom - barTop));
+  // ⚠️ AND THE TARGET IS THE ARTWORK'S *VISIBLE* END, NOT ITS BOX. Two things end
+  // it above the box bottom: --field-rise has already lifted the field (offsets
+  // don't see that transform), and the mask dissolves it at the FOLD
+  // (min(100%, 100svh + rise) — hero.css). Aiming the box bottom at the bar
+  // over-lifted by both: measured 30px of bare cream between the dissolve and
+  // the docked bar at 1440x900, and 139px at 1440x740, where the fold binds.
+  const rise = parseFloat(getComputedStyle(document.documentElement)
+    .getPropertyValue('--field-rise')) || 0;
+  const svhProbe = document.createElement('div');
+  svhProbe.style.cssText = 'position:absolute;top:0;height:100svh;visibility:hidden';
+  document.body.appendChild(svhProbe);
+  const svh = svhProbe.offsetHeight;
+  svhProbe.remove();
+  const visibleEnd = Math.min(fieldBottom - rise, mainTop + pageField.offsetTop + svh);
+  fieldOverhang = Math.max(0, Math.round(visibleEnd - barTop));
   fieldDockScroll = barTop;
 }
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
