@@ -1145,8 +1145,21 @@ html:not(.is-field-live) .intro-divider {
    marooned mid-bar with a void on each side. Auto margin rather than
    `justify-content: space-between` so the gap above still governs the right-hand
    group's interval; space-between would stretch it back out. */
+/* ⚠️ GRID-ANCHORED (2026-09): the wordmark takes EVERYTHING LEFT OF THE SHARED
+   RIGHT COLUMN, so "Selected work" starts on column 8 — the same edge About's and
+   Contact's copy start on (--width-right-column is 5 of the 12). It was
+   `margin-right: auto`, which pushed a content-width cluster to the right edge
+   and left the links ~120px (a column + gutter) right of the copy below them.
+   The pill keeps the right edge via its own `margin-left: auto`.
+   - `%` in flex-basis resolves against the bar's CONTENT box (viewport minus the
+     56px padding), which is the grid's width — so this IS the grid line.
+   - Shrinkable on purpose: the right group (links + pill + 2 gaps) needs ~422px
+     and the column is narrower than that below ~1153px wide, so there the name
+     gives way and the links drift left of column 8 rather than overflowing.
+   - ≤1024 reverts to the content-width cluster (responsive.css), since About
+     and Contact stack there and there is no right column to align to. */
 .intro-bar-name {
-  margin-right: auto;
+  flex: 0 1 calc(100% - var(--width-right-column) - var(--gap-group));
   font-family: var(--font-heading);
   font-size: 1.25rem;
   font-weight: 700;
@@ -1244,6 +1257,7 @@ html:not(.is-field-live) .intro-divider {
    size and the bar's gap sets its distance from "About". */
 .intro-bar-cta-wrap {
   display: flex;
+  margin-left: auto; /* holds the right edge now the wordmark no longer pushes */
 }
 
 /* Solid black pill, white label. */

@@ -277,6 +277,17 @@
   .intro-bar {
     padding-inline: 24px; /* sticky bar: gutter is padding now, not offsets */
   }
+  /* Undo the desktop grid anchor: About and Contact stack here, so there is no
+     right column for the links to start on. Back to the content-width cluster
+     pushed to the right edge. Both halves must go — the name's basis AND the
+     pill's auto margin, or the two auto/flex spaces split the bar. */
+  .intro-bar-name {
+    flex: 0 1 auto;
+    margin-right: auto;
+  }
+  .intro-bar-cta-wrap {
+    margin-left: 0;
+  }
   .site-header-row {
     gap: 2rem;
   }
