@@ -176,6 +176,21 @@ function setFieldGap(px) {
   lastFieldGap = px;
   document.documentElement.style.setProperty('--field-gap', px + 'px');
 }
+let lastFieldCream = -1;
+function setFieldCream(px) {
+  // Same contract as setFieldScroll: root, rounded, guarded — per scroll frame.
+  if (px === lastFieldCream) return;
+  lastFieldCream = px;
+  document.documentElement.style.setProperty('--field-cream', px + 'px');
+}
+// How far the cream climbs toward the bio as the reader scrolls away. The
+// dissolve's START is held (hero.css subtracts --field-cream from both its end
+// and its length), so this only SHORTENS the ramp from below. `ratio` is the
+// share of the resting ramp that survives at the dock; `min` is the shortest the
+// ramp may get — the 17-stop smoothstep lands its stops ~4.5px apart at 72px, so
+// go no lower without adding stops (see the banding notes on --field-fade).
+const FIELD_CREAM = { ratio: 0.4, min: 72 };
+let fieldCreamMax = 0;
 let lastFieldScroll = -1;
 function setFieldScroll(px) {
   // Same contract as setBarBleed: written on the ROOT (all three .page-field
@@ -604,6 +619,7 @@ let fieldDockScroll = 0;
 function measureFieldTuck() {
   fieldOverhang = 0;
   fieldDockScroll = 0;
+  fieldCreamMax = 0;
   // offsetParent is null when the bar is display:none — the ≤680 tier, where
   // there is no pinned bar to tuck behind and the phone tier owns the field's
   // transform outright. Nothing to do, and setFieldScroll(0) below clears any
@@ -630,7 +646,13 @@ function measureFieldTuck() {
     + parseFloat(getComputedStyle(introBar).marginTop || '0');
   if (barTop <= 0) return;
   const bio = document.querySelector('.intro-bio');
-  if (bio) setFieldGap(Math.max(0, Math.round(barTop - (pageTop(bio) + bio.offsetHeight))));
+  if (bio) {
+    const gap = Math.max(0, Math.round(barTop - (pageTop(bio) + bio.offsetHeight)));
+    setFieldGap(gap);
+    // hero.css's --field-fade, restated: clamp(90px, gap, 300px).
+    const fade = Math.min(300, Math.max(90, gap));
+    fieldCreamMax = Math.max(0, fade - Math.max(FIELD_CREAM.min, fade * FIELD_CREAM.ratio));
+  }
   // ⚠️ THE TARGET IS THE BAR'S TOP, NOT ITS BOTTOM. Aiming at the bottom is the
   // obvious reading of "don't bleed past the bar" and it leaves the artwork
   // visible: the mask's last 40% is a fade, so landing its zero-alpha edge on the
@@ -2704,6 +2726,9 @@ function updateScrollEffects() {
     ? Math.min(1, Math.max(0, window.scrollY / fieldDockScroll)) : 0;
   setFieldScroll(fieldOverhang === 0 ? 0
     : Math.round(fieldOverhang * (1 - Math.pow(1 - t, 3))));
+  // The cream climbs on the same eased curve, so the ramp shortens as the
+  // artwork lifts — one motion, not two. See FIELD_CREAM.
+  setFieldCream(Math.round(fieldCreamMax * (1 - Math.pow(1 - t, 3))));
 
   // Scroll-spy: the active section is the LAST one whose RESTING POSITION the
   // page has reached. Highlight every link that targets it (and mark it for

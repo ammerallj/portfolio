@@ -376,7 +376,13 @@ html.is-field-live .page-field-grain { opacity: 0.15; }
      1440x740 is looser (bio 3.22 -> 3.16 at rise 30) so it does not bind. Going
      higher needs something else to give first — the bio's 3:1 is the wall. */
   --field-rise: 30px;
-  --field-mask-end: min(100%, calc(100svh + var(--field-rise)));
+  /* ⚠️ --field-cream (2026-09) is SCROLL-LINKED, published by updateScrollEffects:
+     0 at rest, growing as the reader scrolls away. It is subtracted from BOTH the
+     mask's end and --field-fade below, so --field-mask-start (end − fade) does not
+     move at all — the dissolve's top stays where the bio's clearance put it and
+     only its BOTTOM climbs toward the text. The cream rises; the bio's contrast
+     cannot change, because nothing above the ramp's start is touched. */
+  --field-mask-end: calc(min(100%, calc(100svh + var(--field-rise))) - var(--field-cream, 0px));
   /* HOW TALL THE DISSOLVE IS, as a fraction of the room between the bio's last
      line and the bar. --field-gap is that room, published by measureFieldTuck;
      112px is the no-JS floor.
@@ -412,7 +418,7 @@ html.is-field-live .page-field-grain { opacity: 0.15; }
      browser's linear interpolation between them stays under one 8-bit code step
      on this artwork. Shorter and the segments start to read as facets — the
      original linear ramp's failure, in miniature. */
-  --field-fade: clamp(90px, var(--field-gap, 112px), 300px);
+  --field-fade: calc(clamp(90px, var(--field-gap, 112px), 300px) - var(--field-cream, 0px));
   --field-mask-start: calc(var(--field-mask-end) - var(--field-fade));
 
   /* How far the whole lockup — headline, divider, bio, AND the frost pane with
