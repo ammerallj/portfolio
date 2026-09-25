@@ -964,11 +964,12 @@
   /* The desktop 104px (the section padding + 40 for the hero's frosted dissolve)
      is too deep to peek past on a phone — back to the tier's standard section
      padding. The bottom keeps the desktop's deliberate asymmetry (see
-     #work-section in sections.css) but scaled to this tier: 96 is 1.5x the
-     phone's own 64 section step, the same ratio the desktop 144 is to its 96. */
+     #work-section in sections.css) — was 96, which with About's own 64 top
+     left 160px of cream between the last card and "About Me" on a phone.
+     32 + 64 = 96 total, the same gap the page ends on below About. */
   #work-section {
     padding-top: var(--gap-section);
-    padding-bottom: 96px;
+    padding-bottom: 32px;
   }
 
   /* Remaining 40px→32px step-downs on phones. (.section-title now steps via
@@ -1169,6 +1170,12 @@
     /* ⚠️ The desktop min-height this used to cancel is GONE (sections.css,
        2026-09) — About no longer fills its frame, because keeping the blue panel
        off-screen stopped being the goal. Nothing to reset. */
+    /* --about-tail (ledge rest + a section gap, 224 here) reserves room for
+       Contact's blue ledge — and Contact is display:none at this tier, so it
+       was 224px of empty cream before the footer. One section step instead;
+       with the footer's own 30px top padding the page ends ~94px below the
+       last line, matching the Work → About gap above. */
+    padding-bottom: var(--gap-section);
   }
   .site-footer:not(.site-footer--plain) {
     background-color: transparent;
