@@ -877,6 +877,18 @@
        375x812 these are 460 x 760 — the size the orb layout was tuned on. */
     width: calc(100vw + 85px);
     height: calc(var(--hero-h) + 132px);
+    /* THE WHITE FADE ENDS 8px ABOVE THE FIRST WORK CARD, not at the box's
+       bottom. The card's image starts at --hero-h + 64 on every phone (measured
+       360/375/390/430), and the box runs 68px past that, so the fade was
+       dissolving across the card. Moving the MASK rather than the box leaves
+       the orbs — and every contrast figure — exactly where they were measured.
+       ⚠️ 80px, not the shared 112: at 360x780 only 80px separates the bio's last
+       line from the card, so a longer fade would start inside the bio.
+       ⚠️ --field-mask-start is restated because :root resolved it against
+       :root's --field-mask-end; overriding the end here alone would not move it. */
+    --field-fade: 80px;
+    --field-mask-end: calc(var(--hero-h) + 56px);
+    --field-mask-start: calc(var(--field-mask-end) - var(--field-fade));
     aspect-ratio: auto;
     transform: translateX(-50%);
   }
