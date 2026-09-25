@@ -83,9 +83,8 @@
 
 /* GRAIN, on its OWN layer (2026-09-25) — the desktop .intro-bar has always had it
    (::after in hero.css) and this header never did, so the phone nav read as flat
-   cream beside the grained field. It is the SAME noise, byte for byte (the nav's
-   `navgrain`: baseFrequency 0.55, smooth transfer, 0.3 strength) — one nav grain
-   on the site.
+   cream beside the grained field. It is the SAME grain, `--nav-grain`
+   (global.css) — cream, at the orb grain's speck size.
    ⚠️ ITS OWN, SHORTER FADE, NOT THE FROST'S MASK. The desktop bar learned this:
    grain carried down the whole bleed "lingered as a visible band". So it holds
    across the header box and is gone 40px below it, while the frost keeps
@@ -96,7 +95,8 @@
   inset: 0;
   bottom: -40px;
   z-index: -1;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='navgrain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.55' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23navgrain)' opacity='0.3'/%3E%3C/svg%3E");
+  background-image: var(--nav-grain);
+  background-size: 160px 160px;
   -webkit-mask-image: linear-gradient(to bottom,
     #000 calc(100% - 40px), rgba(0,0,0,0.844) calc(100% - 30px),
     rgba(0,0,0,0.5) calc(100% - 20px), rgba(0,0,0,0.156) calc(100% - 10px),

@@ -1562,8 +1562,16 @@ curve.
 ### The mobile header's scrim (`--header-bleed`, 2026-09)
 
 ⚠️ **IT CARRIES THE NAV GRAIN TOO (2026-09-25)** — `.site-header::after`, the same
-`navgrain` noise as `.intro-bar::after`, on its own 40px fade (not the frost's
-112px mask; grain down a long bleed reads as a band). Hidden under `is-over-dark`.
+grain as `.intro-bar::after`, on its own 40px fade (not the frost's 112px mask;
+grain down a long bleed reads as a band). Hidden under `is-over-dark`.
+⚠️ **THE NAV GRAIN IS NOW CREAM, AT THE ORB GRAIN'S SIZE — `--nav-grain` in
+global.css**, shared by `.intro-bar::after`, `.intro-bar-feather` and
+`.site-header::after`. It was a 0.55-frequency, smooth, saturate-0 GREY noise at
+0.3, 2.4x coarser than the field's and a grey film over the cream. Now
+`baseFrequency 1.3` with a DISCRETE two-level transfer like `.page-field-grain`,
+but the two levels are warm cream rgb(231,225,208) and near-white. The Contact
+ledge's grain (sections.css) still uses the OLD grey noise — it sits over blue,
+where cream specks would read as dust; change it deliberately if at all.
 
 `.site-header`'s frost now **bleeds to full transparency** instead of ending on a
 hard line. It was a flat `background-color: rgba(251,252,248,0.9)` plus
