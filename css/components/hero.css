@@ -891,7 +891,8 @@ html:not(.is-field-live) .intro-divider {
      which needs this same gap to find the bar's bottom edge. */
   margin-bottom: var(--bar-tail);
   padding: 14px 56px;
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) repeat(3, calc(var(--width-right-column) / 3));
   align-items: center;
   /* This gap is now the ONE seam inside the right-hand group (links → CTA), not
      the old three-column rig's column gap. It was a flat 120px (64 at ≤1024, 40
@@ -899,8 +900,10 @@ html:not(.is-field-live) .intro-divider {
      third of the bar. --gap-group instead, the same token the links use, so
      Work · About · Say hello sit at ONE repeating interval and read as a single
      group. It steps 60 → 48 on its own, which is why the two per-tier gap
-     overrides in responsive.css are gone. */
-  gap: var(--gap-group);
+     overrides in responsive.css are gone.
+     ⚠️ Now 0 (2026-09): the bar is a grid whose tracks set every seam — see
+     .intro-bar-name. The ≤768 flex revert supplies its own spacing. */
+  gap: 0;
   /* Enters WITH the text, not after it — delay must match .intro-headline's
      and .intro-band-right's. See the sequence on .intro-headline. */
   animation: intro-bar-fade 0.6s ease-out 0.9s both;
@@ -1174,8 +1177,32 @@ html:not(.is-field-live) .intro-divider {
    marooned mid-bar with a void on each side. Auto margin rather than
    `justify-content: space-between` so the gap above still governs the right-hand
    group's interval; space-between would stretch it back out. */
+/* ⚠️ GRID-ANCHORED (2026-09). Above the revert tiers the bar is a GRID whose last
+   three tracks are the shared right column cut in thirds:
+
+     [ wordmark ........ 1fr ][ Selected work | About me | Say hello ]
+                              └──────── --width-right-column ────────┘
+                               start          centre      end
+
+   - "Selected work" starts exactly where About's and Contact's copy start, the
+     pill ends on the gutter, and "About me" sits on the column's CENTRE — the
+     middle third's centre is the column's centre by construction.
+   - .intro-bar-links is `display: contents`, so its two groups are grid items of
+     the bar itself. The DOM keeps the wrapper for the ≤768 flex revert.
+   - ⚠️ THIS IS NOT THE RETIRED THREE-COLUMN RIG, but it shares its weakness: the
+     track count assumes two links + the pill. Add a link and the tracks (and
+     the :first-child / justify-self rules) must change with it.
+   - Fits at the column's 368.75px floor: thirds of 122.9 hold "Selected work"
+     (106) and the pill (118); the gaps either side of "About me" are ~39 / ~27.
+   - ⚠️ The homepage wordmark is a <p>, and global.css caps every p at --measure
+     (728px). Harmless in a grid track (it is left-aligned), but it is what froze
+     the links above 1440 in the flex version — keep it in mind if this ever goes
+     back to flex-basis sizing.
+   - ≤768 (homepage) / ≤1024 (project pages) revert to the content-width flex
+     cluster (responsive.css): the content stacks there, so there is no right
+     column to align to. */
 .intro-bar-name {
-  margin-right: auto;
+  justify-self: start;
   font-family: var(--font-heading);
   font-size: 1.25rem;
   font-weight: 700;
@@ -1203,7 +1230,7 @@ html:not(.is-field-live) .intro-divider {
    name↔links↔cta gap: Work and About are peers, the wordmark and the CTA are not,
    and the nav should cohere as one group rather than spread across the bar. */
 .intro-bar-links {
-  display: flex;
+  display: contents; /* groups are the bar's grid items; flex again at ≤768 */
   align-items: center;
   gap: var(--gap-group);
 }
@@ -1212,6 +1239,10 @@ html:not(.is-field-live) .intro-divider {
    label — same structure and states as the site header's nav. */
 .intro-bar-group {
   display: flex;
+  justify-self: center; /* "About me" on the right column's centre */
+}
+.intro-bar-group:first-child {
+  justify-self: start; /* "Selected work" on the column's left edge */
 }
 
 .intro-bar-links a {
@@ -1273,6 +1304,7 @@ html:not(.is-field-live) .intro-divider {
    size and the bar's gap sets its distance from "About". */
 .intro-bar-cta-wrap {
   display: flex;
+  justify-self: end; /* the pill on the gutter */
 }
 
 /* Solid black pill, white label. */
