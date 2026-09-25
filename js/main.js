@@ -183,16 +183,14 @@ function setFieldCream(px) {
   lastFieldCream = px;
   document.documentElement.style.setProperty('--field-cream', px + 'px');
 }
-// How far the cream climbs toward the bio as the reader scrolls away. The
-// dissolve's START is held (hero.css subtracts --field-cream from both its end
-// and its length), so this only SHORTENS the ramp from below. `ratio` is the
-// share of the resting ramp that survives; `min` is the shortest the ramp may
-// get — the 17-stop smoothstep lands its stops ~3.5px apart at 56px, so go no
-// lower without adding stops (see the banding notes on --field-fade).
+// How far the white fade band slides up toward the bio as the reader scrolls
+// away, as a fraction of the band's own length. The band moves WHOLE — hero.css
+// subtracts --field-cream from the mask's end only — so it keeps its full soft
+// length; a version that compressed it instead read as too little fade.
 // ⚠️ NO TIMING OF ITS OWN. The climb reads the tuck's own eased progress, so the
 // cream glides up WITH the parallax. A separate span (0.6 was tried) finished the
 // climb early and left the hero lifting on its own — two motions, not one.
-const FIELD_CREAM = { ratio: 0.25, min: 56 };
+const FIELD_CREAM = { ratio: 0.5 };
 let fieldCreamMax = 0;
 let lastFieldScroll = -1;
 function setFieldScroll(px) {
@@ -654,7 +652,7 @@ function measureFieldTuck() {
     setFieldGap(gap);
     // hero.css's --field-fade, restated: clamp(90px, gap, 300px).
     const fade = Math.min(300, Math.max(90, gap));
-    fieldCreamMax = Math.max(0, fade - Math.max(FIELD_CREAM.min, fade * FIELD_CREAM.ratio));
+    fieldCreamMax = Math.round(fade * FIELD_CREAM.ratio);
   }
   // ⚠️ THE TARGET IS THE BAR'S TOP, NOT ITS BOTTOM. Aiming at the bottom is the
   // obvious reading of "don't bleed past the bar" and it leaves the artwork
