@@ -2927,8 +2927,14 @@ function updateScrollEffects() {
   const navTop = (fieldDockScroll) + push;
   const cream = fieldDockScroll > 0
     ? fieldVisibleEnd + lag - navTop - fieldOverhang * (1 - tuck) : 0;
-  setFieldCream(Math.max(0, Math.round(cream)));
-  setHeroTextLift(Math.round(HERO_TEXT.speed * travel));
+  const creamPx = Math.max(0, Math.round(cream));
+  setFieldCream(creamPx);
+  // REDESIGN: the hero text rides the white scrim's edge rather than a speed of
+  // its own. That edge moves on the page by (lag − cream) — the artwork sinks by
+  // lag, the mask pulls its end up by cream — so lifting the text by
+  // (cream − lag) keeps it at a fixed distance below the edge the whole way up.
+  // 0 at rest. HERO_TEXT.speed is unused while this holds.
+  setHeroTextLift(creamPx - lag);
 
   // Scroll-spy: the active section is the LAST one whose RESTING POSITION the
   // page has reached. Highlight every link that targets it (and mark it for
