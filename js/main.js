@@ -680,7 +680,7 @@ function measureFieldTuck() {
   // it tracks the sticky offset and reads the scroll position once docked.)
   // Offsets accumulated to the page, NOT getBoundingClientRect: the hero's load
   // reveal translates .intro-band while this runs, and a rect would report the
-  // animation's mid-flight position. Same rule as initWorkCarousel's photo
+  // animation's mid-flight position. Same rule as the Work carousel's photo
   // measurement — offsets ignore transforms.
   const pageTop = (el) => { let y = 0; for (let n = el; n; n = n.offsetParent) y += n.offsetTop; return y; };
   // Measured UNSHORTENED: this is where the bar sits at rest on screen, and
@@ -2053,619 +2053,49 @@ function initScrollVideos() {
 }
 initScrollVideos();
 
-// The horizontal Work track (sections.css .work-list) LOOPS: scroll past the
-// last card and the first comes round again, in either direction, with no end
-// stop. Progressive enhancement — with JS off the track is still a perfectly
-// good finite horizontal scroller (and .work-list keeps its :not(.is-looping)
-// end-snap for that case), so nothing here can hide a card.
+// The Work MASONRY (sections.css .work-grid). With JS off the grid is a plain
+// two-column grid with aligned rows; this turns it into a masonry by making each
+// row a 1px track and giving every card a span equal to its own height plus the
+// gap. Grid auto-placement then puts each card in whichever column frees up
+// first — the shorter one — so DOM order stays reading order and nothing is
+// ever moved in the DOM.
 //
-// ROTATION, NOT CLONING. The four cards are never duplicated: when the scroll
-// crosses a threshold, the card at one end is MOVED to the other end and the
-// scroll position is walked back by exactly one card-step, so the pixels on
-// screen do not change. One DOM node per project is what lets everything else
-// keep working untouched — initScrollVideos' IntersectionObservers and the
-// reveal groups both hold ELEMENT references, and a moved element is the same
-// element. Cloning would have meant 12 cards, 12 <video> tags, duplicate
-// headings for the crawlers that read this page, and clones whose video never
-// plays because the observers were never attached to them.
-//
-// THE INVARIANT: scrollLeft always sits in [STEP, 2·STEP). That is one card of
-// buffer on each side of the visible one, which is all a track needs when the
-// card is nearly a viewport wide. Snap positions are exact multiples of STEP
-// (.work-list's scroll-padding-inline is set to its own padding-inline, so
-// card i snaps at i·STEP), which is why adding or subtracting a whole STEP
-// always lands on another snap position — the jump never has to fight
-// scroll-snap, and scroll-snap-type never has to be toggled off around it.
-function initWorkCarousel() {
-  const track = document.querySelector('.work-list');
-  if (!track) return; // project pages have no Work track
-  // Fewer than 3 and there isn't enough content to fill the buffer on both
-  // sides, so the seam would show. Leave those as a normal finite scroller.
-  if (track.children.length < 3) return;
+// It re-measures whenever a card changes height (a ResizeObserver per card, so
+// a width change, a font swap or media loading all land here), and switches
+// itself off wherever the grid is down to ONE column (<=768, responsive.css) —
+// read from the live track count, so the breakpoint lives in CSS alone.
+// Heights are offsetHeight, not a rect: the reveal system translates the card
+// link while this runs, and a transform must not leak into the layout.
+function initWorkMasonry() {
+  const grid = document.querySelector('.work-grid');
+  if (!grid || !('ResizeObserver' in window)) return; // project pages have none
+  const cards = Array.from(grid.children);
 
-  // PHONE HAS NO HORIZONTAL TRACK. At <=480 responsive.css reverts .work-list to
-  // a vertical stack, and the loop must switch off with it — this is a
-  // correctness gate, not an optimisation. On a column layout scrollLeft is
-  // pinned at 0, so normalize()'s "scroll back into the buffer" branch would be
-  // permanently true and re-prepend a card on every scroll event, scrambling the
-  // running order of the projects. The query has to track the CSS breakpoint;
-  // both carry a note pointing at the other.
-  const horizontal = window.matchMedia('(min-width: 481px)');
-  // The order the page shipped in. The loop rotates the DOM, so this is the only
-  // record of it — needed to hand a correct stack back when the phone tier takes
-  // over, and it must be captured before the first rotation.
-  const authored = [...track.children];
-  // The pagination bar, if the page ships one. Indexed against `authored`, NOT
-  // against the live DOM: the loop rotates children constantly, so dot 1 has to
-  // mean "the first project in the document" rather than "whatever is first
-  // right now". Optional — project pages have no track at all.
-  const pagination = track.parentElement
-    && track.parentElement.querySelector('.work-pagination');
-  const dots = pagination
-    ? [...pagination.querySelectorAll('.work-pagination-dot')]
-    : [];
-  let active = false;
-  let damping = false;   // true while the wheel-driven damped run owns scrollLeft
-
-  let step = 0;
-
-  // Card width + the track's gap. Read live: every tier changes both.
-  function measureStep() {
-    const first = track.firstElementChild;
-    if (!first) return 0;
-    const gap = parseFloat(getComputedStyle(track).columnGap) || 0;
-    return first.getBoundingClientRect().width + gap;
-  }
-
-  // Pull scrollLeft back into [STEP, 2·STEP), rotating one card per step. Also
-  // does the initial placement: at load scrollLeft is 0, so the first pass
-  // moves the LAST card to the front and lands on STEP — which leaves the
-  // original first card flush on the container's left edge, exactly where it
-  // sat before the loop existed, with the previous project now reachable by
-  // scrolling backwards. The guard is a belt-and-braces stop against a
-  // pathological layout (step measured as 0) spinning the loop forever.
-  //
-  // BOTH branches fire only at a BOUNDARY SNAP POSITION — 2*STEP going forward,
-  // 0 going back — never on merely leaving the rest position. That symmetry is
-  // the whole point, and getting it wrong is a real bug that shipped: the
-  // backward test used to be `scrollLeft < step`, which is true after ONE PIXEL
-  // of leftward movement. So the first frames of a backward gesture teleported
-  // scrollLeft forward by a whole card. The browser had already computed its
-  // snap target from the pre-jump position, so the gesture finished a card away
-  // from where the platform thought it was and came to rest off the snap line —
-  // scrolling forward snapped cleanly, scrolling back did not. Rotating only at
-  // 0 and 2*STEP means the jump always happens exactly where the gesture has
-  // naturally arrived, and -/+ STEP always lands on another snap position.
-  //
-  // The 1px tolerance on the backward test is deliberate. A fractional layout
-  // can leave scrollLeft resting at something like 0.4, which `<= 0` would never
-  // match — and unlike the forward side there is no runway left past 0 to try
-  // again on the next event, so the loop would dead-end at the left edge and the
-  // reader could not scroll back any further. Forward needs no such tolerance:
-  // past 2*STEP the track still has real distance (max is ~2.9*STEP), so a
-  // missed trigger simply fires on the next scroll event.
-  // TOUCH BUDGET. On a finger swipe there is no wheel to intercept — touch falls
-  // straight through to native scroll — and the loop then hands the momentum
-  // fresh runway on every rotation, so it never runs out and the track spins
-  // through the whole carousel. That is the same failure scroll-snap-stop fixes
-  // for the wheel, except iOS does not honour snap-stop reliably through
-  // momentum, and rewriting scrollLeft mid-flight can defeat the snap target the
-  // browser already picked.
-  //
-  // So: at most TOUCH.rotations per gesture. Once spent, the rotation simply
-  // stops happening and the track runs out of its OWN finite runway and halts —
-  // exactly how a non-looping carousel kills a fling. The invariant is restored
-  // once the scroll settles, which is instant and pixel-preserving, so invisible.
-  //
-  // NOT a clamp on scrollLeft: writing to it while native momentum is running is
-  // a tug-of-war the reader sees as jitter. Withholding the rotation takes
-  // nothing away — it just stops giving.
-  function normalize(force) {
-    // The damped run owns scrollLeft for its duration and calls this itself once
-    // it has settled. Without this guard the closing frames of a BACKWARD run
-    // (approaching 0) would trip the rotation mid-flight, which sets scrollLeft
-    // to STEP while the next frame is still easing toward 0 — the two then fight
-    // for the rest of the run.
-    if (damping) return;
-    if (!active || step <= 0) return;
-    const budgeted = !force && performance.now() - lastTouchAt < TOUCH.momentum;
-    let guard = 0;
-    // ⚠️ THE FORWARD TEST NEEDS THE SAME 1px TOLERANCE THE BACKWARD ONE HAS, and
-    // an earlier note here explicitly claimed it did not. That was wrong, and it
-    // stranded the carousel on any viewport where the card's width is fractional.
-    // MEASURED at a 1396px window: --width-right-column's clamp resolves the card
-    // to 1175.3359375, so step is 1235.3359375 and the boundary is 2470.671875 —
-    // but scrollLeft can only land on a device pixel, so it stops at 2470.5, a
-    // shortfall of 0.17px. `>=` is then false forever: normalize() never rotates,
-    // the track sits one step past its rest position, and the reader sees the
-    // PREVIOUS card hanging on the left with no next-card peek on the right.
-    // ⚠️ THIS IS INVISIBLE AT 1440. The design width makes the card exactly 1216
-    // and every boundary a whole number, so testing there will never show it.
-    // Test any width that makes the clamp produce a fraction.
-    while (track.scrollLeft >= step * 2 - 1 && guard++ < 16) {
-      if (budgeted && touchRotations >= TOUCH.rotations) return;
-      const from = track.scrollLeft;
-      track.appendChild(track.firstElementChild);
-      track.scrollLeft = from - step;
-      touchRotations++;
+  const layout = () => {
+    const cs = getComputedStyle(grid);
+    const columns = cs.gridTemplateColumns.split(' ').filter(Boolean).length;
+    if (columns < 2) {
+      grid.classList.remove('is-masonry');
+      cards.forEach((card) => { card.style.gridRowEnd = ''; });
+      return;
     }
-    while (track.scrollLeft <= 1 && guard++ < 16) {
-      if (budgeted && touchRotations >= TOUCH.rotations) return;
-      const from = track.scrollLeft;
-      track.insertBefore(track.lastElementChild, track.firstElementChild);
-      track.scrollLeft = from + step;
-      touchRotations++;
-    }
-  }
-
-  // Which project is at the resting slot, as an AUTHORED index. scrollLeft rests
-  // at STEP with one card of buffer each side, so the card on show is
-  // children[1]; Math.round(scrollLeft / step) generalises that mid-gesture to
-  // whichever card the reader is closest to landing on. That yields a DOM
-  // position, and authored.indexOf turns it back into "which project" — the only
-  // thing a dot can point at while the DOM rotates underneath it.
-  function updateDots() {
-    if (!dots.length || !active || step <= 0) return;
-    const card = track.children[Math.round(track.scrollLeft / step)];
-    const i = card ? authored.indexOf(card) : -1;
-    if (i < 0) return;
-    dots.forEach((dot, k) => {
-      const on = k === i;
-      dot.classList.toggle('is-active', on);
-      if (on) dot.setAttribute('aria-current', 'true');
-      else dot.removeAttribute('aria-current');
+    const gap = parseFloat(cs.columnGap) || 0; // the same token drives both axes
+    grid.classList.add('is-masonry');
+    cards.forEach((card) => {
+      card.style.gridRowEnd = 'span ' + Math.max(1, Math.ceil(card.offsetHeight + gap));
     });
-  }
-
-  // Publish where the resting card's photo ENDS, as a distance from the
-  // container's top, so the bar can hold itself just inside that edge.
-  //
-  // Why this is not pure CSS: at >=1025 the photo is the card's last element, so
-  // the container's own bottom would serve — but at <=1024 it moves to the TOP
-  // and its height is a ratio of the card's WIDTH, while `top` percentages
-  // resolve against HEIGHT. One measured number covers both, and re-runs from
-  // measure(), which already fires on every resize and tier change.
-  function publishPhotoBottom() {
-    if (!pagination || !active) return;
-    const host = pagination.parentElement;
-    const card = track.children[1] || track.firstElementChild;
-    const photo = card && card.querySelector('.work-card-image-link');
-    if (!host || !photo) return;
-    // offsetTop/offsetHeight, NOT getBoundingClientRect: the photo carries
-    // data-reveal, so before its group animates in it is translated down by
-    // REVEAL.distance (16px) and the rect reports that. Measured at load, that
-    // put the bar 16px low — it read as 8px inside the photo instead of 24.
-    // Offsets ignore transforms, so the anchor is the layout position either
-    // way. host is the photo's offsetParent (#work-section .site-container is
-    // the nearest positioned ancestor); keep that `position: relative` if this
-    // ever moves.
-    const y = photo.offsetTop + photo.offsetHeight;
-    host.style.setProperty('--work-photo-bottom', y + 'px');
-  }
-
-  // Re-measure on resize and keep the reader on the card they were looking at:
-  // the step width changes at every breakpoint, so the raw scrollLeft would
-  // point at a different card after the jump.
-  function measure() {
-    if (!active) return;
-    const previous = step;
-    step = measureStep();
-    if (step > 0 && previous > 0) {
-      track.scrollLeft = Math.round(track.scrollLeft / previous) * step;
-    }
-    publishPhotoBottom();
-    updateDots();
-    normalize();
-  }
-
-  // KEYBOARD. Tabbing to a card's link makes the browser scroll it into view on
-  // its own, and that scroll then trips normalize() — which rotates the DOM and
-  // rewrites scrollLeft underneath the browser's own positioning. Measured, the
-  // two together landed focus on the card sitting in the PEEK slot: mostly off
-  // the right edge, with its focus ring cut in half. So don't leave the two to
-  // negotiate. Rotate until the focused card IS the flush one and put the track
-  // on the invariant directly — deterministic, and it can't fight a smooth
-  // scroll because .work-list's scroll-behavior is `auto`, not the page's
-  // `smooth`. Nothing else needs a scroll-into-view: focus order follows the
-  // rotated DOM, which IS the visual order, so tabbing walks the cards in the
-  // order they are actually seen.
-  //
-  // ⚠️ NEVER MOVE THE FOCUSED CARD ITSELF. Moving a focused element resets the
-  // browser's sequential-focus navigation starting point, and the measured
-  // result was Tab walking the projects BACKWARDS (Accessibility → Groups →
-  // Loop → Messaging) — every card correctly flush, in exactly the wrong order.
-  // Bringing the card to slot 1 by shuffling only the cards AROUND it fixes the
-  // order and costs nothing: from slot 0 one card is pulled off the end to sit
-  // in front of it; from slot i>1 the (i−1) cards ahead of it go to the back,
-  // none of which is the card itself.
-  // Rotate until `card` occupies the resting slot, then sit on it. Shared by
-  // keyboard focus and the pagination dots, so the two cannot drift into
-  // disagreeing about where "in view" is.
-  //
-  // ⚠️ It never moves `card` itself. Moving a focused element resets the
-  // browser's sequential-focus starting point; measured, that sent Tab BACKWARDS
-  // through the projects. Hence the first loop: when the card is already first,
-  // rotate the LAST card in front of it rather than appending the card away.
-  //
-  // The landing is INSTANT, not damped. Damping exists to make a wheel gesture
-  // feel continuous with the reader's hand; a dot click and a Tab press are
-  // discrete, and easing across three cards would drag two unrelated projects
-  // past the eye on the way. It also keeps this clear of the damping machinery,
-  // which owns scrollLeft while it runs.
-  function bringIntoView(card) {
-    if (!active || step <= 0) return;
-    if (!card || card.parentElement !== track) return;
-    let guard = 0;
-    while (track.firstElementChild === card && guard++ < 16) {
-      track.insertBefore(track.lastElementChild, track.firstElementChild);
-    }
-    while (track.children[1] !== card && guard++ < 16) {
-      track.appendChild(track.firstElementChild);
-    }
-    track.scrollLeft = step;
-    updateDots();
-  }
-
-  function flushFocusedCard(event) {
-    const card = event.target.closest('.work-card');
-    if (card) bringIntoView(card);
-  }
-
-  dots.forEach((dot, k) => {
-    dot.addEventListener('click', () => stepToward(k));
-  });
-
-  // normalize() is idempotent and cheap (a comparison, and nothing else on the
-  // overwhelming majority of scroll events), so it can run on every one. It
-  // re-enters via the scroll event its own scrollLeft write fires; that pass
-  // finds the invariant already satisfied and does nothing.
-  // DAMPED HORIZONTAL MOTION (2026-08). Wheel deltas accumulate into a single
-  // `target`, and every frame scrollLeft eases a fraction of the remaining
-  // distance toward it. Adapted from the Codrops horizontal-gallery technique,
-  // with one deliberate change: that version replaces native scrolling with a
-  // virtual value behind `overflow: hidden`. Here the damping is applied to the
-  // REAL scrollLeft of a real scroll container, so the track keeps working with
-  // JS off, keeps native keyboard scrolling (which flushFocusedCard depends on),
-  // and keeps touch — none of which survive a virtual scroller.
-  //
-  // ⚠️ THE ACCUMULATING TARGET IS THE WHOLE POINT — do not "simplify" this back
-  // into a fixed-duration animation per gesture. That was tried and reverted the
-  // same day (see CLAUDE.md): a real flick keeps firing momentum wheel events for
-  // a second or more after the fingers lift, so each one landing after an
-  // animation finished started another, and one flick lurched through two or
-  // three cards. Deltas folding into one target cannot chain, because there is no
-  // discrete animation to re-trigger — and delta MAGNITUDE starts mattering
-  // again, so a gentle scroll moves a little and a flick moves a lot.
-  const DAMP = {
-    // MILLISECONDS to land a card. This used to be a per-frame ease fraction,
-    // which meant every adjustment needed the decay formula solved by hand and,
-    // worse, tied the speed to the refresh rate — identical code ran 1033ms on a
-    // 60Hz display and 517ms on a 120Hz one. dampStep now derives the per-frame
-    // factor from this and the elapsed time, so the number below IS the duration
-    // on any display.
-    //
-    // It also makes the timing consistent ACROSS BREAKPOINTS: a fixed ease made
-    // the smaller cards at ≤1024 arrive sooner, because the same fraction of a
-    // shorter distance is less travel. Deriving from the real step holds 650ms
-    // everywhere.
-    //
-    // Judged on real hardware, not here — rAF does not tick in the preview pane,
-    // so this dial can only be set by eye. 370ms read as too fast, 840ms as
-    // laggy, 540ms was close; 650 is the settled value. Note those were all set
-    // against the OLD exponential curve, where most of the number was an
-    // invisible tail — under the spring below, 650ms is 650ms of visible motion,
-    // so it will feel slower than the same number did before.
-    arrival: 650,
-    // How close counts as arrived. At 0.5px the last few pixels crawl for
-    // hundreds of ms while nothing visibly moves — 2px is under half a device
-    // pixel of visible error and cuts that dead tail off.
-    settle: 2,
-    // Fraction of a card the reader must push before the destination is
-    // committed. Small on purpose — this is "which way did they mean", not "did
-    // they push far enough", and waiting longer is what caused the linger.
-    commit: 0.1,
-    quiet: 120,     // ms of wheel silence that means the gesture (and its
-                    // momentum tail) has genuinely ended
-    lineHeight: 16, // px per line, for mouse wheels that report deltaMode 1
   };
-
-  const TOUCH = {
-    rotations: 1,    // rotations allowed per finger swipe
-    momentum: 1200,  // ms after the last touch that still counts as that gesture
-    settle: 180,     // ms of scroll silence before the invariant is restored
-  };
-  let lastTouchAt = -Infinity;
-  let touchRotations = 0;
-  let touchSettleTimer = 0;
-
-  let dampTarget = 0;
-  let dampAnchor = 0;
-  let dampSettling = false;
-  let dampFrame = 0;
-  let dampQuiet = 0;
-  let dampBackstop = 0;
-  let dampLocked = false;   // swallowing the momentum tail after a run finished
-  let dampUnlock = 0;
-
-  // After a run lands, the flick that caused it is STILL firing momentum wheel
-  // events — often for another half second. Re-arming immediately would let the
-  // tail start a second run, which is the chaining that killed the first
-  // attempt at this. So the track locks on arrival and stays locked for as long
-  // as events keep arriving, unlocking only once they have been silent for
-  // DAMP.quiet. This gates RE-ARMING only, never the motion, so the worst a
-  // mis-timed unlock can do is briefly delay a genuine second flick.
-  function relock() {
-    dampLocked = true;
-    clearTimeout(dampUnlock);
-    dampUnlock = setTimeout(() => { dampLocked = false; }, DAMP.quiet);
-  }
-
-  const clamp = (v, lo, hi) => (v < lo ? lo : v > hi ? hi : v);
-
-  function endDamp() {
-    if (!damping) return;
-    damping = false;
-    dampSettling = false;
-    cancelAnimationFrame(dampFrame);
-    clearTimeout(dampQuiet);
-    clearTimeout(dampBackstop);
-    dampVel = 0;
-    track.scrollLeft = dampTarget;   // land exactly on the boundary
-    track.style.scrollSnapType = ''; // back to the stylesheet's mandatory
-    normalize();                     // rotate, and come to rest on STEP
-    updateDots();                    // the card changed — so has the page
-    relock();                        // and swallow the flick's remaining tail
-  }
-
-  let dampLast = 0;
-  let dampVel = 0;   // px/s — carried ACROSS target changes, see below
-
-  // CRITICALLY DAMPED SPRING, not exponential decay.
-  //
-  // Exponential decay (`pos += (target - pos) * factor`) is ease-OUT ONLY: its
-  // velocity is at maximum on the very first frame and only ever falls. Measured
-  // at a 650ms setting it put 39% of the travel in the first 50ms and half of it
-  // in 70ms, then spent the remaining half of the budget covering 4% at under
-  // 8px/frame — invisible. So the motion launched hard and the number in the
-  // config bore little relation to the duration anyone perceives, which is why
-  // this dial was so hard to tune: raising it lengthened a tail you cannot see
-  // while leaving the abrupt start exactly as it was.
-  //
-  // A critically damped spring starts from REST, accelerates, then decelerates
-  // into the target — real ease-in-out — and, being critically damped, settles
-  // without overshoot. It also gives velocity CONTINUITY: `dampVel` survives a
-  // target change, so when onWheel commits mid-run the motion bends toward the
-  // new destination instead of restarting from zero.
-  //
-  // Integrated with the exact analytic solution for critical damping rather than
-  // Euler steps, so it is stable at any dt — including the 50ms cap below, where
-  // a naive integrator visibly overshoots.
-  function dampStep(now) {
-    const dt = (dampLast ? Math.min(now - dampLast, 50) : 16.67) / 1000;
-    dampLast = now;
-
-    // ω from the requested arrival time. For critical damping the remaining
-    // fraction after time T is (1 + ωT)·e^(−ωT); ωT ≈ 8.5 lands it on
-    // DAMP.settle for the card widths this site uses, so ω = 8.5 / arrival.
-    // (That holds arrival to within ~5% across the breakpoints — well under
-    // anything perceptible.)
-    const omega = 8.5 / (DAMP.arrival / 1000);
-
-    const displacement = track.scrollLeft - dampTarget;
-    const b = dampVel + omega * displacement;
-    const decay = Math.exp(-omega * dt);
-    const nextDisplacement = (displacement + b * dt) * decay;
-
-    dampVel = (b - omega * (displacement + b * dt)) * decay;
-    track.scrollLeft = dampTarget + nextDisplacement;
-
-    // Settle on position AND velocity. Position alone is not enough once
-    // velocity is carried across a target change: a reversal can arrive at the
-    // target still moving, and stopping there would cut the motion dead.
-    if (dampSettling
-        && Math.abs(nextDisplacement) < DAMP.settle
-        && Math.abs(dampVel) < DAMP.settle * 20) {
-      endDamp();
-      return;
-    }
-    dampFrame = requestAnimationFrame(dampStep);
-  }
-
-  // ONE CARD toward the project a dot names, carried by the same spring a wheel
-  // gesture gets.
-  //
-  // ⚠️ IT STEPS, IT DOES NOT JUMP — and that is forced, not preferred. Landing on
-  // a distant project with only one card of travel would mean making it adjacent
-  // first, and it cannot be done: the loop reorders by ROTATION, which preserves
-  // the cycle, so the distance between two cards around the ring is invariant.
-  // The choice is one card of motion OR arriving in one click, never both.
-  // With four projects that costs little — from any card, two of the other three
-  // are one step away (one forward, one back) and only the opposite one needs a
-  // second click.
-  //
-  // Direction is the shorter way round; a tie (the opposite card) goes forward.
-  function stepToward(k) {
-    if (!active || step <= 0) return;
-    const target = authored[k];
-    const current = track.children[Math.round(track.scrollLeft / step)];
-    if (!target || !current || target === current) return;
-    // A wheel run already owns scrollLeft — let it finish rather than fight it.
-    if (damping) return;
-
-    const n = authored.length;
-    const forward = (k - authored.indexOf(current) + n) % n;
-    const dir = forward <= n - forward ? 1 : -1;
-
-    // Reduced motion takes the same route the wheel path does at this point:
-    // no animation, just the destination.
-    if (reducedMotion.matches) {
-      bringIntoView(dir === 1 ? track.children[2] : track.firstElementChild);
-      return;
-    }
-
-    // Start a damped run exactly the way onWheel does, with one difference:
-    // dampSettling is true from the first frame. A wheel gesture has to wait to
-    // learn where the reader meant to go; a click said so outright.
-    damping = true;
-    dampSettling = true;
-    dampAnchor = Math.round(track.scrollLeft);
-    dampTarget = dampAnchor + dir * step;
-    track.style.scrollSnapType = 'none';
-    dampLast = 0;
-    dampVel = 0;
-    dampFrame = requestAnimationFrame(dampStep);
-    dampBackstop = setTimeout(endDamp, 2000);
-  }
-
-  // Fallback resolver for a push that never got decisive: the reader nudged the
-  // track a little and stopped. Send it back where it came from. The COMMITTED
-  // case does not come through here — see onWheel — because waiting for the
-  // gesture to go quiet before choosing a destination is exactly what made the
-  // track linger part-way and then jump.
-  function onQuiet() {
-    if (!damping || dampSettling) return;
-    dampTarget = dampAnchor;
-    dampSettling = true;
-  }
-
-  function onWheel(event) {
-    // Reduced motion and the phone tier both fall through to native scrolling.
-    if (!active || reducedMotion.matches) return;
-    // Vertical intent belongs to the page — never swallow it. Only a gesture
-    // that is predominantly horizontal is ours.
-    if (Math.abs(event.deltaX) <= Math.abs(event.deltaY)) return;
-    event.preventDefault();
-    // ...and STOP IT HERE. preventDefault only cancels the browser's own
-    // scrolling; the event still bubbles, and Lenis listens on `window`. A real
-    // trackpad swipe is never exactly deltaY 0 — measured, a horizontal flick
-    // carried deltaY 18 — so Lenis was receiving that remainder and easing the
-    // PAGE up or down underneath the reader while the track moved sideways.
-    // That is the subtle vertical drift while scrolling the carousel.
-    // (A pure deltaY of 0 never showed it, because Lenis discards those itself
-    // as an unknown gesture — which is exactly why this only bit on real
-    // hardware and never in a synthetic test.)
-    // Genuinely vertical gestures still reach Lenis untouched: they return above,
-    // before this line.
-    event.stopPropagation();
-
-    // Still swallowing the previous flick's momentum tail. Keep it swallowed,
-    // and hold the lock open for as long as the tail keeps arriving.
-    if (dampLocked) { relock(); return; }
-
-    if (!damping) {
-      damping = true;
-      dampSettling = false;
-      dampAnchor = Math.round(track.scrollLeft);
-      dampTarget = dampAnchor;
-      // mandatory snap re-snaps ANY programmatic scrollLeft to the nearest snap
-      // position, which would flatten every intermediate frame. It stands down
-      // for the run and is restored in endDamp — safe against a re-snap because
-      // every position written after that point is itself a snap position.
-      track.style.scrollSnapType = 'none';
-      dampLast = 0;   // fresh clock, so the first frame uses the 60fps default
-      dampVel = 0;    // a new gesture starts from rest — that IS the ease-in
-      dampFrame = requestAnimationFrame(dampStep);
-      // See the glide note in CLAUDE.md: rAF STOPS in a backgrounded tab, and
-      // this run owns snap-off plus the `damping` flag. Timers are only
-      // throttled when hidden, never stopped, so the backstop has to be a timer.
-      dampBackstop = setTimeout(endDamp, 2000);
-    }
-
-    // deltaMode 1 means the wheel reports LINES, not pixels — common on real
-    // mouse wheels. Without this a mouse wheel would barely move the track.
-    const px = event.deltaMode === 1 ? event.deltaX * DAMP.lineHeight : event.deltaX;
-
-    // THE CAP. Clamping to one card either side of where the gesture started is
-    // what stops a hard flick running away, and it does so without needing to
-    // know when the gesture ends — the momentum tail keeps arriving and simply
-    // finds the target already pinned. This is the job scroll-snap-stop does on
-    // the native path, done here because snap is off during the run.
-    dampTarget = clamp(dampTarget + px, dampAnchor - step, dampAnchor + step);
-
-    // COMMIT AS SOON AS THE PUSH IS DECISIVE. The destination must not wait for
-    // the gesture to end: a trackpad keeps firing momentum events for up to a
-    // second after the fingers lift, so deciding at that point left the track
-    // sitting part-way (the linger) and then jumping to the card (the snap).
-    // A tenth of a card is enough to know which way the reader meant to go.
-    const moved = dampTarget - dampAnchor;
-    if (Math.abs(moved) >= step * DAMP.commit) {
-      dampTarget = dampAnchor + Math.sign(moved) * step;
-      dampSettling = true;   // the ease can now finish and land
-      return;
-    }
-
-    // Not decisive yet — if the reader stops here, onQuiet sends it home.
-    clearTimeout(dampQuiet);
-    dampQuiet = setTimeout(onQuiet, DAMP.quiet);
-  }
-  // passive:false because the whole point is to preventDefault.
-  track.addEventListener('wheel', onWheel, { passive: false });
-
-  // A fresh swipe gets a fresh budget; touchmove keeps the window open through a
-  // long drag while the finger is still down.
-  track.addEventListener('touchstart', () => {
-    lastTouchAt = performance.now();
-    touchRotations = 0;
-  }, { passive: true });
-  track.addEventListener('touchmove', () => { lastTouchAt = performance.now(); }, { passive: true });
-
-  track.addEventListener('scroll', () => {
-    normalize();
-    // Called here rather than inside normalize(): that returns early while the
-    // damped run owns scrollLeft, and again when a touch gesture has spent its
-    // rotation budget — in both of which the track is still very much moving.
-    // Four class toggles, cheap enough to run on every scroll event.
-    updateDots();
-    // Scroll gone quiet: the gesture is over. Restore the invariant ignoring the
-    // budget, so the next swipe starts from a full buffer on both sides again.
-    clearTimeout(touchSettleTimer);
-    touchSettleTimer = setTimeout(() => { touchRotations = 0; normalize(true); }, TOUCH.settle);
-  }, { passive: true });
-  track.addEventListener('focusin', flushFocusedCard);
-  // Resize drives BOTH jobs, and the tier check comes first: crossing 480 has to
-  // switch the loop on or off before re-measuring, or measure() would size a
-  // step from whichever layout it is no longer in.
-  window.addEventListener('resize', () => { syncToTier(); measure(); });
-
-  function enable() {
-    if (active) return;
-    active = true;
-    // Tells the CSS the loop is live, so the no-JS end-snap steps aside — and
-    // reveals the pagination, which is hidden until this class lands.
-    track.classList.add('is-looping');
-    step = 0;   // force measure() to re-read rather than trust a stale tier
-    measure();
-  }
-
-  function disable() {
-    if (!active) return;
-    active = false;
-    track.classList.remove('is-looping');
-    // Put the projects back in the order the document declares them. appendChild
-    // on an element already in the parent MOVES it, so replaying the authored
-    // list in order is enough to undo any rotation.
-    authored.forEach((card) => track.appendChild(card));
-    track.scrollLeft = 0;
-    step = 0;
-  }
-
-  function syncToTier() {
-    if (horizontal.matches) enable(); else disable();
-  }
-
-  // TWO triggers on purpose, because correctness rides on this and neither event
-  // is guaranteed on its own. `change` is the precise one — it fires only when
-  // the 480 boundary is actually crossed — but it is a single point of failure,
-  // and one was observed being dropped in testing (a desktop→phone transition
-  // left the loop live over a vertical stack, which is exactly the state that
-  // scrambles the card order). `resize` is noisier but independent, so a missed
-  // `change` self-heals on the next resize tick. syncToTier is idempotent —
-  // enable()/disable() both no-op when already in that state — so double
-  // delivery costs nothing.
-  horizontal.addEventListener('change', syncToTier);
-  syncToTier();
+  // Laid out straight from the observer, NOT deferred to a rAF: observer
+  // callbacks already run before paint, and rAF stops outright in a background
+  // tab, which left the spans stale (cards overlapping) until it came back.
+  // No feedback loop: a span never changes a card's own height, and the grid's
+  // own resize re-derives the same spans.
+  const ro = new ResizeObserver(layout);
+  cards.forEach((card) => ro.observe(card));
+  ro.observe(grid);
+  layout();
 }
-initWorkCarousel();
+initWorkMasonry();
 
 
 // ============================================================
@@ -3306,13 +2736,9 @@ function setupLenis(Lenis) {
 // who was only passing through, and needed an arming flag, a cooldown, a release
 // accumulator and five escape hatches to stay survivable.
 //
-// What replaced it is far simpler and is already in initWorkCarousel: a gesture
-// judged predominantly horizontal is stopPropagation'd so it never reaches Lenis,
-// which pins the vertical position for exactly as long as the reader is working
-// the carousel and not a moment longer. Vertical gestures are untouched and
-// scroll the page normally. No state, nothing to escape from, nothing to re-arm.
-//
-// If a hold is ever wanted again, read the four failures above first.
+// The horizontal carousel it served is gone too (2026-09, now a two-column
+// masonry that scrolls with the page). If a hold is ever wanted again, read the
+// four failures above first.
 // Fraction of a section's leftover space placed ABOVE its content when it
 // settles. 0.5 is a true centre; lower lifts the content.
 const SECTION_BIAS = { about: 0.34 };
@@ -3639,7 +3065,7 @@ if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
   // the page default on leave. (Overview pages have no .work-card, so this is a
   // no-op there.)
   document.querySelectorAll('.work-card').forEach(card => {
-    const link = card.querySelector('a.work-card-image-link');
+    const link = card.querySelector('a.work-card-link');
     const href = link ? link.getAttribute('href') || '' : '';
     const variant = GLOW_VARIANTS.find(v => href.includes(v.match));
     if (!variant) return;
