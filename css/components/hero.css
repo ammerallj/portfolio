@@ -374,8 +374,11 @@ html.is-field-live .page-field-grain { opacity: 0.15; }
        60     2.97        2.57   FAILS
        90     2.84        2.54   FAILS
      1440x740 is looser (bio 3.22 -> 3.16 at rise 30) so it does not bind. Going
-     higher needs something else to give first — the bio's 3:1 is the wall. */
-  --field-rise: 30px;
+     higher needs something else to give first — the bio's 3:1 is the wall.
+     REDESIGN: that wall is gone — the lockup sits on white now, not on the
+     field — so the artwork rises 130px to bring the red up into the visible
+     band and push some of the top blue off-screen. Was 30px. */
+  --field-rise: 130px;
   /* ⚠️ --field-cream (scroll-linked, js/main.js) moves the dissolve's END up the
      artwork. It equals the artwork's lag (--field-scroll is negative: the
      artwork sinks, slower than the page) plus the tuck's overhang, so on the

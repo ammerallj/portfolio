@@ -199,7 +199,7 @@ const FIELD_LAG = { k: 0.3 };
 // scroll on top of riding Work's own push (see setHeroTextLift), so the text
 // scrolls away faster than Work rises and fades out on HERO_TEXT_FADE as it
 // goes. 0 would lock the two together (no parallax, constant gap).
-const HERO_TEXT = { speed: 0.9 };
+const HERO_TEXT = { speed: 1.2 };
 let lastHeroTextLift = -1;
 function setHeroTextLift(px) {
   if (px === lastHeroTextLift) return;
@@ -645,7 +645,10 @@ let fieldDockScroll = 0;
 // REDESIGN: 400 (was 240). The extra is what used to be a text-only boost;
 // carried here it lifts the lockup AND Selected Work together on the first
 // gesture, so the gap between them holds instead of opening.
-const HERO_SHORTEN = { px: 400, bias: 1.5 };
+// 530 + a cap of 0.65 of the bar's resting top (was 400 / 0.5): Work gets its
+// own share of the parallax speed — it rises faster to follow the lockup, which
+// still leads it by HERO_TEXT.speed. Larger = faster Work, earlier pin.
+const HERO_SHORTEN = { px: 530, cap: 0.65, bias: 1.5 };
 let heroShorten = 0;
 let fieldVisibleEnd = 0;
 let lastHeroShorten = -1;
@@ -722,7 +725,7 @@ function measureFieldTuck() {
   fieldVisibleEnd = visibleEnd;
   // Now shorten. Capped at half the bar's resting top so a short window still
   // has scroll left to unwind the push over.
-  heroShorten = Math.round(Math.min(HERO_SHORTEN.px, barRest * 0.5));
+  heroShorten = Math.round(Math.min(HERO_SHORTEN.px, barRest * HERO_SHORTEN.cap));
   setHeroShorten(heroShorten);
   // The bar pins when its LAYOUT top reaches the viewport's — the shortened one.
   fieldDockScroll = barRest - heroShorten;
@@ -1370,7 +1373,11 @@ const TOP_NAV_FADE = { from: 0.2, to: 0.4 }; // fraction of the scroll to the ba
 // The hero text fades LATER than the nav — as it exits the top of the screen —
 // so no empty band opens between it and Selected Work, which follows ~170px
 // behind. The nav still goes first, so its white type never sits on the text.
-const HERO_TEXT_FADE = { from: 0.25, to: 0.5 };
+const HERO_TEXT_FADE = { from: 0.1, to: 0.45 };
+// When the docked bar takes over (fraction of the way to its pin), separate from
+// the text fade so the text can go early while the bar arrives with Work close
+// beneath it. The top nav is hidden from here on too.
+const NAV_HANDOFF = 0.85;
 // Extra lift on the first gesture, on top of riding the white edge (see
 // setHeroTextLift). px at full; reached by `over` of the way to the pin.
 const HERO_TEXT_BOOST = { px: 0, over: 0.4 };
@@ -2928,7 +2935,7 @@ function updateScrollEffects() {
     const tf = Math.min(1, Math.max(0,
       (pinP - HERO_TEXT_FADE.from) / (HERO_TEXT_FADE.to - HERO_TEXT_FADE.from)));
     setHeroTextFade(fieldDockScroll > 0 ? 1 - tf * tf * (3 - 2 * tf) : 1);
-    const off = fade <= 0.01 || (fieldDockScroll > 0 && pinP >= HERO_TEXT_FADE.to);
+    const off = fade <= 0.01 || (fieldDockScroll > 0 && pinP >= NAV_HANDOFF);
     html.classList.toggle('is-top-nav-off', off);
     topNav.inert = off;
   }
@@ -2951,7 +2958,7 @@ function updateScrollEffects() {
     const barTop = fieldDockScroll > 0
       ? Math.max(0, fieldDockScroll + push - window.scrollY) : 0;
     const show = fieldDockScroll > 0
-      && (pinP >= HERO_TEXT_FADE.to || barTop <= 0);
+      && (pinP >= NAV_HANDOFF || barTop <= 0);
     setBarLift(show ? Math.round(barTop) : 0);
     html.classList.toggle('is-bar-docked', show);
     introBar.inert = !show;
