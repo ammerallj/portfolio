@@ -75,10 +75,11 @@ let sectionSpyScrollY = null;
 // when the spy switches to it (a fraction of the viewport height). Work needs
 // it because the masonry is TALLER THAN THE SCREEN: its resting position puts
 // the first cards right under the nav, so at 1440x900 the cards were fully on
-// screen from scrollY ~300 while "Selected work" only lit at ~700. At 0.5 it
-// lights once the first cards reach the middle of the screen. Sections not
+// screen from scrollY ~300 while "Selected work" only lit at ~700. At 0.7 it
+// lights once the first cards are 70% of the way down the screen (0.5 was
+// mid-screen and read a touch late). Sections not
 // listed use their resting position unchanged, as before.
-const SPY_LEAD = { 'work-section': 0.5 };
+const SPY_LEAD = { 'work-section': 0.7 };
 // Where a NAV CLICK should land, which is not always where the section rests.
 // Same TDZ rule as above — declared here, above updateScrollEffects.
 let sectionClickScrollY = null;
