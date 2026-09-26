@@ -1365,7 +1365,7 @@ const TOP_NAV_FADE = { from: 0.2, to: 0.4 }; // fraction of the scroll to the ba
 // The hero text fades LATER than the nav — as it exits the top of the screen —
 // so no empty band opens between it and Selected Work, which follows ~170px
 // behind. The nav still goes first, so its white type never sits on the text.
-const HERO_TEXT_FADE = { from: 0.6, to: 0.95 };
+const HERO_TEXT_FADE = { from: 0.25, to: 0.5 };
 let lastHeroTextFade = -1;
 function setHeroTextFade(v) {
   const r = Math.round(v * 1000) / 1000;
