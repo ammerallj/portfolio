@@ -79,6 +79,25 @@
   overflow: hidden;
   color: var(--color-text);
   text-decoration: none;
+  /* Hover / keyboard focus grows the WHOLE card a touch, on the site's
+     card-zoom curve and duration (the same 0.5s ease the next-case pager uses).
+     ⚠️ The individual `scale` property, never `transform: scale()`: this link
+     is the card's reveal target, and the motion system writes an inline
+     `transform: translateY()` on it — a CSS transform here would be overwritten.
+     `scale` composes with it. 1.02 on a ~670px card is ~13px, well inside the
+     grid's 60px gutter, so a grown card never touches its neighbour. */
+  scale: 1;
+  transition: scale 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.work-card-link:focus-visible {
+  scale: 1.02;
+}
+
+@media (hover: hover) {
+  .work-card-link:hover {
+    scale: 1.02;
+  }
 }
 
 /* The media frame. Its HEIGHT is the masonry's main dial: --media-ratio per
@@ -101,8 +120,6 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  scale: 1;
-  transition: scale 0.6s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .work-card-placeholder {
@@ -174,10 +191,6 @@
     opacity: 1;
     translate: 0 0;
   }
-  .work-card-link:hover .work-card-media > img,
-  .work-card-link:hover .work-card-media > video {
-    scale: 1.03;
-  }
 }
 
 .work-card-link:focus-visible .work-card-title {
@@ -209,11 +222,16 @@
 
 @media (prefers-reduced-motion: reduce) {
   .work-card-title,
-  .work-card-description,
-  .work-card-media > img,
-  .work-card-media > video {
+  .work-card-description {
     transition: none;
     translate: none;
+  }
+  /* No growth at all — the crossfade still says "you're on this card". */
+  .work-card-link,
+  .work-card-link:hover,
+  .work-card-link:focus-visible {
+    transition: none;
+    scale: 1;
   }
 }
 
