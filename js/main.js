@@ -68,6 +68,17 @@ navSections.push(...introBarSections);
 // `is-loading`, so they ran straight into it. Anything the spy reads must be
 // declared above this line, and must be tested on a project page.
 let sectionRestingScrollY = null;
+// When the SCROLL-SPY counts a section as arrived, which can come BEFORE its
+// resting position. Same TDZ rule — declared here, set by initSectionGeometry.
+let sectionSpyScrollY = null;
+// Per section, how far down the viewport its content's top edge may still be
+// when the spy switches to it (a fraction of the viewport height). Work needs
+// it because the masonry is TALLER THAN THE SCREEN: its resting position puts
+// the first cards right under the nav, so at 1440x900 the cards were fully on
+// screen from scrollY ~300 while "Selected work" only lit at ~700. At 0.5 it
+// lights once the first cards reach the middle of the screen. Sections not
+// listed use their resting position unchanged, as before.
+const SPY_LEAD = { 'work-section': 0.5 };
 // Where a NAV CLICK should land, which is not always where the section rests.
 // Same TDZ rule as above — declared here, above updateScrollEffects.
 let sectionClickScrollY = null;
@@ -2316,9 +2327,11 @@ function updateScrollEffects() {
   // Contact's resting position is reachable, so it simply works.
   let activeEl = null, activeRest = -Infinity;
   let restingKnown = false;
-  if (sectionRestingScrollY) {
+  if (sectionSpyScrollY) {
     for (const s of navSections) {
-      const rest = sectionRestingScrollY(s.el);
+      // Resting position, or earlier for a section in SPY_LEAD (Work) — see
+      // sectionSpyScrollY. Clicks still land at rest.
+      const rest = sectionSpyScrollY(s.el);
       if (rest == null) continue;                  // not a settling section / not this tier
       restingKnown = true;
       // 2px of slack: the resting position is fractional and the scroll lands on
@@ -2861,6 +2874,17 @@ function initSectionGeometry(lenis) {
   }
 
   sectionRestingScrollY = (el) => (sections.includes(el) && wide.matches ? restingFor(el) : null);
+  // The spy's arrival line: the resting position, or EARLIER for a section in
+  // SPY_LEAD — once its content's top has risen to that fraction of the
+  // viewport. Never later than rest, so a nav click (which lands at rest)
+  // always lights its own link. Offsets, like restingFor: a section's content
+  // can be transformed by the reveal.
+  sectionSpyScrollY = (el) => {
+    const rest = sectionRestingScrollY(el);
+    const lead = SPY_LEAD[el.id];
+    if (rest == null || lead == null || !el.children.length) return rest;
+    return Math.min(rest, pageTopOf(el.children[0]) - window.innerHeight * lead);
+  };
   measureAboutRest();   // the reach window's top anchor; needs the line above.
 
   // WHERE A CLICK LANDS, which is deliberately not always the resting position.
