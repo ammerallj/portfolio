@@ -889,10 +889,10 @@ html:not(.is-field-live) .intro-divider {
 .intro-band {
   flex: 0 0 auto;
   /* The nav bar that used to rest here is hidden until it docks, so the
-     lockup no longer reserves its 80px — just a group gap to the fold
-     (60/48/40 by tier). Was calc(64px + --bar-tail + --gap-content). */
+     lockup no longer reserves its 80px — just a content gap to the fold.
+     Was --gap-group, before that calc(64px + --bar-tail + --gap-content). */
   padding-top: 0;
-  padding-bottom: var(--gap-group);
+  padding-bottom: var(--gap-content);
   overflow: visible;
 }
 
