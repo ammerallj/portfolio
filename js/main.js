@@ -1382,6 +1382,12 @@ const HERO_TEXT_FADE = { from: 0.1, to: 0.45 };
 // the text fade so the text can go early while the bar arrives with Work close
 // beneath it. The top nav is hidden from here on too.
 const NAV_HANDOFF = 0.45; // = HERO_TEXT_FADE.to: no nav-less stretch
+// The glide to Selected Work when the docked nav appears (see the hand-off in
+// updateScrollEffects). easeInOutSine: a gentle start and a soft landing.
+const WORK_GLIDE = { duration: 1.0, easing: (t) => -(Math.cos(Math.PI * t) - 1) / 2 };
+let workGlideArmed = true;
+let lastHandoffShow = false;
+let lastGlideScrollY = 0;
 // Extra lift on the first gesture, on top of riding the white edge (see
 // setHeroTextLift). px at full; reached by `over` of the way to the pin.
 const HERO_TEXT_BOOST = { px: 0, over: 0.4 };
@@ -2960,6 +2966,25 @@ function updateScrollEffects() {
     html.classList.toggle('is-bar-lifted', show);
     html.classList.toggle('is-bar-docked', show);
     introBar.inert = !show;
+    // ...and the moment it appears on the way DOWN, the page glides on to
+    // Selected Work's resting position (WORK_GLIDE). Once per pass: it re-arms
+    // only after the reader is back above the hand-off. Lenis's scrollTo is
+    // not locked, so any wheel/touch input mid-glide simply takes over.
+    // ⚠️ CLAUDE.md records four earlier auto-scrolls into Work that were
+    // removed because they grabbed readers who were only passing. This one is
+    // Jenna's explicit ask (2026-09-26); it fires only on a downward crossing.
+    const down = window.scrollY > lastGlideScrollY;
+    if (!show) workGlideArmed = true;
+    else if (!lastHandoffShow && down && workGlideArmed
+      && !reducedMotion.matches && window.__lenis && sectionRestingScrollY) {
+      const target = sectionRestingScrollY(document.getElementById('work-section'));
+      if (target != null && target > window.scrollY + 4) {
+        workGlideArmed = false;
+        window.__lenis.scrollTo(target, { duration: WORK_GLIDE.duration, easing: WORK_GLIDE.easing });
+      }
+    }
+    lastHandoffShow = show;
+    lastGlideScrollY = window.scrollY;
   }
   // Negative: .page-field's transform subtracts it, so the artwork moves DOWN
   // relative to the page, i.e. slower than the scroll.
