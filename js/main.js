@@ -3040,6 +3040,13 @@ function updateScrollEffects() {
     }
     if (atBottom && lastEl) activeEl = lastEl;
   }
+  // REDESIGN: the docked bar is revealed early (NAV_HANDOFF), with Selected Work
+  // rising right under it — so from that moment "Selected work" reads active,
+  // rather than waiting for Work's resting position. Only fills an empty slot;
+  // About and Contact still take over as they are reached.
+  if (!activeEl && html.classList.contains('is-bar-docked')) {
+    activeEl = document.getElementById('work-section');
+  }
   navSections.forEach(s => {
     const on = s.el === activeEl;
     s.link.classList.toggle('is-active', on);
