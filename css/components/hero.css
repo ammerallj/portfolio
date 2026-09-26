@@ -931,6 +931,13 @@ html:not(.is-field-live) .intro-divider {
    (where an auto cross-axis margin pushes it right). (0,2,0) so the tiers'
    padding-inline shorthands on .intro-band don't win; ≤680 resets it. */
 .intro .intro-band {
+  /* The right block's last line sits on the headline's last line. Baselines,
+     not boxes: a 96px/1.05 headline and 18px/1.5 text carry different space
+     under their letters, so box bottoms would leave the small text visibly
+     low. flex-end is the fallback where last-baseline isn't supported. The
+     ≤768 stack resets this (it would push the headline right). */
+  align-items: flex-end;
+  align-items: last baseline;
   padding-left: var(--nav-lead, 56px); /* the headline starts under the clock */
   padding-right: var(--nav-col-inset, 56px);
 }
@@ -944,7 +951,7 @@ html:not(.is-field-live) .intro-divider {
 
 .intro-bio {
   font-weight: 400;
-  color: var(--color-text-70);
+  color: var(--color-text); /* primary */
   -webkit-text-stroke: 0;
 }
 
@@ -956,7 +963,7 @@ html:not(.is-field-live) .intro-divider {
   margin: var(--gap-content) 0 0; /* was --gap-group; one block with the bio */
   font-size: var(--size-lg);
   font-weight: 500;
-  color: var(--color-text);
+  color: var(--color-text-70); /* secondary */
 }
 
 /* ---- REDESIGN: the top nav over the gradient ----

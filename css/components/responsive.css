@@ -538,8 +538,9 @@
     display: none;
   }
   /* REDESIGN: the two lockup columns stack once they share a narrow row. */
-  .intro-band {
+  .intro .intro-band {
     flex-direction: column;
+    align-items: stretch; /* undo the row's last-baseline (hero.css) */
     gap: var(--gap-content);
   }
   .intro-band-left {
