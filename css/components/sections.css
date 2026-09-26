@@ -100,6 +100,64 @@
   }
 }
 
+/* HOVER SCRIM — the project's cursor-glow colour rising from the card's bottom
+   edge and dissolving to nothing ~2/3 of the way up. Subtle by design: 0.2 at
+   its strongest, over the panel's cream.
+   The colour is the CORE of that project's cursor PNG (images/*-cursor.png,
+   sampled), keyed on the link's href — the same href match js/main.js's
+   GLOW_VARIANTS uses to tint the cursor — so card and cursor always agree.
+   Re-sample if a cursor PNG is re-exported; nothing enforces the pairing.
+   It paints BEHIND the card's text: the link isolates, and the scrim sits at
+   z-index -1 inside it, above the panel's own background.
+   ⚠️ A SMOOTHSTEP in 13 stops, never a two-stop linear ramp — a straight alpha
+   line reads as a band at its top edge (the same finding as the hero mask,
+   the Contact ledge and the header scrim). */
+.work-card-link {
+  position: relative;
+  isolation: isolate;
+}
+
+.work-card-link[href$="messaging.html"]       { --card-glow: 2, 183, 236; }   /* blue */
+.work-card-link[href$="microsoft-loop.html"]  { --card-glow: 178, 48, 237; }  /* purple */
+.work-card-link[href$="facebook-groups.html"] { --card-glow: 250, 55, 90; }   /* red */
+.work-card-link[href$="accessibility.html"]   { --card-glow: 230, 68, 222; }  /* pink */
+
+.work-card-link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(
+    to top,
+    rgba(var(--card-glow, 0, 0, 0), 0.200) 0%,
+    rgba(var(--card-glow, 0, 0, 0), 0.196) 5.4%,
+    rgba(var(--card-glow, 0, 0, 0), 0.185) 10.8%,
+    rgba(var(--card-glow, 0, 0, 0), 0.169) 16.2%,
+    rgba(var(--card-glow, 0, 0, 0), 0.148) 21.7%,
+    rgba(var(--card-glow, 0, 0, 0), 0.125) 27.1%,
+    rgba(var(--card-glow, 0, 0, 0), 0.100) 32.5%,
+    rgba(var(--card-glow, 0, 0, 0), 0.075) 37.9%,
+    rgba(var(--card-glow, 0, 0, 0), 0.052) 43.3%,
+    rgba(var(--card-glow, 0, 0, 0), 0.031) 48.8%,
+    rgba(var(--card-glow, 0, 0, 0), 0.015) 54.2%,
+    rgba(var(--card-glow, 0, 0, 0), 0.004) 59.6%,
+    rgba(var(--card-glow, 0, 0, 0), 0) 65%
+  );
+  opacity: 0;
+  transition: opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.work-card-link:focus-visible::after {
+  opacity: 1;
+}
+
+@media (hover: hover) {
+  .work-card-link:hover::after {
+    opacity: 1;
+  }
+}
+
 /* The media frame. Its HEIGHT is the masonry's main dial: --media-ratio per
    card (5 / 4 taller, 16 / 10 shorter — kept under ~75% of a 900px fold). When real art arrives, drop
    an <img> or <video> in here in place of the placeholder span; it fills the
