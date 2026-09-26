@@ -1071,6 +1071,10 @@ html.is-top-nav-off .top-nav {
    Gated on has-top-nav, set by js/main.js: with no JS the bar is never
    hidden, so both navs show and neither is lost. */
 html.has-top-nav .intro-bar {
+  /* Lifted onto the top of the screen from the moment the hero text has faded
+     until it genuinely pins (--bar-lift, js/main.js; 0 once docked). Scroll-
+     linked, so no transition on it. */
+  transform: translateY(calc(-1 * var(--bar-lift, 0px)));
   animation: none;
   opacity: 0;
   visibility: hidden;

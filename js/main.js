@@ -199,7 +199,7 @@ const FIELD_LAG = { k: 0.3 };
 // scroll on top of riding Work's own push (see setHeroTextLift), so the text
 // scrolls away faster than Work rises and fades out on HERO_TEXT_FADE as it
 // goes. 0 would lock the two together (no parallax, constant gap).
-const HERO_TEXT = { speed: 0.4 };
+const HERO_TEXT = { speed: 0.9 };
 let lastHeroTextLift = -1;
 function setHeroTextLift(px) {
   if (px === lastHeroTextLift) return;
@@ -1375,6 +1375,12 @@ const HERO_TEXT_FADE = { from: 0.25, to: 0.5 };
 // setHeroTextLift). px at full; reached by `over` of the way to the pin.
 const HERO_TEXT_BOOST = { px: 0, over: 0.4 };
 let lastHeroTextFade = -1;
+let lastBarLift = -1;
+function setBarLift(px) {
+  if (px === lastBarLift) return;
+  lastBarLift = px;
+  document.documentElement.style.setProperty('--bar-lift', px + 'px');
+}
 function setHeroTextFade(v) {
   const r = Math.round(v * 1000) / 1000;
   if (r === lastHeroTextFade) return;
@@ -2869,11 +2875,8 @@ function updateScrollEffects() {
   if (introBar) {
     const docked = introBar.getBoundingClientRect().top <= 0;
     introBar.classList.toggle('is-docked', docked);
-    // REDESIGN: the top nav hands over to this bar the moment it docks.
-    if (topNav) {
-      html.classList.toggle('is-bar-docked', docked);
-      introBar.inert = !docked;
-    }
+    // REDESIGN: the hand-off from the top nav to this bar (is-bar-docked) is
+    // decided further down, once push is known — see --bar-lift.
   }
 
   // ...and the field lifts away as the reader moves. See measureFieldTuck above.
@@ -2925,7 +2928,7 @@ function updateScrollEffects() {
     const tf = Math.min(1, Math.max(0,
       (pinP - HERO_TEXT_FADE.from) / (HERO_TEXT_FADE.to - HERO_TEXT_FADE.from)));
     setHeroTextFade(fieldDockScroll > 0 ? 1 - tf * tf * (3 - 2 * tf) : 1);
-    const off = fade <= 0.01 || html.classList.contains('is-bar-docked');
+    const off = fade <= 0.01 || (fieldDockScroll > 0 && pinP >= HERO_TEXT_FADE.to);
     html.classList.toggle('is-top-nav-off', off);
     topNav.inert = off;
   }
@@ -2938,6 +2941,21 @@ function updateScrollEffects() {
   const pinR = 1 - pinP;
   const push = fieldDockScroll > 0 ? heroShorten * pinR * pinR : 0;
   setHeroPush(Math.round(push));
+  // REDESIGN: the docked bar takes over the moment the hero text has faded to
+  // 0 — not when it actually pins, which is later. Until it pins, --bar-lift
+  // translates it up onto the top of the screen: its visual top is its layout
+  // top + push − scroll, and lifting by exactly that keeps it at 0, meeting
+  // the real sticky dock with no jump (the lift is 0 there by construction).
+  // A transform, so nothing in the layout moves.
+  if (topNav && introBar) {
+    const barTop = fieldDockScroll > 0
+      ? Math.max(0, fieldDockScroll + push - window.scrollY) : 0;
+    const show = fieldDockScroll > 0
+      && (pinP >= HERO_TEXT_FADE.to || barTop <= 0);
+    setBarLift(show ? Math.round(barTop) : 0);
+    html.classList.toggle('is-bar-docked', show);
+    introBar.inert = !show;
+  }
   // Negative: .page-field's transform subtracts it, so the artwork moves DOWN
   // relative to the page, i.e. slower than the scroll.
   setFieldScroll(-lag);
