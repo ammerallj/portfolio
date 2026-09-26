@@ -1361,7 +1361,7 @@ try {
 // Seattle time; the fade and the hand-off to .intro-bar live in
 // updateScrollEffects. Null on project pages, so all of it is skipped there.
 const topNav = document.querySelector('.top-nav');
-const TOP_NAV_FADE = { from: 0.35, to: 0.55 }; // fraction of the scroll to the bar's pin
+const TOP_NAV_FADE = { from: 0.2, to: 0.4 }; // fraction of the scroll to the bar's pin
 // The hero text fades LATER than the nav — as it exits the top of the screen —
 // so no empty band opens between it and Selected Work, which follows ~170px
 // behind. The nav still goes first, so its white type never sits on the text.
@@ -3593,7 +3593,10 @@ function initSectionGeometry(lenis) {
 // (robust across browsers, unlike an observer); Motion.dev runs the fade + rise.
 // Where a Work card fades in / back out, as fractions of the viewport height
 // measured on the card's top. Was 0.85 / 0.95.
-const WORK_REVEAL = { in: 0.97, out: 0.995 };
+// REDESIGN: 0.9 / 0.95 — the same 0.9 line every other section reveals on. At
+// 0.97 the reveal fired with only ~34px of card above the fold while Work was
+// rising at ~1.8x, so the whole rise-and-fade played out of sight.
+const WORK_REVEAL = { in: 0.9, out: 0.95 };
 function setupReveals(motion) {
   const { animate } = motion;
   const groups = Array.from(document.querySelectorAll('[data-reveal-group]'));
