@@ -1377,7 +1377,7 @@ const HERO_TEXT_FADE = { from: 0.1, to: 0.45 };
 // When the docked bar takes over (fraction of the way to its pin), separate from
 // the text fade so the text can go early while the bar arrives with Work close
 // beneath it. The top nav is hidden from here on too.
-const NAV_HANDOFF = 0.85;
+const NAV_HANDOFF = 0.45; // = HERO_TEXT_FADE.to: no nav-less stretch
 // Extra lift on the first gesture, on top of riding the white edge (see
 // setHeroTextLift). px at full; reached by `over` of the way to the pin.
 const HERO_TEXT_BOOST = { px: 0, over: 0.4 };
