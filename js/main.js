@@ -1370,7 +1370,8 @@ function setTopNavFade(v) {
   // REDESIGN: one value fades the top nav AND the hero text together.
   document.documentElement.style.setProperty('--hero-fade', r);
 }
-// REDESIGN: the hero's right column spans exactly the nav's items — from
+// REDESIGN: the hero's left edge sits on the clock's, and its right column
+// spans exactly the nav's items — from
 // "Selected work"'s left edge to the "Say hello" pill's right edge — at every
 // width the top nav shows. Measured rather than restated because below 768 the
 // items are a content-width cluster (their widths come from the morph sizers
@@ -1382,11 +1383,15 @@ function measureNavColumns() {
   const root = document.documentElement.style;
   const first = topNav.querySelector('.top-nav-link');
   const cta = topNav.querySelector('.top-nav-cta');
-  if (!first || !cta || getComputedStyle(topNav).display === 'none') {
+  const clock = topNav.querySelector('.top-nav-clock');
+  if (!first || !cta || !clock || getComputedStyle(topNav).display === 'none') {
     root.removeProperty('--nav-col-w');
     root.removeProperty('--nav-col-inset');
+    root.removeProperty('--nav-lead');
     return;
   }
+  // ...and the headline's left edge sits on the clock's.
+  root.setProperty('--nav-lead', clock.getBoundingClientRect().left.toFixed(2) + 'px');
   const l = first.getBoundingClientRect().left;
   const r = cta.getBoundingClientRect().right;
   root.setProperty('--nav-col-w', (r - l).toFixed(2) + 'px');

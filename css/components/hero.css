@@ -931,6 +931,7 @@ html:not(.is-field-live) .intro-divider {
    (where an auto cross-axis margin pushes it right). (0,2,0) so the tiers'
    padding-inline shorthands on .intro-band don't win; ≤680 resets it. */
 .intro .intro-band {
+  padding-left: var(--nav-lead, 56px); /* the headline starts under the clock */
   padding-right: var(--nav-col-inset, 56px);
 }
 

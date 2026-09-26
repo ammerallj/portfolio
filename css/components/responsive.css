@@ -630,6 +630,7 @@
   /* ...so the hero's right column stops tracking it (hero.css) and runs the
      full stacked width again. The 480 tier restates the inset for its gutter. */
   .intro .intro-band {
+    padding-left: 40px;
     padding-right: 40px;
   }
   .intro .intro-band-right {
@@ -891,7 +892,8 @@
     display: none;
   }
   .intro .intro-band {
-    padding-right: 16px; /* REDESIGN: matches the tier gutter (see 680) */
+    padding-left: 16px; /* REDESIGN: matches the tier gutter (see 680) */
+    padding-right: 16px;
   }
   /* The gradient field is CENTERED on the viewport by default (translateX(-50%)
      on a box frozen at 1639.44px wide, so a phone just crops more of it). Nudge
