@@ -542,6 +542,16 @@
   .intro-band-left {
     flex: 0 0 auto;
   }
+  /* REDESIGN: the top nav's links leave the right-column grid where the
+     content stacks, the same as .intro-bar's revert to a cluster. */
+  .top-nav {
+    grid-template-columns: minmax(0, 1fr) auto auto auto;
+    column-gap: 32px;
+    padding: 0 24px;
+  }
+  .top-nav-link:first-of-type {
+    justify-self: center;
+  }
   /* Portrait tablet + phone work cards run Image -> Title -> Meta ->
      Description (their frames lead with the image; the wrappers are already
      flattened by the 1024 tier's display:contents, which is what makes this
@@ -609,6 +619,11 @@
    480 block still follows this one and wins where they overlap.
    ========================================================================== */
 @media (max-width: 680px) {
+  /* REDESIGN: no top nav below the desktop bar's own hand-off point. */
+  .top-nav {
+    display: none;
+  }
+
   /* The landing's bottom bar goes; the header + floatie below replace it.
      .intro-bar is a SIBLING of .intro whose negative top margin is cancelled
      by an equal bottom margin, so removing it from flow costs the hero

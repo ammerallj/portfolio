@@ -1355,6 +1355,39 @@ try {
 // value); this only runs on the homepage with motion allowed. .intro-top is
 // bottom-anchored and overflow-clipped, so the statements' differing line counts
 // never move the divider below.
+// REDESIGN (exploration): the fixed top nav over the hero. Its clock shows
+// Seattle time; the fade and the hand-off to .intro-bar live in
+// updateScrollEffects. Null on project pages, so all of it is skipped there.
+const topNav = document.querySelector('.top-nav');
+const TOP_NAV_FADE = { from: 0.35, to: 0.55 }; // fraction of the scroll to the bar's pin
+let lastTopNavFade = -1;
+function setTopNavFade(v) {
+  const r = Math.round(v * 1000) / 1000;
+  if (r === lastTopNavFade) return;
+  lastTopNavFade = r;
+  document.documentElement.style.setProperty('--top-nav-fade', r);
+}
+function initTopNav() {
+  if (!topNav) return;
+  document.documentElement.classList.add('has-top-nav');
+  const clock = topNav.querySelector('.top-nav-clock');
+  if (!clock) return;
+  const fmt = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/Los_Angeles',
+    hour: 'numeric',
+    minute: '2-digit',
+    timeZoneName: 'short',
+  });
+  const tick = () => {
+    const now = new Date();
+    clock.textContent = fmt.format(now); // e.g. "10:42 AM PDT"
+    clock.dateTime = now.toISOString();
+    // Re-render on the next minute boundary rather than polling.
+    setTimeout(tick, 60000 - (now.getTime() % 60000) + 50);
+  };
+  tick();
+}
+
 function initHeadlineMorph() {
   const h1 = document.querySelector('.intro-headline');
   if (!h1 || h1.hasAttribute('data-static') || reducedMotion.matches) return;
@@ -1565,6 +1598,7 @@ function initHeadlineMorph() {
   })();
 }
 
+initTopNav();
 initHeadlineMorph();
 
 // Every item in the site nav answers itself while the pointer (or keyboard
@@ -2770,7 +2804,13 @@ function updateScrollEffects() {
   // rest too, hero.css) — it still marks the pinned state. Guarded: project pages
   // have no .intro-bar.
   if (introBar) {
-    introBar.classList.toggle('is-docked', introBar.getBoundingClientRect().top <= 0);
+    const docked = introBar.getBoundingClientRect().top <= 0;
+    introBar.classList.toggle('is-docked', docked);
+    // REDESIGN: the top nav hands over to this bar the moment it docks.
+    if (topNav) {
+      html.classList.toggle('is-bar-docked', docked);
+      introBar.inert = !docked;
+    }
   }
 
   // ...and the field lifts away as the reader moves. See measureFieldTuck above.
@@ -2811,6 +2851,18 @@ function updateScrollEffects() {
   //   bias 2   → peak 1.92x at 78%
   // The plain ease-in p^2 it replaced ended at 1.8x and dropped to 1x at the pin.
   const pinP = fieldDockScroll > 0 ? travel / fieldDockScroll : 0;
+  // REDESIGN: the top nav fades out before the lockup (rising at 1.5x) passes
+  // under it — white type over the dark headline otherwise — and is gone for
+  // good once the bar docks. Smoothstep over TOP_NAV_FADE of the way to the pin.
+  if (topNav) {
+    const f = Math.min(1, Math.max(0,
+      (pinP - TOP_NAV_FADE.from) / (TOP_NAV_FADE.to - TOP_NAV_FADE.from)));
+    const fade = fieldDockScroll > 0 ? 1 - f * f * (3 - 2 * f) : 1;
+    setTopNavFade(fade);
+    const off = fade <= 0.01 || html.classList.contains('is-bar-docked');
+    html.classList.toggle('is-top-nav-off', off);
+    topNav.inert = off;
+  }
   const pinE = Math.pow(pinP, HERO_SHORTEN.bias);
   const push = fieldDockScroll > 0 ? heroShorten * (1 - pinE * pinE * (3 - 2 * pinE)) : 0;
   setHeroPush(Math.round(push));

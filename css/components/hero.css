@@ -936,6 +936,129 @@ html:not(.is-field-live) .intro-divider {
   color: var(--color-text);
 }
 
+/* ---- REDESIGN: the top nav over the gradient ----
+   Fixed at the top, white type, Seattle time on the left and a hairline
+   running to the links — which sit on the shared right column exactly as
+   .intro-bar's do, so the hand-off lands the links in the same place.
+   --top-nav-fade (js/main.js) takes it out as the lockup scrolls up under it;
+   html.is-bar-docked hands over to .intro-bar at Selected Work. */
+.top-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 95;
+  height: 64px;
+  padding: 0 56px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) repeat(3, calc(var(--width-right-column) / 3));
+  align-items: center;
+  color: #fff;
+  font-family: var(--font-body);
+  font-size: var(--size-base);
+  letter-spacing: -0.01em;
+  /* Scroll-linked: no transition on this opacity, by the standing rule. */
+  opacity: var(--top-nav-fade, 1);
+}
+
+/* The entrance fade lives on the children, so it can't pin the parent's
+   scroll-linked opacity (an animation's fill beats a declaration). */
+.top-nav > * {
+  animation: intro-bar-fade 0.6s ease-out 0.9s both;
+}
+
+html.is-top-nav-off .top-nav {
+  visibility: hidden;
+}
+
+.top-nav-lead {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  min-width: 0;
+  padding-right: 24px; /* air between the rule and "Selected work" */
+}
+
+.top-nav-clock {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.top-nav-rule {
+  flex: 1 1 auto;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.top-nav-link {
+  position: relative;
+  justify-self: center;
+  color: #fff;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.top-nav-link:first-of-type {
+  justify-self: start;
+}
+
+.top-nav-link::before {
+  content: '';
+  position: absolute;
+  inset: -7px -15px;
+  z-index: -1;
+  border-radius: 100px;
+  transition: background-color 0.35s ease;
+  pointer-events: none;
+}
+
+@media (hover: hover) {
+  .top-nav-link:hover::before {
+    background: rgba(255, 255, 255, 0.18);
+  }
+}
+
+.top-nav-cta {
+  justify-self: end;
+  display: inline-flex;
+  align-items: center;
+  height: 36px;
+  padding: 0 20px;
+  border-radius: 100px;
+  background: #fff;
+  color: #000;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background-color 0.15s ease;
+}
+
+.top-nav-cta:hover {
+  background: rgba(255, 255, 255, 0.75);
+}
+
+/* The existing bar keeps its whole scroll machinery (it still drives the
+   field's dissolve and the hero push) but stays invisible until it docks.
+   Gated on has-top-nav, set by js/main.js: with no JS the bar is never
+   hidden, so both navs show and neither is lost. */
+html.has-top-nav .intro-bar {
+  animation: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.35s ease, visibility 0s linear 0.35s;
+}
+
+html.has-top-nav.is-bar-docked .intro-bar {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.35s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .top-nav > * {
+    animation: none;
+  }
+}
+
 /* ---- The site nav: the hero's bottom bar, sticky ----
    In flow AFTER the hero, pulled up into it: 14px pad + 36px row + 30px
    bottom-gap = -80px margin-top lands the row 30px above the fold bottom;
