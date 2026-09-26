@@ -414,14 +414,27 @@
   white-space: nowrap;
 }
 
-/* "Coming soon" (Loop, Groups) — the pill's own box and type, FILLED instead of
-   outlined, so it reads as a status of the case study rather than as a second
-   provenance pill. First in the row, the same slot the lock takes on the gated
-   cards: both qualify what is behind the card. The border stays (transparent)
-   so it stands exactly as tall as the pill beside it. */
+/* "Coming soon" (Loop, Groups) — the pill's own box, type and frosted cream
+   (below), WITHOUT the hairline, so it reads as a status of the case study
+   rather than as a second provenance pill. First in the row, the same slot the
+   lock takes on the gated cards: both qualify what is behind the card. The
+   border stays (transparent) so it stands exactly as tall as the pill beside
+   it. */
 .work-card-pill--soon {
   border-color: transparent;
-  background-color: rgba(0, 0, 0, 0.06);
+}
+
+/* FROSTED CREAM — every piece of the meta row (the pills and the lock circle)
+   is a small pane of the page's own cream (--color-bg, #FBFCF8, written as rgb
+   because a hex token cannot be part-transparent) over a background blur. At
+   rest it sits on the pale panel and reads as a soft chip; on hover the scrim's
+   colour rises behind it and the blur turns that into a frosted tint.
+   "Coming soon" differs from "Shipped" by its missing hairline alone now. */
+.work-card-pill,
+.work-card-lock {
+  background-color: rgba(251, 252, 248, 0.6);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
 }
 
 .work-card-pill-arrow {
