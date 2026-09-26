@@ -903,15 +903,11 @@ html:not(.is-field-live) .intro-divider {
 
 .intro-headline {
   font-weight: 500;
-  font-size: var(--section-title-size);
-  line-height: 1.1;
+  font-size: var(--display-size); /* 96px at 1440, down to 56 */
+  line-height: 1.05;
   color: var(--color-text);
   -webkit-text-stroke: 0;
   max-width: none;
-}
-
-.intro-headline > span {
-  display: block;
 }
 
 /* Both columns rise together (the bio used to drop from the divider). */
