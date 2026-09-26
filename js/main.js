@@ -1366,6 +1366,9 @@ const TOP_NAV_FADE = { from: 0.2, to: 0.4 }; // fraction of the scroll to the ba
 // so no empty band opens between it and Selected Work, which follows ~170px
 // behind. The nav still goes first, so its white type never sits on the text.
 const HERO_TEXT_FADE = { from: 0.25, to: 0.5 };
+// Extra lift on the first gesture, on top of riding the white edge (see
+// setHeroTextLift). px at full; reached by `over` of the way to the pin.
+const HERO_TEXT_BOOST = { px: 100, over: 0.4 };
 let lastHeroTextFade = -1;
 function setHeroTextFade(v) {
   const r = Math.round(v * 1000) / 1000;
@@ -2947,7 +2950,13 @@ function updateScrollEffects() {
   // lag, the mask pulls its end up by cream — so lifting the text by
   // (cream − lag) keeps it at a fixed distance below the edge the whole way up.
   // 0 at rest. HERO_TEXT.speed is unused while this holds.
-  setHeroTextLift(creamPx - lag);
+  // ...plus HERO_TEXT_BOOST on top: an extra lift front-loaded onto the first
+  // gesture (ease-out over the first `over` of the way to the pin), so the
+  // lockup visibly glides off as soon as the reader scrolls. It leads the white
+  // edge by up to `px`, which is fine — it is fading out over the same stretch.
+  const bt = fieldDockScroll > 0 ? Math.min(1, pinP / HERO_TEXT_BOOST.over) : 0;
+  const boost = HERO_TEXT_BOOST.px * (1 - (1 - bt) * (1 - bt));
+  setHeroTextLift(Math.round(creamPx - lag + boost));
 
   // Scroll-spy: the active section is the LAST one whose RESTING POSITION the
   // page has reached. Highlight every link that targets it (and mark it for
