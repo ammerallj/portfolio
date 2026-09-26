@@ -195,7 +195,9 @@ const FIELD_LAG = { k: 0.3 };
 // 1 + speed of the scroll — the fastest of the three layers. LINEAR, because a
 // changing speed is what read as loose. Held once the bar pins; the text is off
 // screen by then.
-const HERO_TEXT = { speed: 0.5 };
+// REDESIGN: 0.25 (was 0.5) — a gentler rise, since the text now also fades
+// out with the top nav (--hero-fade).
+const HERO_TEXT = { speed: 0.25 };
 let lastHeroTextLift = -1;
 function setHeroTextLift(px) {
   if (px === lastHeroTextLift) return;
@@ -1365,7 +1367,8 @@ function setTopNavFade(v) {
   const r = Math.round(v * 1000) / 1000;
   if (r === lastTopNavFade) return;
   lastTopNavFade = r;
-  document.documentElement.style.setProperty('--top-nav-fade', r);
+  // REDESIGN: one value fades the top nav AND the hero text together.
+  document.documentElement.style.setProperty('--hero-fade', r);
 }
 function initTopNav() {
   if (!topNav) return;

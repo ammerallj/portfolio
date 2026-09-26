@@ -910,6 +910,13 @@ html:not(.is-field-live) .intro-divider {
   max-width: none;
 }
 
+/* The lockup fades out on scroll with the top nav — the same --hero-fade
+   (js/main.js), so the two go together. Scroll-linked: no transition. The
+   columns' entrance animations are on the children, so they can't pin this. */
+.intro-band {
+  opacity: var(--hero-fade, 1);
+}
+
 /* Both columns rise together (the bio used to drop from the divider). */
 .intro-band-right {
   animation-name: intro-headline-rise;
@@ -936,7 +943,7 @@ html:not(.is-field-live) .intro-divider {
    Fixed at the top, white type, Seattle time on the left and a hairline
    running to the links — which sit on the shared right column exactly as
    .intro-bar's do, so the hand-off lands the links in the same place.
-   --top-nav-fade (js/main.js) takes it out as the lockup scrolls up under it;
+   --hero-fade (js/main.js) takes it out as the lockup scrolls up under it;
    html.is-bar-docked hands over to .intro-bar at Selected Work. */
 .top-nav {
   position: fixed;
@@ -954,7 +961,7 @@ html:not(.is-field-live) .intro-divider {
   font-size: var(--size-base);
   letter-spacing: -0.01em;
   /* Scroll-linked: no transition on this opacity, by the standing rule. */
-  opacity: var(--top-nav-fade, 1);
+  opacity: var(--hero-fade, 1);
 }
 
 /* The entrance fade lives on the children, so it can't pin the parent's
