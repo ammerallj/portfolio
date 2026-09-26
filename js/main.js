@@ -195,8 +195,8 @@ const FIELD_LAG = { k: 0.3 };
 // 1 + speed of the scroll — the fastest of the three layers. LINEAR, because a
 // changing speed is what read as loose. Held once the bar pins; the text is off
 // screen by then.
-// REDESIGN: 0.25 (was 0.5) — a gentler rise, since the text now also fades
-// out with the top nav (--hero-fade).
+// REDESIGN: unused — the text rides the white scrim's edge now (see
+// setHeroTextLift in updateScrollEffects) and fades on HERO_TEXT_FADE.
 const HERO_TEXT = { speed: 0.25 };
 let lastHeroTextLift = -1;
 function setHeroTextLift(px) {
@@ -1362,13 +1362,23 @@ try {
 // updateScrollEffects. Null on project pages, so all of it is skipped there.
 const topNav = document.querySelector('.top-nav');
 const TOP_NAV_FADE = { from: 0.35, to: 0.55 }; // fraction of the scroll to the bar's pin
+// The hero text fades LATER than the nav — as it exits the top of the screen —
+// so no empty band opens between it and Selected Work, which follows ~170px
+// behind. The nav still goes first, so its white type never sits on the text.
+const HERO_TEXT_FADE = { from: 0.6, to: 0.95 };
+let lastHeroTextFade = -1;
+function setHeroTextFade(v) {
+  const r = Math.round(v * 1000) / 1000;
+  if (r === lastHeroTextFade) return;
+  lastHeroTextFade = r;
+  document.documentElement.style.setProperty('--hero-text-fade', r);
+}
 let lastTopNavFade = -1;
 function setTopNavFade(v) {
   const r = Math.round(v * 1000) / 1000;
   if (r === lastTopNavFade) return;
   lastTopNavFade = r;
-  // REDESIGN: one value fades the top nav AND the hero text together.
-  document.documentElement.style.setProperty('--hero-fade', r);
+  document.documentElement.style.setProperty('--top-nav-fade', r);
 }
 // REDESIGN: the hero's left edge sits on the clock's, and its right column
 // spans exactly the nav's items — from
@@ -2904,6 +2914,9 @@ function updateScrollEffects() {
       (pinP - TOP_NAV_FADE.from) / (TOP_NAV_FADE.to - TOP_NAV_FADE.from)));
     const fade = fieldDockScroll > 0 ? 1 - f * f * (3 - 2 * f) : 1;
     setTopNavFade(fade);
+    const tf = Math.min(1, Math.max(0,
+      (pinP - HERO_TEXT_FADE.from) / (HERO_TEXT_FADE.to - HERO_TEXT_FADE.from)));
+    setHeroTextFade(fieldDockScroll > 0 ? 1 - tf * tf * (3 - 2 * tf) : 1);
     const off = fade <= 0.01 || html.classList.contains('is-bar-docked');
     html.classList.toggle('is-top-nav-off', off);
     topNav.inert = off;

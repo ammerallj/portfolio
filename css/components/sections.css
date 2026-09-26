@@ -16,7 +16,11 @@
    up (it is --gap-heading's desktop number), not an invented one.
    Change both numbers here and in the responsive.css 480 tier together. */
 #work-section {
-  padding-top: 104px;
+  /* REDESIGN: --gap-content (was 104px). The hero now ends in plain white with
+     its own --gap-group below the lockup, so the old breathing room below the
+     frosted dissolve left a ~170px empty band between the fading hero text and
+     the first card as they rise together. ≤480 keeps its own (responsive.css). */
+  padding-top: var(--gap-content);
   padding-bottom: 144px;
   /* No hairline into About. The 240px of air across this seam (144 below the
      cards + 96 above the About heading) already separates them, and with the
