@@ -82,7 +82,7 @@
 }
 
 /* The media frame. Its HEIGHT is the masonry's main dial: --media-ratio per
-   card (4 / 5 tall, 1 / 1 square, 16 / 10 wide…). When real art arrives, drop
+   card (5 / 4 taller, 16 / 10 shorter — kept under ~75% of a 900px fold). When real art arrives, drop
    an <img> or <video> in here in place of the placeholder span; it fills the
    frame with object-fit: cover. */
 .work-card-media {
