@@ -402,7 +402,8 @@
   display: inline-flex;
   align-items: center;
   gap: 0.4em;
-  border: 1px solid rgba(0, 0, 0, 0.22);
+  /* 0.5px — a true hairline on 2x displays (1x rounds it up to one pixel). */
+  border: 0.5px solid rgba(0, 0, 0, 0.22);
   border-radius: 100px;
   padding: 0.4em 0.85em;
   font-family: var(--font-body);
@@ -414,27 +415,16 @@
   white-space: nowrap;
 }
 
-/* "Coming soon" (Loop, Groups) — the pill's own box, type and frosted cream
-   (below), WITHOUT the hairline, so it reads as a status of the case study
-   rather than as a second provenance pill. First in the row, the same slot the
-   lock takes on the gated cards: both qualify what is behind the card. The
-   border stays (transparent) so it stands exactly as tall as the pill beside
-   it. */
-.work-card-pill--soon {
-  border-color: transparent;
-}
-
-/* FROSTED CREAM — every piece of the meta row (the pills and the lock circle)
-   is a small pane of the page's own cream (--color-bg, #FBFCF8, written as rgb
-   because a hex token cannot be part-transparent) over a background blur. At
-   rest it sits on the pale panel and reads as a soft chip; on hover the scrim's
-   colour rises behind it and the blur turns that into a frosted tint.
-   "Coming soon" differs from "Shipped" by its missing hairline alone now. */
+/* CREAM CHIPS — every piece of the meta row (the pills, "Coming soon" and the
+   lock circle) is the page's own cream (--color-bg, #FBFCF8, written as rgb so
+   it can be part-transparent) at 0.9, inside the same 0.5px hairline. No blur:
+   the chips sit on the card's flat panel, so there was nothing behind them to
+   frost. "Coming soon" (Loop, Groups) is the same chip with no arrow or year;
+   it opens the row, in the slot the lock takes on the gated cards, because both
+   qualify what is behind the card. */
 .work-card-pill,
 .work-card-lock {
-  background-color: rgba(251, 252, 248, 0.6);
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
+  background-color: rgba(251, 252, 248, 0.9);
 }
 
 .work-card-pill-arrow {
@@ -462,15 +452,15 @@
    out as its parts rather than hard-coded to 31.9px for that reason:
      1.5em  the line box (--size-xs x the body's 1.5 line-height)
    + 0.8em  the pill's 0.4em padding, top and bottom
-   + 2px    both hairlines */
+   + 1px    both 0.5px hairlines */
 .work-card-lock {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex: none;
-  width: calc(1.5em + 0.8em + 2px);
-  height: calc(1.5em + 0.8em + 2px);
-  border: 1px solid rgba(0, 0, 0, 0.22); /* the pill's hairline, not --color-border */
+  width: calc(1.5em + 0.8em + 1px);
+  height: calc(1.5em + 0.8em + 1px);
+  border: 0.5px solid rgba(0, 0, 0, 0.22); /* the pill's hairline, not --color-border */
   border-radius: 50%;
   font-size: var(--size-xs);
   color: var(--color-text-70);
