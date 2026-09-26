@@ -640,7 +640,10 @@ let fieldDockScroll = 0;
 // ⚠️ px IS THE SPEED DIAL: nav/Work run at 1 + px / (bar's resting top − px) of
 // the scroll. At 1440x900: 180 → 1.28x (imperceptible) · 240 → 1.41x (current) ·
 // 300 → 1.58x · the 410 cap → 2.0x ("too free", lost the scroll's tension).
-const HERO_SHORTEN = { px: 240, bias: 1.5 };
+// REDESIGN: 400 (was 240). The extra is what used to be a text-only boost;
+// carried here it lifts the lockup AND Selected Work together on the first
+// gesture, so the gap between them holds instead of opening.
+const HERO_SHORTEN = { px: 400, bias: 1.5 };
 let heroShorten = 0;
 let fieldVisibleEnd = 0;
 let lastHeroShorten = -1;
@@ -1368,7 +1371,7 @@ const TOP_NAV_FADE = { from: 0.2, to: 0.4 }; // fraction of the scroll to the ba
 const HERO_TEXT_FADE = { from: 0.25, to: 0.5 };
 // Extra lift on the first gesture, on top of riding the white edge (see
 // setHeroTextLift). px at full; reached by `over` of the way to the pin.
-const HERO_TEXT_BOOST = { px: 100, over: 0.4 };
+const HERO_TEXT_BOOST = { px: 0, over: 0.4 };
 let lastHeroTextFade = -1;
 function setHeroTextFade(v) {
   const r = Math.round(v * 1000) / 1000;
@@ -2954,9 +2957,16 @@ function updateScrollEffects() {
   // gesture (ease-out over the first `over` of the way to the pin), so the
   // lockup visibly glides off as soon as the reader scrolls. It leads the white
   // edge by up to `px`, which is fine — it is fading out over the same stretch.
+  // REDESIGN: HERO_TEXT_BOOST.px is 0 — the extra first-gesture lift moved
+  // into HERO_SHORTEN, where Work shares it. A text-only boost opens a gap.
+  // ...and it now rides WORK's own extra movement (heroShorten − push) rather
+  // than (cream − lag): the two differ by the resting overhang and the lag,
+  // which on short windows let the gap to Work grow ~80px mid-scroll. Locked
+  // to Work, the lockup→Work gap is constant at every size by construction,
+  // and it still tracks the white closely, which is tied to the same bar.
   const bt = fieldDockScroll > 0 ? Math.min(1, pinP / HERO_TEXT_BOOST.over) : 0;
   const boost = HERO_TEXT_BOOST.px * (1 - (1 - bt) * (1 - bt));
-  setHeroTextLift(Math.round(creamPx - lag + boost));
+  setHeroTextLift(fieldDockScroll > 0 ? Math.round(heroShorten - push + boost) : 0);
 
   // Scroll-spy: the active section is the LAST one whose RESTING POSITION the
   // page has reached. Highlight every link that targets it (and mark it for
