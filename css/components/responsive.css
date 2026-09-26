@@ -534,6 +534,14 @@
   .intro-band-spacer {
     display: none;
   }
+  /* REDESIGN: the two lockup columns stack once they share a narrow row. */
+  .intro-band {
+    flex-direction: column;
+    gap: var(--gap-content);
+  }
+  .intro-band-left {
+    flex: 0 0 auto;
+  }
   /* Portrait tablet + phone work cards run Image -> Title -> Meta ->
      Description (their frames lead with the image; the wrappers are already
      flattened by the 1024 tier's display:contents, which is what makes this

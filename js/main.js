@@ -1357,7 +1357,7 @@ try {
 // never move the divider below.
 function initHeadlineMorph() {
   const h1 = document.querySelector('.intro-headline');
-  if (!h1 || reducedMotion.matches) return;
+  if (!h1 || h1.hasAttribute('data-static') || reducedMotion.matches) return;
 
   const PHRASES = [
     'Making products make sense.',

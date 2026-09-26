@@ -385,7 +385,10 @@ html.is-field-live .page-field-grain { opacity: 0.15; }
      Two earlier builds are superseded: a mask slide that SETTLED BACK (the white
      visibly reversed), and a rigid lift plus a --work-glide on the nav and Work
      (no gap, but the nav ran 1.25x → 0.75x of the scroll and read as loose). */
-  --field-mask-end: calc(min(100%, calc(100svh + var(--field-rise))) - var(--field-cream, 0px));
+  /* REDESIGN (exploration): the dissolve ends two-thirds down the fold, so the
+     bottom third is clean white for the lockup. Was
+     calc(min(100%, calc(100svh + var(--field-rise))) - var(--field-cream, 0px)). */
+  --field-mask-end: calc(66svh + var(--field-rise) - var(--field-cream, 0px));
   /* HOW TALL THE DISSOLVE IS, as a fraction of the room between the bio's last
      line and the bar. --field-gap is that room, published by measureFieldTuck;
      112px is the no-JS floor.
@@ -421,7 +424,8 @@ html.is-field-live .page-field-grain { opacity: 0.15; }
      browser's linear interpolation between them stays under one 8-bit code step
      on this artwork. Shorter and the segments start to read as facets — the
      original linear ramp's failure, in miniature. */
-  --field-fade: clamp(90px, var(--field-gap, 112px), 300px);
+  /* REDESIGN: a long, soft fade (was clamp(90px, var(--field-gap, 112px), 300px)). */
+  --field-fade: 30svh;
   --field-mask-start: calc(var(--field-mask-end) - var(--field-fade));
 
   /* How far the whole lockup — headline, divider, bio, AND the frost pane with
@@ -869,6 +873,67 @@ html:not(.is-field-live) .intro-divider {
 @keyframes intro-bio-drop {
   from { transform: translateY(calc(-1 * var(--rise, 64px))); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
+}
+
+/* ============================================================
+   REDESIGN (exploration, worktree-redesign) — the lockup sits in
+   the white lower third, reference-style: name/role/place bottom
+   left, summary + "previously" in the shared right column. Dark
+   type on white, so the white-on-field contrast work above does
+   not apply here. Overrides only; the rules above are untouched.
+   ============================================================ */
+.intro {
+  justify-content: flex-end;
+}
+
+.intro-band {
+  flex: 0 0 auto;
+  /* Clears the nav bar pulled up into the hero (64px bar + --bar-tail)
+     plus a group gap of air above it. */
+  padding-top: 0;
+  padding-bottom: calc(64px + var(--bar-tail) + var(--gap-group));
+  overflow: visible;
+}
+
+.intro-band-left {
+  flex: 0 1 var(--width-title-column);
+  min-width: 0;
+  margin-right: auto;
+}
+
+.intro-headline {
+  font-weight: 500;
+  font-size: var(--section-title-size);
+  line-height: 1.1;
+  color: var(--color-text);
+  -webkit-text-stroke: 0;
+  max-width: none;
+}
+
+.intro-headline > span {
+  display: block;
+}
+
+/* Both columns rise together (the bio used to drop from the divider). */
+.intro-band-right {
+  animation-name: intro-headline-rise;
+}
+
+.intro-bio {
+  font-weight: 400;
+  color: var(--color-text-70);
+  -webkit-text-stroke: 0;
+}
+
+.intro-bio::before {
+  display: none; /* the ≤768 scrim is for white type on the field */
+}
+
+.intro-previously {
+  margin: var(--gap-group) 0 0;
+  font-size: var(--size-lg);
+  font-weight: 500;
+  color: var(--color-text);
 }
 
 /* ---- The site nav: the hero's bottom bar, sticky ----
