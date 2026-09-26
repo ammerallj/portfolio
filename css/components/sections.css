@@ -255,6 +255,16 @@
   white-space: nowrap;
 }
 
+/* "Coming soon" (Loop, Groups) — the pill's own box and type, FILLED instead of
+   outlined, so it reads as a status of the case study rather than as a second
+   provenance pill. First in the row, the same slot the lock takes on the gated
+   cards: both qualify what is behind the card. The border stays (transparent)
+   so it stands exactly as tall as the pill beside it. */
+.work-card-pill--soon {
+  border-color: transparent;
+  background-color: rgba(0, 0, 0, 0.06);
+}
+
 .work-card-pill-arrow {
   font-size: 1.15em;
   line-height: 0;
