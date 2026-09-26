@@ -146,16 +146,67 @@
   );
   opacity: 0;
   transition: opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  /* BREATHING: the scrim's top edge rises and falls ~10% from the bottom. */
+  transform-origin: 50% 100%;
+  animation: work-scrim-breathe 5.5s ease-in-out infinite alternate paused;
 }
 
-.work-card-link:focus-visible::after {
+/* DRIFT: a soft glow of the same colour, sliding side to side along the
+   bottom edge. Same back layer as the scrim (z -1 in the isolated link), so
+   both stay behind the media, the title and the pills. Clipped by the card's
+   overflow: hidden. */
+.work-card-link::before {
+  content: "";
+  position: absolute;
+  left: 15%;
+  bottom: -25%;
+  width: 70%;
+  height: 65%;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(
+    closest-side,
+    rgba(var(--card-glow, 0, 0, 0), 0.120) 0%,
+    rgba(var(--card-glow, 0, 0, 0), 0.115) 12.5%,
+    rgba(var(--card-glow, 0, 0, 0), 0.101) 25%,
+    rgba(var(--card-glow, 0, 0, 0), 0.082) 37.5%,
+    rgba(var(--card-glow, 0, 0, 0), 0.060) 50%,
+    rgba(var(--card-glow, 0, 0, 0), 0.038) 62.5%,
+    rgba(var(--card-glow, 0, 0, 0), 0.019) 75%,
+    rgba(var(--card-glow, 0, 0, 0), 0.005) 87.5%,
+    rgba(var(--card-glow, 0, 0, 0), 0) 100%
+  );
+  opacity: 0;
+  transition: opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  animation: work-scrim-drift 8s ease-in-out infinite alternate paused;
+}
+
+/* The motion only RUNS while the card is hovered / focused. Paused rather than
+   removed, so it picks up where it left off instead of snapping back to its
+   first frame while the fade-out is still visible — and a paused animation
+   costs nothing. Both are transforms, so they stay on the compositor. */
+.work-card-link:focus-visible::after,
+.work-card-link:focus-visible::before {
   opacity: 1;
+  animation-play-state: running;
 }
 
 @media (hover: hover) {
-  .work-card-link:hover::after {
+  .work-card-link:hover::after,
+  .work-card-link:hover::before {
     opacity: 1;
+    animation-play-state: running;
   }
+}
+
+@keyframes work-scrim-breathe {
+  from { transform: scaleY(1); }
+  to   { transform: scaleY(1.1); }
+}
+
+@keyframes work-scrim-drift {
+  from { transform: translateX(-22%); }
+  to   { transform: translateX(22%); }
 }
 
 /* The media frame. Its HEIGHT is the masonry's main dial: --media-ratio per
@@ -292,6 +343,11 @@
   .work-card-description {
     transition: none;
     translate: none;
+  }
+  /* The scrim keeps its colour and drops only the movement. */
+  .work-card-link::before,
+  .work-card-link::after {
+    animation: none;
   }
   /* No growth at all — the crossfade still says "you're on this card". */
   .work-card-link,
