@@ -1384,7 +1384,7 @@ const HERO_TEXT_FADE = { from: 0.1, to: 0.45 };
 const NAV_HANDOFF = 0.45; // = HERO_TEXT_FADE.to: no nav-less stretch
 // The glide to Selected Work when the docked nav appears (see the hand-off in
 // updateScrollEffects). easeInOutSine: a gentle start and a soft landing.
-const WORK_GLIDE = { duration: 1.0, easing: (t) => -(Math.cos(Math.PI * t) - 1) / 2 };
+const WORK_GLIDE = { duration: 1.4, easing: (t) => -(Math.cos(Math.PI * t) - 1) / 2 };
 let workGlideArmed = true;
 let lastHandoffShow = false;
 let lastGlideScrollY = 0;
@@ -2977,7 +2977,18 @@ function updateScrollEffects() {
     if (!show) workGlideArmed = true;
     else if (!lastHandoffShow && down && workGlideArmed
       && !reducedMotion.matches && window.__lenis && sectionRestingScrollY) {
-      const target = sectionRestingScrollY(document.getElementById('work-section'));
+      // Target: the first card's title one --gap-group below the nav, not
+      // Work's centred resting position (which left ~230px of air under the
+      // bar). Page position from offsets, so push and the reveal's translate
+      // don't skew it; exact once the push has unwound, which it has here.
+      const title = document.querySelector('#work-section .work-card .section-title');
+      let target = null;
+      if (title) {
+        let y = 0;
+        for (let n = title; n; n = n.offsetParent) y += n.offsetTop;
+        const gap = parseFloat(getComputedStyle(html).getPropertyValue('--gap-group')) || 48;
+        target = y - introBar.offsetHeight - gap;
+      }
       if (target != null && target > window.scrollY + 4) {
         workGlideArmed = false;
         window.__lenis.scrollTo(target, { duration: WORK_GLIDE.duration, easing: WORK_GLIDE.easing });
