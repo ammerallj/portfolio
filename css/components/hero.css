@@ -888,10 +888,11 @@ html:not(.is-field-live) .intro-divider {
 
 .intro-band {
   flex: 0 0 auto;
-  /* Clears the (hidden-at-rest) nav bar pulled up into the hero — 64px bar
-     + --bar-tail — plus a content gap of air (was --gap-group, 40px higher). */
+  /* The nav bar that used to rest here is hidden until it docks, so the
+     lockup no longer reserves its 80px — just a group gap to the fold
+     (60/48/40 by tier). Was calc(64px + --bar-tail + --gap-content). */
   padding-top: 0;
-  padding-bottom: calc(64px + var(--bar-tail) + var(--gap-content));
+  padding-bottom: var(--gap-group);
   overflow: visible;
 }
 
