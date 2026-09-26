@@ -195,9 +195,11 @@ const FIELD_LAG = { k: 0.3 };
 // 1 + speed of the scroll — the fastest of the three layers. LINEAR, because a
 // changing speed is what read as loose. Held once the bar pins; the text is off
 // screen by then.
-// REDESIGN: unused — the text rides the white scrim's edge now (see
-// setHeroTextLift in updateScrollEffects) and fades on HERO_TEXT_FADE.
-const HERO_TEXT = { speed: 0.25 };
+// REDESIGN: the lockup's PARALLAX over Selected Work — extra lift per px of
+// scroll on top of riding Work's own push (see setHeroTextLift), so the text
+// scrolls away faster than Work rises and fades out on HERO_TEXT_FADE as it
+// goes. 0 would lock the two together (no parallax, constant gap).
+const HERO_TEXT = { speed: 0.4 };
 let lastHeroTextLift = -1;
 function setHeroTextLift(px) {
   if (px === lastHeroTextLift) return;
@@ -2966,7 +2968,8 @@ function updateScrollEffects() {
   // and it still tracks the white closely, which is tied to the same bar.
   const bt = fieldDockScroll > 0 ? Math.min(1, pinP / HERO_TEXT_BOOST.over) : 0;
   const boost = HERO_TEXT_BOOST.px * (1 - (1 - bt) * (1 - bt));
-  setHeroTextLift(fieldDockScroll > 0 ? Math.round(heroShorten - push + boost) : 0);
+  setHeroTextLift(fieldDockScroll > 0
+    ? Math.round(heroShorten - push + boost + HERO_TEXT.speed * travel) : 0);
 
   // Scroll-spy: the active section is the LAST one whose RESTING POSITION the
   // page has reached. Highlight every link that targets it (and mark it for
