@@ -1644,9 +1644,11 @@ function initNavMorph() {
   if (reducedMotion.matches) return;
 
   const MORPHS = [
-    { selector: '.intro-bar-links a[href$="#work-section"]', rest: 'Selected work', hover: 'What I made' },
-    { selector: '.intro-bar-links a[href$="#about"]', rest: 'About me', hover: 'Who am I?' },
-    { selector: '.intro-bar-cta', rest: 'Say hello', hover: 'Why hello!' },
+    // REDESIGN: the top nav's items take the same morph, which is also what
+    // sizes each one to fit its wider label — so the two navs' items match.
+    { selector: '.intro-bar-links a[href$="#work-section"], .top-nav-link[href$="#work-section"]', rest: 'Selected work', hover: 'What I made' },
+    { selector: '.intro-bar-links a[href$="#about"], .top-nav-link[href$="#about"]', rest: 'About me', hover: 'Who am I?' },
+    { selector: '.intro-bar-cta, .top-nav-cta', rest: 'Say hello', hover: 'Why hello!' },
   ];
 
   const DURATION = 285; // ms — the spring's own settle time, see above

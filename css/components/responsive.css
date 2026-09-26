@@ -277,6 +277,9 @@
   .intro-bar {
     padding-inline: 24px; /* sticky bar: gutter is padding now, not offsets */
   }
+  .top-nav {
+    padding-inline: 24px; /* REDESIGN: matches .intro-bar */
+  }
   /* Project pages stack .project-block at this tier (the homepage's About holds
      two columns down to 768), so there is no right column for the nav's grid
      anchor to meet here. Same flex revert as the 768 tier, scoped to --page. */
@@ -542,15 +545,16 @@
   .intro-band-left {
     flex: 0 0 auto;
   }
-  /* REDESIGN: the top nav's links leave the right-column grid where the
-     content stacks, the same as .intro-bar's revert to a cluster. */
+  /* REDESIGN: the top nav leaves the right-column grid where the content
+     stacks — the same flex cluster as .intro-bar above, same gaps (links one
+     --gap-group apart, --gap-group before the pill), so the items match. */
   .top-nav {
-    grid-template-columns: minmax(0, 1fr) auto auto auto;
-    column-gap: 32px;
-    padding: 0 24px;
+    display: flex;
+    gap: var(--gap-group);
   }
-  .top-nav-link:first-of-type {
-    justify-self: center;
+  .top-nav-lead {
+    flex: 1 1 auto;
+    padding-right: 0;
   }
   /* Portrait tablet + phone work cards run Image -> Title -> Meta ->
      Description (their frames lead with the image; the wrappers are already
