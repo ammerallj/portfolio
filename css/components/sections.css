@@ -229,8 +229,9 @@
   color: var(--color-text);
 }
 
-/* Per-card meta eyebrow: a small "Shipped" status pill + a company · year stamp
-   on one line, sitting above the card description in the right column. */
+/* Per-card meta row, under the title: the lock badge (gated projects only) and
+   one "SHIPPED · 2023 ↗" pill. The company stamp that sat beside the pill was
+   dropped 2026-09; the year moved into the pill. */
 .work-card-meta {
   display: flex;
   align-items: center;
@@ -257,14 +258,6 @@
 .work-card-pill-arrow {
   font-size: 1.15em;
   line-height: 0;
-}
-
-.work-card-stamp {
-  font-family: var(--font-body);
-  font-size: var(--size-xs); /* 13px — matches the pill's eyebrow scale */
-  letter-spacing: -0.01em;
-  color: var(--color-text-70);
-  white-space: nowrap;
 }
 
 /* Lock badge — OPENS the meta row on the two projects whose FULL CASE STUDY is
