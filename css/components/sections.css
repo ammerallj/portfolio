@@ -151,16 +151,18 @@
   animation: work-scrim-breathe 5.5s ease-in-out infinite alternate paused;
 }
 
-/* DRIFT: a soft glow of the same colour, sliding side to side along the
-   bottom edge. Same back layer as the scrim (z -1 in the isolated link), so
+/* THE WASH: a soft glow of the same colour, lapping up from the bottom edge
+   and back (keyframes below). Same back layer as the scrim (z -1 in the isolated link), so
    both stay behind the media, the title and the pills. Clipped by the card's
    overflow: hidden. */
 .work-card-link::before {
   content: "";
   position: absolute;
-  left: 15%;
+  /* Wider than the card on both sides, so it reads as a shoreline across the
+     whole bottom edge rather than a spot; `closest-side` makes it an ellipse. */
+  left: -15%;
   bottom: -25%;
-  width: 70%;
+  width: 130%;
   height: 65%;
   z-index: -1;
   pointer-events: none;
@@ -178,7 +180,7 @@
   );
   opacity: 0;
   transition: opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1);
-  animation: work-scrim-drift 8s ease-in-out infinite alternate paused;
+  animation: work-scrim-drift 6s linear infinite paused;
 }
 
 /* The motion only RUNS while the card is hovered / focused. Paused rather than
@@ -204,9 +206,25 @@
   to   { transform: scaleY(1.1); }
 }
 
+/* THE WASH — water lapping on a beach. The glow rests low (mostly below the
+   card's bottom edge, which clips it), SURGES up on an ease-out so it slows as
+   it reaches its highest point, spreading a touch wider like a wave thinning
+   out, then slides back down more slowly on an ease-in-out. Not `alternate`:
+   the way up and the way back are deliberately different speeds.
+   A paused animation rests on its 0% frame, so every hover starts from the
+   low water mark and washes up. */
 @keyframes work-scrim-drift {
-  from { transform: translateX(-22%); }
-  to   { transform: translateX(22%); }
+  0% {
+    transform: translateY(45%) scaleX(0.9);
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  40% {
+    transform: translateY(-8%) scaleX(1.1);
+    animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1);
+  }
+  100% {
+    transform: translateY(45%) scaleX(0.9);
+  }
 }
 
 /* The media frame. Its HEIGHT is the masonry's main dial: --media-ratio per
