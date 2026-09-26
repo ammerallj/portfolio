@@ -1370,6 +1370,30 @@ function setTopNavFade(v) {
   // REDESIGN: one value fades the top nav AND the hero text together.
   document.documentElement.style.setProperty('--hero-fade', r);
 }
+// REDESIGN: the hero's right column spans exactly the nav's items — from
+// "Selected work"'s left edge to the "Say hello" pill's right edge — at every
+// width the top nav shows. Measured rather than restated because below 768 the
+// items are a content-width cluster (their widths come from the morph sizers
+// and the font), which CSS cannot express. Layout-only: init, resize, fonts.
+// Where the top nav is display:none (≤680) both properties are cleared and the
+// tier CSS takes over. CSS fallbacks are the desktop values, for no-JS.
+function measureNavColumns() {
+  if (!topNav) return;
+  const root = document.documentElement.style;
+  const first = topNav.querySelector('.top-nav-link');
+  const cta = topNav.querySelector('.top-nav-cta');
+  if (!first || !cta || getComputedStyle(topNav).display === 'none') {
+    root.removeProperty('--nav-col-w');
+    root.removeProperty('--nav-col-inset');
+    return;
+  }
+  const l = first.getBoundingClientRect().left;
+  const r = cta.getBoundingClientRect().right;
+  root.setProperty('--nav-col-w', (r - l).toFixed(2) + 'px');
+  root.setProperty('--nav-col-inset',
+    (document.documentElement.clientWidth - r).toFixed(2) + 'px');
+}
+
 function initTopNav() {
   if (!topNav) return;
   document.documentElement.classList.add('has-top-nav');
@@ -1874,6 +1898,17 @@ function initNavMorph() {
 }
 
 initNavMorph();
+// REDESIGN: after the morph has sized the top nav's items. Fonts change those
+// widths, so measure again once they land (and re-derive the field tuck, which
+// reads the bio's position).
+measureNavColumns();
+if (document.fonts && document.fonts.ready) {
+  document.fonts.ready.then(() => {
+    measureNavColumns();
+    measureFieldTuck();
+    updateScrollEffects();
+  });
+}
 
 // Scroll-triggered video. A work-card video (data-autoplay-in-view) sits under a
 // sibling .work-card-poster JPG — the placeholder no-JS visitors and crawlers
@@ -3253,6 +3288,7 @@ measureFieldTuck();
 measureContactArrival();
 measureAboutRest();
 window.addEventListener('resize', () => {
+  measureNavColumns(); // REDESIGN: before the tuck, which reads the bio
   measureFieldTuck();
   measureContactArrival();
   measureAboutRest();

@@ -923,6 +923,24 @@ html:not(.is-field-live) .intro-divider {
   animation-name: intro-headline-rise;
 }
 
+/* The right column spans the nav's items exactly: its right edge on the pill's,
+   its width from "Selected work" to there. Both measured by measureNavColumns
+   (js/main.js); the fallbacks are the desktop grid's own values (56px bar
+   padding, the shared right column). width + margin-left: auto rather than a
+   flex-basis, so the same two rules hold in the row layout AND the ≤768 stack
+   (where an auto cross-axis margin pushes it right). (0,2,0) so the tiers'
+   padding-inline shorthands on .intro-band don't win; ≤680 resets it. */
+.intro .intro-band {
+  padding-right: var(--nav-col-inset, 56px);
+}
+
+.intro .intro-band-right {
+  flex: none;
+  width: var(--nav-col-w, var(--width-right-column));
+  max-width: 100%;
+  margin-left: auto;
+}
+
 .intro-bio {
   font-weight: 400;
   color: var(--color-text-70);
