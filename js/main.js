@@ -664,6 +664,10 @@ function setHeroPush(px) {
   document.documentElement.style.setProperty('--hero-push', px + 'px');
 }
 function measureFieldTuck() {
+  // REDESIGN: measure with the bar back in flow — is-bar-lifted makes it
+  // position: fixed (no offsetParent, no margins). updateScrollEffects re-adds
+  // the class on its next pass.
+  document.documentElement.classList.remove('is-bar-lifted');
   fieldOverhang = 0;
   fieldDockScroll = 0;
   fieldVisibleEnd = 0;
@@ -1382,12 +1386,7 @@ const NAV_HANDOFF = 0.45; // = HERO_TEXT_FADE.to: no nav-less stretch
 // setHeroTextLift). px at full; reached by `over` of the way to the pin.
 const HERO_TEXT_BOOST = { px: 0, over: 0.4 };
 let lastHeroTextFade = -1;
-let lastBarLift = -1;
-function setBarLift(px) {
-  if (px === lastBarLift) return;
-  lastBarLift = px;
-  document.documentElement.style.setProperty('--bar-lift', px + 'px');
-}
+
 function setHeroTextFade(v) {
   const r = Math.round(v * 1000) / 1000;
   if (r === lastHeroTextFade) return;
@@ -2883,7 +2882,7 @@ function updateScrollEffects() {
     const docked = introBar.getBoundingClientRect().top <= 0;
     introBar.classList.toggle('is-docked', docked);
     // REDESIGN: the hand-off from the top nav to this bar (is-bar-docked) is
-    // decided further down, once push is known — see --bar-lift.
+    // decided further down, once push is known — see is-bar-lifted.
   }
 
   // ...and the field lifts away as the reader moves. See measureFieldTuck above.
@@ -2948,18 +2947,17 @@ function updateScrollEffects() {
   const pinR = 1 - pinP;
   const push = fieldDockScroll > 0 ? heroShorten * pinR * pinR : 0;
   setHeroPush(Math.round(push));
-  // REDESIGN: the docked bar takes over the moment the hero text has faded to
-  // 0 — not when it actually pins, which is later. Until it pins, --bar-lift
-  // translates it up onto the top of the screen: its visual top is its layout
-  // top + push − scroll, and lifting by exactly that keeps it at 0, meeting
-  // the real sticky dock with no jump (the lift is 0 there by construction).
-  // A transform, so nothing in the layout moves.
+  // REDESIGN: the docked bar takes over at NAV_HANDOFF — before it would pin
+  // on its own. From then on it is position: FIXED at the top (is-bar-lifted,
+  // hero.css), with Work taking a matching negative margin so the layout is
+  // identical. ⚠️ NOT a scroll-linked transform: that was tried (--bar-lift)
+  // and it glitched — scroll events land a frame behind the compositor's
+  // scroll, so a sticky bar corrected by a per-frame transform wobbles while
+  // the page is moving, and this bar is moving at 2-3x the scroll there.
   if (topNav && introBar) {
-    const barTop = fieldDockScroll > 0
-      ? Math.max(0, fieldDockScroll + push - window.scrollY) : 0;
     const show = fieldDockScroll > 0
-      && (pinP >= NAV_HANDOFF || barTop <= 0);
-    setBarLift(show ? Math.round(barTop) : 0);
+      && (pinP >= NAV_HANDOFF || window.scrollY >= fieldDockScroll);
+    html.classList.toggle('is-bar-lifted', show);
     html.classList.toggle('is-bar-docked', show);
     introBar.inert = !show;
   }
