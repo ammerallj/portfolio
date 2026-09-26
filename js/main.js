@@ -2908,8 +2908,14 @@ function updateScrollEffects() {
     html.classList.toggle('is-top-nav-off', off);
     topNav.inert = off;
   }
-  const pinE = Math.pow(pinP, HERO_SHORTEN.bias);
-  const push = fieldDockScroll > 0 ? heroShorten * (1 - pinE * pinE * (3 - 2 * pinE)) : 0;
+  // REDESIGN: EASE-OUT, not the biased smoothstep. The hero text now fades out
+  // early, and with the old curve Work started at ~1x and only sped up late, so
+  // it lagged exactly when the text left — ~450px of empty screen mid-scroll.
+  // (1 − p)^2 puts Work's fastest rise on the first gesture (1 + 2·S/D, ~1.8x
+  // at 1440x900) and eases to exactly 1x at the pin (slope 0 there), so the
+  // dock still doesn't jump. HERO_SHORTEN.bias is unused by this curve.
+  const pinR = 1 - pinP;
+  const push = fieldDockScroll > 0 ? heroShorten * pinR * pinR : 0;
   setHeroPush(Math.round(push));
   // Negative: .page-field's transform subtracts it, so the artwork moves DOWN
   // relative to the page, i.e. slower than the scroll.
