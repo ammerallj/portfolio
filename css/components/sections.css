@@ -107,6 +107,15 @@
 .work-card-media {
   position: relative;
   aspect-ratio: var(--media-ratio, 4 / 3);
+  /* THE LEVELLING STRETCH. initWorkMasonry sets --work-extra on the last card
+     of the shorter column so both columns end on one line; it lands HERE, as
+     padding under the ratio, so the frame (and any image filling it) grows
+     rather than leaving a band of panel under the text.
+     ⚠️ `content-box` is what makes the padding ADD height: under the reset's
+     border-box, aspect-ratio would size the padding box and swallow it. The
+     frame has no horizontal padding or border, so its width is unchanged. */
+  box-sizing: content-box;
+  padding-bottom: var(--work-extra, 0px);
   overflow: hidden;
   display: flex;
   align-items: center;

@@ -2071,25 +2071,65 @@ function initWorkMasonry() {
   if (!grid || !('ResizeObserver' in window)) return; // project pages have none
   const cards = Array.from(grid.children);
 
+  // Each card's height WITHOUT the stretch below. The stretch lives on the card
+  // (as padding under its media), so its own height includes it; subtracting
+  // the stretch it currently carries gives the natural height back, which is
+  // what keeps the ResizeObserver from chasing its own writes.
+  const extraOf = (card) => parseFloat(card.dataset.extra) || 0;
+  const setExtra = (card, px) => {
+    card.dataset.extra = px;
+    card.style.setProperty('--work-extra', px + 'px');
+  };
+
   const layout = () => {
     const cs = getComputedStyle(grid);
     const columns = cs.gridTemplateColumns.split(' ').filter(Boolean).length;
     if (columns < 2) {
       grid.classList.remove('is-masonry');
-      cards.forEach((card) => { card.style.gridRowEnd = ''; });
+      cards.forEach((card) => {
+        card.style.gridRowEnd = '';
+        setExtra(card, 0);
+      });
       return;
     }
     const gap = parseFloat(cs.columnGap) || 0; // the same token drives both axes
     grid.classList.add('is-masonry');
-    cards.forEach((card) => {
-      card.style.gridRowEnd = 'span ' + Math.max(1, Math.ceil(card.offsetHeight + gap));
+
+    // PASS 1 — place on natural heights, so the stretch never decides which
+    // column a card lands in.
+    const natural = cards.map((card) => card.offsetHeight - extraOf(card));
+    cards.forEach((card, i) => {
+      card.style.gridRowEnd = 'span ' + Math.max(1, Math.ceil(natural[i] + gap));
+    });
+
+    // PASS 2 — BOTTOMS LEVEL. Find each column's last card and stretch the
+    // ones in the shorter columns by the difference, so the grid ends on one
+    // line (the reference is Jenna's: "align top and bottom evenly"). Only the
+    // LAST card of a column moves, so nothing is re-placed: lengthening the
+    // bottom of a column can only make that column later, never earlier.
+    // Offsets, not rects — the reveal translates each card's link.
+    const last = new Map(); // column x -> { i, bottom }
+    cards.forEach((card, i) => {
+      const x = card.offsetLeft;
+      const bottom = card.offsetTop + natural[i];
+      const prev = last.get(x);
+      if (!prev || bottom > prev.bottom) last.set(x, { i, bottom });
+    });
+    const floor = Math.max(...[...last.values()].map((c) => c.bottom));
+    const extra = new Array(cards.length).fill(0);
+    last.forEach(({ i, bottom }) => { extra[i] = Math.round(floor - bottom); });
+
+    cards.forEach((card, i) => {
+      if (extraOf(card) !== extra[i]) setExtra(card, extra[i]);
+      card.style.gridRowEnd = 'span ' + Math.max(1, Math.ceil(natural[i] + extra[i] + gap));
     });
   };
   // Laid out straight from the observer, NOT deferred to a rAF: observer
   // callbacks already run before paint, and rAF stops outright in a background
   // tab, which left the spans stale (cards overlapping) until it came back.
-  // No feedback loop: a span never changes a card's own height, and the grid's
-  // own resize re-derives the same spans.
+  // No feedback loop: a span never changes a card's own height, and a stretch
+  // this pass wrote is subtracted back out before measuring, so the pass it
+  // triggers derives the same numbers and writes nothing.
   const ro = new ResizeObserver(layout);
   cards.forEach((card) => ro.observe(card));
   ro.observe(grid);
