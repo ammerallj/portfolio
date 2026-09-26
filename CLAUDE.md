@@ -46,6 +46,62 @@ how they overwrite each other's work. `.claude/settings.json` sets
     behind the header's "Say hello" trigger) on every page.
   - `responsive.css` — **ALL width breakpoints, site-wide.** Organized by screen size (1440 → 1024 → 768 → **680** → 480 → **374**px). Imported last so it overrides desktop styles. The 680 tier is a NAV-ONLY tier — see **The nav hand-off at 680** below. The 374 tier holds ONE rule, the narrow-phone hero fade — see **Phones: the shader's own box**.
 
+## ⚠️ REDESIGN IN PROGRESS — branch `worktree-redesign` (2026-09-26)
+
+**This branch is an exploration Jenna is NOT staging yet.** It lives in
+`.claude/worktrees/redesign/`, branched from staging `378e79a`. Keep it; don't
+stage it until she says so. Much of the landing documentation below describes
+the PRE-redesign hero and is superseded here wherever the two disagree.
+
+**The landing now (desktop/tablet, >680):**
+- **Hero lockup in the white lower part of the fold**, reference-style: `h1`
+  "Jenna Ammerall." (96px `--display-size`, weight 500, dark, no morph —
+  `data-static` skips `initHeadlineMorph`) bottom-left; right column
+  "Product designer making sense of complexity, grounded in visual craft."
+  (primary) + "Previously at Meta and Microsoft." (secondary, 18px/400).
+  The right block is **last-baseline aligned** with the h1 (`align-items: last
+  baseline`, flex-end fallback); stacks at ≤768. The divider is gone.
+- **The field's white scrim**: `--field-mask-end: 72svh + rise − cream`,
+  `--field-fade: 30svh`, `--field-rise: 130px` (lifts the artwork to show more
+  red / less top blue; the bio-contrast ceiling on rise no longer applies — the
+  text sits on white).
+- **Fixed `.top-nav`** (index.html, before `.intro`): Seattle clock
+  (`initTopNav`, Intl `America/Los_Angeles`) + a centred white hairline + the
+  same three items as `.intro-bar`, white on the gradient, hidden ≤680.
+  `measureNavColumns` publishes `--nav-lead` (clock's left edge → the h1's left
+  edge) and `--nav-col-w` / `--nav-col-inset` (Selected work → pill → the right
+  column), so the hero lines up with the nav at every width. The top nav's items
+  take `initNavMorph` too, which is what makes their widths match the bar's.
+
+**Scroll choreography** (all in `updateScrollEffects`, pure functions of scroll
+except the one glide):
+- `HERO_SHORTEN { px: 530, cap: 0.65 }` — the hero is laid out shorter and
+  pushed back; the push unwinds on **ease-out `(1 − p)²`** (was the biased
+  smoothstep), so Work rises fastest on the first gesture and hits 1× at the pin.
+- The lockup rides Work's own movement (`shorten − push`) **plus**
+  `HERO_TEXT.speed` (1.2) × travel — the parallax that pulls it away upward.
+- Fades are separate: `TOP_NAV_FADE` 0.2–0.4, `HERO_TEXT_FADE` 0.1–0.45
+  (`--top-nav-fade`, `--hero-text-fade`), fractions of the way to the pin.
+- `NAV_HANDOFF` 0.45: the docked `.intro-bar` appears (invisible before —
+  `html.has-top-nav`) and is **position: fixed** from then on
+  (`is-bar-lifted`), with Work taking a `-shorten` margin so layout is
+  identical. ⚠️ **Not a scroll-linked transform** — `--bar-lift` was tried and
+  wobbled, because scroll events land a frame behind the compositor.
+  "Selected work" is active from the hand-off.
+- `WORK_GLIDE` (1.4s, easeInOutSine): on a downward crossing of the hand-off,
+  Lenis glides to put the first card's title one `--gap-group` under the nav.
+  Once per pass, re-arms above the hand-off, skipped for reduced motion,
+  unlocked (reader input takes over). ⚠️ Four earlier auto-scrolls into Work
+  were removed (see Horizontal Tracks); this one is Jenna's explicit ask.
+- `WORK_REVEAL` 0.9 / 0.95 (the site-wide line), so the card's rise-and-fade
+  plays on screen. `#work-section` padding-top is `--gap-content` (was 104).
+
+**Open / not done:** phones (≤480) were not tuned for any of this; the nav
+link "Selected work" still lands on Work's centred resting position, not the
+glide's landing spot; meta descriptions / JSON-LD / llms.txt still carry the
+old bio (Jenna to decide); white type on the top of the gradient hasn't been
+contrast-checked.
+
 ## Landing (2026-08) — "Making products make sense."
 The homepage hero is the Figma 339:3745 landing: `images/hero-bkg.jpg` laid as
 a PAGE background at `z:-1` inside `main` (a stacking context — body's own
