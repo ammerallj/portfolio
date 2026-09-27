@@ -1404,6 +1404,12 @@ function workLandingScrollY() {
   return Math.min(Math.max(y - barH - gap, 0), Math.max(max, 0));
 }
 let workGlideArmed = true;
+// True while a nav click is driving the scroll (setupLenis's anchor handler).
+// The glide must stand down then: the click is already heading to the same
+// spot, and a second scrollTo restarts the trip from rest on an ease-IN — a
+// visible stall at the hand-off that read as the page getting stuck.
+let navClickScrolling = false;
+let navClickTimer = 0;
 let lastHandoffShow = false;
 let lastGlideScrollY = 0;
 // Extra lift on the first gesture, on top of riding the white edge (see
@@ -2993,7 +2999,7 @@ function updateScrollEffects() {
     // Jenna's explicit ask (2026-09-26); it fires only on a downward crossing.
     const down = window.scrollY > lastGlideScrollY;
     if (!show) workGlideArmed = true;
-    else if (!lastHandoffShow && down && workGlideArmed
+    else if (!lastHandoffShow && down && workGlideArmed && !navClickScrolling
       && !reducedMotion.matches && window.__lenis && sectionRestingScrollY) {
       const target = workLandingScrollY();
       if (target != null && target > window.scrollY + 4) {
@@ -3495,6 +3501,12 @@ function setupLenis(Lenis) {
       if (!target) return;
       e.preventDefault();
       const fromMenu = !!link.closest('.mobile-menu');
+      // REDESIGN: hold off the hand-off glide for the length of this trip. The
+      // timer is a backstop — onComplete does not fire if the reader interrupts.
+      const clearClick = () => { navClickScrolling = false; clearTimeout(navClickTimer); };
+      navClickScrolling = true;
+      clearTimeout(navClickTimer);
+      navClickTimer = setTimeout(clearClick, 2500);
       // A settling section does not rest with its top on the nav line — it rests
       // CENTRED in the space under it (see initSectionGeometry). Aiming these at
       // the generic offset made the link land in one place and then get moved
@@ -3504,10 +3516,10 @@ function setupLenis(Lenis) {
       // is its TOP, not its centre.
       const resting = sectionClickScrollY && sectionClickScrollY(target);
       if (resting != null) {
-        lenis.scrollTo(resting, { immediate: fromMenu });
+        lenis.scrollTo(resting, { immediate: fromMenu, onComplete: clearClick });
         return;
       }
-      lenis.scrollTo(target, { offset: -headerOffset, immediate: fromMenu });
+      lenis.scrollTo(target, { offset: -headerOffset, immediate: fromMenu, onComplete: clearClick });
     });
   });
 }
