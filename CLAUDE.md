@@ -96,9 +96,13 @@ except the one glide):
 - `WORK_REVEAL` 0.9 / 0.95 (the site-wide line), so the card's rise-and-fade
   plays on screen. `#work-section` padding-top is `--gap-content` (was 104).
 
-**Open / not done:** phones (≤480) were not tuned for any of this; the nav
-link "Selected work" still lands on Work's centred resting position, not the
-glide's landing spot; meta descriptions / JSON-LD / llms.txt still carry the
+  **The "Selected work" nav click lands on the same spot** —
+  `workLandingScrollY()` is the one definition, read by the glide and by
+  `sectionClickScrollY`; it sits below Work's resting position, so the spy
+  still lights the link. Verified identical from the top, from About and via
+  the glide (1440x900: scroll 266, title at 128).
+
+**Open / not done:** phones (≤480) were not tuned for any of this; meta descriptions / JSON-LD / llms.txt still carry the
 old bio (Jenna to decide); white type on the top of the gradient hasn't been
 contrast-checked.
 

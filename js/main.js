@@ -1385,6 +1385,24 @@ const NAV_HANDOFF = 0.45; // = HERO_TEXT_FADE.to: no nav-less stretch
 // The glide to Selected Work when the docked nav appears (see the hand-off in
 // updateScrollEffects). easeInOutSine: a gentle start and a soft landing.
 const WORK_GLIDE = { duration: 1.4, easing: (t) => -(Math.cos(Math.PI * t) - 1) / 2 };
+// Where Selected Work LANDS — the glide above and the nav link's click
+// (sectionClickScrollY) both use this, so the two cannot disagree: the first
+// card's title one --gap-group below the nav. Not Work's centred resting
+// position, which left ~230px of air under the bar. Page position from
+// offsets, so the push and the reveal's translate don't skew it. Null where
+// there is no top nav or no bar (project pages, and ≤680 via the caller).
+function workLandingScrollY() {
+  const bar = document.querySelector('.intro-bar');
+  const title = document.querySelector('#work-section .work-card .section-title');
+  if (!topNav || !bar || !title) return null;
+  let y = 0;
+  for (let n = title; n; n = n.offsetParent) y += n.offsetTop;
+  const gap = parseFloat(getComputedStyle(document.documentElement)
+    .getPropertyValue('--gap-group')) || 48;
+  const barH = bar.offsetHeight || 64;
+  const max = document.documentElement.scrollHeight - window.innerHeight;
+  return Math.min(Math.max(y - barH - gap, 0), Math.max(max, 0));
+}
 let workGlideArmed = true;
 let lastHandoffShow = false;
 let lastGlideScrollY = 0;
@@ -2977,18 +2995,7 @@ function updateScrollEffects() {
     if (!show) workGlideArmed = true;
     else if (!lastHandoffShow && down && workGlideArmed
       && !reducedMotion.matches && window.__lenis && sectionRestingScrollY) {
-      // Target: the first card's title one --gap-group below the nav, not
-      // Work's centred resting position (which left ~230px of air under the
-      // bar). Page position from offsets, so push and the reveal's translate
-      // don't skew it; exact once the push has unwound, which it has here.
-      const title = document.querySelector('#work-section .work-card .section-title');
-      let target = null;
-      if (title) {
-        let y = 0;
-        for (let n = title; n; n = n.offsetParent) y += n.offsetTop;
-        const gap = parseFloat(getComputedStyle(html).getPropertyValue('--gap-group')) || 48;
-        target = y - introBar.offsetHeight - gap;
-      }
+      const target = workLandingScrollY();
       if (target != null && target > window.scrollY + 4) {
         workGlideArmed = false;
         window.__lenis.scrollTo(target, { duration: WORK_GLIDE.duration, easing: WORK_GLIDE.easing });
@@ -3625,7 +3632,15 @@ function initSectionGeometry(lenis) {
   // after clicking About.
   sectionClickScrollY = (el) => {
     if (!sections.includes(el) || !wide.matches) return null;
-    return el.id === 'contact' ? topAlignedFor(el) : restingFor(el);
+    if (el.id === 'contact') return topAlignedFor(el);
+    // REDESIGN: Work's click lands where the hand-off glide does. It sits
+    // BELOW Work's resting position (the spy's threshold), so the spy still
+    // lights "Selected work" after the click.
+    if (el.id === 'work-section') {
+      const landing = workLandingScrollY();
+      if (landing != null) return landing;
+    }
+    return restingFor(el);
   };
 
   // Contact's min-height is `100dvh - nav - footer`, and the footer's height is
