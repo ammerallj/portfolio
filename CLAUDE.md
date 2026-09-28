@@ -55,7 +55,10 @@ the PRE-redesign hero and is superseded here wherever the two disagree.
 
 **The landing now (desktop/tablet, >680):**
 - **Hero lockup in the white lower part of the fold**, reference-style: `h1`
-  "I’m Jenna, a product / interaction designer based in Seattle."
+  "I’m Jenna Ammerall, a product / interaction designer based in Seattle."
+  (7 of the 12 columns — `58.333vw − 73.67px`, 766.33 at 1440 — set on
+  `.intro-band-left` only; the shared 6-col `--width-title-column` is the
+  Work cards'. "product&nbsp;/" keeps the slash off the start of a line.)
   (`--section-title-size` 56/44/32 — one step under `--display-size`; weight
   500, dark, no morph — `data-static` skips `initHeadlineMorph`) bottom-left;
   right column "I care about how things fit together, balancing product

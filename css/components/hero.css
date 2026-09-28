@@ -900,7 +900,12 @@ html:not(.is-field-live) .intro-divider {
 }
 
 .intro-band-left {
-  flex: 0 1 var(--width-title-column);
+  /* SEVEN columns of the fluid 12-col grid (56px margins, 20px gutters):
+     7·(100vw − 332px)/12 + 6 gutters = 58.333vw − 73.67px — 766.33px at 1440,
+     524.2 at the 1025 floor. With the 5-column right block and one gutter the
+     row fills all 12. Deliberately NOT --width-title-column (6 cols), which the
+     Work card titles share. */
+  flex: 0 1 clamp(524.2px, 58.333vw - 73.67px, 766.33px);
   min-width: 0;
   margin-right: auto;
 }
