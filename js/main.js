@@ -1396,18 +1396,11 @@ const topNav = document.querySelector('.top-nav');
 const WORK_IN = 8;
 const NAV_SWAP = 400; // backstop only — the swap follows the white
 const HERO_TEXT_OUT = 160; // backstop — the lockup fades with the nav swap
-// The glide to Selected Work when the docked nav appears (see the hand-off in
-// updateScrollEffects). easeOutCubic over 1.0s (was easeInOutSine / 1.4s):
-// the ease-in held the cards ~380px down for the first beat after the nav
-// appeared, which read as a gap under the bar; now they come straight up and
-// settle softly.
-// 0.6s since the one-trigger hand-off: it matches Selected Work's 0.6s fade-up
-// (sections.css), so the cards shift up WHILE they fade in and arrive under
-// the bar together, instead of fading in far down and gliding for another beat.
-const WORK_GLIDE = { duration: 0.6, easing: (t) => 1 - Math.pow(1 - t, 3) };
-// Where Selected Work LANDS — the glide above and the nav link's click
-// (sectionClickScrollY) both use this, so the two cannot disagree: the first
-// card's TOP EDGE one --gap-group below the nav. Not Work's centred resting
+// Where the "Selected work" nav click LANDS (sectionClickScrollY): the first
+// card's TOP EDGE one --gap-group below the nav. (It was shared with an
+// automatic glide into Work on the hand-off — REMOVED 2026-09-27 at Jenna's
+// ask: it pulled the reader down. Don't reintroduce one; see Horizontal Tracks
+// for the four earlier auto-scrolls that were removed for the same reason.) Not Work's centred resting
 // position, which left ~230px of air under the bar. Page position from
 // offsets, so the push and the reveal's translate don't skew it. Null where
 // there is no top nav or no bar (project pages, and ≤680 via the caller).
@@ -1428,15 +1421,6 @@ function workLandingScrollY() {
   const max = document.documentElement.scrollHeight - window.innerHeight;
   return Math.min(Math.max(y - barH - gap, 0), Math.max(max, 0));
 }
-let workGlideArmed = true;
-// True while a nav click is driving the scroll (setupLenis's anchor handler).
-// The glide must stand down then: the click is already heading to the same
-// spot, and a second scrollTo restarts the trip from rest on an ease-IN — a
-// visible stall at the hand-off that read as the page getting stuck.
-let navClickScrolling = false;
-let navClickTimer = 0;
-let lastHandoffShow = false;
-let lastGlideScrollY = 0;
 // Extra lift on the first gesture, on top of riding the white edge (see
 // setHeroTextLift). px at full; reached by `over` of the way to the pin.
 const HERO_TEXT_BOOST = { px: 0, over: 0.4 };
@@ -2512,25 +2496,6 @@ function updateScrollEffects() {
     html.classList.toggle('is-bar-lifted', show);
     html.classList.toggle('is-bar-docked', show);
     introBar.inert = !show;
-    // ...and the moment it appears on the way DOWN, the page glides on to
-    // Selected Work's resting position (WORK_GLIDE). Once per pass: it re-arms
-    // only after the reader is back above the hand-off. Lenis's scrollTo is
-    // not locked, so any wheel/touch input mid-glide simply takes over.
-    // ⚠️ CLAUDE.md records four earlier auto-scrolls into Work that were
-    // removed because they grabbed readers who were only passing. This one is
-    // Jenna's explicit ask (2026-09-26); it fires only on a downward crossing.
-    const down = window.scrollY > lastGlideScrollY;
-    if (!show) workGlideArmed = true;
-    else if (!lastHandoffShow && down && workGlideArmed && !navClickScrolling
-      && !reducedMotion.matches && window.__lenis && sectionRestingScrollY) {
-      const target = workLandingScrollY();
-      if (target != null && target > window.scrollY + 4) {
-        workGlideArmed = false;
-        window.__lenis.scrollTo(target, { duration: WORK_GLIDE.duration, easing: WORK_GLIDE.easing });
-      }
-    }
-    lastHandoffShow = show;
-    lastGlideScrollY = window.scrollY;
   }
   // REDESIGN: the hero text rides the white scrim's edge rather than a speed of
   // its own. That edge moves on the page by (lag − cream) — the artwork sinks by
@@ -3010,12 +2975,6 @@ function setupLenis(Lenis) {
       if (!target) return;
       e.preventDefault();
       const fromMenu = !!link.closest('.mobile-menu');
-      // REDESIGN: hold off the hand-off glide for the length of this trip. The
-      // timer is a backstop — onComplete does not fire if the reader interrupts.
-      const clearClick = () => { navClickScrolling = false; clearTimeout(navClickTimer); };
-      navClickScrolling = true;
-      clearTimeout(navClickTimer);
-      navClickTimer = setTimeout(clearClick, 2500);
       // A settling section does not rest with its top on the nav line — it rests
       // CENTRED in the space under it (see initSectionGeometry). Aiming these at
       // the generic offset made the link land in one place and then get moved
@@ -3025,10 +2984,10 @@ function setupLenis(Lenis) {
       // is its TOP, not its centre.
       const resting = sectionClickScrollY && sectionClickScrollY(target);
       if (resting != null) {
-        lenis.scrollTo(resting, { immediate: fromMenu, onComplete: clearClick });
+        lenis.scrollTo(resting, { immediate: fromMenu });
         return;
       }
-      lenis.scrollTo(target, { offset: -headerOffset, immediate: fromMenu, onComplete: clearClick });
+      lenis.scrollTo(target, { offset: -headerOffset, immediate: fromMenu });
     });
   });
 }
@@ -3169,9 +3128,9 @@ function initSectionGeometry(lenis) {
   sectionClickScrollY = (el) => {
     if (!sections.includes(el) || !wide.matches) return null;
     if (el.id === 'contact') return topAlignedFor(el);
-    // REDESIGN: Work's click lands where the hand-off glide does. It sits
-    // BELOW Work's resting position (the spy's threshold), so the spy still
-    // lights "Selected work" after the click.
+    // REDESIGN: Work's click lands the first card one --gap-group under the
+    // nav (workLandingScrollY). It sits BELOW Work's resting position (the
+    // spy's threshold), so the spy still lights "Selected work" after it.
     if (el.id === 'work-section') {
       const landing = workLandingScrollY();
       if (landing != null) return landing;

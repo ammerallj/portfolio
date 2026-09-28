@@ -106,11 +106,10 @@ except the one glide):
   identical. ⚠️ **Not a scroll-linked transform** — `--bar-lift` was tried and
   wobbled, because scroll events land a frame behind the compositor.
   "Selected work" is active from the hand-off.
-- `WORK_GLIDE` (0.6s, easeOutCubic — matches Work's fade-up so the cards shift up while fading in): on a downward crossing of the hand-off,
-  Lenis glides to put the first card's title one `--gap-group` under the nav.
-  Once per pass, re-arms above the hand-off, skipped for reduced motion,
-  unlocked (reader input takes over). ⚠️ Four earlier auto-scrolls into Work
-  were removed (see Horizontal Tracks); this one is Jenna's explicit ask.
+- **NO automatic glide into Work.** `WORK_GLIDE` (a Lenis scrollTo fired at
+  the hand-off) was built, tuned, and REMOVED 2026-09-27 at Jenna's ask — it
+  pulled her down the page. That is the fifth auto-scroll into Work removed
+  for the same reason (see Horizontal Tracks); don't rebuild one.
 - `WORK_REVEAL` 0.9 / 0.95 (the site-wide line), so the card's rise-and-fade
   plays on screen. `#work-section` padding-top is `--gap-content` (was 104).
 
