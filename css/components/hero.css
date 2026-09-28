@@ -1480,8 +1480,43 @@ html.has-top-nav.is-bar-docked .intro-bar {
   color: #fff;
 }
 
+/* ⚠️ ACCESSIBILITY (2026-09-28): FULL WHITE, not 0.75. On the solid accent
+   0.75 white measured 3.97:1 — under AA's 4.5 for this 16px text; full white
+   is 5.86. And 0.9 is not enough either: against black before the swap there
+   is no crossover where both clear 4.5 (best 4.28). The active link is marked
+   by its weight (600), so the dimmer inactive white is not needed for that. */
 .intro-bar.is-over-dark .intro-bar-links a {
-  color: rgba(255, 255, 255, 0.75);
+  color: #fff;
+}
+
+/* ...and FULL BLACK while Contact's blue is behind the bar but the labels have
+   not swapped yet (js/main.js toggles .is-over-ramp). The resting rgba(0,0,0,.8)
+   is a floor tuned for the hero's gradient; on the deep end of the blue ramp it
+   fell to 3.9:1. Full black and full white cross at ramp alpha 0.86, both
+   4.58:1 — the DARK_TEXT_ALPHA the swap already uses. */
+.intro-bar.is-over-ramp .intro-bar-links a {
+  color: #000;
+}
+
+/* THE SWAP'S HALO (2026-09-28, accessibility). With the blue ramp showing
+   through the bar, there is no swap moment at which every pixel of a label
+   clears 4.5:1: for ~12px of scroll the ramp changes colour across a single
+   line of type (worst 3.5:1 measured at the swap, 4.1 even with a 200px ramp).
+   A tight halo in the colour each label needs to stand out from becomes the
+   glyphs' immediate background, which is what contrast is measured against —
+   cream behind the black labels on the ramp, accent behind the white ones. On
+   plain cream or plain blue the halo matches its surroundings and disappears;
+   it only shows through the swap itself. */
+.intro-bar.is-over-ramp .intro-bar-name,
+.intro-bar.is-over-ramp .intro-bar-links a {
+  text-shadow: 0 0 1px rgb(251, 252, 248), 0 0 4px rgb(251, 252, 248),
+    0 0 10px rgba(251, 252, 248, 0.9);
+}
+
+.intro-bar.is-over-dark .intro-bar-name,
+.intro-bar.is-over-dark .intro-bar-links a {
+  text-shadow: 0 0 1px rgb(var(--color-accent-rgb)), 0 0 4px rgb(var(--color-accent-rgb)),
+    0 0 10px rgba(var(--color-accent-rgb), 0.9);
 }
 
 @media (hover: hover) {

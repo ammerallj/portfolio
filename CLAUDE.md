@@ -256,6 +256,24 @@ functions of scroll, the fades are timed class toggles):
   the blue passes mid-screen, and Contact's copy on the normal in-order reveal.
   Open: WHEN the nav swaps to white on blue — Jenna wants that tackled for
   accessibility separately.
+- **The nav swap, for accessibility (2026-09-28; Jenna chose to KEEP the
+  see-through bar over a solid cream → blue switch).** Measured against the
+  ramp (cream #FBFCF8 → accent #4A45FF), 16px labels, AA 4.5:
+  · at rest on blue the links were white 0.75 = **3.97** (fail) → now `#fff`,
+    5.86. 0.9 is NOT enough: against black there is no crossover where both
+    clear 4.5 (best 4.28). Same fix on `.site-header .site-nav-bar a`.
+  · before the swap, over the ramp, the 0.8 black fell to **3.9** → full black
+    via `.intro-bar.is-over-ramp` (JS: blue behind the bar, not yet swapped).
+    Full black / full white cross at ramp alpha 0.86, both 4.58 — the existing
+    `DARK_TEXT_ALPHA`.
+  · ⚠️ A see-through bar CANNOT pass on every frame: the ramp changes colour
+    across one line of type, leaving ~12px of scroll under 4.5 at the swap
+    (worst 3.5 at the 96px `navRamp`; a longer ramp only raises the floor, 4.1
+    at 200). Closed with a tight TEXT HALO (cream behind the black labels on the
+    ramp, accent behind the white ones, hero.css "THE SWAP'S HALO") — the halo
+    is the glyphs' immediate background, so contrast is measured against it. It
+    is invisible on plain cream / plain blue. Not yet eyeballed at the swap:
+    claude-in-chrome's tab kept going hidden, which freezes painting.
   ⚠️ Not yet judged by feel on a trackpad.
 - **The orbs are tuned for COLOUR now, not contrast** (the text sits on
   white). ⚠️ **PAINT ORDER DECIDES WHICH COLOUR WINS** — the lesson again:

@@ -2881,7 +2881,7 @@ function updateScrollEffects() {
     if (contactRect.height === 0) {
       // Contact is hidden (dropped at the mobile tier) — there's no blue panel to
       // invert over, so keep the bars in their normal (cream) state.
-      stickyBars.forEach(bar => bar.classList.remove('is-over-dark'));
+      stickyBars.forEach(bar => bar.classList.remove('is-over-dark', 'is-over-ramp'));
       setBarBleed(BAR_BLEED);
       setDarkMix(0);
       setBarFill('');
@@ -3004,6 +3004,9 @@ function updateScrollEffects() {
         ? contactAlphaAt(contactGlyphMid, blue, liveLedge) >= DARK_TEXT_ALPHA
         : mix >= DARK_TEXT_AT;
       stickyBars.forEach(bar => bar.classList.toggle('is-over-dark', flipToWhite));
+      // Blue behind the bar but not yet swapped: labels go FULL black (hero.css
+      // .is-over-ramp) — the resting 0.8 black fails AA on the deep ramp.
+      stickyBars.forEach(bar => bar.classList.toggle('is-over-ramp', !flipToWhite && covered > 0));
 
       // CLIP THE FROST TO CONTACT'S TOP EDGE. The bar's glass bleeds BAR_BLEED
       // past its own bottom so it melts into the page instead of ending on a

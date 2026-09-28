@@ -252,7 +252,7 @@ body:has(.intro) .site-header {
 
 /* --- Over the blue Contact panel: white text + white chips --- */
 .site-header.is-over-dark .site-nav-bar a {
-  color: rgba(255, 255, 255, 0.75);
+  color: #fff; /* was 0.75 white: 3.97:1 on the accent, under AA (see hero.css) */
 }
 
 .site-header.is-over-dark .site-nav-bar a.is-active {
