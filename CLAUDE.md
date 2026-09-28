@@ -82,22 +82,22 @@ functions of scroll, the fades are timed class toggles):
   smoothstep), so Work rises fastest on the first gesture and hits 1× at the pin.
 - The lockup rides Work's own movement (`shorten − push`) **plus**
   `HERO_TEXT.speed` (0.8) × travel — the parallax that pulls it away upward.
-- **The hand-off is THREE timed steps, none tied to scroll distance** (Jenna's
-  ask), all reversing above their trigger:
-  1. `WORK_IN` (8px) — Selected Work's container fades up (0.6s,
-     `is-work-in`, sections.css), so the cards rise visibly under the lockup.
-  2. **Nav swap** — the top nav fades out and the docked bar fades in the
-     moment the white's edge reaches the top nav's bottom. That edge is READ
-     from the canvas's mask; a JS re-derivation got it wrong because the
-     redesign's white ends at a CSS 72svh.
-  3. The lockup fades out (0.5s) AT the swap (`HERO_TEXT_OUT` 160 is only a
-     backstop).
-  **The white RIDES THE LOCKUP**: `cream = lag + textLift`, so its edge stays
-  16px above the headline all the way up and the gradient stays visible above
-  the text until the white reaches the nav (~106px at 1440x900, ~72 at
-  1000x650). Forcing it to the top in the first ~48px — tried — wiped the
-  colour almost at once; with the swap reading the white, no force is needed.
-  `NAV_SWAP` (400) is a backstop.
+- **The landing nav is NOT pinned (2026-09-27).** `.top-nav` is
+  `position: absolute` at the top of the page and scrolls away with the hero.
+  Pinning it and swapping it out mid-hero was tried several ways (fixed
+  triggers, on the white reaching it, on a contrast rule) and every version
+  left white type on a pale backdrop for a stretch. Jenna's call: keep it
+  where it is.
+- **The docked bar is revealed when Selected Work ENTERS** — the section's
+  visual top reaching the bar's bottom (~290px of scroll at 1440x900, which is
+  also where it would pin). Between the landing nav scrolling off (~64px) and
+  that, there is deliberately no nav on screen.
+- `WORK_IN` (8px): Selected Work's container fades up (0.6s, `is-work-in`,
+  sections.css), so the cards rise visibly under the lockup.
+- The lockup fades out (0.5s) at `HERO_TEXT_OUT` (160px) or on entering Work.
+- **The white RIDES THE LOCKUP**: `cream = lag + textLift`, so its edge stays
+  16px above the headline all the way up and the gradient stays in view above
+  the text. Forcing it to the top early — tried — wiped the colour at once.
 - **The gradient drifts at half the scroll speed** (`FIELD_LAG.k` 0.5, was
   0.3). The white is unaffected — `cream` already includes the lag.
 - The docked `.intro-bar` (invisible before — `html.has-top-nav`) is

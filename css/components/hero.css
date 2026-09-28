@@ -977,13 +977,14 @@ html.is-hero-text-out .intro-band {
 }
 
 /* ---- REDESIGN: the top nav over the gradient ----
-   Fixed at the top, white type, Seattle time on the left and a hairline
-   running to the links — which sit on the shared right column exactly as
-   .intro-bar's do, so the hand-off lands the links in the same place.
-   html.is-top-nav-off (js/main.js) fades it out at the hand-off;
-   html.is-bar-docked hands over to .intro-bar at Selected Work. */
+   At the top of the page (not pinned), white type, Seattle time on the left
+   and a hairline running to the links — which sit on the shared right column
+   exactly as .intro-bar's do. It scrolls away with the hero;
+   html.is-bar-docked reveals .intro-bar when Selected Work enters. */
 .top-nav {
-  position: fixed;
+  /* NOT pinned (2026-09-27): it sits at the top of the page and scrolls away
+     with the hero; the docked .intro-bar takes over when Work enters. */
+  position: absolute;
   top: 0;
   left: 0;
   right: 0;
@@ -997,11 +998,6 @@ html.is-hero-text-out .intro-band {
   font-family: var(--font-body);
   font-size: var(--size-base);
   letter-spacing: -0.01em;
-  /* Scroll-linked: no transition on this opacity, by the standing rule. */
-  /* Fades out on a TIMED transition at the hand-off (is-top-nav-off, set at
-     HERO_TEXT_OUT in js/main.js) — not scroll-linked. */
-  opacity: 1;
-  transition: opacity 0.5s ease;
 }
 
 /* The entrance fade lives on the children, so it can't pin the parent's
@@ -1010,12 +1006,6 @@ html.is-hero-text-out .intro-band {
   animation: intro-bar-fade 0.6s ease-out 0.9s both;
 }
 
-html.is-top-nav-off .top-nav {
-  opacity: 0;
-  visibility: hidden;
-  /* visibility waits for the fade, so the fade is seen */
-  transition: opacity 0.5s ease, visibility 0s linear 0.5s;
-}
 
 .top-nav-lead {
   display: flex;

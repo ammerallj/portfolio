@@ -1386,16 +1386,17 @@ try {
 // Seattle time; the fade and the hand-off to .intro-bar live in
 // updateScrollEffects. Null on project pages, so all of it is skipped there.
 const topNav = document.querySelector('.top-nav');
-// THE HAND-OFF, in three steps on TIMED transitions (not scroll-linked):
-// WORK_IN   — Selected Work fades up from the first bit of scroll, so the cards
-//             are visibly rising right under the lockup (sections.css).
-// NAV_SWAP  — the top nav fades out and the docked bar fades in, the moment the
-//             white finishes climbing to the top (the white's ease completes
-//             here, so the top nav's white type never sits on white).
-// HERO_TEXT_OUT — the lockup fades out (0.5s, hero.css).
+// THE HAND-OFF (timed transitions, not scroll-linked opacities):
+// - The landing nav (.top-nav) is NOT pinned: it sits at the top of the page
+//   and simply scrolls away with the hero (hero.css).
+// - WORK_IN — Selected Work fades up from the first bit of scroll, so the
+//   cards are visibly rising right under the lockup (sections.css).
+// - The docked bar is revealed when Selected Work ENTERS — its top reaches the
+//   bottom of the bar (updateScrollEffects).
+// - HERO_TEXT_OUT — the lockup fades out (0.5s, hero.css), or on entering
+//   Work if that comes first.
 const WORK_IN = 8;
-const NAV_SWAP = 400; // backstop only — the swap follows the white
-const HERO_TEXT_OUT = 160; // backstop — the lockup fades with the nav swap
+const HERO_TEXT_OUT = 160;
 // Where the "Selected work" nav click LANDS (sectionClickScrollY): the first
 // card's TOP EDGE one --gap-group below the nav. (It was shared with an
 // automatic glide into Work on the hand-off — REMOVED 2026-09-27 at Jenna's
@@ -2455,34 +2456,17 @@ function updateScrollEffects() {
     : 0;
   const creamPx = Math.max(0, Math.round(cream));
   setFieldCream(creamPx);
-  // REDESIGN: the hand-off, on TIMED transitions rather than opacities tied to
-  // scroll distance (see WORK_IN / NAV_SWAP / HERO_TEXT_OUT). The navs swap the
-  // moment the white's edge reaches the bottom of the top nav — measured here,
-  // after the white is computed — so the top nav's white type never sits on
-  // white; NAV_SWAP is the backstop. Back above, everything reverses.
-  // The white's end in the viewport, READ from the canvas's own mask rather
-  // than re-derived (the redesign ends it at a CSS 72svh, which no JS constant
-  // restates). Only while it can still matter — the first NAV_SWAP px — so the
-  // per-frame style read is brief.
-  let whiteEndV = Infinity;
-  if (topNav && fieldDockScroll > 0 && window.scrollY > 0 && window.scrollY <= NAV_SWAP) {
-    const cv = document.querySelector('.page-field-canvas');
-    if (cv) {
-      const cs = getComputedStyle(cv);
-      const stops = (cs.maskImage || cs.webkitMaskImage || '').match(/-?[\d.]+px/g);
-      if (stops) whiteEndV = cv.getBoundingClientRect().top + parseFloat(stops[stops.length - 1]);
-    }
-  }
-  const navOut = fieldDockScroll > 0 && window.scrollY > 0
-    && (window.scrollY > NAV_SWAP || (topNav && whiteEndV <= topNav.offsetHeight));
-  // The lockup fades AT the swap: it rides the white, so it reaches the top
-  // together with it. HERO_TEXT_OUT is only a backstop now.
+  // REDESIGN: the docked bar is revealed when Selected Work ENTERS — its
+  // visual top (push included, hence the rect) reaches the bottom of the bar.
+  // The landing nav above is not pinned; it has already scrolled away with the
+  // hero. Back above, everything reverses.
+  const workEl = document.getElementById('work-section');
+  const navOut = fieldDockScroll > 0 && window.scrollY > 0 && workEl && introBar
+    && workEl.getBoundingClientRect().top <= (introBar.offsetHeight || 64);
   const heroOut = navOut || (fieldDockScroll > 0 && window.scrollY > HERO_TEXT_OUT);
   if (topNav) {
     html.classList.toggle('is-hero-text-out', heroOut);
-    html.classList.toggle('is-top-nav-off', navOut);
     html.classList.toggle('is-work-in', fieldDockScroll > 0 && window.scrollY > WORK_IN);
-    topNav.inert = navOut;
   }
   // REDESIGN: the docked bar takes over at the nav swap (navOut) —
   // before it would pin on its own. From then on it is position: FIXED at the top (is-bar-lifted,
