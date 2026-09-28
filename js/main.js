@@ -956,14 +956,17 @@ const FIELD = {
   blobs: [
     // REDESIGN (2026-09-27): the hero text sits on WHITE now, so the contrast
     // limits that shaped these orbs no longer bind — they are tuned for colour.
-    // Red and magenta/violet hold their colour further out (per-orb ramp) and
-    // magenta/violet come in from the edges; cyan loses its ramp boost and
-    // shrinks, so it stops washing over the red. Was, in order:
-    //   magenta r .652 x .107 · violet x .942 · red (shared ramp) ·
-    //   cyan r .4738 ramp { mid .62, midAlpha .6 }.
+    // Red now paints at the BOTTOM (paintOrder), and magenta/violet — which
+    // sit over it — are SMALLER and held near their edges, so each reads as a
+    // distinct orb: magenta left, red centre, violet right. All three hold
+    // their colour further out (per-orb ramp); cyan lost its ramp boost and
+    // shrank. Measured over the visible band at 1440x900: magenta 51%, red
+    // 34%, purple 14%, blue 1%. Was, in order:
+    //   magenta r .652 x .107 · violet r .5054 x .942 y .499 · red (shared
+    //   ramp) · cyan r .4738 ramp { mid .62, midAlpha .6 }.
     // ⚠️ lab/field-shader.html is NOT synced with this.
-    { col: [0.8392, 0.3020, 0.8078], r: 0.652,  x: 0.170, y: 0.375, a: 1.00, ramp: { mid: 0.60, midAlpha: 0.65 } }, // magenta #D64DCE
-    { col: [0.5725, 0.2196, 0.8902], r: 0.5054, x: 0.880, y: 0.499, a: 1.00, ramp: { mid: 0.60, midAlpha: 0.65 } }, // violet  #9238E3
+    { col: [0.8392, 0.3020, 0.8078], r: 0.36,   x: 0.10,  y: 0.375, a: 1.00, ramp: { mid: 0.60, midAlpha: 0.65 } }, // magenta #D64DCE
+    { col: [0.5725, 0.2196, 0.8902], r: 0.36,   x: 0.93,  y: 0.45,  a: 1.00, ramp: { mid: 0.60, midAlpha: 0.65 } }, // violet  #9238E3
     { col: [0.9765, 0.2471, 0.2471], r: 0.6275, x: 0.590, y: 0.640, a: 1.00, ramp: { mid: 0.62, midAlpha: 0.72 } }, // red     #F93F3F
     { col: [0.0039, 0.6235, 0.8471], r: 0.42,   x: 0.547, y: 0.08,  a: 1.00, pulse: 0.15 }, // cyan #019FD8
   ],
@@ -1055,7 +1058,12 @@ const FIELD = {
   // ⚠️ uCol MUST be permuted with uBlob. The shader composites slot 0 first, so
   // the uniform slot IS the stack position; upload one reordered and not the
   // other and every orb paints in its neighbour's colour.
-  paintOrder: [1, 0, 2, 3],
+  // REDESIGN (2026-09-27): RED AT THE BOTTOM — [2, 1, 0, 3] = red, violet,
+  // magenta, cyan. Red was third, over violet and magenta, and with the
+  // biggest reach it blanketed both: no purple, no distinct magenta. Under
+  // them it fills the middle while magenta (left) and violet (right) paint
+  // over it at the sides. Was [1, 0, 2, 3].
+  paintOrder: [2, 1, 0, 3],
   // PHONE LAYOUT (≤480, chosen at page load with FIELD_STATIC). The phone draws
   // the field into its own narrow PORTRAIT box (responsive.css, .page-field-canvas
   // at the 480 tier), and the desktop layout — composed for a 16:10 frame, sized

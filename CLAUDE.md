@@ -108,11 +108,14 @@ functions of scroll, the fades are timed class toggles):
   16px above the headline all the way up and the gradient stays in view above
   the text. Forcing it to the top early — tried — wiped the colour at once.
 - **The orbs are tuned for COLOUR now, not contrast** (the text sits on
-  white): red and magenta/violet carry per-orb ramps (midAlpha .72 / .65) so
-  they hold their colour further out, magenta/violet moved in from the edges
-  (x .17 / .88), and cyan lost its ramp boost and shrank (r .42). The old
-  values are in the comment above `FIELD.blobs`. ⚠️ `lab/field-shader.html`
-  is NOT synced with these.
+  white). ⚠️ **PAINT ORDER DECIDES WHICH COLOUR WINS** — the lesson again:
+  strengthening red while it painted over magenta/violet just blanketed them
+  (0% purple); moving red to the bottom with magenta/violet at full size
+  flipped it (0% red). Shipped: `paintOrder` [2, 1, 0, 3] (red at the bottom),
+  magenta r .36 x .10 and violet r .36 x .93 held at their edges, all three on
+  per-orb ramps, cyan r .42 with no boost — magenta 51% / red 34% / purple
+  14% / blue 1% of the visible band at 1440x900. Old values are in the comment
+  above `FIELD.blobs`. ⚠️ `lab/field-shader.html` is NOT synced with these.
 - **The gradient drifts at half the scroll speed** (`FIELD_LAG.k` 0.5, was
   0.3). The white is unaffected — `cream` already includes the lag.
 - The docked `.intro-bar` (invisible before — `html.has-top-nav`) is
