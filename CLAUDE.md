@@ -98,6 +98,8 @@ except the one glide):
   1000x650). Forcing it to the top in the first ~48px — tried — wiped the
   colour almost at once; with the swap reading the white, no force is needed.
   `NAV_SWAP` (400) is a backstop.
+- **The gradient drifts at half the scroll speed** (`FIELD_LAG.k` 0.5, was
+  0.3). The white is unaffected — `cream` already includes the lag.
 - The docked `.intro-bar` (invisible before — `html.has-top-nav`) is
   **position: fixed** from the hand-off on
   (`is-bar-lifted`), with Work taking a `-shorten` margin so layout is

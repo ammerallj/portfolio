@@ -202,7 +202,8 @@ function setFieldCream(px) {
 const FIELD_TUCK = { span: 0.6 };
 // The artwork's lag: it moves at (1 − k) of the scroll while the white, the nav
 // and Selected Work move at exactly 1 and slide up over it.
-const FIELD_LAG = { k: 0.3 };
+// REDESIGN: 0.5 (was 0.3) — the gradient drifts at half the scroll speed.
+const FIELD_LAG = { k: 0.5 };
 // The hero TEXT's parallax: the headline, divider and bio rise at a constant
 // 1 + speed of the scroll — the fastest of the three layers. LINEAR, because a
 // changing speed is what read as loose. Held once the bar pins; the text is off
