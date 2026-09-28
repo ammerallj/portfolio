@@ -115,6 +115,11 @@ functions of scroll, the fades are timed class toggles):
 - **The white RIDES THE LOCKUP**: `cream = lag + textLift`, so its edge stays
   16px above the headline all the way up and the gradient stays in view above
   the text. Forcing it to the top early — tried — wiped the colour at once.
+- **Work cards are WHITE with no hover gradients** (2026-09-27): fill #fff
+  (was a 2.5% black cream panel); the hover scrim, the lapping wash, their
+  keyframes and the per-card `--card-glow` colours are deleted. Hover still
+  grows the card and swaps its text. (The custom cursor's own colours are
+  separate — `GLOW_VARIANTS` in js/main.js — and untouched.)
 - **Work cards can carry HOVER MEDIA** (Loop first, 2026-09-27): a still
   `.work-card-cover` (JPEG, lazy) with a `.work-card-hover` GIF over it whose
   `src` is set only on first hover (`data-hover-src`, `initWorkHoverMedia`),

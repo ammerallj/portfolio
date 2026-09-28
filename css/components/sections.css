@@ -100,7 +100,8 @@ html.has-top-nav.is-work-in #work-section .site-container {
   flex-direction: column;
   border-radius: var(--work-card-radius);
   border: 1px solid var(--color-border-light);
-  background-color: rgba(0, 0, 0, 0.025);
+  /* REDESIGN: white (was rgba(0,0,0,0.025) — a cream panel). */
+  background-color: #fff;
   overflow: hidden;
   color: var(--color-text);
   text-decoration: none;
@@ -125,131 +126,14 @@ html.has-top-nav.is-work-in #work-section .site-container {
   }
 }
 
-/* HOVER SCRIM — the project's cursor-glow colour rising from the card's bottom
-   edge and dissolving to nothing ~2/3 of the way up. Subtle by design: 0.2 at
-   its strongest, over the panel's cream.
-   The colour is the CORE of that project's cursor PNG (images/*-cursor.png,
-   sampled), keyed on the link's href — the same href match js/main.js's
-   GLOW_VARIANTS uses to tint the cursor — so card and cursor always agree.
-   Re-sample if a cursor PNG is re-exported; nothing enforces the pairing.
-   It paints BEHIND the card's text: the link isolates, and the scrim sits at
-   z-index -1 inside it, above the panel's own background.
-   ⚠️ A SMOOTHSTEP in 13 stops, never a two-stop linear ramp — a straight alpha
-   line reads as a band at its top edge (the same finding as the hero mask,
-   the Contact ledge and the header scrim). */
+/* REDESIGN (2026-09-27): the HOVER SCRIM (the project's cursor colour rising
+   from the card's bottom), the lapping WASH, their keyframes and the per-card
+   --card-glow colours were REMOVED at Jenna's ask — the card is plain white
+   on hover. Hover still grows it (scale above) and swaps its text. The scrim
+   is in the version history if it is ever wanted back. */
 .work-card-link {
   position: relative;
   isolation: isolate;
-}
-
-.work-card-link[href$="messaging.html"]       { --card-glow: 2, 183, 236; }   /* blue */
-.work-card-link[href$="microsoft-loop.html"]  { --card-glow: 178, 48, 237; }  /* purple */
-.work-card-link[href$="facebook-groups.html"] { --card-glow: 250, 55, 90; }   /* red */
-.work-card-link[href$="accessibility.html"]   { --card-glow: 230, 68, 222; }  /* pink */
-
-.work-card-link::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background: linear-gradient(
-    to top,
-    rgba(var(--card-glow, 0, 0, 0), 0.200) 0%,
-    rgba(var(--card-glow, 0, 0, 0), 0.196) 5.4%,
-    rgba(var(--card-glow, 0, 0, 0), 0.185) 10.8%,
-    rgba(var(--card-glow, 0, 0, 0), 0.169) 16.2%,
-    rgba(var(--card-glow, 0, 0, 0), 0.148) 21.7%,
-    rgba(var(--card-glow, 0, 0, 0), 0.125) 27.1%,
-    rgba(var(--card-glow, 0, 0, 0), 0.100) 32.5%,
-    rgba(var(--card-glow, 0, 0, 0), 0.075) 37.9%,
-    rgba(var(--card-glow, 0, 0, 0), 0.052) 43.3%,
-    rgba(var(--card-glow, 0, 0, 0), 0.031) 48.8%,
-    rgba(var(--card-glow, 0, 0, 0), 0.015) 54.2%,
-    rgba(var(--card-glow, 0, 0, 0), 0.004) 59.6%,
-    rgba(var(--card-glow, 0, 0, 0), 0) 65%
-  );
-  opacity: 0;
-  transition: opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1);
-  /* BREATHING: the scrim's top edge rises and falls ~10% from the bottom. */
-  transform-origin: 50% 100%;
-  animation: work-scrim-breathe 5.5s ease-in-out infinite alternate paused;
-}
-
-/* THE WASH: a soft glow of the same colour, lapping up from the bottom edge
-   and back (keyframes below). Same back layer as the scrim (z -1 in the isolated link), so
-   both stay behind the media, the title and the pills. Clipped by the card's
-   overflow: hidden. */
-.work-card-link::before {
-  content: "";
-  position: absolute;
-  /* Wider than the card on both sides, so it reads as a shoreline across the
-     whole bottom edge rather than a spot; `closest-side` makes it an ellipse. */
-  left: -15%;
-  bottom: -25%;
-  width: 130%;
-  height: 65%;
-  z-index: -1;
-  pointer-events: none;
-  background: radial-gradient(
-    closest-side,
-    rgba(var(--card-glow, 0, 0, 0), 0.120) 0%,
-    rgba(var(--card-glow, 0, 0, 0), 0.115) 12.5%,
-    rgba(var(--card-glow, 0, 0, 0), 0.101) 25%,
-    rgba(var(--card-glow, 0, 0, 0), 0.082) 37.5%,
-    rgba(var(--card-glow, 0, 0, 0), 0.060) 50%,
-    rgba(var(--card-glow, 0, 0, 0), 0.038) 62.5%,
-    rgba(var(--card-glow, 0, 0, 0), 0.019) 75%,
-    rgba(var(--card-glow, 0, 0, 0), 0.005) 87.5%,
-    rgba(var(--card-glow, 0, 0, 0), 0) 100%
-  );
-  opacity: 0;
-  transition: opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1);
-  animation: work-scrim-drift 6s linear infinite paused;
-}
-
-/* The motion only RUNS while the card is hovered / focused. Paused rather than
-   removed, so it picks up where it left off instead of snapping back to its
-   first frame while the fade-out is still visible — and a paused animation
-   costs nothing. Both are transforms, so they stay on the compositor. */
-.work-card-link:focus-visible::after,
-.work-card-link:focus-visible::before {
-  opacity: 1;
-  animation-play-state: running;
-}
-
-@media (hover: hover) {
-  .work-card-link:hover::after,
-  .work-card-link:hover::before {
-    opacity: 1;
-    animation-play-state: running;
-  }
-}
-
-@keyframes work-scrim-breathe {
-  from { transform: scaleY(1); }
-  to   { transform: scaleY(1.1); }
-}
-
-/* THE WASH — water lapping on a beach. The glow rests low (mostly below the
-   card's bottom edge, which clips it), SURGES up on an ease-out so it slows as
-   it reaches its highest point, spreading a touch wider like a wave thinning
-   out, then slides back down more slowly on an ease-in-out. Not `alternate`:
-   the way up and the way back are deliberately different speeds.
-   A paused animation rests on its 0% frame, so every hover starts from the
-   low water mark and washes up. */
-@keyframes work-scrim-drift {
-  0% {
-    transform: translateY(45%) scaleX(0.9);
-    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
-  }
-  40% {
-    transform: translateY(-8%) scaleX(1.1);
-    animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1);
-  }
-  100% {
-    transform: translateY(45%) scaleX(0.9);
-  }
 }
 
 /* The media frame. Its HEIGHT is the masonry's main dial: --media-ratio per
@@ -401,11 +285,6 @@ html.has-top-nav.is-work-in #work-section .site-container {
   .work-card-description {
     transition: none;
     translate: none;
-  }
-  /* The scrim keeps its colour and drops only the movement. */
-  .work-card-link::before,
-  .work-card-link::after {
-    animation: none;
   }
   /* No growth at all — the crossfade still says "you're on this card". */
   .work-card-link,
