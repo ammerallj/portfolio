@@ -210,7 +210,7 @@ const FIELD_LAG = { k: 0.5 };
 // screen by then.
 // REDESIGN: the lockup's PARALLAX over Selected Work — extra lift per px of
 // scroll on top of riding Work's own push (see setHeroTextLift), so the text
-// scrolls away faster than Work rises and fades out at HERO_TEXT_OUT as it
+// scrolls away faster than Work rises and fades out (once Work fills half the viewport) as it
 // goes. 0 would lock the two together (no parallax, constant gap).
 const HERO_TEXT = { speed: 0.8 };
 let lastHeroTextLift = -1;
@@ -1394,10 +1394,9 @@ const topNav = document.querySelector('.top-nav');
 // - The docked bar is revealed once the gradient has cleared from under it —
 //   the white's edge reaching the bar's bottom (updateScrollEffects).
 //   NAV_REVEAL_MAX is the backstop.
-// - HERO_TEXT_OUT — the lockup fades out (0.5s, hero.css), or on entering
-//   Work if that comes first.
+// - The lockup fades out (0.5s, hero.css) once Selected Work fills more than
+//   half the viewport.
 const WORK_IN = 8;
-const HERO_TEXT_OUT = 160;
 const NAV_REVEAL_MAX = 400;
 // Where the "Selected work" nav click LANDS (sectionClickScrollY): the first
 // card's TOP EDGE one --gap-group below the nav. (It was shared with an
@@ -2427,7 +2426,7 @@ function updateScrollEffects() {
   // at 1440x900) and eases to exactly 1x at the pin (slope 0 there), so the
   // dock still doesn't jump. HERO_SHORTEN.bias is unused by this curve.
   // CUBIC ease-out (was quadratic): more of Work's catch-up happens before the
-  // docked nav appears (HERO_TEXT_OUT), so the cards are already close under it.
+  // docked nav appears, so the cards are already close under it.
   // Slope is still 0 at the pin (1x there, no jump); the cost is a faster first
   // gesture (1 + 3·S/D at the start, vs 1 + 2·S/D).
   const pinR = 1 - pinP;
@@ -2478,7 +2477,12 @@ function updateScrollEffects() {
   const navOut = fieldDockScroll > 0 && !!topNav && window.scrollY > 0
     && (window.scrollY > NAV_REVEAL_MAX
         || whiteEndV <= ((introBar && introBar.offsetHeight) || 64));
-  const heroOut = navOut || (fieldDockScroll > 0 && window.scrollY > HERO_TEXT_OUT);
+  // The lockup fades only once Selected Work fills MORE THAN HALF the
+  // viewport — its visual top (push included, hence the rect) above the middle
+  // of the screen. Jenna's rule; not tied to the nav reveal or a distance.
+  const workEl = document.getElementById('work-section');
+  const heroOut = fieldDockScroll > 0 && !!workEl
+    && workEl.getBoundingClientRect().top < window.innerHeight / 2;
   if (topNav) {
     html.classList.toggle('is-hero-text-out', heroOut);
     html.classList.toggle('is-work-in', fieldDockScroll > 0 && window.scrollY > WORK_IN);
@@ -2560,7 +2564,7 @@ function updateScrollEffects() {
     }
     if (atBottom && lastEl) activeEl = lastEl;
   }
-  // REDESIGN: the docked bar is revealed early (HERO_TEXT_OUT), with Selected Work
+  // REDESIGN: the docked bar is revealed early (gradient cleared), with Selected Work
   // rising right under it — so from that moment "Selected work" reads active,
   // rather than waiting for Work's resting position. Only fills an empty slot;
   // About and Contact still take over as they are reached.

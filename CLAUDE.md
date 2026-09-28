@@ -98,7 +98,9 @@ functions of scroll, the fades are timed class toggles):
   drops it back into the hero's flow, so a fade-out showed a ghost bar.
 - `WORK_IN` (8px): Selected Work's container fades up (0.6s, `is-work-in`,
   sections.css), so the cards rise visibly under the lockup.
-- The lockup fades out (0.5s) at `HERO_TEXT_OUT` (160px) or on entering Work.
+- The lockup fades out (0.5s) only once Selected Work fills MORE THAN HALF
+  the viewport (its top above the screen's middle) — Jenna's rule. ~91px of
+  scroll at 1440x900, just before the docked bar appears.
 - **The white RIDES THE LOCKUP**: `cream = lag + textLift`, so its edge stays
   16px above the headline all the way up and the gradient stays in view above
   the text. Forcing it to the top early — tried — wiped the colour at once.
