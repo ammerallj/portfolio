@@ -446,7 +446,6 @@ const ABOUT_LIFT = { speed: 0.8, fadeAt: 0.5, gap: 16 };
 const CONTACT_SHORTEN = { px: 500, cap: 0.5 };
 let contactShorten = 0;
 let aboutRestY = null;
-let aboutToContactY = 0;
 let lastContactPush = -1;
 function setContactPush(px) {
   if (px === lastContactPush) return;
@@ -510,7 +509,6 @@ let contactLedgeRest = 160;
 function measureAboutRest() {
   aboutRestEdge = 0;
   aboutRestY = null;
-  aboutToContactY = 0;
   // Zeroed FIRST, so the About → Contact distance is measured unshortened.
   contactShorten = 0;
   document.documentElement.style.setProperty('--contact-shorten', '0px');
@@ -526,7 +524,6 @@ function measureAboutRest() {
     document.documentElement.style.setProperty('--contact-shorten', contactShorten + 'px');
   }
   aboutRestY = rest;
-  aboutToContactY = Math.max(1, maxY() - rest);
   // In ON-SCREEN terms: at About's rest the push is the whole shorten, so the
   // panel is seen exactly where it was before the layout moved.
   aboutRestEdge = Math.max(0, pageTop(contactSection) - rest + contactShorten);
@@ -2794,7 +2791,11 @@ function updateScrollEffects() {
   // THE PACE (CONTACT_SHORTEN): the push unwinds from the whole shorten at
   // About's rest to 0 at the scroll floor, on the hero's cubic ease-out.
   if (contactShorten > 0 && aboutRestY != null) {
-    const q = Math.max(0, Math.min(1, (window.scrollY - aboutRestY) / aboutToContactY));
+    // ⚠️ The floor is read LIVE, not from the measure: images and fonts that
+    // land after it change the page's height, and a stale distance left the
+    // push short of 0 at the bottom — Contact never reached its locked view.
+    const floorY = document.documentElement.scrollHeight - window.innerHeight;
+    const q = Math.max(0, Math.min(1, (window.scrollY - aboutRestY) / Math.max(1, floorY - aboutRestY)));
     setContactPush(Math.round(contactShorten * (1 - q) * (1 - q) * (1 - q)));
   } else {
     setContactPush(0);
@@ -3117,6 +3118,18 @@ window.addEventListener('resize', () => {
   measureAboutRest();
   updateScrollEffects();
 });
+// Late layout (images, web fonts) changes the page's height after the first
+// measure; re-measure once each has settled, or the Contact pacing and resting
+// positions are taken from a page that no longer exists.
+const remeasureLate = () => {
+  measureNavColumns();
+  measureFieldTuck();
+  measureContactArrival();
+  measureAboutRest();
+  updateScrollEffects();
+};
+window.addEventListener('load', remeasureLate);
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(remeasureLate);
 updateScrollEffects();
 
 // ============================================================

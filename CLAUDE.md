@@ -210,6 +210,12 @@ functions of scroll, the fades are timed class toggles):
     Shorten is zeroed then measured in `measureAboutRest`; `aboutRestEdge` is
     stored in ON-SCREEN terms (+ shorten) and `contactRestEdge` now comes from
     layout offsets, so neither picks up a translate.
+    ⚠️ The push's progress reads the scroll floor LIVE (`scrollHeight −
+    innerHeight` per frame). It was measured once at load, and in a real
+    browser images/fonts landing afterwards changed the page height, so the push
+    never reached 0 and Contact stopped short of its locked view (nav still
+    dark, heading at the bottom). The measures also re-run on `load` and
+    `document.fonts.ready` (`remeasureLate`).
   ⚠️ Not yet judged by feel on a trackpad.
 - **The orbs are tuned for COLOUR now, not contrast** (the text sits on
   white). ⚠️ **PAINT ORDER DECIDES WHICH COLOUR WINS** — the lesson again:
