@@ -78,7 +78,7 @@ the PRE-redesign hero and is superseded here wherever the two disagree.
 **Scroll choreography** (all in `updateScrollEffects`, pure functions of scroll
 except the one glide):
 - `HERO_SHORTEN { px: 530, cap: 0.65 }` — the hero is laid out shorter and
-  pushed back; the push unwinds on **ease-out `(1 − p)²`** (was the biased
+  pushed back; the push unwinds on **cubic ease-out `(1 − p)³`** (was the biased
   smoothstep), so Work rises fastest on the first gesture and hits 1× at the pin.
 - The lockup rides Work's own movement (`shorten − push`) **plus**
   `HERO_TEXT.speed` (1.2) × travel — the parallax that pulls it away upward.

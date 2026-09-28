@@ -2464,8 +2464,12 @@ function updateScrollEffects() {
   // (1 − p)^2 puts Work's fastest rise on the first gesture (1 + 2·S/D, ~1.8x
   // at 1440x900) and eases to exactly 1x at the pin (slope 0 there), so the
   // dock still doesn't jump. HERO_SHORTEN.bias is unused by this curve.
+  // CUBIC ease-out (was quadratic): more of Work's catch-up happens before the
+  // docked nav appears at NAV_HANDOFF, so the cards are already close under it.
+  // Slope is still 0 at the pin (1x there, no jump); the cost is a faster first
+  // gesture (1 + 3·S/D at the start, vs 1 + 2·S/D).
   const pinR = 1 - pinP;
-  const push = fieldDockScroll > 0 ? heroShorten * pinR * pinR : 0;
+  const push = fieldDockScroll > 0 ? heroShorten * pinR * pinR * pinR : 0;
   setHeroPush(Math.round(push));
   // REDESIGN: the docked bar takes over at NAV_HANDOFF — before it would pin
   // on its own. From then on it is position: FIXED at the top (is-bar-lifted,
