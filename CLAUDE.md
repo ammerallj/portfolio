@@ -221,6 +221,11 @@ functions of scroll, the fades are timed class toggles):
   from `--contact-trim` 144, which left no slack; at trim 0 the full-frame
   min-height has room. Measured at 1466x993: 201px nav → heading, 200px below
   the content (was 96 / ~305).
+- **Scrolling UP reverses it cleanly** because `setupReveals` skips About's
+  groups while `#about.is-about-out` is set. Without that, the lift carried
+  About's content off the top, the reveal system reset it as "off-screen", and
+  scrolling back up replayed a staggered reveal on top of the 0.5s fade —
+  About sat half-blank. Verified in Chrome (visible tab, real wheel scroll).
   ⚠️ Not yet judged by feel on a trackpad.
 - **The orbs are tuned for COLOUR now, not contrast** (the text sits on
   white). ⚠️ **PAINT ORDER DECIDES WHICH COLOUR WINS** — the lesson again:

@@ -3484,6 +3484,13 @@ function setupReveals(motion) {
     const vh = window.innerHeight || document.documentElement.clientHeight;
     groups.forEach((group) => {
       const r = group.getBoundingClientRect();
+      // ⚠️ EXCEPT About while Contact has it faded out (#about.is-about-out,
+      // ABOUT_LIFT). The lift carries About's content off the top, which used to
+      // reset it here — so scrolling back up it replayed a staggered reveal on
+      // top of the lift's own fade and sat half-blank for a moment. Held in its
+      // revealed state, it comes back on the one 0.5s fade, like the hero's
+      // lockup. Once the class is gone the normal reset applies again.
+      if (group.closest('#about.is-about-out')) return;
       if (r.bottom <= 0 || r.top >= vh) {
         // Fully off-screen (above or below): instant reset to hidden, ready to
         // fade in on the next entry.
