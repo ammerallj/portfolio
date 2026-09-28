@@ -116,6 +116,12 @@ functions of scroll, the fades are timed class toggles):
   per-orb ramps, cyan r .48 y .16 with no boost — magenta 45% / red 30% /
   purple 16% / blue 8% of the visible band at 1440x900. Old values are in the comment
   above `FIELD.blobs`. ⚠️ `lab/field-shader.html` is NOT synced with these.
+- **Tablets (≤1024) draw the shader in a SCREEN-WIDTH box** (responsive.css,
+  1024 tier): `width: 100vw; height: 72svh + rise + 80px; aspect-ratio: auto`,
+  so the orbs scale down with the screen (orb sizes are fractions of the box's
+  width, and `--field-w` there is ~1.65x the screen at 1024x768 and ~2.1x at
+  768x1024). The JPEG fallback keeps `--field-w`; ≤480 keeps its own box. The
+  72svh restates the mask's end — change them together.
 - **The orbs animate ~30% faster** (`FIELD.motion.speed` 2.4, was 1.85) —
   same drift distance and pulse size, shorter loops.
 - **The gradient drifts at half the scroll speed** (`FIELD_LAG.k` 0.5, was

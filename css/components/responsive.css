@@ -212,6 +212,23 @@
     --field-w: max(1688.69px, 220svh, 117.27vw);
   }
 
+  /* REDESIGN (2026-09-27): THE SHADER GETS ITS OWN SCREEN-WIDTH BOX ON
+     TABLETS, so the orbs scale DOWN with the screen. Orb sizes are fractions
+     of the box's WIDTH, and --field-w above (for the JPEG fallback, which is
+     kept) is ~1.65x the screen at 1024x768 and ~2.1x at 768x1024 — so the orbs
+     came out as big as a large desktop's. The box was that wide only to be
+     TALL enough; the shader reads the canvas's real aspect (uAspect), so the
+     orbs stay round in any box — the same move the phone tier makes. Height:
+     down to the white's end (72svh, hero.css --field-mask-end) plus the rise,
+     with 80px spare so the artwork's edge stays under the white. The ≤480
+     tier restates its own box and wins there. */
+  .page-field-canvas,
+  .page-field-grain {
+    width: 100vw;
+    height: calc(72svh + var(--field-rise) + 80px);
+    aspect-ratio: auto;
+  }
+
   /* ⚠️ SPACE-BETWEEN INSIDE .contact-inner WAS TRIED HERE AND REVERTED (2026-09).
      The idea was sound at rest — the panel fills a tall fold, so on a portrait
      tablet the content clustered in the top quarter with 621px of empty blue
