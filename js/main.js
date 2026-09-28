@@ -2504,7 +2504,18 @@ function updateScrollEffects() {
   // sank by lag; the mask pulls its end up by cream). It must sit on the nav's
   // VISUAL top — the shortened layout top plus the push — with the resting
   // overhang closing on the tuck's curve. At rest this is exactly 0.
-  const navTop = (fieldDockScroll) + push;
+  let navTop = (fieldDockScroll) + push;
+  // REDESIGN: the docked bar appears at NAV_HANDOFF, fixed at the TOP of the
+  // screen — well before its layout position gets there. Left glued to the
+  // layout position, the white edge was still ~100px down at that moment and
+  // a band of gradient showed under the bar's frost. So its target eases from
+  // the layout position to the viewport top (scrollY) across the text's fade,
+  // arriving exactly at the hand-off; past the pin the two are the same.
+  if (topNav && fieldDockScroll > 0) {
+    const a = HERO_TEXT_FADE.from;
+    const e0 = Math.min(1, Math.max(0, (pinP - a) / (NAV_HANDOFF - a)));
+    navTop += (window.scrollY - navTop) * (e0 * e0 * (3 - 2 * e0));
+  }
   const cream = fieldDockScroll > 0
     ? fieldVisibleEnd + lag - navTop - fieldOverhang * (1 - tuck) : 0;
   const creamPx = Math.max(0, Math.round(cream));
