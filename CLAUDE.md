@@ -135,10 +135,11 @@ functions of scroll, the fades are timed class toggles):
   own re-export, 1100x1088 / 8.5MB at 20-25fps in motion (was 1866x1846 / 21.4MB) — same
   framing, so it still registers with the 1866px still. ~1.5x on desktop (the
   card paints ~517–650px).
-  **Accessibility followed** (`ax-card.gif` 960x651, 8.3MB, 20-25fps): Jenna's
-  re-export is a NEW composition (a larger browser window with more margin), so
-  the frame takes the GIF's ratio (`960 / 651`) and the still is the GIF's own
-  first frame (960px — soft until Jenna exports a matching full-size PNG).
+  **Accessibility followed** (`ax-card.gif` 1500x1018, 17.2MB, ~22fps): the
+  frame takes the GIF's ratio (`1500 / 1018`). The GIF is a CROP of Jenna's
+  3120x1880 `ax-card.png`, so the still is that same crop cut from the PNG
+  (box 197,38 → 2887,1863, found by matching against GIF frame 0) and saved at
+  1920px. Re-find the crop if either file is re-exported.
 - **The orbs are tuned for COLOUR now, not contrast** (the text sits on
   white). ⚠️ **PAINT ORDER DECIDES WHICH COLOUR WINS** — the lesson again:
   strengthening red while it painted over magenta/violet just blanketed them
