@@ -246,6 +246,16 @@ functions of scroll, the fades are timed class toggles):
   the bar instead of dragging a 520px ramp past it. Measured 1440x900: blue
   1.0–1.2x at the nav, the 98px scrim clears the bar in ~80px of scroll, nav
   flips right after.
+- ⚠️ **PARED BACK (2026-09-28, Jenna: "it pulls suddenly on me" partway into
+  About).** The pull was `CONTACT_SHORTEN`'s push (up to ~4x on the first
+  gesture) together with `ABOUT_LIFT.speed`'s 1.8x text. Now OFF, as dials set
+  to zero rather than deleted: `CONTACT_SHORTEN.px` 0, `CONTACT_LAG.k` 0,
+  `ABOUT_LIFT.speed` 0, `CONTACT_COPY.ride` null (and the one-screen pre-reveal
+  is removed). Everything moves at exactly 1x. STILL LIVE: the scrim riding
+  About's last line and shortening to `navRamp` past the nav, About's fade once
+  the blue passes mid-screen, and Contact's copy on the normal in-order reveal.
+  Open: WHEN the nav swaps to white on blue — Jenna wants that tackled for
+  accessibility separately.
   ⚠️ Not yet judged by feel on a trackpad.
 - **The orbs are tuned for COLOUR now, not contrast** (the text sits on
   white). ⚠️ **PAINT ORDER DECIDES WHICH COLOUR WINS** — the lesson again:

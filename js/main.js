@@ -436,23 +436,19 @@ function setContactPeek(px) {
 // All three are 0 at both resting positions (About's and Contact's), so both
 // settled compositions are unchanged. Pure functions of scroll; the fade is a
 // timed class toggle, like the lockup's.
-const CONTACT_LAG = { k: 0.5 };
-const ABOUT_LIFT = { speed: 0.8, fadeAt: 0.5, gap: 16 };
+const CONTACT_LAG = { k: 0 };      // OFF (2026-09-28, Jenna: "it pulls") — was 0.5
+const ABOUT_LIFT = { speed: 0, fadeAt: 0.5, gap: 16 }; // lift OFF (was 0.8); fade + gap still live
 // Contact's copy RIDES the blue on the way in: its heading holds `ride` px
 // under the blue's top, then settles into its centred resting place as the page
 // lands — so the blue never arrives as an empty band ahead of the content.
-const CONTACT_COPY = { ride: 128, navRamp: 96 };
-// How far below the fold Contact's copy starts its reveal, as a fraction of
-// the viewport. A full screen: the blue sweeps in at up to ~4x, so anything
-// less left the copy mid-fade as it arrived.
-const CONTACT_PREREVEAL = 1;
+const CONTACT_COPY = { ride: null, navRamp: 96 }; // ride OFF (was 128): the copy reveals in order instead
 let contactQ = 1;
 // ...and the fourth part, the one that sets the PACE: Contact is laid out
 // SHORTER by `px` (capped at `cap` of the About → Contact scroll), pulled back
 // down by --contact-push at About's rest, and the push unwinds on the hero's own
 // cubic ease-out (1 − q)³ — so Contact rises fastest on the first gesture past
 // About and lands at exactly 1x. The mirror of HERO_SHORTEN.
-const CONTACT_SHORTEN = { px: 500, cap: 0.5 };
+const CONTACT_SHORTEN = { px: 0, cap: 0.5 }; // OFF — this was the sudden pull (was 500)
 let contactShorten = 0;
 let aboutRestY = null;
 let lastContactPush = -1;
@@ -3105,8 +3101,10 @@ function updateScrollEffects() {
       // to `ride` below the blue's top, easing back to 0 over the About →
       // Contact scroll. Position-only, so scrolling up plays it backwards.
       const settle = contactQ * contactQ * (3 - 2 * contactQ);
-      const pull = Math.max(0, contactCopyOffset - CONTACT_COPY.ride) * (1 - settle);
-      setContactPeek(reducedMotion.matches ? 0 : Math.round(contactLead - pull));
+      const pull = CONTACT_COPY.ride == null ? 0
+        : Math.max(0, contactCopyOffset - CONTACT_COPY.ride) * (1 - settle);
+      setContactPeek(reducedMotion.matches || CONTACT_COPY.ride == null
+        ? 0 : Math.round(contactLead - pull));
     }
   }
 
@@ -3518,17 +3516,6 @@ function setupReveals(motion) {
       // revealed state, it comes back on the one 0.5s fade, like the hero's
       // lockup. Once the class is gone the normal reset applies again.
       if (group.closest('#about.is-about-out')) return;
-      // ⚠️ AND CONTACT FADES IN AHEAD OF ITSELF. Its copy rides the blue
-      // (CONTACT_COPY), which sweeps in at up to ~4x scroll speed; on the normal
-      // on-screen trigger the copy was still mid-fade while the blue arrived,
-      // which read as an empty band of blue. Starting a screen (CONTACT_PREREVEAL)
-      // below the fold means it has finished fading before it is seen.
-      if (group.closest('#contact')) {
-        const ahead = vh * (1 + CONTACT_PREREVEAL);
-        if (r.top < ahead && r.bottom > 0) setVisible(group, true);
-        else setVisible(group, false);
-        return;
-      }
       if (r.bottom <= 0 || r.top >= vh) {
         // Fully off-screen (above or below): instant reset to hidden, ready to
         // fade in on the next entry.
