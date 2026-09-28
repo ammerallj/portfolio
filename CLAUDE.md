@@ -226,6 +226,18 @@ functions of scroll, the fades are timed class toggles):
   About's content off the top, the reveal system reset it as "off-screen", and
   scrolling back up replayed a staggered reveal on top of the 0.5s fade —
   About sat half-blank. Verified in Chrome (visible tab, real wheel scroll).
+- **Contact's copy RIDES THE BLUE** (`CONTACT_COPY.ride` 128): `--contact-peek`
+  is now `lead − max(0, copyOffset − ride) × (1 − smoothstep(q))` — it follows
+  the blue's lead, holds its heading 128px under the blue's top on the way in,
+  and eases into its centred rest as the page lands. Position-only; it replaced
+  the direction-dependent `magnitude * peekDir` peek. And the copy is
+  PRE-REVEALED a full screen below the fold (`CONTACT_PREREVEAL` 1, a Contact
+  branch in `setupReveals`): on the normal on-screen trigger it was still
+  mid-fade as the ~4x blue arrived, which read as an empty band of blue.
+  ⚠️ Chrome tabs driven by claude-in-chrome keep dropping to `hidden` when
+  Jenna's focus is elsewhere — frame logs of 10 frames mean the run was paused.
+  The reveal trigger itself fires from Lenis's scroll event, so it can be
+  checked in a hidden pane via `group.__revealVisible`.
   ⚠️ Not yet judged by feel on a trackpad.
 - **The orbs are tuned for COLOUR now, not contrast** (the text sits on
   white). ⚠️ **PAINT ORDER DECIDES WHICH COLOUR WINS** — the lesson again:
