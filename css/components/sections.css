@@ -984,7 +984,11 @@ html.has-top-nav.is-work-in #work-section .site-container {
      Fluid gap: it scales WITH the fluid right column
      (242px at 1440 → 48px floor by ~1025) so the columns stay balanced as they
      narrow instead of the gap eating the space. Stacks at ≤768 (responsive.css). */
-  gap: clamp(48px, 46.75vw - 431.16px, 15.125rem);
+  /* REDESIGN (2026-09-28): the text runs 7 of the 12 columns (was the shared
+     5-column --width-right-column), the photo keeps 4, and this gap is the one
+     empty column between them plus its two gutters: (100vw - 332px)/12 + 40px
+     = 132px at 1440. See .about-right. */
+  gap: calc(8.3333vw + 12.33px);
   /* No block padding — the heading's 100px margin-bottom sets the gap to
      content, and the section's 60px padding handles the bottom spacing */
   padding-block: 0;
@@ -1133,14 +1137,16 @@ html.has-top-nav.is-work-in #work-section .site-container {
 .about-right {
   /* Shared right column flush to the container's right edge — shares the
      single right-column edge used across the site (fluid 369→542). */
-  flex: 0 0 var(--width-right-column);
+  /* 7 grid columns, not the shared 5-column --width-right-column (redesign,
+     2026-09-28): 7·(100vw − 332px)/12 + 6·20px = 766px at 1440. ⚠️ About's
+     copy no longer starts on the nav's "Selected work" line. */
+  flex: 0 0 min(calc(58.3333vw - 73.67px), 766.33px); /* capped at its 1440 width, like the token it replaced, so lines don't run long on wide screens */
   display: flex;
   flex-direction: column;
-  /* 96px between the two eyebrow-led blocks — the widest gap that still reads
-     as "within About" (--gap-heading at 144 is the section-title measure).
-     The eyebrow → body gap inside each block stays --gap-content (20), so the
-     eyebrow reads as belonging to the copy under it, not floating between. */
-  gap: var(--gap-section);
+  /* Bio → facts list (redesign, 2026-09-28). Was --gap-section (96) between
+     two eyebrow-led blocks; the eyebrows are gone and the list's hairline
+     already marks the break, so a group gap is enough. */
+  gap: var(--gap-group);
   /* (The desktop pull-up beside the headline lives on .about-layout — a
      negative margin HERE would overflow the reveal group's rect and get
      cut out mid-view on exit. See the .about-layout comment.) */
@@ -1175,6 +1181,47 @@ html.has-top-nav.is-work-in #work-section .site-container {
   line-height: 1.4;
   color: var(--color-text);
   max-width: none;
+}
+
+/* FACTS under the bio (redesign, 2026-09-28): a full-strength hairline, then
+   label | entries rows, one step smaller than the bio so it reads as
+   reference rather than prose. Each <dd> is one entry: its first line is the
+   organisation, any further lines are the role / detail in 70% ink. */
+.about-facts {
+  margin: 0;
+  padding-top: var(--gap-content);
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  gap: 28px; /* row → row */
+  font-family: var(--font-body);
+  font-size: var(--size-base);
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+  color: var(--color-text);
+}
+
+.about-facts-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  column-gap: var(--gap-content);
+  row-gap: 16px; /* entry → entry within a row */
+}
+
+.about-facts dt {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.about-facts dd {
+  grid-column: 2;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.about-facts dd span + span {
+  color: var(--color-text-70);
 }
 
 .about-skills-list {

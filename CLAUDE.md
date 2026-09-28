@@ -150,6 +150,15 @@ functions of scroll, the fades are timed class toggles):
   applies only when it is ≤15% of the frame's height (`LEVEL_MAX`) — with three
   cards Messaging sat alone and a 376px stretch cropped ~37% of its art, so the
   columns now end unevenly instead.
+- **About me** (2026-09-28): Jenna's three-paragraph bio as one unlabelled
+  `.about-body` (Career Story / Outside of Work eyebrows gone), then
+  `.about-facts` — a black hairline and `dl` rows (label | entries, 16px,
+  role lines at 70%): Experience, Education, Patents. The text column is 7 of
+  the 12 grid columns (`min(58.333vw − 73.67px, 766px)`), not the shared
+  5-column `--width-right-column`, with one empty column before the photo, so
+  About's copy no longer starts on the nav's "Selected work" line. "Senior
+  Product Designer" is now in visible copy; the meta/JSON-LD titles still
+  say "Product Designer".
 - **The orbs are tuned for COLOUR now, not contrast** (the text sits on
   white). ⚠️ **PAINT ORDER DECIDES WHICH COLOUR WINS** — the lesson again:
   strengthening red while it painted over magenta/violet just blanketed them
