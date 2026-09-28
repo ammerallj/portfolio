@@ -56,13 +56,13 @@ the PRE-redesign hero and is superseded here wherever the two disagree.
 **The landing now (desktop/tablet, >680):**
 - **Hero lockup in the white lower part of the fold**, reference-style: `h1`
   "I’m Jenna, a product / interaction designer based in Seattle."
-  (`--display-size` 96 at 1440; weight 500, dark, no morph — `data-static`
-  skips `initHeadlineMorph`) across the full width, and the supporting text
-  STACKED UNDER it on the nav's item column: "I care about how things fit
-  together, balancing product behavior and visual craft." (primary) +
-  "Previously at Meta and Microsoft." (secondary, 18px/400). The band is a
-  column at every width now (was side by side, last-baseline aligned).
-  The divider is gone.
+  (`--section-title-size` 56/44/32 — one step under `--display-size`; weight
+  500, dark, no morph — `data-static` skips `initHeadlineMorph`) bottom-left;
+  right column "I care about how things fit together, balancing product
+  behavior and visual craft." (primary) + "Previously at Meta and Microsoft."
+  (secondary, 18px/400).
+  The right block is **last-baseline aligned** with the h1 (`align-items: last
+  baseline`, flex-end fallback); stacks at ≤768. The divider is gone.
 - **The field's white scrim**: `--field-mask-end: 72svh + rise − cream`,
   `--field-fade: 30svh`, `--field-rise: 130px` (lifts the artwork to show more
   red / less top blue; the bio-contrast ceiling on rise no longer applies — the

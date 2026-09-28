@@ -900,15 +900,14 @@ html:not(.is-field-live) .intro-divider {
 }
 
 .intro-band-left {
-  /* Full width: the headline runs across the page, the supporting text sits
-     underneath it (the band is a column — see .intro .intro-band). */
-  flex: 0 0 auto;
+  flex: 0 1 var(--width-title-column);
   min-width: 0;
+  margin-right: auto;
 }
 
 .intro-headline {
   font-weight: 500;
-  font-size: var(--display-size); /* 96px at 1440, down to 56 */
+  font-size: var(--section-title-size); /* one step under --display-size: 56/44/32 */
   line-height: 1.05;
   color: var(--color-text);
   -webkit-text-stroke: 0;
@@ -935,12 +934,13 @@ html:not(.is-field-live) .intro-divider {
    (where an auto cross-axis margin pushes it right). (0,2,0) so the tiers'
    padding-inline shorthands on .intro-band don't win; ≤680 resets it. */
 .intro .intro-band {
-  /* STACKED at every width: headline first, the supporting text beneath it
-     (still on the nav's item column via its width + margin-left: auto). Was a
-     side-by-side row with the two blocks last-baseline aligned. */
-  flex-direction: column;
-  align-items: stretch;
-  gap: var(--gap-group);
+  /* The right block's last line sits on the headline's last line. Baselines,
+     not boxes: a 96px/1.05 headline and 18px/1.5 text carry different space
+     under their letters, so box bottoms would leave the small text visibly
+     low. flex-end is the fallback where last-baseline isn't supported. The
+     ≤768 stack resets this (it would push the headline right). */
+  align-items: flex-end;
+  align-items: last baseline;
   padding-left: var(--nav-lead, 56px); /* the headline starts under the clock */
   padding-right: var(--nav-col-inset, 56px);
 }
