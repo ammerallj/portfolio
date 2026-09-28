@@ -1394,7 +1394,10 @@ const HERO_TEXT_OUT = 80;
 // the ease-in held the cards ~380px down for the first beat after the nav
 // appeared, which read as a gap under the bar; now they come straight up and
 // settle softly.
-const WORK_GLIDE = { duration: 1.0, easing: (t) => 1 - Math.pow(1 - t, 3) };
+// 0.6s since the one-trigger hand-off: it matches Selected Work's 0.6s fade-up
+// (sections.css), so the cards shift up WHILE they fade in and arrive under
+// the bar together, instead of fading in far down and gliding for another beat.
+const WORK_GLIDE = { duration: 0.6, easing: (t) => 1 - Math.pow(1 - t, 3) };
 // Where Selected Work LANDS — the glide above and the nav link's click
 // (sectionClickScrollY) both use this, so the two cannot disagree: the first
 // card's TOP EDGE one --gap-group below the nav. Not Work's centred resting
