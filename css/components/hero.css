@@ -1080,7 +1080,10 @@ html.has-top-nav .intro-bar {
   animation: none;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.35s ease, visibility 0s linear 0.35s;
+  /* Hides INSTANTLY: leaving the docked state drops the bar back into the
+     hero's flow (is-bar-lifted comes off), so a fade-out showed a ghost bar
+     mid-hero for its duration. It only fades IN (the .is-bar-docked rule). */
+  transition: none;
 }
 
 /* From the hand-off on (HERO_TEXT_OUT, js/main.js) the bar is FIXED at the top

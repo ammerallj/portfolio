@@ -1391,8 +1391,8 @@ const topNav = document.querySelector('.top-nav');
 //   and simply scrolls away with the hero (hero.css).
 // - WORK_IN — Selected Work fades up from the first bit of scroll, so the
 //   cards are visibly rising right under the lockup (sections.css).
-// - The docked bar is revealed when Selected Work ENTERS — its top reaches the
-//   bottom of the bar (updateScrollEffects).
+// - The docked bar is revealed as soon as the landing nav has scrolled off the
+//   top (updateScrollEffects).
 // - HERO_TEXT_OUT — the lockup fades out (0.5s, hero.css), or on entering
 //   Work if that comes first.
 const WORK_IN = 8;
@@ -2456,13 +2456,13 @@ function updateScrollEffects() {
     : 0;
   const creamPx = Math.max(0, Math.round(cream));
   setFieldCream(creamPx);
-  // REDESIGN: the docked bar is revealed when Selected Work ENTERS — its
-  // visual top (push included, hence the rect) reaches the bottom of the bar.
-  // The landing nav above is not pinned; it has already scrolled away with the
-  // hero. Back above, everything reverses.
-  const workEl = document.getElementById('work-section');
-  const navOut = fieldDockScroll > 0 && window.scrollY > 0 && workEl && introBar
-    && workEl.getBoundingClientRect().top <= (introBar.offsetHeight || 64);
+  // REDESIGN: the docked bar is revealed the moment the landing nav (not
+  // pinned) has scrolled fully off the top — so there is never a stretch with
+  // no nav. (It first waited for Selected Work to reach the bar, ~290px at
+  // 1440x900, which left ~225px of scroll with no nav at all.) Back above,
+  // everything reverses.
+  const navOut = fieldDockScroll > 0 && !!topNav
+    && window.scrollY >= (topNav.offsetHeight || 64);
   const heroOut = navOut || (fieldDockScroll > 0 && window.scrollY > HERO_TEXT_OUT);
   if (topNav) {
     html.classList.toggle('is-hero-text-out', heroOut);
