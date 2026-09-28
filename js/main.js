@@ -2261,7 +2261,8 @@ initScrollVideos();
 function initWorkMasonry() {
   const grid = document.querySelector('.work-grid');
   if (!grid || !('ResizeObserver' in window)) return; // project pages have none
-  const cards = Array.from(grid.children);
+  // A card with `hidden` is out of the layout, not a zero-height slot.
+  const cards = Array.from(grid.children).filter((card) => !card.hidden);
 
   // Each card's height WITHOUT the stretch below. The stretch lives on the card
   // (as padding under its media), so its own height includes it; subtracting
