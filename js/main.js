@@ -1395,8 +1395,11 @@ const HERO_TEXT_FADE = { from: 0.1, to: 0.45 };
 // beneath it. The top nav is hidden from here on too.
 const NAV_HANDOFF = 0.45; // = HERO_TEXT_FADE.to: no nav-less stretch
 // The glide to Selected Work when the docked nav appears (see the hand-off in
-// updateScrollEffects). easeInOutSine: a gentle start and a soft landing.
-const WORK_GLIDE = { duration: 1.4, easing: (t) => -(Math.cos(Math.PI * t) - 1) / 2 };
+// updateScrollEffects). easeOutCubic over 1.0s (was easeInOutSine / 1.4s):
+// the ease-in held the cards ~380px down for the first beat after the nav
+// appeared, which read as a gap under the bar; now they come straight up and
+// settle softly.
+const WORK_GLIDE = { duration: 1.0, easing: (t) => 1 - Math.pow(1 - t, 3) };
 // Where Selected Work LANDS — the glide above and the nav link's click
 // (sectionClickScrollY) both use this, so the two cannot disagree: the first
 // card's TOP EDGE one --gap-group below the nav. Not Work's centred resting

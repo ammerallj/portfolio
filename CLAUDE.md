@@ -90,7 +90,7 @@ except the one glide):
   identical. ⚠️ **Not a scroll-linked transform** — `--bar-lift` was tried and
   wobbled, because scroll events land a frame behind the compositor.
   "Selected work" is active from the hand-off.
-- `WORK_GLIDE` (1.4s, easeInOutSine): on a downward crossing of the hand-off,
+- `WORK_GLIDE` (1.0s, easeOutCubic — the ease-in read as a gap under the bar): on a downward crossing of the hand-off,
   Lenis glides to put the first card's title one `--gap-group` under the nav.
   Once per pass, re-arms above the hand-off, skipped for reduced motion,
   unlocked (reader input takes over). ⚠️ Four earlier auto-scrolls into Work
