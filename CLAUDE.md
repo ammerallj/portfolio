@@ -64,9 +64,12 @@ the PRE-redesign hero and is superseded here wherever the two disagree.
   The right block is **last-baseline aligned** with the h1 (`align-items: last
   baseline`, flex-end fallback); stacks at ≤768. The divider is gone.
 - **The field's white scrim**: `--field-mask-end: 72svh + rise − cream`,
-  `--field-fade: 30svh`, `--field-rise: 130px` (lifts the artwork to show more
+  `--field-fade: 30svh`, `--field-rise: 200px` (lifts the artwork to show more
   red / less top blue; the bio-contrast ceiling on rise no longer applies — the
   text sits on white).
+  ⚠️ The ceiling is the artwork's bottom edge: it must stay BELOW the white's
+  end or it shows as a hard line. At 200 the margin is 31px at 1440x900 and
+  64 at 1280x720 — re-measure before raising it again.
 - **Fixed `.top-nav`** (index.html, before `.intro`): Seattle clock
   (`initTopNav`, Intl `America/Los_Angeles`) + a centred white hairline + the
   same three items as `.intro-bar`, white on the gradient, hidden ≤680.
