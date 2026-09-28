@@ -88,12 +88,14 @@ functions of scroll, the fades are timed class toggles):
   triggers, on the white reaching it, on a contrast rule) and every version
   left white type on a pale backdrop for a stretch. Jenna's call: keep it
   where it is.
-- **The docked bar is revealed the moment the landing nav has scrolled off
-  the top** (`scrollY ≥ .top-nav` height, 64px) — so there is never a stretch
-  with no nav. (It first waited for Selected Work to reach it, ~290px, which
-  left ~225px with no nav.) It fades IN, but hides INSTANTLY: leaving the
-  docked state drops it back into the hero's flow, so a fade-out showed a
-  ghost bar mid-hero.
+- **The docked bar is revealed once the gradient has cleared from under
+  it** — the white's solid edge reaching the bar's bottom, READ from the
+  canvas's mask (~106px of scroll at 1440x900, ~72 at 1000x650;
+  `NAV_REVEAL_MAX` 400 is a backstop). Bracketed by two rejects: when the
+  landing nav scrolls off (64px — too soon, the bar sat over a band of
+  gradient) and when Work reaches the bar (~290px — too late, a long stretch
+  with no nav). It fades IN but hides INSTANTLY: leaving the docked state
+  drops it back into the hero's flow, so a fade-out showed a ghost bar.
 - `WORK_IN` (8px): Selected Work's container fades up (0.6s, `is-work-in`,
   sections.css), so the cards rise visibly under the lockup.
 - The lockup fades out (0.5s) at `HERO_TEXT_OUT` (160px) or on entering Work.

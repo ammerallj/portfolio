@@ -1391,12 +1391,14 @@ const topNav = document.querySelector('.top-nav');
 //   and simply scrolls away with the hero (hero.css).
 // - WORK_IN — Selected Work fades up from the first bit of scroll, so the
 //   cards are visibly rising right under the lockup (sections.css).
-// - The docked bar is revealed as soon as the landing nav has scrolled off the
-//   top (updateScrollEffects).
+// - The docked bar is revealed once the gradient has cleared from under it —
+//   the white's edge reaching the bar's bottom (updateScrollEffects).
+//   NAV_REVEAL_MAX is the backstop.
 // - HERO_TEXT_OUT — the lockup fades out (0.5s, hero.css), or on entering
 //   Work if that comes first.
 const WORK_IN = 8;
 const HERO_TEXT_OUT = 160;
+const NAV_REVEAL_MAX = 400;
 // Where the "Selected work" nav click LANDS (sectionClickScrollY): the first
 // card's TOP EDGE one --gap-group below the nav. (It was shared with an
 // automatic glide into Work on the hand-off — REMOVED 2026-09-27 at Jenna's
@@ -2456,13 +2458,26 @@ function updateScrollEffects() {
     : 0;
   const creamPx = Math.max(0, Math.round(cream));
   setFieldCream(creamPx);
-  // REDESIGN: the docked bar is revealed the moment the landing nav (not
-  // pinned) has scrolled fully off the top — so there is never a stretch with
-  // no nav. (It first waited for Selected Work to reach the bar, ~290px at
-  // 1440x900, which left ~225px of scroll with no nav at all.) Back above,
-  // everything reverses.
-  const navOut = fieldDockScroll > 0 && !!topNav
-    && window.scrollY >= (topNav.offsetHeight || 64);
+  // REDESIGN: the docked bar is revealed once the GRADIENT HAS CLEARED from
+  // under it — the white's solid edge reaching the bar's bottom — so it lands
+  // on plain cream, not over a band of colour. Tried and rejected: when the
+  // landing nav scrolls off (64px — too soon, the bar sat over the gradient)
+  // and when Selected Work reaches the bar (~290px — too late, no nav for a
+  // long stretch). The edge is READ from the canvas's mask (the redesign ends
+  // the white at a CSS 72svh that no JS constant restates), and only while it
+  // can still matter; NAV_REVEAL_MAX is the backstop. Back above, reverses.
+  let whiteEndV = Infinity;
+  if (topNav && fieldDockScroll > 0 && window.scrollY > 0 && window.scrollY <= NAV_REVEAL_MAX) {
+    const cv = document.querySelector('.page-field-canvas');
+    if (cv) {
+      const cs = getComputedStyle(cv);
+      const stops = (cs.maskImage || cs.webkitMaskImage || '').match(/-?[\d.]+px/g);
+      if (stops) whiteEndV = cv.getBoundingClientRect().top + parseFloat(stops[stops.length - 1]);
+    }
+  }
+  const navOut = fieldDockScroll > 0 && !!topNav && window.scrollY > 0
+    && (window.scrollY > NAV_REVEAL_MAX
+        || whiteEndV <= ((introBar && introBar.offsetHeight) || 64));
   const heroOut = navOut || (fieldDockScroll > 0 && window.scrollY > HERO_TEXT_OUT);
   if (topNav) {
     html.classList.toggle('is-hero-text-out', heroOut);
