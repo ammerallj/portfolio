@@ -914,11 +914,18 @@ html:not(.is-field-live) .intro-divider {
   max-width: none;
 }
 
-/* The lockup fades out as it exits the top of the screen — --hero-text-fade
-   (js/main.js), later than the top nav's own fade. Scroll-linked: no transition. The
-   columns' entrance animations are on the children, so they can't pin this. */
+/* The lockup FADES OUT ON ITS OWN CLOCK once the reader starts scrolling —
+   a timed transition, not a scroll-linked opacity, so it goes cleanly whatever
+   the scroll speed (html.is-hero-text-out, js/main.js; back in at the top).
+   This is a state change, so a transition is right here. The columns'
+   entrance animations are on the children, so they can't pin this. */
 .intro-band {
-  opacity: var(--hero-text-fade, 1);
+  opacity: 1;
+  transition: opacity 0.5s ease;
+}
+
+html.is-hero-text-out .intro-band {
+  opacity: 0;
 }
 
 /* Both columns rise together (the bio used to drop from the divider). */

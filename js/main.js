@@ -211,7 +211,7 @@ const FIELD_LAG = { k: 0.3 };
 // scroll on top of riding Work's own push (see setHeroTextLift), so the text
 // scrolls away faster than Work rises and fades out on HERO_TEXT_FADE as it
 // goes. 0 would lock the two together (no parallax, constant gap).
-const HERO_TEXT = { speed: 1.2 };
+const HERO_TEXT = { speed: 0.5 };
 let lastHeroTextLift = -1;
 function setHeroTextLift(px) {
   if (px === lastHeroTextLift) return;
@@ -1389,7 +1389,9 @@ const TOP_NAV_FADE = { from: 0.2, to: 0.4 }; // fraction of the scroll to the ba
 // The hero text fades LATER than the nav — as it exits the top of the screen —
 // so no empty band opens between it and Selected Work, which follows ~170px
 // behind. The nav still goes first, so its white type never sits on the text.
-const HERO_TEXT_FADE = { from: 0.1, to: 0.45 };
+const HERO_TEXT_FADE = { from: 0.1, to: 0.45 }; // (now only paces the white edge's ease to the top)
+// Scroll past this and the hero text fades out on its own (0.5s, hero.css).
+const HERO_TEXT_OUT = 16;
 // When the docked bar takes over (fraction of the way to its pin), separate from
 // the text fade so the text can go early while the bar arrives with Work close
 // beneath it. The top nav is hidden from here on too.
@@ -1435,14 +1437,6 @@ let lastGlideScrollY = 0;
 // Extra lift on the first gesture, on top of riding the white edge (see
 // setHeroTextLift). px at full; reached by `over` of the way to the pin.
 const HERO_TEXT_BOOST = { px: 0, over: 0.4 };
-let lastHeroTextFade = -1;
-
-function setHeroTextFade(v) {
-  const r = Math.round(v * 1000) / 1000;
-  if (r === lastHeroTextFade) return;
-  lastHeroTextFade = r;
-  document.documentElement.style.setProperty('--hero-text-fade', r);
-}
 let lastTopNavFade = -1;
 function setTopNavFade(v) {
   const r = Math.round(v * 1000) / 1000;
@@ -2451,9 +2445,11 @@ function updateScrollEffects() {
       (pinP - TOP_NAV_FADE.from) / (TOP_NAV_FADE.to - TOP_NAV_FADE.from)));
     const fade = fieldDockScroll > 0 ? 1 - f * f * (3 - 2 * f) : 1;
     setTopNavFade(fade);
-    const tf = Math.min(1, Math.max(0,
-      (pinP - HERO_TEXT_FADE.from) / (HERO_TEXT_FADE.to - HERO_TEXT_FADE.from)));
-    setHeroTextFade(fieldDockScroll > 0 ? 1 - tf * tf * (3 - 2 * tf) : 1);
+    // The hero text fades out on a TIMED transition once the reader has
+    // scrolled HERO_TEXT_OUT px (hero.css), and back in when they return
+    // above it — not an opacity tied to scroll distance.
+    html.classList.toggle('is-hero-text-out',
+      fieldDockScroll > 0 && window.scrollY > HERO_TEXT_OUT);
     const off = fade <= 0.01 || (fieldDockScroll > 0 && pinP >= NAV_HANDOFF);
     html.classList.toggle('is-top-nav-off', off);
     topNav.inert = off;

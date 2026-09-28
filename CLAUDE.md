@@ -81,9 +81,12 @@ except the one glide):
   pushed back; the push unwinds on **cubic ease-out `(1 − p)³`** (was the biased
   smoothstep), so Work rises fastest on the first gesture and hits 1× at the pin.
 - The lockup rides Work's own movement (`shorten − push`) **plus**
-  `HERO_TEXT.speed` (1.2) × travel — the parallax that pulls it away upward.
-- Fades are separate: `TOP_NAV_FADE` 0.2–0.4, `HERO_TEXT_FADE` 0.1–0.45
-  (`--top-nav-fade`, `--hero-text-fade`), fractions of the way to the pin.
+  `HERO_TEXT.speed` (0.5) × travel — the parallax that pulls it away upward.
+- The top nav fades on scroll (`TOP_NAV_FADE` 0.2–0.4, `--top-nav-fade`). The
+  hero TEXT does not: past `HERO_TEXT_OUT` (16px) `html.is-hero-text-out` fades
+  it on a 0.5s TIMED transition, and back in at the top — Jenna asked for it
+  not to be tied to scroll distance. `HERO_TEXT_FADE` now only paces the white
+  edge's ease up to the viewport top by the hand-off.
 - `NAV_HANDOFF` 0.45: the docked `.intro-bar` appears (invisible before —
   `html.has-top-nav`) and is **position: fixed** from then on
   (`is-bar-lifted`), with Work taking a `-shorten` margin so layout is
