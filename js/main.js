@@ -438,6 +438,21 @@ function setContactPeek(px) {
 // timed class toggle, like the lockup's.
 const CONTACT_LAG = { k: 0.5 };
 const ABOUT_LIFT = { speed: 0.8, fadeAt: 0.5, gap: 16 };
+// ...and the fourth part, the one that sets the PACE: Contact is laid out
+// SHORTER by `px` (capped at `cap` of the About → Contact scroll), pulled back
+// down by --contact-push at About's rest, and the push unwinds on the hero's own
+// cubic ease-out (1 − q)³ — so Contact rises fastest on the first gesture past
+// About and lands at exactly 1x. The mirror of HERO_SHORTEN.
+const CONTACT_SHORTEN = { px: 500, cap: 0.5 };
+let contactShorten = 0;
+let aboutRestY = null;
+let aboutToContactY = 0;
+let lastContactPush = -1;
+function setContactPush(px) {
+  if (px === lastContactPush) return;
+  lastContactPush = px;
+  document.documentElement.style.setProperty('--contact-push', px + 'px');
+}
 
 let lastContactLag = 1;
 function setContactLag(px) {
@@ -494,12 +509,27 @@ let aboutRestEdge = 0;
 let contactLedgeRest = 160;
 function measureAboutRest() {
   aboutRestEdge = 0;
+  aboutRestY = null;
+  aboutToContactY = 0;
+  // Zeroed FIRST, so the About → Contact distance is measured unshortened.
+  contactShorten = 0;
+  document.documentElement.style.setProperty('--contact-shorten', '0px');
   if (!contactSection || !aboutSection || !sectionRestingScrollY) return;
   const rest = sectionRestingScrollY(aboutSection);
   if (rest == null) return;   // ≤680 / reduced motion: nothing settles, so the
   const pageTop = (el) => {    // reach falls back to full, i.e. today's ledge.
     let y = 0; for (let n = el; n; n = n.offsetParent) y += n.offsetTop; return y; };
-  aboutRestEdge = Math.max(0, pageTop(contactSection) - rest);
+  const maxY = () => document.documentElement.scrollHeight - window.innerHeight;
+  if (!reducedMotion.matches) {
+    contactShorten = Math.round(Math.max(0,
+      Math.min(CONTACT_SHORTEN.px, (maxY() - rest) * CONTACT_SHORTEN.cap)));
+    document.documentElement.style.setProperty('--contact-shorten', contactShorten + 'px');
+  }
+  aboutRestY = rest;
+  aboutToContactY = Math.max(1, maxY() - rest);
+  // In ON-SCREEN terms: at About's rest the push is the whole shorten, so the
+  // panel is seen exactly where it was before the layout moved.
+  aboutRestEdge = Math.max(0, pageTop(contactSection) - rest + contactShorten);
 }
 let contactAccentRGB = '74, 69, 255';
 let contactGlyphMid = 32;
@@ -587,7 +617,9 @@ function measureContactArrival() {
   }
   if (!contactSection) return;
   // Where the panel's top edge comes to rest once the page is scrolled out.
-  const docTop = contactSection.getBoundingClientRect().top + window.scrollY;
+  // Layout offsets, not a rect: the section carries translates (the hero's push
+  // and --contact-push) that must not leak into a resting position.
+  const docTop = (() => { let y = 0; for (let n = contactSection; n; n = n.offsetParent) y += n.offsetTop; return y; })();
   contactRestEdge = Math.max(0,
     docTop - (document.documentElement.scrollHeight - window.innerHeight));
 }
@@ -2759,6 +2791,15 @@ function updateScrollEffects() {
   // to 1 at Contact's, on a smoothstep so neither end has a kink; the offset is
   // k × (distance still to travel) × t, which is 0 at BOTH rests and settles at
   // (1 − k) speed. NEGATIVE = the blue sits ABOVE the panel's layout top.
+  // THE PACE (CONTACT_SHORTEN): the push unwinds from the whole shorten at
+  // About's rest to 0 at the scroll floor, on the hero's cubic ease-out.
+  if (contactShorten > 0 && aboutRestY != null) {
+    const q = Math.max(0, Math.min(1, (window.scrollY - aboutRestY) / aboutToContactY));
+    setContactPush(Math.round(contactShorten * (1 - q) * (1 - q) * (1 - q)));
+  } else {
+    setContactPush(0);
+  }
+
   let contactLead = 0;
   let contactT = 0;
   if (contactSection && aboutRestEdge > 0) {

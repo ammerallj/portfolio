@@ -198,8 +198,19 @@ functions of scroll, the fades are timed class toggles):
     `CONTACT.reach` schedule and the up-scroll `ledgeShorten` (both now unused).
   Measured at 1440x900 by driving updateScrollEffects by hand (the pane and a
   backgrounded Chrome tab both stop rAF): gap 14px while riding, lead ≤133px,
-  About fades at y≈2124, nav flips to white at the end as before. ⚠️ Not yet
-  judged by feel on a trackpad.
+  About fades at y≈2124, nav flips to white at the end as before.
+  · and the PACE, the mirror of `HERO_SHORTEN` (added after Jenna noticed the
+    landing's hand-off was far quicker): `CONTACT_SHORTEN { px: 500, cap: 0.5 }`
+    lays `#contact` out higher (`margin-top: −--contact-shorten`) and pushes it
+    + the footer back down by `--contact-push`, which unwinds on the hero's
+    cubic `(1 − q)³` over About-rest → scroll floor. About → Contact went
+    ~1030 → ~530px of scroll at 1440x900; the blue peaks at 4.3x scroll speed
+    on the first gesture (Work peaks ~3.7x) and lands at 0.5x. `#contact`'s
+    `translate` ADDS `--hero-push` because it also matches `.intro-bar ~ *`.
+    Shorten is zeroed then measured in `measureAboutRest`; `aboutRestEdge` is
+    stored in ON-SCREEN terms (+ shorten) and `contactRestEdge` now comes from
+    layout offsets, so neither picks up a translate.
+  ⚠️ Not yet judged by feel on a trackpad.
 - **The orbs are tuned for COLOUR now, not contrast** (the text sits on
   white). ⚠️ **PAINT ORDER DECIDES WHICH COLOUR WINS** — the lesson again:
   strengthening red while it painted over magenta/violet just blanketed them

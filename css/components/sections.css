@@ -723,6 +723,20 @@ html.has-top-nav.is-work-in #work-section .site-container {
    panel is unchanged. Bottom-anchored, so nothing opens above the footer.
    The field's grain and its overlay blend came with it (see the note on
    .contact-section below). */
+/* THE PACE (redesign, 2026-09-28): Contact is laid out HIGHER by
+   --contact-shorten and pushed back down by --contact-push, which unwinds to 0
+   as the page reaches its floor (js/main.js CONTACT_SHORTEN) — the mirror of the
+   hero's --hero-shorten / --hero-push. The footer rides the same push. #contact
+   also matches `.intro-bar ~ *`, so the hero's push is added here, not lost. */
+#contact {
+  margin-top: calc(-1 * var(--contact-shorten, 0px));
+  translate: 0 calc(var(--hero-push, 0px) + var(--contact-push, 0px));
+}
+
+.site-footer {
+  translate: 0 var(--contact-push, 0px);
+}
+
 .contact-bg {
   position: absolute;
   left: 0;
