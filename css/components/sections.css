@@ -992,7 +992,7 @@ html.has-top-nav.is-work-in #work-section .site-container {
      vertically against the photo stack (Jenna's reference). The text takes 7
      columns (text-dominant), the photos the rest; this is the
      seam between them. Supersedes the 7-column note above. */
-  gap: var(--gap-group);
+  gap: calc(8.3333vw + 12.33px); /* one empty grid column + its two gutters, (100vw − 332px)/12 + 40px = 132px at 1440 (Jenna, 2026-09-28) */
   /* No block padding — the heading's 100px margin-bottom sets the gap to
      content, and the section's 60px padding handles the bottom spacing */
   padding-block: 0;
