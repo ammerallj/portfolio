@@ -50,7 +50,9 @@ how they overwrite each other's work. `.claude/settings.json` sets
 
 **This branch is an exploration Jenna is NOT staging yet.** It lives in
 `.claude/worktrees/redesign/`, branched from staging `378e79a`. Keep it; don't
-stage it until she says so. Much of the landing documentation below describes
+stage it until she says so. **It also carries the masonry Work section**:
+`worktree-work-section` (its own worktree) was merged in on 2026-09-27 — merge
+that branch again if more Work-section work lands there. Much of the landing documentation below describes
 the PRE-redesign hero and is superseded here wherever the two disagree.
 
 **The landing now (desktop/tablet, >680):**
@@ -159,9 +161,17 @@ functions of scroll, the fades are timed class toggles):
   card's top one `--gap-group` under the nav (1440x900: card at 126). It sits
   below Work's resting position, so the spy still lights the link.
 
-**Open / not done:** phones (≤480) were not tuned for any of this; meta descriptions / JSON-LD / llms.txt still carry the
-old bio (Jenna to decide); white type on the top of the gradient hasn't been
-contrast-checked.
+**Open / not done (as of 2026-09-27):**
+- Phones (≤480) were not tuned for any of this — they keep their own mobile
+  header, phone orb layout and still field.
+- Meta descriptions / JSON-LD / llms.txt still carry the old bio and title
+  (Jenna to decide; ask before cascading copy).
+- The landing nav's white type over the gradient hasn't been contrast-checked
+  at rest.
+- `lab/field-shader.html` is not synced with the retuned orbs, paint order,
+  motion speed or the tablet mapping.
+- Jenna judges motion by feel on a trackpad; the preview pane can't. Every
+  timing here was measured, not felt — expect further tuning.
 
 ## Landing (2026-08) — "Making products make sense."
 The homepage hero is the Figma 339:3745 landing: `images/hero-bkg.jpg` laid as
