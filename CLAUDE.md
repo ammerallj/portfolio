@@ -122,6 +122,16 @@ functions of scroll, the fades are timed class toggles):
   width, and `--field-w` there is ~1.65x the screen at 1024x768 and ~2.1x at
   768x1024). The JPEG fallback keeps `--field-w`; ≤480 keeps its own box. The
   72svh restates the mask's end — change them together.
+- **Tablets DERIVE their orb layout from the desktop one** (`tabletBlob` in
+  `initHeroField`, 481–1024, read per draw so it follows a resize): each orb
+  keeps its place in the visible colour band (top → the white's end at
+  72svh), x scaled by width, y by the band's height, radius by a
+  height-weighted mean `sy^(2/3)·sx^(1/3)` (an even geometric mean left
+  portrait 51% red — red paints at the bottom and fills what the others
+  miss). Reference: desktop at 1440x900. Measured colour mix: desktop
+  42/33/16/8 (magenta/red/purple/blue), 1024x768 41/33/17/8, 768x1024
+  35/40/19/6. Don't hand-tune a fixed tablet layout — it can only suit one
+  window shape.
 - **The orbs animate ~30% faster** (`FIELD.motion.speed` 2.4, was 1.85) —
   same drift distance and pulse size, shorter loops.
 - **The gradient drifts at half the scroll speed** (`FIELD_LAG.k` 0.5, was

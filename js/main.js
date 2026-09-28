@@ -1242,8 +1242,12 @@ function initHeroField() {
   gl.uniform1f(U.uWarp, FIELD.motion.warp);
   gl.uniform2f(U.uAmp,  FIELD.motion.drift, FIELD.motion.drift * FIELD.motion.driftYRatio);
 
+  // The box's CSS size, kept for the tablet layout below.
+  let boxW = 1, boxH = 1;
   function resize() {
     const r = canvas.getBoundingClientRect();
+    boxW = Math.max(1, r.width);
+    boxH = Math.max(1, r.height);
     const w = Math.max(1, Math.round(r.width  * FIELD.renderScale));
     const h = Math.max(1, Math.round(r.height * FIELD.renderScale));
     if (canvas.width !== w || canvas.height !== h) {
@@ -1275,17 +1279,52 @@ function initHeroField() {
   const colData  = new Float32Array(12);
   const rampData = new Float32Array(16);
 
+  // TABLET LAYOUT (481-1024, responsive.css draws the shader in a screen-width
+  // box there): DERIVED from the desktop composition rather than hand-tuned, so
+  // any tablet shape — portrait or landscape — reads like the web layout. Each
+  // orb keeps its place in the VISIBLE COLOUR BAND (top of the screen to the
+  // white's end at 72svh): x scales with the width, y with the band's height,
+  // and the radius by a height-weighted mean of the two (see sr). The reference is the desktop at 1440x900 (box 1440 x 1440/1.6377,
+  // band 0.72 x 900). The desktop offsetY is baked in, so none is added after.
+  // Read per draw from the live box, so it follows a window being resized.
+  const FIELD_TABLET = matchMedia('(max-width: 1024px)');
+  const TABLET_REF = { w: 1440, h: 1440 / 1.6377, band: 0.72 * 900 };
+  let fieldRisePx = null;
+  function tabletBlob(b) {
+    if (fieldRisePx == null) {
+      fieldRisePx = parseFloat(getComputedStyle(document.documentElement)
+        .getPropertyValue('--field-rise')) || 0;
+    }
+    const sx = boxW / TABLET_REF.w;
+    const sy = (0.72 * window.innerHeight) / TABLET_REF.band;
+    // Weighted toward the band's HEIGHT (2/3 : 1/3, not an even geometric
+    // mean): red paints at the bottom and fills whatever the others don't
+    // reach, so in a tall portrait band an even mix left it at 51% of the
+    // colour. Landscape barely moves (sx and sy are close there).
+    const sr = Math.pow(sy, 2 / 3) * Math.pow(sx, 1 / 3);
+    const X = b.x * TABLET_REF.w * sx;
+    const Y = ((b.y + FIELD.offsetY) * TABLET_REF.h - fieldRisePx) * sy;
+    return Object.assign({}, b, {
+      x: X / boxW,
+      y: (Y + fieldRisePx) / boxH,
+      r: (b.r * TABLET_REF.w * sr) / boxW,
+    });
+  }
+
   function draw(t, entranceMs) {
     resize();
     const e = FIELD.entrance;
+    const tablet = !FIELD_STATIC.matches && FIELD_TABLET.matches;
     FIELD.paintOrder.forEach((blobIdx, slot) => {
       const b = FIELD_STATIC.matches
         ? Object.assign({}, FIELD.blobs[blobIdx], FIELD.phone.blobs[blobIdx])
+        : tablet ? tabletBlob(FIELD.blobs[blobIdx])
         : FIELD.blobs[blobIdx];
       const p = entranceMs == null ? 1
         : Math.max(0, Math.min(1, (entranceMs - entranceStarts[blobIdx]) / e.duration));
       blobData[slot * 4 + 0] = b.x;
-      blobData[slot * 4 + 1] = b.y + (FIELD_STATIC.matches ? FIELD.phone.offsetY : FIELD.offsetY);
+      blobData[slot * 4 + 1] = b.y + (FIELD_STATIC.matches ? FIELD.phone.offsetY
+        : tablet ? 0 : FIELD.offsetY);
       blobData[slot * 4 + 2] = b.r;
       blobData[slot * 4 + 3] = b.a * p;
       colData[slot * 3 + 0] = b.col[0];
