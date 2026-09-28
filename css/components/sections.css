@@ -1134,6 +1134,34 @@ html.has-top-nav.is-work-in #work-section .site-container {
   height: 100%;
 }
 
+/* THE PHOTO STACK (redesign, 2026-09-28) — replaced the .about-photo
+   carousel above, whose rules are now unused. In flow at every width: a wide
+   landscape filling the left column, then a smaller portrait under it,
+   left-aligned. The column is the flex remainder beside the capped text, so
+   on wide screens the photos grow instead of the gap. */
+.about-stack {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--gap-content);
+}
+
+.about-stack img {
+  display: block;
+  height: auto;
+  border-radius: 24px;
+  background-color: #d9d9d9;
+}
+
+.about-stack-wide {
+  width: 100%;
+}
+
+.about-stack-small {
+  width: 50%;
+}
+
 .about-right {
   /* Shared right column flush to the container's right edge — shares the
      single right-column edge used across the site (fluid 369→542). */

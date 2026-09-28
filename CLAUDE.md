@@ -159,6 +159,14 @@ functions of scroll, the fades are timed class toggles):
   About's copy no longer starts on the nav's "Selected work" line. "Senior
   Product Designer" is now in visible copy; the meta/JSON-LD titles still
   say "Product Designer".
+  The photo CAROUSEL is gone: `.about-stack` holds two stills in flow — a wide
+  landscape (`about-photo2-crop.jpg`, photo2 cropped 28px a side to drop its
+  baked-in rounded white corners) filling the left column, then `about-photo4`
+  at half width, left-aligned, 24px radius. The left column is the flex
+  remainder beside the capped text, so on wide screens the photos grow rather
+  than the gap (photo→text 133px at 1440, 156 at 1728). `.about-photo*` rules
+  and the ≤768 `.about-photo` overrides are now unused. ⚠️ photo2's source is
+  only 858px wide, so the wide photo softens past ~1440 on a 2x display.
 - **The orbs are tuned for COLOUR now, not contrast** (the text sits on
   white). ⚠️ **PAINT ORDER DECIDES WHICH COLOUR WINS** — the lesson again:
   strengthening red while it painted over magenta/violet just blanketed them

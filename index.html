@@ -159,7 +159,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,200;0,500;0,700;1,500&family=Inter:wght@400..700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=7ec20362" />
+  <link rel="stylesheet" href="style.css?v=ebeb4f34" />
   <!-- The landing field's JPEG fallback — PHONES ONLY since 2026-09, so the
        preload is gated to match the <picture> in <main>. Without the media
        attribute this fetches 1.4MB on every desktop and tablet visit for an
@@ -483,48 +483,14 @@
 
         <!-- LEFT COLUMN -->
         <div class="about-left" data-reveal data-reveal-order="3">
-          <!-- Two-slide crossfade on the SAME machinery as the project pages'
-               masthead carousel (.project-carousel* in project-overview.css,
-               initCarousel in js/main.js). Those classes are reused rather than
-               duplicated: style.css imports project-overview.css on every page,
-               so they are already loaded here, and one carousel with one set of
-               rules beats two that can drift.
-               ⚠️ It takes the SLIDE and DOT classes but NOT `.project-carousel`
-               itself. That class only supplies `position: relative`, which
-               .about-photo already beats by being position:absolute — and since
-               project-overview.css imports after sections.css, adding it flipped
-               the box to relative, dropped its top/bottom anchoring and collapsed
-               it to 429x0. .about-photo is already a valid containing block for
-               the inset:0 slides, and `.about-photo img` already gives every
-               image object-fit: cover. -->
-          <div class="about-photo" data-carousel>
-            <!-- Slide 1 keeps the art-directed swap: portrait photo1 beside the
-                 text on desktop AND the 1024 two-column tier; landscape photo2
-                 only once the layout stacks (≤768, where the .about-photo box
-                 also goes landscape — responsive.css). Keep this breakpoint in
-                 step with the stack. -->
-            <picture class="project-carousel-slide is-active">
-              <source srcset="images/about-photo2.jpg" media="(max-width: 768px)" />
-              <img src="images/about-photo1.jpg" width="769" height="1024" loading="lazy" alt="Jenna Ammerall holding Maeve, her dachshund, outdoors in Seattle" onerror="this.style.display='none'" />
-            </picture>
-            <!-- Slide 2 needs no art direction: portrait like photo1, so the same
-                 object-fit: cover crop serves the desktop box and the stacked one.
-                 The source arrived with EXIF Orientation 6 (rotate 90 CW) — the
-                 rotation is now baked into the pixels and the tag normalised to 1,
-                 so the file reads 900x1200 to everything and these width/height
-                 attributes are the real ones. Don't trust `sips -g orientation`
-                 here; it reports nil for a file that plainly carries the tag. -->
-            <img class="project-carousel-slide" src="images/about-photo3.jpg" width="900" height="1200" loading="lazy" alt="Maeve, Jenna's dachshund, nosing a bright pink rose held out to her on a Seattle sidewalk" onerror="this.style.display='none'" />
-            <!-- Also portrait, also no art direction needed. EXIF Orientation 1
-                 on this one, so nothing to bake in — but check, don't assume:
-                 about-photo3's source was Orientation 6. -->
-            <img class="project-carousel-slide" src="images/about-photo4.jpg" width="900" height="1200" loading="lazy" alt="Jenna standing on a granite outcrop above Seoul at dusk, the city skyline and N Seoul Tower behind her" onerror="this.style.display='none'" />
-            <div class="project-carousel-dots" role="group" aria-label="Choose photo">
-              <button type="button" class="project-carousel-dot is-active" aria-current="true" aria-label="Show photo 1 of 3"></button>
-              <button type="button" class="project-carousel-dot" aria-label="Show photo 2 of 3"></button>
-              <button type="button" class="project-carousel-dot" aria-label="Show photo 3 of 3"></button>
-            </div>
-            <div class="about-photo-placeholder" aria-hidden="true"></div>
+          <!-- Two stills, stacked (redesign, 2026-09-28; replaced the 3-photo
+               carousel): a wide landscape across the column, then a smaller
+               portrait under it, left-aligned. about-photo2-crop is
+               about-photo2 cropped 28px each side to remove the rounded white
+               corners baked into that file. -->
+          <div class="about-stack">
+            <img class="about-stack-wide" src="images/about-photo2-crop.jpg?v=1" width="802" height="444" loading="lazy" alt="Jenna Ammerall holding Maeve, her dachshund, outdoors in Seattle" />
+            <img class="about-stack-small" src="images/about-photo4.jpg" width="900" height="1200" loading="lazy" alt="Jenna standing on a granite outcrop above Seoul at dusk, the city skyline and N Seoul Tower behind her" />
           </div>
         </div>
 
