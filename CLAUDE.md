@@ -57,7 +57,8 @@ the PRE-redesign hero and is superseded here wherever the two disagree.
 - **Hero lockup in the white lower part of the fold**, reference-style: `h1`
   "I’m Jenna Ammerall, a product / interaction designer based in Seattle."
   — "I’m Jenna Ammerall," is ALWAYS its own first line (`.intro-headline-name`,
-  `display: block`), in the real Hanken 500 italic.
+  `display: block`); only "Jenna Ammerall" is italic (`.intro-headline-italic`,
+  the real Hanken 500 italic).
   (7 of the 12 columns — `58.333vw − 73.67px`, 766.33 at 1440 — set on
   `.intro-band-left` only; the shared 6-col `--width-title-column` is the
   Work cards'. "product&nbsp;/" keeps the slash off the start of a line.)
@@ -3315,7 +3316,7 @@ own version, separate from the `style.css?v=` / `@import` CSS bump below).
   where it actually renders. Current request (worktree-redesign):
   `Hanken+Grotesk:ital,wght@0,200;0,500;0,700;1,500` + `Inter:wght@400..700`.
   **The ONE italic face is Hanken 500 italic**, used by the hero's
-  `.intro-headline-name` ("I’m Jenna Ammerall,"). Any other weight or family in
+  `.intro-headline-italic` (the name, "Jenna Ammerall"). Any other weight or family in
   italic still renders as a browser-sheared oblique — add its axis to **all
   five** links first. If the hero drops the italic, take `1,500` out again
   (it was added and removed once before, in 2026-08); don't leave an unused
