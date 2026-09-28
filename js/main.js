@@ -1097,7 +1097,8 @@ const FIELD = {
   // Timings are indexed by ORB, not by stack slot — reordering the stack must
   // not silently re-time the entrance.
   entrance: { lead: 280, stagger: 240, duration: 320 },
-  motion: { speed: 1.85, drift: 0.050, driftYRatio: 0.2, pulse: 0.30, warp: 0.55 },
+  // REDESIGN: speed 2.4 (was 1.85) — ~30% quicker drift and pulse, same travel.
+  motion: { speed: 2.4, drift: 0.050, driftYRatio: 0.2, pulse: 0.30, warp: 0.55 },
   // Buffer size vs CSS px. BELOW devicePixelRatio deliberately: a soft
   // gradient carries no per-pixel detail, so 1.0 on a 2x display is a 4x
   // fill-rate saving nobody can see. Grain is the one thing that does want

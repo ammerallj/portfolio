@@ -116,6 +116,8 @@ functions of scroll, the fades are timed class toggles):
   per-orb ramps, cyan r .48 y .16 with no boost — magenta 45% / red 30% /
   purple 16% / blue 8% of the visible band at 1440x900. Old values are in the comment
   above `FIELD.blobs`. ⚠️ `lab/field-shader.html` is NOT synced with these.
+- **The orbs animate ~30% faster** (`FIELD.motion.speed` 2.4, was 1.85) —
+  same drift distance and pulse size, shorter loops.
 - **The gradient drifts at half the scroll speed** (`FIELD_LAG.k` 0.5, was
   0.3). The white is unaffected — `cream` already includes the lag.
 - The docked `.intro-bar` (invisible before — `html.has-top-nav`) is
