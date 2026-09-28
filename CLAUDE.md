@@ -83,7 +83,7 @@ except the one glide):
 - The lockup rides Work's own movement (`shorten − push`) **plus**
   `HERO_TEXT.speed` (0.5) × travel — the parallax that pulls it away upward.
 - The top nav fades on scroll (`TOP_NAV_FADE` 0.2–0.4, `--top-nav-fade`). The
-  hero TEXT does not: past `HERO_TEXT_OUT` (16px) `html.is-hero-text-out` fades
+  hero TEXT does not: past `HERO_TEXT_OUT` (80px) `html.is-hero-text-out` fades
   it on a 0.5s TIMED transition, and back in at the top — Jenna asked for it
   not to be tied to scroll distance. `HERO_TEXT_FADE` now only paces the white
   edge's ease up to the viewport top by the hand-off.

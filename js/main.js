@@ -1391,7 +1391,7 @@ const TOP_NAV_FADE = { from: 0.2, to: 0.4 }; // fraction of the scroll to the ba
 // behind. The nav still goes first, so its white type never sits on the text.
 const HERO_TEXT_FADE = { from: 0.1, to: 0.45 }; // (now only paces the white edge's ease to the top)
 // Scroll past this and the hero text fades out on its own (0.5s, hero.css).
-const HERO_TEXT_OUT = 16;
+const HERO_TEXT_OUT = 80;
 // When the docked bar takes over (fraction of the way to its pin), separate from
 // the text fade so the text can go early while the bar arrives with Work close
 // beneath it. The top nav is hidden from here on too.
