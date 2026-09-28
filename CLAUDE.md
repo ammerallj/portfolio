@@ -82,13 +82,15 @@ except the one glide):
   smoothstep), so Work rises fastest on the first gesture and hits 1× at the pin.
 - The lockup rides Work's own movement (`shorten − push`) **plus**
   `HERO_TEXT.speed` (0.5) × travel — the parallax that pulls it away upward.
-- The top nav fades on scroll (`TOP_NAV_FADE` 0.2–0.4, `--top-nav-fade`). The
-  hero TEXT does not: past `HERO_TEXT_OUT` (80px) `html.is-hero-text-out` fades
-  it on a 0.5s TIMED transition, and back in at the top — Jenna asked for it
-  not to be tied to scroll distance. `HERO_TEXT_FADE` now only paces the white
-  edge's ease up to the viewport top by the hand-off.
-- `NAV_HANDOFF` 0.45: the docked `.intro-bar` appears (invisible before —
-  `html.has-top-nav`) and is **position: fixed** from then on
+- **ONE hand-off trigger, `HERO_TEXT_OUT` (80px of scroll), on TIMED
+  transitions — nothing here is tied to scroll distance** (Jenna's ask): the
+  hero text and the top nav fade out (0.5s, `is-hero-text-out` /
+  `is-top-nav-off`), the docked `.intro-bar` fades in, and Selected Work's
+  container fades up (0.6s, sections.css). All reverse above the trigger.
+  The white edge eases to the viewport top over those first 80px so the bar
+  never lands on gradient — which also means the gradient is gone by ~55px.
+- The docked `.intro-bar` (invisible before — `html.has-top-nav`) is
+  **position: fixed** from the hand-off on
   (`is-bar-lifted`), with Work taking a `-shorten` margin so layout is
   identical. ⚠️ **Not a scroll-linked transform** — `--bar-lift` was tried and
   wobbled, because scroll events land a frame behind the compositor.

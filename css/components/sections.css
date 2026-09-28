@@ -35,6 +35,28 @@
   border-bottom: none;
 }
 
+/* REDESIGN: Selected Work FADES UP at the hero hand-off — the same trigger
+   that swaps the navs (html.is-hero-text-out, js/main.js) — on a timed
+   transition. Gated on has-top-nav, so no-JS and the project pages never hide
+   it. The cards' own [data-reveal] items still play inside this. */
+html.has-top-nav #work-section .site-container {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+html.has-top-nav.is-hero-text-out #work-section .site-container {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.has-top-nav #work-section .site-container {
+    transform: none;
+    transition: opacity 0.3s ease;
+  }
+}
+
 /* THE WORK GRID — a two-column MASONRY (2026-09). It replaced the looping
    horizontal carousel (initWorkCarousel, the pagination dots and the scroll
    videos' carousel-specific buffering are all gone with it).

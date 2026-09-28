@@ -209,7 +209,7 @@ const FIELD_LAG = { k: 0.3 };
 // screen by then.
 // REDESIGN: the lockup's PARALLAX over Selected Work — extra lift per px of
 // scroll on top of riding Work's own push (see setHeroTextLift), so the text
-// scrolls away faster than Work rises and fades out on HERO_TEXT_FADE as it
+// scrolls away faster than Work rises and fades out at HERO_TEXT_OUT as it
 // goes. 0 would lock the two together (no parallax, constant gap).
 const HERO_TEXT = { speed: 0.5 };
 let lastHeroTextLift = -1;
@@ -1385,17 +1385,10 @@ try {
 // Seattle time; the fade and the hand-off to .intro-bar live in
 // updateScrollEffects. Null on project pages, so all of it is skipped there.
 const topNav = document.querySelector('.top-nav');
-const TOP_NAV_FADE = { from: 0.2, to: 0.4 }; // fraction of the scroll to the bar's pin
-// The hero text fades LATER than the nav — as it exits the top of the screen —
-// so no empty band opens between it and Selected Work, which follows ~170px
-// behind. The nav still goes first, so its white type never sits on the text.
-const HERO_TEXT_FADE = { from: 0.1, to: 0.45 }; // (now only paces the white edge's ease to the top)
-// Scroll past this and the hero text fades out on its own (0.5s, hero.css).
+// THE HAND-OFF: scroll past this and the hero swaps out on timed transitions —
+// hero text + top nav fade out, the docked bar fades in, Selected Work fades up
+// — and the white has finished climbing to the top of the screen by then.
 const HERO_TEXT_OUT = 80;
-// When the docked bar takes over (fraction of the way to its pin), separate from
-// the text fade so the text can go early while the bar arrives with Work close
-// beneath it. The top nav is hidden from here on too.
-const NAV_HANDOFF = 0.45; // = HERO_TEXT_FADE.to: no nav-less stretch
 // The glide to Selected Work when the docked nav appears (see the hand-off in
 // updateScrollEffects). easeOutCubic over 1.0s (was easeInOutSine / 1.4s):
 // the ease-in held the cards ~380px down for the first beat after the nav
@@ -1437,13 +1430,6 @@ let lastGlideScrollY = 0;
 // Extra lift on the first gesture, on top of riding the white edge (see
 // setHeroTextLift). px at full; reached by `over` of the way to the pin.
 const HERO_TEXT_BOOST = { px: 0, over: 0.4 };
-let lastTopNavFade = -1;
-function setTopNavFade(v) {
-  const r = Math.round(v * 1000) / 1000;
-  if (r === lastTopNavFade) return;
-  lastTopNavFade = r;
-  document.documentElement.style.setProperty('--top-nav-fade', r);
-}
 // REDESIGN: the hero's left edge sits on the clock's, and its right column
 // spans exactly the nav's items — from
 // "Selected work"'s left edge to the "Say hello" pill's right edge — at every
@@ -2437,22 +2423,15 @@ function updateScrollEffects() {
   //   bias 2   → peak 1.92x at 78%
   // The plain ease-in p^2 it replaced ended at 1.8x and dropped to 1x at the pin.
   const pinP = fieldDockScroll > 0 ? travel / fieldDockScroll : 0;
-  // REDESIGN: the top nav fades out before the lockup (rising at 1.5x) passes
-  // under it — white type over the dark headline otherwise — and is gone for
-  // good once the bar docks. Smoothstep over TOP_NAV_FADE of the way to the pin.
+  // REDESIGN: ONE trigger, HERO_TEXT_OUT px of scroll, swaps the whole hero
+  // out on TIMED transitions rather than opacities tied to scroll distance: the
+  // hero text and the top nav fade out (0.5s), the docked bar fades in (below),
+  // and Selected Work fades up (sections.css). Back above it, all reverse.
+  const heroOut = fieldDockScroll > 0 && window.scrollY > HERO_TEXT_OUT;
   if (topNav) {
-    const f = Math.min(1, Math.max(0,
-      (pinP - TOP_NAV_FADE.from) / (TOP_NAV_FADE.to - TOP_NAV_FADE.from)));
-    const fade = fieldDockScroll > 0 ? 1 - f * f * (3 - 2 * f) : 1;
-    setTopNavFade(fade);
-    // The hero text fades out on a TIMED transition once the reader has
-    // scrolled HERO_TEXT_OUT px (hero.css), and back in when they return
-    // above it — not an opacity tied to scroll distance.
-    html.classList.toggle('is-hero-text-out',
-      fieldDockScroll > 0 && window.scrollY > HERO_TEXT_OUT);
-    const off = fade <= 0.01 || (fieldDockScroll > 0 && pinP >= NAV_HANDOFF);
-    html.classList.toggle('is-top-nav-off', off);
-    topNav.inert = off;
+    html.classList.toggle('is-hero-text-out', heroOut);
+    html.classList.toggle('is-top-nav-off', heroOut);
+    topNav.inert = heroOut;
   }
   // REDESIGN: EASE-OUT, not the biased smoothstep. The hero text now fades out
   // early, and with the old curve Work started at ~1x and only sped up late, so
@@ -2461,22 +2440,21 @@ function updateScrollEffects() {
   // at 1440x900) and eases to exactly 1x at the pin (slope 0 there), so the
   // dock still doesn't jump. HERO_SHORTEN.bias is unused by this curve.
   // CUBIC ease-out (was quadratic): more of Work's catch-up happens before the
-  // docked nav appears at NAV_HANDOFF, so the cards are already close under it.
+  // docked nav appears (HERO_TEXT_OUT), so the cards are already close under it.
   // Slope is still 0 at the pin (1x there, no jump); the cost is a faster first
   // gesture (1 + 3·S/D at the start, vs 1 + 2·S/D).
   const pinR = 1 - pinP;
   const push = fieldDockScroll > 0 ? heroShorten * pinR * pinR * pinR : 0;
   setHeroPush(Math.round(push));
-  // REDESIGN: the docked bar takes over at NAV_HANDOFF — before it would pin
-  // on its own. From then on it is position: FIXED at the top (is-bar-lifted,
+  // REDESIGN: the docked bar takes over at the same trigger (heroOut) —
+  // before it would pin on its own. From then on it is position: FIXED at the top (is-bar-lifted,
   // hero.css), with Work taking a matching negative margin so the layout is
   // identical. ⚠️ NOT a scroll-linked transform: that was tried (--bar-lift)
   // and it glitched — scroll events land a frame behind the compositor's
   // scroll, so a sticky bar corrected by a per-frame transform wobbles while
   // the page is moving, and this bar is moving at 2-3x the scroll there.
   if (topNav && introBar) {
-    const show = fieldDockScroll > 0
-      && (pinP >= NAV_HANDOFF || window.scrollY >= fieldDockScroll);
+    const show = heroOut || (fieldDockScroll > 0 && window.scrollY >= fieldDockScroll);
     html.classList.toggle('is-bar-lifted', show);
     html.classList.toggle('is-bar-docked', show);
     introBar.inert = !show;
@@ -2508,15 +2486,14 @@ function updateScrollEffects() {
   // VISUAL top — the shortened layout top plus the push — with the resting
   // overhang closing on the tuck's curve. At rest this is exactly 0.
   let navTop = (fieldDockScroll) + push;
-  // REDESIGN: the docked bar appears at NAV_HANDOFF, fixed at the TOP of the
+  // REDESIGN: the docked bar appears at HERO_TEXT_OUT, fixed at the TOP of the
   // screen — well before its layout position gets there. Left glued to the
-  // layout position, the white edge was still ~100px down at that moment and
-  // a band of gradient showed under the bar's frost. So its target eases from
-  // the layout position to the viewport top (scrollY) across the text's fade,
-  // arriving exactly at the hand-off; past the pin the two are the same.
+  // layout position, the white edge was still far down at that moment and
+  // gradient showed under the bar's frost. So its target eases from the layout
+  // position to the viewport top (scrollY) over the first HERO_TEXT_OUT px,
+  // arriving exactly as the bar appears; past the pin the two are the same.
   if (topNav && fieldDockScroll > 0) {
-    const a = HERO_TEXT_FADE.from;
-    const e0 = Math.min(1, Math.max(0, (pinP - a) / (NAV_HANDOFF - a)));
+    const e0 = Math.min(1, Math.max(0, window.scrollY / HERO_TEXT_OUT));
     navTop += (window.scrollY - navTop) * (e0 * e0 * (3 - 2 * e0));
   }
   const cream = fieldDockScroll > 0
@@ -2590,7 +2567,7 @@ function updateScrollEffects() {
     }
     if (atBottom && lastEl) activeEl = lastEl;
   }
-  // REDESIGN: the docked bar is revealed early (NAV_HANDOFF), with Selected Work
+  // REDESIGN: the docked bar is revealed early (HERO_TEXT_OUT), with Selected Work
   // rising right under it — so from that moment "Selected work" reads active,
   // rather than waiting for Work's resting position. Only fills an empty slot;
   // About and Contact still take over as they are reached.

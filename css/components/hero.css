@@ -980,7 +980,7 @@ html.is-hero-text-out .intro-band {
    Fixed at the top, white type, Seattle time on the left and a hairline
    running to the links — which sit on the shared right column exactly as
    .intro-bar's do, so the hand-off lands the links in the same place.
-   --top-nav-fade (js/main.js) takes it out as the lockup scrolls up under it;
+   html.is-top-nav-off (js/main.js) fades it out at the hand-off;
    html.is-bar-docked hands over to .intro-bar at Selected Work. */
 .top-nav {
   position: fixed;
@@ -998,7 +998,10 @@ html.is-hero-text-out .intro-band {
   font-size: var(--size-base);
   letter-spacing: -0.01em;
   /* Scroll-linked: no transition on this opacity, by the standing rule. */
-  opacity: var(--top-nav-fade, 1);
+  /* Fades out on a TIMED transition at the hand-off (is-top-nav-off, set at
+     HERO_TEXT_OUT in js/main.js) — not scroll-linked. */
+  opacity: 1;
+  transition: opacity 0.5s ease;
 }
 
 /* The entrance fade lives on the children, so it can't pin the parent's
@@ -1008,7 +1011,10 @@ html.is-hero-text-out .intro-band {
 }
 
 html.is-top-nav-off .top-nav {
+  opacity: 0;
   visibility: hidden;
+  /* visibility waits for the fade, so the fade is seen */
+  transition: opacity 0.5s ease, visibility 0s linear 0.5s;
 }
 
 .top-nav-lead {
@@ -1087,7 +1093,7 @@ html.has-top-nav .intro-bar {
   transition: opacity 0.35s ease, visibility 0s linear 0.35s;
 }
 
-/* From the hand-off on (NAV_HANDOFF, js/main.js) the bar is FIXED at the top
+/* From the hand-off on (HERO_TEXT_OUT, js/main.js) the bar is FIXED at the top
    rather than sticky, so it can sit there before it would have pinned. Its
    in-flow footprint was margin-top (-80 - shorten) + 64 + margin-bottom 16 =
    -shorten; the next section takes exactly that as a margin, so nothing in the
