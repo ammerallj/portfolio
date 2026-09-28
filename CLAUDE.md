@@ -113,8 +113,8 @@ functions of scroll, the fades are timed class toggles):
   (0% purple); moving red to the bottom with magenta/violet at full size
   flipped it (0% red). Shipped: `paintOrder` [2, 1, 0, 3] (red at the bottom),
   magenta r .36 x .10 and violet r .36 x .93 held at their edges, all three on
-  per-orb ramps, cyan r .42 with no boost — magenta 51% / red 34% / purple
-  14% / blue 1% of the visible band at 1440x900. Old values are in the comment
+  per-orb ramps, cyan r .48 y .16 with no boost — magenta 45% / red 30% /
+  purple 16% / blue 8% of the visible band at 1440x900. Old values are in the comment
   above `FIELD.blobs`. ⚠️ `lab/field-shader.html` is NOT synced with these.
 - **The gradient drifts at half the scroll speed** (`FIELD_LAG.k` 0.5, was
   0.3). The white is unaffected — `cream` already includes the lag.

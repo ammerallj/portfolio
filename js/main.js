@@ -960,15 +960,16 @@ const FIELD = {
     // sit over it — are SMALLER and held near their edges, so each reads as a
     // distinct orb: magenta left, red centre, violet right. All three hold
     // their colour further out (per-orb ramp); cyan lost its ramp boost and
-    // shrank. Measured over the visible band at 1440x900: magenta 51%, red
-    // 34%, purple 14%, blue 1%. Was, in order:
+    // then came down and grew a little (r .48 y .16). Measured over the
+    // visible band at 1440x900: magenta 45%, red 30%, purple 16%, blue 8%.
+    // Was, in order:
     //   magenta r .652 x .107 · violet r .5054 x .942 y .499 · red (shared
     //   ramp) · cyan r .4738 ramp { mid .62, midAlpha .6 }.
     // ⚠️ lab/field-shader.html is NOT synced with this.
     { col: [0.8392, 0.3020, 0.8078], r: 0.36,   x: 0.10,  y: 0.375, a: 1.00, ramp: { mid: 0.60, midAlpha: 0.65 } }, // magenta #D64DCE
     { col: [0.5725, 0.2196, 0.8902], r: 0.36,   x: 0.93,  y: 0.45,  a: 1.00, ramp: { mid: 0.60, midAlpha: 0.65 } }, // violet  #9238E3
     { col: [0.9765, 0.2471, 0.2471], r: 0.6275, x: 0.590, y: 0.640, a: 1.00, ramp: { mid: 0.62, midAlpha: 0.72 } }, // red     #F93F3F
-    { col: [0.0039, 0.6235, 0.8471], r: 0.42,   x: 0.547, y: 0.08,  a: 1.00, pulse: 0.15 }, // cyan #019FD8
+    { col: [0.0039, 0.6235, 0.8471], r: 0.48,   x: 0.547, y: 0.16,  a: 1.00, pulse: 0.15 }, // cyan #019FD8 (was r .42 y .08)
   ],
   // Calmed 2026-09 (speed 2.05 -> 1.7, drift 0.05 -> 0.032). Drift carries
   // most of the reduction on purpose: amplitude reads as restraint,
