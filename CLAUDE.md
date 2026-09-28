@@ -56,6 +56,8 @@ the PRE-redesign hero and is superseded here wherever the two disagree.
 **The landing now (desktop/tablet, >680):**
 - **Hero lockup in the white lower part of the fold**, reference-style: `h1`
   "I’m Jenna Ammerall, a product / interaction designer based in Seattle."
+  — "I’m Jenna Ammerall," is ALWAYS its own first line (`.intro-headline-name`,
+  `display: block`), in the real Hanken 500 italic.
   (7 of the 12 columns — `58.333vw − 73.67px`, 766.33 at 1440 — set on
   `.intro-band-left` only; the shared 6-col `--width-title-column` is the
   Work cards'. "product&nbsp;/" keeps the slash off the start of a line.)
@@ -3310,15 +3312,14 @@ own version, separate from the `style.css?v=` / `@import` CSS bump below).
   refetches the entire stylesheet instead of reusing it. So when a face is added,
   add it **everywhere**, even to pages that don't use it — the `@font-face` rules
   cost ~1.7KB of CSS there and download no woff2, because a face is only fetched
-  where it actually renders. Current request:
-  `Hanken+Grotesk:wght@200;500;700` + `Inter:wght@400..700`.
-  **The site loads ZERO italic faces.** So `font-style: italic` anywhere today
-  renders as a browser-sheared oblique — obvious and ugly at display sizes. Before
-  using italic, add the axis (`ital,wght@0,200;0,500;0,700;1,500` for Hanken —
-  verified available) to **all five** links. A `1,500` face was added and then
-  removed again in 2026-08 when the insight band dropped italic (and the band was
-  later removed entirely); don't leave an unused face behind if italic is dropped
-  again.
+  where it actually renders. Current request (worktree-redesign):
+  `Hanken+Grotesk:ital,wght@0,200;0,500;0,700;1,500` + `Inter:wght@400..700`.
+  **The ONE italic face is Hanken 500 italic**, used by the hero's
+  `.intro-headline-name` ("I’m Jenna Ammerall,"). Any other weight or family in
+  italic still renders as a browser-sheared oblique — add its axis to **all
+  five** links first. If the hero drops the italic, take `1,500` out again
+  (it was added and removed once before, in 2026-08); don't leave an unused
+  face behind.
 - ⚠️ **AFTER A DEPLOY, HARD-RELOAD BEFORE JUDGING ANYTHING.** `index.html` has no
   cache-buster of its own (correctly — see the `?v=` entry below), so a browser
   that already has the page keeps serving the OLD html, which still names the OLD

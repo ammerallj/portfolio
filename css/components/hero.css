@@ -974,6 +974,16 @@ html.is-hero-text-out .intro-band {
   display: none; /* the ≤768 scrim is for white type on the field */
 }
 
+/* "I’m Jenna Ammerall," always on its own first line, in the REAL Hanken
+   Grotesk 500 italic (loaded on all five pages' font link as 1,500 — the site
+   loaded no italic before, so a bare font-style would have been a browser-
+   sheared oblique). display: block makes the break; the space after the span
+   keeps the heading's text correct for screen readers and crawlers. */
+.intro-headline-name {
+  display: block;
+  font-style: italic;
+}
+
 .intro-previously {
   margin: var(--gap-content) 0 0; /* was --gap-group; one block with the bio */
   font-size: var(--size-lg);
