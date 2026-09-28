@@ -424,6 +424,29 @@ function setContactPeek(px) {
   document.documentElement.style.setProperty('--contact-peek', px + 'px');
 }
 
+// ABOUT → CONTACT IS THE HERO → WORK TRANSITION IN REVERSE (redesign,
+// 2026-09-28, Jenna's ask). Three parts, each the mirror of one in the hero:
+//   · the blue LEADS the panel and settles at HALF speed (CONTACT_LAG) — the
+//     mirror of the gradient drifting at (1 − FIELD_LAG.k) as it leaves;
+//   · About's copy lifts away faster than the scroll (ABOUT_LIFT.speed, the
+//     hero lockup's HERO_TEXT.speed) and fades once the blue fills more than
+//     half the viewport (fadeAt — the lockup's "Work fills half" rule);
+//   · the blue scrim RIDES the copy: the ledge's top keeps ABOUT_LIFT.gap below
+//     About's last line — the mirror of the white riding the lockup.
+// All three are 0 at both resting positions (About's and Contact's), so both
+// settled compositions are unchanged. Pure functions of scroll; the fade is a
+// timed class toggle, like the lockup's.
+const CONTACT_LAG = { k: 0.5 };
+const ABOUT_LIFT = { speed: 0.8, fadeAt: 0.5, gap: 16 };
+
+let lastContactLag = 1;
+function setContactLag(px) {
+  // Moves .contact-bg's top and the ledge's bottom together (sections.css).
+  if (px === lastContactLag) return;
+  lastContactLag = px;
+  document.documentElement.style.setProperty('--contact-lag', px + 'px');
+}
+
 // The frost's alpha at a given y inside the bar's ::before box.
 function contactFrostAt(y) {
   const f = CONTACT.frost;
@@ -2732,6 +2755,23 @@ function updateScrollEffects() {
   // offsetHeight 0, so the max below reads the visible one.
   updatePeekDir();
 
+  // THE BLUE'S LEAD (see CONTACT_LAG). `t` runs 0 at About's resting position
+  // to 1 at Contact's, on a smoothstep so neither end has a kink; the offset is
+  // k × (distance still to travel) × t, which is 0 at BOTH rests and settles at
+  // (1 − k) speed. NEGATIVE = the blue sits ABOVE the panel's layout top.
+  let contactLead = 0;
+  let contactT = 0;
+  if (contactSection && aboutRestEdge > 0) {
+    const ce = contactSection.getBoundingClientRect().top;
+    const span = aboutRestEdge - contactRestEdge;
+    const u = span > 0 ? Math.max(0, Math.min(1, (aboutRestEdge - ce) / span)) : 0;
+    contactT = u * u * (3 - 2 * u);
+    if (!reducedMotion.matches) {
+      contactLead = -CONTACT_LAG.k * Math.max(0, ce - contactRestEdge) * contactT;
+    }
+  }
+  setContactLag(Math.round(contactLead));
+
   // About's parallax. Guarded: project pages have no #about, so nothing is ever
   // published and the CSS fallback (0px) leaves them exactly as they were.
   if (aboutSection) {
@@ -2766,10 +2806,19 @@ function updateScrollEffects() {
     //
     // The blend runs on Contact's own approach, so it is symmetric: scrolling up
     // to About, Contact recedes and the push relaxes back into the lag.
+    // ⚠️ REDESIGN: the old push toward the ledge is replaced by the hero's
+    // lockup behaviour, mirrored — the copy lifts away at ABOUT_LIFT.speed of the
+    // scroll past its resting position, and fades once the blue fills more than
+    // half the viewport. The resting lag blends out over the first 120px so the
+    // hand-over has no step.
     if (contactSection) {
       const ce = contactSection.getBoundingClientRect().top;
-      const near = Math.max(0, Math.min(1, (vh - ce) / (vh * 0.75)));
-      peek = peek * (1 - near) + ABOUT_PEEK.push * near;
+      const travel = aboutRestEdge > 0 ? Math.max(0, aboutRestEdge - ce) : 0;
+      const w = Math.min(1, travel / 120);
+      const lift = reducedMotion.matches ? 0 : -ABOUT_LIFT.speed * travel;
+      peek = peek * (1 - w) + lift;
+      aboutSection.classList.toggle('is-about-out',
+        travel > 0 && ce + contactLead < vh * ABOUT_LIFT.fadeAt);
     }
     setAboutPeek(Math.round(peek));
   }
@@ -2785,11 +2834,12 @@ function updateScrollEffects() {
       setDarkMix(0);
       setBarFill('');
       setContactPeek(0);
+      setContactLag(0);
     } else {
       const scrollAnchorTop = parseFloat(getComputedStyle(html).scrollPaddingTop) || 0;
       const barHeight = Math.max(...stickyBars.map(bar => bar.offsetHeight));
       const invertLine = Math.max(scrollAnchorTop, barHeight);
-      const gap = contactRect.top - invertLine;   // bar's bottom to the panel's top
+      const gap = contactRect.top + contactLead - invertLine; // bar's bottom to the BLUE's top
 
       // PROGRESSIVE INVERSION — driven by HOW MUCH OF THE BAR ACTUALLY HAS BLUE
       // BEHIND IT, which is the whole rule and needs no tuning.
@@ -2837,6 +2887,10 @@ function updateScrollEffects() {
       // read the LIVE ledge, so it has to exist before them. ----
       const ledge = contactLedge;                    // measured, not read per frame
       const edge = contactRect.top;
+      // Where the BLUE actually is: the panel's layout top plus its lead (see
+      // CONTACT_LAG). Everything that describes colour — the ledge, the bar's
+      // tint, its fill, the label flip — reads this, not the layout top.
+      const blue = edge + contactLead;
       // The ledge's live height, SHORTENED as the reader scrolls up so its top
       // descends and the blue sits lower. Everything downstream takes this rather
       // than the token, or the bar's fill stops matching the ramp it is a window
@@ -2849,19 +2903,27 @@ function updateScrollEffects() {
       // ⚠️ Smoothstep, so it is flat at BOTH ends — the growth neither starts nor
       // stops with a kink, and About's resting composition is a stationary point
       // rather than a corner the reader crosses.
-      const reachSpan = (aboutRestEdge - contactRestEdge) * CONTACT.reach.span;
-      const reachT = aboutRestEdge > 0 && reachSpan > 0
-        ? Math.max(0, Math.min(1, (aboutRestEdge - edge) / reachSpan))
-        : 1;                                   // unmeasurable -> today's full ledge
-      const reach = reachT * reachT * (3 - 2 * reachT);
+      // ⚠️ REDESIGN: THE LEDGE RIDES ABOUT'S COPY (the mirror of the hero's
+      // white riding the lockup) instead of growing on a fixed reach schedule:
+      // its top keeps ABOUT_LIFT.gap below About's last line, capped at the
+      // token's length. It blends in from the resting length over the first
+      // 120px of travel, so About's resting composition keeps its clean cream. No direction term — scrolling up plays it backwards.
       const restLen = Math.min(contactLedgeRest, ledge);
-      const reached = restLen + (ledge - restLen) * reach;
-      const ledgeShorten = Math.max(0, peekDir) * CONTACT.peek.ledgeShorten;
-      const liveLedge = Math.max(1, reached - ledgeShorten);
+      let liveLedge;
+      if (aboutSection && aboutSection.lastElementChild && aboutRestEdge > 0) {
+        const aboutBottom = aboutSection.lastElementChild.getBoundingClientRect().bottom;
+        const ride = Math.max(1, Math.min(ledge, blue - (aboutBottom + ABOUT_LIFT.gap)));
+        // Engages over the first 120px past About's rest (the same hand-over as
+        // the lift), so the scrim is riding by the time the copy is moving.
+        const w = Math.min(1, Math.max(0, aboutRestEdge - edge) / 120);
+        liveLedge = Math.max(1, restLen + (ride - restLen) * w);
+      } else {
+        liveLedge = ledge;                     // unmeasurable -> the full ledge
+      }
       setLedgeLift(Math.round(ledge - liveLedge));
-      setContactEdge(Math.round(edge * 100) / 100);
+      setContactEdge(Math.round(blue * 100) / 100);
 
-      const covered = blueBehindBar(contactRect.top, liveLedge, invertLine);
+      const covered = blueBehindBar(blue, liveLedge, invertLine);
       const mix = Math.max(0, Math.min(1, covered / DARK_FULL_AT));
       setDarkMix(mix);
       // THE LABELS SWITCH ONCE, AND ON WHAT THEY ACTUALLY SIT ON.
@@ -2881,7 +2943,7 @@ function updateScrollEffects() {
       // The old test is kept for a hard edge (--contact-ledge: 0), where the
       // gradient does not exist and 0.85 is still the measured answer.
       const flipToWhite = liveLedge > 0
-        ? contactAlphaAt(contactGlyphMid, contactRect.top, liveLedge) >= DARK_TEXT_ALPHA
+        ? contactAlphaAt(contactGlyphMid, blue, liveLedge) >= DARK_TEXT_ALPHA
         : mix >= DARK_TEXT_AT;
       stickyBars.forEach(bar => bar.classList.toggle('is-over-dark', flipToWhite));
 
@@ -2904,8 +2966,8 @@ function updateScrollEffects() {
       // there is no bar to paint a ramp into. The ledge itself still renders —
       // it is the panel's own edge, not the bar's.
       const barLive = introBar && introBar.offsetParent !== null;
-      if (barLive && ledge > 0 && edge > 0 && edge - liveLedge < barHeight + BAR_BLEED + 2) {
-        setBarFill(buildBarFill(edge, liveLedge));
+      if (barLive && ledge > 0 && blue > 0 && blue - liveLedge < barHeight + BAR_BLEED + 2) {
+        setBarFill(buildBarFill(blue, liveLedge));
       } else {
         setBarFill('');
       }

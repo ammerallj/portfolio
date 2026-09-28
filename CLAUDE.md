@@ -180,6 +180,26 @@ functions of scroll, the fades are timed class toggles):
   then `.about-facts` moved OUT of the text column into its own
   `site-container` below as a 3-column grid (1 column ≤768), each column a
   hairline + 18px uppercase Hanken label + tight 14px entries.
+- **About → Contact is the hero → Work transition in REVERSE** (2026-09-28,
+  js/main.js `CONTACT_LAG` / `ABOUT_LIFT`), all 0 at both resting positions:
+  · the blue LEADS the panel (`--contact-lag`, negative = above its layout
+    top) by k 0.5 × distance-to-go × a smoothstep over About-rest → Contact-rest,
+    so it settles at half speed like the gradient leaves. The blue and its grain
+    moved off `.contact-section` onto a new `.contact-bg` layer (bottom-anchored,
+    so no gap opens above the footer); the ledge's `bottom` subtracts the lag.
+    Everything colour-related in the Contact block (tint, bar fill, label flip,
+    bleed gap) reads `blue = edge + contactLead`, not the layout top.
+  · About's copy lifts at `ABOUT_LIFT.speed` 0.8 × travel past its rest (it
+    REPLACED the old push toward the ledge) and fades (`#about.is-about-out`,
+    0.5s) once the blue's top passes the viewport's middle.
+  · the ledge RIDES the copy: its top keeps 16px under About's last element
+    (`aboutSection.lastElementChild`), capped at the token, blended in over the
+    first 120px of travel so About's resting cream is kept. This replaced the
+    `CONTACT.reach` schedule and the up-scroll `ledgeShorten` (both now unused).
+  Measured at 1440x900 by driving updateScrollEffects by hand (the pane and a
+  backgrounded Chrome tab both stop rAF): gap 14px while riding, lead ≤133px,
+  About fades at y≈2124, nav flips to white at the end as before. ⚠️ Not yet
+  judged by feel on a trackpad.
 - **The orbs are tuned for COLOUR now, not contrast** (the text sits on
   white). ⚠️ **PAINT ORDER DECIDES WHICH COLOUR WINS** — the lesson again:
   strengthening red while it painted over magenta/violet just blanketed them

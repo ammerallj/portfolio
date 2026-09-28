@@ -558,7 +558,9 @@ html.has-top-nav.is-work-in #work-section .site-container {
   right: 0;
   /* The element's BOTTOM edge sits 100% of its own height above the panel's
      bottom — i.e. exactly on the panel's top. */
-  bottom: calc(100% - var(--contact-ledge-overlap, 0px));
+  bottom: calc(100% - var(--contact-ledge-overlap, 0px) - var(--contact-lag, 0px));
+  /* --contact-lag (redesign): the blue LEADS the panel as it arrives, so the
+     ledge sits on the blue's top, not the section's. 0 at rest. */
   /* ⚠️ THE BOTTOM IS WELDED AND THE HEIGHT CARRIES THE MOTION.
      --contact-ledge-lift SHORTENS the dissolve as the reader scrolls up: the
      bottom stays welded to the panel and the top descends, so the blue's leading
@@ -714,6 +716,35 @@ html.has-top-nav.is-work-in #work-section .site-container {
   transform: translateY(var(--contact-peek, 0px));
 }
 
+/* THE PANEL'S BLUE, on its own layer (redesign, 2026-09-28). It used to be the
+   section's own background; it moved here so it can LEAD the panel as Contact
+   arrives — --contact-lag (negative = above the panel's top) is the mirror of
+   the hero gradient drifting at half speed, and is 0 at rest, so the settled
+   panel is unchanged. Bottom-anchored, so nothing opens above the footer.
+   The field's grain and its overlay blend came with it (see the note on
+   .contact-section below). */
+.contact-bg {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: var(--contact-lag, 0px);
+  background-color: var(--color-accent);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='cg' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.3' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='discrete' tableValues='0 1'/%3E%3CfeFuncG type='discrete' tableValues='0 1'/%3E%3CfeFuncB type='discrete' tableValues='0 1'/%3E%3CfeFuncA type='linear' slope='0' intercept='1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23cg)' opacity='0.14'/%3E%3C/svg%3E");
+  background-blend-mode: overlay;
+  pointer-events: none;
+}
+
+/* ABOUT FADES as Contact takes over the viewport — the mirror of the hero
+   lockup fading once Work fills half the screen (js/main.js ABOUT_LIFT). */
+#about > .site-container {
+  transition: opacity 0.5s ease;
+}
+
+#about.is-about-out > .site-container {
+  opacity: 0;
+}
+
 @media (prefers-reduced-motion: reduce) {
   /* The LEDGE stays — it is a dissolve, not motion, and the panel should not
      change character because someone asked the page to hold still. Only the
@@ -731,7 +762,6 @@ html.has-top-nav.is-work-in #work-section .site-container {
      the difference, putting a 12px sliver of footer under the panel and needing
      a +24 correction on the min-height to cancel it. Symmetric is the same
      picture with none of that. */
-  background-color: var(--color-accent);
   /* ⚠️ THE PANEL CARRIES THE FIELD'S GRAIN. It was the ONE coloured surface on the
      site without any — the hero field, the nav's frost and the ledge all have it,
      so the dissolve came out of a grained surface, through a grained ramp, and
@@ -752,8 +782,6 @@ html.has-top-nav.is-work-in #work-section .site-container {
 
      ⚠️ Baked into the rect's opacity rather than set on a layer, because both of
      this element's pseudo-elements are already spent on the ledge. Tune there. */
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='cg' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.3' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='discrete' tableValues='0 1'/%3E%3CfeFuncG type='discrete' tableValues='0 1'/%3E%3CfeFuncB type='discrete' tableValues='0 1'/%3E%3CfeFuncA type='linear' slope='0' intercept='1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23cg)' opacity='0.14'/%3E%3C/svg%3E");
-  background-blend-mode: overlay;
   color: #fff;
   padding-top: 96px;
   /* Pinned to 96 at EVERY tier, so it does not follow .page-section down to 64
