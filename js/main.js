@@ -207,7 +207,11 @@ const FIELD_LAG = { k: 0.3 };
 // 1 + speed of the scroll — the fastest of the three layers. LINEAR, because a
 // changing speed is what read as loose. Held once the bar pins; the text is off
 // screen by then.
-const HERO_TEXT = { speed: 0.5 };
+// REDESIGN: the lockup's PARALLAX over Selected Work — extra lift per px of
+// scroll on top of riding Work's own push (see setHeroTextLift), so the text
+// scrolls away faster than Work rises and fades out on HERO_TEXT_FADE as it
+// goes. 0 would lock the two together (no parallax, constant gap).
+const HERO_TEXT = { speed: 1.2 };
 let lastHeroTextLift = -1;
 function setHeroTextLift(px) {
   if (px === lastHeroTextLift) return;
@@ -650,7 +654,13 @@ let fieldDockScroll = 0;
 // ⚠️ px IS THE SPEED DIAL: nav/Work run at 1 + px / (bar's resting top − px) of
 // the scroll. At 1440x900: 180 → 1.28x (imperceptible) · 240 → 1.41x (current) ·
 // 300 → 1.58x · the 410 cap → 2.0x ("too free", lost the scroll's tension).
-const HERO_SHORTEN = { px: 240, bias: 1.5 };
+// REDESIGN: 400 (was 240). The extra is what used to be a text-only boost;
+// carried here it lifts the lockup AND Selected Work together on the first
+// gesture, so the gap between them holds instead of opening.
+// 530 + a cap of 0.65 of the bar's resting top (was 400 / 0.5): Work gets its
+// own share of the parallax speed — it rises faster to follow the lockup, which
+// still leads it by HERO_TEXT.speed. Larger = faster Work, earlier pin.
+const HERO_SHORTEN = { px: 530, cap: 0.65, bias: 1.5 };
 let heroShorten = 0;
 let fieldVisibleEnd = 0;
 let lastHeroShorten = -1;
@@ -666,6 +676,10 @@ function setHeroPush(px) {
   document.documentElement.style.setProperty('--hero-push', px + 'px');
 }
 function measureFieldTuck() {
+  // REDESIGN: measure with the bar back in flow — is-bar-lifted makes it
+  // position: fixed (no offsetParent, no margins). updateScrollEffects re-adds
+  // the class on its next pass.
+  document.documentElement.classList.remove('is-bar-lifted');
   fieldOverhang = 0;
   fieldDockScroll = 0;
   fieldVisibleEnd = 0;
@@ -727,7 +741,7 @@ function measureFieldTuck() {
   fieldVisibleEnd = visibleEnd;
   // Now shorten. Capped at half the bar's resting top so a short window still
   // has scroll left to unwind the push over.
-  heroShorten = Math.round(Math.min(HERO_SHORTEN.px, barRest * 0.5));
+  heroShorten = Math.round(Math.min(HERO_SHORTEN.px, barRest * HERO_SHORTEN.cap));
   setHeroShorten(heroShorten);
   // The bar pins when its LAYOUT top reaches the viewport's — the shortened one.
   fieldDockScroll = barRest - heroShorten;
@@ -1367,9 +1381,125 @@ try {
 // value); this only runs on the homepage with motion allowed. .intro-top is
 // bottom-anchored and overflow-clipped, so the statements' differing line counts
 // never move the divider below.
+// REDESIGN (exploration): the fixed top nav over the hero. Its clock shows
+// Seattle time; the fade and the hand-off to .intro-bar live in
+// updateScrollEffects. Null on project pages, so all of it is skipped there.
+const topNav = document.querySelector('.top-nav');
+const TOP_NAV_FADE = { from: 0.2, to: 0.4 }; // fraction of the scroll to the bar's pin
+// The hero text fades LATER than the nav — as it exits the top of the screen —
+// so no empty band opens between it and Selected Work, which follows ~170px
+// behind. The nav still goes first, so its white type never sits on the text.
+const HERO_TEXT_FADE = { from: 0.1, to: 0.45 };
+// When the docked bar takes over (fraction of the way to its pin), separate from
+// the text fade so the text can go early while the bar arrives with Work close
+// beneath it. The top nav is hidden from here on too.
+const NAV_HANDOFF = 0.45; // = HERO_TEXT_FADE.to: no nav-less stretch
+// The glide to Selected Work when the docked nav appears (see the hand-off in
+// updateScrollEffects). easeInOutSine: a gentle start and a soft landing.
+const WORK_GLIDE = { duration: 1.4, easing: (t) => -(Math.cos(Math.PI * t) - 1) / 2 };
+// Where Selected Work LANDS — the glide above and the nav link's click
+// (sectionClickScrollY) both use this, so the two cannot disagree: the first
+// card's TOP EDGE one --gap-group below the nav. Not Work's centred resting
+// position, which left ~230px of air under the bar. Page position from
+// offsets, so the push and the reveal's translate don't skew it. Null where
+// there is no top nav or no bar (project pages, and ≤680 via the caller).
+// ⚠️ The card, not its title: in the masonry (worktree-work-section) the title
+// sits at the BOTTOM of a card ~625px tall, so aiming at it glided straight
+// past the first image. (It was `.work-card .section-title` in the carousel,
+// where the title led the card.) The <li> is measured, not its link — the
+// link is the reveal's transform target.
+function workLandingScrollY() {
+  const bar = document.querySelector('.intro-bar');
+  const title = document.querySelector('#work-section .work-card');
+  if (!topNav || !bar || !title) return null;
+  let y = 0;
+  for (let n = title; n; n = n.offsetParent) y += n.offsetTop;
+  const gap = parseFloat(getComputedStyle(document.documentElement)
+    .getPropertyValue('--gap-group')) || 48;
+  const barH = bar.offsetHeight || 64;
+  const max = document.documentElement.scrollHeight - window.innerHeight;
+  return Math.min(Math.max(y - barH - gap, 0), Math.max(max, 0));
+}
+let workGlideArmed = true;
+// True while a nav click is driving the scroll (setupLenis's anchor handler).
+// The glide must stand down then: the click is already heading to the same
+// spot, and a second scrollTo restarts the trip from rest on an ease-IN — a
+// visible stall at the hand-off that read as the page getting stuck.
+let navClickScrolling = false;
+let navClickTimer = 0;
+let lastHandoffShow = false;
+let lastGlideScrollY = 0;
+// Extra lift on the first gesture, on top of riding the white edge (see
+// setHeroTextLift). px at full; reached by `over` of the way to the pin.
+const HERO_TEXT_BOOST = { px: 0, over: 0.4 };
+let lastHeroTextFade = -1;
+
+function setHeroTextFade(v) {
+  const r = Math.round(v * 1000) / 1000;
+  if (r === lastHeroTextFade) return;
+  lastHeroTextFade = r;
+  document.documentElement.style.setProperty('--hero-text-fade', r);
+}
+let lastTopNavFade = -1;
+function setTopNavFade(v) {
+  const r = Math.round(v * 1000) / 1000;
+  if (r === lastTopNavFade) return;
+  lastTopNavFade = r;
+  document.documentElement.style.setProperty('--top-nav-fade', r);
+}
+// REDESIGN: the hero's left edge sits on the clock's, and its right column
+// spans exactly the nav's items — from
+// "Selected work"'s left edge to the "Say hello" pill's right edge — at every
+// width the top nav shows. Measured rather than restated because below 768 the
+// items are a content-width cluster (their widths come from the morph sizers
+// and the font), which CSS cannot express. Layout-only: init, resize, fonts.
+// Where the top nav is display:none (≤680) both properties are cleared and the
+// tier CSS takes over. CSS fallbacks are the desktop values, for no-JS.
+function measureNavColumns() {
+  if (!topNav) return;
+  const root = document.documentElement.style;
+  const first = topNav.querySelector('.top-nav-link');
+  const cta = topNav.querySelector('.top-nav-cta');
+  const clock = topNav.querySelector('.top-nav-clock');
+  if (!first || !cta || !clock || getComputedStyle(topNav).display === 'none') {
+    root.removeProperty('--nav-col-w');
+    root.removeProperty('--nav-col-inset');
+    root.removeProperty('--nav-lead');
+    return;
+  }
+  // ...and the headline's left edge sits on the clock's.
+  root.setProperty('--nav-lead', clock.getBoundingClientRect().left.toFixed(2) + 'px');
+  const l = first.getBoundingClientRect().left;
+  const r = cta.getBoundingClientRect().right;
+  root.setProperty('--nav-col-w', (r - l).toFixed(2) + 'px');
+  root.setProperty('--nav-col-inset',
+    (document.documentElement.clientWidth - r).toFixed(2) + 'px');
+}
+
+function initTopNav() {
+  if (!topNav) return;
+  document.documentElement.classList.add('has-top-nav');
+  const clock = topNav.querySelector('.top-nav-clock');
+  if (!clock) return;
+  const fmt = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/Los_Angeles',
+    hour: 'numeric',
+    minute: '2-digit',
+    timeZoneName: 'short',
+  });
+  const tick = () => {
+    const now = new Date();
+    clock.textContent = fmt.format(now); // e.g. "10:42 AM PDT"
+    clock.dateTime = now.toISOString();
+    // Re-render on the next minute boundary rather than polling.
+    setTimeout(tick, 60000 - (now.getTime() % 60000) + 50);
+  };
+  tick();
+}
+
 function initHeadlineMorph() {
   const h1 = document.querySelector('.intro-headline');
-  if (!h1 || reducedMotion.matches) return;
+  if (!h1 || h1.hasAttribute('data-static') || reducedMotion.matches) return;
 
   const PHRASES = [
     'Making products make sense.',
@@ -1577,6 +1707,7 @@ function initHeadlineMorph() {
   })();
 }
 
+initTopNav();
 initHeadlineMorph();
 
 // Every item in the site nav answers itself while the pointer (or keyboard
@@ -1622,9 +1753,11 @@ function initNavMorph() {
   if (reducedMotion.matches) return;
 
   const MORPHS = [
-    { selector: '.intro-bar-links a[href$="#work-section"]', rest: 'Selected work', hover: 'What I made' },
-    { selector: '.intro-bar-links a[href$="#about"]', rest: 'About me', hover: 'Who am I?' },
-    { selector: '.intro-bar-cta', rest: 'Say hello', hover: 'Why hello!' },
+    // REDESIGN: the top nav's items take the same morph, which is also what
+    // sizes each one to fit its wider label — so the two navs' items match.
+    { selector: '.intro-bar-links a[href$="#work-section"], .top-nav-link[href$="#work-section"]', rest: 'Selected work', hover: 'What I made' },
+    { selector: '.intro-bar-links a[href$="#about"], .top-nav-link[href$="#about"]', rest: 'About me', hover: 'Who am I?' },
+    { selector: '.intro-bar-cta, .top-nav-cta', rest: 'Say hello', hover: 'Why hello!' },
   ];
 
   const DURATION = 285; // ms — the spring's own settle time, see above
@@ -1847,6 +1980,17 @@ function initNavMorph() {
 }
 
 initNavMorph();
+// REDESIGN: after the morph has sized the top nav's items. Fonts change those
+// widths, so measure again once they land (and re-derive the field tuck, which
+// reads the bio's position).
+measureNavColumns();
+if (document.fonts && document.fonts.ready) {
+  document.fonts.ready.then(() => {
+    measureNavColumns();
+    measureFieldTuck();
+    updateScrollEffects();
+  });
+}
 
 // Scroll-triggered video. A work-card video (data-autoplay-in-view) sits under a
 // sibling .work-card-poster JPG — the placeholder no-JS visitors and crawlers
@@ -2252,7 +2396,10 @@ function updateScrollEffects() {
   // rest too, hero.css) — it still marks the pinned state. Guarded: project pages
   // have no .intro-bar.
   if (introBar) {
-    introBar.classList.toggle('is-docked', introBar.getBoundingClientRect().top <= 0);
+    const docked = introBar.getBoundingClientRect().top <= 0;
+    introBar.classList.toggle('is-docked', docked);
+    // REDESIGN: the hand-off from the top nav to this bar (is-bar-docked) is
+    // decided further down, once push is known — see is-bar-lifted.
   }
 
   // ...and the field lifts away as the reader moves. See measureFieldTuck above.
@@ -2293,9 +2440,63 @@ function updateScrollEffects() {
   //   bias 2   → peak 1.92x at 78%
   // The plain ease-in p^2 it replaced ended at 1.8x and dropped to 1x at the pin.
   const pinP = fieldDockScroll > 0 ? travel / fieldDockScroll : 0;
-  const pinE = Math.pow(pinP, HERO_SHORTEN.bias);
-  const push = fieldDockScroll > 0 ? heroShorten * (1 - pinE * pinE * (3 - 2 * pinE)) : 0;
+  // REDESIGN: the top nav fades out before the lockup (rising at 1.5x) passes
+  // under it — white type over the dark headline otherwise — and is gone for
+  // good once the bar docks. Smoothstep over TOP_NAV_FADE of the way to the pin.
+  if (topNav) {
+    const f = Math.min(1, Math.max(0,
+      (pinP - TOP_NAV_FADE.from) / (TOP_NAV_FADE.to - TOP_NAV_FADE.from)));
+    const fade = fieldDockScroll > 0 ? 1 - f * f * (3 - 2 * f) : 1;
+    setTopNavFade(fade);
+    const tf = Math.min(1, Math.max(0,
+      (pinP - HERO_TEXT_FADE.from) / (HERO_TEXT_FADE.to - HERO_TEXT_FADE.from)));
+    setHeroTextFade(fieldDockScroll > 0 ? 1 - tf * tf * (3 - 2 * tf) : 1);
+    const off = fade <= 0.01 || (fieldDockScroll > 0 && pinP >= NAV_HANDOFF);
+    html.classList.toggle('is-top-nav-off', off);
+    topNav.inert = off;
+  }
+  // REDESIGN: EASE-OUT, not the biased smoothstep. The hero text now fades out
+  // early, and with the old curve Work started at ~1x and only sped up late, so
+  // it lagged exactly when the text left — ~450px of empty screen mid-scroll.
+  // (1 − p)^2 puts Work's fastest rise on the first gesture (1 + 2·S/D, ~1.8x
+  // at 1440x900) and eases to exactly 1x at the pin (slope 0 there), so the
+  // dock still doesn't jump. HERO_SHORTEN.bias is unused by this curve.
+  const pinR = 1 - pinP;
+  const push = fieldDockScroll > 0 ? heroShorten * pinR * pinR : 0;
   setHeroPush(Math.round(push));
+  // REDESIGN: the docked bar takes over at NAV_HANDOFF — before it would pin
+  // on its own. From then on it is position: FIXED at the top (is-bar-lifted,
+  // hero.css), with Work taking a matching negative margin so the layout is
+  // identical. ⚠️ NOT a scroll-linked transform: that was tried (--bar-lift)
+  // and it glitched — scroll events land a frame behind the compositor's
+  // scroll, so a sticky bar corrected by a per-frame transform wobbles while
+  // the page is moving, and this bar is moving at 2-3x the scroll there.
+  if (topNav && introBar) {
+    const show = fieldDockScroll > 0
+      && (pinP >= NAV_HANDOFF || window.scrollY >= fieldDockScroll);
+    html.classList.toggle('is-bar-lifted', show);
+    html.classList.toggle('is-bar-docked', show);
+    introBar.inert = !show;
+    // ...and the moment it appears on the way DOWN, the page glides on to
+    // Selected Work's resting position (WORK_GLIDE). Once per pass: it re-arms
+    // only after the reader is back above the hand-off. Lenis's scrollTo is
+    // not locked, so any wheel/touch input mid-glide simply takes over.
+    // ⚠️ CLAUDE.md records four earlier auto-scrolls into Work that were
+    // removed because they grabbed readers who were only passing. This one is
+    // Jenna's explicit ask (2026-09-26); it fires only on a downward crossing.
+    const down = window.scrollY > lastGlideScrollY;
+    if (!show) workGlideArmed = true;
+    else if (!lastHandoffShow && down && workGlideArmed && !navClickScrolling
+      && !reducedMotion.matches && window.__lenis && sectionRestingScrollY) {
+      const target = workLandingScrollY();
+      if (target != null && target > window.scrollY + 4) {
+        workGlideArmed = false;
+        window.__lenis.scrollTo(target, { duration: WORK_GLIDE.duration, easing: WORK_GLIDE.easing });
+      }
+    }
+    lastHandoffShow = show;
+    lastGlideScrollY = window.scrollY;
+  }
   // Negative: .page-field's transform subtracts it, so the artwork moves DOWN
   // relative to the page, i.e. slower than the scroll.
   setFieldScroll(-lag);
@@ -2306,8 +2507,28 @@ function updateScrollEffects() {
   const navTop = (fieldDockScroll) + push;
   const cream = fieldDockScroll > 0
     ? fieldVisibleEnd + lag - navTop - fieldOverhang * (1 - tuck) : 0;
-  setFieldCream(Math.max(0, Math.round(cream)));
-  setHeroTextLift(Math.round(HERO_TEXT.speed * travel));
+  const creamPx = Math.max(0, Math.round(cream));
+  setFieldCream(creamPx);
+  // REDESIGN: the hero text rides the white scrim's edge rather than a speed of
+  // its own. That edge moves on the page by (lag − cream) — the artwork sinks by
+  // lag, the mask pulls its end up by cream — so lifting the text by
+  // (cream − lag) keeps it at a fixed distance below the edge the whole way up.
+  // 0 at rest. HERO_TEXT.speed is unused while this holds.
+  // ...plus HERO_TEXT_BOOST on top: an extra lift front-loaded onto the first
+  // gesture (ease-out over the first `over` of the way to the pin), so the
+  // lockup visibly glides off as soon as the reader scrolls. It leads the white
+  // edge by up to `px`, which is fine — it is fading out over the same stretch.
+  // REDESIGN: HERO_TEXT_BOOST.px is 0 — the extra first-gesture lift moved
+  // into HERO_SHORTEN, where Work shares it. A text-only boost opens a gap.
+  // ...and it now rides WORK's own extra movement (heroShorten − push) rather
+  // than (cream − lag): the two differ by the resting overhang and the lag,
+  // which on short windows let the gap to Work grow ~80px mid-scroll. Locked
+  // to Work, the lockup→Work gap is constant at every size by construction,
+  // and it still tracks the white closely, which is tied to the same bar.
+  const bt = fieldDockScroll > 0 ? Math.min(1, pinP / HERO_TEXT_BOOST.over) : 0;
+  const boost = HERO_TEXT_BOOST.px * (1 - (1 - bt) * (1 - bt));
+  setHeroTextLift(fieldDockScroll > 0
+    ? Math.round(heroShorten - push + boost + HERO_TEXT.speed * travel) : 0);
 
   // Scroll-spy: the active section is the LAST one whose RESTING POSITION the
   // page has reached. Highlight every link that targets it (and mark it for
@@ -2354,6 +2575,13 @@ function updateScrollEffects() {
       if (top <= NAV_OFFSET && top > activeTop) { activeTop = top; activeEl = s.el; }
     }
     if (atBottom && lastEl) activeEl = lastEl;
+  }
+  // REDESIGN: the docked bar is revealed early (NAV_HANDOFF), with Selected Work
+  // rising right under it — so from that moment "Selected work" reads active,
+  // rather than waiting for Work's resting position. Only fills an empty slot;
+  // About and Contact still take over as they are reached.
+  if (!activeEl && html.classList.contains('is-bar-docked')) {
+    activeEl = document.getElementById('work-section');
   }
   navSections.forEach(s => {
     const on = s.el === activeEl;
@@ -2680,6 +2908,7 @@ measureFieldTuck();
 measureContactArrival();
 measureAboutRest();
 window.addEventListener('resize', () => {
+  measureNavColumns(); // REDESIGN: before the tuck, which reads the bio
   measureFieldTuck();
   measureContactArrival();
   measureAboutRest();
@@ -2761,6 +2990,12 @@ function setupLenis(Lenis) {
       if (!target) return;
       e.preventDefault();
       const fromMenu = !!link.closest('.mobile-menu');
+      // REDESIGN: hold off the hand-off glide for the length of this trip. The
+      // timer is a backstop — onComplete does not fire if the reader interrupts.
+      const clearClick = () => { navClickScrolling = false; clearTimeout(navClickTimer); };
+      navClickScrolling = true;
+      clearTimeout(navClickTimer);
+      navClickTimer = setTimeout(clearClick, 2500);
       // A settling section does not rest with its top on the nav line — it rests
       // CENTRED in the space under it (see initSectionGeometry). Aiming these at
       // the generic offset made the link land in one place and then get moved
@@ -2770,10 +3005,10 @@ function setupLenis(Lenis) {
       // is its TOP, not its centre.
       const resting = sectionClickScrollY && sectionClickScrollY(target);
       if (resting != null) {
-        lenis.scrollTo(resting, { immediate: fromMenu });
+        lenis.scrollTo(resting, { immediate: fromMenu, onComplete: clearClick });
         return;
       }
-      lenis.scrollTo(target, { offset: -headerOffset, immediate: fromMenu });
+      lenis.scrollTo(target, { offset: -headerOffset, immediate: fromMenu, onComplete: clearClick });
     });
   });
 }
@@ -2878,13 +3113,21 @@ function initSectionGeometry(lenis) {
   // The spy's arrival line: the resting position, or EARLIER for a section in
   // SPY_LEAD — once its content's top has risen to that fraction of the
   // viewport. Never later than rest, so a nav click (which lands at rest)
-  // always lights its own link. Offsets, like restingFor: a section's content
-  // can be transformed by the reveal.
+  // always lights its own link.
+  // ⚠️ ON-SCREEN position (a rect), NOT offsets — deliberately unlike
+  // restingFor. The redesign lays the hero out SHORTER and pushes everything
+  // after it back down visually (`translate: --hero-push`), so a layout offset
+  // put Work's content 240px higher than it appears and lit "Selected work"
+  // at the very top of the hero. The rect includes that push; it is taken on
+  // the section's container, which the reveal does not translate (it moves
+  // the card links inside it). Re-derived every frame, so it tracks the push
+  // as it unwinds: the test reduces to "content top <= lead of the viewport".
   sectionSpyScrollY = (el) => {
     const rest = sectionRestingScrollY(el);
     const lead = SPY_LEAD[el.id];
     if (rest == null || lead == null || !el.children.length) return rest;
-    return Math.min(rest, pageTopOf(el.children[0]) - window.innerHeight * lead);
+    const top = el.children[0].getBoundingClientRect().top + window.scrollY;
+    return Math.min(rest, top - window.innerHeight * lead);
   };
   measureAboutRest();   // the reach window's top anchor; needs the line above.
 
@@ -2905,7 +3148,15 @@ function initSectionGeometry(lenis) {
   // after clicking About.
   sectionClickScrollY = (el) => {
     if (!sections.includes(el) || !wide.matches) return null;
-    return el.id === 'contact' ? topAlignedFor(el) : restingFor(el);
+    if (el.id === 'contact') return topAlignedFor(el);
+    // REDESIGN: Work's click lands where the hand-off glide does. It sits
+    // BELOW Work's resting position (the spy's threshold), so the spy still
+    // lights "Selected work" after the click.
+    if (el.id === 'work-section') {
+      const landing = workLandingScrollY();
+      if (landing != null) return landing;
+    }
+    return restingFor(el);
   };
 
   // Contact's min-height is `100dvh - nav - footer`, and the footer's height is
@@ -2961,7 +3212,10 @@ function initSectionGeometry(lenis) {
 // (robust across browsers, unlike an observer); Motion.dev runs the fade + rise.
 // Where a Work card fades in / back out, as fractions of the viewport height
 // measured on the card's top. Was 0.85 / 0.95.
-const WORK_REVEAL = { in: 0.97, out: 0.995 };
+// REDESIGN: 0.9 / 0.95 — the same 0.9 line every other section reveals on. At
+// 0.97 the reveal fired with only ~34px of card above the fold while Work was
+// rising at ~1.8x, so the whole rise-and-fade played out of sight.
+const WORK_REVEAL = { in: 0.9, out: 0.95 };
 function setupReveals(motion) {
   const { animate } = motion;
   const groups = Array.from(document.querySelectorAll('[data-reveal-group]'));

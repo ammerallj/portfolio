@@ -374,8 +374,11 @@ html.is-field-live .page-field-grain { opacity: 0.15; }
        60     2.97        2.57   FAILS
        90     2.84        2.54   FAILS
      1440x740 is looser (bio 3.22 -> 3.16 at rise 30) so it does not bind. Going
-     higher needs something else to give first — the bio's 3:1 is the wall. */
-  --field-rise: 30px;
+     higher needs something else to give first — the bio's 3:1 is the wall.
+     REDESIGN: that wall is gone — the lockup sits on white now, not on the
+     field — so the artwork rises 130px to bring the red up into the visible
+     band and push some of the top blue off-screen. Was 30px. */
+  --field-rise: 130px;
   /* ⚠️ --field-cream (scroll-linked, js/main.js) moves the dissolve's END up the
      artwork. It equals the artwork's lag (--field-scroll is negative: the
      artwork sinks, slower than the page) plus the tuck's overhang, so on the
@@ -385,7 +388,10 @@ html.is-field-live .page-field-grain { opacity: 0.15; }
      Two earlier builds are superseded: a mask slide that SETTLED BACK (the white
      visibly reversed), and a rigid lift plus a --work-glide on the nav and Work
      (no gap, but the nav ran 1.25x → 0.75x of the scroll and read as loose). */
-  --field-mask-end: calc(min(100%, calc(100svh + var(--field-rise))) - var(--field-cream, 0px));
+  /* REDESIGN (exploration): the dissolve ends 72% down the fold (was 66%), so
+     the bottom ~quarter is clean white for the lockup. Was
+     calc(min(100%, calc(100svh + var(--field-rise))) - var(--field-cream, 0px)). */
+  --field-mask-end: calc(72svh + var(--field-rise) - var(--field-cream, 0px));
   /* HOW TALL THE DISSOLVE IS, as a fraction of the room between the bio's last
      line and the bar. --field-gap is that room, published by measureFieldTuck;
      112px is the no-JS floor.
@@ -421,7 +427,8 @@ html.is-field-live .page-field-grain { opacity: 0.15; }
      browser's linear interpolation between them stays under one 8-bit code step
      on this artwork. Shorter and the segments start to read as facets — the
      original linear ramp's failure, in miniature. */
-  --field-fade: clamp(90px, var(--field-gap, 112px), 300px);
+  /* REDESIGN: a long, soft fade (was clamp(90px, var(--field-gap, 112px), 300px)). */
+  --field-fade: 30svh;
   --field-mask-start: calc(var(--field-mask-end) - var(--field-fade));
 
   /* How far the whole lockup — headline, divider, bio, AND the frost pane with
@@ -869,6 +876,239 @@ html:not(.is-field-live) .intro-divider {
 @keyframes intro-bio-drop {
   from { transform: translateY(calc(-1 * var(--rise, 64px))); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
+}
+
+/* ============================================================
+   REDESIGN (exploration, worktree-redesign) — the lockup sits in
+   the white lower third, reference-style: name/role/place bottom
+   left, summary + "previously" in the shared right column. Dark
+   type on white, so the white-on-field contrast work above does
+   not apply here. Overrides only; the rules above are untouched.
+   ============================================================ */
+.intro {
+  justify-content: flex-end;
+}
+
+.intro-band {
+  flex: 0 0 auto;
+  /* The nav bar that used to rest here is hidden until it docks, so the
+     lockup no longer reserves its 80px — just a group gap to the fold
+     (60/48/40 by tier). Was calc(64px + --bar-tail + --gap-content). */
+  padding-top: 0;
+  padding-bottom: var(--gap-group);
+  overflow: visible;
+}
+
+.intro-band-left {
+  /* Full width: the headline runs across the page, the supporting text sits
+     underneath it (the band is a column — see .intro .intro-band). */
+  flex: 0 0 auto;
+  min-width: 0;
+}
+
+.intro-headline {
+  font-weight: 500;
+  font-size: var(--display-size); /* 96px at 1440, down to 56 */
+  line-height: 1.05;
+  color: var(--color-text);
+  -webkit-text-stroke: 0;
+  max-width: none;
+}
+
+/* The lockup fades out as it exits the top of the screen — --hero-text-fade
+   (js/main.js), later than the top nav's own fade. Scroll-linked: no transition. The
+   columns' entrance animations are on the children, so they can't pin this. */
+.intro-band {
+  opacity: var(--hero-text-fade, 1);
+}
+
+/* Both columns rise together (the bio used to drop from the divider). */
+.intro-band-right {
+  animation-name: intro-headline-rise;
+}
+
+/* The right column spans the nav's items exactly: its right edge on the pill's,
+   its width from "Selected work" to there. Both measured by measureNavColumns
+   (js/main.js); the fallbacks are the desktop grid's own values (56px bar
+   padding, the shared right column). width + margin-left: auto rather than a
+   flex-basis, so the same two rules hold in the row layout AND the ≤768 stack
+   (where an auto cross-axis margin pushes it right). (0,2,0) so the tiers'
+   padding-inline shorthands on .intro-band don't win; ≤680 resets it. */
+.intro .intro-band {
+  /* STACKED at every width: headline first, the supporting text beneath it
+     (still on the nav's item column via its width + margin-left: auto). Was a
+     side-by-side row with the two blocks last-baseline aligned. */
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--gap-group);
+  padding-left: var(--nav-lead, 56px); /* the headline starts under the clock */
+  padding-right: var(--nav-col-inset, 56px);
+}
+
+.intro .intro-band-right {
+  flex: none;
+  width: var(--nav-col-w, var(--width-right-column));
+  max-width: 100%;
+  margin-left: auto;
+}
+
+.intro-bio {
+  font-weight: 400;
+  color: var(--color-text); /* primary */
+  -webkit-text-stroke: 0;
+}
+
+.intro-bio::before {
+  display: none; /* the ≤768 scrim is for white type on the field */
+}
+
+.intro-previously {
+  margin: var(--gap-content) 0 0; /* was --gap-group; one block with the bio */
+  font-size: var(--size-lg);
+  font-weight: 400; /* regular, like the description above it */
+  color: var(--color-text-70); /* secondary */
+}
+
+/* ---- REDESIGN: the top nav over the gradient ----
+   Fixed at the top, white type, Seattle time on the left and a hairline
+   running to the links — which sit on the shared right column exactly as
+   .intro-bar's do, so the hand-off lands the links in the same place.
+   --top-nav-fade (js/main.js) takes it out as the lockup scrolls up under it;
+   html.is-bar-docked hands over to .intro-bar at Selected Work. */
+.top-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 95;
+  height: 64px;
+  padding: 0 56px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) repeat(3, calc(var(--width-right-column) / 3));
+  align-items: center;
+  color: #fff;
+  font-family: var(--font-body);
+  font-size: var(--size-base);
+  letter-spacing: -0.01em;
+  /* Scroll-linked: no transition on this opacity, by the standing rule. */
+  opacity: var(--top-nav-fade, 1);
+}
+
+/* The entrance fade lives on the children, so it can't pin the parent's
+   scroll-linked opacity (an animation's fill beats a declaration). */
+.top-nav > * {
+  animation: intro-bar-fade 0.6s ease-out 0.9s both;
+}
+
+html.is-top-nav-off .top-nav {
+  visibility: hidden;
+}
+
+.top-nav-lead {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  min-width: 0;
+  padding-right: 24px; /* air between the rule and "Selected work" */
+}
+
+.top-nav-clock {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.top-nav-rule {
+  flex: 1 1 auto;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.top-nav-link {
+  position: relative;
+  justify-self: center;
+  color: #fff;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.top-nav-link:first-of-type {
+  justify-self: start;
+}
+
+.top-nav-link::before {
+  content: '';
+  position: absolute;
+  inset: -7px -15px;
+  z-index: -1;
+  border-radius: 100px;
+  transition: background-color 0.35s ease;
+  pointer-events: none;
+}
+
+@media (hover: hover) {
+  .top-nav-link:hover::before {
+    background: rgba(255, 255, 255, 0.18);
+  }
+}
+
+.top-nav-cta {
+  justify-self: end;
+  display: inline-flex;
+  align-items: center;
+  height: 36px;
+  padding: 0 20px;
+  border-radius: 100px;
+  background: #fff;
+  color: #000;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background-color 0.15s ease;
+}
+
+.top-nav-cta:hover {
+  background: rgba(255, 255, 255, 0.75);
+}
+
+/* The existing bar keeps its whole scroll machinery (it still drives the
+   field's dissolve and the hero push) but stays invisible until it docks.
+   Gated on has-top-nav, set by js/main.js: with no JS the bar is never
+   hidden, so both navs show and neither is lost. */
+html.has-top-nav .intro-bar {
+  animation: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.35s ease, visibility 0s linear 0.35s;
+}
+
+/* From the hand-off on (NAV_HANDOFF, js/main.js) the bar is FIXED at the top
+   rather than sticky, so it can sit there before it would have pinned. Its
+   in-flow footprint was margin-top (-80 - shorten) + 64 + margin-bottom 16 =
+   -shorten; the next section takes exactly that as a margin, so nothing in the
+   layout moves when it leaves the flow. translate: none drops the hero push,
+   which only described its in-flow position. */
+html.has-top-nav.is-bar-lifted .intro-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  margin: 0;
+  translate: none;
+}
+
+html.has-top-nav.is-bar-lifted .intro-bar + * {
+  margin-top: calc(-1 * var(--hero-shorten, 0px));
+}
+
+html.has-top-nav.is-bar-docked .intro-bar {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.35s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .top-nav > * {
+    animation: none;
+  }
 }
 
 /* ---- The site nav: the hero's bottom bar, sticky ----
