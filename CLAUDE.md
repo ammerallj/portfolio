@@ -128,6 +128,12 @@ functions of scroll, the fades are timed class toggles):
   reduced motion keep the still. Loop's JPEG was resized 4080 → 2040 at q80
   (1.45MB → 215KB); the GIF is 2040x1200, 511KB. Its art is 17:10 in a 16:10
   frame, so ~3% is cropped off each side.
+  **Messaging followed** (`messaging-card.jpg` / `.gif`, 1866x1846): its frame
+  takes the art's own ratio (`--media-ratio: 1866 / 1846`) because two phone
+  screens in a 5:4 frame lose their status and nav bars. The still is Jenna's
+  PNG cropped (4, 2) so it registers with the GIF exactly. ⚠️ **The GIF is
+  21.4MB as supplied** (161 frames, 9.5s) — ~40x Loop's; it only loads on first
+  hover, but it is a candidate for a smaller re-export.
 - **The orbs are tuned for COLOUR now, not contrast** (the text sits on
   white). ⚠️ **PAINT ORDER DECIDES WHICH COLOUR WINS** — the lesson again:
   strengthening red while it painted over magenta/violet just blanketed them

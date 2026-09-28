@@ -387,8 +387,11 @@
 
           <li class="work-card" data-reveal-group>
             <a class="work-card-link" href="work/messaging.html" data-reveal>
-              <div class="work-card-media" style="--media-ratio: 5 / 4">
-                <span class="work-card-placeholder" aria-hidden="true">[Placeholder]</span>
+              <!-- The art's own ratio: two phone screens, near-square, so a 5:4
+                   frame would crop their status and nav bars. -->
+              <div class="work-card-media" style="--media-ratio: 1866 / 1846">
+                <img class="work-card-cover" src="images/messaging-card.jpg?v=1" width="1866" height="1846" alt="" loading="lazy" />
+                <img class="work-card-hover" data-hover-src="images/messaging-card.gif?v=1" width="1866" height="1846" alt="" aria-hidden="true" />
               </div>
               <div class="work-card-text">
                 <div class="work-card-swap">
