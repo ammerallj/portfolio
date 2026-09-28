@@ -441,7 +441,7 @@ const ABOUT_LIFT = { speed: 0.8, fadeAt: 0.5, gap: 16 };
 // Contact's copy RIDES the blue on the way in: its heading holds `ride` px
 // under the blue's top, then settles into its centred resting place as the page
 // lands — so the blue never arrives as an empty band ahead of the content.
-const CONTACT_COPY = { ride: 128 };
+const CONTACT_COPY = { ride: 128, navRamp: 96 };
 // How far below the fold Contact's copy starts its reveal, as a fraction of
 // the viewport. A full screen: the blue sweeps in at up to ~4x, so anything
 // less left the copy mid-fade as it arrived.
@@ -2820,7 +2820,10 @@ function updateScrollEffects() {
     const u = span > 0 ? Math.max(0, Math.min(1, (aboutRestEdge - ce) / span)) : 0;
     contactT = u * u * (3 - 2 * u);
     if (!reducedMotion.matches) {
-      contactLead = -CONTACT_LAG.k * Math.max(0, ce - contactRestEdge) * contactT;
+      // × (1 − t): the lead tapers out as it lands, so the blue arrives at FULL
+      // scroll speed. At plain k the blue settled at 0.5x, and that slow tail
+      // happened exactly under the nav — the scrim hung there (Jenna).
+      contactLead = -CONTACT_LAG.k * Math.max(0, ce - contactRestEdge) * contactT * (1 - contactT);
     }
   }
   setContactLag(Math.round(contactLead));
@@ -2973,6 +2976,12 @@ function updateScrollEffects() {
       } else {
         liveLedge = ledge;                     // unmeasurable -> the full ledge
       }
+      // ⚠️ AND IT SHORTENS AS IT NEARS THE NAV. By then About has faded and the
+      // ride has nothing to follow, so a full-length ramp only crawled past the
+      // bar. Capped to the blue's distance from the bar's bottom (floored at
+      // CONTACT_COPY.navRamp), the scrim sweeps behind the nav instead.
+      liveLedge = Math.max(1, Math.min(liveLedge,
+        Math.max(CONTACT_COPY.navRamp, blue - invertLine)));
       setLedgeLift(Math.round(ledge - liveLedge));
       setContactEdge(Math.round(blue * 100) / 100);
 

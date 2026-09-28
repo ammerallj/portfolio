@@ -238,6 +238,14 @@ functions of scroll, the fades are timed class toggles):
   Jenna's focus is elsewhere — frame logs of 10 frames mean the run was paused.
   The reveal trigger itself fires from Lenis's scroll event, so it can be
   checked in a hidden pane via `group.__revealVisible`.
+- **The scrim SWEEPS PAST the nav, it doesn't hang there** (Jenna: "move past
+  it, not linger"). Two changes: the lead is multiplied by `(1 − t)` so the blue
+  lands at FULL scroll speed (plain k settled it at 0.5x, and that slow tail was
+  exactly under the nav), and the ledge is capped to
+  `max(CONTACT_COPY.navRamp 96, blue − invertLine)` so it shortens as it nears
+  the bar instead of dragging a 520px ramp past it. Measured 1440x900: blue
+  1.0–1.2x at the nav, the 98px scrim clears the bar in ~80px of scroll, nav
+  flips right after.
   ⚠️ Not yet judged by feel on a trackpad.
 - **The orbs are tuned for COLOUR now, not contrast** (the text sits on
   white). ⚠️ **PAINT ORDER DECIDES WHICH COLOUR WINS** — the lesson again:
