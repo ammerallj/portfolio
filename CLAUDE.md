@@ -152,7 +152,7 @@ functions of scroll, the fades are timed class toggles):
   columns now end unevenly instead.
 - **About me** (2026-09-28): Jenna's three-paragraph bio as one unlabelled
   `.about-body` (Career Story / Outside of Work eyebrows gone), then
-  `.about-facts` — a black hairline and `dl` rows (label | entries, 16px,
+  `.about-facts` — a black hairline and `dl` rows (label | entries, 14px / 1.25, tight like Jenna's reference,
   role lines at 70%): Experience, Education, Patents. The text column is 7 of
   the 12 grid columns (`min(58.333vw − 73.67px, 766px)`), not the shared
   5-column `--width-right-column`, with one empty column before the photo, so

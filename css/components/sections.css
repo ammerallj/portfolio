@@ -1145,8 +1145,9 @@ html.has-top-nav.is-work-in #work-section .site-container {
   flex-direction: column;
   /* Bio → facts list (redesign, 2026-09-28). Was --gap-section (96) between
      two eyebrow-led blocks; the eyebrows are gone and the list's hairline
-     already marks the break, so a group gap is enough. */
-  gap: var(--gap-group);
+     already marks the break, so a short gap is enough (40px, after the
+     reference's tight bio → rule spacing). */
+  gap: 40px;
   /* (The desktop pull-up beside the headline lives on .about-layout — a
      negative margin HERE would overflow the reveal group's rect and get
      cut out mid-view on exit. See the .about-layout comment.) */
@@ -1193,11 +1194,11 @@ html.has-top-nav.is-work-in #work-section .site-container {
   border-top: 1px solid var(--color-border);
   display: flex;
   flex-direction: column;
-  gap: 28px; /* row → row */
+  gap: 20px; /* row → row — tight, after the reference */
   font-family: var(--font-body);
-  font-size: var(--size-base);
-  line-height: 1.4;
-  letter-spacing: -0.01em;
+  font-size: 0.875rem; /* 14px — reference type, well under the 18px bio */
+  line-height: 1.25;
+  letter-spacing: -0.005em;
   color: var(--color-text);
 }
 
@@ -1205,7 +1206,7 @@ html.has-top-nav.is-work-in #work-section .site-container {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
   column-gap: var(--gap-content);
-  row-gap: 16px; /* entry → entry within a row */
+  row-gap: 10px; /* entry → entry within a row */
 }
 
 .about-facts dt {
