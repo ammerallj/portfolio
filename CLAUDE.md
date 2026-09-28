@@ -169,8 +169,8 @@ functions of scroll, the fades are timed class toggles):
   only 858px wide, so the wide photo softens past ~1440 on a 2x display.
   **Second pass, same day — TEXT LEFT, PHOTOS RIGHT, centred** (Jenna's
   reference): `.about-right` (the TEXT, despite its name) takes `order: -1`
-  and the 5-column `--width-right-column`; the photo stack takes the rest
-  (726px at 1440); `.about-layout` is `align-items: center` with a
+  and 7 columns (`min(58.333vw − 73.67px, 766px)`, text-dominant at Jenna's
+  ask); the photo stack takes the rest (502px at 1440, growing past it); `.about-layout` is `align-items: center` with a
   `--gap-group` seam, and the heading pull-up is off (heading above the row).
   Stacked (≤768) the text comes first. The 7-column / 133px-gap numbers above
   are the previous pass.

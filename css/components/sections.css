@@ -989,8 +989,8 @@ html.has-top-nav.is-work-in #work-section .site-container {
      empty column between them plus its two gutters: (100vw - 332px)/12 + 40px
      = 132px at 1440. See .about-right. */
   /* REDESIGN, second pass (2026-09-28): TEXT LEFT, PHOTOS RIGHT, text centred
-     vertically against the photo stack (Jenna's reference). The text takes the
-     shared 5-column --width-right-column, the photos the rest; this is the
+     vertically against the photo stack (Jenna's reference). The text takes 7
+     columns (text-dominant), the photos the rest; this is the
      seam between them. Supersedes the 7-column note above. */
   gap: var(--gap-group);
   /* No block padding — the heading's 100px margin-bottom sets the gap to
@@ -1173,7 +1173,7 @@ html.has-top-nav.is-work-in #work-section .site-container {
   /* 7 grid columns, not the shared 5-column --width-right-column (redesign,
      2026-09-28): 7·(100vw − 332px)/12 + 6·20px = 766px at 1440. ⚠️ About's
      copy no longer starts on the nav's "Selected work" line. */
-  flex: 0 0 var(--width-right-column); /* 5 columns — the 7-column min(58.3333vw − 73.67px, 766px) was the previous layout */
+  flex: 0 0 min(calc(58.3333vw - 73.67px), 766.33px); /* 7 grid columns, text-dominant (Jenna, 2026-09-28): 7·(100vw − 332px)/12 + 6·20px, capped at its 1440 width so lines don't run long */
   order: -1; /* visually LEFT of the photos; also first when stacked */
   display: flex;
   flex-direction: column;
