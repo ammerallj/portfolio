@@ -107,6 +107,12 @@ functions of scroll, the fades are timed class toggles):
 - **The white RIDES THE LOCKUP**: `cream = lag + textLift`, so its edge stays
   16px above the headline all the way up and the gradient stays in view above
   the text. Forcing it to the top early — tried — wiped the colour at once.
+- **The orbs are tuned for COLOUR now, not contrast** (the text sits on
+  white): red and magenta/violet carry per-orb ramps (midAlpha .72 / .65) so
+  they hold their colour further out, magenta/violet moved in from the edges
+  (x .17 / .88), and cyan lost its ramp boost and shrank (r .42). The old
+  values are in the comment above `FIELD.blobs`. ⚠️ `lab/field-shader.html`
+  is NOT synced with these.
 - **The gradient drifts at half the scroll speed** (`FIELD_LAG.k` 0.5, was
   0.3). The white is unaffected — `cream` already includes the lag.
 - The docked `.intro-bar` (invisible before — `html.has-top-nav`) is

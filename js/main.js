@@ -954,10 +954,18 @@ const FIELD = {
   // fell to 1% at cyan's peak. At 0.15 red holds 12–24% through the cycle.
   // Blobs may set `pulse`; the rest take FIELD.motion.pulse.
   blobs: [
-    { col: [0.8392, 0.3020, 0.8078], r: 0.652,  x: 0.107, y: 0.375, a: 1.00 }, // magenta #D64DCE (0.5669 base, x1.15)
-    { col: [0.5725, 0.2196, 0.8902], r: 0.5054, x: 0.942, y: 0.499, a: 1.00 }, // violet  #9238E3
-    { col: [0.9765, 0.2471, 0.2471], r: 0.6275, x: 0.590, y: 0.640, a: 1.00 }, // red     #F93F3F
-    { col: [0.0039, 0.6235, 0.8471], r: 0.4738, x: 0.547, y: 0.08,   a: 1.00, ramp: { mid: 0.62, midAlpha: 0.6 }, pulse: 0.15 }, // cyan #019FD8 (y was -0.016)
+    // REDESIGN (2026-09-27): the hero text sits on WHITE now, so the contrast
+    // limits that shaped these orbs no longer bind — they are tuned for colour.
+    // Red and magenta/violet hold their colour further out (per-orb ramp) and
+    // magenta/violet come in from the edges; cyan loses its ramp boost and
+    // shrinks, so it stops washing over the red. Was, in order:
+    //   magenta r .652 x .107 · violet x .942 · red (shared ramp) ·
+    //   cyan r .4738 ramp { mid .62, midAlpha .6 }.
+    // ⚠️ lab/field-shader.html is NOT synced with this.
+    { col: [0.8392, 0.3020, 0.8078], r: 0.652,  x: 0.170, y: 0.375, a: 1.00, ramp: { mid: 0.60, midAlpha: 0.65 } }, // magenta #D64DCE
+    { col: [0.5725, 0.2196, 0.8902], r: 0.5054, x: 0.880, y: 0.499, a: 1.00, ramp: { mid: 0.60, midAlpha: 0.65 } }, // violet  #9238E3
+    { col: [0.9765, 0.2471, 0.2471], r: 0.6275, x: 0.590, y: 0.640, a: 1.00, ramp: { mid: 0.62, midAlpha: 0.72 } }, // red     #F93F3F
+    { col: [0.0039, 0.6235, 0.8471], r: 0.42,   x: 0.547, y: 0.08,  a: 1.00, pulse: 0.15 }, // cyan #019FD8
   ],
   // Calmed 2026-09 (speed 2.05 -> 1.7, drift 0.05 -> 0.032). Drift carries
   // most of the reduction on purpose: amplitude reads as restraint,
