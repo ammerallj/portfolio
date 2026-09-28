@@ -2310,7 +2310,18 @@ function initWorkMasonry() {
     });
     const floor = Math.max(...[...last.values()].map((c) => c.bottom));
     const extra = new Array(cards.length).fill(0);
-    last.forEach(({ i, bottom }) => { extra[i] = Math.round(floor - bottom); });
+    // The stretch lands under the media frame, and object-fit: cover then
+    // crops the art's sides — fine for a sliver, not for a column holding a
+    // single card (3 cards: Messaging alone was stretched 376px, losing ~37%
+    // of its width). Past LEVEL_MAX of the frame's own height, the columns
+    // simply end unevenly.
+    const LEVEL_MAX = 0.15;
+    last.forEach(({ i, bottom }) => {
+      const media = cards[i].querySelector('.work-card-media');
+      const frame = media ? media.offsetHeight - extraOf(cards[i]) : 0;
+      const short = Math.round(floor - bottom);
+      extra[i] = short <= frame * LEVEL_MAX ? short : 0;
+    });
 
     cards.forEach((card, i) => {
       if (extraOf(card) !== extra[i]) setExtra(card, extra[i]);
@@ -2356,6 +2367,22 @@ function initWorkHoverMedia() {
   });
 }
 initWorkHoverMedia();
+
+// Work-card skeleton: a grey shimmering frame until the still has loaded
+// (sections.css). Only frames whose still is not yet decoded get it, so a
+// cached load paints straight through; an error clears it too, so a broken
+// image never leaves the frame shimmering forever.
+function initWorkSkeleton() {
+  document.querySelectorAll('.work-card-cover').forEach((img) => {
+    const media = img.closest('.work-card-media');
+    if (!media || (img.complete && img.naturalWidth)) return;
+    media.classList.add('is-loading');
+    const done = () => media.classList.remove('is-loading');
+    img.addEventListener('load', done, { once: true });
+    img.addEventListener('error', done, { once: true });
+  });
+}
+initWorkSkeleton();
 
 
 // ============================================================

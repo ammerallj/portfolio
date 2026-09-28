@@ -140,6 +140,16 @@ functions of scroll, the fades are timed class toggles):
   3120x1880 `ax-card.png`, so the still is that same crop cut from the PNG
   (box 197,38 → 2887,1863, found by matching against GIF frame 0) and saved at
   1920px. Re-find the crop if either file is re-exported.
+- **Work-card SKELETON** (2026-09-28): until a card's still loads, its frame is
+  grey `#ececea` with a shimmer, and the still fades in over 0.4s
+  (`initWorkSkeleton` + `.work-card-media.is-loading`). Only frames whose still
+  isn't decoded yet get it; errors clear it; reduced motion drops the shimmer.
+  GIFs still load on first hover — preloading all of them is ~25MB.
+- **Facebook Groups card is HIDDEN** (`hidden` on its `<li>`; remove to restore).
+  `initWorkMasonry` skips hidden cards, and the bottom-levelling stretch now
+  applies only when it is ≤15% of the frame's height (`LEVEL_MAX`) — with three
+  cards Messaging sat alone and a 376px stretch cropped ~37% of its art, so the
+  columns now end unevenly instead.
 - **The orbs are tuned for COLOUR now, not contrast** (the text sits on
   white). ⚠️ **PAINT ORDER DECIDES WHICH COLOUR WINS** — the lesson again:
   strengthening red while it painted over magenta/violet just blanketed them

@@ -187,6 +187,43 @@ html.has-top-nav.is-work-in #work-section .site-container {
   opacity: 1;
 }
 
+/* SKELETON: until a card's still has loaded, its frame is a grey block with a
+   soft shimmer, and the still fades in over it once it arrives.
+   initWorkSkeleton (js/main.js) adds .is-loading only to frames whose still
+   is not already decoded, so no-JS and cached loads never see it. */
+.work-card-cover {
+  transition: opacity 0.4s ease;
+}
+
+.work-card-media.is-loading {
+  background-color: #ececea;
+}
+
+.work-card-media.is-loading .work-card-cover {
+  opacity: 0;
+}
+
+.work-card-media.is-loading::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg,
+    rgba(255, 255, 255, 0) 30%,
+    rgba(255, 255, 255, 0.55) 50%,
+    rgba(255, 255, 255, 0) 70%);
+  background-size: 250% 100%;
+  animation: work-skeleton-shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes work-skeleton-shimmer {
+  from { background-position: 100% 0; }
+  to   { background-position: 0 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .work-card-media.is-loading::after { animation: none; opacity: 0; }
+}
+
 .work-card-placeholder {
   font-family: var(--font-body);
   font-size: var(--size-xs);
