@@ -159,7 +159,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,200;0,500;0,700;1,500&family=Inter:wght@400..700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=2ec1aa5f" />
+  <link rel="stylesheet" href="style.css?v=efd64338" />
   <!-- The landing field's JPEG fallback — PHONES ONLY since 2026-09, so the
        preload is gated to match the <picture> in <main>. Without the media
        attribute this fetches 1.4MB on every desktop and tablet visit for an
@@ -483,14 +483,11 @@
 
         <!-- LEFT COLUMN -->
         <div class="about-left" data-reveal data-reveal-order="3">
-          <!-- Two stills, stacked (redesign, 2026-09-28; replaced the 3-photo
-               carousel): a wide landscape across the column, then a smaller
-               portrait under it, left-aligned. about-photo2-crop is
-               about-photo2 cropped 28px each side to remove the rounded white
-               corners baked into that file. -->
+          <!-- One landscape still (redesign, 2026-09-28; replaced the 3-photo
+               carousel). about-photo2-crop is about-photo2 cropped 28px each
+               side to remove the rounded white corners baked into that file. -->
           <div class="about-stack">
             <img class="about-stack-wide" src="images/about-photo2-crop.jpg?v=1" width="802" height="444" loading="lazy" alt="Jenna Ammerall holding Maeve, her dachshund, outdoors in Seattle" />
-            <img class="about-stack-small" src="images/about-photo4.jpg" width="900" height="1200" loading="lazy" alt="Jenna standing on a granite outcrop above Seoul at dusk, the city skyline and N Seoul Tower behind her" />
           </div>
         </div>
 
@@ -503,8 +500,13 @@
             <p>Away from the screen, I spend a lot of time with my dachshund, Maeve, and serve on the board of my condominium association, where I’ve discovered I genuinely enjoy the odd challenge of keeping a small community running. I’m also usually discovering new music or wandering through an art exhibition, collecting ideas and references along the way.</p>
           </div>
 
-          <!-- Facts under the bio: a hairline, then label | entries rows. -->
-          <dl class="about-facts">
+        </div>
+      </div>
+
+      <!-- Facts: three columns across the full width, each under a hairline
+           with its label as a heading. -->
+      <div class="site-container" data-reveal-group>
+          <dl class="about-facts" data-reveal>
             <div class="about-facts-row">
               <dt>Experience</dt>
               <dd><span>Meta</span><span>Senior Product Designer · 2022–2026</span></dd>
@@ -519,8 +521,6 @@
               <dd><span>Co-inventor · Microsoft Loop / Fluid Framework</span></dd>
             </div>
           </dl>
-
-        </div>
       </div>
     </section>
 

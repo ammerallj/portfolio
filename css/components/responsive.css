@@ -375,6 +375,12 @@
    Work imagery shrinks; the hero headline and intro paragraph go full width.
    ========================================================================== */
 @media (max-width: 768px) {
+  /* About facts: one column per row once About stacks (redesign). */
+  .about-facts {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: var(--gap-group);
+  }
+
   /* SPACING SCALE, portrait-tablet step: identical to the 1024 tier (gutter 24,
      group 48), so nothing is re-declared here — the tokens above cascade down.
      This tier only carries what genuinely differs at portrait width. */

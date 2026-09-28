@@ -1000,7 +1000,7 @@ html.has-top-nav.is-work-in #work-section .site-container {
      the ROW's height is the right column's text alone, and the stretched
      left column hands that height to the photo — the text column is the
      section's height authority. */
-  align-items: center; /* text centred against the photos (was stretch) */
+  align-items: flex-start; /* text and photo top-aligned (third pass; was centred) */
   /* DESKTOP: the supporting text starts level with the "About Me." headline.
      The pull-up lives on the CONTAINER (with the photo pushed back down by
      the same amount below) — NOT on .about-right — so the reveal system's
@@ -1173,7 +1173,7 @@ html.has-top-nav.is-work-in #work-section .site-container {
   /* 7 grid columns, not the shared 5-column --width-right-column (redesign,
      2026-09-28): 7·(100vw − 332px)/12 + 6·20px = 766px at 1440. ⚠️ About's
      copy no longer starts on the nav's "Selected work" line. */
-  flex: 0 0 min(calc(58.3333vw - 73.67px), 766.33px); /* 7 grid columns, text-dominant (Jenna, 2026-09-28): 7·(100vw − 332px)/12 + 6·20px, capped at its 1440 width so lines don't run long */
+  flex: 0 0 min(calc(50vw - 66px), 654px); /* 6 grid columns (third pass, 2026-09-28): 6·(100vw − 332px)/12 + 5·20px = 654px at 1440, capped there. Text and photo split the row about evenly, per Jenna's reference. */
   order: -1; /* visually LEFT of the photos; also first when stacked */
   display: flex;
   flex-direction: column;
@@ -1218,38 +1218,43 @@ html.has-top-nav.is-work-in #work-section .site-container {
   max-width: none;
 }
 
-/* FACTS under the bio (redesign, 2026-09-28): a full-strength hairline, then
-   label | entries rows, one step smaller than the bio so it reads as
-   reference rather than prose. Each <dd> is one entry: its first line is the
-   organisation, any further lines are the role / detail in 70% ink. */
+/* FACTS (redesign, 2026-09-28, third pass — Jenna's reference): three
+   columns across the full container under the bio + photo row. Each column
+   opens on a black hairline with its label as a small uppercase heading;
+   entries sit tight beneath (organisation, then role / detail at 70%).
+   One column per row at ≤768 (responsive.css). */
 .about-facts {
-  margin: 0;
-  padding-top: var(--gap-content);
-  border-top: 1px solid var(--color-border);
-  display: flex;
-  flex-direction: column;
-  gap: 20px; /* row → row — tight, after the reference */
+  margin: var(--gap-group) 0 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  column-gap: var(--gap-content);
+  row-gap: var(--gap-group);
   font-family: var(--font-body);
-  font-size: 0.875rem; /* 14px — reference type, well under the 18px bio */
+  font-size: 0.875rem; /* 14px */
   line-height: 1.25;
   letter-spacing: -0.005em;
   color: var(--color-text);
 }
 
 .about-facts-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
-  column-gap: var(--gap-content);
-  row-gap: 10px; /* entry → entry within a row */
+  border-top: 1px solid var(--color-border);
+  padding-top: var(--gap-content);
+  display: flex;
+  flex-direction: column;
+  gap: 10px; /* entry → entry */
 }
 
 .about-facts dt {
-  grid-column: 1;
-  grid-row: 1;
+  font-family: var(--font-heading);
+  font-size: var(--size-lg);
+  font-weight: 500;
+  line-height: 1.2;
+  text-transform: uppercase;
+  letter-spacing: 0;
+  margin-bottom: 6px;
 }
 
 .about-facts dd {
-  grid-column: 2;
   margin: 0;
   display: flex;
   flex-direction: column;

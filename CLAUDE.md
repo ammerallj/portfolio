@@ -174,6 +174,12 @@ functions of scroll, the fades are timed class toggles):
   `--gap-group` seam, and the heading pull-up is off (heading above the row).
   Stacked (≤768) the text comes first. The 7-column / 133px-gap numbers above
   are the previous pass.
+  **Third pass, same day (CURRENT)** — after Jenna's mentorship-page
+  reference: ONE photo (`about-photo2-crop`, the Seoul portrait dropped), bio
+  6 columns (`min(50vw − 66px, 654px)`) left and photo right, TOP-aligned;
+  then `.about-facts` moved OUT of the text column into its own
+  `site-container` below as a 3-column grid (1 column ≤768), each column a
+  hairline + 18px uppercase Hanken label + tight 14px entries.
 - **The orbs are tuned for COLOUR now, not contrast** (the text sits on
   white). ⚠️ **PAINT ORDER DECIDES WHICH COLOUR WINS** — the lesson again:
   strengthening red while it painted over magenta/violet just blanketed them
