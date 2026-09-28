@@ -75,8 +75,8 @@ the PRE-redesign hero and is superseded here wherever the two disagree.
   column), so the hero lines up with the nav at every width. The top nav's items
   take `initNavMorph` too, which is what makes their widths match the bar's.
 
-**Scroll choreography** (all in `updateScrollEffects`, pure functions of scroll
-except the one glide):
+**Scroll choreography** (all in `updateScrollEffects`; positions are pure
+functions of scroll, the fades are timed class toggles):
 - `HERO_SHORTEN { px: 530, cap: 0.65 }` — the hero is laid out shorter and
   pushed back; the push unwinds on **cubic ease-out `(1 − p)³`** (was the biased
   smoothstep), so Work rises fastest on the first gesture and hits 1× at the pin.
@@ -111,13 +111,11 @@ except the one glide):
   pulled her down the page. That is the fifth auto-scroll into Work removed
   for the same reason (see Horizontal Tracks); don't rebuild one.
 - `WORK_REVEAL` 0.9 / 0.95 (the site-wide line), so the card's rise-and-fade
-  plays on screen. `#work-section` padding-top is `--gap-content` (was 104).
+  plays on screen. `#work-section` padding-top is 0 (was 104).
 
-  **The "Selected work" nav click lands on the same spot** —
-  `workLandingScrollY()` is the one definition, read by the glide and by
-  `sectionClickScrollY`; it sits below Work's resting position, so the spy
-  still lights the link. Verified identical from the top, from About and via
-  the glide (1440x900: scroll 266, title at 128).
+  **The "Selected work" nav click** lands on `workLandingScrollY()` — the first
+  card's top one `--gap-group` under the nav (1440x900: card at 126). It sits
+  below Work's resting position, so the spy still lights the link.
 
 **Open / not done:** phones (≤480) were not tuned for any of this; meta descriptions / JSON-LD / llms.txt still carry the
 old bio (Jenna to decide); white type on the top of the gradient hasn't been
