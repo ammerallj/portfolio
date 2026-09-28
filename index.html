@@ -159,7 +159,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@200;500;700&family=Inter:wght@400..700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=ea8fe428" />
+  <link rel="stylesheet" href="style.css?v=a2994b90" />
   <!-- The landing field's JPEG fallback — PHONES ONLY since 2026-09, so the
        preload is gated to match the <picture> in <main>. Without the media
        attribute this fetches 1.4MB on every desktop and tablet visit for an
@@ -372,116 +372,92 @@
     </nav>
 
     <!-- SELECTED WORK -->
+    <!-- A two-column MASONRY of cards (2026-09; replaced the looping horizontal
+         carousel). DOM order is READING order, left to right: card 1 top-left,
+         card 2 top-right, and every later card drops into whichever column is
+         shorter (initWorkMasonry in js/main.js). With JS off it is a plain
+         two-column grid, rows aligned. One column at <=768.
+         Each card is ONE link. The media frame's height comes from
+         --media-ratio on .work-card-media: change that per card to vary the
+         masonry. Hover / keyboard focus fades the title out and the
+         description in, in the same slot (sections.css). -->
     <section class="page-section" aria-labelledby="work-heading" id="work-section">
       <div class="site-container">
-        <ul class="work-list" role="list">
+        <ul class="work-grid" role="list">
 
           <li class="work-card" data-reveal-group>
-            <div class="work-card-body">
-              <div class="work-card-left">
-                <h2 class="section-title" id="work-heading" data-reveal data-reveal-order="0">Creating Continuity Across Messaging</h2>
+            <a class="work-card-link" href="work/messaging.html" data-reveal>
+              <div class="work-card-media" style="--media-ratio: 5 / 4">
+                <span class="work-card-placeholder" aria-hidden="true">[Placeholder]</span>
               </div>
-              <div class="work-card-right">
-                <div class="work-card-meta" data-reveal data-reveal-order="1">
+              <div class="work-card-text">
+                <div class="work-card-swap">
+                  <h2 class="work-card-title" id="work-heading">Facebook Messaging</h2>
+                  <p class="work-card-description">Defining how conversations move across Facebook and Messenger.</p>
+                </div>
+                <div class="work-card-meta">
                   <span class="work-card-lock"><svg class="work-card-lock-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><rect x="4" y="9" width="16" height="12" rx="4" stroke="currentColor" stroke-width="1.5"/><path d="M12 16L12 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 9V7C16 4.79086 14.2091 3 12 3C9.79086 3 8 4.79086 8 7L8 9" stroke="currentColor" stroke-width="1.5"/></svg><span class="visually-hidden">Full case study locked</span></span>
-                  <span class="work-card-pill">Shipped <span class="work-card-pill-arrow" aria-hidden="true">&#8599;</span></span>
-                  <span class="work-card-stamp">Meta &middot; 2023</span>
+                  <span class="work-card-pill">Shipped &middot; 2023 <span class="work-card-pill-arrow" aria-hidden="true">&#8599;</span></span>
                 </div>
-                <p class="work-card-description" data-reveal data-reveal-order="1">I defined an interaction model for messaging across Facebook, connecting fragmented entry points and clarifying when conversations should stay in-app or hand off to Messenger.</p>
               </div>
-            </div>
-            <a class="work-card-image-link" href="work/messaging.html" data-reveal data-reveal-order="2">
-              <video class="work-card-image" muted playsinline preload="none" width="2660" height="830" data-autoplay-in-view aria-hidden="true">
-                <source src="images/work-messaging.mp4?v=2" type="video/mp4" />
-              </video>
-              <img class="work-card-poster" src="images/work-messaging.jpg?v=3" width="2660" height="830" loading="eager" fetchpriority="high" alt="Preview of continuity work across Facebook Messaging surfaces" />
-              <span class="visually-hidden">Creating Continuity Across Messaging — project overview</span>
             </a>
           </li>
 
           <li class="work-card" data-reveal-group>
-            <div class="work-card-body">
-              <div class="work-card-left">
-                <h2 class="section-title" data-reveal data-reveal-order="0">Shaping Accessibility Across Products</h2>
+            <a class="work-card-link" href="work/microsoft-loop.html" data-reveal>
+              <div class="work-card-media" style="--media-ratio: 16 / 10">
+                <span class="work-card-placeholder" aria-hidden="true">[Placeholder]</span>
               </div>
-              <div class="work-card-right">
-                <div class="work-card-meta" data-reveal data-reveal-order="1">
+              <div class="work-card-text">
+                <div class="work-card-swap">
+                  <h2 class="work-card-title">Microsoft Loop</h2>
+                  <p class="work-card-description">Designing 0&rarr;1 collaborative primitive that works across apps.</p>
+                </div>
+                <div class="work-card-meta">
+                  <span class="work-card-pill">Coming soon</span>
+                  <span class="work-card-pill">Shipped &middot; 2022 <span class="work-card-pill-arrow" aria-hidden="true">&#8599;</span></span>
+                </div>
+              </div>
+            </a>
+          </li>
+
+          <li class="work-card" data-reveal-group>
+            <a class="work-card-link" href="work/facebook-groups.html" data-reveal>
+              <div class="work-card-media" style="--media-ratio: 5 / 4">
+                <span class="work-card-placeholder" aria-hidden="true">[Placeholder]</span>
+              </div>
+              <div class="work-card-text">
+                <div class="work-card-swap">
+                  <h2 class="work-card-title">Facebook Groups</h2>
+                  <p class="work-card-description">Adapting Group Home around how members arrive and what's new.</p>
+                </div>
+                <div class="work-card-meta">
+                  <span class="work-card-pill">Coming soon</span>
+                  <span class="work-card-pill">Shipped &middot; 2023 <span class="work-card-pill-arrow" aria-hidden="true">&#8599;</span></span>
+                </div>
+              </div>
+            </a>
+          </li>
+
+          <li class="work-card" data-reveal-group>
+            <a class="work-card-link" href="work/accessibility.html" data-reveal>
+              <div class="work-card-media" style="--media-ratio: 16 / 10">
+                <span class="work-card-placeholder" aria-hidden="true">[Placeholder]</span>
+              </div>
+              <div class="work-card-text">
+                <div class="work-card-swap">
+                  <h2 class="work-card-title">Accessibility on meta.com</h2>
+                  <p class="work-card-description">Bringing accessibility features and support across Meta products into one place.</p>
+                </div>
+                <div class="work-card-meta">
                   <span class="work-card-lock"><svg class="work-card-lock-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><rect x="4" y="9" width="16" height="12" rx="4" stroke="currentColor" stroke-width="1.5"/><path d="M12 16L12 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 9V7C16 4.79086 14.2091 3 12 3C9.79086 3 8 4.79086 8 7L8 9" stroke="currentColor" stroke-width="1.5"/></svg><span class="visually-hidden">Full case study locked</span></span>
-                  <span class="work-card-pill">Shipped <span class="work-card-pill-arrow" aria-hidden="true">&#8599;</span></span>
-                  <span class="work-card-stamp">Meta &middot; 2026</span>
+                  <span class="work-card-pill">Shipped &middot; 2026 <span class="work-card-pill-arrow" aria-hidden="true">&#8599;</span></span>
                 </div>
-                <p class="work-card-description" data-reveal data-reveal-order="1">I designed how accessibility guidance surfaced across Meta, from AI-assisted product decisions and review tools to its first centralized public accessibility destination.</p>
               </div>
-            </div>
-            <a class="work-card-image-link" href="work/accessibility.html" data-reveal data-reveal-order="2">
-              <video class="work-card-image" muted playsinline preload="none" width="2660" height="830" data-autoplay-in-view aria-hidden="true">
-                <source src="images/work-accessibility.mp4?v=2" type="video/mp4" />
-              </video>
-              <img class="work-card-poster" src="images/work-accessibility.jpg?v=4" width="2660" height="830" loading="lazy" alt="Preview of accessibility guidance, product features, and a knowledge base built at Meta" />
-              <span class="visually-hidden">Shaping Accessibility Across Products — project overview</span>
-            </a>
-          </li>
-
-          <li class="work-card" data-reveal-group>
-            <div class="work-card-body">
-              <div class="work-card-left">
-                <h2 class="section-title" data-reveal data-reveal-order="0">Giving Components an Identity</h2>
-              </div>
-              <div class="work-card-right">
-                <div class="work-card-meta" data-reveal data-reveal-order="1">
-                  <span class="work-card-pill">Shipped <span class="work-card-pill-arrow" aria-hidden="true">&#8599;</span></span>
-                  <span class="work-card-stamp">Microsoft &middot; 2022</span>
-                </div>
-                <p class="work-card-description" data-reveal data-reveal-order="1">I established how live components preserved their identity and behavior across Microsoft 365, shaping the first components in Teams and a patented control for sharing and connections.</p>
-              </div>
-            </div>
-            <a class="work-card-image-link" href="work/microsoft-loop.html" data-reveal data-reveal-order="2">
-              <video class="work-card-image" muted playsinline preload="none" width="2660" height="830" data-autoplay-in-view aria-hidden="true">
-                <source src="images/work-loop.mp4?v=2" type="video/mp4" />
-              </video>
-              <img class="work-card-poster" src="images/work-loop.jpg?v=3" width="2660" height="830" loading="lazy" alt="Preview of Microsoft Loop collaborative workspace components" /><span class="visually-hidden">Giving Components an Identity — project overview</span>
-            </a>
-          </li>
-
-          <li class="work-card" data-reveal-group>
-            <div class="work-card-body">
-              <div class="work-card-left">
-                <h2 class="section-title" data-reveal data-reveal-order="0">Helping People Navigate Communities</h2>
-              </div>
-              <div class="work-card-right">
-                <div class="work-card-meta" data-reveal data-reveal-order="1">
-                  <span class="work-card-pill">Shipped <span class="work-card-pill-arrow" aria-hidden="true">&#8599;</span></span>
-                  <span class="work-card-stamp">Meta &middot; 2023</span>
-                </div>
-                <p class="work-card-description" data-reveal data-reveal-order="1">I redesigned navigation, states, and key entry points across Groups Home, improving orientation and aligning more of the experience with Facebook's design system.</p>
-              </div>
-            </div>
-            <a class="work-card-image-link" href="work/facebook-groups.html" data-reveal data-reveal-order="2">
-              <video class="work-card-image" muted playsinline preload="none" width="2660" height="830" data-autoplay-in-view aria-hidden="true">
-                <source src="images/work-communities.mp4?v=2" type="video/mp4" />
-              </video>
-              <img class="work-card-poster" src="images/work-communities.jpg?v=5" width="2660" height="830" loading="lazy" alt="Preview of community navigation work across Facebook Groups" /><span class="visually-hidden">Helping People Navigate Communities — project overview</span>
             </a>
           </li>
 
         </ul>
-
-        <!-- Carousel pagination. ONE bar, held still over the cover photo while
-             the photos slide underneath it — so it is a sibling of the track,
-             not a child of any card. Order is the AUTHORED project order, which
-             the loop's DOM rotation does not disturb: js/main.js maps dot k to
-             authored[k], so dot 1 always means the first project on the page.
-             Hidden until .work-list carries .is-looping, which JS adds only when
-             the horizontal track is live — so no dots with JS off, and none at
-             <=480 where the track is a plain vertical stack.
-             No data-reveal: it belongs to no reveal group, and one here would
-             leave it hidden for good. -->
-        <div class="work-pagination" role="group" aria-label="Selected work pagination">
-          <button type="button" class="work-pagination-dot is-active" aria-current="true" aria-label="Show Creating Continuity Across Messaging"></button>
-          <button type="button" class="work-pagination-dot" aria-label="Show Shaping Accessibility Across Products"></button>
-          <button type="button" class="work-pagination-dot" aria-label="Show Giving Components an Identity"></button>
-          <button type="button" class="work-pagination-dot" aria-label="Show Helping People Navigate Communities"></button>
-        </div>
       </div>
     </section>
 
@@ -613,6 +589,6 @@
   </div>
   <div class="wave-cursor" id="wave-cursor" aria-hidden="true">👋</div>
 
-  <script src="js/main.js?v=1d680316" defer></script>
+  <script src="js/main.js?v=765a2c40" defer></script>
 </body>
 </html>
