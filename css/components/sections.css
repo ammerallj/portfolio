@@ -988,7 +988,11 @@ html.has-top-nav.is-work-in #work-section .site-container {
      5-column --width-right-column), the photo keeps 4, and this gap is the one
      empty column between them plus its two gutters: (100vw - 332px)/12 + 40px
      = 132px at 1440. See .about-right. */
-  gap: calc(8.3333vw + 12.33px);
+  /* REDESIGN, second pass (2026-09-28): TEXT LEFT, PHOTOS RIGHT, text centred
+     vertically against the photo stack (Jenna's reference). The text takes the
+     shared 5-column --width-right-column, the photos the rest; this is the
+     seam between them. Supersedes the 7-column note above. */
+  gap: var(--gap-group);
   /* No block padding — the heading's 100px margin-bottom sets the gap to
      content, and the section's 60px padding handles the bottom spacing */
   padding-block: 0;
@@ -996,7 +1000,7 @@ html.has-top-nav.is-work-in #work-section .site-container {
      the ROW's height is the right column's text alone, and the stretched
      left column hands that height to the photo — the text column is the
      section's height authority. */
-  align-items: stretch;
+  align-items: center; /* text centred against the photos (was stretch) */
   /* DESKTOP: the supporting text starts level with the "About Me." headline.
      The pull-up lives on the CONTAINER (with the photo pushed back down by
      the same amount below) — NOT on .about-right — so the reveal system's
@@ -1009,7 +1013,8 @@ html.has-top-nav.is-work-in #work-section .site-container {
      (64→48→32) — no per-tier pull-up override needed. Reset to 0 once About
      stacks at ≤768 (responsive.css). */
   --about-pullup: calc(var(--section-title-size) + var(--gap-group));
-  margin-top: calc(-1 * var(--about-pullup));
+  /* The pull-up is OFF in the centred layout: the heading sits above the row. */
+  margin-top: 0;
 }
 
 .about-left {
@@ -1020,7 +1025,7 @@ html.has-top-nav.is-work-in #work-section .site-container {
   align-items: flex-start;
   /* Cancels the container's pull-up so the photo stays below the heading;
      only the right column rides up beside it. */
-  margin-top: var(--about-pullup);
+  margin-top: 0; /* pull-up off (centred layout) — was var(--about-pullup) */
   /* Anchors the absolute .about-photo fill (desktop only). */
   position: relative;
 }
@@ -1168,7 +1173,8 @@ html.has-top-nav.is-work-in #work-section .site-container {
   /* 7 grid columns, not the shared 5-column --width-right-column (redesign,
      2026-09-28): 7·(100vw − 332px)/12 + 6·20px = 766px at 1440. ⚠️ About's
      copy no longer starts on the nav's "Selected work" line. */
-  flex: 0 0 min(calc(58.3333vw - 73.67px), 766.33px); /* capped at its 1440 width, like the token it replaced, so lines don't run long on wide screens */
+  flex: 0 0 var(--width-right-column); /* 5 columns — the 7-column min(58.3333vw − 73.67px, 766px) was the previous layout */
+  order: -1; /* visually LEFT of the photos; also first when stacked */
   display: flex;
   flex-direction: column;
   /* Bio → facts list (redesign, 2026-09-28). Was --gap-section (96) between
