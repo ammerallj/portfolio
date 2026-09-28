@@ -159,7 +159,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,200;0,500;0,700;1,500&family=Inter:wght@400..700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=fc64e3fd" />
+  <link rel="stylesheet" href="style.css?v=37a9c185" />
   <!-- The landing field's JPEG fallback — PHONES ONLY since 2026-09, so the
        preload is gated to match the <picture> in <main>. Without the media
        attribute this fetches 1.4MB on every desktop and tablet visit for an
@@ -406,7 +406,10 @@
           <li class="work-card" data-reveal-group>
             <a class="work-card-link" href="work/microsoft-loop.html" data-reveal>
               <div class="work-card-media" style="--media-ratio: 16 / 10">
-                <span class="work-card-placeholder" aria-hidden="true">[Placeholder]</span>
+                <!-- At rest the still; on hover the GIF (loaded on first hover
+                     only, restarted each time — initWorkHoverMedia). -->
+                <img class="work-card-cover" src="images/loop-cover-card.jpg?v=1" width="2040" height="1200" alt="" loading="lazy" />
+                <img class="work-card-hover" data-hover-src="images/loop-cover-card.gif?v=1" width="2040" height="1200" alt="" aria-hidden="true" />
               </div>
               <div class="work-card-text">
                 <div class="work-card-swap">
@@ -589,6 +592,6 @@
   </div>
   <div class="wave-cursor" id="wave-cursor" aria-hidden="true">👋</div>
 
-  <script src="js/main.js?v=9799cac5" defer></script>
+  <script src="js/main.js?v=fa54bcb8" defer></script>
 </body>
 </html>

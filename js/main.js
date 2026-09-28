@@ -2329,6 +2329,33 @@ function initWorkMasonry() {
 }
 initWorkMasonry();
 
+// Work cards with hover media: the still at rest, the GIF on hover. The GIF's
+// src is set on first hover (and re-set with a fresh fragment each time, which
+// restarts it from its first frame without refetching — a fragment is not part
+// of the fetch); the class that shows it lands on `load`, so a slow first
+// fetch never shows an empty frame. Mouse and keyboard focus only — touch has
+// no hover — and nothing under reduced motion. Null-safe: pages without it
+// simply find no targets.
+function initWorkHoverMedia() {
+  if (reducedMotion.matches) return;
+  document.querySelectorAll('.work-card-hover[data-hover-src]').forEach((img) => {
+    const link = img.closest('.work-card-link');
+    if (!link) return;
+    const src = img.dataset.hoverSrc;
+    let n = 0;
+    const play = () => {
+      img.onload = () => link.classList.add('is-hover-playing');
+      img.src = src + '#' + (++n);
+    };
+    const stop = () => link.classList.remove('is-hover-playing');
+    link.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') play(); });
+    link.addEventListener('pointerleave', stop);
+    link.addEventListener('focus', play);
+    link.addEventListener('blur', stop);
+  });
+}
+initWorkHoverMedia();
+
 
 // ============================================================
 // IMAGE CAROUSEL — a crossfade between slides, used by the project pages'

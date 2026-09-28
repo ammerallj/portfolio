@@ -115,6 +115,14 @@ functions of scroll, the fades are timed class toggles):
 - **The white RIDES THE LOCKUP**: `cream = lag + textLift`, so its edge stays
   16px above the headline all the way up and the gradient stays in view above
   the text. Forcing it to the top early — tried — wiped the colour at once.
+- **Work cards can carry HOVER MEDIA** (Loop first, 2026-09-27): a still
+  `.work-card-cover` (JPEG, lazy) with a `.work-card-hover` GIF over it whose
+  `src` is set only on first hover (`data-hover-src`, `initWorkHoverMedia`),
+  restarted each hover with a fresh `#n` fragment (no refetch), shown via
+  `.is-hover-playing` only after `load`. Mouse + keyboard focus; touch and
+  reduced motion keep the still. Loop's JPEG was resized 4080 → 2040 at q80
+  (1.45MB → 215KB); the GIF is 2040x1200, 511KB. Its art is 17:10 in a 16:10
+  frame, so ~3% is cropped off each side.
 - **The orbs are tuned for COLOUR now, not contrast** (the text sits on
   white). ⚠️ **PAINT ORDER DECIDES WHICH COLOUR WINS** — the lesson again:
   strengthening red while it painted over magenta/violet just blanketed them

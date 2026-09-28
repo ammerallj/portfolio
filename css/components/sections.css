@@ -283,6 +283,21 @@ html.has-top-nav.is-work-in #work-section .site-container {
   object-fit: cover;
 }
 
+/* HOVER MEDIA: a card can carry a still (.work-card-cover) and an animated
+   GIF over it (.work-card-hover). The GIF has no src until the first hover
+   (initWorkHoverMedia, js/main.js), so its weight is only paid by readers who
+   hover; it fades in only once it has loaded, so the frame never flashes
+   empty. Touch and reduced motion keep the still. */
+.work-card-hover {
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+}
+
+.work-card-link.is-hover-playing .work-card-hover {
+  opacity: 1;
+}
+
 .work-card-placeholder {
   font-family: var(--font-body);
   font-size: var(--size-xs);
