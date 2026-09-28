@@ -132,9 +132,9 @@ functions of scroll, the fades are timed class toggles):
   takes the art's own ratio (`--media-ratio: 1866 / 1846`) because two phone
   screens in a 5:4 frame lose their status and nav bars. The still is Jenna's
   PNG cropped (4, 2) so it registers with the GIF exactly. The GIF is Jenna's
-  own re-export, 640x633 / 1.96MB (was 1866x1846 / 21.4MB) — same framing, so
-  it still registers with the 1866px still. ⚠️ It is ~1x on desktop (the card
-  paints ~517–650px), so on a 2x display the hover plays softer than the still.
+  own re-export, 960x950 / 3.9MB (was 1866x1846 / 21.4MB, then 640px) — same
+  framing, so it still registers with the 1866px still. ~1.5x on desktop (the
+  card paints ~517–650px).
 - **The orbs are tuned for COLOUR now, not contrast** (the text sits on
   white). ⚠️ **PAINT ORDER DECIDES WHICH COLOUR WINS** — the lesson again:
   strengthening red while it painted over magenta/violet just blanketed them
