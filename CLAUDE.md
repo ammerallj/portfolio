@@ -216,6 +216,11 @@ functions of scroll, the fades are timed class toggles):
     never reached 0 and Contact stopped short of its locked view (nav still
     dark, heading at the bottom). The measures also re-run on `load` and
     `document.fonts.ready` (`remeasureLate`).
+- **Contact's copy is CENTRED in the panel again** (`justify-content: center`,
+  2026-09-28, Jenna: more breathing room under the nav). Top-aligning dated
+  from `--contact-trim` 144, which left no slack; at trim 0 the full-frame
+  min-height has room. Measured at 1466x993: 201px nav → heading, 200px below
+  the content (was 96 / ~305).
   ⚠️ Not yet judged by feel on a trackpad.
 - **The orbs are tuned for COLOUR now, not contrast** (the text sits on
   white). ⚠️ **PAINT ORDER DECIDES WHICH COLOUR WINS** — the lesson again:

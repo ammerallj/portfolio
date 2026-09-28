@@ -862,11 +862,13 @@ html.has-top-nav.is-work-in #work-section .site-container {
   min-height: calc(100dvh - var(--footer-height) - var(--contact-trim, 0px));
   display: flex;
   flex-direction: column;
-  /* ⚠️ TOP-ALIGNED since --contact-trim. Centring only ever did something while
-     min-height exceeded the content; the trim closed that, so `center` now
-     resolves identically to `flex-start` and the old lift hack was paying 96px
-     of panel height for nothing. See .contact-inner. */
-  justify-content: flex-start;
+  /* CENTRED (redesign, 2026-09-28, Jenna: "more breathing room between nav").
+     It was top-aligned while --contact-trim left the panel no slack; the trim is
+     0 again, so the full-frame min-height has room and `center` puts the copy
+     in the middle of the space BELOW the nav (padding-top carries
+     --nav-offset). Where the content fills the panel (short windows, portrait's
+     min-height: 0) it resolves to the old top-aligned position. */
+  justify-content: center;
   /* THE PADDING YIELDS SO THE FOOTER STAYS IN FRAME. min-height above is a floor,
      not a cap: at a short window the copy plus a fixed 96px either side outgrew
      it and the panel pushed the footer off the fold (measured at 1440x700:
