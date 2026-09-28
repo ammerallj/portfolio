@@ -135,6 +135,10 @@ functions of scroll, the fades are timed class toggles):
   own re-export, 1100x1088 / 8.5MB at 20-25fps in motion (was 1866x1846 / 21.4MB) — same
   framing, so it still registers with the 1866px still. ~1.5x on desktop (the
   card paints ~517–650px).
+  **Accessibility followed** (`ax-card.jpg` 2040x1199 from Jenna's 2872px PNG /
+  `ax-card.gif` 640x376, 1.9MB, ~7.6fps): its frame also takes the art's ratio
+  (`2872 / 1688`) — a full-width page capture, so 16:10 clipped the nav's
+  right-hand icons. Still and GIF register exactly at scale.
 - **The orbs are tuned for COLOUR now, not contrast** (the text sits on
   white). ⚠️ **PAINT ORDER DECIDES WHICH COLOUR WINS** — the lesson again:
   strengthening red while it painted over magenta/violet just blanketed them
