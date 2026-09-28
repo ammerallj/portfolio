@@ -1393,8 +1393,8 @@ const topNav = document.querySelector('.top-nav');
 //             here, so the top nav's white type never sits on white).
 // HERO_TEXT_OUT — the lockup fades out (0.5s, hero.css).
 const WORK_IN = 8;
-const NAV_SWAP = 48;
-const HERO_TEXT_OUT = 80;
+const NAV_SWAP = 400; // backstop only — the swap follows the white
+const HERO_TEXT_OUT = 160; // backstop — the lockup fades with the nav swap
 // The glide to Selected Work when the docked nav appears (see the hand-off in
 // updateScrollEffects). easeOutCubic over 1.0s (was easeInOutSine / 1.4s):
 // the ease-in held the cards ~380px down for the first beat after the nav
@@ -2452,19 +2452,22 @@ function updateScrollEffects() {
   // sank by lag; the mask pulls its end up by cream). It must sit on the nav's
   // VISUAL top — the shortened layout top plus the push — with the resting
   // overhang closing on the tuck's curve. At rest this is exactly 0.
-  let navTop = (fieldDockScroll) + push;
-  // REDESIGN: the docked bar appears at HERO_TEXT_OUT, fixed at the TOP of the
-  // screen — well before its layout position gets there. Left glued to the
-  // layout position, the white edge was still far down at that moment and
-  // gradient showed under the bar's frost. So its target eases from the layout
-  // position to the viewport top (scrollY) over the first HERO_TEXT_OUT px,
-  // arriving exactly as the bar appears; past the pin the two are the same.
-  if (topNav && fieldDockScroll > 0) {
-    const e0 = Math.min(1, Math.max(0, window.scrollY / NAV_SWAP));
-    navTop += (window.scrollY - navTop) * (e0 * e0 * (3 - 2 * e0));
-  }
+  const navTop = (fieldDockScroll) + push;
+  // REDESIGN: the lockup's lift (applied below as --hero-text-lift).
+  const bt = fieldDockScroll > 0 ? Math.min(1, pinP / HERO_TEXT_BOOST.over) : 0;
+  const boost = HERO_TEXT_BOOST.px * (1 - (1 - bt) * (1 - bt));
+  const textLift = fieldDockScroll > 0
+    ? Math.round(heroShorten - push + boost + HERO_TEXT.speed * travel) : 0;
+  // REDESIGN: the white RIDES THE LOCKUP — its edge keeps its resting 16px
+  // above the headline all the way up (cream = lag + textLift: the artwork
+  // sinks by lag, the text rises by textLift). It used to be forced to the
+  // viewport top within the first ~48px so the docked bar never landed on
+  // gradient, which wiped the colour almost instantly; the nav swap now waits
+  // for the white to reach the top nav instead, so that force is not needed.
   const cream = fieldDockScroll > 0
-    ? fieldVisibleEnd + lag - navTop - fieldOverhang * (1 - tuck) : 0;
+    ? (topNav ? lag + textLift
+              : fieldVisibleEnd + lag - navTop - fieldOverhang * (1 - tuck))
+    : 0;
   const creamPx = Math.max(0, Math.round(cream));
   setFieldCream(creamPx);
   // REDESIGN: the hand-off, on TIMED transitions rather than opacities tied to
@@ -2485,9 +2488,11 @@ function updateScrollEffects() {
       if (stops) whiteEndV = cv.getBoundingClientRect().top + parseFloat(stops[stops.length - 1]);
     }
   }
-  const heroOut = fieldDockScroll > 0 && window.scrollY > HERO_TEXT_OUT;
   const navOut = fieldDockScroll > 0 && window.scrollY > 0
     && (window.scrollY > NAV_SWAP || (topNav && whiteEndV <= topNav.offsetHeight));
+  // The lockup fades AT the swap: it rides the white, so it reaches the top
+  // together with it. HERO_TEXT_OUT is only a backstop now.
+  const heroOut = navOut || (fieldDockScroll > 0 && window.scrollY > HERO_TEXT_OUT);
   if (topNav) {
     html.classList.toggle('is-hero-text-out', heroOut);
     html.classList.toggle('is-top-nav-off', navOut);
@@ -2542,10 +2547,7 @@ function updateScrollEffects() {
   // which on short windows let the gap to Work grow ~80px mid-scroll. Locked
   // to Work, the lockup→Work gap is constant at every size by construction,
   // and it still tracks the white closely, which is tied to the same bar.
-  const bt = fieldDockScroll > 0 ? Math.min(1, pinP / HERO_TEXT_BOOST.over) : 0;
-  const boost = HERO_TEXT_BOOST.px * (1 - (1 - bt) * (1 - bt));
-  setHeroTextLift(fieldDockScroll > 0
-    ? Math.round(heroShorten - push + boost + HERO_TEXT.speed * travel) : 0);
+  setHeroTextLift(textLift);
 
   // Scroll-spy: the active section is the LAST one whose RESTING POSITION the
   // page has reached. Highlight every link that targets it (and mark it for

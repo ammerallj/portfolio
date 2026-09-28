@@ -88,12 +88,16 @@ except the one glide):
      `is-work-in`, sections.css), so the cards rise visibly under the lockup.
   2. **Nav swap** — the top nav fades out and the docked bar fades in the
      moment the white's edge reaches the top nav's bottom. That edge is READ
-     from the canvas's mask (only during the first `NAV_SWAP` px, the
-     backstop, 48); a JS re-derivation got it wrong because the redesign's
-     white ends at a CSS 72svh. ~25px at 1000x650, ~31px at 1440x900.
-  3. `HERO_TEXT_OUT` (80px) — the lockup fades out (0.5s).
-  The white edge eases to the viewport top over the first `NAV_SWAP` px, so
-  the bar never lands on gradient (the gradient is gone early as a result).
+     from the canvas's mask; a JS re-derivation got it wrong because the
+     redesign's white ends at a CSS 72svh.
+  3. The lockup fades out (0.5s) AT the swap (`HERO_TEXT_OUT` 160 is only a
+     backstop).
+  **The white RIDES THE LOCKUP**: `cream = lag + textLift`, so its edge stays
+  16px above the headline all the way up and the gradient stays visible above
+  the text until the white reaches the nav (~106px at 1440x900, ~72 at
+  1000x650). Forcing it to the top in the first ~48px — tried — wiped the
+  colour almost at once; with the swap reading the white, no force is needed.
+  `NAV_SWAP` (400) is a backstop.
 - The docked `.intro-bar` (invisible before — `html.has-top-nav`) is
   **position: fixed** from the hand-off on
   (`is-bar-lifted`), with Work taking a `-shorten` margin so layout is
