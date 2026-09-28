@@ -211,7 +211,7 @@ const FIELD_LAG = { k: 0.3 };
 // scroll on top of riding Work's own push (see setHeroTextLift), so the text
 // scrolls away faster than Work rises and fades out at HERO_TEXT_OUT as it
 // goes. 0 would lock the two together (no parallax, constant gap).
-const HERO_TEXT = { speed: 0.5 };
+const HERO_TEXT = { speed: 0.8 };
 let lastHeroTextLift = -1;
 function setHeroTextLift(px) {
   if (px === lastHeroTextLift) return;
@@ -1385,9 +1385,15 @@ try {
 // Seattle time; the fade and the hand-off to .intro-bar live in
 // updateScrollEffects. Null on project pages, so all of it is skipped there.
 const topNav = document.querySelector('.top-nav');
-// THE HAND-OFF: scroll past this and the hero swaps out on timed transitions —
-// hero text + top nav fade out, the docked bar fades in, Selected Work fades up
-// — and the white has finished climbing to the top of the screen by then.
+// THE HAND-OFF, in three steps on TIMED transitions (not scroll-linked):
+// WORK_IN   — Selected Work fades up from the first bit of scroll, so the cards
+//             are visibly rising right under the lockup (sections.css).
+// NAV_SWAP  — the top nav fades out and the docked bar fades in, the moment the
+//             white finishes climbing to the top (the white's ease completes
+//             here, so the top nav's white type never sits on white).
+// HERO_TEXT_OUT — the lockup fades out (0.5s, hero.css).
+const WORK_IN = 8;
+const NAV_SWAP = 48;
 const HERO_TEXT_OUT = 80;
 // The glide to Selected Work when the docked nav appears (see the hand-off in
 // updateScrollEffects). easeOutCubic over 1.0s (was easeInOutSine / 1.4s):
@@ -2426,16 +2432,6 @@ function updateScrollEffects() {
   //   bias 2   → peak 1.92x at 78%
   // The plain ease-in p^2 it replaced ended at 1.8x and dropped to 1x at the pin.
   const pinP = fieldDockScroll > 0 ? travel / fieldDockScroll : 0;
-  // REDESIGN: ONE trigger, HERO_TEXT_OUT px of scroll, swaps the whole hero
-  // out on TIMED transitions rather than opacities tied to scroll distance: the
-  // hero text and the top nav fade out (0.5s), the docked bar fades in (below),
-  // and Selected Work fades up (sections.css). Back above it, all reverse.
-  const heroOut = fieldDockScroll > 0 && window.scrollY > HERO_TEXT_OUT;
-  if (topNav) {
-    html.classList.toggle('is-hero-text-out', heroOut);
-    html.classList.toggle('is-top-nav-off', heroOut);
-    topNav.inert = heroOut;
-  }
   // REDESIGN: EASE-OUT, not the biased smoothstep. The hero text now fades out
   // early, and with the old curve Work started at ~1x and only sped up late, so
   // it lagged exactly when the text left — ~450px of empty screen mid-scroll.
@@ -2449,7 +2445,56 @@ function updateScrollEffects() {
   const pinR = 1 - pinP;
   const push = fieldDockScroll > 0 ? heroShorten * pinR * pinR * pinR : 0;
   setHeroPush(Math.round(push));
-  // REDESIGN: the docked bar takes over at the same trigger (heroOut) —
+  // Negative: .page-field's transform subtracts it, so the artwork moves DOWN
+  // relative to the page, i.e. slower than the scroll.
+  setFieldScroll(-lag);
+  // The white's end, on the page, is fieldVisibleEnd + lag − cream (the artwork
+  // sank by lag; the mask pulls its end up by cream). It must sit on the nav's
+  // VISUAL top — the shortened layout top plus the push — with the resting
+  // overhang closing on the tuck's curve. At rest this is exactly 0.
+  let navTop = (fieldDockScroll) + push;
+  // REDESIGN: the docked bar appears at HERO_TEXT_OUT, fixed at the TOP of the
+  // screen — well before its layout position gets there. Left glued to the
+  // layout position, the white edge was still far down at that moment and
+  // gradient showed under the bar's frost. So its target eases from the layout
+  // position to the viewport top (scrollY) over the first HERO_TEXT_OUT px,
+  // arriving exactly as the bar appears; past the pin the two are the same.
+  if (topNav && fieldDockScroll > 0) {
+    const e0 = Math.min(1, Math.max(0, window.scrollY / NAV_SWAP));
+    navTop += (window.scrollY - navTop) * (e0 * e0 * (3 - 2 * e0));
+  }
+  const cream = fieldDockScroll > 0
+    ? fieldVisibleEnd + lag - navTop - fieldOverhang * (1 - tuck) : 0;
+  const creamPx = Math.max(0, Math.round(cream));
+  setFieldCream(creamPx);
+  // REDESIGN: the hand-off, on TIMED transitions rather than opacities tied to
+  // scroll distance (see WORK_IN / NAV_SWAP / HERO_TEXT_OUT). The navs swap the
+  // moment the white's edge reaches the bottom of the top nav — measured here,
+  // after the white is computed — so the top nav's white type never sits on
+  // white; NAV_SWAP is the backstop. Back above, everything reverses.
+  // The white's end in the viewport, READ from the canvas's own mask rather
+  // than re-derived (the redesign ends it at a CSS 72svh, which no JS constant
+  // restates). Only while it can still matter — the first NAV_SWAP px — so the
+  // per-frame style read is brief.
+  let whiteEndV = Infinity;
+  if (topNav && fieldDockScroll > 0 && window.scrollY > 0 && window.scrollY <= NAV_SWAP) {
+    const cv = document.querySelector('.page-field-canvas');
+    if (cv) {
+      const cs = getComputedStyle(cv);
+      const stops = (cs.maskImage || cs.webkitMaskImage || '').match(/-?[\d.]+px/g);
+      if (stops) whiteEndV = cv.getBoundingClientRect().top + parseFloat(stops[stops.length - 1]);
+    }
+  }
+  const heroOut = fieldDockScroll > 0 && window.scrollY > HERO_TEXT_OUT;
+  const navOut = fieldDockScroll > 0 && window.scrollY > 0
+    && (window.scrollY > NAV_SWAP || (topNav && whiteEndV <= topNav.offsetHeight));
+  if (topNav) {
+    html.classList.toggle('is-hero-text-out', heroOut);
+    html.classList.toggle('is-top-nav-off', navOut);
+    html.classList.toggle('is-work-in', fieldDockScroll > 0 && window.scrollY > WORK_IN);
+    topNav.inert = navOut;
+  }
+  // REDESIGN: the docked bar takes over at the nav swap (navOut) —
   // before it would pin on its own. From then on it is position: FIXED at the top (is-bar-lifted,
   // hero.css), with Work taking a matching negative margin so the layout is
   // identical. ⚠️ NOT a scroll-linked transform: that was tried (--bar-lift)
@@ -2457,7 +2502,7 @@ function updateScrollEffects() {
   // scroll, so a sticky bar corrected by a per-frame transform wobbles while
   // the page is moving, and this bar is moving at 2-3x the scroll there.
   if (topNav && introBar) {
-    const show = heroOut || (fieldDockScroll > 0 && window.scrollY >= fieldDockScroll);
+    const show = navOut || (fieldDockScroll > 0 && window.scrollY >= fieldDockScroll);
     html.classList.toggle('is-bar-lifted', show);
     html.classList.toggle('is-bar-docked', show);
     introBar.inert = !show;
@@ -2481,28 +2526,6 @@ function updateScrollEffects() {
     lastHandoffShow = show;
     lastGlideScrollY = window.scrollY;
   }
-  // Negative: .page-field's transform subtracts it, so the artwork moves DOWN
-  // relative to the page, i.e. slower than the scroll.
-  setFieldScroll(-lag);
-  // The white's end, on the page, is fieldVisibleEnd + lag − cream (the artwork
-  // sank by lag; the mask pulls its end up by cream). It must sit on the nav's
-  // VISUAL top — the shortened layout top plus the push — with the resting
-  // overhang closing on the tuck's curve. At rest this is exactly 0.
-  let navTop = (fieldDockScroll) + push;
-  // REDESIGN: the docked bar appears at HERO_TEXT_OUT, fixed at the TOP of the
-  // screen — well before its layout position gets there. Left glued to the
-  // layout position, the white edge was still far down at that moment and
-  // gradient showed under the bar's frost. So its target eases from the layout
-  // position to the viewport top (scrollY) over the first HERO_TEXT_OUT px,
-  // arriving exactly as the bar appears; past the pin the two are the same.
-  if (topNav && fieldDockScroll > 0) {
-    const e0 = Math.min(1, Math.max(0, window.scrollY / HERO_TEXT_OUT));
-    navTop += (window.scrollY - navTop) * (e0 * e0 * (3 - 2 * e0));
-  }
-  const cream = fieldDockScroll > 0
-    ? fieldVisibleEnd + lag - navTop - fieldOverhang * (1 - tuck) : 0;
-  const creamPx = Math.max(0, Math.round(cream));
-  setFieldCream(creamPx);
   // REDESIGN: the hero text rides the white scrim's edge rather than a speed of
   // its own. That edge moves on the page by (lag − cream) — the artwork sinks by
   // lag, the mask pulls its end up by cream — so lifting the text by

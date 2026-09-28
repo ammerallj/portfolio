@@ -81,14 +81,19 @@ except the one glide):
   pushed back; the push unwinds on **cubic ease-out `(1 − p)³`** (was the biased
   smoothstep), so Work rises fastest on the first gesture and hits 1× at the pin.
 - The lockup rides Work's own movement (`shorten − push`) **plus**
-  `HERO_TEXT.speed` (0.5) × travel — the parallax that pulls it away upward.
-- **ONE hand-off trigger, `HERO_TEXT_OUT` (80px of scroll), on TIMED
-  transitions — nothing here is tied to scroll distance** (Jenna's ask): the
-  hero text and the top nav fade out (0.5s, `is-hero-text-out` /
-  `is-top-nav-off`), the docked `.intro-bar` fades in, and Selected Work's
-  container fades up (0.6s, sections.css). All reverse above the trigger.
-  The white edge eases to the viewport top over those first 80px so the bar
-  never lands on gradient — which also means the gradient is gone by ~55px.
+  `HERO_TEXT.speed` (0.8) × travel — the parallax that pulls it away upward.
+- **The hand-off is THREE timed steps, none tied to scroll distance** (Jenna's
+  ask), all reversing above their trigger:
+  1. `WORK_IN` (8px) — Selected Work's container fades up (0.6s,
+     `is-work-in`, sections.css), so the cards rise visibly under the lockup.
+  2. **Nav swap** — the top nav fades out and the docked bar fades in the
+     moment the white's edge reaches the top nav's bottom. That edge is READ
+     from the canvas's mask (only during the first `NAV_SWAP` px, the
+     backstop, 48); a JS re-derivation got it wrong because the redesign's
+     white ends at a CSS 72svh. ~25px at 1000x650, ~31px at 1440x900.
+  3. `HERO_TEXT_OUT` (80px) — the lockup fades out (0.5s).
+  The white edge eases to the viewport top over the first `NAV_SWAP` px, so
+  the bar never lands on gradient (the gradient is gone early as a result).
 - The docked `.intro-bar` (invisible before — `html.has-top-nav`) is
   **position: fixed** from the hand-off on
   (`is-bar-lifted`), with Work taking a `-shorten` margin so layout is

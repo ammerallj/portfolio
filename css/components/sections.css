@@ -35,9 +35,9 @@
   border-bottom: none;
 }
 
-/* REDESIGN: Selected Work FADES UP at the hero hand-off — the same trigger
-   that swaps the navs (html.is-hero-text-out, js/main.js) — on a timed
-   transition. Gated on has-top-nav, so no-JS and the project pages never hide
+/* REDESIGN: Selected Work FADES UP as soon as the reader starts scrolling
+   (html.is-work-in, WORK_IN in js/main.js) — timed, so the cards are rising
+   and revealing right under the hero lockup. Gated on has-top-nav, so no-JS and the project pages never hide
    it. The cards' own [data-reveal] items still play inside this. */
 html.has-top-nav #work-section .site-container {
   opacity: 0;
@@ -45,7 +45,7 @@ html.has-top-nav #work-section .site-container {
   transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.33, 1, 0.68, 1);
 }
 
-html.has-top-nav.is-hero-text-out #work-section .site-container {
+html.has-top-nav.is-work-in #work-section .site-container {
   opacity: 1;
   transform: none;
 }
