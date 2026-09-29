@@ -113,20 +113,27 @@
    The 542px side-by-side columns no longer fit, so the nav reflows and
    Work / About stack into a single full-width column.
    ========================================================================== */
-@media (max-width: 1024px) {
-  /* THE FIRST WORK CARD PEEKS ON TABLETS (2026-09-28, Jenna — same as the
-     phone): the landing is --hero-peek shorter than the fold, so ~120px of the
-     first card shows (it starts 24px below the hero). The hero, the gradient's
-     white end and the canvas box all subtract it, so lockup and gradient shift
-     up TOGETHER; tabletBlob (js/main.js) reads it for the orbs' band too. The
-     ≤480 tier sets its own --hero-h and canvas box and wins there. */
+/* ============================================================
+   ≤1376 — THE FIRST WORK CARD PEEKS (2026-09-28, Jenna). Tablets up to the 13"
+   iPad Pro (1032 portrait / 1376 landscape) — and so laptops up to 1376 too —
+   take the phone's presentation: the landing is --hero-peek shorter than the
+   fold, so ~88px of the first card shows. The hero, the gradient's white end
+   and (≤1024) the tablet canvas box all subtract it, so lockup and gradient
+   shift up TOGETHER; tabletBlob (js/main.js) reads it for the orbs' band too.
+   WORK_PEEKS in js/main.js uses this same query. The ≤480 tier sets its own
+   --hero-h and canvas box and wins there.
+   ============================================================ */
+@media (max-width: 1376px) {
   :root {
-    --hero-peek: 88px; /* was 144 — less card showing (Jenna, 2026-09-28) */
+    --hero-peek: 88px; /* was 144 — less card showing */
     --field-mask-end: calc(72svh - var(--hero-peek) + var(--field-rise) - var(--field-cream, 0px));
   }
   .intro {
     height: calc(100svh - var(--hero-peek));
   }
+}
+
+@media (max-width: 1024px) {
 
   /* THE BIO FILLS ITS COLUMN ON TABLETS (2026-09-28, Jenna: "take up more
      width or adjust the text cut off"). At 24px in the 369px nav-aligned column
