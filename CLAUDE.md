@@ -368,6 +368,14 @@ functions of scroll, the fades are timed class toggles):
   `100dvh − 184`, a Work-card peek that read as empty cream), so "Prev. at…"
   ends 40px above the screen's bottom (390x844: headline 535, gradient end 338).
   ⚠️ This retires the ≤480 card-peek scroll cue and its 120px maths above.
+- ⚠️ **The Work cards were INVISIBLE on phones**: `is-work-in` (the timed fade-up
+  of `#work-section .site-container`) required `fieldDockScroll > 0`, which is 0
+  wherever the landing bar is `display: none` (≤680). Now `NO_LANDING_BAR` (≤680)
+  sets it outright; the cards keep their own reveals.
+- On phones the card title is LEFT-aligned: the no-hover column resets
+  `align-self` (the grid's bottom-align meant right-align in a column), and
+  About's entrance parallax is off ≤680 (its pull-up is bounded by the section
+  gap, 64 there — it had lifted "About Me" to 4px under the last card).
 - **The Selected work / About me floatie stays tucked on the landing**: it
   appears once the hero's bottom is above mid-screen (the `is-tucked` state,
   homepage variant only).

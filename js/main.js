@@ -1560,6 +1560,8 @@ const topNav = document.querySelector('.top-nav');
 // - The lockup fades out (0.5s, hero.css) once Selected Work fills more than
 //   half the viewport.
 const WORK_IN = 8;
+// Below this the .intro-bar is display:none (responsive.css 680 tier).
+const NO_LANDING_BAR = window.matchMedia('(max-width: 680px)');
 const NAV_REVEAL_MAX = 400;
 // Where the "Selected work" nav click LANDS (sectionClickScrollY): the first
 // card's TOP EDGE one --gap-group below the nav. (It was shared with an
@@ -2743,7 +2745,11 @@ function updateScrollEffects() {
     && workEl.getBoundingClientRect().top < window.innerHeight / 2;
   if (topNav) {
     html.classList.toggle('is-hero-text-out', heroOut);
-    html.classList.toggle('is-work-in', fieldDockScroll > 0 && window.scrollY > WORK_IN);
+    // ≤680 there is no landing bar (fieldDockScroll stays 0), so the timed
+    // fade-up never fired and the Work cards sat at opacity 0 on phones. There
+    // the container is simply in; each card still has its own reveal.
+    html.classList.toggle('is-work-in', NO_LANDING_BAR.matches
+      || (fieldDockScroll > 0 && window.scrollY > WORK_IN));
   }
   // REDESIGN: the docked bar takes over at the nav swap (navOut) —
   // before it would pin on its own. From then on it is position: FIXED at the top (is-bar-lifted,
@@ -2967,6 +2973,10 @@ function updateScrollEffects() {
       aboutSection.classList.toggle('is-about-out',
         travel > 0 && ce + contactLead < vh * ABOUT_LIFT.fadeAt);
     }
+    // ≤680 (phones): no About parallax. Its pull-up is bounded by the section
+    // gap, which is 96 on desktop but 64 here — measured, it lifted About's
+    // heading to 4px under the last Work card (2026-09-28).
+    if (NO_LANDING_BAR.matches) peek = 0;
     setAboutPeek(Math.round(peek));
   }
 
