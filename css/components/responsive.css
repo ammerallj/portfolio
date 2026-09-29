@@ -1104,8 +1104,17 @@
 
   /* Phone work cards: one column (from the 768 tier), and the 17px Figma
      description size. */
-  .work-card-description {
+  /* "Prev. at Meta and Microsoft." shares the card text size on phones
+     (2026-09-28, Jenna) — one rule, so the two cannot drift apart. */
+  .work-card-description,
+  .intro-previously {
     font-size: 17px; /* Figma */
+  }
+
+  /* The hero bio steps down on phones: 24 → 20 (2026-09-28, Jenna). At 24 it
+     was three-quarters of the 32px headline; desktop's ratio is 24:56. */
+  .intro-bio {
+    font-size: 20px;
   }
 
   /* About tightens BELOW --gap-heading (40) to 20: what follows the heading
