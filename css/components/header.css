@@ -276,3 +276,29 @@ body:has(.intro) .site-header {
   }
 }
 
+
+/* The phone header's CLOCK (homepage, 2026-09-28) takes the wordmark's slot but
+   the desktop top nav clock's voice: body face, regular weight. */
+.site-name.site-clock {
+  font-family: var(--font-body);
+  font-size: var(--size-base);
+  font-weight: 400;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+/* OVER THE GRADIENT (≤480 homepage, js toggles .is-header-on-field): the header
+   is transparent with white type, like the desktop landing nav — no frost, no
+   grain, white clock, white "Say hello" pill with black text. The frosted cream
+   bar returns once the gradient has passed from behind it. */
+.site-header.is-header-on-field::before,
+.site-header.is-header-on-field::after {
+  opacity: 0;
+}
+.site-header.is-header-on-field .site-name {
+  color: #fff;
+}
+.site-header.is-header-on-field .mobile-menu-toggle {
+  background: #fff;
+  color: #000;
+}

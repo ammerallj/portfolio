@@ -347,6 +347,27 @@ functions of scroll, the fades are timed class toggles):
   card's top one `--gap-group` under the nav (1440x900: card at 126). It sits
   below Work's resting position, so the spy still lights the link.
 
+**Phones (≤480), 2026-09-28 — Jenna's iPhone pass:**
+- **The gradient is the top of the screen only**: the shader box is
+  `--phone-field-h` tall (`40svh`, or 32px above the headline if shorter —
+  `measurePhoneField`, offsets + `--hero-drop` because the load reveal
+  translates the headline) and its white fade ends at its own bottom; the JPEG
+  fallback is masked to the same line. The lockup sits on cream. Measured gap
+  above the headline: 32 at 375x667 (band only 149px there), 53 at 390x844, 106
+  at 430x932. Phones DERIVE their orbs from the desktop composition
+  (`phoneBlob`, beside `tabletBlob`), the box being the colour band; the old
+  hand-tuned `FIELD.phone` is no longer read.
+- **The header is transparent with white type over the gradient**
+  (`.site-header.is-header-on-field`, toggled above the is-loading return while
+  the gradient's solid part is still behind it): no frost, white clock, white
+  "Say hello" pill. It becomes the frosted cream bar once the gradient passes.
+- **The wordmark is a CLOCK** on the homepage header (`<time class="site-name
+  site-clock top-nav-clock">`, "Seattle" without JS; `initTopNav` fills every
+  `.top-nav-clock`). Tapping it no longer scrolls to the top.
+- **The Selected work / About me floatie stays tucked on the landing**: it
+  appears once the hero's bottom is above mid-screen (the `is-tucked` state,
+  homepage variant only).
+
 **Open / not done (as of 2026-09-27):**
 - Phones (≤480) were not tuned for any of this — they keep their own mobile
   header, phone orb layout and still field.

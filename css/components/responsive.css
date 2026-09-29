@@ -842,6 +842,11 @@
        ⚠️ --hero-drop is the ONE number to change to move the lockup: the
        transform, the pane's start, and the pane's reach all read from it. */
     --hero-h: calc(100dvh - 184px);
+    /* THE PHONE GRADIENT'S HEIGHT (2026-09-28, Jenna: "half or less of the
+       viewport so the hero text lock-up can be on white"). The shader box is
+       this tall and its white fade ends at its own bottom; the headline starts
+       ~46% down (391px at 390x844), so 40svh leaves clear cream above it. */
+    --phone-field-h: 40svh;
     /* ⚠️ 40, NOT 70 — it moved down by the same 30px --field-nudge-y moved up,
        so the lockup and the artwork stay rigid relative to each other. See the
        nudge's note above; these two are one decision. */
@@ -902,6 +907,13 @@
     transform: translateX(calc(-50% + 50px))
                translateY(calc(-12% + var(--field-nudge-y)));
   }
+  /* The JPEG fallback ends where the shader does: at --phone-field-h. Its box
+     is far larger, so without this it would still colour the whole hero. */
+  img.page-field {
+    --field-fade: 112px;
+    --field-mask-end: var(--phone-field-h);
+    --field-mask-start: calc(var(--field-mask-end) - var(--field-fade));
+  }
 
   /* THE SHADER GETS ITS OWN NARROW, TALL BOX ON PHONES (2026-09).
      At 1250px wide only ~30% of the artwork was on screen and no orb read as a
@@ -915,7 +927,9 @@
        with the viewport (--hero-h, this tier) and the box did not. Resolved at
        375x812 these are 460 x 760 — the size the orb layout was tuned on. */
     width: calc(100vw + 85px);
-    height: calc(var(--hero-h) + 132px);
+    /* Was --hero-h + 132px (the whole hero, lockup on colour). Now the top
+       --phone-field-h only, so every orb is drawn inside it rather than cut. */
+    height: var(--phone-field-h);
     /* THE WHITE FADE ENDS 8px ABOVE THE FIRST WORK CARD, not at the box's
        bottom. The card's image starts at --hero-h + 64 on every phone (measured
        360/375/390/430), and the box runs 68px past that, so the fade was
@@ -931,7 +945,7 @@
        ⚠️ --field-mask-start is restated because :root resolved it against
        :root's --field-mask-end; overriding the end here alone would not move it. */
     --field-fade: 112px;
-    --field-mask-end: calc(var(--hero-h) + 56px);
+    --field-mask-end: var(--phone-field-h);
     --field-mask-start: calc(var(--field-mask-end) - var(--field-fade));
     aspect-ratio: auto;
     transform: translateX(-50%);

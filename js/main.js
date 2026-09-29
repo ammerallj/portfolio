@@ -1131,6 +1131,9 @@ const FIELD = {
   // fraction of the box's HEIGHT, r of its WIDTH, and a blob's vertical reach is
   // r × aspect, so in a portrait box every orb reaches LESS far up and down than
   // it does across — which is why these are larger than the desktop radii.
+  // ⚠️ NO LONGER READ (2026-09-28): phones now derive their layout from the
+  // desktop one (phoneBlob, beside tabletBlob) since their gradient became the
+  // top --phone-field-h only. Kept as the record of the tall-box tuning.
   phone: {
     offsetY: 0,
     blobs: [
@@ -1368,20 +1371,40 @@ function initHeroField() {
     });
   }
 
+  // PHONE LAYOUT (≤480), DERIVED THE SAME WAY (2026-09-28). The phone's shader
+  // box is now just the top --phone-field-h of the screen (responsive.css), so
+  // the whole box IS the colour band: the desktop composition is fitted into it
+  // exactly as tabletBlob fits it into a tablet's band. Replaces the hand-tuned
+  // FIELD.phone layout, which was built for a tall box behind the lockup. The
+  // phone box has no rise transform, so the desktop's (200px) is only undone.
+  // The band runs from the screen's TOP: the phone header is transparent over
+  // the gradient (is-header-on-field), so the top-centre blue shows behind it
+  // the way it does behind the desktop landing nav.
+  const PHONE_REF_RISE = 200;
+  function phoneBlob(b) {
+    const sx = boxW / TABLET_REF.w;
+    const sy = boxH / TABLET_REF.band;
+    const sr = Math.pow(sy, 2 / 3) * Math.pow(sx, 1 / 3);
+    const Y = ((b.y + FIELD.offsetY) * TABLET_REF.h - PHONE_REF_RISE) * sy;
+    return Object.assign({}, b, {
+      x: (b.x * TABLET_REF.w * sx) / boxW,
+      y: Y / boxH,
+      r: (b.r * TABLET_REF.w * sr) / boxW,
+    });
+  }
+
   function draw(t, entranceMs) {
     resize();
     const e = FIELD.entrance;
     const tablet = !FIELD_STATIC.matches && FIELD_TABLET.matches;
     FIELD.paintOrder.forEach((blobIdx, slot) => {
-      const b = FIELD_STATIC.matches
-        ? Object.assign({}, FIELD.blobs[blobIdx], FIELD.phone.blobs[blobIdx])
+      const b = FIELD_STATIC.matches ? phoneBlob(FIELD.blobs[blobIdx])
         : tablet ? tabletBlob(FIELD.blobs[blobIdx])
         : FIELD.blobs[blobIdx];
       const p = entranceMs == null ? 1
         : Math.max(0, Math.min(1, (entranceMs - entranceStarts[blobIdx]) / e.duration));
       blobData[slot * 4 + 0] = b.x;
-      blobData[slot * 4 + 1] = b.y + (FIELD_STATIC.matches ? FIELD.phone.offsetY
-        : tablet ? 0 : FIELD.offsetY);
+      blobData[slot * 4 + 1] = b.y + (FIELD_STATIC.matches || tablet ? 0 : FIELD.offsetY);
       blobData[slot * 4 + 2] = b.r;
       blobData[slot * 4 + 3] = b.a * p;
       colData[slot * 3 + 0] = b.col[0];
@@ -1474,6 +1497,29 @@ function initHeroField() {
     draw(clock, entranceT);
   })(prev);
 }
+
+// THE PHONE GRADIENT'S HEIGHT (≤480): 40svh, or 32px above the headline,
+// whichever is shorter (2026-09-28). The lockup is bottom-anchored in a hero of
+// 100dvh − 184, so on a short phone the headline rises above 40% of the screen
+// (375x667: headline at 181, 40svh at 267) and the colour would sit behind it.
+// Set BEFORE initHeroField: phones draw one static frame, sized by this box.
+function measurePhoneField() {
+  const root = document.documentElement;
+  const h1 = document.querySelector('.intro-headline');
+  if (!h1 || !window.matchMedia('(max-width: 480px)').matches) {
+    root.style.removeProperty('--phone-field-h');
+    return;
+  }
+  // OFFSETS, not a rect: the load reveal translates the headline (it rises
+  // 64px into place), so a rect taken at init reads it 64px low. Offsets ignore
+  // transforms, so the tier's own --hero-drop (also a transform) is added back.
+  let top = 0;
+  for (let n = h1; n; n = n.offsetParent) top += n.offsetTop;
+  top += parseFloat(getComputedStyle(root).getPropertyValue('--hero-drop')) || 0;
+  const px = Math.round(Math.max(120, Math.min(window.innerHeight * 0.4, top - 32)));
+  root.style.setProperty('--phone-field-h', px + 'px');
+}
+measurePhoneField();
 
 try {
   initHeroField();
@@ -1572,8 +1618,9 @@ function measureNavColumns() {
 function initTopNav() {
   if (!topNav) return;
   document.documentElement.classList.add('has-top-nav');
-  const clock = topNav.querySelector('.top-nav-clock');
-  if (!clock) return;
+  // Every clock on the page: the desktop top nav's AND the phone header's.
+  const clocks = document.querySelectorAll('.top-nav-clock');
+  if (!clocks.length) return;
   const fmt = new Intl.DateTimeFormat('en-US', {
     timeZone: 'America/Los_Angeles',
     hour: 'numeric',
@@ -1582,8 +1629,10 @@ function initTopNav() {
   });
   const tick = () => {
     const now = new Date();
-    clock.textContent = fmt.format(now); // e.g. "10:42 AM PDT"
-    clock.dateTime = now.toISOString();
+    clocks.forEach((clock) => {
+      clock.textContent = fmt.format(now); // e.g. "10:42 AM PDT"
+      clock.dateTime = now.toISOString();
+    });
     // Re-render on the next minute boundary rather than polling.
     setTimeout(tick, 60000 - (now.getTime() % 60000) + 50);
   };
@@ -2544,6 +2593,22 @@ function updateScrollEffects() {
   // added one, so a no-JS visitor keeps the legible frosted bar.
   html.classList.toggle('is-at-page-top', window.scrollY <= 0);
 
+  // THE PHONE HEADER IS TRANSPARENT AND WHITE WHILE IT IS OVER THE GRADIENT
+  // (≤480, 2026-09-28, Jenna — like the desktop landing nav): no frost, white
+  // clock, white pill. Held while the gradient's SOLID colour (above its white
+  // fade) is still behind the header; after that the frosted cream bar returns,
+  // or white type would sit on cream. Above the is-loading return, like the
+  // flag above it, because the header is on screen through the load reveal.
+  if (siteHeader) {
+    let onField = false;
+    const cv = document.querySelector('.page-field-canvas');
+    if (cv && window.matchMedia('(max-width: 480px)').matches) {
+      const fade = parseFloat(getComputedStyle(cv).getPropertyValue('--field-fade')) || 112;
+      onField = cv.getBoundingClientRect().bottom - fade > siteHeader.getBoundingClientRect().bottom;
+    }
+    siteHeader.classList.toggle('is-header-on-field', onField);
+  }
+
   // While the load reveal is in progress, let CSS control opacity
   // instead of stomping it with an inline style here
   if (html.classList.contains('is-loading')) return;
@@ -2794,7 +2859,13 @@ function updateScrollEffects() {
     });
     if (sectionPillBar && siteFooter) {
       const footerIn = siteFooter.getBoundingClientRect().top < window.innerHeight;
-      sectionPillBar.classList.toggle('is-tucked', footerIn);
+      // The HOMEPAGE floatie also stays tucked until the landing is behind the
+      // reader — the hero's bottom above the middle of the screen (2026-09-28,
+      // Jenna). The project pages' chapter floatie is unaffected.
+      const heroEl = sectionPillBar.classList.contains('section-pills--site-nav')
+        ? document.querySelector('.intro') : null;
+      const onLanding = heroEl && heroEl.getBoundingClientRect().bottom > window.innerHeight * 0.5;
+      sectionPillBar.classList.toggle('is-tucked', footerIn || !!onLanding);
     }
   }
 
@@ -3161,6 +3232,7 @@ measureFieldTuck();
 measureContactArrival();
 measureAboutRest();
 window.addEventListener('resize', () => {
+  measurePhoneField();
   measureNavColumns(); // REDESIGN: before the tuck, which reads the bio
   measureFieldTuck();
   measureContactArrival();
@@ -3171,6 +3243,7 @@ window.addEventListener('resize', () => {
 // measure; re-measure once each has settled, or the Contact pacing and resting
 // positions are taken from a page that no longer exists.
 const remeasureLate = () => {
+  measurePhoneField();
   measureNavColumns();
   measureFieldTuck();
   measureContactArrival();
