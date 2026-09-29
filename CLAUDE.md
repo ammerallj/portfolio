@@ -349,7 +349,7 @@ functions of scroll, the fades are timed class toggles):
 
 **Phones (≤480), 2026-09-28 — Jenna's iPhone pass:**
 - **The gradient is the top of the screen only**: the shader box is
-  `--phone-field-h` tall (`40svh`, or 32px above the headline if shorter —
+  `--phone-field-h` tall (`50svh` — was 40 — or 32px above the headline if shorter —
   `measurePhoneField`, offsets + `--hero-drop` because the load reveal
   translates the headline) and its white fade ends at its own bottom; the JPEG
   fallback is masked to the same line. The lockup sits on cream. Measured gap
