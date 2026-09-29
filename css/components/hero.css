@@ -374,8 +374,11 @@ html.is-field-live .page-field-grain { opacity: 0.15; }
        60     2.97        2.57   FAILS
        90     2.84        2.54   FAILS
      1440x740 is looser (bio 3.22 -> 3.16 at rise 30) so it does not bind. Going
-     higher needs something else to give first — the bio's 3:1 is the wall. */
-  --field-rise: 30px;
+     higher needs something else to give first — the bio's 3:1 is the wall.
+     REDESIGN: that wall is gone — the lockup sits on white now, not on the
+     field — so the artwork rises 200px to bring the red up into the visible
+     band and push more of the top blue off-screen. Was 30px, then 130. */
+  --field-rise: 200px;
   /* ⚠️ --field-cream (scroll-linked, js/main.js) moves the dissolve's END up the
      artwork. It equals the artwork's lag (--field-scroll is negative: the
      artwork sinks, slower than the page) plus the tuck's overhang, so on the
@@ -385,7 +388,10 @@ html.is-field-live .page-field-grain { opacity: 0.15; }
      Two earlier builds are superseded: a mask slide that SETTLED BACK (the white
      visibly reversed), and a rigid lift plus a --work-glide on the nav and Work
      (no gap, but the nav ran 1.25x → 0.75x of the scroll and read as loose). */
-  --field-mask-end: calc(min(100%, calc(100svh + var(--field-rise))) - var(--field-cream, 0px));
+  /* REDESIGN (exploration): the dissolve ends 72% down the fold (was 66%), so
+     the bottom ~quarter is clean white for the lockup. Was
+     calc(min(100%, calc(100svh + var(--field-rise))) - var(--field-cream, 0px)). */
+  --field-mask-end: calc(72svh + var(--field-rise) - var(--field-cream, 0px));
   /* HOW TALL THE DISSOLVE IS, as a fraction of the room between the bio's last
      line and the bar. --field-gap is that room, published by measureFieldTuck;
      112px is the no-JS floor.
@@ -421,7 +427,8 @@ html.is-field-live .page-field-grain { opacity: 0.15; }
      browser's linear interpolation between them stays under one 8-bit code step
      on this artwork. Shorter and the segments start to read as facets — the
      original linear ramp's failure, in miniature. */
-  --field-fade: clamp(90px, var(--field-gap, 112px), 300px);
+  /* REDESIGN: a long, soft fade (was clamp(90px, var(--field-gap, 112px), 300px)). */
+  --field-fade: 30svh;
   --field-mask-start: calc(var(--field-mask-end) - var(--field-fade));
 
   /* How far the whole lockup — headline, divider, bio, AND the frost pane with
@@ -871,6 +878,263 @@ html:not(.is-field-live) .intro-divider {
   to { transform: translateY(0); opacity: 1; }
 }
 
+/* ============================================================
+   REDESIGN (exploration, worktree-redesign) — the lockup sits in
+   the white lower third, reference-style: name/role/place bottom
+   left, summary + "previously" in the shared right column. Dark
+   type on white, so the white-on-field contrast work above does
+   not apply here. Overrides only; the rules above are untouched.
+   ============================================================ */
+.intro {
+  justify-content: flex-end;
+}
+
+.intro-band {
+  flex: 0 0 auto;
+  /* The nav bar that used to rest here is hidden until it docks, so the
+     lockup no longer reserves its 80px — just a group gap to the fold
+     (60/48/40 by tier). Was calc(64px + --bar-tail + --gap-content). */
+  padding-top: 0;
+  padding-bottom: var(--gap-group);
+  overflow: visible;
+}
+
+.intro-band-left {
+  /* SEVEN columns of the fluid 12-col grid (56px margins, 20px gutters):
+     7·(100vw − 332px)/12 + 6 gutters = 58.333vw − 73.67px — 766.33px at 1440,
+     524.2 at the 1025 floor. With the 5-column right block and one gutter the
+     row fills all 12. Deliberately NOT --width-title-column (6 cols), which the
+     Work card titles share. */
+  flex: 0 1 clamp(524.2px, 58.333vw - 73.67px, 766.33px);
+  min-width: 0;
+  margin-right: auto;
+}
+
+.intro-headline {
+  font-weight: 500;
+  font-size: var(--section-title-size); /* one step under --display-size: 56/44/32 */
+  line-height: 1.05;
+  color: var(--color-text);
+  -webkit-text-stroke: 0;
+  max-width: none;
+}
+
+/* The lockup FADES OUT ON ITS OWN CLOCK once the reader starts scrolling —
+   a timed transition, not a scroll-linked opacity, so it goes cleanly whatever
+   the scroll speed (html.is-hero-text-out, js/main.js; back in at the top).
+   This is a state change, so a transition is right here. The columns'
+   entrance animations are on the children, so they can't pin this. */
+.intro-band {
+  opacity: 1;
+  transition: opacity 0.5s ease;
+}
+
+html.is-hero-text-out .intro-band {
+  opacity: 0;
+}
+
+/* Both columns rise together (the bio used to drop from the divider). */
+.intro-band-right {
+  animation-name: intro-headline-rise;
+}
+
+/* The right column spans the nav's items exactly: its right edge on the pill's,
+   its width from "Selected work" to there. Both measured by measureNavColumns
+   (js/main.js); the fallbacks are the desktop grid's own values (56px bar
+   padding, the shared right column). width + margin-left: auto rather than a
+   flex-basis, so the same two rules hold in the row layout AND the ≤768 stack
+   (where an auto cross-axis margin pushes it right). (0,2,0) so the tiers'
+   padding-inline shorthands on .intro-band don't win; ≤680 resets it. */
+.intro .intro-band {
+  /* The right block's last line sits on the headline's last line. Baselines,
+     not boxes: a 96px/1.05 headline and 18px/1.5 text carry different space
+     under their letters, so box bottoms would leave the small text visibly
+     low. flex-end is the fallback where last-baseline isn't supported. The
+     ≤768 stack resets this (it would push the headline right). */
+  align-items: flex-end;
+  align-items: last baseline;
+  padding-left: var(--nav-lead, 56px); /* the headline starts under the clock */
+  padding-right: var(--nav-col-inset, 56px);
+}
+
+.intro .intro-band-right {
+  flex: none;
+  width: var(--nav-col-w, var(--width-right-column));
+  max-width: 100%;
+  margin-left: auto;
+}
+
+.intro-bio {
+  font-weight: 400;
+  color: var(--color-text); /* primary */
+  -webkit-text-stroke: 0;
+}
+
+.intro-bio::before {
+  display: none; /* the ≤768 scrim is for white type on the field */
+}
+
+/* "I’m Jenna Ammerall," always on its own first line (display: block makes
+   the break; the space after the span keeps the heading's text correct for
+   screen readers and crawlers). Only the NAME is italic — "I’m" and the comma
+   stay upright — in the REAL Hanken Grotesk 500 italic, loaded on all five
+   pages' font link as 1,500 (a bare font-style would be a sheared oblique). */
+.intro-headline-name {
+  display: block;
+}
+
+.intro-headline-italic {
+  font-style: italic;
+}
+
+.intro-previously {
+  margin: var(--gap-content) 0 0; /* was --gap-group; one block with the bio */
+  font-size: var(--size-lg);
+  font-weight: 400; /* regular, like the description above it */
+  color: var(--color-text-70); /* secondary */
+}
+
+/* ---- REDESIGN: the top nav over the gradient ----
+   At the top of the page (not pinned), white type, Seattle time on the left
+   and a hairline running to the links — which sit on the shared right column
+   exactly as .intro-bar's do. It scrolls away with the hero;
+   html.is-bar-docked reveals .intro-bar when Selected Work enters. */
+.top-nav {
+  /* NOT pinned (2026-09-27): it sits at the top of the page and scrolls away
+     with the hero; the docked .intro-bar takes over when Work enters. */
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 95;
+  height: 64px;
+  padding: 0 56px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) repeat(3, calc(var(--width-right-column) / 3));
+  align-items: center;
+  color: #fff;
+  font-family: var(--font-body);
+  font-size: var(--size-base);
+  letter-spacing: -0.01em;
+}
+
+/* The entrance fade lives on the children, so it can't pin the parent's
+   scroll-linked opacity (an animation's fill beats a declaration). */
+.top-nav > * {
+  animation: intro-bar-fade 0.6s ease-out 0.9s both;
+}
+
+
+.top-nav-lead {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  min-width: 0;
+  padding-right: 24px; /* air between the rule and "Selected work" */
+}
+
+.top-nav-clock {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.top-nav-rule {
+  flex: 1 1 auto;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.top-nav-link {
+  position: relative;
+  justify-self: center;
+  color: #fff;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.top-nav-link:first-of-type {
+  justify-self: start;
+}
+
+.top-nav-link::before {
+  content: '';
+  position: absolute;
+  inset: -7px -15px;
+  z-index: -1;
+  border-radius: 100px;
+  transition: background-color 0.35s ease;
+  pointer-events: none;
+}
+
+@media (hover: hover) {
+  .top-nav-link:hover::before {
+    background: rgba(255, 255, 255, 0.18);
+  }
+}
+
+.top-nav-cta {
+  justify-self: end;
+  display: inline-flex;
+  align-items: center;
+  height: 36px;
+  padding: 0 20px;
+  border-radius: 100px;
+  background: #fff;
+  color: #000;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background-color 0.15s ease;
+}
+
+.top-nav-cta:hover {
+  background: rgba(255, 255, 255, 0.75);
+}
+
+/* The existing bar keeps its whole scroll machinery (it still drives the
+   field's dissolve and the hero push) but stays invisible until it docks.
+   Gated on has-top-nav, set by js/main.js: with no JS the bar is never
+   hidden, so both navs show and neither is lost. */
+html.has-top-nav .intro-bar {
+  animation: none;
+  opacity: 0;
+  visibility: hidden;
+  /* Hides INSTANTLY: leaving the docked state drops the bar back into the
+     hero's flow (is-bar-lifted comes off), so a fade-out showed a ghost bar
+     mid-hero for its duration. It only fades IN (the .is-bar-docked rule). */
+  transition: none;
+}
+
+/* From the hand-off on (HERO_TEXT_OUT, js/main.js) the bar is FIXED at the top
+   rather than sticky, so it can sit there before it would have pinned. Its
+   in-flow footprint was margin-top (-80 - shorten) + 64 + margin-bottom 16 =
+   -shorten; the next section takes exactly that as a margin, so nothing in the
+   layout moves when it leaves the flow. translate: none drops the hero push,
+   which only described its in-flow position. */
+html.has-top-nav.is-bar-lifted .intro-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  margin: 0;
+  translate: none;
+}
+
+html.has-top-nav.is-bar-lifted .intro-bar + * {
+  margin-top: calc(-1 * var(--hero-shorten, 0px));
+}
+
+html.has-top-nav.is-bar-docked .intro-bar {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.35s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .top-nav > * {
+    animation: none;
+  }
+}
+
 /* ---- The site nav: the hero's bottom bar, sticky ----
    In flow AFTER the hero, pulled up into it: 14px pad + 36px row + 30px
    bottom-gap = -80px margin-top lands the row 30px above the fold bottom;
@@ -1216,8 +1480,43 @@ html:not(.is-field-live) .intro-divider {
   color: #fff;
 }
 
+/* ⚠️ ACCESSIBILITY (2026-09-28): FULL WHITE, not 0.75. On the solid accent
+   0.75 white measured 3.97:1 — under AA's 4.5 for this 16px text; full white
+   is 5.86. And 0.9 is not enough either: against black before the swap there
+   is no crossover where both clear 4.5 (best 4.28). The active link is marked
+   by its weight (600), so the dimmer inactive white is not needed for that. */
 .intro-bar.is-over-dark .intro-bar-links a {
-  color: rgba(255, 255, 255, 0.75);
+  color: #fff;
+}
+
+/* ...and FULL BLACK while Contact's blue is behind the bar but the labels have
+   not swapped yet (js/main.js toggles .is-over-ramp). The resting rgba(0,0,0,.8)
+   is a floor tuned for the hero's gradient; on the deep end of the blue ramp it
+   fell to 3.9:1. Full black and full white cross at ramp alpha 0.86, both
+   4.58:1 — the DARK_TEXT_ALPHA the swap already uses. */
+.intro-bar.is-over-ramp .intro-bar-links a {
+  color: #000;
+}
+
+/* THE SWAP'S HALO (2026-09-28, accessibility). With the blue ramp showing
+   through the bar, there is no swap moment at which every pixel of a label
+   clears 4.5:1: for ~12px of scroll the ramp changes colour across a single
+   line of type (worst 3.5:1 measured at the swap, 4.1 even with a 200px ramp).
+   A tight halo in the colour each label needs to stand out from becomes the
+   glyphs' immediate background, which is what contrast is measured against —
+   cream behind the black labels on the ramp, accent behind the white ones. On
+   plain cream or plain blue the halo matches its surroundings and disappears;
+   it only shows through the swap itself. */
+.intro-bar.is-over-ramp .intro-bar-name,
+.intro-bar.is-over-ramp .intro-bar-links a {
+  text-shadow: 0 0 1px rgb(251, 252, 248), 0 0 4px rgb(251, 252, 248),
+    0 0 10px rgba(251, 252, 248, 0.9);
+}
+
+.intro-bar.is-over-dark .intro-bar-name,
+.intro-bar.is-over-dark .intro-bar-links a {
+  text-shadow: 0 0 1px rgb(var(--color-accent-rgb)), 0 0 4px rgb(var(--color-accent-rgb)),
+    0 0 10px rgba(var(--color-accent-rgb), 0.9);
 }
 
 @media (hover: hover) {

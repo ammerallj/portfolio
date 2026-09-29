@@ -8,20 +8,22 @@
    The bottom is ALSO deliberately asymmetric, and that is a knowing exception to
    the rule in global.css `.page-section`: normally both sides of a divider carry
    the same measure (96), because one token driving both is what stops the
-   symmetry drifting. Two things earn the break here. The cards are a horizontal
-   track, so this section ends on the flat bottom edge of a card image rather
-   than on a text baseline — a hard edge that sits closer to the rule than type
-   would. And since the Public Footprints section was removed, Work now runs
+   symmetry drifting. Two things earn the break here. The section ends on the
+   flat bottom edge of a card panel rather than on a text baseline — a hard
+   edge that sits closer to the rule than type would. And since the Public Footprints section was removed, Work now runs
    straight into About with nothing between them. 144 is the scale's next value
    up (it is --gap-heading's desktop number), not an invented one.
    Change both numbers here and in the responsive.css 480 tier together. */
 #work-section {
-  padding-top: 104px;
+  /* REDESIGN: 0 (was 104px, then --gap-content). The hero ends in plain white
+     with its own --gap-group below the lockup, so the masonry cards start right
+     at the section's top. ≤480 keeps its own (responsive.css). */
+  padding-top: 0;
   padding-bottom: 144px;
   /* No hairline into About. The 240px of air across this seam (144 below the
      cards + 96 above the About heading) already separates them, and with the
      section now coming to rest composed under the nav (initSectionGeometry), a
-     rule sitting mid-viewport read as a lid on the carousel rather than as a
+     rule sitting mid-viewport read as a lid on the cards rather than as a
      join between two sections.
      ⚠️ This is the LAST hairline on the homepage — global.css already drops it
      from About (`:has(+ .contact-section)`, since the blue panel's own edge
@@ -33,216 +35,308 @@
   border-bottom: none;
 }
 
-/* The Work list is a HORIZONTAL TRACK (2026-08). The cards no longer stack down
-   the page — they run left→right, one near-full-width card at a time with the
-   next one peeking in from the right, and the reader swipes / shift-scrolls
-   through them. Native scroll only: no JS, no scroll-jacking, and it still works
-   with JS off.
+/* REDESIGN: Selected Work FADES UP as soon as the reader starts scrolling
+   (html.is-work-in, WORK_IN in js/main.js) — timed, so the cards are rising
+   and revealing right under the hero lockup. Gated on has-top-nav, so no-JS and the project pages never hide
+   it. The cards' own [data-reveal] items still play inside this. */
+html.has-top-nav #work-section .site-container {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.33, 1, 0.68, 1);
+}
 
-   ⚠️ Lenis leaves this alone, and that is not luck — do NOT add
-   `data-lenis-prevent` here. Lenis runs at its default
-   gestureOrientation: 'vertical', and it bails out of any gesture whose deltaY
-   is 0 (a horizontal trackpad swipe or touch drag) BEFORE it calls
-   preventDefault, so the browser's own horizontal scrolling survives untouched.
-   `data-lenis-prevent` would instead kill SMOOTH VERTICAL scrolling for the
-   whole section the pointer is over — the opposite of the fix. */
-.work-list {
+html.has-top-nav.is-work-in #work-section .site-container {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.has-top-nav #work-section .site-container {
+    transform: none;
+    transition: opacity 0.3s ease;
+  }
+}
+
+/* THE WORK GRID — a two-column MASONRY (2026-09). It replaced the looping
+   horizontal carousel (initWorkCarousel, the pagination dots and the scroll
+   videos' carousel-specific buffering are all gone with it).
+
+   TWO COLUMNS MAXIMUM, variable height. The height of each card comes from its
+   media frame's --media-ratio (set inline per card in index.html), plus its
+   text block.
+
+   HOW THE MASONRY WORKS. Without JS this is a plain two-column grid: rows
+   align, and a short card simply leaves air under itself. initWorkMasonry
+   (js/main.js) adds .is-masonry, which turns every row into a 1px track and
+   gives each card `grid-row-end: span <its height + the gap>`. Grid
+   auto-placement then does the rest on its own: its cursor only moves forward,
+   so each card lands in whichever column frees up first — the shorter one.
+   That is why DOM order stays READING order (left, right, then shortest), and
+   why the phone's single column needs no reordering.
+   ⚠️ The gap lives in the SPAN, not in row-gap, once masonry is on — row-gap is
+   0 there because 1px rows with a 60px gap between each would be absurd. The
+   grid's negative bottom margin hands back the one trailing gap the last card
+   in each column carries. */
+.work-grid {
+  --work-gap: var(--gap-group);
   list-style: none;
-  display: flex;
-  flex-direction: row;
-  /* card → card. --gap-section (96) is the vertical rhythm between peer
-     sections; horizontally it is just dead air the reader swipes across. */
-  gap: var(--gap-group);
-
-  overflow-x: auto;
-  /* Cards scroll off the SCREEN edge, not the container's inset: the track
-     bleeds out through the page gutter and pads the same amount back, so card 1
-     still opens flush on the container's left edge. */
-  margin-inline: calc(var(--page-gutter) * -1);
-  padding-inline: var(--page-gutter);
-
-  scroll-snap-type: x mandatory;
-  /* Without this the snapport is the full scrollport, so a card would snap to
-     the screen edge and sit under the gutter instead of on the container line. */
-  scroll-padding-inline: var(--page-gutter);
-  overscroll-behavior-x: contain;
-
-  /* overflow-x: auto forces overflow-y to compute to `auto` too, so the track
-     would clip anything that leaves a card vertically: the reveal system's 16px
-     translateY and the image link's 1.02 hover scale. The padding gives both
-     room; the negative margin hands the space straight back, so the section's
-     vertical rhythm is byte-for-byte what it was. */
-  padding-block: 24px;
-  margin-block: -24px;
-
-  /* The peeking card is the affordance; a scrollbar under the track would read
-     as chrome on an editorial page. Every card holds focusable links, so
-     keyboard users still reach (and scroll) the track by tabbing. */
-  scrollbar-width: none;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: var(--work-gap);
+  row-gap: var(--work-gap);
+  align-items: start;
 }
 
-.work-list::-webkit-scrollbar {
-  display: none;
+.work-grid.is-masonry {
+  grid-auto-rows: 1px;
+  row-gap: 0;
+  margin-bottom: calc(var(--work-gap) * -1);
 }
 
-.work-card {
-  /* One card at a time; --work-peek is what's left over, and it is what tells
-     the reader there IS a next card. The basis is a percentage of the TRACK's
-     content box (= the container's inner width), so the sliver stays a constant
-     number of pixels at every viewport instead of scaling with it. Neither
-     grow nor shrink: the card is a fixed slide, not a flex child. */
-  flex: 0 0 calc(100% - var(--work-peek));
-  scroll-snap-align: start;
-  /* ONE CARD PER GESTURE, however hard the flick. The scroll is forbidden to
-     pass over a snap position, so momentum decelerates into the very next card
-     instead of running on — the browser still animates that deceleration, so
-     this caps the travel without costing any smoothness.
-     Why this track needs it and an ordinary one doesn't: a finite scroller
-     stops a fling by running out of runway. The loop (initWorkCarousel in
-     js/main.js) rewrites scrollLeft back by one card every time it rotates, so
-     there is always more runway ahead and a fast trackpad fling never runs out
-     — it spun through the whole carousel. Snap-stop is what puts the floor back
-     under it, and it does so in the browser's own scrolling, which is why the
-     fix is here rather than a JS speed limiter fighting the momentum. */
-  scroll-snap-stop: always;
-
+/* THE CARD — a quiet panel (fill + hairline + a large radius), the media on
+   top and the title + meta row at the bottom. The whole card is ONE link. */
+.work-card-link {
   display: flex;
   flex-direction: column;
-  /* Text lockup → image (Figma 60px). Stacked below 1025 the card's parts are
-     siblings rather than two blocks, so the 1024 tier drops this to
-     --gap-content. */
-  gap: var(--gap-group);
-  /* Reveal is handled by the shared [data-reveal] motion system (Motion.dev);
-     the card's title, description, and image fade + rise in sequence. */
-}
-
-/* NO-JS FALLBACK ONLY. With the loop running (initWorkCarousel in js/main.js
-   adds .is-looping) there is no last card — the cards rotate, so :last-child is
-   whichever one happens to sit at the DOM end, and giving that one a different
-   snap alignment would break the loop's arithmetic: every snap position has to
-   stay an exact multiple of one card-step for the seamless jump to land on one.
-   Without JS the track is a plain finite scroller, and there the real last card
-   can never reach the start line — the track runs out --work-peek short, so the
-   browser falls back to "closest reachable position" and the card rests off the
-   grid by an arbitrary amount. Snapping it to the END instead puts its right
-   edge on the container's right line, mirroring the opening frame.
-   Don't "fix" the shortfall with a trailing spacer: the card's flex-basis is a
-   PERCENTAGE of the track's content box, so a padding-inline-end would shrink
-   every card by that same amount. */
-.work-list:not(.is-looping) .work-card:last-child {
-  scroll-snap-align: end;
-}
-
-/* Each work image is a link that opens an email. Block-level so it fills the
-   card like the image did; radius matches the image so the focus ring rounds. */
-.work-card-image-link {
-  display: block;
-  border-radius: 60px;
-  flex-shrink: 0;
-  position: relative;
-  /* Clips the media to the rounded corners. */
+  border-radius: var(--work-card-radius);
+  border: 1px solid var(--color-border-light);
+  /* REDESIGN: white (was rgba(0,0,0,0.025) — a cream panel). */
+  background-color: #fff;
   overflow: hidden;
-  /* Hover scale uses the INDIVIDUAL `scale` property, not `transform: scale()`,
-     because this link is a reveal target — js/main.js (Motion) sets an inline
-     `transform: translateY()` on it, which would override a CSS `transform`.
-     `scale`/`translate`/`transform` compose independently, so the two coexist. */
+  color: var(--color-text);
+  text-decoration: none;
+  /* Hover / keyboard focus grows the WHOLE card a touch, on the site's
+     card-zoom curve and duration (the same 0.5s ease the next-case pager uses).
+     ⚠️ The individual `scale` property, never `transform: scale()`: this link
+     is the card's reveal target, and the motion system writes an inline
+     `transform: translateY()` on it — a CSS transform here would be overwritten.
+     `scale` composes with it. 1.02 on a ~670px card is ~13px, well inside the
+     grid's 60px gutter, so a grown card never touches its neighbour. */
   scale: 1;
-  transition: scale 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: scale 0.5s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* Hover/focus: the rounded image/video FRAME itself scales up a touch — the
-   frame grows as one unit, rather than the media zooming inside a fixed frame.
-   The old inner media-zoom and the dim overlay are both removed; the text block
-   is untouched. Keyboard focus keeps the global :focus-visible outline on top. */
-.work-card-image-link:focus-visible {
+.work-card-link:focus-visible {
   scale: 1.02;
 }
 
-/* True-hover devices only — on touch, tapped :hover sticks (see header.css) */
 @media (hover: hover) {
-  .work-card-image-link:hover {
+  .work-card-link:hover {
     scale: 1.02;
   }
 }
 
-.work-card-image {
-  width: 100%;
-  height: 415px;
-  object-fit: cover;
-  border-radius: 60px;
-  display: block;
-  background-color: #d9d9d9;
-  flex-shrink: 0;
+/* REDESIGN (2026-09-27): the HOVER SCRIM (the project's cursor colour rising
+   from the card's bottom), the lapping WASH, their keyframes and the per-card
+   --card-glow colours were REMOVED at Jenna's ask — the card is plain white
+   on hover. Hover still grows it (scale above) and swaps its text. The scrim
+   is in the version history if it is ever wanted back. */
+.work-card-link {
+  position: relative;
+  isolation: isolate;
 }
 
-/* Poster overlay: the static JPG sits ON TOP of the video (same box + crop) and
-   is the placeholder no-JS visitors and crawlers see. js/main.js fades it out
-   the instant the video actually starts playing, so a poster that isn't the
-   exact first frame never shows as a hard cut — and it fades back in when the
-   card leaves view, so the next scroll-in starts clean. */
-.work-card-poster {
+/* The media frame. Its HEIGHT is the masonry's main dial: --media-ratio per
+   card (5 / 4 taller, 16 / 10 shorter — kept under ~75% of a 900px fold). When real art arrives, drop
+   an <img> or <video> in here in place of the placeholder span; it fills the
+   frame with object-fit: cover. */
+.work-card-media {
+  position: relative;
+  aspect-ratio: var(--media-ratio, 4 / 3);
+  /* THE LEVELLING STRETCH. initWorkMasonry sets --work-extra on the last card
+     of the shorter column so both columns end on one line; it lands HERE, as
+     padding under the ratio, so the frame (and any image filling it) grows
+     rather than leaving a band of panel under the text.
+     ⚠️ `content-box` is what makes the padding ADD height: under the reset's
+     border-box, aspect-ratio would size the padding box and swallow it. The
+     frame has no horizontal padding or border, so its width is unchanged. */
+  box-sizing: content-box;
+  padding-bottom: var(--work-extra, 0px);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* --media-shift (per card, inline) lifts the art by that much and grows it by
+   the same, so its top edge tucks under the frame while the bottom stays
+   filled. Messaging uses it to hide the 1px grey line along its export's top
+   edge; still and GIF move together, so they still register. */
+.work-card-media > img,
+.work-card-media > video {
   position: absolute;
   inset: 0;
+  top: calc(-1 * var(--media-shift, 0px));
   width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: inherit;
-  /* ⚠️ 0.25s, DOWN FROM 0.45s (2026-09) — this is a fraction of a 2.03s CLIP,
-     not a page transition, and that is the whole reason it is short.
-     The reveal only starts once play() resolves, which is itself ~350-400ms into
-     the damped advance (the play trigger is intersectionRatio >= 0.4). At 0.45s
-     the crossfade then ate a further 22% of the clip, so the card finished
-     revealing with under 1.6s of motion left — reported as "it reveals late,
-     then it's over". 0.25s hands ~200ms of that back.
-     ⚠️ It is felt most on work-accessibility, and NOT because that card is
-     special: all four clips are 2.03s, but accessibility is the densest encode
-     at 1.50 MB/s against 1.00-1.13 for the others, so a late reveal costs the
-     most motion there. Fixing it here fixes it everywhere.
-     ⚠️ DO NOT take this to 0. The crossfade exists so the reveal shows moving
-     video rather than a blank or black gap; the poster and the first frame are
-     close but not identical (measured mean channel delta 12-16), so a hard cut
-     shows as a flicker. */
+  height: calc(100% + var(--media-shift, 0px));
+  /* --media-fit (per card, inline): `contain` shows the whole art inside the
+     frame instead of cropping it — Facebook Groups, a single tall phone. */
+  object-fit: var(--media-fit, cover);
+}
+
+/* HOVER MEDIA: a card can carry a still (.work-card-cover) and an animated
+   GIF over it (.work-card-hover). The GIF has no src until the first hover
+   (initWorkHoverMedia, js/main.js), so its weight is only paid by readers who
+   hover; it fades in only once it has loaded, so the frame never flashes
+   empty. Touch and reduced motion keep the still. */
+.work-card-hover {
+  opacity: 0;
   transition: opacity 0.25s ease;
   pointer-events: none;
 }
 
-.work-card-poster.is-faded {
+.work-card-link.is-hover-playing .work-card-hover {
+  opacity: 1;
+}
+
+/* SKELETON: until a card's still has loaded, its frame is a grey block with a
+   soft shimmer, and the still fades in over it once it arrives.
+   initWorkSkeleton (js/main.js) adds .is-loading only to frames whose still
+   is not already decoded, so no-JS and cached loads never see it. */
+.work-card-cover {
+  transition: opacity 0.4s ease;
+}
+
+.work-card-media.is-loading {
+  background-color: #ececea;
+}
+
+.work-card-media.is-loading .work-card-cover {
   opacity: 0;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .work-card-image-link {
-    transition: none;
-  }
+.work-card-media.is-loading::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg,
+    rgba(255, 255, 255, 0) 30%,
+    rgba(255, 255, 255, 0.55) 50%,
+    rgba(255, 255, 255, 0) 70%);
+  background-size: 250% 100%;
+  animation: work-skeleton-shimmer 1.4s ease-in-out infinite;
+}
 
-  .work-card-image-link:hover,
-  .work-card-image-link:focus-visible {
+@keyframes work-skeleton-shimmer {
+  from { background-position: 100% 0; }
+  to   { background-position: 0 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .work-card-media.is-loading::after { animation: none; opacity: 0; }
+}
+
+.work-card-placeholder {
+  font-family: var(--font-body);
+  font-size: var(--size-xs);
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: rgba(0, 0, 0, 0.35);
+}
+
+.work-card-text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-content);
+  padding: var(--work-card-pad);
+  padding-top: 0;
+}
+
+/* TITLE ↔ DESCRIPTION — one slot, two layers. Both sit in the SAME grid cell,
+   so the cell is always as tall as the taller of the two (the description) and
+   the card never changes height on hover — which would reflow the masonry
+   under the pointer. The title rests on the cell's BOTTOM edge, just above the
+   meta row; the reserved room reads as air under the media. */
+.work-card-swap {
+  display: grid;
+}
+
+.work-card-title,
+.work-card-description {
+  grid-area: 1 / 1;
+  transition:
+    opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+    translate 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.work-card-title {
+  align-self: end;
+  font-family: var(--font-heading);
+  font-size: var(--work-card-title-size);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  color: var(--color-text);
+}
+
+.work-card-description {
+  align-self: end;
+  font-family: var(--font-body);
+  font-size: var(--size-lg);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 1.4;
+  color: var(--color-text);
+  max-width: none;
+  opacity: 0;
+  translate: 0 8px;
+}
+
+/* Hover (true-hover devices only — a tapped :hover sticks on touch) and
+   KEYBOARD focus: the title fades out, the description fades up into its
+   place. The meta row stays put. */
+@media (hover: hover) {
+  .work-card-link:hover .work-card-title {
+    opacity: 0;
+    translate: 0 -8px;
+  }
+  .work-card-link:hover .work-card-description {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+.work-card-link:focus-visible .work-card-title {
+  opacity: 0;
+  translate: 0 -8px;
+}
+.work-card-link:focus-visible .work-card-description {
+  opacity: 1;
+  translate: 0 0;
+}
+
+/* NO HOVER (phones, tablets): nothing to reveal it, so the description simply
+   sits under the title, always visible. */
+@media (hover: none) {
+  .work-card-swap {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+  }
+  .work-card-description {
+    opacity: 1;
+    translate: none;
+  }
+  .work-card-link:focus-visible .work-card-title {
+    opacity: 1;
+    translate: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .work-card-title,
+  .work-card-description {
+    transition: none;
+    translate: none;
+  }
+  /* No growth at all — the crossfade still says "you're on this card". */
+  .work-card-link,
+  .work-card-link:hover,
+  .work-card-link:focus-visible {
+    transition: none;
     scale: 1;
   }
-}
-
-.work-card-body {
-  display: flex;
-  /* 20px gap: the heading (left) column resolves to 766px at the 1440 design
-     width and the 542px description block stays flush to the container's right
-     edge (766 + 20 + 542 = 1328). The left flexes so it shrinks below 1440. */
-  gap: 1.25rem;
-  align-items: flex-start;
-}
-
-.work-card-left {
-  /* Six grid columns (654px at 1440) — the headline's own measure, rather
-     than "whatever's left" (which resolved to 766px). margin-right:auto puts
-     the leftover between the columns so the description block stays flush to
-     the card's right edge.
-     SHRINKABLE since the horizontal track (2026-08): the card is now narrower
-     than the container by --work-peek, and at 1440 the two fixed columns
-     (654 + 20 + 542) add up to more than the card has. Both sides give a
-     little rather than one of them overflowing. margin-right:auto still takes
-     the leftover whenever there IS any, so nothing moves above ~1500. */
-  flex: 0 1 var(--width-title-column);
-  min-width: 0;
-  margin-right: auto;
 }
 
 /* 64px Medium (adopted 2026-08-04 — was 40px Bold). Hanken Grotesk's 500
@@ -257,55 +351,22 @@
   color: var(--color-text);
 }
 
-.work-card-right {
-  /* Shared right column flush to the container's right edge — anchored the
-     same way as the nav, so its left edge (and the description) stays aligned
-     with the "Work" nav item across the whole desktop range, not just 1440.
-     Fluid 369→542 across the 1025–1440 band via the shared token. */
-  flex: 0 1 var(--width-right-column);
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  /* Full row height (the body top-aligns its children by default) with the
-     description flushed to the BOTTOM, so its last line sits on the row's
-     baseline, level with the bottom of the headline beside it. flex-end, not
-     space-between: the meta line was removed from these cards (2026-08-04 —
-     the overview page's masthead carries that metadata), and a lone child
-     under space-between would sit at the TOP instead. */
-  align-self: stretch;
-  justify-content: flex-end;
-}
-
-/* (.intro-body p used to share this rule; the Jul 2026 hero revision gave the
-   intro copy its own 28px desktop type, owned by hero.css.) */
-.work-card-description {
-  font-family: var(--font-body);
-  font-size: var(--size-lg);
-  font-weight: 400;
-  letter-spacing: -0.02em;
-  /* 1.4, not the 1.3 this carried when the descriptions were one-line hooks.
-     They are now ~35-word summaries setting 4-5 lines across the 542px column,
-     which is the same multi-line job .about-body p and .project-impact-list li
-     already use 1.4 for. */
-  line-height: 1.4;
-  color: var(--color-text);
-  max-width: none;
-}
-
-/* Per-card meta eyebrow: a small "Shipped" status pill + a company · year stamp
-   on one line, sitting above the card description in the right column. */
+/* Per-card meta row, under the title: the lock badge (gated projects only) and
+   one "SHIPPED · 2023 ↗" pill. The company stamp that sat beside the pill was
+   dropped 2026-09; the year moved into the pill. */
 .work-card-meta {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 0.7rem;
-  margin-bottom: 0.85rem;
 }
 
 .work-card-pill {
   display: inline-flex;
   align-items: center;
   gap: 0.4em;
-  border: 1px solid rgba(0, 0, 0, 0.22);
+  /* 0.5px — a true hairline on 2x displays (1x rounds it up to one pixel). */
+  border: 0.5px solid rgba(0, 0, 0, 0.22);
   border-radius: 100px;
   padding: 0.4em 0.85em;
   font-family: var(--font-body);
@@ -317,17 +378,21 @@
   white-space: nowrap;
 }
 
+/* CREAM CHIPS — every piece of the meta row (the pills, "Coming soon" and the
+   lock circle) is the page's own cream (--color-bg, #FBFCF8, written as rgb so
+   it can be part-transparent) at 0.9, inside the same 0.5px hairline. No blur:
+   the chips sit on the card's flat panel, so there was nothing behind them to
+   frost. "Coming soon" (Loop, Groups) is the same chip with no arrow or year;
+   it opens the row, in the slot the lock takes on the gated cards, because both
+   qualify what is behind the card. */
+.work-card-pill,
+.work-card-lock {
+  background-color: rgba(251, 252, 248, 0.9);
+}
+
 .work-card-pill-arrow {
   font-size: 1.15em;
   line-height: 0;
-}
-
-.work-card-stamp {
-  font-family: var(--font-body);
-  font-size: var(--size-xs); /* 13px — matches the pill's eyebrow scale */
-  letter-spacing: -0.01em;
-  color: var(--color-text-70);
-  white-space: nowrap;
 }
 
 /* Lock badge — OPENS the meta row on the two projects whose FULL CASE STUDY is
@@ -350,97 +415,15 @@
    out as its parts rather than hard-coded to 31.9px for that reason:
      1.5em  the line box (--size-xs x the body's 1.5 line-height)
    + 0.8em  the pill's 0.4em padding, top and bottom
-   + 2px    both hairlines */
-/* CAROUSEL PAGINATION — which of the four projects is on screen, drawn over the
-   bottom of the cover photo.
-
-   ⚠️ IT IS HELD STILL WHILE THE PHOTOS SLIDE UNDER IT. That is the whole reason
-   it lives outside the track as one element, positioned against the container,
-   rather than as four copies riding inside the cards. A per-card version was
-   built first and needs no JS at all (card 3 simply pre-marks dot 3) — but it
-   travels with its card, which is exactly the thing this must not do. If the
-   requirement ever relaxes, that version is the simpler one.
-
-   HORIZONTAL: the resting card starts flush at the container's left edge (the
-   track's scroll-padding-inline matches its own padding-inline) and is
-   `100% - --work-peek` wide, so its centre is half of that. No JS involved.
-
-   VERTICAL: --work-photo-bottom, published by initWorkCarousel, is the distance
-   from the container's top to the resting card's photo bottom. It cannot be
-   pure CSS: at >=1025 the photo is the card's LAST element, so the container's
-   own bottom would do, but at <=1024 it moves to the TOP and its height is a
-   ratio of the card's WIDTH — and `top` percentages resolve against HEIGHT. The
-   100% fallback is the desktop answer, so the bar is already right before the
-   first measurement and if the script ever fails to run.
-
-   Same pill as .project-carousel-dots (project-overview.css) — translucent
-   black, backdrop blur, 10px dots, white when active — because it is the same
-   object in the same situation: dots over an image. Restated rather than shared
-   because that one is positioned for a masthead slide and this one is anchored
-   to a moving track. */
-#work-section .site-container {
-  position: relative;
-}
-
-.work-pagination {
-  position: absolute;
-  left: calc((100% - var(--work-peek)) / 2);
-  top: var(--work-photo-bottom, 100%);
-  /* Up by its own height plus the inset, so the pill sits INSIDE the photo's
-     bottom edge whatever height the dots end up being. */
-  transform: translate(-50%, calc(-100% - 24px));
-  z-index: 2;
-  display: flex;
-  gap: 12px;
-  padding: 9px 14px;
-  border-radius: 999px;
-  background: rgba(0, 0, 0, 0.3);
-  -webkit-backdrop-filter: blur(6px);
-  backdrop-filter: blur(6px);
-}
-
-/* No loop, no pages to be on: covers JS-off and the <=480 vertical stack with
-   one rule, since .is-looping is added only when the track is actually running.
-   The sibling combinator is why the markup must stay next to the track. */
-.work-list:not(.is-looping) ~ .work-pagination {
-  display: none;
-}
-
-.work-pagination-dot {
-  width: 10px;
-  height: 10px;
-  padding: 0;
-  border: none;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.45);
-  cursor: pointer;
-  -webkit-appearance: none;
-  appearance: none;
-  transition: background-color 0.2s ease, transform 0.2s ease;
-}
-
-.work-pagination-dot:hover {
-  background: rgba(255, 255, 255, 0.75);
-}
-
-.work-pagination-dot.is-active {
-  background: #fff;
-  transform: scale(1.2);
-}
-
-.work-pagination-dot:focus-visible {
-  outline: 2px solid #fff;
-  outline-offset: 3px;
-}
-
+   + 1px    both 0.5px hairlines */
 .work-card-lock {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex: none;
-  width: calc(1.5em + 0.8em + 2px);
-  height: calc(1.5em + 0.8em + 2px);
-  border: 1px solid rgba(0, 0, 0, 0.22); /* the pill's hairline, not --color-border */
+  width: calc(1.5em + 0.8em + 1px);
+  height: calc(1.5em + 0.8em + 1px);
+  border: 0.5px solid rgba(0, 0, 0, 0.22); /* the pill's hairline, not --color-border */
   border-radius: 50%;
   font-size: var(--size-xs);
   color: var(--color-text-70);
@@ -577,7 +560,9 @@
   right: 0;
   /* The element's BOTTOM edge sits 100% of its own height above the panel's
      bottom — i.e. exactly on the panel's top. */
-  bottom: calc(100% - var(--contact-ledge-overlap, 0px));
+  bottom: calc(100% - var(--contact-ledge-overlap, 0px) - var(--contact-lag, 0px));
+  /* --contact-lag (redesign): the blue LEADS the panel as it arrives, so the
+     ledge sits on the blue's top, not the section's. 0 at rest. */
   /* ⚠️ THE BOTTOM IS WELDED AND THE HEIGHT CARRIES THE MOTION.
      --contact-ledge-lift SHORTENS the dissolve as the reader scrolls up: the
      bottom stays welded to the panel and the top descends, so the blue's leading
@@ -733,6 +718,49 @@
   transform: translateY(var(--contact-peek, 0px));
 }
 
+/* THE PANEL'S BLUE, on its own layer (redesign, 2026-09-28). It used to be the
+   section's own background; it moved here so it can LEAD the panel as Contact
+   arrives — --contact-lag (negative = above the panel's top) is the mirror of
+   the hero gradient drifting at half speed, and is 0 at rest, so the settled
+   panel is unchanged. Bottom-anchored, so nothing opens above the footer.
+   The field's grain and its overlay blend came with it (see the note on
+   .contact-section below). */
+/* THE PACE (redesign, 2026-09-28): Contact is laid out HIGHER by
+   --contact-shorten and pushed back down by --contact-push, which unwinds to 0
+   as the page reaches its floor (js/main.js CONTACT_SHORTEN) — the mirror of the
+   hero's --hero-shorten / --hero-push. The footer rides the same push. #contact
+   also matches `.intro-bar ~ *`, so the hero's push is added here, not lost. */
+#contact {
+  margin-top: calc(-1 * var(--contact-shorten, 0px));
+  translate: 0 calc(var(--hero-push, 0px) + var(--contact-push, 0px));
+}
+
+.site-footer {
+  translate: 0 var(--contact-push, 0px);
+}
+
+.contact-bg {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: var(--contact-lag, 0px);
+  background-color: var(--color-accent);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='cg' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.3' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='discrete' tableValues='0 1'/%3E%3CfeFuncG type='discrete' tableValues='0 1'/%3E%3CfeFuncB type='discrete' tableValues='0 1'/%3E%3CfeFuncA type='linear' slope='0' intercept='1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23cg)' opacity='0.14'/%3E%3C/svg%3E");
+  background-blend-mode: overlay;
+  pointer-events: none;
+}
+
+/* ABOUT FADES as Contact takes over the viewport — the mirror of the hero
+   lockup fading once Work fills half the screen (js/main.js ABOUT_LIFT). */
+#about > .site-container {
+  transition: opacity 0.5s ease;
+}
+
+#about.is-about-out > .site-container {
+  opacity: 0;
+}
+
 @media (prefers-reduced-motion: reduce) {
   /* The LEDGE stays — it is a dissolve, not motion, and the panel should not
      change character because someone asked the page to hold still. Only the
@@ -750,7 +778,6 @@
      the difference, putting a 12px sliver of footer under the panel and needing
      a +24 correction on the min-height to cancel it. Symmetric is the same
      picture with none of that. */
-  background-color: var(--color-accent);
   /* ⚠️ THE PANEL CARRIES THE FIELD'S GRAIN. It was the ONE coloured surface on the
      site without any — the hero field, the nav's frost and the ledge all have it,
      so the dissolve came out of a grained surface, through a grained ramp, and
@@ -771,8 +798,6 @@
 
      ⚠️ Baked into the rect's opacity rather than set on a layer, because both of
      this element's pseudo-elements are already spent on the ledge. Tune there. */
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='cg' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.3' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='discrete' tableValues='0 1'/%3E%3CfeFuncG type='discrete' tableValues='0 1'/%3E%3CfeFuncB type='discrete' tableValues='0 1'/%3E%3CfeFuncA type='linear' slope='0' intercept='1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23cg)' opacity='0.14'/%3E%3C/svg%3E");
-  background-blend-mode: overlay;
   color: #fff;
   padding-top: 96px;
   /* Pinned to 96 at EVERY tier, so it does not follow .page-section down to 64
@@ -839,11 +864,13 @@
   min-height: calc(100dvh - var(--footer-height) - var(--contact-trim, 0px));
   display: flex;
   flex-direction: column;
-  /* ⚠️ TOP-ALIGNED since --contact-trim. Centring only ever did something while
-     min-height exceeded the content; the trim closed that, so `center` now
-     resolves identically to `flex-start` and the old lift hack was paying 96px
-     of panel height for nothing. See .contact-inner. */
-  justify-content: flex-start;
+  /* CENTRED (redesign, 2026-09-28, Jenna: "more breathing room between nav").
+     It was top-aligned while --contact-trim left the panel no slack; the trim is
+     0 again, so the full-frame min-height has room and `center` puts the copy
+     in the middle of the space BELOW the nav (padding-top carries
+     --nav-offset). Where the content fills the panel (short windows, portrait's
+     min-height: 0) it resolves to the old top-aligned position. */
+  justify-content: center;
   /* THE PADDING YIELDS SO THE FOOTER STAYS IN FRAME. min-height above is a floor,
      not a cap: at a short window the copy plus a fixed 96px either side outgrew
      it and the panel pushed the footer off the fold (measured at 1440x700:
@@ -1003,7 +1030,15 @@
      Fluid gap: it scales WITH the fluid right column
      (242px at 1440 → 48px floor by ~1025) so the columns stay balanced as they
      narrow instead of the gap eating the space. Stacks at ≤768 (responsive.css). */
-  gap: clamp(48px, 46.75vw - 431.16px, 15.125rem);
+  /* REDESIGN (2026-09-28): the text runs 7 of the 12 columns (was the shared
+     5-column --width-right-column), the photo keeps 4, and this gap is the one
+     empty column between them plus its two gutters: (100vw - 332px)/12 + 40px
+     = 132px at 1440. See .about-right. */
+  /* REDESIGN, second pass (2026-09-28): TEXT LEFT, PHOTOS RIGHT, text centred
+     vertically against the photo stack (Jenna's reference). The text takes 7
+     columns (text-dominant), the photos the rest; this is the
+     seam between them. Supersedes the 7-column note above. */
+  gap: calc(8.3333vw + 12.33px); /* one empty grid column + its two gutters, (100vw − 332px)/12 + 40px = 132px at 1440 (Jenna, 2026-09-28) */
   /* No block padding — the heading's 100px margin-bottom sets the gap to
      content, and the section's 60px padding handles the bottom spacing */
   padding-block: 0;
@@ -1011,7 +1046,7 @@
      the ROW's height is the right column's text alone, and the stretched
      left column hands that height to the photo — the text column is the
      section's height authority. */
-  align-items: stretch;
+  align-items: flex-start; /* text and photo top-aligned (third pass; was centred) */
   /* DESKTOP: the supporting text starts level with the "About Me." headline.
      The pull-up lives on the CONTAINER (with the photo pushed back down by
      the same amount below) — NOT on .about-right — so the reveal system's
@@ -1024,7 +1059,8 @@
      (64→48→32) — no per-tier pull-up override needed. Reset to 0 once About
      stacks at ≤768 (responsive.css). */
   --about-pullup: calc(var(--section-title-size) + var(--gap-group));
-  margin-top: calc(-1 * var(--about-pullup));
+  /* The pull-up is OFF in the centred layout: the heading sits above the row. */
+  margin-top: 0;
 }
 
 .about-left {
@@ -1035,7 +1071,7 @@
   align-items: flex-start;
   /* Cancels the container's pull-up so the photo stays below the heading;
      only the right column rides up beside it. */
-  margin-top: var(--about-pullup);
+  margin-top: 0; /* pull-up off (centred layout) — was var(--about-pullup) */
   /* Anchors the absolute .about-photo fill (desktop only). */
   position: relative;
 }
@@ -1149,17 +1185,52 @@
   height: 100%;
 }
 
+/* THE PHOTO STACK (redesign, 2026-09-28) — replaced the .about-photo
+   carousel above, whose rules are now unused. In flow at every width: a wide
+   landscape filling the left column, then a smaller portrait under it,
+   left-aligned. The column is the flex remainder beside the capped text, so
+   on wide screens the photos grow instead of the gap. */
+.about-stack {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--gap-content);
+  /* (A white Work-card-style frame around the photo was tried and removed
+     2026-09-28: its radii didn't nest, and the Work cards' material signals a
+     link where there is none. The photo sits straight on the page.) */
+}
+
+.about-stack img {
+  display: block;
+  height: auto;
+  border-radius: 24px;
+  background-color: #d9d9d9;
+}
+
+.about-stack-wide {
+  width: 100%;
+}
+
+.about-stack-small {
+  width: 50%;
+}
+
 .about-right {
   /* Shared right column flush to the container's right edge — shares the
      single right-column edge used across the site (fluid 369→542). */
-  flex: 0 0 var(--width-right-column);
+  /* 7 grid columns, not the shared 5-column --width-right-column (redesign,
+     2026-09-28): 7·(100vw − 332px)/12 + 6·20px = 766px at 1440. ⚠️ About's
+     copy no longer starts on the nav's "Selected work" line. */
+  flex: 0 0 var(--width-right-column); /* 5 grid columns — the shared token, 542px at 1440 (2026-09-28: 7 → 6 → 5 so the photo could grow); the photo takes the rest */
+  order: -1; /* visually LEFT of the photos; also first when stacked */
   display: flex;
   flex-direction: column;
-  /* 96px between the two eyebrow-led blocks — the widest gap that still reads
-     as "within About" (--gap-heading at 144 is the section-title measure).
-     The eyebrow → body gap inside each block stays --gap-content (20), so the
-     eyebrow reads as belonging to the copy under it, not floating between. */
-  gap: var(--gap-section);
+  /* Bio → facts list (redesign, 2026-09-28). Was --gap-section (96) between
+     two eyebrow-led blocks; the eyebrows are gone and the list's hairline
+     already marks the break, so a short gap is enough (40px, after the
+     reference's tight bio → rule spacing). */
+  gap: 40px;
   /* (The desktop pull-up beside the headline lives on .about-layout — a
      negative margin HERE would overflow the reveal group's rect and get
      cut out mid-view on exit. See the .about-layout comment.) */
@@ -1194,6 +1265,52 @@
   line-height: 1.4;
   color: var(--color-text);
   max-width: none;
+}
+
+/* FACTS (redesign, 2026-09-28, third pass — Jenna's reference): three
+   columns across the full container under the bio + photo row. Each column
+   opens on a black hairline with its label as a small uppercase heading;
+   entries sit tight beneath (organisation, then role / detail at 70%).
+   One column per row at ≤768 (responsive.css). */
+.about-facts {
+  margin: var(--gap-group) 0 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  column-gap: var(--gap-content);
+  row-gap: var(--gap-group);
+  font-family: var(--font-body);
+  font-size: 0.875rem; /* 14px */
+  line-height: 1.25;
+  letter-spacing: -0.005em;
+  color: var(--color-text);
+}
+
+.about-facts-row {
+  border-top: 1px solid var(--color-border);
+  padding-top: var(--gap-content);
+  display: flex;
+  flex-direction: column;
+  gap: 10px; /* entry → entry */
+}
+
+.about-facts dt {
+  font-family: var(--font-heading);
+  font-size: var(--size-lg);
+  font-weight: 500;
+  line-height: 1.2;
+  text-transform: uppercase;
+  letter-spacing: 0;
+  margin-bottom: 6px;
+}
+
+.about-facts dd {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.about-facts dd span + span {
+  color: var(--color-text-70);
 }
 
 .about-skills-list {

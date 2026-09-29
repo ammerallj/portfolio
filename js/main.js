@@ -68,6 +68,18 @@ navSections.push(...introBarSections);
 // `is-loading`, so they ran straight into it. Anything the spy reads must be
 // declared above this line, and must be tested on a project page.
 let sectionRestingScrollY = null;
+// When the SCROLL-SPY counts a section as arrived, which can come BEFORE its
+// resting position. Same TDZ rule — declared here, set by initSectionGeometry.
+let sectionSpyScrollY = null;
+// Per section, how far down the viewport its content's top edge may still be
+// when the spy switches to it (a fraction of the viewport height). Work needs
+// it because the masonry is TALLER THAN THE SCREEN: its resting position puts
+// the first cards right under the nav, so at 1440x900 the cards were fully on
+// screen from scrollY ~300 while "Selected work" only lit at ~700. At 0.7 it
+// lights once the first cards are 70% of the way down the screen (0.5 was
+// mid-screen and read a touch late). Sections not
+// listed use their resting position unchanged, as before.
+const SPY_LEAD = { 'work-section': 0.7 };
 // Where a NAV CLICK should land, which is not always where the section rests.
 // Same TDZ rule as above — declared here, above updateScrollEffects.
 let sectionClickScrollY = null;
@@ -190,12 +202,17 @@ function setFieldCream(px) {
 const FIELD_TUCK = { span: 0.6 };
 // The artwork's lag: it moves at (1 − k) of the scroll while the white, the nav
 // and Selected Work move at exactly 1 and slide up over it.
-const FIELD_LAG = { k: 0.3 };
+// REDESIGN: 0.5 (was 0.3) — the gradient drifts at half the scroll speed.
+const FIELD_LAG = { k: 0.5 };
 // The hero TEXT's parallax: the headline, divider and bio rise at a constant
 // 1 + speed of the scroll — the fastest of the three layers. LINEAR, because a
 // changing speed is what read as loose. Held once the bar pins; the text is off
 // screen by then.
-const HERO_TEXT = { speed: 0.5 };
+// REDESIGN: the lockup's PARALLAX over Selected Work — extra lift per px of
+// scroll on top of riding Work's own push (see setHeroTextLift), so the text
+// scrolls away faster than Work rises and fades out (once Work fills half the viewport) as it
+// goes. 0 would lock the two together (no parallax, constant gap).
+const HERO_TEXT = { speed: 0.8 };
 let lastHeroTextLift = -1;
 function setHeroTextLift(px) {
   if (px === lastHeroTextLift) return;
@@ -407,6 +424,48 @@ function setContactPeek(px) {
   document.documentElement.style.setProperty('--contact-peek', px + 'px');
 }
 
+// ABOUT → CONTACT IS THE HERO → WORK TRANSITION IN REVERSE (redesign,
+// 2026-09-28, Jenna's ask). Three parts, each the mirror of one in the hero:
+//   · the blue LEADS the panel and settles at HALF speed (CONTACT_LAG) — the
+//     mirror of the gradient drifting at (1 − FIELD_LAG.k) as it leaves;
+//   · About's copy lifts away faster than the scroll (ABOUT_LIFT.speed, the
+//     hero lockup's HERO_TEXT.speed) and fades once the blue fills more than
+//     half the viewport (fadeAt — the lockup's "Work fills half" rule);
+//   · the blue scrim RIDES the copy: the ledge's top keeps ABOUT_LIFT.gap below
+//     About's last line — the mirror of the white riding the lockup.
+// All three are 0 at both resting positions (About's and Contact's), so both
+// settled compositions are unchanged. Pure functions of scroll; the fade is a
+// timed class toggle, like the lockup's.
+const CONTACT_LAG = { k: 0 };      // OFF (2026-09-28, Jenna: "it pulls") — was 0.5
+const ABOUT_LIFT = { speed: 0, fadeAt: 0.5, gap: 16 }; // lift OFF (was 0.8); fade + gap still live
+// Contact's copy RIDES the blue on the way in: its heading holds `ride` px
+// under the blue's top, then settles into its centred resting place as the page
+// lands — so the blue never arrives as an empty band ahead of the content.
+const CONTACT_COPY = { ride: null, navRamp: 96 }; // ride OFF (was 128): the copy reveals in order instead
+let contactQ = 1;
+// ...and the fourth part, the one that sets the PACE: Contact is laid out
+// SHORTER by `px` (capped at `cap` of the About → Contact scroll), pulled back
+// down by --contact-push at About's rest, and the push unwinds on the hero's own
+// cubic ease-out (1 − q)³ — so Contact rises fastest on the first gesture past
+// About and lands at exactly 1x. The mirror of HERO_SHORTEN.
+const CONTACT_SHORTEN = { px: 0, cap: 0.5 }; // OFF — this was the sudden pull (was 500)
+let contactShorten = 0;
+let aboutRestY = null;
+let lastContactPush = -1;
+function setContactPush(px) {
+  if (px === lastContactPush) return;
+  lastContactPush = px;
+  document.documentElement.style.setProperty('--contact-push', px + 'px');
+}
+
+let lastContactLag = 1;
+function setContactLag(px) {
+  // Moves .contact-bg's top and the ledge's bottom together (sections.css).
+  if (px === lastContactLag) return;
+  lastContactLag = px;
+  document.documentElement.style.setProperty('--contact-lag', px + 'px');
+}
+
 // The frost's alpha at a given y inside the bar's ::before box.
 function contactFrostAt(y) {
   const f = CONTACT.frost;
@@ -454,12 +513,25 @@ let aboutRestEdge = 0;
 let contactLedgeRest = 160;
 function measureAboutRest() {
   aboutRestEdge = 0;
+  aboutRestY = null;
+  // Zeroed FIRST, so the About → Contact distance is measured unshortened.
+  contactShorten = 0;
+  document.documentElement.style.setProperty('--contact-shorten', '0px');
   if (!contactSection || !aboutSection || !sectionRestingScrollY) return;
   const rest = sectionRestingScrollY(aboutSection);
   if (rest == null) return;   // ≤680 / reduced motion: nothing settles, so the
   const pageTop = (el) => {    // reach falls back to full, i.e. today's ledge.
     let y = 0; for (let n = el; n; n = n.offsetParent) y += n.offsetTop; return y; };
-  aboutRestEdge = Math.max(0, pageTop(contactSection) - rest);
+  const maxY = () => document.documentElement.scrollHeight - window.innerHeight;
+  if (!reducedMotion.matches) {
+    contactShorten = Math.round(Math.max(0,
+      Math.min(CONTACT_SHORTEN.px, (maxY() - rest) * CONTACT_SHORTEN.cap)));
+    document.documentElement.style.setProperty('--contact-shorten', contactShorten + 'px');
+  }
+  aboutRestY = rest;
+  // In ON-SCREEN terms: at About's rest the push is the whole shorten, so the
+  // panel is seen exactly where it was before the layout moved.
+  aboutRestEdge = Math.max(0, pageTop(contactSection) - rest + contactShorten);
 }
 let contactAccentRGB = '74, 69, 255';
 let contactGlyphMid = 32;
@@ -547,7 +619,9 @@ function measureContactArrival() {
   }
   if (!contactSection) return;
   // Where the panel's top edge comes to rest once the page is scrolled out.
-  const docTop = contactSection.getBoundingClientRect().top + window.scrollY;
+  // Layout offsets, not a rect: the section carries translates (the hero's push
+  // and --contact-push) that must not leak into a resting position.
+  const docTop = (() => { let y = 0; for (let n = contactSection; n; n = n.offsetParent) y += n.offsetTop; return y; })();
   contactRestEdge = Math.max(0,
     docTop - (document.documentElement.scrollHeight - window.innerHeight));
 }
@@ -638,7 +712,13 @@ let fieldDockScroll = 0;
 // ⚠️ px IS THE SPEED DIAL: nav/Work run at 1 + px / (bar's resting top − px) of
 // the scroll. At 1440x900: 180 → 1.28x (imperceptible) · 240 → 1.41x (current) ·
 // 300 → 1.58x · the 410 cap → 2.0x ("too free", lost the scroll's tension).
-const HERO_SHORTEN = { px: 240, bias: 1.5 };
+// REDESIGN: 400 (was 240). The extra is what used to be a text-only boost;
+// carried here it lifts the lockup AND Selected Work together on the first
+// gesture, so the gap between them holds instead of opening.
+// 530 + a cap of 0.65 of the bar's resting top (was 400 / 0.5): Work gets its
+// own share of the parallax speed — it rises faster to follow the lockup, which
+// still leads it by HERO_TEXT.speed. Larger = faster Work, earlier pin.
+const HERO_SHORTEN = { px: 530, cap: 0.65, bias: 1.5 };
 let heroShorten = 0;
 let fieldVisibleEnd = 0;
 let lastHeroShorten = -1;
@@ -654,6 +734,10 @@ function setHeroPush(px) {
   document.documentElement.style.setProperty('--hero-push', px + 'px');
 }
 function measureFieldTuck() {
+  // REDESIGN: measure with the bar back in flow — is-bar-lifted makes it
+  // position: fixed (no offsetParent, no margins). updateScrollEffects re-adds
+  // the class on its next pass.
+  document.documentElement.classList.remove('is-bar-lifted');
   fieldOverhang = 0;
   fieldDockScroll = 0;
   fieldVisibleEnd = 0;
@@ -680,7 +764,7 @@ function measureFieldTuck() {
   // it tracks the sticky offset and reads the scroll position once docked.)
   // Offsets accumulated to the page, NOT getBoundingClientRect: the hero's load
   // reveal translates .intro-band while this runs, and a rect would report the
-  // animation's mid-flight position. Same rule as initWorkCarousel's photo
+  // animation's mid-flight position. Same rule as the Work carousel's photo
   // measurement — offsets ignore transforms.
   const pageTop = (el) => { let y = 0; for (let n = el; n; n = n.offsetParent) y += n.offsetTop; return y; };
   // Measured UNSHORTENED: this is where the bar sits at rest on screen, and
@@ -715,7 +799,7 @@ function measureFieldTuck() {
   fieldVisibleEnd = visibleEnd;
   // Now shorten. Capped at half the bar's resting top so a short window still
   // has scroll left to unwind the push over.
-  heroShorten = Math.round(Math.min(HERO_SHORTEN.px, barRest * 0.5));
+  heroShorten = Math.round(Math.min(HERO_SHORTEN.px, barRest * HERO_SHORTEN.cap));
   setHeroShorten(heroShorten);
   // The bar pins when its LAYOUT top reaches the viewport's — the shortened one.
   fieldDockScroll = barRest - heroShorten;
@@ -927,10 +1011,22 @@ const FIELD = {
   // fell to 1% at cyan's peak. At 0.15 red holds 12–24% through the cycle.
   // Blobs may set `pulse`; the rest take FIELD.motion.pulse.
   blobs: [
-    { col: [0.8392, 0.3020, 0.8078], r: 0.652,  x: 0.107, y: 0.375, a: 1.00 }, // magenta #D64DCE (0.5669 base, x1.15)
-    { col: [0.5725, 0.2196, 0.8902], r: 0.5054, x: 0.942, y: 0.499, a: 1.00 }, // violet  #9238E3
-    { col: [0.9765, 0.2471, 0.2471], r: 0.6275, x: 0.590, y: 0.640, a: 1.00 }, // red     #F93F3F
-    { col: [0.0039, 0.6235, 0.8471], r: 0.4738, x: 0.547, y: 0.08,   a: 1.00, ramp: { mid: 0.62, midAlpha: 0.6 }, pulse: 0.15 }, // cyan #019FD8 (y was -0.016)
+    // REDESIGN (2026-09-27): the hero text sits on WHITE now, so the contrast
+    // limits that shaped these orbs no longer bind — they are tuned for colour.
+    // Red now paints at the BOTTOM (paintOrder), and magenta/violet — which
+    // sit over it — are SMALLER and held near their edges, so each reads as a
+    // distinct orb: magenta left, red centre, violet right. All three hold
+    // their colour further out (per-orb ramp); cyan lost its ramp boost and
+    // then came down and grew a little (r .48 y .16). Measured over the
+    // visible band at 1440x900: magenta 45%, red 30%, purple 16%, blue 8%.
+    // Was, in order:
+    //   magenta r .652 x .107 · violet r .5054 x .942 y .499 · red (shared
+    //   ramp) · cyan r .4738 ramp { mid .62, midAlpha .6 }.
+    // ⚠️ lab/field-shader.html is NOT synced with this.
+    { col: [0.8392, 0.3020, 0.8078], r: 0.36,   x: 0.10,  y: 0.375, a: 1.00, ramp: { mid: 0.60, midAlpha: 0.65 } }, // magenta #D64DCE
+    { col: [0.5725, 0.2196, 0.8902], r: 0.36,   x: 0.93,  y: 0.45,  a: 1.00, ramp: { mid: 0.60, midAlpha: 0.65 } }, // violet  #9238E3
+    { col: [0.9765, 0.2471, 0.2471], r: 0.6275, x: 0.590, y: 0.640, a: 1.00, ramp: { mid: 0.62, midAlpha: 0.72 } }, // red     #F93F3F
+    { col: [0.0039, 0.6235, 0.8471], r: 0.48,   x: 0.547, y: 0.16,  a: 1.00, pulse: 0.15 }, // cyan #019FD8 (was r .42 y .08)
   ],
   // Calmed 2026-09 (speed 2.05 -> 1.7, drift 0.05 -> 0.032). Drift carries
   // most of the reduction on purpose: amplitude reads as restraint,
@@ -1020,7 +1116,12 @@ const FIELD = {
   // ⚠️ uCol MUST be permuted with uBlob. The shader composites slot 0 first, so
   // the uniform slot IS the stack position; upload one reordered and not the
   // other and every orb paints in its neighbour's colour.
-  paintOrder: [1, 0, 2, 3],
+  // REDESIGN (2026-09-27): RED AT THE BOTTOM — [2, 1, 0, 3] = red, violet,
+  // magenta, cyan. Red was third, over violet and magenta, and with the
+  // biggest reach it blanketed both: no purple, no distinct magenta. Under
+  // them it fills the middle while magenta (left) and violet (right) paint
+  // over it at the sides. Was [1, 0, 2, 3].
+  paintOrder: [2, 1, 0, 3],
   // PHONE LAYOUT (≤480, chosen at page load with FIELD_STATIC). The phone draws
   // the field into its own narrow PORTRAIT box (responsive.css, .page-field-canvas
   // at the 480 tier), and the desktop layout — composed for a 16:10 frame, sized
@@ -1053,7 +1154,8 @@ const FIELD = {
   // Timings are indexed by ORB, not by stack slot — reordering the stack must
   // not silently re-time the entrance.
   entrance: { lead: 280, stagger: 240, duration: 320 },
-  motion: { speed: 1.85, drift: 0.050, driftYRatio: 0.2, pulse: 0.30, warp: 0.55 },
+  // REDESIGN: speed 2.4 (was 1.85) — ~30% quicker drift and pulse, same travel.
+  motion: { speed: 2.4, drift: 0.050, driftYRatio: 0.2, pulse: 0.30, warp: 0.55 },
   // Buffer size vs CSS px. BELOW devicePixelRatio deliberately: a soft
   // gradient carries no per-pixel detail, so 1.0 on a 2x display is a 4x
   // fill-rate saving nobody can see. Grain is the one thing that does want
@@ -1197,8 +1299,12 @@ function initHeroField() {
   gl.uniform1f(U.uWarp, FIELD.motion.warp);
   gl.uniform2f(U.uAmp,  FIELD.motion.drift, FIELD.motion.drift * FIELD.motion.driftYRatio);
 
+  // The box's CSS size, kept for the tablet layout below.
+  let boxW = 1, boxH = 1;
   function resize() {
     const r = canvas.getBoundingClientRect();
+    boxW = Math.max(1, r.width);
+    boxH = Math.max(1, r.height);
     const w = Math.max(1, Math.round(r.width  * FIELD.renderScale));
     const h = Math.max(1, Math.round(r.height * FIELD.renderScale));
     if (canvas.width !== w || canvas.height !== h) {
@@ -1230,17 +1336,52 @@ function initHeroField() {
   const colData  = new Float32Array(12);
   const rampData = new Float32Array(16);
 
+  // TABLET LAYOUT (481-1024, responsive.css draws the shader in a screen-width
+  // box there): DERIVED from the desktop composition rather than hand-tuned, so
+  // any tablet shape — portrait or landscape — reads like the web layout. Each
+  // orb keeps its place in the VISIBLE COLOUR BAND (top of the screen to the
+  // white's end at 72svh): x scales with the width, y with the band's height,
+  // and the radius by a height-weighted mean of the two (see sr). The reference is the desktop at 1440x900 (box 1440 x 1440/1.6377,
+  // band 0.72 x 900). The desktop offsetY is baked in, so none is added after.
+  // Read per draw from the live box, so it follows a window being resized.
+  const FIELD_TABLET = matchMedia('(max-width: 1024px)');
+  const TABLET_REF = { w: 1440, h: 1440 / 1.6377, band: 0.72 * 900 };
+  let fieldRisePx = null;
+  function tabletBlob(b) {
+    if (fieldRisePx == null) {
+      fieldRisePx = parseFloat(getComputedStyle(document.documentElement)
+        .getPropertyValue('--field-rise')) || 0;
+    }
+    const sx = boxW / TABLET_REF.w;
+    const sy = (0.72 * window.innerHeight) / TABLET_REF.band;
+    // Weighted toward the band's HEIGHT (2/3 : 1/3, not an even geometric
+    // mean): red paints at the bottom and fills whatever the others don't
+    // reach, so in a tall portrait band an even mix left it at 51% of the
+    // colour. Landscape barely moves (sx and sy are close there).
+    const sr = Math.pow(sy, 2 / 3) * Math.pow(sx, 1 / 3);
+    const X = b.x * TABLET_REF.w * sx;
+    const Y = ((b.y + FIELD.offsetY) * TABLET_REF.h - fieldRisePx) * sy;
+    return Object.assign({}, b, {
+      x: X / boxW,
+      y: (Y + fieldRisePx) / boxH,
+      r: (b.r * TABLET_REF.w * sr) / boxW,
+    });
+  }
+
   function draw(t, entranceMs) {
     resize();
     const e = FIELD.entrance;
+    const tablet = !FIELD_STATIC.matches && FIELD_TABLET.matches;
     FIELD.paintOrder.forEach((blobIdx, slot) => {
       const b = FIELD_STATIC.matches
         ? Object.assign({}, FIELD.blobs[blobIdx], FIELD.phone.blobs[blobIdx])
+        : tablet ? tabletBlob(FIELD.blobs[blobIdx])
         : FIELD.blobs[blobIdx];
       const p = entranceMs == null ? 1
         : Math.max(0, Math.min(1, (entranceMs - entranceStarts[blobIdx]) / e.duration));
       blobData[slot * 4 + 0] = b.x;
-      blobData[slot * 4 + 1] = b.y + (FIELD_STATIC.matches ? FIELD.phone.offsetY : FIELD.offsetY);
+      blobData[slot * 4 + 1] = b.y + (FIELD_STATIC.matches ? FIELD.phone.offsetY
+        : tablet ? 0 : FIELD.offsetY);
       blobData[slot * 4 + 2] = b.r;
       blobData[slot * 4 + 3] = b.a * p;
       colData[slot * 3 + 0] = b.col[0];
@@ -1355,9 +1496,103 @@ try {
 // value); this only runs on the homepage with motion allowed. .intro-top is
 // bottom-anchored and overflow-clipped, so the statements' differing line counts
 // never move the divider below.
+// REDESIGN (exploration): the fixed top nav over the hero. Its clock shows
+// Seattle time; the fade and the hand-off to .intro-bar live in
+// updateScrollEffects. Null on project pages, so all of it is skipped there.
+const topNav = document.querySelector('.top-nav');
+// THE HAND-OFF (timed transitions, not scroll-linked opacities):
+// - The landing nav (.top-nav) is NOT pinned: it sits at the top of the page
+//   and simply scrolls away with the hero (hero.css).
+// - WORK_IN — Selected Work fades up from the first bit of scroll, so the
+//   cards are visibly rising right under the lockup (sections.css).
+// - The docked bar is revealed once the gradient has cleared from under it —
+//   the white's edge reaching the bar's bottom (updateScrollEffects).
+//   NAV_REVEAL_MAX is the backstop.
+// - The lockup fades out (0.5s, hero.css) once Selected Work fills more than
+//   half the viewport.
+const WORK_IN = 8;
+const NAV_REVEAL_MAX = 400;
+// Where the "Selected work" nav click LANDS (sectionClickScrollY): the first
+// card's TOP EDGE one --gap-group below the nav. (It was shared with an
+// automatic glide into Work on the hand-off — REMOVED 2026-09-27 at Jenna's
+// ask: it pulled the reader down. Don't reintroduce one; see Horizontal Tracks
+// for the four earlier auto-scrolls that were removed for the same reason.) Not Work's centred resting
+// position, which left ~230px of air under the bar. Page position from
+// offsets, so the push and the reveal's translate don't skew it. Null where
+// there is no top nav or no bar (project pages, and ≤680 via the caller).
+// ⚠️ The card, not its title: in the masonry (worktree-work-section) the title
+// sits at the BOTTOM of a card ~625px tall, so aiming at it glided straight
+// past the first image. (It was `.work-card .section-title` in the carousel,
+// where the title led the card.) The <li> is measured, not its link — the
+// link is the reveal's transform target.
+function workLandingScrollY() {
+  const bar = document.querySelector('.intro-bar');
+  const title = document.querySelector('#work-section .work-card');
+  if (!topNav || !bar || !title) return null;
+  let y = 0;
+  for (let n = title; n; n = n.offsetParent) y += n.offsetTop;
+  const gap = parseFloat(getComputedStyle(document.documentElement)
+    .getPropertyValue('--gap-group')) || 48;
+  const barH = bar.offsetHeight || 64;
+  const max = document.documentElement.scrollHeight - window.innerHeight;
+  return Math.min(Math.max(y - barH - gap, 0), Math.max(max, 0));
+}
+// Extra lift on the first gesture, on top of riding the white edge (see
+// setHeroTextLift). px at full; reached by `over` of the way to the pin.
+const HERO_TEXT_BOOST = { px: 0, over: 0.4 };
+// REDESIGN: the hero's left edge sits on the clock's, and its right column
+// spans exactly the nav's items — from
+// "Selected work"'s left edge to the "Say hello" pill's right edge — at every
+// width the top nav shows. Measured rather than restated because below 768 the
+// items are a content-width cluster (their widths come from the morph sizers
+// and the font), which CSS cannot express. Layout-only: init, resize, fonts.
+// Where the top nav is display:none (≤680) both properties are cleared and the
+// tier CSS takes over. CSS fallbacks are the desktop values, for no-JS.
+function measureNavColumns() {
+  if (!topNav) return;
+  const root = document.documentElement.style;
+  const first = topNav.querySelector('.top-nav-link');
+  const cta = topNav.querySelector('.top-nav-cta');
+  const clock = topNav.querySelector('.top-nav-clock');
+  if (!first || !cta || !clock || getComputedStyle(topNav).display === 'none') {
+    root.removeProperty('--nav-col-w');
+    root.removeProperty('--nav-col-inset');
+    root.removeProperty('--nav-lead');
+    return;
+  }
+  // ...and the headline's left edge sits on the clock's.
+  root.setProperty('--nav-lead', clock.getBoundingClientRect().left.toFixed(2) + 'px');
+  const l = first.getBoundingClientRect().left;
+  const r = cta.getBoundingClientRect().right;
+  root.setProperty('--nav-col-w', (r - l).toFixed(2) + 'px');
+  root.setProperty('--nav-col-inset',
+    (document.documentElement.clientWidth - r).toFixed(2) + 'px');
+}
+
+function initTopNav() {
+  if (!topNav) return;
+  document.documentElement.classList.add('has-top-nav');
+  const clock = topNav.querySelector('.top-nav-clock');
+  if (!clock) return;
+  const fmt = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/Los_Angeles',
+    hour: 'numeric',
+    minute: '2-digit',
+    timeZoneName: 'short',
+  });
+  const tick = () => {
+    const now = new Date();
+    clock.textContent = fmt.format(now); // e.g. "10:42 AM PDT"
+    clock.dateTime = now.toISOString();
+    // Re-render on the next minute boundary rather than polling.
+    setTimeout(tick, 60000 - (now.getTime() % 60000) + 50);
+  };
+  tick();
+}
+
 function initHeadlineMorph() {
   const h1 = document.querySelector('.intro-headline');
-  if (!h1 || reducedMotion.matches) return;
+  if (!h1 || h1.hasAttribute('data-static') || reducedMotion.matches) return;
 
   const PHRASES = [
     'Making products make sense.',
@@ -1565,6 +1800,7 @@ function initHeadlineMorph() {
   })();
 }
 
+initTopNav();
 initHeadlineMorph();
 
 // Every item in the site nav answers itself while the pointer (or keyboard
@@ -1610,9 +1846,11 @@ function initNavMorph() {
   if (reducedMotion.matches) return;
 
   const MORPHS = [
-    { selector: '.intro-bar-links a[href$="#work-section"]', rest: 'Selected work', hover: 'What I made' },
-    { selector: '.intro-bar-links a[href$="#about"]', rest: 'About me', hover: 'Who am I?' },
-    { selector: '.intro-bar-cta', rest: 'Say hello', hover: 'Why hello!' },
+    // REDESIGN: the top nav's items take the same morph, which is also what
+    // sizes each one to fit its wider label — so the two navs' items match.
+    { selector: '.intro-bar-links a[href$="#work-section"], .top-nav-link[href$="#work-section"]', rest: 'Selected work', hover: 'What I made' },
+    { selector: '.intro-bar-links a[href$="#about"], .top-nav-link[href$="#about"]', rest: 'About me', hover: 'Who am I?' },
+    { selector: '.intro-bar-cta, .top-nav-cta', rest: 'Say hello', hover: 'Why hello!' },
   ];
 
   const DURATION = 285; // ms — the spring's own settle time, see above
@@ -1835,6 +2073,17 @@ function initNavMorph() {
 }
 
 initNavMorph();
+// REDESIGN: after the morph has sized the top nav's items. Fonts change those
+// widths, so measure again once they land (and re-derive the field tuck, which
+// reads the bio's position).
+measureNavColumns();
+if (document.fonts && document.fonts.ready) {
+  document.fonts.ready.then(() => {
+    measureNavColumns();
+    measureFieldTuck();
+    updateScrollEffects();
+  });
+}
 
 // Scroll-triggered video. A work-card video (data-autoplay-in-view) sits under a
 // sibling .work-card-poster JPG — the placeholder no-JS visitors and crawlers
@@ -2053,619 +2302,165 @@ function initScrollVideos() {
 }
 initScrollVideos();
 
-// The horizontal Work track (sections.css .work-list) LOOPS: scroll past the
-// last card and the first comes round again, in either direction, with no end
-// stop. Progressive enhancement — with JS off the track is still a perfectly
-// good finite horizontal scroller (and .work-list keeps its :not(.is-looping)
-// end-snap for that case), so nothing here can hide a card.
+// The Work MASONRY (sections.css .work-grid). With JS off the grid is a plain
+// two-column grid with aligned rows; this turns it into a masonry by making each
+// row a 1px track and giving every card a span equal to its own height plus the
+// gap. Grid auto-placement then puts each card in whichever column frees up
+// first — the shorter one — so DOM order stays reading order and nothing is
+// ever moved in the DOM.
 //
-// ROTATION, NOT CLONING. The four cards are never duplicated: when the scroll
-// crosses a threshold, the card at one end is MOVED to the other end and the
-// scroll position is walked back by exactly one card-step, so the pixels on
-// screen do not change. One DOM node per project is what lets everything else
-// keep working untouched — initScrollVideos' IntersectionObservers and the
-// reveal groups both hold ELEMENT references, and a moved element is the same
-// element. Cloning would have meant 12 cards, 12 <video> tags, duplicate
-// headings for the crawlers that read this page, and clones whose video never
-// plays because the observers were never attached to them.
-//
-// THE INVARIANT: scrollLeft always sits in [STEP, 2·STEP). That is one card of
-// buffer on each side of the visible one, which is all a track needs when the
-// card is nearly a viewport wide. Snap positions are exact multiples of STEP
-// (.work-list's scroll-padding-inline is set to its own padding-inline, so
-// card i snaps at i·STEP), which is why adding or subtracting a whole STEP
-// always lands on another snap position — the jump never has to fight
-// scroll-snap, and scroll-snap-type never has to be toggled off around it.
-function initWorkCarousel() {
-  const track = document.querySelector('.work-list');
-  if (!track) return; // project pages have no Work track
-  // Fewer than 3 and there isn't enough content to fill the buffer on both
-  // sides, so the seam would show. Leave those as a normal finite scroller.
-  if (track.children.length < 3) return;
+// It re-measures whenever a card changes height (a ResizeObserver per card, so
+// a width change, a font swap or media loading all land here), and switches
+// itself off wherever the grid is down to ONE column (<=768, responsive.css) —
+// read from the live track count, so the breakpoint lives in CSS alone.
+// Heights are offsetHeight, not a rect: the reveal system translates the card
+// link while this runs, and a transform must not leak into the layout.
+function initWorkMasonry() {
+  const grid = document.querySelector('.work-grid');
+  if (!grid || !('ResizeObserver' in window)) return; // project pages have none
+  // A card with `hidden` is out of the layout, not a zero-height slot.
+  const cards = Array.from(grid.children).filter((card) => !card.hidden);
 
-  // PHONE HAS NO HORIZONTAL TRACK. At <=480 responsive.css reverts .work-list to
-  // a vertical stack, and the loop must switch off with it — this is a
-  // correctness gate, not an optimisation. On a column layout scrollLeft is
-  // pinned at 0, so normalize()'s "scroll back into the buffer" branch would be
-  // permanently true and re-prepend a card on every scroll event, scrambling the
-  // running order of the projects. The query has to track the CSS breakpoint;
-  // both carry a note pointing at the other.
-  const horizontal = window.matchMedia('(min-width: 481px)');
-  // The order the page shipped in. The loop rotates the DOM, so this is the only
-  // record of it — needed to hand a correct stack back when the phone tier takes
-  // over, and it must be captured before the first rotation.
-  const authored = [...track.children];
-  // The pagination bar, if the page ships one. Indexed against `authored`, NOT
-  // against the live DOM: the loop rotates children constantly, so dot 1 has to
-  // mean "the first project in the document" rather than "whatever is first
-  // right now". Optional — project pages have no track at all.
-  const pagination = track.parentElement
-    && track.parentElement.querySelector('.work-pagination');
-  const dots = pagination
-    ? [...pagination.querySelectorAll('.work-pagination-dot')]
-    : [];
-  let active = false;
-  let damping = false;   // true while the wheel-driven damped run owns scrollLeft
+  // Each card's height WITHOUT the stretch below. The stretch lives on the card
+  // (as padding under its media), so its own height includes it; subtracting
+  // the stretch it currently carries gives the natural height back, which is
+  // what keeps the ResizeObserver from chasing its own writes.
+  const extraOf = (card) => parseFloat(card.dataset.extra) || 0;
+  const setExtra = (card, px) => {
+    card.dataset.extra = px;
+    card.style.setProperty('--work-extra', px + 'px');
+  };
 
-  let step = 0;
-
-  // Card width + the track's gap. Read live: every tier changes both.
-  function measureStep() {
-    const first = track.firstElementChild;
-    if (!first) return 0;
-    const gap = parseFloat(getComputedStyle(track).columnGap) || 0;
-    return first.getBoundingClientRect().width + gap;
-  }
-
-  // Pull scrollLeft back into [STEP, 2·STEP), rotating one card per step. Also
-  // does the initial placement: at load scrollLeft is 0, so the first pass
-  // moves the LAST card to the front and lands on STEP — which leaves the
-  // original first card flush on the container's left edge, exactly where it
-  // sat before the loop existed, with the previous project now reachable by
-  // scrolling backwards. The guard is a belt-and-braces stop against a
-  // pathological layout (step measured as 0) spinning the loop forever.
-  //
-  // BOTH branches fire only at a BOUNDARY SNAP POSITION — 2*STEP going forward,
-  // 0 going back — never on merely leaving the rest position. That symmetry is
-  // the whole point, and getting it wrong is a real bug that shipped: the
-  // backward test used to be `scrollLeft < step`, which is true after ONE PIXEL
-  // of leftward movement. So the first frames of a backward gesture teleported
-  // scrollLeft forward by a whole card. The browser had already computed its
-  // snap target from the pre-jump position, so the gesture finished a card away
-  // from where the platform thought it was and came to rest off the snap line —
-  // scrolling forward snapped cleanly, scrolling back did not. Rotating only at
-  // 0 and 2*STEP means the jump always happens exactly where the gesture has
-  // naturally arrived, and -/+ STEP always lands on another snap position.
-  //
-  // The 1px tolerance on the backward test is deliberate. A fractional layout
-  // can leave scrollLeft resting at something like 0.4, which `<= 0` would never
-  // match — and unlike the forward side there is no runway left past 0 to try
-  // again on the next event, so the loop would dead-end at the left edge and the
-  // reader could not scroll back any further. Forward needs no such tolerance:
-  // past 2*STEP the track still has real distance (max is ~2.9*STEP), so a
-  // missed trigger simply fires on the next scroll event.
-  // TOUCH BUDGET. On a finger swipe there is no wheel to intercept — touch falls
-  // straight through to native scroll — and the loop then hands the momentum
-  // fresh runway on every rotation, so it never runs out and the track spins
-  // through the whole carousel. That is the same failure scroll-snap-stop fixes
-  // for the wheel, except iOS does not honour snap-stop reliably through
-  // momentum, and rewriting scrollLeft mid-flight can defeat the snap target the
-  // browser already picked.
-  //
-  // So: at most TOUCH.rotations per gesture. Once spent, the rotation simply
-  // stops happening and the track runs out of its OWN finite runway and halts —
-  // exactly how a non-looping carousel kills a fling. The invariant is restored
-  // once the scroll settles, which is instant and pixel-preserving, so invisible.
-  //
-  // NOT a clamp on scrollLeft: writing to it while native momentum is running is
-  // a tug-of-war the reader sees as jitter. Withholding the rotation takes
-  // nothing away — it just stops giving.
-  function normalize(force) {
-    // The damped run owns scrollLeft for its duration and calls this itself once
-    // it has settled. Without this guard the closing frames of a BACKWARD run
-    // (approaching 0) would trip the rotation mid-flight, which sets scrollLeft
-    // to STEP while the next frame is still easing toward 0 — the two then fight
-    // for the rest of the run.
-    if (damping) return;
-    if (!active || step <= 0) return;
-    const budgeted = !force && performance.now() - lastTouchAt < TOUCH.momentum;
-    let guard = 0;
-    // ⚠️ THE FORWARD TEST NEEDS THE SAME 1px TOLERANCE THE BACKWARD ONE HAS, and
-    // an earlier note here explicitly claimed it did not. That was wrong, and it
-    // stranded the carousel on any viewport where the card's width is fractional.
-    // MEASURED at a 1396px window: --width-right-column's clamp resolves the card
-    // to 1175.3359375, so step is 1235.3359375 and the boundary is 2470.671875 —
-    // but scrollLeft can only land on a device pixel, so it stops at 2470.5, a
-    // shortfall of 0.17px. `>=` is then false forever: normalize() never rotates,
-    // the track sits one step past its rest position, and the reader sees the
-    // PREVIOUS card hanging on the left with no next-card peek on the right.
-    // ⚠️ THIS IS INVISIBLE AT 1440. The design width makes the card exactly 1216
-    // and every boundary a whole number, so testing there will never show it.
-    // Test any width that makes the clamp produce a fraction.
-    while (track.scrollLeft >= step * 2 - 1 && guard++ < 16) {
-      if (budgeted && touchRotations >= TOUCH.rotations) return;
-      const from = track.scrollLeft;
-      track.appendChild(track.firstElementChild);
-      track.scrollLeft = from - step;
-      touchRotations++;
+  const layout = () => {
+    const cs = getComputedStyle(grid);
+    const columns = cs.gridTemplateColumns.split(' ').filter(Boolean).length;
+    if (columns < 2) {
+      grid.classList.remove('is-masonry');
+      cards.forEach((card) => {
+        card.style.gridRowEnd = '';
+        setExtra(card, 0);
+      });
+      return;
     }
-    while (track.scrollLeft <= 1 && guard++ < 16) {
-      if (budgeted && touchRotations >= TOUCH.rotations) return;
-      const from = track.scrollLeft;
-      track.insertBefore(track.lastElementChild, track.firstElementChild);
-      track.scrollLeft = from + step;
-      touchRotations++;
-    }
-  }
+    const gap = parseFloat(cs.columnGap) || 0; // the same token drives both axes
+    grid.classList.add('is-masonry');
 
-  // Which project is at the resting slot, as an AUTHORED index. scrollLeft rests
-  // at STEP with one card of buffer each side, so the card on show is
-  // children[1]; Math.round(scrollLeft / step) generalises that mid-gesture to
-  // whichever card the reader is closest to landing on. That yields a DOM
-  // position, and authored.indexOf turns it back into "which project" — the only
-  // thing a dot can point at while the DOM rotates underneath it.
-  function updateDots() {
-    if (!dots.length || !active || step <= 0) return;
-    const card = track.children[Math.round(track.scrollLeft / step)];
-    const i = card ? authored.indexOf(card) : -1;
-    if (i < 0) return;
-    dots.forEach((dot, k) => {
-      const on = k === i;
-      dot.classList.toggle('is-active', on);
-      if (on) dot.setAttribute('aria-current', 'true');
-      else dot.removeAttribute('aria-current');
+    // PASS 1 — place on natural heights, so the stretch never decides which
+    // column a card lands in.
+    const natural = cards.map((card) => card.offsetHeight - extraOf(card));
+    cards.forEach((card, i) => {
+      card.style.gridRowEnd = 'span ' + Math.max(1, Math.ceil(natural[i] + gap));
     });
-  }
 
-  // Publish where the resting card's photo ENDS, as a distance from the
-  // container's top, so the bar can hold itself just inside that edge.
-  //
-  // Why this is not pure CSS: at >=1025 the photo is the card's last element, so
-  // the container's own bottom would serve — but at <=1024 it moves to the TOP
-  // and its height is a ratio of the card's WIDTH, while `top` percentages
-  // resolve against HEIGHT. One measured number covers both, and re-runs from
-  // measure(), which already fires on every resize and tier change.
-  function publishPhotoBottom() {
-    if (!pagination || !active) return;
-    const host = pagination.parentElement;
-    const card = track.children[1] || track.firstElementChild;
-    const photo = card && card.querySelector('.work-card-image-link');
-    if (!host || !photo) return;
-    // offsetTop/offsetHeight, NOT getBoundingClientRect: the photo carries
-    // data-reveal, so before its group animates in it is translated down by
-    // REVEAL.distance (16px) and the rect reports that. Measured at load, that
-    // put the bar 16px low — it read as 8px inside the photo instead of 24.
-    // Offsets ignore transforms, so the anchor is the layout position either
-    // way. host is the photo's offsetParent (#work-section .site-container is
-    // the nearest positioned ancestor); keep that `position: relative` if this
-    // ever moves.
-    const y = photo.offsetTop + photo.offsetHeight;
-    host.style.setProperty('--work-photo-bottom', y + 'px');
-  }
+    // PASS 2 — BOTTOMS LEVEL. Find each column's last card and stretch the
+    // ones in the shorter columns by the difference, so the grid ends on one
+    // line (the reference is Jenna's: "align top and bottom evenly"). Only the
+    // LAST card of a column moves, so nothing is re-placed: lengthening the
+    // bottom of a column can only make that column later, never earlier.
+    // Offsets, not rects — the reveal translates each card's link.
+    const last = new Map(); // column x -> { i, bottom }
+    cards.forEach((card, i) => {
+      const x = card.offsetLeft;
+      const bottom = card.offsetTop + natural[i];
+      const prev = last.get(x);
+      if (!prev || bottom > prev.bottom) last.set(x, { i, bottom });
+    });
+    const floor = Math.max(...[...last.values()].map((c) => c.bottom));
+    const extra = new Array(cards.length).fill(0);
+    // The stretch lands under the media frame, and object-fit: cover then
+    // crops the art's sides — fine for a sliver, not for a column holding a
+    // single card (3 cards: Messaging alone was stretched 376px, losing ~37%
+    // of its width). Past LEVEL_MAX of the frame's own height, the columns
+    // simply end unevenly.
+    const LEVEL_MAX = 0.15;
+    last.forEach(({ i, bottom }) => {
+      const media = cards[i].querySelector('.work-card-media');
+      const frame = media ? media.offsetHeight - extraOf(cards[i]) : 0;
+      const short = Math.round(floor - bottom);
+      // (A contained frame was once exempt from LEVEL_MAX because stretching it
+      // can't crop — but it made the Groups card 778px tall, too tall to see
+      // whole on screen. Reverted: every card obeys the cap.)
+      extra[i] = short <= frame * LEVEL_MAX ? short : 0;
+    });
 
-  // Re-measure on resize and keep the reader on the card they were looking at:
-  // the step width changes at every breakpoint, so the raw scrollLeft would
-  // point at a different card after the jump.
-  function measure() {
-    if (!active) return;
-    const previous = step;
-    step = measureStep();
-    if (step > 0 && previous > 0) {
-      track.scrollLeft = Math.round(track.scrollLeft / previous) * step;
-    }
-    publishPhotoBottom();
-    updateDots();
-    normalize();
-  }
-
-  // KEYBOARD. Tabbing to a card's link makes the browser scroll it into view on
-  // its own, and that scroll then trips normalize() — which rotates the DOM and
-  // rewrites scrollLeft underneath the browser's own positioning. Measured, the
-  // two together landed focus on the card sitting in the PEEK slot: mostly off
-  // the right edge, with its focus ring cut in half. So don't leave the two to
-  // negotiate. Rotate until the focused card IS the flush one and put the track
-  // on the invariant directly — deterministic, and it can't fight a smooth
-  // scroll because .work-list's scroll-behavior is `auto`, not the page's
-  // `smooth`. Nothing else needs a scroll-into-view: focus order follows the
-  // rotated DOM, which IS the visual order, so tabbing walks the cards in the
-  // order they are actually seen.
-  //
-  // ⚠️ NEVER MOVE THE FOCUSED CARD ITSELF. Moving a focused element resets the
-  // browser's sequential-focus navigation starting point, and the measured
-  // result was Tab walking the projects BACKWARDS (Accessibility → Groups →
-  // Loop → Messaging) — every card correctly flush, in exactly the wrong order.
-  // Bringing the card to slot 1 by shuffling only the cards AROUND it fixes the
-  // order and costs nothing: from slot 0 one card is pulled off the end to sit
-  // in front of it; from slot i>1 the (i−1) cards ahead of it go to the back,
-  // none of which is the card itself.
-  // Rotate until `card` occupies the resting slot, then sit on it. Shared by
-  // keyboard focus and the pagination dots, so the two cannot drift into
-  // disagreeing about where "in view" is.
-  //
-  // ⚠️ It never moves `card` itself. Moving a focused element resets the
-  // browser's sequential-focus starting point; measured, that sent Tab BACKWARDS
-  // through the projects. Hence the first loop: when the card is already first,
-  // rotate the LAST card in front of it rather than appending the card away.
-  //
-  // The landing is INSTANT, not damped. Damping exists to make a wheel gesture
-  // feel continuous with the reader's hand; a dot click and a Tab press are
-  // discrete, and easing across three cards would drag two unrelated projects
-  // past the eye on the way. It also keeps this clear of the damping machinery,
-  // which owns scrollLeft while it runs.
-  function bringIntoView(card) {
-    if (!active || step <= 0) return;
-    if (!card || card.parentElement !== track) return;
-    let guard = 0;
-    while (track.firstElementChild === card && guard++ < 16) {
-      track.insertBefore(track.lastElementChild, track.firstElementChild);
-    }
-    while (track.children[1] !== card && guard++ < 16) {
-      track.appendChild(track.firstElementChild);
-    }
-    track.scrollLeft = step;
-    updateDots();
-  }
-
-  function flushFocusedCard(event) {
-    const card = event.target.closest('.work-card');
-    if (card) bringIntoView(card);
-  }
-
-  dots.forEach((dot, k) => {
-    dot.addEventListener('click', () => stepToward(k));
-  });
-
-  // normalize() is idempotent and cheap (a comparison, and nothing else on the
-  // overwhelming majority of scroll events), so it can run on every one. It
-  // re-enters via the scroll event its own scrollLeft write fires; that pass
-  // finds the invariant already satisfied and does nothing.
-  // DAMPED HORIZONTAL MOTION (2026-08). Wheel deltas accumulate into a single
-  // `target`, and every frame scrollLeft eases a fraction of the remaining
-  // distance toward it. Adapted from the Codrops horizontal-gallery technique,
-  // with one deliberate change: that version replaces native scrolling with a
-  // virtual value behind `overflow: hidden`. Here the damping is applied to the
-  // REAL scrollLeft of a real scroll container, so the track keeps working with
-  // JS off, keeps native keyboard scrolling (which flushFocusedCard depends on),
-  // and keeps touch — none of which survive a virtual scroller.
-  //
-  // ⚠️ THE ACCUMULATING TARGET IS THE WHOLE POINT — do not "simplify" this back
-  // into a fixed-duration animation per gesture. That was tried and reverted the
-  // same day (see CLAUDE.md): a real flick keeps firing momentum wheel events for
-  // a second or more after the fingers lift, so each one landing after an
-  // animation finished started another, and one flick lurched through two or
-  // three cards. Deltas folding into one target cannot chain, because there is no
-  // discrete animation to re-trigger — and delta MAGNITUDE starts mattering
-  // again, so a gentle scroll moves a little and a flick moves a lot.
-  const DAMP = {
-    // MILLISECONDS to land a card. This used to be a per-frame ease fraction,
-    // which meant every adjustment needed the decay formula solved by hand and,
-    // worse, tied the speed to the refresh rate — identical code ran 1033ms on a
-    // 60Hz display and 517ms on a 120Hz one. dampStep now derives the per-frame
-    // factor from this and the elapsed time, so the number below IS the duration
-    // on any display.
-    //
-    // It also makes the timing consistent ACROSS BREAKPOINTS: a fixed ease made
-    // the smaller cards at ≤1024 arrive sooner, because the same fraction of a
-    // shorter distance is less travel. Deriving from the real step holds 650ms
-    // everywhere.
-    //
-    // Judged on real hardware, not here — rAF does not tick in the preview pane,
-    // so this dial can only be set by eye. 370ms read as too fast, 840ms as
-    // laggy, 540ms was close; 650 is the settled value. Note those were all set
-    // against the OLD exponential curve, where most of the number was an
-    // invisible tail — under the spring below, 650ms is 650ms of visible motion,
-    // so it will feel slower than the same number did before.
-    arrival: 650,
-    // How close counts as arrived. At 0.5px the last few pixels crawl for
-    // hundreds of ms while nothing visibly moves — 2px is under half a device
-    // pixel of visible error and cuts that dead tail off.
-    settle: 2,
-    // Fraction of a card the reader must push before the destination is
-    // committed. Small on purpose — this is "which way did they mean", not "did
-    // they push far enough", and waiting longer is what caused the linger.
-    commit: 0.1,
-    quiet: 120,     // ms of wheel silence that means the gesture (and its
-                    // momentum tail) has genuinely ended
-    lineHeight: 16, // px per line, for mouse wheels that report deltaMode 1
+    cards.forEach((card, i) => {
+      if (extraOf(card) !== extra[i]) setExtra(card, extra[i]);
+      card.style.gridRowEnd = 'span ' + Math.max(1, Math.ceil(natural[i] + extra[i] + gap));
+    });
   };
-
-  const TOUCH = {
-    rotations: 1,    // rotations allowed per finger swipe
-    momentum: 1200,  // ms after the last touch that still counts as that gesture
-    settle: 180,     // ms of scroll silence before the invariant is restored
-  };
-  let lastTouchAt = -Infinity;
-  let touchRotations = 0;
-  let touchSettleTimer = 0;
-
-  let dampTarget = 0;
-  let dampAnchor = 0;
-  let dampSettling = false;
-  let dampFrame = 0;
-  let dampQuiet = 0;
-  let dampBackstop = 0;
-  let dampLocked = false;   // swallowing the momentum tail after a run finished
-  let dampUnlock = 0;
-
-  // After a run lands, the flick that caused it is STILL firing momentum wheel
-  // events — often for another half second. Re-arming immediately would let the
-  // tail start a second run, which is the chaining that killed the first
-  // attempt at this. So the track locks on arrival and stays locked for as long
-  // as events keep arriving, unlocking only once they have been silent for
-  // DAMP.quiet. This gates RE-ARMING only, never the motion, so the worst a
-  // mis-timed unlock can do is briefly delay a genuine second flick.
-  function relock() {
-    dampLocked = true;
-    clearTimeout(dampUnlock);
-    dampUnlock = setTimeout(() => { dampLocked = false; }, DAMP.quiet);
-  }
-
-  const clamp = (v, lo, hi) => (v < lo ? lo : v > hi ? hi : v);
-
-  function endDamp() {
-    if (!damping) return;
-    damping = false;
-    dampSettling = false;
-    cancelAnimationFrame(dampFrame);
-    clearTimeout(dampQuiet);
-    clearTimeout(dampBackstop);
-    dampVel = 0;
-    track.scrollLeft = dampTarget;   // land exactly on the boundary
-    track.style.scrollSnapType = ''; // back to the stylesheet's mandatory
-    normalize();                     // rotate, and come to rest on STEP
-    updateDots();                    // the card changed — so has the page
-    relock();                        // and swallow the flick's remaining tail
-  }
-
-  let dampLast = 0;
-  let dampVel = 0;   // px/s — carried ACROSS target changes, see below
-
-  // CRITICALLY DAMPED SPRING, not exponential decay.
-  //
-  // Exponential decay (`pos += (target - pos) * factor`) is ease-OUT ONLY: its
-  // velocity is at maximum on the very first frame and only ever falls. Measured
-  // at a 650ms setting it put 39% of the travel in the first 50ms and half of it
-  // in 70ms, then spent the remaining half of the budget covering 4% at under
-  // 8px/frame — invisible. So the motion launched hard and the number in the
-  // config bore little relation to the duration anyone perceives, which is why
-  // this dial was so hard to tune: raising it lengthened a tail you cannot see
-  // while leaving the abrupt start exactly as it was.
-  //
-  // A critically damped spring starts from REST, accelerates, then decelerates
-  // into the target — real ease-in-out — and, being critically damped, settles
-  // without overshoot. It also gives velocity CONTINUITY: `dampVel` survives a
-  // target change, so when onWheel commits mid-run the motion bends toward the
-  // new destination instead of restarting from zero.
-  //
-  // Integrated with the exact analytic solution for critical damping rather than
-  // Euler steps, so it is stable at any dt — including the 50ms cap below, where
-  // a naive integrator visibly overshoots.
-  function dampStep(now) {
-    const dt = (dampLast ? Math.min(now - dampLast, 50) : 16.67) / 1000;
-    dampLast = now;
-
-    // ω from the requested arrival time. For critical damping the remaining
-    // fraction after time T is (1 + ωT)·e^(−ωT); ωT ≈ 8.5 lands it on
-    // DAMP.settle for the card widths this site uses, so ω = 8.5 / arrival.
-    // (That holds arrival to within ~5% across the breakpoints — well under
-    // anything perceptible.)
-    const omega = 8.5 / (DAMP.arrival / 1000);
-
-    const displacement = track.scrollLeft - dampTarget;
-    const b = dampVel + omega * displacement;
-    const decay = Math.exp(-omega * dt);
-    const nextDisplacement = (displacement + b * dt) * decay;
-
-    dampVel = (b - omega * (displacement + b * dt)) * decay;
-    track.scrollLeft = dampTarget + nextDisplacement;
-
-    // Settle on position AND velocity. Position alone is not enough once
-    // velocity is carried across a target change: a reversal can arrive at the
-    // target still moving, and stopping there would cut the motion dead.
-    if (dampSettling
-        && Math.abs(nextDisplacement) < DAMP.settle
-        && Math.abs(dampVel) < DAMP.settle * 20) {
-      endDamp();
-      return;
-    }
-    dampFrame = requestAnimationFrame(dampStep);
-  }
-
-  // ONE CARD toward the project a dot names, carried by the same spring a wheel
-  // gesture gets.
-  //
-  // ⚠️ IT STEPS, IT DOES NOT JUMP — and that is forced, not preferred. Landing on
-  // a distant project with only one card of travel would mean making it adjacent
-  // first, and it cannot be done: the loop reorders by ROTATION, which preserves
-  // the cycle, so the distance between two cards around the ring is invariant.
-  // The choice is one card of motion OR arriving in one click, never both.
-  // With four projects that costs little — from any card, two of the other three
-  // are one step away (one forward, one back) and only the opposite one needs a
-  // second click.
-  //
-  // Direction is the shorter way round; a tie (the opposite card) goes forward.
-  function stepToward(k) {
-    if (!active || step <= 0) return;
-    const target = authored[k];
-    const current = track.children[Math.round(track.scrollLeft / step)];
-    if (!target || !current || target === current) return;
-    // A wheel run already owns scrollLeft — let it finish rather than fight it.
-    if (damping) return;
-
-    const n = authored.length;
-    const forward = (k - authored.indexOf(current) + n) % n;
-    const dir = forward <= n - forward ? 1 : -1;
-
-    // Reduced motion takes the same route the wheel path does at this point:
-    // no animation, just the destination.
-    if (reducedMotion.matches) {
-      bringIntoView(dir === 1 ? track.children[2] : track.firstElementChild);
-      return;
-    }
-
-    // Start a damped run exactly the way onWheel does, with one difference:
-    // dampSettling is true from the first frame. A wheel gesture has to wait to
-    // learn where the reader meant to go; a click said so outright.
-    damping = true;
-    dampSettling = true;
-    dampAnchor = Math.round(track.scrollLeft);
-    dampTarget = dampAnchor + dir * step;
-    track.style.scrollSnapType = 'none';
-    dampLast = 0;
-    dampVel = 0;
-    dampFrame = requestAnimationFrame(dampStep);
-    dampBackstop = setTimeout(endDamp, 2000);
-  }
-
-  // Fallback resolver for a push that never got decisive: the reader nudged the
-  // track a little and stopped. Send it back where it came from. The COMMITTED
-  // case does not come through here — see onWheel — because waiting for the
-  // gesture to go quiet before choosing a destination is exactly what made the
-  // track linger part-way and then jump.
-  function onQuiet() {
-    if (!damping || dampSettling) return;
-    dampTarget = dampAnchor;
-    dampSettling = true;
-  }
-
-  function onWheel(event) {
-    // Reduced motion and the phone tier both fall through to native scrolling.
-    if (!active || reducedMotion.matches) return;
-    // Vertical intent belongs to the page — never swallow it. Only a gesture
-    // that is predominantly horizontal is ours.
-    if (Math.abs(event.deltaX) <= Math.abs(event.deltaY)) return;
-    event.preventDefault();
-    // ...and STOP IT HERE. preventDefault only cancels the browser's own
-    // scrolling; the event still bubbles, and Lenis listens on `window`. A real
-    // trackpad swipe is never exactly deltaY 0 — measured, a horizontal flick
-    // carried deltaY 18 — so Lenis was receiving that remainder and easing the
-    // PAGE up or down underneath the reader while the track moved sideways.
-    // That is the subtle vertical drift while scrolling the carousel.
-    // (A pure deltaY of 0 never showed it, because Lenis discards those itself
-    // as an unknown gesture — which is exactly why this only bit on real
-    // hardware and never in a synthetic test.)
-    // Genuinely vertical gestures still reach Lenis untouched: they return above,
-    // before this line.
-    event.stopPropagation();
-
-    // Still swallowing the previous flick's momentum tail. Keep it swallowed,
-    // and hold the lock open for as long as the tail keeps arriving.
-    if (dampLocked) { relock(); return; }
-
-    if (!damping) {
-      damping = true;
-      dampSettling = false;
-      dampAnchor = Math.round(track.scrollLeft);
-      dampTarget = dampAnchor;
-      // mandatory snap re-snaps ANY programmatic scrollLeft to the nearest snap
-      // position, which would flatten every intermediate frame. It stands down
-      // for the run and is restored in endDamp — safe against a re-snap because
-      // every position written after that point is itself a snap position.
-      track.style.scrollSnapType = 'none';
-      dampLast = 0;   // fresh clock, so the first frame uses the 60fps default
-      dampVel = 0;    // a new gesture starts from rest — that IS the ease-in
-      dampFrame = requestAnimationFrame(dampStep);
-      // See the glide note in CLAUDE.md: rAF STOPS in a backgrounded tab, and
-      // this run owns snap-off plus the `damping` flag. Timers are only
-      // throttled when hidden, never stopped, so the backstop has to be a timer.
-      dampBackstop = setTimeout(endDamp, 2000);
-    }
-
-    // deltaMode 1 means the wheel reports LINES, not pixels — common on real
-    // mouse wheels. Without this a mouse wheel would barely move the track.
-    const px = event.deltaMode === 1 ? event.deltaX * DAMP.lineHeight : event.deltaX;
-
-    // THE CAP. Clamping to one card either side of where the gesture started is
-    // what stops a hard flick running away, and it does so without needing to
-    // know when the gesture ends — the momentum tail keeps arriving and simply
-    // finds the target already pinned. This is the job scroll-snap-stop does on
-    // the native path, done here because snap is off during the run.
-    dampTarget = clamp(dampTarget + px, dampAnchor - step, dampAnchor + step);
-
-    // COMMIT AS SOON AS THE PUSH IS DECISIVE. The destination must not wait for
-    // the gesture to end: a trackpad keeps firing momentum events for up to a
-    // second after the fingers lift, so deciding at that point left the track
-    // sitting part-way (the linger) and then jumping to the card (the snap).
-    // A tenth of a card is enough to know which way the reader meant to go.
-    const moved = dampTarget - dampAnchor;
-    if (Math.abs(moved) >= step * DAMP.commit) {
-      dampTarget = dampAnchor + Math.sign(moved) * step;
-      dampSettling = true;   // the ease can now finish and land
-      return;
-    }
-
-    // Not decisive yet — if the reader stops here, onQuiet sends it home.
-    clearTimeout(dampQuiet);
-    dampQuiet = setTimeout(onQuiet, DAMP.quiet);
-  }
-  // passive:false because the whole point is to preventDefault.
-  track.addEventListener('wheel', onWheel, { passive: false });
-
-  // A fresh swipe gets a fresh budget; touchmove keeps the window open through a
-  // long drag while the finger is still down.
-  track.addEventListener('touchstart', () => {
-    lastTouchAt = performance.now();
-    touchRotations = 0;
-  }, { passive: true });
-  track.addEventListener('touchmove', () => { lastTouchAt = performance.now(); }, { passive: true });
-
-  track.addEventListener('scroll', () => {
-    normalize();
-    // Called here rather than inside normalize(): that returns early while the
-    // damped run owns scrollLeft, and again when a touch gesture has spent its
-    // rotation budget — in both of which the track is still very much moving.
-    // Four class toggles, cheap enough to run on every scroll event.
-    updateDots();
-    // Scroll gone quiet: the gesture is over. Restore the invariant ignoring the
-    // budget, so the next swipe starts from a full buffer on both sides again.
-    clearTimeout(touchSettleTimer);
-    touchSettleTimer = setTimeout(() => { touchRotations = 0; normalize(true); }, TOUCH.settle);
-  }, { passive: true });
-  track.addEventListener('focusin', flushFocusedCard);
-  // Resize drives BOTH jobs, and the tier check comes first: crossing 480 has to
-  // switch the loop on or off before re-measuring, or measure() would size a
-  // step from whichever layout it is no longer in.
-  window.addEventListener('resize', () => { syncToTier(); measure(); });
-
-  function enable() {
-    if (active) return;
-    active = true;
-    // Tells the CSS the loop is live, so the no-JS end-snap steps aside — and
-    // reveals the pagination, which is hidden until this class lands.
-    track.classList.add('is-looping');
-    step = 0;   // force measure() to re-read rather than trust a stale tier
-    measure();
-  }
-
-  function disable() {
-    if (!active) return;
-    active = false;
-    track.classList.remove('is-looping');
-    // Put the projects back in the order the document declares them. appendChild
-    // on an element already in the parent MOVES it, so replaying the authored
-    // list in order is enough to undo any rotation.
-    authored.forEach((card) => track.appendChild(card));
-    track.scrollLeft = 0;
-    step = 0;
-  }
-
-  function syncToTier() {
-    if (horizontal.matches) enable(); else disable();
-  }
-
-  // TWO triggers on purpose, because correctness rides on this and neither event
-  // is guaranteed on its own. `change` is the precise one — it fires only when
-  // the 480 boundary is actually crossed — but it is a single point of failure,
-  // and one was observed being dropped in testing (a desktop→phone transition
-  // left the loop live over a vertical stack, which is exactly the state that
-  // scrambles the card order). `resize` is noisier but independent, so a missed
-  // `change` self-heals on the next resize tick. syncToTier is idempotent —
-  // enable()/disable() both no-op when already in that state — so double
-  // delivery costs nothing.
-  horizontal.addEventListener('change', syncToTier);
-  syncToTier();
+  // Laid out straight from the observer, NOT deferred to a rAF: observer
+  // callbacks already run before paint, and rAF stops outright in a background
+  // tab, which left the spans stale (cards overlapping) until it came back.
+  // No feedback loop: a span never changes a card's own height, and a stretch
+  // this pass wrote is subtracted back out before measuring, so the pass it
+  // triggers derives the same numbers and writes nothing.
+  const ro = new ResizeObserver(layout);
+  cards.forEach((card) => ro.observe(card));
+  ro.observe(grid);
+  layout();
 }
-initWorkCarousel();
+initWorkMasonry();
+
+// Work cards with hover media: the still at rest, the GIF on hover. The GIF's
+// src is set on first hover (and re-set with a fresh fragment each time, which
+// restarts it from its first frame without refetching — a fragment is not part
+// of the fetch); the class that shows it lands on `load`, so a slow first
+// fetch never shows an empty frame. Mouse and keyboard focus only — touch has
+// no hover — and nothing under reduced motion. Null-safe: pages without it
+// simply find no targets.
+function initWorkHoverMedia() {
+  if (reducedMotion.matches) return;
+  document.querySelectorAll('.work-card-hover[data-hover-src]').forEach((img) => {
+    const link = img.closest('.work-card-link');
+    if (!link) return;
+    const src = img.dataset.hoverSrc;
+    // A <video> hover (MP4 — a fraction of a GIF's weight, full colour): the
+    // src lands on first hover, each hover restarts it from 0, and the class
+    // that shows it waits for play() to resolve, so a slow first fetch still
+    // shows the still rather than an empty frame. Paused on leave.
+    if (img.tagName === 'VIDEO') {
+      const playVideo = () => {
+        if (!img.getAttribute('src')) img.src = src;
+        img.currentTime = 0;
+        const p = img.play();
+        if (p && p.then) p.then(() => link.classList.add('is-hover-playing')).catch(() => {});
+      };
+      const stopVideo = () => { link.classList.remove('is-hover-playing'); img.pause(); };
+      link.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') playVideo(); });
+      link.addEventListener('pointerleave', stopVideo);
+      link.addEventListener('focus', playVideo);
+      link.addEventListener('blur', stopVideo);
+      return;
+    }
+    let n = 0;
+    const play = () => {
+      img.onload = () => link.classList.add('is-hover-playing');
+      img.src = src + '#' + (++n);
+    };
+    const stop = () => link.classList.remove('is-hover-playing');
+    link.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') play(); });
+    link.addEventListener('pointerleave', stop);
+    link.addEventListener('focus', play);
+    link.addEventListener('blur', stop);
+  });
+}
+initWorkHoverMedia();
+
+// Work-card skeleton: a grey shimmering frame until the still has loaded
+// (sections.css). Only frames whose still is not yet decoded get it, so a
+// cached load paints straight through; an error clears it too, so a broken
+// image never leaves the frame shimmering forever.
+function initWorkSkeleton() {
+  document.querySelectorAll('.work-card-cover').forEach((img) => {
+    const media = img.closest('.work-card-media');
+    if (!media || (img.complete && img.naturalWidth)) return;
+    media.classList.add('is-loading');
+    const done = () => media.classList.remove('is-loading');
+    img.addEventListener('load', done, { once: true });
+    img.addEventListener('error', done, { once: true });
+  });
+}
+initWorkSkeleton();
 
 
 // ============================================================
@@ -2770,7 +2565,10 @@ function updateScrollEffects() {
   // rest too, hero.css) — it still marks the pinned state. Guarded: project pages
   // have no .intro-bar.
   if (introBar) {
-    introBar.classList.toggle('is-docked', introBar.getBoundingClientRect().top <= 0);
+    const docked = introBar.getBoundingClientRect().top <= 0;
+    introBar.classList.toggle('is-docked', docked);
+    // REDESIGN: the hand-off from the top nav to this bar (is-bar-docked) is
+    // decided further down, once push is known — see is-bar-lifted.
   }
 
   // ...and the field lifts away as the reader moves. See measureFieldTuck above.
@@ -2811,8 +2609,18 @@ function updateScrollEffects() {
   //   bias 2   → peak 1.92x at 78%
   // The plain ease-in p^2 it replaced ended at 1.8x and dropped to 1x at the pin.
   const pinP = fieldDockScroll > 0 ? travel / fieldDockScroll : 0;
-  const pinE = Math.pow(pinP, HERO_SHORTEN.bias);
-  const push = fieldDockScroll > 0 ? heroShorten * (1 - pinE * pinE * (3 - 2 * pinE)) : 0;
+  // REDESIGN: EASE-OUT, not the biased smoothstep. The hero text now fades out
+  // early, and with the old curve Work started at ~1x and only sped up late, so
+  // it lagged exactly when the text left — ~450px of empty screen mid-scroll.
+  // (1 − p)^2 puts Work's fastest rise on the first gesture (1 + 2·S/D, ~1.8x
+  // at 1440x900) and eases to exactly 1x at the pin (slope 0 there), so the
+  // dock still doesn't jump. HERO_SHORTEN.bias is unused by this curve.
+  // CUBIC ease-out (was quadratic): more of Work's catch-up happens before the
+  // docked nav appears, so the cards are already close under it.
+  // Slope is still 0 at the pin (1x there, no jump); the cost is a faster first
+  // gesture (1 + 3·S/D at the start, vs 1 + 2·S/D).
+  const pinR = 1 - pinP;
+  const push = fieldDockScroll > 0 ? heroShorten * pinR * pinR * pinR : 0;
   setHeroPush(Math.round(push));
   // Negative: .page-field's transform subtracts it, so the artwork moves DOWN
   // relative to the page, i.e. slower than the scroll.
@@ -2822,10 +2630,83 @@ function updateScrollEffects() {
   // VISUAL top — the shortened layout top plus the push — with the resting
   // overhang closing on the tuck's curve. At rest this is exactly 0.
   const navTop = (fieldDockScroll) + push;
+  // REDESIGN: the lockup's lift (applied below as --hero-text-lift).
+  const bt = fieldDockScroll > 0 ? Math.min(1, pinP / HERO_TEXT_BOOST.over) : 0;
+  const boost = HERO_TEXT_BOOST.px * (1 - (1 - bt) * (1 - bt));
+  const textLift = fieldDockScroll > 0
+    ? Math.round(heroShorten - push + boost + HERO_TEXT.speed * travel) : 0;
+  // REDESIGN: the white RIDES THE LOCKUP — its edge keeps its resting 16px
+  // above the headline all the way up (cream = lag + textLift: the artwork
+  // sinks by lag, the text rises by textLift). It used to be forced to the
+  // viewport top within the first ~48px so the docked bar never landed on
+  // gradient, which wiped the colour almost instantly; the nav swap now waits
+  // for the white to reach the top nav instead, so that force is not needed.
   const cream = fieldDockScroll > 0
-    ? fieldVisibleEnd + lag - navTop - fieldOverhang * (1 - tuck) : 0;
-  setFieldCream(Math.max(0, Math.round(cream)));
-  setHeroTextLift(Math.round(HERO_TEXT.speed * travel));
+    ? (topNav ? lag + textLift
+              : fieldVisibleEnd + lag - navTop - fieldOverhang * (1 - tuck))
+    : 0;
+  const creamPx = Math.max(0, Math.round(cream));
+  setFieldCream(creamPx);
+  // REDESIGN: the docked bar is revealed once the GRADIENT HAS CLEARED from
+  // under it — the white's solid edge reaching the bar's bottom — so it lands
+  // on plain cream, not over a band of colour. Tried and rejected: when the
+  // landing nav scrolls off (64px — too soon, the bar sat over the gradient)
+  // and when Selected Work reaches the bar (~290px — too late, no nav for a
+  // long stretch). The edge is READ from the canvas's mask (the redesign ends
+  // the white at a CSS 72svh that no JS constant restates), and only while it
+  // can still matter; NAV_REVEAL_MAX is the backstop. Back above, reverses.
+  let whiteEndV = Infinity;
+  if (topNav && fieldDockScroll > 0 && window.scrollY > 0 && window.scrollY <= NAV_REVEAL_MAX) {
+    const cv = document.querySelector('.page-field-canvas');
+    if (cv) {
+      const cs = getComputedStyle(cv);
+      const stops = (cs.maskImage || cs.webkitMaskImage || '').match(/-?[\d.]+px/g);
+      if (stops) whiteEndV = cv.getBoundingClientRect().top + parseFloat(stops[stops.length - 1]);
+    }
+  }
+  const navOut = fieldDockScroll > 0 && !!topNav && window.scrollY > 0
+    && (window.scrollY > NAV_REVEAL_MAX
+        || whiteEndV <= ((introBar && introBar.offsetHeight) || 64));
+  // The lockup fades only once Selected Work fills MORE THAN HALF the
+  // viewport — its visual top (push included, hence the rect) above the middle
+  // of the screen. Jenna's rule; not tied to the nav reveal or a distance.
+  const workEl = document.getElementById('work-section');
+  const heroOut = fieldDockScroll > 0 && !!workEl
+    && workEl.getBoundingClientRect().top < window.innerHeight / 2;
+  if (topNav) {
+    html.classList.toggle('is-hero-text-out', heroOut);
+    html.classList.toggle('is-work-in', fieldDockScroll > 0 && window.scrollY > WORK_IN);
+  }
+  // REDESIGN: the docked bar takes over at the nav swap (navOut) —
+  // before it would pin on its own. From then on it is position: FIXED at the top (is-bar-lifted,
+  // hero.css), with Work taking a matching negative margin so the layout is
+  // identical. ⚠️ NOT a scroll-linked transform: that was tried (--bar-lift)
+  // and it glitched — scroll events land a frame behind the compositor's
+  // scroll, so a sticky bar corrected by a per-frame transform wobbles while
+  // the page is moving, and this bar is moving at 2-3x the scroll there.
+  if (topNav && introBar) {
+    const show = navOut || (fieldDockScroll > 0 && window.scrollY >= fieldDockScroll);
+    html.classList.toggle('is-bar-lifted', show);
+    html.classList.toggle('is-bar-docked', show);
+    introBar.inert = !show;
+  }
+  // REDESIGN: the hero text rides the white scrim's edge rather than a speed of
+  // its own. That edge moves on the page by (lag − cream) — the artwork sinks by
+  // lag, the mask pulls its end up by cream — so lifting the text by
+  // (cream − lag) keeps it at a fixed distance below the edge the whole way up.
+  // 0 at rest. HERO_TEXT.speed is unused while this holds.
+  // ...plus HERO_TEXT_BOOST on top: an extra lift front-loaded onto the first
+  // gesture (ease-out over the first `over` of the way to the pin), so the
+  // lockup visibly glides off as soon as the reader scrolls. It leads the white
+  // edge by up to `px`, which is fine — it is fading out over the same stretch.
+  // REDESIGN: HERO_TEXT_BOOST.px is 0 — the extra first-gesture lift moved
+  // into HERO_SHORTEN, where Work shares it. A text-only boost opens a gap.
+  // ...and it now rides WORK's own extra movement (heroShorten − push) rather
+  // than (cream − lag): the two differ by the resting overhang and the lag,
+  // which on short windows let the gap to Work grow ~80px mid-scroll. Locked
+  // to Work, the lockup→Work gap is constant at every size by construction,
+  // and it still tracks the white closely, which is tied to the same bar.
+  setHeroTextLift(textLift);
 
   // Scroll-spy: the active section is the LAST one whose RESTING POSITION the
   // page has reached. Highlight every link that targets it (and mark it for
@@ -2846,9 +2727,11 @@ function updateScrollEffects() {
   // Contact's resting position is reachable, so it simply works.
   let activeEl = null, activeRest = -Infinity;
   let restingKnown = false;
-  if (sectionRestingScrollY) {
+  if (sectionSpyScrollY) {
     for (const s of navSections) {
-      const rest = sectionRestingScrollY(s.el);
+      // Resting position, or earlier for a section in SPY_LEAD (Work) — see
+      // sectionSpyScrollY. Clicks still land at rest.
+      const rest = sectionSpyScrollY(s.el);
       if (rest == null) continue;                  // not a settling section / not this tier
       restingKnown = true;
       // 2px of slack: the resting position is fractional and the scroll lands on
@@ -2870,6 +2753,13 @@ function updateScrollEffects() {
       if (top <= NAV_OFFSET && top > activeTop) { activeTop = top; activeEl = s.el; }
     }
     if (atBottom && lastEl) activeEl = lastEl;
+  }
+  // REDESIGN: the docked bar is revealed early (gradient cleared), with Selected Work
+  // rising right under it — so from that moment "Selected work" reads active,
+  // rather than waiting for Work's resting position. Only fills an empty slot;
+  // About and Contact still take over as they are reached.
+  if (!activeEl && html.classList.contains('is-bar-docked')) {
+    activeEl = document.getElementById('work-section');
   }
   navSections.forEach(s => {
     const on = s.el === activeEl;
@@ -2920,6 +2810,41 @@ function updateScrollEffects() {
   // offsetHeight 0, so the max below reads the visible one.
   updatePeekDir();
 
+  // THE BLUE'S LEAD (see CONTACT_LAG). `t` runs 0 at About's resting position
+  // to 1 at Contact's, on a smoothstep so neither end has a kink; the offset is
+  // k × (distance still to travel) × t, which is 0 at BOTH rests and settles at
+  // (1 − k) speed. NEGATIVE = the blue sits ABOVE the panel's layout top.
+  // THE PACE (CONTACT_SHORTEN): the push unwinds from the whole shorten at
+  // About's rest to 0 at the scroll floor, on the hero's cubic ease-out.
+  if (contactShorten > 0 && aboutRestY != null) {
+    // ⚠️ The floor is read LIVE, not from the measure: images and fonts that
+    // land after it change the page's height, and a stale distance left the
+    // push short of 0 at the bottom — Contact never reached its locked view.
+    const floorY = document.documentElement.scrollHeight - window.innerHeight;
+    const q = Math.max(0, Math.min(1, (window.scrollY - aboutRestY) / Math.max(1, floorY - aboutRestY)));
+    contactQ = q;
+    setContactPush(Math.round(contactShorten * (1 - q) * (1 - q) * (1 - q)));
+  } else {
+    setContactPush(0);
+    contactQ = 1;
+  }
+
+  let contactLead = 0;
+  let contactT = 0;
+  if (contactSection && aboutRestEdge > 0) {
+    const ce = contactSection.getBoundingClientRect().top;
+    const span = aboutRestEdge - contactRestEdge;
+    const u = span > 0 ? Math.max(0, Math.min(1, (aboutRestEdge - ce) / span)) : 0;
+    contactT = u * u * (3 - 2 * u);
+    if (!reducedMotion.matches) {
+      // × (1 − t): the lead tapers out as it lands, so the blue arrives at FULL
+      // scroll speed. At plain k the blue settled at 0.5x, and that slow tail
+      // happened exactly under the nav — the scrim hung there (Jenna).
+      contactLead = -CONTACT_LAG.k * Math.max(0, ce - contactRestEdge) * contactT * (1 - contactT);
+    }
+  }
+  setContactLag(Math.round(contactLead));
+
   // About's parallax. Guarded: project pages have no #about, so nothing is ever
   // published and the CSS fallback (0px) leaves them exactly as they were.
   if (aboutSection) {
@@ -2954,10 +2879,19 @@ function updateScrollEffects() {
     //
     // The blend runs on Contact's own approach, so it is symmetric: scrolling up
     // to About, Contact recedes and the push relaxes back into the lag.
+    // ⚠️ REDESIGN: the old push toward the ledge is replaced by the hero's
+    // lockup behaviour, mirrored — the copy lifts away at ABOUT_LIFT.speed of the
+    // scroll past its resting position, and fades once the blue fills more than
+    // half the viewport. The resting lag blends out over the first 120px so the
+    // hand-over has no step.
     if (contactSection) {
       const ce = contactSection.getBoundingClientRect().top;
-      const near = Math.max(0, Math.min(1, (vh - ce) / (vh * 0.75)));
-      peek = peek * (1 - near) + ABOUT_PEEK.push * near;
+      const travel = aboutRestEdge > 0 ? Math.max(0, aboutRestEdge - ce) : 0;
+      const w = Math.min(1, travel / 120);
+      const lift = reducedMotion.matches ? 0 : -ABOUT_LIFT.speed * travel;
+      peek = peek * (1 - w) + lift;
+      aboutSection.classList.toggle('is-about-out',
+        travel > 0 && ce + contactLead < vh * ABOUT_LIFT.fadeAt);
     }
     setAboutPeek(Math.round(peek));
   }
@@ -2968,16 +2902,17 @@ function updateScrollEffects() {
     if (contactRect.height === 0) {
       // Contact is hidden (dropped at the mobile tier) — there's no blue panel to
       // invert over, so keep the bars in their normal (cream) state.
-      stickyBars.forEach(bar => bar.classList.remove('is-over-dark'));
+      stickyBars.forEach(bar => bar.classList.remove('is-over-dark', 'is-over-ramp'));
       setBarBleed(BAR_BLEED);
       setDarkMix(0);
       setBarFill('');
       setContactPeek(0);
+      setContactLag(0);
     } else {
       const scrollAnchorTop = parseFloat(getComputedStyle(html).scrollPaddingTop) || 0;
       const barHeight = Math.max(...stickyBars.map(bar => bar.offsetHeight));
       const invertLine = Math.max(scrollAnchorTop, barHeight);
-      const gap = contactRect.top - invertLine;   // bar's bottom to the panel's top
+      const gap = contactRect.top + contactLead - invertLine; // bar's bottom to the BLUE's top
 
       // PROGRESSIVE INVERSION — driven by HOW MUCH OF THE BAR ACTUALLY HAS BLUE
       // BEHIND IT, which is the whole rule and needs no tuning.
@@ -3025,6 +2960,10 @@ function updateScrollEffects() {
       // read the LIVE ledge, so it has to exist before them. ----
       const ledge = contactLedge;                    // measured, not read per frame
       const edge = contactRect.top;
+      // Where the BLUE actually is: the panel's layout top plus its lead (see
+      // CONTACT_LAG). Everything that describes colour — the ledge, the bar's
+      // tint, its fill, the label flip — reads this, not the layout top.
+      const blue = edge + contactLead;
       // The ledge's live height, SHORTENED as the reader scrolls up so its top
       // descends and the blue sits lower. Everything downstream takes this rather
       // than the token, or the bar's fill stops matching the ramp it is a window
@@ -3037,19 +2976,33 @@ function updateScrollEffects() {
       // ⚠️ Smoothstep, so it is flat at BOTH ends — the growth neither starts nor
       // stops with a kink, and About's resting composition is a stationary point
       // rather than a corner the reader crosses.
-      const reachSpan = (aboutRestEdge - contactRestEdge) * CONTACT.reach.span;
-      const reachT = aboutRestEdge > 0 && reachSpan > 0
-        ? Math.max(0, Math.min(1, (aboutRestEdge - edge) / reachSpan))
-        : 1;                                   // unmeasurable -> today's full ledge
-      const reach = reachT * reachT * (3 - 2 * reachT);
+      // ⚠️ REDESIGN: THE LEDGE RIDES ABOUT'S COPY (the mirror of the hero's
+      // white riding the lockup) instead of growing on a fixed reach schedule:
+      // its top keeps ABOUT_LIFT.gap below About's last line, capped at the
+      // token's length. It blends in from the resting length over the first
+      // 120px of travel, so About's resting composition keeps its clean cream. No direction term — scrolling up plays it backwards.
       const restLen = Math.min(contactLedgeRest, ledge);
-      const reached = restLen + (ledge - restLen) * reach;
-      const ledgeShorten = Math.max(0, peekDir) * CONTACT.peek.ledgeShorten;
-      const liveLedge = Math.max(1, reached - ledgeShorten);
+      let liveLedge;
+      if (aboutSection && aboutSection.lastElementChild && aboutRestEdge > 0) {
+        const aboutBottom = aboutSection.lastElementChild.getBoundingClientRect().bottom;
+        const ride = Math.max(1, Math.min(ledge, blue - (aboutBottom + ABOUT_LIFT.gap)));
+        // Engages over the first 120px past About's rest (the same hand-over as
+        // the lift), so the scrim is riding by the time the copy is moving.
+        const w = Math.min(1, Math.max(0, aboutRestEdge - edge) / 120);
+        liveLedge = Math.max(1, restLen + (ride - restLen) * w);
+      } else {
+        liveLedge = ledge;                     // unmeasurable -> the full ledge
+      }
+      // ⚠️ AND IT SHORTENS AS IT NEARS THE NAV. By then About has faded and the
+      // ride has nothing to follow, so a full-length ramp only crawled past the
+      // bar. Capped to the blue's distance from the bar's bottom (floored at
+      // CONTACT_COPY.navRamp), the scrim sweeps behind the nav instead.
+      liveLedge = Math.max(1, Math.min(liveLedge,
+        Math.max(CONTACT_COPY.navRamp, blue - invertLine)));
       setLedgeLift(Math.round(ledge - liveLedge));
-      setContactEdge(Math.round(edge * 100) / 100);
+      setContactEdge(Math.round(blue * 100) / 100);
 
-      const covered = blueBehindBar(contactRect.top, liveLedge, invertLine);
+      const covered = blueBehindBar(blue, liveLedge, invertLine);
       const mix = Math.max(0, Math.min(1, covered / DARK_FULL_AT));
       setDarkMix(mix);
       // THE LABELS SWITCH ONCE, AND ON WHAT THEY ACTUALLY SIT ON.
@@ -3069,9 +3022,12 @@ function updateScrollEffects() {
       // The old test is kept for a hard edge (--contact-ledge: 0), where the
       // gradient does not exist and 0.85 is still the measured answer.
       const flipToWhite = liveLedge > 0
-        ? contactAlphaAt(contactGlyphMid, contactRect.top, liveLedge) >= DARK_TEXT_ALPHA
+        ? contactAlphaAt(contactGlyphMid, blue, liveLedge) >= DARK_TEXT_ALPHA
         : mix >= DARK_TEXT_AT;
       stickyBars.forEach(bar => bar.classList.toggle('is-over-dark', flipToWhite));
+      // Blue behind the bar but not yet swapped: labels go FULL black (hero.css
+      // .is-over-ramp) — the resting 0.8 black fails AA on the deep ramp.
+      stickyBars.forEach(bar => bar.classList.toggle('is-over-ramp', !flipToWhite && covered > 0));
 
       // CLIP THE FROST TO CONTACT'S TOP EDGE. The bar's glass bleeds BAR_BLEED
       // past its own bottom so it melts into the page instead of ending on a
@@ -3092,8 +3048,8 @@ function updateScrollEffects() {
       // there is no bar to paint a ramp into. The ledge itself still renders —
       // it is the panel's own edge, not the bar's.
       const barLive = introBar && introBar.offsetParent !== null;
-      if (barLive && ledge > 0 && edge > 0 && edge - liveLedge < barHeight + BAR_BLEED + 2) {
-        setBarFill(buildBarFill(edge, liveLedge));
+      if (barLive && ledge > 0 && blue > 0 && blue - liveLedge < barHeight + BAR_BLEED + 2) {
+        setBarFill(buildBarFill(blue, liveLedge));
       } else {
         setBarFill('');
       }
@@ -3163,7 +3119,16 @@ function updateScrollEffects() {
       const magnitude = peakPeek * x * x * (3 - 2 * x);
       // -1 scrolling down (lag, gap closes), +1 scrolling up (lead, drops away).
       // Magnitude is 0 at the resting position, so the sign can never snap there.
-      setContactPeek(Math.round(magnitude * peekDir));
+      // ⚠️ REDESIGN: the copy RIDES THE BLUE (CONTACT_COPY) instead of the
+      // direction-dependent peek above (`magnitude * peekDir`, now unused). It
+      // follows the blue's lead and is pulled up from its centred resting offset
+      // to `ride` below the blue's top, easing back to 0 over the About →
+      // Contact scroll. Position-only, so scrolling up plays it backwards.
+      const settle = contactQ * contactQ * (3 - 2 * contactQ);
+      const pull = CONTACT_COPY.ride == null ? 0
+        : Math.max(0, contactCopyOffset - CONTACT_COPY.ride) * (1 - settle);
+      setContactPeek(reducedMotion.matches || CONTACT_COPY.ride == null
+        ? 0 : Math.round(contactLead - pull));
     }
   }
 
@@ -3196,11 +3161,24 @@ measureFieldTuck();
 measureContactArrival();
 measureAboutRest();
 window.addEventListener('resize', () => {
+  measureNavColumns(); // REDESIGN: before the tuck, which reads the bio
   measureFieldTuck();
   measureContactArrival();
   measureAboutRest();
   updateScrollEffects();
 });
+// Late layout (images, web fonts) changes the page's height after the first
+// measure; re-measure once each has settled, or the Contact pacing and resting
+// positions are taken from a page that no longer exists.
+const remeasureLate = () => {
+  measureNavColumns();
+  measureFieldTuck();
+  measureContactArrival();
+  measureAboutRest();
+  updateScrollEffects();
+};
+window.addEventListener('load', remeasureLate);
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(remeasureLate);
 updateScrollEffects();
 
 // ============================================================
@@ -3306,13 +3284,9 @@ function setupLenis(Lenis) {
 // who was only passing through, and needed an arming flag, a cooldown, a release
 // accumulator and five escape hatches to stay survivable.
 //
-// What replaced it is far simpler and is already in initWorkCarousel: a gesture
-// judged predominantly horizontal is stopPropagation'd so it never reaches Lenis,
-// which pins the vertical position for exactly as long as the reader is working
-// the carousel and not a moment longer. Vertical gestures are untouched and
-// scroll the page normally. No state, nothing to escape from, nothing to re-arm.
-//
-// If a hold is ever wanted again, read the four failures above first.
+// The horizontal carousel it served is gone too (2026-09, now a two-column
+// masonry that scrolls with the page). If a hold is ever wanted again, read the
+// four failures above first.
 // Fraction of a section's leftover space placed ABOVE its content when it
 // settles. 0.5 is a true centre; lower lifts the content.
 const SECTION_BIAS = { about: 0.34 };
@@ -3395,6 +3369,25 @@ function initSectionGeometry(lenis) {
   }
 
   sectionRestingScrollY = (el) => (sections.includes(el) && wide.matches ? restingFor(el) : null);
+  // The spy's arrival line: the resting position, or EARLIER for a section in
+  // SPY_LEAD — once its content's top has risen to that fraction of the
+  // viewport. Never later than rest, so a nav click (which lands at rest)
+  // always lights its own link.
+  // ⚠️ ON-SCREEN position (a rect), NOT offsets — deliberately unlike
+  // restingFor. The redesign lays the hero out SHORTER and pushes everything
+  // after it back down visually (`translate: --hero-push`), so a layout offset
+  // put Work's content 240px higher than it appears and lit "Selected work"
+  // at the very top of the hero. The rect includes that push; it is taken on
+  // the section's container, which the reveal does not translate (it moves
+  // the card links inside it). Re-derived every frame, so it tracks the push
+  // as it unwinds: the test reduces to "content top <= lead of the viewport".
+  sectionSpyScrollY = (el) => {
+    const rest = sectionRestingScrollY(el);
+    const lead = SPY_LEAD[el.id];
+    if (rest == null || lead == null || !el.children.length) return rest;
+    const top = el.children[0].getBoundingClientRect().top + window.scrollY;
+    return Math.min(rest, top - window.innerHeight * lead);
+  };
   measureAboutRest();   // the reach window's top anchor; needs the line above.
 
   // WHERE A CLICK LANDS, which is deliberately not always the resting position.
@@ -3414,7 +3407,15 @@ function initSectionGeometry(lenis) {
   // after clicking About.
   sectionClickScrollY = (el) => {
     if (!sections.includes(el) || !wide.matches) return null;
-    return el.id === 'contact' ? topAlignedFor(el) : restingFor(el);
+    if (el.id === 'contact') return topAlignedFor(el);
+    // REDESIGN: Work's click lands the first card one --gap-group under the
+    // nav (workLandingScrollY). It sits BELOW Work's resting position (the
+    // spy's threshold), so the spy still lights "Selected work" after it.
+    if (el.id === 'work-section') {
+      const landing = workLandingScrollY();
+      if (landing != null) return landing;
+    }
+    return restingFor(el);
   };
 
   // Contact's min-height is `100dvh - nav - footer`, and the footer's height is
@@ -3470,7 +3471,10 @@ function initSectionGeometry(lenis) {
 // (robust across browsers, unlike an observer); Motion.dev runs the fade + rise.
 // Where a Work card fades in / back out, as fractions of the viewport height
 // measured on the card's top. Was 0.85 / 0.95.
-const WORK_REVEAL = { in: 0.97, out: 0.995 };
+// REDESIGN: 0.9 / 0.95 — the same 0.9 line every other section reveals on. At
+// 0.97 the reveal fired with only ~34px of card above the fold while Work was
+// rising at ~1.8x, so the whole rise-and-fade played out of sight.
+const WORK_REVEAL = { in: 0.9, out: 0.95 };
 function setupReveals(motion) {
   const { animate } = motion;
   const groups = Array.from(document.querySelectorAll('[data-reveal-group]'));
@@ -3529,6 +3533,13 @@ function setupReveals(motion) {
     const vh = window.innerHeight || document.documentElement.clientHeight;
     groups.forEach((group) => {
       const r = group.getBoundingClientRect();
+      // ⚠️ EXCEPT About while Contact has it faded out (#about.is-about-out,
+      // ABOUT_LIFT). The lift carries About's content off the top, which used to
+      // reset it here — so scrolling back up it replayed a staggered reveal on
+      // top of the lift's own fade and sat half-blank for a moment. Held in its
+      // revealed state, it comes back on the one 0.5s fade, like the hero's
+      // lockup. Once the class is gone the normal reset applies again.
+      if (group.closest('#about.is-about-out')) return;
       if (r.bottom <= 0 || r.top >= vh) {
         // Fully off-screen (above or below): instant reset to hidden, ready to
         // fade in on the next entry.
@@ -3639,8 +3650,9 @@ if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
   // the page default on leave. (Overview pages have no .work-card, so this is a
   // no-op there.)
   document.querySelectorAll('.work-card').forEach(card => {
-    const link = card.querySelector('a.work-card-image-link');
-    const href = link ? link.getAttribute('href') || '' : '';
+    const link = card.querySelector('a.work-card-link');
+    // data-href while the cards are parked (not links yet — see index.html).
+    const href = link ? link.getAttribute('href') || link.dataset.href || '' : '';
     const variant = GLOW_VARIANTS.find(v => href.includes(v.match));
     if (!variant) return;
     card.addEventListener('mouseenter', () => setGlowVariant(variant.cls));

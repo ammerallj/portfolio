@@ -46,6 +46,319 @@ how they overwrite each other's work. `.claude/settings.json` sets
     behind the header's "Say hello" trigger) on every page.
   - `responsive.css` — **ALL width breakpoints, site-wide.** Organized by screen size (1440 → 1024 → 768 → **680** → 480 → **374**px). Imported last so it overrides desktop styles. The 680 tier is a NAV-ONLY tier — see **The nav hand-off at 680** below. The 374 tier holds ONE rule, the narrow-phone hero fade — see **Phones: the shader's own box**.
 
+## ⚠️ REDESIGN IN PROGRESS — branch `worktree-redesign` (2026-09-26)
+
+**This branch is an exploration Jenna is NOT staging yet.** It lives in
+`.claude/worktrees/redesign/`, branched from staging `378e79a`. Keep it; don't
+stage it until she says so. **It also carries the masonry Work section**:
+`worktree-work-section` (its own worktree) was merged in on 2026-09-27 — merge
+that branch again if more Work-section work lands there. Much of the landing documentation below describes
+the PRE-redesign hero and is superseded here wherever the two disagree.
+
+**The landing now (desktop/tablet, >680):**
+- **Hero lockup in the white lower part of the fold**, reference-style: `h1`
+  "I’m Jenna Ammerall, a product / interaction designer based in Seattle."
+  — "I’m Jenna Ammerall," is ALWAYS its own first line (`.intro-headline-name`,
+  `display: block`); only "Jenna Ammerall" is italic (`.intro-headline-italic`,
+  the real Hanken 500 italic).
+  (7 of the 12 columns — `58.333vw − 73.67px`, 766.33 at 1440 — set on
+  `.intro-band-left` only; the shared 6-col `--width-title-column` is the
+  Work cards'. "product&nbsp;/" keeps the slash off the start of a line.)
+  (`--section-title-size` 56/44/32 — one step under `--display-size`; weight
+  500, dark, no morph — `data-static` skips `initHeadlineMorph`) bottom-left;
+  right column "I care about how things fit together, balancing product
+  behavior and visual craft." (primary) + "Previously at Meta and Microsoft."
+  (secondary, 18px/400).
+  The right block is **last-baseline aligned** with the h1 (`align-items: last
+  baseline`, flex-end fallback); stacks at ≤768. The divider is gone.
+- **The field's white scrim**: `--field-mask-end: 72svh + rise − cream`,
+  `--field-fade: 30svh`, `--field-rise: 200px` (lifts the artwork to show more
+  red / less top blue; the bio-contrast ceiling on rise no longer applies — the
+  text sits on white).
+  ⚠️ The ceiling is the artwork's bottom edge: it must stay BELOW the white's
+  end or it shows as a hard line. At 200 the margin is 31px at 1440x900 and
+  64 at 1280x720 — re-measure before raising it again.
+- **Fixed `.top-nav`** (index.html, before `.intro`): Seattle clock
+  (`initTopNav`, Intl `America/Los_Angeles`) + a centred white hairline + the
+  same three items as `.intro-bar`, white on the gradient, hidden ≤680.
+  `measureNavColumns` publishes `--nav-lead` (clock's left edge → the h1's left
+  edge) and `--nav-col-w` / `--nav-col-inset` (Selected work → pill → the right
+  column), so the hero lines up with the nav at every width. The top nav's items
+  take `initNavMorph` too, which is what makes their widths match the bar's.
+
+**Scroll choreography** (all in `updateScrollEffects`; positions are pure
+functions of scroll, the fades are timed class toggles):
+- `HERO_SHORTEN { px: 530, cap: 0.65 }` — the hero is laid out shorter and
+  pushed back; the push unwinds on **cubic ease-out `(1 − p)³`** (was the biased
+  smoothstep), so Work rises fastest on the first gesture and hits 1× at the pin.
+- The lockup rides Work's own movement (`shorten − push`) **plus**
+  `HERO_TEXT.speed` (0.8) × travel — the parallax that pulls it away upward.
+- **The landing nav is NOT pinned (2026-09-27).** `.top-nav` is
+  `position: absolute` at the top of the page and scrolls away with the hero.
+  Pinning it and swapping it out mid-hero was tried several ways (fixed
+  triggers, on the white reaching it, on a contrast rule) and every version
+  left white type on a pale backdrop for a stretch. Jenna's call: keep it
+  where it is.
+- **The docked bar is revealed once the gradient has cleared from under
+  it** — the white's solid edge reaching the bar's bottom, READ from the
+  canvas's mask (~106px of scroll at 1440x900, ~72 at 1000x650;
+  `NAV_REVEAL_MAX` 400 is a backstop). Bracketed by two rejects: when the
+  landing nav scrolls off (64px — too soon, the bar sat over a band of
+  gradient) and when Work reaches the bar (~290px — too late, a long stretch
+  with no nav). It fades IN but hides INSTANTLY: leaving the docked state
+  drops it back into the hero's flow, so a fade-out showed a ghost bar.
+- `WORK_IN` (8px): Selected Work's container fades up (0.6s, `is-work-in`,
+  sections.css), so the cards rise visibly under the lockup.
+- The lockup fades out (0.5s) only once Selected Work fills MORE THAN HALF
+  the viewport (its top above the screen's middle) — Jenna's rule. ~91px of
+  scroll at 1440x900, just before the docked bar appears.
+- **The white RIDES THE LOCKUP**: `cream = lag + textLift`, so its edge stays
+  16px above the headline all the way up and the gradient stays in view above
+  the text. Forcing it to the top early — tried — wiped the colour at once.
+- **Work cards are WHITE with no hover gradients** (2026-09-27): fill #fff
+  (was a 2.5% black cream panel); the hover scrim, the lapping wash, their
+  keyframes and the per-card `--card-glow` colours are deleted. Hover still
+  grows the card and swaps its text. (The custom cursor's own colours are
+  separate — `GLOW_VARIANTS` in js/main.js — and untouched.)
+- **Work cards can carry HOVER MEDIA** (Loop first, 2026-09-27): a still
+  `.work-card-cover` (JPEG, lazy) with a `.work-card-hover` GIF over it whose
+  `src` is set only on first hover (`data-hover-src`, `initWorkHoverMedia`),
+  restarted each hover with a fresh `#n` fragment (no refetch), shown via
+  `.is-hover-playing` only after `load`. Mouse + keyboard focus; touch and
+  reduced motion keep the still. Loop's JPEG was resized 4080 → 2040 at q80
+  (1.45MB → 215KB); the GIF is 2040x1200, 511KB. Its art is 17:10 in a 16:10
+  frame, so ~3% is cropped off each side.
+  **Messaging followed** (`messaging-card.jpg` / `.gif`, 1866x1846): its frame
+  takes the art's own ratio (`--media-ratio: 1866 / 1846`) because two phone
+  screens in a 5:4 frame lose their status and nav bars. The still is Jenna's
+  PNG cropped (4, 2) so it registers with the GIF exactly. The GIF is Jenna's
+  own re-export, 1100x1088 / 8.5MB at 20-25fps in motion (was 1866x1846 / 21.4MB) — same
+  framing, so it still registers with the 1866px still. ~1.5x on desktop (the
+  card paints ~517–650px).
+  **Accessibility followed** (`ax-card.gif` 1500x1018, 17.2MB, ~22fps): the
+  frame takes the GIF's ratio (`1500 / 1018`). The GIF is a CROP of Jenna's
+  3120x1880 `ax-card.png`, so the still is that same crop cut from the PNG
+  (box 197,38 → 2887,1863, found by matching against GIF frame 0) and saved at
+  1920px. Re-find the crop if either file is re-exported.
+- **Work-card SKELETON** (2026-09-28): until a card's still loads, its frame is
+  grey `#ececea` with a shimmer, and the still fades in over 0.4s
+  (`initWorkSkeleton` + `.work-card-media.is-loading`). Only frames whose still
+  isn't decoded yet get it; errors clear it; reduced motion drops the shimmer.
+  GIFs still load on first hover — preloading all of them is ~25MB.
+- ⚠️ **THE WORK CARDS ARE NOT LINKS YET** (2026-09-28): the project pages are
+  being reworked, so each card's destination is PARKED in `data-href` instead of
+  `href` — no click, no Tab stop (verified: `focus()` does not take), no
+  navigation; hover (swap + media) still works, and the cursor glow reads
+  `data-href` as a fallback. To restore: rename `data-href` → `href` on the four
+  `.work-card-link`s in index.html.
+- **HOVER VIDEO is supported** (2026-09-28): a `<video class="work-card-hover"
+  data-hover-src muted loop playsinline preload="none">` gets its src on first
+  hover, restarts from 0 each hover, and is shown (`is-hover-playing`) only once
+  `play()` resolves; paused on leave (`initWorkHoverMedia`). Facebook Groups uses
+  it — `fb-card.mp4`, 4.3MB for the 5s clip its 13MB GIF carried. The others are
+  still GIFs; MP4 is the better format for all of them.
+  ⚠️ Jenna's updated Groups export (with the bottom tab bar) arrived saved as
+  `ax-card.png/.gif/.mp4` in the main folder, overwriting the Accessibility
+  originals there. The worktree's `ax-card.jpg/.gif` are the real Accessibility
+  art and are untouched.
+- **Facebook Groups card is BACK** (2026-09-28) with Jenna's `fb-card` media:
+  a single tall phone (974x1848; GIF 119 frames ~23fps, 14.1MB) CONTAINED in
+  the 5:4 frame (`--media-fit: contain`, read by `.work-card-media > img`) — at
+  its own ratio the card would be ~1200px tall. It does NOT take the levelling
+  stretch: exempting contained frames made it 778px tall, too tall to see whole
+  (Jenna), so the columns end ~154px apart at 1440 again.
+  (History: it was hidden earlier the same day —
+  `initWorkMasonry` skips hidden cards, and the bottom-levelling stretch now
+  applies only when it is ≤15% of the frame's height (`LEVEL_MAX`) — with three
+  cards Messaging sat alone and a 376px stretch cropped ~37% of its art, so the
+  columns now end unevenly instead.
+- **About me** (2026-09-28): Jenna's three-paragraph bio as one unlabelled
+  `.about-body` (Career Story / Outside of Work eyebrows gone), then
+  `.about-facts` — a black hairline and `dl` rows (label | entries, 14px / 1.25, tight like Jenna's reference,
+  role lines at 70%): Experience, Education, Patents. The text column is 7 of
+  the 12 grid columns (`min(58.333vw − 73.67px, 766px)`), not the shared
+  5-column `--width-right-column`, with one empty column before the photo, so
+  About's copy no longer starts on the nav's "Selected work" line. "Senior
+  Product Designer" is now in visible copy; the meta/JSON-LD titles still
+  say "Product Designer".
+  The photo CAROUSEL is gone: `.about-stack` holds two stills in flow — a wide
+  landscape (`about-photo2-crop.jpg`, photo2 cropped 28px a side to drop its
+  baked-in rounded white corners) filling the left column, then `about-photo4`
+  at half width, left-aligned, 24px radius. The left column is the flex
+  remainder beside the capped text, so on wide screens the photos grow rather
+  than the gap (photo→text 133px at 1440, 156 at 1728). `.about-photo*` rules
+  and the ≤768 `.about-photo` overrides are now unused. ⚠️ photo2's source is
+  only 858px wide, so the wide photo softens past ~1440 on a 2x display.
+  **Second pass, same day — TEXT LEFT, PHOTOS RIGHT, centred** (Jenna's
+  reference): `.about-right` (the TEXT, despite its name) takes `order: -1`
+  and 7 columns (`min(58.333vw − 73.67px, 766px)`, text-dominant at Jenna's
+  ask); the photo stack takes the rest (502px at 1440, growing past it); `.about-layout` is `align-items: center` with a
+  `--gap-group` seam, and the heading pull-up is off (heading above the row).
+  Stacked (≤768) the text comes first. The 7-column / 133px-gap numbers above
+  are the previous pass.
+  **Third pass, same day (CURRENT)** — after Jenna's mentorship-page
+  reference: ONE photo (`about-photo2-crop`, the Seoul portrait dropped), bio
+  5 columns (the shared `--width-right-column`; 7 → 6 → 5 so the photo could grow) left and photo right, TOP-aligned, one empty grid column between (`8.333vw + 12.33px`, 132px at 1440);
+  then `.about-facts` moved OUT of the text column into its own
+  `site-container` below as a 3-column grid (1 column ≤768), each column a
+  hairline + 18px uppercase Hanken label + tight 14px entries.
+  ⚠️ **No card around the photo** — both a card around ALL of About and a white
+  Work-card frame around just the photo were built and removed on 2026-09-28:
+  the frame's radii didn't nest (40 outer, 24 inner, 32 padding) and the Work
+  cards' white material reads as a link on this site. The photo sits on the page.
+- **About → Contact is the hero → Work transition in REVERSE** (2026-09-28,
+  js/main.js `CONTACT_LAG` / `ABOUT_LIFT`), all 0 at both resting positions:
+  · the blue LEADS the panel (`--contact-lag`, negative = above its layout
+    top) by k 0.5 × distance-to-go × a smoothstep over About-rest → Contact-rest,
+    so it settles at half speed like the gradient leaves. The blue and its grain
+    moved off `.contact-section` onto a new `.contact-bg` layer (bottom-anchored,
+    so no gap opens above the footer); the ledge's `bottom` subtracts the lag.
+    Everything colour-related in the Contact block (tint, bar fill, label flip,
+    bleed gap) reads `blue = edge + contactLead`, not the layout top.
+  · About's copy lifts at `ABOUT_LIFT.speed` 0.8 × travel past its rest (it
+    REPLACED the old push toward the ledge) and fades (`#about.is-about-out`,
+    0.5s) once the blue's top passes the viewport's middle.
+  · the ledge RIDES the copy: its top keeps 16px under About's last element
+    (`aboutSection.lastElementChild`), capped at the token, blended in over the
+    first 120px of travel so About's resting cream is kept. This replaced the
+    `CONTACT.reach` schedule and the up-scroll `ledgeShorten` (both now unused).
+  Measured at 1440x900 by driving updateScrollEffects by hand (the pane and a
+  backgrounded Chrome tab both stop rAF): gap 14px while riding, lead ≤133px,
+  About fades at y≈2124, nav flips to white at the end as before.
+  · and the PACE, the mirror of `HERO_SHORTEN` (added after Jenna noticed the
+    landing's hand-off was far quicker): `CONTACT_SHORTEN { px: 500, cap: 0.5 }`
+    lays `#contact` out higher (`margin-top: −--contact-shorten`) and pushes it
+    + the footer back down by `--contact-push`, which unwinds on the hero's
+    cubic `(1 − q)³` over About-rest → scroll floor. About → Contact went
+    ~1030 → ~530px of scroll at 1440x900; the blue peaks at 4.3x scroll speed
+    on the first gesture (Work peaks ~3.7x) and lands at 0.5x. `#contact`'s
+    `translate` ADDS `--hero-push` because it also matches `.intro-bar ~ *`.
+    Shorten is zeroed then measured in `measureAboutRest`; `aboutRestEdge` is
+    stored in ON-SCREEN terms (+ shorten) and `contactRestEdge` now comes from
+    layout offsets, so neither picks up a translate.
+    ⚠️ The push's progress reads the scroll floor LIVE (`scrollHeight −
+    innerHeight` per frame). It was measured once at load, and in a real
+    browser images/fonts landing afterwards changed the page height, so the push
+    never reached 0 and Contact stopped short of its locked view (nav still
+    dark, heading at the bottom). The measures also re-run on `load` and
+    `document.fonts.ready` (`remeasureLate`).
+- **Contact's copy is CENTRED in the panel again** (`justify-content: center`,
+  2026-09-28, Jenna: more breathing room under the nav). Top-aligning dated
+  from `--contact-trim` 144, which left no slack; at trim 0 the full-frame
+  min-height has room. Measured at 1466x993: 201px nav → heading, 200px below
+  the content (was 96 / ~305).
+- **Scrolling UP reverses it cleanly** because `setupReveals` skips About's
+  groups while `#about.is-about-out` is set. Without that, the lift carried
+  About's content off the top, the reveal system reset it as "off-screen", and
+  scrolling back up replayed a staggered reveal on top of the 0.5s fade —
+  About sat half-blank. Verified in Chrome (visible tab, real wheel scroll).
+- **Contact's copy RIDES THE BLUE** (`CONTACT_COPY.ride` 128): `--contact-peek`
+  is now `lead − max(0, copyOffset − ride) × (1 − smoothstep(q))` — it follows
+  the blue's lead, holds its heading 128px under the blue's top on the way in,
+  and eases into its centred rest as the page lands. Position-only; it replaced
+  the direction-dependent `magnitude * peekDir` peek. And the copy is
+  PRE-REVEALED a full screen below the fold (`CONTACT_PREREVEAL` 1, a Contact
+  branch in `setupReveals`): on the normal on-screen trigger it was still
+  mid-fade as the ~4x blue arrived, which read as an empty band of blue.
+  ⚠️ Chrome tabs driven by claude-in-chrome keep dropping to `hidden` when
+  Jenna's focus is elsewhere — frame logs of 10 frames mean the run was paused.
+  The reveal trigger itself fires from Lenis's scroll event, so it can be
+  checked in a hidden pane via `group.__revealVisible`.
+- **The scrim SWEEPS PAST the nav, it doesn't hang there** (Jenna: "move past
+  it, not linger"). Two changes: the lead is multiplied by `(1 − t)` so the blue
+  lands at FULL scroll speed (plain k settled it at 0.5x, and that slow tail was
+  exactly under the nav), and the ledge is capped to
+  `max(CONTACT_COPY.navRamp 96, blue − invertLine)` so it shortens as it nears
+  the bar instead of dragging a 520px ramp past it. Measured 1440x900: blue
+  1.0–1.2x at the nav, the 98px scrim clears the bar in ~80px of scroll, nav
+  flips right after.
+- ⚠️ **PARED BACK (2026-09-28, Jenna: "it pulls suddenly on me" partway into
+  About).** The pull was `CONTACT_SHORTEN`'s push (up to ~4x on the first
+  gesture) together with `ABOUT_LIFT.speed`'s 1.8x text. Now OFF, as dials set
+  to zero rather than deleted: `CONTACT_SHORTEN.px` 0, `CONTACT_LAG.k` 0,
+  `ABOUT_LIFT.speed` 0, `CONTACT_COPY.ride` null (and the one-screen pre-reveal
+  is removed). Everything moves at exactly 1x. STILL LIVE: the scrim riding
+  About's last line and shortening to `navRamp` past the nav, About's fade once
+  the blue passes mid-screen, and Contact's copy on the normal in-order reveal.
+  Open: WHEN the nav swaps to white on blue — Jenna wants that tackled for
+  accessibility separately.
+- **The nav swap, for accessibility (2026-09-28; Jenna chose to KEEP the
+  see-through bar over a solid cream → blue switch).** Measured against the
+  ramp (cream #FBFCF8 → accent #4A45FF), 16px labels, AA 4.5:
+  · at rest on blue the links were white 0.75 = **3.97** (fail) → now `#fff`,
+    5.86. 0.9 is NOT enough: against black there is no crossover where both
+    clear 4.5 (best 4.28). Same fix on `.site-header .site-nav-bar a`.
+  · before the swap, over the ramp, the 0.8 black fell to **3.9** → full black
+    via `.intro-bar.is-over-ramp` (JS: blue behind the bar, not yet swapped).
+    Full black / full white cross at ramp alpha 0.86, both 4.58 — the existing
+    `DARK_TEXT_ALPHA`.
+  · ⚠️ A see-through bar CANNOT pass on every frame: the ramp changes colour
+    across one line of type, leaving ~12px of scroll under 4.5 at the swap
+    (worst 3.5 at the 96px `navRamp`; a longer ramp only raises the floor, 4.1
+    at 200). Closed with a tight TEXT HALO (cream behind the black labels on the
+    ramp, accent behind the white ones, hero.css "THE SWAP'S HALO") — the halo
+    is the glyphs' immediate background, so contrast is measured against it. It
+    is invisible on plain cream / plain blue. Not yet eyeballed at the swap:
+    claude-in-chrome's tab kept going hidden, which freezes painting.
+  ⚠️ Not yet judged by feel on a trackpad.
+- **The orbs are tuned for COLOUR now, not contrast** (the text sits on
+  white). ⚠️ **PAINT ORDER DECIDES WHICH COLOUR WINS** — the lesson again:
+  strengthening red while it painted over magenta/violet just blanketed them
+  (0% purple); moving red to the bottom with magenta/violet at full size
+  flipped it (0% red). Shipped: `paintOrder` [2, 1, 0, 3] (red at the bottom),
+  magenta r .36 x .10 and violet r .36 x .93 held at their edges, all three on
+  per-orb ramps, cyan r .48 y .16 with no boost — magenta 45% / red 30% /
+  purple 16% / blue 8% of the visible band at 1440x900. Old values are in the comment
+  above `FIELD.blobs`. ⚠️ `lab/field-shader.html` is NOT synced with these.
+- **Tablets (≤1024) draw the shader in a SCREEN-WIDTH box** (responsive.css,
+  1024 tier): `width: 100vw; height: 72svh + rise + 80px; aspect-ratio: auto`,
+  so the orbs scale down with the screen (orb sizes are fractions of the box's
+  width, and `--field-w` there is ~1.65x the screen at 1024x768 and ~2.1x at
+  768x1024). The JPEG fallback keeps `--field-w`; ≤480 keeps its own box. The
+  72svh restates the mask's end — change them together.
+- **Tablets DERIVE their orb layout from the desktop one** (`tabletBlob` in
+  `initHeroField`, 481–1024, read per draw so it follows a resize): each orb
+  keeps its place in the visible colour band (top → the white's end at
+  72svh), x scaled by width, y by the band's height, radius by a
+  height-weighted mean `sy^(2/3)·sx^(1/3)` (an even geometric mean left
+  portrait 51% red — red paints at the bottom and fills what the others
+  miss). Reference: desktop at 1440x900. Measured colour mix: desktop
+  42/33/16/8 (magenta/red/purple/blue), 1024x768 41/33/17/8, 768x1024
+  35/40/19/6. Don't hand-tune a fixed tablet layout — it can only suit one
+  window shape.
+- **The orbs animate ~30% faster** (`FIELD.motion.speed` 2.4, was 1.85) —
+  same drift distance and pulse size, shorter loops.
+- **The gradient drifts at half the scroll speed** (`FIELD_LAG.k` 0.5, was
+  0.3). The white is unaffected — `cream` already includes the lag.
+- The docked `.intro-bar` (invisible before — `html.has-top-nav`) is
+  **position: fixed** from the hand-off on
+  (`is-bar-lifted`), with Work taking a `-shorten` margin so layout is
+  identical. ⚠️ **Not a scroll-linked transform** — `--bar-lift` was tried and
+  wobbled, because scroll events land a frame behind the compositor.
+  "Selected work" is active from the hand-off.
+- **NO automatic glide into Work.** `WORK_GLIDE` (a Lenis scrollTo fired at
+  the hand-off) was built, tuned, and REMOVED 2026-09-27 at Jenna's ask — it
+  pulled her down the page. That is the fifth auto-scroll into Work removed
+  for the same reason (see Horizontal Tracks); don't rebuild one.
+- `WORK_REVEAL` 0.9 / 0.95 (the site-wide line), so the card's rise-and-fade
+  plays on screen. `#work-section` padding-top is 0 (was 104).
+
+  **The "Selected work" nav click** lands on `workLandingScrollY()` — the first
+  card's top one `--gap-group` under the nav (1440x900: card at 126). It sits
+  below Work's resting position, so the spy still lights the link.
+
+**Open / not done (as of 2026-09-27):**
+- Phones (≤480) were not tuned for any of this — they keep their own mobile
+  header, phone orb layout and still field.
+- Meta descriptions / JSON-LD / llms.txt still carry the old bio and title
+  (Jenna to decide; ask before cascading copy).
+- The landing nav's white type over the gradient hasn't been contrast-checked
+  at rest.
+- `lab/field-shader.html` is not synced with the retuned orbs, paint order,
+  motion speed or the tablet mapping.
+- Jenna judges motion by feel on a trackpad; the preview pane can't. Every
+  timing here was measured, not felt — expect further tuning.
+
 ## Landing (2026-08) — "Making products make sense."
 The homepage hero is the Figma 339:3745 landing: `images/hero-bkg.jpg` laid as
 a PAGE background at `z:-1` inside `main` (a stacking context — body's own
@@ -3196,15 +3509,14 @@ own version, separate from the `style.css?v=` / `@import` CSS bump below).
   refetches the entire stylesheet instead of reusing it. So when a face is added,
   add it **everywhere**, even to pages that don't use it — the `@font-face` rules
   cost ~1.7KB of CSS there and download no woff2, because a face is only fetched
-  where it actually renders. Current request:
-  `Hanken+Grotesk:wght@200;500;700` + `Inter:wght@400..700`.
-  **The site loads ZERO italic faces.** So `font-style: italic` anywhere today
-  renders as a browser-sheared oblique — obvious and ugly at display sizes. Before
-  using italic, add the axis (`ital,wght@0,200;0,500;0,700;1,500` for Hanken —
-  verified available) to **all five** links. A `1,500` face was added and then
-  removed again in 2026-08 when the insight band dropped italic (and the band was
-  later removed entirely); don't leave an unused face behind if italic is dropped
-  again.
+  where it actually renders. Current request (worktree-redesign):
+  `Hanken+Grotesk:ital,wght@0,200;0,500;0,700;1,500` + `Inter:wght@400..700`.
+  **The ONE italic face is Hanken 500 italic**, used by the hero's
+  `.intro-headline-italic` (the name, "Jenna Ammerall"). Any other weight or family in
+  italic still renders as a browser-sheared oblique — add its axis to **all
+  five** links first. If the hero drops the italic, take `1,500` out again
+  (it was added and removed once before, in 2026-08); don't leave an unused
+  face behind.
 - ⚠️ **AFTER A DEPLOY, HARD-RELOAD BEFORE JUDGING ANYTHING.** `index.html` has no
   cache-buster of its own (correctly — see the `?v=` entry below), so a browser
   that already has the page keeps serving the OLD html, which still names the OLD

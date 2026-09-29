@@ -146,14 +146,16 @@
     --gap-group: 48px;
     --gap-heading: 96px;
     --page-gutter: 24px;
-    /* Work track peek: 120 − 48 (gap) + 24 (gutter) = 96px of the next card
-       visible. Steps down with the gutter — the sliver is a proportion of the
-       screen, not a fixed sign-post. */
+    /* --work-peek outlived the Work carousel it was named for: the hero's
+       .intro-band still pads its right edge by it (hero.css). */
     --work-peek: 120px;
     --section-title-size: 2.75rem; /* 44px */
     --project-block-title-size: 2.25rem; /* 36px — one notch under the 44 above */
     --next-case-title-size: 1.75rem; /* 28px — one notch under the block heading */
     --next-case-radius: 48px;
+    --work-card-title-size: 1.75rem; /* 28px */
+    --work-card-radius: 32px;
+    --work-card-pad: 28px;
     /* LOCKED across the whole 1024→481 band — no clamp. The global token is
        fluid (6.67vw), which slid the display from 68.3px at 1024 down to 56 by
        768: the headline changed size and, because it's bottom-anchored to the
@@ -208,6 +210,23 @@
        do want them locked together, re-measure landscape before changing the
        floor; don't just copy the desktop number in. */
     --field-w: max(1688.69px, 220svh, 117.27vw);
+  }
+
+  /* REDESIGN (2026-09-27): THE SHADER GETS ITS OWN SCREEN-WIDTH BOX ON
+     TABLETS, so the orbs scale DOWN with the screen. Orb sizes are fractions
+     of the box's WIDTH, and --field-w above (for the JPEG fallback, which is
+     kept) is ~1.65x the screen at 1024x768 and ~2.1x at 768x1024 — so the orbs
+     came out as big as a large desktop's. The box was that wide only to be
+     TALL enough; the shader reads the canvas's real aspect (uAspect), so the
+     orbs stay round in any box — the same move the phone tier makes. Height:
+     down to the white's end (72svh, hero.css --field-mask-end) plus the rise,
+     with 80px spare so the artwork's edge stays under the white. The ≤480
+     tier restates its own box and wins there. */
+  .page-field-canvas,
+  .page-field-grain {
+    width: 100vw;
+    height: calc(72svh + var(--field-rise) + 80px);
+    aspect-ratio: auto;
   }
 
   /* ⚠️ SPACE-BETWEEN INSIDE .contact-inner WAS TRIED HERE AND REVERTED (2026-09).
@@ -277,6 +296,9 @@
   .intro-bar {
     padding-inline: 24px; /* sticky bar: gutter is padding now, not offsets */
   }
+  .top-nav {
+    padding-inline: 24px; /* REDESIGN: matches .intro-bar */
+  }
   /* Project pages stack .project-block at this tier (the homepage's About holds
      two columns down to 768), so there is no right column for the nav's grid
      anchor to meet here. Same flex revert as the 768 tier, scoped to --page. */
@@ -301,36 +323,6 @@
        narrowed to ~369px by this width, which would bunch the nav). Shrinkable
        so it can never push the name out on narrow edge cases. */
     flex: 0 1 542px;
-  }
-
-  /* Landscape-tablet work cards stack in ONE column in the frame's order:
-     Title -> Meta -> Description -> Image (280:5182) — the same order the DOM
-     already reads in. The desktop DOM nests title in .work-card-body/
-     .work-card-left and meta+description in .work-card-right, with the image a
-     sibling AFTER both — so display:contents dissolves all three wrappers and
-     promotes the four leaves to direct flex children of .work-card. (The ≤768
-     tier re-orders these to image-first for the portrait frames.) */
-  .work-card-body,
-  .work-card-left,
-  .work-card-right {
-    display: contents;
-  }
-
-  .work-card {
-    /* Stacked, so the card's parts are siblings in one rhythm rather than a
-       text lockup set against an image — content, not group. */
-    gap: var(--gap-content);
-  }
-
-  .work-card-image-link {
-    margin-top: 16px; /* description→image reads 40px in the frame (24 + 16) */
-  }
-
-  .work-card-image {
-    /* The frame's image is proportional (976×305 = 1328:415, same crop as the
-       1440 design), not the desktop's fixed 415px strip. */
-    height: auto;
-    aspect-ratio: 1328 / 415;
   }
 
   /* (The big content H2 steps 56 → 44 → 32 via --section-title-size in each
@@ -383,6 +375,12 @@
    Work imagery shrinks; the hero headline and intro paragraph go full width.
    ========================================================================== */
 @media (max-width: 768px) {
+  /* About facts: one column per row once About stacks (redesign). */
+  .about-facts {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: var(--gap-group);
+  }
+
   /* SPACING SCALE, portrait-tablet step: identical to the 1024 tier (gutter 24,
      group 48), so nothing is re-declared here — the tokens above cascade down.
      This tier only carries what genuinely differs at portrait width. */
@@ -445,9 +443,7 @@
        from 1024 to 481) — this is the card shape alone. */
     --next-case-radius: 32px;
 
-    /* Work track peek: 104 − 48 (gap) + 24 (gutter) = 80px visible. The gutter
-       and gap both hold from 1024, but the CARD is narrower here, so the peek
-       gives a little back to the content rather than staying at 120. */
+    /* --work-peek: see the 1024 tier — now read only by the hero band. */
     --work-peek: 104px;
   }
 
@@ -534,42 +530,39 @@
   .intro-band-spacer {
     display: none;
   }
-  /* Portrait tablet + phone work cards run Image -> Title -> Meta ->
-     Description (their frames lead with the image; the wrappers are already
-     flattened by the 1024 tier's display:contents, which is what makes this
-     interleaving possible). The 1024 tier's title-first rhythm resets too.
+  /* REDESIGN: the two lockup columns stack once they share a narrow row. */
+  .intro .intro-band {
+    flex-direction: column;
+    align-items: stretch; /* undo the row's last-baseline (hero.css) */
+    gap: var(--gap-content);
+  }
+  .intro-band-left {
+    flex: 0 0 auto;
+  }
+  /* REDESIGN: the top nav leaves the right-column grid where the content
+     stacks — the same flex cluster as .intro-bar above, same gaps (links one
+     --gap-group apart, --gap-group before the pill), so the items match. */
+  .top-nav {
+    display: flex;
+    gap: var(--gap-group);
+  }
+  .top-nav-lead {
+    flex: 1 1 auto;
+    padding-right: 0;
+  }
+  /* The Work masonry drops to ONE column. initWorkMasonry reads the live
+     track count and switches itself off, so no JS change is needed here. */
+  .work-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
 
-     ⚠️ EVERY sibling needs an explicit order, including the ones that look
-     like they land right on their own. .work-card-meta carried none until
-     2026-08-31, which is not "leave it where it is": an unset order is 0, the
-     SAME group as the image, and within a group the flattened DOM order decides
-     — meta comes out of .work-card-right ahead of the image-link, so the pill
-     and stamp rendered ABOVE the picture, before the reader had a title to
-     attach them to. Numbering three of four siblings silently promotes the
-     fourth to first. */
-  .work-card-image-link { order: 0; margin-top: 0; }
-  .section-title { order: 1; }
-  .work-card-meta { order: 2; }
-  .work-card-description { order: 3; }
-
-  /* (.work-card's stacked gap is --gap-content, set in the 1024 tier and
-     inherited here — the card reflows the same way at both portrait sizes.) */
-
-  .work-card-image-link,
-  .work-card-image,
   .project-hero-figure,
   .project-figure {
-    /* The project hero is the same image as the Work card, so it steps to the
-       same radius here. Keep these together. (The next-case card is NOT in this
+    /* (The next-case card is NOT in this
        group: it steps at every tier via --next-case-radius, so it lands on 32
        here rather than jumping 60 → 24 in one move.) */
     border-radius: 24px;
   }
-
-  /* NO fixed height here any more — the 1024 tier's proportional rule cascades
-     down. A fixed strip crops the 3.2:1 artwork: at 720 wide, 220px made the
-     frame 3.27 and object-fit: cover shaved the top and bottom. The ratio keeps
-     the whole image at every width. */
 
   .about-skills-list {
     grid-template-columns: 1fr;
@@ -601,6 +594,21 @@
    480 block still follows this one and wins where they overlap.
    ========================================================================== */
 @media (max-width: 680px) {
+  /* REDESIGN: no top nav below the desktop bar's own hand-off point. */
+  .top-nav {
+    display: none;
+  }
+  /* ...so the hero's right column stops tracking it (hero.css) and runs the
+     full stacked width again. The 480 tier restates the inset for its gutter. */
+  .intro .intro-band {
+    padding-left: 40px;
+    padding-right: 40px;
+  }
+  .intro .intro-band-right {
+    width: auto;
+    margin-left: 0;
+  }
+
   /* The landing's bottom bar goes; the header + floatie below replace it.
      .intro-bar is a SIBLING of .intro whose negative top margin is cancelled
      by an equal bottom margin, so removing it from flow costs the hero
@@ -706,6 +714,9 @@
        move at every tier (the radius below does, because it's a shape, not type). */
     --next-case-title-size: 1.75rem; /* 28px — held, not stepped */
     --next-case-radius: 24px;
+    --work-card-title-size: 1.5rem; /* 24px */
+    --work-card-radius: 24px;
+    --work-card-pad: 20px;
 
     /* SPACING SCALE, phone step — the tightest, and where the scale was
        derived (see the block at the top of this file). Group and section both
@@ -720,9 +731,6 @@
     --gap-section: 64px;
     --gap-heading: 40px;
     --page-gutter: 16px;
-    /* NO --work-peek here on purpose: the phone has no horizontal track to peek
-       out of (see .work-list in this tier). The 768 value still cascades in, but
-       nothing reads it — .work-card's flex is fully overridden below. */
 
     /* Hero field, phone size: 85% of the 1821.6px the artwork is frozen at
        everywhere else (hero.css) — a 15% narrower crop, so less of the gradient
@@ -854,6 +862,10 @@
   .intro-band-spacer {
     display: none;
   }
+  .intro .intro-band {
+    padding-left: 16px; /* REDESIGN: matches the tier gutter (see 680) */
+    padding-right: 16px;
+  }
   /* The gradient field is CENTERED on the viewport by default (translateX(-50%)
      on a box frozen at 1639.44px wide, so a phone just crops more of it). Nudge
      that crop 50px to the RIGHT. A fixed px offset, not a %, so it is locked:
@@ -937,8 +949,7 @@
      ⚠️ THIS BREAKPOINT IS PAIRED WITH A JS GATE. `initHeroField` in js/main.js
      bails on the same 480 query and never creates a WebGL context, which is
      where the actual saving is — `display: none` alone would leave the render
-     loop running invisibly. Move one and you MUST move the other, the same way
-     initWorkCarousel is paired with this tier's layout revert.
+     loop running invisibly. Move one and you MUST move the other.
 
      Everything the shader path needs is still intact underneath: the <img> was
      never removed, still carries fetchpriority="high", and is still the LCP
@@ -1071,70 +1082,11 @@
     padding: 8px 10px;
   }
 
-  /* Phone work cards inherit the Image -> Title -> Meta -> Description order
-     (set in the 768 tier) and the flattened wrappers from the 1024 tier; only
-     the 20px rhythm and the Figma type sizes are specific to this breakpoint. */
-  .work-card {
-    gap: 20px;
-  }
-  /* The horizontal track's card→card gap, cut below --gap-group (40). Empty
-     space BETWEEN cards buys nothing on a phone — it is swiped past — whereas
-     every pixel it costs comes straight off the card's own width. 24 keeps the
-     40px peek (see --work-peek above) and hands 16px back to the headline. */
-  /* NO HORIZONTAL SCROLL ON PHONE (2026-08). The track is a horizontal,
-     snapping, looping carousel from 481 up; here it reverts to the plain
-     vertical stack it always was. A phone already scrolls vertically, so a
-     sideways gesture inside that is a second, competing axis — and it costs the
-     card ~48px of width it cannot spare at 32px headline type.
-     ⚠️ The JS half of this is NOT optional. initWorkCarousel (js/main.js)
-     watches the same 480 boundary and switches itself off, restoring the
-     authored card order. Without that gate it would keep rotating the DOM and
-     writing scrollLeft on a container that no longer scrolls — scrollLeft is
-     pinned at 0, so its "scroll back into the buffer" loop would re-prepend
-     cards on every scroll event and scramble the running order. Change this
-     breakpoint and you must change the matchMedia query with it. */
-  .work-list {
-    flex-direction: column;
-    gap: var(--gap-section);
-    /* Undo the bleed, the snap, and the clip-guard padding — all of them exist
-       only to serve a horizontal scrollport. */
-    overflow-x: visible;
-    margin-inline: 0;
-    padding-inline: 0;
-    padding-block: 0;
-    margin-block: 0;
-    scroll-snap-type: none;
-    scroll-padding-inline: 0;
-  }
-
-  .work-card {
-    /* MUST be reset, not just left alone: in a COLUMN flex container the basis
-       applies to the main axis, so the desktop `flex: 0 0 calc(100% - peek)`
-       would set each card's HEIGHT to the container's height minus the peek.
-       `auto` hands height back to the content; the container's default
-       align-items: stretch gives the card the full width. */
-    flex: 0 0 auto;
-  }
-  /* NO fixed height — the 1024 tier's `aspect-ratio: 1328 / 415` cascades down.
-     This tier used to force 201px, which on a 343px card made the frame 1.71
-     against the artwork's 3.20: object-fit: cover then threw away 47% OF THE
-     IMAGE'S WIDTH, taking only the middle band. That is content, not padding —
-     work-accessibility.jpg keeps its UI in the left and right thirds, so the
-     lead card showed an empty gradient. Proportional gives 343x107 and the whole
-     composition.
-     ⚠️ The 201 came from the Figma phone frame, so this deliberately departs from
-     it. The frames were drawn before these 3.2:1 exports existed; matching the
-     number cost the picture. Every other tier is already proportional — desktop's
-     415px on a 1328 card IS 3.20 — so this makes the phone consistent rather than
-     special. If a taller phone card is wanted, it needs its own crop exported at
-     that ratio, not a shorter frame over a wide image. */
+  /* Phone work cards: one column (from the 768 tier), and the 17px Figma
+     description size. */
   .work-card-description {
     font-size: 17px; /* Figma */
   }
-
-  /* (No rule needed for .work-pagination here: this tier disables the loop, so
-     .is-looping comes off .work-list and the sibling rule in sections.css hides
-     the bar on its own — the same rule that covers JS being off.) */
 
   /* About tightens BELOW --gap-heading (40) to 20: what follows the heading
      here is the photo, not text, and an image edge needs less separation from

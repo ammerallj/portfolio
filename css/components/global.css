@@ -91,6 +91,15 @@
      as a pill on a phone and as a barely-bent corner on a desktop. */
   --next-case-radius: 60px;
 
+  /* Homepage WORK CARD (the two-column masonry, sections.css). Title is the
+     "smaller headline" of a half-width card — 32 → 28 (≤1024) → 24 (≤480).
+     Its own token rather than --next-case-title-size: same number today, but a
+     masonry card and the project pages' pager answer to different things.
+     Radius and inner padding step with it in each responsive.css :root. */
+  --work-card-title-size: 2rem;   /* 32px */
+  --work-card-radius: 40px;
+  --work-card-pad: 32px;
+
   --space-xs: 0.5rem;
   --space-sm: 1rem;
   --space-md: 2rem;
@@ -554,13 +563,16 @@ p {
    ⚠️ Headings are deliberately absent. They are their own composition — the
    landing's two-line statement is broken where Jenna wants it. */
 .intro-bio,
-.work-card-description,
 .about-body p,
 .project-lead,
 .project-impact-list li,
 .next-case-description {
   text-wrap: pretty;
 }
+/* (.work-card-description left this list 2026-09-28: `pretty` pulled a word
+   down to avoid an orphan, so a one-line description that just missed fitting
+   broke early and left the first line well short of the card's edge. Jenna
+   wants the first line to run full width; a lone last word is the trade.) */
 
 a {
   color: var(--color-text);
