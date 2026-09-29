@@ -186,14 +186,6 @@ functions of scroll, the fades are timed class toggles):
   then `.about-facts` moved OUT of the text column into its own
   `site-container` below as a 3-column grid (1 column ≤768), each column a
   hairline + 18px uppercase Hanken label + tight 14px entries.
-  **All of About sits in ONE white rounded card** (`.about-card`, 2026-09-28):
-  the Work cards' material (#fff, `--color-border-light` hairline,
-  `--work-card-radius`), padded by `--gap-group`. The outer `.site-container`
-  is now About's only child container, so `#about > .site-container` (peek +
-  fade) and `aboutSection.lastElementChild` (the scrim ride) both mean the card.
-  ⚠️ The bio's 7-column width and the one-column gap are still vw maths for the
-  FULL container, so inside the card's padding the photo shrinks (307x170 at
-  1440) — re-derive against the card if that matters.
 - **About → Contact is the hero → Work transition in REVERSE** (2026-09-28,
   js/main.js `CONTACT_LAG` / `ABOUT_LIFT`), all 0 at both resting positions:
   · the blue LEADS the panel (`--contact-lag`, negative = above its layout

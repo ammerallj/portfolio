@@ -159,7 +159,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,200;0,500;0,700;1,500&family=Inter:wght@400..700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=1d011efd" />
+  <link rel="stylesheet" href="style.css?v=b601c576" />
   <!-- The landing field's JPEG fallback — PHONES ONLY since 2026-09, so the
        preload is gated to match the <picture> in <main>. Without the media
        attribute this fetches 1.4MB on every desktop and tablet visit for an
@@ -476,16 +476,13 @@
 
     <!-- ABOUT -->
     <section class="page-section" aria-labelledby="about-heading" id="about">
-      <!-- ONE white rounded card holds all of About (2026-09-28), styled like
-           the Work cards. The outer .site-container keeps the page gutter and
-           still carries About's peek + fade (#about > .site-container). -->
       <div class="site-container">
-      <div class="about-card">
         <h2 class="section-title" id="about-heading" data-reveal-group data-reveal>About Me</h2>
+      </div>
       <!-- Reveal orders 2/3 (not 0/1): the right column is pulled up level with
            the heading, so this group and the heading's fire on the same scroll
            tick — the offsets are what keep "About Me." leading the sequence. -->
-      <div class="about-layout" data-reveal-group>
+      <div class="about-layout site-container" data-reveal-group>
 
         <!-- LEFT COLUMN -->
         <div class="about-left" data-reveal data-reveal-order="3">
@@ -511,7 +508,7 @@
 
       <!-- Facts: three columns across the full width, each under a hairline
            with its label as a heading. -->
-      <div data-reveal-group>
+      <div class="site-container" data-reveal-group>
           <dl class="about-facts" data-reveal>
             <div class="about-facts-row">
               <dt>Experience</dt>
@@ -527,8 +524,6 @@
               <dd><span>Co-inventor · Microsoft Loop / Fluid Framework</span></dd>
             </div>
           </dl>
-      </div>
-      </div>
       </div>
     </section>
 
