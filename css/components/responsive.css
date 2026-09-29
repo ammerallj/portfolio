@@ -1158,6 +1158,15 @@
     align-items: center; /* centred, as on desktop (was flex-start; 2026-09-28) */
     text-align: center;
   }
+  /* Two lines on phones: the owner, then "Human directed. AI built." — the
+     " · " between them only makes sense on one line (2026-09-28). */
+  .footer-sep {
+    display: none;
+  }
+  .footer-owner,
+  .footer-credit {
+    display: block;
+  }
 
   /* The on-page Contact section is dropped on mobile — its info (connect block +
      On My Mind) now lives in the Contact menu overlay. With the blue panel gone,
