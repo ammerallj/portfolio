@@ -1566,8 +1566,8 @@ const topNav = document.querySelector('.top-nav');
 const WORK_IN = 8;
 // Below this the .intro-bar is display:none (responsive.css 680 tier).
 const NO_LANDING_BAR = window.matchMedia('(max-width: 680px)');
-// At and below this the first Work card peeks above the fold (responsive.css).
-const WORK_PEEKS = window.matchMedia('(max-width: 1024px)');
+// At and below this the first Work card peeks above the fold (responsive.css ≤1376).
+const WORK_PEEKS = window.matchMedia('(max-width: 1376px)');
 const NAV_REVEAL_MAX = 400;
 // Where the "Selected work" nav click LANDS (sectionClickScrollY): the first
 // card's TOP EDGE one --gap-group below the nav. (It was shared with an
@@ -2775,7 +2775,7 @@ function updateScrollEffects() {
     // ≤680 there is no landing bar (fieldDockScroll stays 0), so the timed
     // fade-up never fired and the Work cards sat at opacity 0 on phones. There
     // the container is simply in; each card still has its own reveal.
-    // ≤1024 the first card PEEKS at rest (--hero-peek, responsive.css), so
+    // ≤1376 the first card PEEKS at rest (--hero-peek, responsive.css), so
     // the container is in from the start there — a timed fade-up would leave
     // the peek empty until the first scroll.
     html.classList.toggle('is-work-in', NO_LANDING_BAR.matches || WORK_PEEKS.matches
