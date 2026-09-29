@@ -1361,7 +1361,7 @@ function initHeroField() {
     }
     const sx = boxW / TABLET_REF.w;
     // The stacked 481–768 hero publishes its own white end (measurePhoneField).
-    const stackEnd = parseFloat(document.documentElement.style.getPropertyValue('--stack-field-end'));
+    const stackEnd = parseFloat(document.documentElement.style.getPropertyValue('--hero-field-end'));
     const bandPx = Number.isFinite(stackEnd) ? stackEnd : 0.72 * window.innerHeight - heroPeekPx;
     const sy = bandPx / TABLET_REF.band;
     // Weighted toward the band's HEIGHT (2/3 : 1/3, not an even geometric
@@ -1514,20 +1514,23 @@ const PHONE_FIELD_GAP = 48;
 function measurePhoneField() {
   const root = document.documentElement;
   const h1 = document.querySelector('.intro-headline');
-  // 481–768 — THE STACKED TABLET HERO (2026-09-28): the lockup stacks there, so
-  // the headline starts higher than the 72svh gradient allows for (740x1000:
-  // headline at 602, the white's end at 632). Publish where the white must end
-  // — PHONE_FIELD_GAP above the headline, in PAGE px — for the 768 tier's mask
-  // and canvas box, and for tabletBlob's band.
-  const stacked = h1 && window.matchMedia('(min-width: 481px)').matches
-    && (root.classList.contains('is-hero-stacked')
-      || window.matchMedia('(max-width: 768px)').matches);
-  if (stacked) {
+  // ABOVE 480 — THE WHITE ENDS PHONE_FIELD_GAP ABOVE THE HEADLINE (2026-09-28).
+  // First only for the stacked hero (740x1000: headline at 602, the 72svh end
+  // at 632); now at every width, because a fixed share of the screen doesn't
+  // follow the headline either way — it ran 12–23px BEHIND it on short laptops
+  // (1280x800, 1366x768, 1440x760) and left 195px of empty cream above it on a
+  // portrait iPad (1024x1366). Published in PAGE px for the tiers' masks and
+  // canvas boxes and for tabletBlob's band. Above 1024 (and not stacked) the
+  // CSS takes min() with the 72svh end, so it only ever pulls the white UP
+  // there: the desktop canvas box is sized by its aspect, not by this, and a
+  // white that moved down could expose the artwork's bottom edge.
+  const aboveMobile = h1 && window.matchMedia('(min-width: 481px)').matches;
+  if (aboveMobile) {
     let t = 0;
     for (let n = h1; n; n = n.offsetParent) t += n.offsetTop;
-    root.style.setProperty('--stack-field-end', Math.round(Math.max(160, t - PHONE_FIELD_GAP)) + 'px');
+    root.style.setProperty('--hero-field-end', Math.round(Math.max(160, t - PHONE_FIELD_GAP)) + 'px');
   } else {
-    root.style.removeProperty('--stack-field-end');
+    root.style.removeProperty('--hero-field-end');
   }
   if (!h1 || !window.matchMedia('(max-width: 480px)').matches) {
     root.style.removeProperty('--phone-field-h');
@@ -2666,7 +2669,7 @@ function updateScrollEffects() {
   // flag above it, because the header is on screen through the load reveal.
   // ≤680, everywhere this header is the nav (was ≤480 only; 481–680 kept the
   // frosted band over the gradient). The white's end comes from the measured
-  // tokens — --phone-field-h (≤480) or --stack-field-end (481–768) — in page
+  // tokens — --phone-field-h (≤480) or --hero-field-end (481–768) — in page
   // px; the header stays transparent while that end, less a fade's worth, is
   // still below it.
   if (siteHeader) {
@@ -2674,7 +2677,7 @@ function updateScrollEffects() {
     if (NO_LANDING_BAR.matches) {
       const rs = document.documentElement.style;
       const end = parseFloat(rs.getPropertyValue('--phone-field-h'))
-        || parseFloat(rs.getPropertyValue('--stack-field-end'));
+        || parseFloat(rs.getPropertyValue('--hero-field-end'));
       if (end) onField = end - window.scrollY - 112 > siteHeader.getBoundingClientRect().bottom;
     }
     siteHeader.classList.toggle('is-header-on-field', onField);
