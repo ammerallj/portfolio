@@ -1519,7 +1519,9 @@ function measurePhoneField() {
   // headline at 602, the white's end at 632). Publish where the white must end
   // — PHONE_FIELD_GAP above the headline, in PAGE px — for the 768 tier's mask
   // and canvas box, and for tabletBlob's band.
-  const stacked = h1 && window.matchMedia('(min-width: 481px) and (max-width: 768px)').matches;
+  const stacked = h1 && window.matchMedia('(min-width: 481px)').matches
+    && (root.classList.contains('is-hero-stacked')
+      || window.matchMedia('(max-width: 768px)').matches);
   if (stacked) {
     let t = 0;
     for (let n = h1; n; n = n.offsetParent) t += n.offsetTop;
@@ -1542,6 +1544,21 @@ function measurePhoneField() {
   const px = Math.round(Math.max(120, top - PHONE_FIELD_GAP));
   root.style.setProperty('--phone-field-h', px + 'px');
 }
+// STACK THE HERO THE MOMENT ITS HEADLINE WOULD WRAP TO 4 LINES (2026-09-28,
+// Jenna). Width alone can't say when — the headline steps 56 → 44px at 1024,
+// so it is 4 lines at 1025–~1200 and 3 again at 1024 — so it is MEASURED: the
+// class is cleared, the side-by-side headline's lines counted (offsetHeight,
+// which ignores the load reveal's transform), and the class set if > 3. The
+// ≤768 tier stacks by media query anyway; ≤680 has the phone layout.
+function measureHeroStack() {
+  const root = document.documentElement;
+  const h1 = document.querySelector('.intro-headline');
+  root.classList.remove('is-hero-stacked');
+  if (!h1 || window.matchMedia('(max-width: 768px)').matches) return;
+  const lh = parseFloat(getComputedStyle(h1).lineHeight) || 1;
+  root.classList.toggle('is-hero-stacked', Math.round(h1.offsetHeight / lh) > 3);
+}
+measureHeroStack();
 measurePhoneField();
 
 try {
@@ -3290,7 +3307,20 @@ window.addEventListener('scroll', onScroll, { passive: true });
 measureFieldTuck();
 measureContactArrival();
 measureAboutRest();
+// The stack decision re-runs once a resize SETTLES too: measured mid-resize
+// (1180 → 1024) it read the layout before the 1024 tier's type step applied
+// and stacked a headline that fits in 3 lines.
+let heroStackTimer = 0;
 window.addEventListener('resize', () => {
+  clearTimeout(heroStackTimer);
+  heroStackTimer = setTimeout(() => {
+    measureHeroStack();
+    measurePhoneField();
+    updateScrollEffects();
+  }, 150);
+});
+window.addEventListener('resize', () => {
+  measureHeroStack();
   measurePhoneField();
   measureNavColumns(); // REDESIGN: before the tuck, which reads the bio
   measureFieldTuck();
@@ -3302,6 +3332,7 @@ window.addEventListener('resize', () => {
 // measure; re-measure once each has settled, or the Contact pacing and resting
 // positions are taken from a page that no longer exists.
 const remeasureLate = () => {
+  measureHeroStack();
   measurePhoneField();
   measureNavColumns();
   measureFieldTuck();
