@@ -364,6 +364,10 @@ functions of scroll, the fades are timed class toggles):
 - **The wordmark is a CLOCK** on the homepage header (`<time class="site-name
   site-clock top-nav-clock">`, "Seattle" without JS; `initTopNav` fills every
   `.top-nav-clock`). Tapping it no longer scrolls to the top.
+- **The lockup is BOTTOM-ALIGNED**: `--hero-h` is `100svh − --gap-group` (was
+  `100dvh − 184`, a Work-card peek that read as empty cream), so "Prev. at…"
+  ends 40px above the screen's bottom (390x844: headline 535, gradient end 338).
+  ⚠️ This retires the ≤480 card-peek scroll cue and its 120px maths above.
 - **The Selected work / About me floatie stays tucked on the landing**: it
   appears once the hero's bottom is above mid-screen (the `is-tucked` state,
   homepage variant only).
