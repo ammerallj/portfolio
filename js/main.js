@@ -1159,11 +1159,16 @@ const FIELD = {
   entrance: { lead: 280, stagger: 240, duration: 320 },
   // REDESIGN: speed 2.4 (was 1.85) — ~30% quicker drift and pulse, same travel.
   motion: { speed: 2.4, drift: 0.050, driftYRatio: 0.2, pulse: 0.30, warp: 0.55 },
-  // Buffer size vs CSS px. BELOW devicePixelRatio deliberately: a soft
-  // gradient carries no per-pixel detail, so 1.0 on a 2x display is a 4x
-  // fill-rate saving nobody can see. Grain is the one thing that does want
-  // device pixels, which is why it is a CSS layer (hero.css) and not in here.
-  renderScale: 1.0,
+  // Buffer size vs CSS px, as a CAP on devicePixelRatio (2026-09-29). It was a
+  // flat 1.0 — "a soft gradient carries no per-pixel detail, so 1x on a 2x
+  // display is a 4x fill-rate saving nobody can see" — and that turned out to
+  // be wrong in practice: the feedback was the hero "looks like a low quality
+  // image". At 1x the browser stretches the buffer 2x, which softens the orb
+  // edges and, worse, blows the one-code-value DITHER up into 2x2 device-pixel
+  // blocks — exactly the texture of an over-compressed JPEG. Rendering at the
+  // display's own density keeps the dither at device pixels, where it vanishes.
+  // Capped at 2: a 3x phone gains nothing visible over 2x and pays 2.25x.
+  renderScale: 2,
 };
 
 /* ⚠️ PHONES NOW GET THE SHADER TOO (2026-09) — this used to bail here and hide
@@ -1308,8 +1313,9 @@ function initHeroField() {
     const r = canvas.getBoundingClientRect();
     boxW = Math.max(1, r.width);
     boxH = Math.max(1, r.height);
-    const w = Math.max(1, Math.round(r.width  * FIELD.renderScale));
-    const h = Math.max(1, Math.round(r.height * FIELD.renderScale));
+    const scale = Math.min(window.devicePixelRatio || 1, FIELD.renderScale);
+    const w = Math.max(1, Math.round(r.width  * scale));
+    const h = Math.max(1, Math.round(r.height * scale));
     if (canvas.width !== w || canvas.height !== h) {
       canvas.width = w;
       canvas.height = h;
