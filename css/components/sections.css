@@ -1227,7 +1227,7 @@ html.has-top-nav.is-work-in #work-section .site-container {
   /* 7 grid columns, not the shared 5-column --width-right-column (redesign,
      2026-09-28): 7·(100vw − 332px)/12 + 6·20px = 766px at 1440. ⚠️ About's
      copy no longer starts on the nav's "Selected work" line. */
-  flex: 0 0 min(calc(58.3333vw - 73.67px), 766.33px); /* 7 grid columns (Jenna: "more content width", 2026-09-28): 7·(100vw − 332px)/12 + 6·20px = 766px at 1440, capped there; the photo takes the rest */
+  flex: 0 0 min(calc(50vw - 66px), 654px); /* 6 grid columns (2026-09-28, back from 7 so the photo — now in its own card — can grow): 6·(100vw − 332px)/12 + 5·20px = 654px at 1440, capped there; the photo takes the rest */
   order: -1; /* visually LEFT of the photos; also first when stacked */
   display: flex;
   flex-direction: column;
