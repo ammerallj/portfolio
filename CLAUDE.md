@@ -148,8 +148,9 @@ functions of scroll, the fades are timed class toggles):
 - **Facebook Groups card is BACK** (2026-09-28) with Jenna's `fb-card` media:
   a single tall phone (974x1848; GIF 119 frames ~23fps, 14.1MB) CONTAINED in
   the 5:4 frame (`--media-fit: contain`, read by `.work-card-media > img`) — at
-  its own ratio the card would be ~1200px tall. A contained frame always takes
-  the full levelling stretch (it can't crop), so the columns end level again.
+  its own ratio the card would be ~1200px tall. It does NOT take the levelling
+  stretch: exempting contained frames made it 778px tall, too tall to see whole
+  (Jenna), so the columns end ~154px apart at 1440 again.
   (History: it was hidden earlier the same day —
   `initWorkMasonry` skips hidden cards, and the bottom-levelling stretch now
   applies only when it is ≤15% of the frame's height (`LEVEL_MAX`) — with three
