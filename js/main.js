@@ -2414,6 +2414,24 @@ function initWorkHoverMedia() {
     const link = img.closest('.work-card-link');
     if (!link) return;
     const src = img.dataset.hoverSrc;
+    // A <video> hover (MP4 — a fraction of a GIF's weight, full colour): the
+    // src lands on first hover, each hover restarts it from 0, and the class
+    // that shows it waits for play() to resolve, so a slow first fetch still
+    // shows the still rather than an empty frame. Paused on leave.
+    if (img.tagName === 'VIDEO') {
+      const playVideo = () => {
+        if (!img.getAttribute('src')) img.src = src;
+        img.currentTime = 0;
+        const p = img.play();
+        if (p && p.then) p.then(() => link.classList.add('is-hover-playing')).catch(() => {});
+      };
+      const stopVideo = () => { link.classList.remove('is-hover-playing'); img.pause(); };
+      link.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') playVideo(); });
+      link.addEventListener('pointerleave', stopVideo);
+      link.addEventListener('focus', playVideo);
+      link.addEventListener('blur', stopVideo);
+      return;
+    }
     let n = 0;
     const play = () => {
       img.onload = () => link.classList.add('is-hover-playing');

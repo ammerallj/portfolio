@@ -145,6 +145,16 @@ functions of scroll, the fades are timed class toggles):
   (`initWorkSkeleton` + `.work-card-media.is-loading`). Only frames whose still
   isn't decoded yet get it; errors clear it; reduced motion drops the shimmer.
   GIFs still load on first hover — preloading all of them is ~25MB.
+- **HOVER VIDEO is supported** (2026-09-28): a `<video class="work-card-hover"
+  data-hover-src muted loop playsinline preload="none">` gets its src on first
+  hover, restarts from 0 each hover, and is shown (`is-hover-playing`) only once
+  `play()` resolves; paused on leave (`initWorkHoverMedia`). Facebook Groups uses
+  it — `fb-card.mp4`, 4.3MB for the 5s clip its 13MB GIF carried. The others are
+  still GIFs; MP4 is the better format for all of them.
+  ⚠️ Jenna's updated Groups export (with the bottom tab bar) arrived saved as
+  `ax-card.png/.gif/.mp4` in the main folder, overwriting the Accessibility
+  originals there. The worktree's `ax-card.jpg/.gif` are the real Accessibility
+  art and are untouched.
 - **Facebook Groups card is BACK** (2026-09-28) with Jenna's `fb-card` media:
   a single tall phone (974x1848; GIF 119 frames ~23fps, 14.1MB) CONTAINED in
   the 5:4 frame (`--media-fit: contain`, read by `.work-card-media > img`) — at
