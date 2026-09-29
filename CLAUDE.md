@@ -186,10 +186,10 @@ functions of scroll, the fades are timed class toggles):
   then `.about-facts` moved OUT of the text column into its own
   `site-container` below as a 3-column grid (1 column ≤768), each column a
   hairline + 18px uppercase Hanken label + tight 14px entries.
-  **The photo sits in a white rounded card** (`.about-stack` itself: #fff,
-  hairline, `--work-card-radius`, `--work-card-pad`) — the Work cards' material.
-  ⚠️ Around the PHOTO only: a card around ALL of About was built first and
-  reverted the same day (Jenna: "around the image, not the entire section").
+  ⚠️ **No card around the photo** — both a card around ALL of About and a white
+  Work-card frame around just the photo were built and removed on 2026-09-28:
+  the frame's radii didn't nest (40 outer, 24 inner, 32 padding) and the Work
+  cards' white material reads as a link on this site. The photo sits on the page.
 - **About → Contact is the hero → Work transition in REVERSE** (2026-09-28,
   js/main.js `CONTACT_LAG` / `ABOUT_LIFT`), all 0 at both resting positions:
   · the blue LEADS the panel (`--contact-lag`, negative = above its layout
