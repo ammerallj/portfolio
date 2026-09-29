@@ -128,6 +128,21 @@
     height: calc(100svh - var(--hero-peek));
   }
 
+  /* THE BIO FILLS ITS COLUMN ON TABLETS (2026-09-28, Jenna: "take up more
+     width or adjust the text cut off"). At 24px in the 369px nav-aligned column
+     the words packed badly — every line ended 70–95px short of the edge (769
+     wide). 20px (the phone size) in a column of at least 400px sets it in two
+     full lines (ends 79 / 3px short). The column still tracks the nav where the
+     nav is wider; below that it starts up to ~31px left of "Selected work".
+     The headline's line breaks are unchanged at the narrower 301px. The 680
+     tier's width: auto still wins below it. */
+  .intro .intro-band-right {
+    width: max(400px, var(--nav-col-w, var(--width-right-column)));
+  }
+  .intro-bio {
+    font-size: 20px;
+  }
+
   /* ⚠️ CONTACT'S ARRIVAL IS TIGHTENED HERE, AND THE REASON IS VIEWPORT HEIGHT,
      NOT WIDTH — the page geometry is IDENTICAL at every width (measured: About's
      last line to Contact's heading is 461px at 1440, 1024 and 834 alike; the
