@@ -3651,7 +3651,8 @@ if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
   // no-op there.)
   document.querySelectorAll('.work-card').forEach(card => {
     const link = card.querySelector('a.work-card-link');
-    const href = link ? link.getAttribute('href') || '' : '';
+    // data-href while the cards are parked (not links yet — see index.html).
+    const href = link ? link.getAttribute('href') || link.dataset.href || '' : '';
     const variant = GLOW_VARIANTS.find(v => href.includes(v.match));
     if (!variant) return;
     card.addEventListener('mouseenter', () => setGlowVariant(variant.cls));

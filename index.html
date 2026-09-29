@@ -385,8 +385,12 @@
       <div class="site-container">
         <ul class="work-grid" role="list">
 
+          <!-- ⚠️ CARDS ARE NOT LINKS YET (2026-09-28): the project pages are being
+               reworked, so each card's destination is PARKED in data-href rather
+               than href — no click, no tab stop, no navigation; hover still
+               works. To turn them back on, rename data-href → href on all four. -->
           <li class="work-card" data-reveal-group>
-            <a class="work-card-link" href="work/messaging.html" data-reveal>
+            <a class="work-card-link" data-href="work/messaging.html" data-reveal>
               <!-- The art's own ratio: two phone screens, near-square, so a 5:4
                    frame would crop their status and nav bars. -->
               <div class="work-card-media" style="--media-ratio: 1866 / 1846; --media-shift: 8px">
@@ -407,7 +411,7 @@
           </li>
 
           <li class="work-card" data-reveal-group>
-            <a class="work-card-link" href="work/microsoft-loop.html" data-reveal>
+            <a class="work-card-link" data-href="work/microsoft-loop.html" data-reveal>
               <div class="work-card-media" style="--media-ratio: 16 / 10">
                 <!-- At rest the still; on hover the GIF (loaded on first hover
                      only, restarted each time — initWorkHoverMedia). -->
@@ -428,7 +432,7 @@
           </li>
 
           <li class="work-card" data-reveal-group>
-            <a class="work-card-link" href="work/facebook-groups.html" data-reveal>
+            <a class="work-card-link" data-href="work/facebook-groups.html" data-reveal>
               <!-- One tall phone (974x1848) on white: CONTAINED in the 5:4 frame,
                    not cropped — its white margin blends into the white card.
                    At the art's own ratio the card would be ~1200px tall. -->
@@ -451,7 +455,7 @@
           </li>
 
           <li class="work-card" data-reveal-group>
-            <a class="work-card-link" href="work/accessibility.html" data-reveal>
+            <a class="work-card-link" data-href="work/accessibility.html" data-reveal>
               <!-- The art's own ratio: a full-width page capture, so 16:10 would
                    clip the nav's right-hand icons. -->
               <div class="work-card-media" style="--media-ratio: 1500 / 1018">
@@ -580,6 +584,6 @@
   </div>
   <div class="wave-cursor" id="wave-cursor" aria-hidden="true">👋</div>
 
-  <script src="js/main.js?v=b2930791" defer></script>
+  <script src="js/main.js?v=b94491e9" defer></script>
 </body>
 </html>

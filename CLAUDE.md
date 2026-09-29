@@ -145,6 +145,12 @@ functions of scroll, the fades are timed class toggles):
   (`initWorkSkeleton` + `.work-card-media.is-loading`). Only frames whose still
   isn't decoded yet get it; errors clear it; reduced motion drops the shimmer.
   GIFs still load on first hover — preloading all of them is ~25MB.
+- ⚠️ **THE WORK CARDS ARE NOT LINKS YET** (2026-09-28): the project pages are
+  being reworked, so each card's destination is PARKED in `data-href` instead of
+  `href` — no click, no Tab stop (verified: `focus()` does not take), no
+  navigation; hover (swap + media) still works, and the cursor glow reads
+  `data-href` as a fallback. To restore: rename `data-href` → `href` on the four
+  `.work-card-link`s in index.html.
 - **HOVER VIDEO is supported** (2026-09-28): a `<video class="work-card-hover"
   data-hover-src muted loop playsinline preload="none">` gets its src on first
   hover, restarts from 0 each hover, and is shown (`is-hover-playing`) only once
