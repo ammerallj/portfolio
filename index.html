@@ -159,7 +159,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,200;0,500;0,700;1,500&family=Inter:wght@400..700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=b09dc432" />
+  <link rel="stylesheet" href="style.css?v=b601c576" />
   <!-- The landing field's JPEG fallback — PHONES ONLY since 2026-09, so the
        preload is gated to match the <picture> in <main>. Without the media
        attribute this fetches 1.4MB on every desktop and tablet visit for an
@@ -427,11 +427,14 @@
             </a>
           </li>
 
-          <!-- HIDDEN FOR NOW (2026-09-28): remove `hidden` to restore. -->
-          <li class="work-card" data-reveal-group hidden>
+          <li class="work-card" data-reveal-group>
             <a class="work-card-link" href="work/facebook-groups.html" data-reveal>
-              <div class="work-card-media" style="--media-ratio: 5 / 4">
-                <span class="work-card-placeholder" aria-hidden="true">[Placeholder]</span>
+              <!-- One tall phone (974x1848) on white: CONTAINED in the 5:4 frame,
+                   not cropped — its white margin blends into the white card.
+                   At the art's own ratio the card would be ~1200px tall. -->
+              <div class="work-card-media" style="--media-ratio: 5 / 4; --media-fit: contain">
+                <img class="work-card-cover" src="images/fb-card.jpg?v=1" width="974" height="1848" alt="" loading="lazy" />
+                <img class="work-card-hover" data-hover-src="images/fb-card.gif?v=1" width="974" height="1848" alt="" aria-hidden="true" />
               </div>
               <div class="work-card-text">
                 <div class="work-card-swap">
@@ -576,6 +579,6 @@
   </div>
   <div class="wave-cursor" id="wave-cursor" aria-hidden="true">👋</div>
 
-  <script src="js/main.js?v=183aeac8" defer></script>
+  <script src="js/main.js?v=f00e6583" defer></script>
 </body>
 </html>

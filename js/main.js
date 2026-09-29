@@ -2377,7 +2377,10 @@ function initWorkMasonry() {
       const media = cards[i].querySelector('.work-card-media');
       const frame = media ? media.offsetHeight - extraOf(cards[i]) : 0;
       const short = Math.round(floor - bottom);
-      extra[i] = short <= frame * LEVEL_MAX ? short : 0;
+      // A CONTAINED frame (--media-fit: contain) never crops — stretching it
+      // only adds white around the art — so it always takes the full stretch.
+      const contained = media && media.style.getPropertyValue('--media-fit').trim() === 'contain';
+      extra[i] = contained || short <= frame * LEVEL_MAX ? short : 0;
     });
 
     cards.forEach((card, i) => {

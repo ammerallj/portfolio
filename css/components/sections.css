@@ -169,7 +169,9 @@ html.has-top-nav.is-work-in #work-section .site-container {
   top: calc(-1 * var(--media-shift, 0px));
   width: 100%;
   height: calc(100% + var(--media-shift, 0px));
-  object-fit: cover;
+  /* --media-fit (per card, inline): `contain` shows the whole art inside the
+     frame instead of cropping it — Facebook Groups, a single tall phone. */
+  object-fit: var(--media-fit, cover);
 }
 
 /* HOVER MEDIA: a card can carry a still (.work-card-cover) and an animated

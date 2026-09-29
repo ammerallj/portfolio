@@ -145,7 +145,12 @@ functions of scroll, the fades are timed class toggles):
   (`initWorkSkeleton` + `.work-card-media.is-loading`). Only frames whose still
   isn't decoded yet get it; errors clear it; reduced motion drops the shimmer.
   GIFs still load on first hover — preloading all of them is ~25MB.
-- **Facebook Groups card is HIDDEN** (`hidden` on its `<li>`; remove to restore).
+- **Facebook Groups card is BACK** (2026-09-28) with Jenna's `fb-card` media:
+  a single tall phone (974x1848; GIF 119 frames ~23fps, 14.1MB) CONTAINED in
+  the 5:4 frame (`--media-fit: contain`, read by `.work-card-media > img`) — at
+  its own ratio the card would be ~1200px tall. A contained frame always takes
+  the full levelling stretch (it can't crop), so the columns end level again.
+  (History: it was hidden earlier the same day —
   `initWorkMasonry` skips hidden cards, and the bottom-levelling stretch now
   applies only when it is ≤15% of the frame's height (`LEVEL_MAX`) — with three
   cards Messaging sat alone and a 376px stretch cropped ~37% of its art, so the
