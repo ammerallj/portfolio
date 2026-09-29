@@ -1498,7 +1498,7 @@ function initHeroField() {
   })(prev);
 }
 
-// THE PHONE GRADIENT'S HEIGHT (≤480): 40svh, or 32px above the headline,
+// THE PHONE GRADIENT'S HEIGHT (≤480): 50svh (was 40), or 32px above the headline,
 // whichever is shorter (2026-09-28). The lockup is bottom-anchored in a hero of
 // 100dvh − 184, so on a short phone the headline rises above 40% of the screen
 // (375x667: headline at 181, 40svh at 267) and the colour would sit behind it.
@@ -1516,7 +1516,7 @@ function measurePhoneField() {
   let top = 0;
   for (let n = h1; n; n = n.offsetParent) top += n.offsetTop;
   top += parseFloat(getComputedStyle(root).getPropertyValue('--hero-drop')) || 0;
-  const px = Math.round(Math.max(120, Math.min(window.innerHeight * 0.4, top - 32)));
+  const px = Math.round(Math.max(120, Math.min(window.innerHeight * 0.5, top - 32)));
   root.style.setProperty('--phone-field-h', px + 'px');
 }
 measurePhoneField();

@@ -851,7 +851,7 @@
        viewport so the hero text lock-up can be on white"). The shader box is
        this tall and its white fade ends at its own bottom; the headline starts
        ~46% down (391px at 390x844), so 40svh leaves clear cream above it. */
-    --phone-field-h: 40svh;
+    --phone-field-h: 50svh; /* was 40svh; extended once the lockup moved to the bottom (Jenna) */
     /* ⚠️ 40, NOT 70 — it moved down by the same 30px --field-nudge-y moved up,
        so the lockup and the artwork stay rigid relative to each other. See the
        nudge's note above; these two are one decision. */
