@@ -390,9 +390,14 @@
           <!-- ⚠️ CARDS ARE NOT LINKS YET (2026-09-28): the project pages are being
                reworked, so each card's destination is PARKED in data-href rather
                than href — no click, no tab stop, no navigation; hover still
-               works. To turn them back on, rename data-href → href on all four. -->
+               works. To turn them back on, rename data-href → href on all four.
+               EXCEPT THE TWO LOCKED CARDS (Messaging, Accessibility — the ones
+               with the lock badge), which DO link, in a new tab, to the
+               password-protected Figma case-study deck (Jenna, 2026-09-28).
+               They keep data-href too: the cursor glow reads it for the card's
+               colour. -->
           <li class="work-card" data-reveal-group>
-            <a class="work-card-link" data-href="work/messaging.html" data-reveal>
+            <a class="work-card-link" href="https://www.figma.com/deck/3ID7RXQRZUqKIDq6cGxGnY/Jenna-Portfolio-%E2%80%94-Portfolio-2026-B?node-id=1-42&amp;viewport=-129%2C-110%2C0.69&amp;t=REUsrarH3k2S5FDV-1&amp;scaling=min-zoom&amp;content-scaling=fixed&amp;page-id=0%3A1" target="_blank" rel="noopener" data-href="work/messaging.html" data-reveal>
               <!-- The art's own ratio: two phone screens, near-square, so a 5:4
                    frame would crop their status and nav bars. -->
               <div class="work-card-media" style="--media-ratio: 1866 / 1846; --media-shift: 8px">
@@ -405,7 +410,7 @@
                   <p class="work-card-description">Defining how conversations adapt to intent and context.</p>
                 </div>
                 <div class="work-card-meta">
-                  <span class="work-card-lock"><svg class="work-card-lock-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><rect x="4" y="9" width="16" height="12" rx="4" stroke="currentColor" stroke-width="1.5"/><path d="M12 16L12 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 9V7C16 4.79086 14.2091 3 12 3C9.79086 3 8 4.79086 8 7L8 9" stroke="currentColor" stroke-width="1.5"/></svg><span class="visually-hidden">Full case study locked</span></span>
+                  <span class="work-card-lock"><svg class="work-card-lock-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><rect x="4" y="9" width="16" height="12" rx="4" stroke="currentColor" stroke-width="1.5"/><path d="M12 16L12 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 9V7C16 4.79086 14.2091 3 12 3C9.79086 3 8 4.79086 8 7L8 9" stroke="currentColor" stroke-width="1.5"/></svg><span class="visually-hidden">Full case study locked, opens in a new tab</span></span>
                   <span class="work-card-pill">Shipped &middot; 2023 <span class="work-card-pill-arrow" aria-hidden="true">&#8599;</span></span>
                 </div>
               </div>
@@ -457,7 +462,7 @@
           </li>
 
           <li class="work-card" data-reveal-group>
-            <a class="work-card-link" data-href="work/accessibility.html" data-reveal>
+            <a class="work-card-link" href="https://www.figma.com/deck/3ID7RXQRZUqKIDq6cGxGnY/Jenna-Portfolio-%E2%80%94-Portfolio-2026-B?node-id=1-42&amp;viewport=-129%2C-110%2C0.69&amp;t=REUsrarH3k2S5FDV-1&amp;scaling=min-zoom&amp;content-scaling=fixed&amp;page-id=0%3A1" target="_blank" rel="noopener" data-href="work/accessibility.html" data-reveal>
               <!-- The art's own ratio: a full-width page capture, so 16:10 would
                    clip the nav's right-hand icons. -->
               <div class="work-card-media" style="--media-ratio: 1500 / 1018">
@@ -470,7 +475,7 @@
                   <p class="work-card-description">Organizing accessibility features and support around people’s needs.</p>
                 </div>
                 <div class="work-card-meta">
-                  <span class="work-card-lock"><svg class="work-card-lock-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><rect x="4" y="9" width="16" height="12" rx="4" stroke="currentColor" stroke-width="1.5"/><path d="M12 16L12 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 9V7C16 4.79086 14.2091 3 12 3C9.79086 3 8 4.79086 8 7L8 9" stroke="currentColor" stroke-width="1.5"/></svg><span class="visually-hidden">Full case study locked</span></span>
+                  <span class="work-card-lock"><svg class="work-card-lock-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><rect x="4" y="9" width="16" height="12" rx="4" stroke="currentColor" stroke-width="1.5"/><path d="M12 16L12 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 9V7C16 4.79086 14.2091 3 12 3C9.79086 3 8 4.79086 8 7L8 9" stroke="currentColor" stroke-width="1.5"/></svg><span class="visually-hidden">Full case study locked, opens in a new tab</span></span>
                   <span class="work-card-pill">Shipped &middot; 2026 <span class="work-card-pill-arrow" aria-hidden="true">&#8599;</span></span>
                 </div>
               </div>
@@ -586,6 +591,6 @@
   </div>
   <div class="wave-cursor" id="wave-cursor" aria-hidden="true">👋</div>
 
-  <script src="js/main.js?v=bcdde778" defer></script>
+  <script src="js/main.js?v=72950079" defer></script>
 </body>
 </html>
