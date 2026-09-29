@@ -841,12 +841,13 @@
        top here because the header is fixed and .intro starts at 0.
        ⚠️ --hero-drop is the ONE number to change to move the lockup: the
        transform, the pane's start, and the pane's reach all read from it. */
-    /* BOTTOM-ALIGNED LOCKUP (2026-09-28, Jenna): the hero is the whole screen
-       less a group gap, so "Prev. at Meta and Microsoft." ends --gap-group above
-       the bottom edge. Was 100dvh − 184 (a Work-card peek as the scroll cue),
-       which read as empty cream under the lockup. svh, not dvh, so the hero
-       doesn't reflow when Safari's toolbar collapses. */
-    --hero-h: calc(100svh - var(--gap-group));
+    /* THE FIRST WORK CARD PEEKS (2026-09-28, Jenna: "shift the landing up to
+       reveal part of the first card"): the hero ends 184px above the fold —
+       Work's 64px top padding + ~120px of card. It was 100svh − 40 (lockup on
+       the fold's bottom) for one round; the "empty cream" that prompted that was
+       the Work cards being invisible on phones (is-work-in never fired), since
+       fixed. svh, not dvh, so it doesn't reflow when Safari's toolbar goes. */
+    --hero-h: calc(100svh - 184px);
     /* THE PHONE GRADIENT'S HEIGHT (2026-09-28, Jenna: "half or less of the
        viewport so the hero text lock-up can be on white"). The shader box is
        this tall and its white fade ends at its own bottom; the headline starts

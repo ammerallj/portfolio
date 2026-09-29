@@ -364,10 +364,10 @@ functions of scroll, the fades are timed class toggles):
 - **The wordmark is a CLOCK** on the homepage header (`<time class="site-name
   site-clock top-nav-clock">`, "Seattle" without JS; `initTopNav` fills every
   `.top-nav-clock`). Tapping it no longer scrolls to the top.
-- **The lockup is BOTTOM-ALIGNED**: `--hero-h` is `100svh − --gap-group` (was
-  `100dvh − 184`, a Work-card peek that read as empty cream), so "Prev. at…"
-  ends 40px above the screen's bottom (390x844: headline 535, gradient end 338).
-  ⚠️ This retires the ≤480 card-peek scroll cue and its 120px maths above.
+- **The first Work card PEEKS again**: `--hero-h` is `100svh − 184px` (Work's
+  64px padding + ~120px of card). It was briefly `100svh − 40` (lockup on the
+  fold) because the peek "read as empty cream" — which was really the Work cards
+  being invisible on phones (see below). svh, not the old dvh.
 - ⚠️ **The Work cards were INVISIBLE on phones**: `is-work-in` (the timed fade-up
   of `#work-section .site-container`) required `fieldDockScroll > 0`, which is 0
   wherever the landing bar is `display: none` (≤680). Now `NO_LANDING_BAR` (≤680)
