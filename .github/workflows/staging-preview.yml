@@ -5,7 +5,10 @@
 # same way Pages builds the live site (Jekyll, honouring _config.yml's excludes),
 # then makes two changes so the copy can never pose as the real site:
 #   - removes CNAME, so it never claims ammerallj.design
-#   - replaces robots.txt with Disallow-all, so search engines skip it
+#   - rewrites every page's robots meta to noindex, nofollow, and serves an
+#     allow-all robots.txt so crawlers can actually READ that noindex (a
+#     Disallow-all robots.txt hides the tag, and a blocked URL can still be
+#     indexed from an outside link)
 # The live site (ammerallj/portfolio) deploys by its own legacy Pages build and
 # is untouched by this workflow.
 name: Staging preview
@@ -37,7 +40,12 @@ jobs:
       - name: Mark as staging (no custom domain, no indexing)
         run: |
           sudo rm -f _site/CNAME
-          printf 'User-agent: *\nDisallow: /\n' | sudo tee _site/robots.txt >/dev/null
+          sudo find _site -name '*.html' -exec sed -i 's|<meta name="robots" content="index, follow" />|<meta name="robots" content="noindex, nofollow" />|' {} +
+          if grep -rl --include='*.html' 'content="index, follow"' _site; then
+            echo "A page still allows indexing; the robots meta tag changed shape." >&2
+            exit 1
+          fi
+          printf 'User-agent: *\nAllow: /\n' | sudo tee _site/robots.txt >/dev/null
       - uses: actions/upload-pages-artifact@v3
 
   deploy:

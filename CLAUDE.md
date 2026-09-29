@@ -179,8 +179,9 @@ functions of scroll, the fades are timed class toggles):
   the 12 grid columns (`min(58.333vw − 73.67px, 766px)`), not the shared
   5-column `--width-right-column`, with one empty column before the photo, so
   About's copy no longer starts on the nav's "Selected work" line. "Senior
-  Product Designer" is now in visible copy; the meta/JSON-LD titles still
-  say "Product Designer".
+  Product Designer" is now in visible copy, and (2026-09-29) the title tag,
+  meta/OG/Twitter descriptions, JSON-LD `jobTitle` / Occupation and llms.txt
+  follow it.
   The photo CAROUSEL is gone: `.about-stack` holds two stills in flow — a wide
   landscape (`about-photo2-crop.jpg`, photo2 cropped 28px a side to drop its
   baked-in rounded white corners) filling the left column, then `about-photo4`
@@ -426,8 +427,9 @@ seconds (the load reveal); use offsets.
 **Open / not done (as of 2026-09-27):**
 - Phones (≤480) were not tuned for any of this — they keep their own mobile
   header, phone orb layout and still field.
-- Meta descriptions / JSON-LD / llms.txt still carry the old bio and title
-  (Jenna to decide; ask before cascading copy).
+- llms.txt's summary still carries the old bio sentence ("gets to the root of
+  the problem…"); the TITLE was cascaded 2026-09-29 (Jenna to decide the bio;
+  ask before cascading copy).
 - The landing nav's white type over the gradient hasn't been contrast-checked
   at rest.
 - `lab/field-shader.html` is not synced with the retuned orbs, paint order,
@@ -3639,7 +3641,10 @@ own version, separate from the `style.css?v=` / `@import` CSS bump below).
     force-pushes staging to its `main`. Built by
     `.github/workflows/staging-preview.yml`, which lives in this repo but is
     guarded to run only there: same Jekyll build as live, CNAME stripped (so it
-    never claims ammerallj.design), robots.txt replaced with Disallow-all.
+    never claims ammerallj.design), every page's robots meta rewritten to
+    `noindex, nofollow` and robots.txt set to allow-all so crawlers can READ that
+    tag (a Disallow-all robots.txt hides it; the build fails if any page still
+    says `index, follow`).
     ⚠️ **Public, not private** — unindexed, but anyone with the URL sees
     unreleased work. It's served under `/portfolio-staging/`, so any future
     root-absolute path (`href="/…"`) will break there — keep paths relative.
@@ -3726,16 +3731,19 @@ is defined somewhere in the site.
   `description`, and `creditText` is a copy of text already visible in the HTML.
   Never put a figure, credential, employer, or date in JSON-LD that a reader
   can't also see on the page. If the visible copy changes, change the schema.
-  **"Senior" is the worked example, and it has now gone the other way (2026-08).**
-  The landing first dropped the line carrying it, leaving the credential only in
-  metadata — a rule violation. It was restored to the bio, then dropped again
-  when the bio was rewritten. Rather than re-add it to the copy, the title came
-  OUT of the schema: `jobTitle` is now "Product Designer", and the three meta
-  descriptions, both JSON-LD `description`s and llms.txt all match. **There is no
-  "senior" anywhere on the site** — check with
-  `grep -rn -i senior index.html llms.txt work/*.html` before reintroducing it,
-  and if you do, put it in the visible copy FIRST. `jobTitle` is exactly the kind
-  of field that quietly outlives the sentence it came from.
+  **"Senior" is the worked example (2026-09-29).** It was dropped from the
+  schema in 2026-08 when no visible copy carried it; it came back once About's
+  Experience row showed "Senior Product Designer · 2022–2026" — visible copy
+  FIRST, then the title tag, meta/OG/Twitter descriptions, JSON-LD `jobTitle` /
+  Occupation and llms.txt. If that row ever loses "Senior", take it out of all of
+  those again. `jobTitle` is exactly the kind of field that quietly outlives the
+  sentence it came from. Per-project Role rows / `creditText` stay "Product
+  Designer" — those are Jenna's per-project copy.
+- **`knowsAbout` / Occupation `skills` follow the hero's positioning** (interaction
+  design, product behavior, product strategy, visual craft, cross-product
+  experience). Design Systems was dropped and Accessibility moved last
+  (2026-09-29): Jenna has deliberately moved away from being categorised by
+  them. Re-order these if the hero's positioning changes.
 - The `abstract` fields exist so an answer engine quotes **Jenna's own numbers**
   rather than paraphrasing. Keep them in sync with the Impact bullets.
 - **Never add the locked case-study URL** (the Figma deck) to `llms.txt`, the

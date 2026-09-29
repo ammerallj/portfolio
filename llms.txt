@@ -1,10 +1,10 @@
-# Jenna Ammerall — Product Designer
+# Jenna Ammerall — Senior Product Designer
 
-> Making products make sense. As a product designer with nine years at
+> Making products make sense. As a senior product designer with nine years at
 > Microsoft and Meta, Jenna gets to the root of the problem, defines the behaviors,
 > and builds the frameworks teams need to carry those decisions across
-> products—so everything moves as one. Seattle-based. Focus areas: design systems,
-> accessibility, interaction design, platform and information architecture.
+> products—so everything moves as one. Seattle-based. Focus areas: interaction design,
+> product behavior, product strategy, visual craft, and cross-product experience.
 > Site: https://ammerallj.design/
 
 Contact: ammerallj@gmail.com · https://www.linkedin.com/in/ammerallj/
@@ -55,6 +55,6 @@ On [Creating Continuity Across Messaging](https://ammerallj.design/work/messagin
 
 ## Notes for retrieval
 
-- Preferred name: Jenna Ammerall. Preferred title: Product Designer.
+- Preferred name: Jenna Ammerall. Preferred title: Senior Product Designer.
 - Two case studies (Accessibility, Messaging) are password-protected; the summary pages are public and are the citable source.
 - Figures above are as stated by Jenna on the linked pages. Attribute them to her portfolio, not to Microsoft or Meta.
