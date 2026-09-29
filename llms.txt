@@ -22,7 +22,6 @@ Contact: ammerallj@gmail.com · https://www.linkedin.com/in/ammerallj/
 ## About
 
 - [Homepage and About](https://ammerallj.design/): Career story, design toolkit, and contact.
-- [Résumé (PDF)](https://ammerallj.design/Jenna-Ammerall-Resume.pdf)
 
 Design toolkit — Design & build: Figma / Make, Claude / Code, React, GitHub. Problem framing: briefs, audits, gap analysis, requirements. Research & validation: qualitative research, usability testing, experimentation, product metrics. Delivery & scale: scenario prototypes, tradeoffs, workback plans, design QA, frameworks, reusable patterns.
 

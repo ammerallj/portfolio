@@ -3704,7 +3704,7 @@ nothing here changes a pixel.
 |---|---|
 | `robots.txt` | `User-agent: *` allow-all, **plus every AI crawler named explicitly** in two labeled groups: *answer engines* (OAI-SearchBot, Claude-SearchBot, PerplexityBot, …) and *training* (GPTBot, ClaudeBot, Google-Extended, CCBot, …). Naming them is a signal, not a functional change — the wildcard already allows them. To opt out of one, flip its `Allow: /` to `Disallow: /`. |
 | `llms.txt` | Root-level markdown digest for LLMs ([llmstxt.org](https://llmstxt.org)) — summary, the four case studies with their Impact figures, toolkit, and the public footprints grouped **under the project page each set now lives on**. **Adoption is still partial**; it's cheap insurance, not the main lever. |
-| `sitemap.xml` | The 4 project pages + homepage + the résumé PDF. Bump `lastmod` when content changes. |
+| `sitemap.xml` | The 4 project pages + homepage. (The résumé PDF was removed from the site 2026-09-28.) Bump `lastmod` when content changes. |
 | `index.html` JSON-LD | One `@graph`: `WebSite` → `ProfilePage` → `Person` → `ItemList` of the 4 case studies. |
 | `work/*.html` JSON-LD | One `@graph`: `CreativeWork` + `BreadcrumbList`. |
 
