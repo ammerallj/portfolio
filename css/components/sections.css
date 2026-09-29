@@ -314,6 +314,12 @@ html.has-top-nav.is-work-in #work-section .site-container {
     flex-direction: column;
     gap: var(--space-xs);
   }
+  /* align-self: end is the grid's BOTTOM-align above; in this column it would
+     mean RIGHT-align, which pushed the titles to the card's right edge. */
+  .work-card-title,
+  .work-card-description {
+    align-self: auto;
+  }
   .work-card-description {
     opacity: 1;
     translate: none;
