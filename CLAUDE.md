@@ -385,12 +385,12 @@ functions of scroll, the fades are timed class toggles):
   homepage variant only).
 
 **Tablets (481–1024): the first Work card peeks too** (2026-09-28):
-`--hero-peek` (144px, responsive.css 1024 tier) shortens `.intro`, pulls the
+`--hero-peek` (88px, was 144 — responsive.css 1024 tier) shortens `.intro`, pulls the
 gradient's white end (`--field-mask-end`) and the tablet canvas box up by the
 same amount, and `tabletBlob` subtracts it from the orbs' band — so lockup and
 gradient move together. `WORK_PEEKS` (≤1024) sets `is-work-in` at rest, or the
-peek would be empty until the first scroll. Measured: 144px of card at 768x1024
-and 1024x768; desktop 1440 unchanged (no `--hero-peek`).
+peek would be empty until the first scroll. At 144 it showed 144px of card at 768x1024
+and 1024x768 — too much; now 88; desktop 1440 unchanged (no `--hero-peek`).
 
 **Open / not done (as of 2026-09-27):**
 - Phones (≤480) were not tuned for any of this — they keep their own mobile
