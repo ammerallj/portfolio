@@ -79,10 +79,7 @@ let sectionSpyScrollY = null;
 // lights once the first cards are 70% of the way down the screen (0.5 was
 // mid-screen and read a touch late). Sections not
 // listed use their resting position unchanged, as before.
-// About (2026-09-28, Jenna: "a little earlier"): it lit only once its heading
-// was ~106px from the top at 1440x900, nearly under the nav; 0.4 lights it with
-// the heading 40% down the screen, ~250px of scroll sooner.
-const SPY_LEAD = { 'work-section': 0.7, about: 0.4 };
+const SPY_LEAD = { 'work-section': 0.7 };
 // Where a NAV CLICK should land, which is not always where the section rests.
 // Same TDZ rule as above — declared here, above updateScrollEffects.
 let sectionClickScrollY = null;
@@ -3386,6 +3383,21 @@ function initSectionGeometry(lenis) {
   // as it unwinds: the test reduces to "content top <= lead of the viewport".
   sectionSpyScrollY = (el) => {
     const rest = sectionRestingScrollY(el);
+    // ABOUT lights the moment the Work cards are OUT OF VIEW — the bottom of
+    // the card grid (the taller masonry column) has passed up behind the nav
+    // (2026-09-28, Jenna). Its resting position was late (heading ~106px from
+    // the top); a fraction of the screen (0.4) was too early. Rect, not
+    // offsets, like SPY_LEAD below, so the hero's push is included.
+    if (el.id === 'about' && rest != null) {
+      const grid = document.querySelector('.work-grid');
+      if (grid) {
+        // A rect, not offsetHeight/offsetParent: the docked bar is position:
+        // fixed, which reports offsetParent null. display:none (≤680) reads 0.
+        const nav = introBar ? introBar.getBoundingClientRect().height : 0;
+        const gridBottom = grid.getBoundingClientRect().bottom + window.scrollY;
+        return Math.min(rest, gridBottom - nav);
+      }
+    }
     const lead = SPY_LEAD[el.id];
     if (rest == null || lead == null || !el.children.length) return rest;
     const top = el.children[0].getBoundingClientRect().top + window.scrollY;
