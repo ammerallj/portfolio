@@ -392,6 +392,13 @@ gradient move together. `WORK_PEEKS` (≤1376) sets `is-work-in` at rest, or the
 peek would be empty until the first scroll. At 144 it showed 144px of card at 768x1024
 and 1024x768 — too much; now 88; desktop 1440 unchanged (no `--hero-peek`).
 
+**481–768 — the stacked hero** (2026-09-28): the bio sits under the headline at
+full width from the left edge (not indented to the nav's "Selected work"
+column), and the gradient's white end follows the headline: `measurePhoneField`
+publishes `--stack-field-end` (48px above it, page px) for the 768 tier's mask
+and canvas box and for `tabletBlob`'s band. It had ended ~30px BELOW the
+headline's top at 740x1000 because the stacked lockup is taller.
+
 **Open / not done (as of 2026-09-27):**
 - Phones (≤480) were not tuned for any of this — they keep their own mobile
   header, phone orb layout and still field.
