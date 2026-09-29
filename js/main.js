@@ -79,7 +79,10 @@ let sectionSpyScrollY = null;
 // lights once the first cards are 70% of the way down the screen (0.5 was
 // mid-screen and read a touch late). Sections not
 // listed use their resting position unchanged, as before.
-const SPY_LEAD = { 'work-section': 0.7 };
+// About (2026-09-28, Jenna: "a little earlier"): it lit only once its heading
+// was ~106px from the top at 1440x900, nearly under the nav; 0.4 lights it with
+// the heading 40% down the screen, ~250px of scroll sooner.
+const SPY_LEAD = { 'work-section': 0.7, about: 0.4 };
 // Where a NAV CLICK should land, which is not always where the section rests.
 // Same TDZ rule as above — declared here, above updateScrollEffects.
 let sectionClickScrollY = null;
