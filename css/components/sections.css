@@ -1137,6 +1137,16 @@ html.has-top-nav.is-work-in #work-section .site-container {
    doesn't ride up and the section above's hairline stops crossing the text.
    (On mobile that content below is the photo, since the layout stacks
    photo-first.) */
+/* THE ABOUT CARD (2026-09-28): all of About — heading, bio + photo, facts — in
+   one white rounded panel, the Work cards' material (fill, hairline, radius
+   tokens). Padded by --gap-group so the big heading has room from the edge. */
+.about-card {
+  background-color: #fff;
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--work-card-radius);
+  padding: var(--gap-group);
+}
+
 #about-heading {
   /* --gap-group, not --gap-heading: an image follows this title, and an
      image edge needs less separation than a text block (same call as the
