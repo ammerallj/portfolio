@@ -1155,7 +1155,8 @@
 
   .site-footer .site-container {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center; /* centred, as on desktop (was flex-start; 2026-09-28) */
+    text-align: center;
   }
 
   /* The on-page Contact section is dropped on mobile — its info (connect block +
