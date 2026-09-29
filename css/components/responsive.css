@@ -411,6 +411,23 @@
    Work imagery shrinks; the hero headline and intro paragraph go full width.
    ========================================================================== */
 @media (max-width: 768px) {
+  /* THE STACKED HERO, 481–768 (2026-09-28, Jenna): the bio sits under the
+     headline at FULL width from the left edge, like the phone — not indented to
+     the nav's "Selected work" column. And the gradient's white end follows the
+     headline (--stack-field-end, measured in js/main.js, 48px above it) because
+     the stacked lockup is taller and the headline starts above 72svh. */
+  .intro .intro-band-right {
+    width: auto;
+    margin-left: 0;
+  }
+  :root {
+    --field-mask-end: calc(var(--stack-field-end, calc(72svh - var(--hero-peek))) + var(--field-rise) - var(--field-cream, 0px));
+  }
+  .page-field-canvas,
+  .page-field-grain {
+    height: calc(var(--stack-field-end, calc(72svh - var(--hero-peek))) + var(--field-rise) + 80px);
+  }
+
   /* About facts: one column per row once About stacks (redesign). */
   .about-facts {
     grid-template-columns: minmax(0, 1fr);

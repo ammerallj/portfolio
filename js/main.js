@@ -1360,7 +1360,10 @@ function initHeroField() {
       heroPeekPx = parseFloat(rs.getPropertyValue('--hero-peek')) || 0;
     }
     const sx = boxW / TABLET_REF.w;
-    const sy = (0.72 * window.innerHeight - heroPeekPx) / TABLET_REF.band;
+    // The stacked 481–768 hero publishes its own white end (measurePhoneField).
+    const stackEnd = parseFloat(document.documentElement.style.getPropertyValue('--stack-field-end'));
+    const bandPx = Number.isFinite(stackEnd) ? stackEnd : 0.72 * window.innerHeight - heroPeekPx;
+    const sy = bandPx / TABLET_REF.band;
     // Weighted toward the band's HEIGHT (2/3 : 1/3, not an even geometric
     // mean): red paints at the bottom and fills whatever the others don't
     // reach, so in a tall portrait band an even mix left it at 51% of the
@@ -1511,6 +1514,19 @@ const PHONE_FIELD_GAP = 48;
 function measurePhoneField() {
   const root = document.documentElement;
   const h1 = document.querySelector('.intro-headline');
+  // 481–768 — THE STACKED TABLET HERO (2026-09-28): the lockup stacks there, so
+  // the headline starts higher than the 72svh gradient allows for (740x1000:
+  // headline at 602, the white's end at 632). Publish where the white must end
+  // — PHONE_FIELD_GAP above the headline, in PAGE px — for the 768 tier's mask
+  // and canvas box, and for tabletBlob's band.
+  const stacked = h1 && window.matchMedia('(min-width: 481px) and (max-width: 768px)').matches;
+  if (stacked) {
+    let t = 0;
+    for (let n = h1; n; n = n.offsetParent) t += n.offsetTop;
+    root.style.setProperty('--stack-field-end', Math.round(Math.max(160, t - PHONE_FIELD_GAP)) + 'px');
+  } else {
+    root.style.removeProperty('--stack-field-end');
+  }
   if (!h1 || !window.matchMedia('(max-width: 480px)').matches) {
     root.style.removeProperty('--phone-field-h');
     return;
