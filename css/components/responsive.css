@@ -114,6 +114,20 @@
    Work / About stack into a single full-width column.
    ========================================================================== */
 @media (max-width: 1024px) {
+  /* THE FIRST WORK CARD PEEKS ON TABLETS (2026-09-28, Jenna — same as the
+     phone): the landing is --hero-peek shorter than the fold, so ~120px of the
+     first card shows (it starts 24px below the hero). The hero, the gradient's
+     white end and the canvas box all subtract it, so lockup and gradient shift
+     up TOGETHER; tabletBlob (js/main.js) reads it for the orbs' band too. The
+     ≤480 tier sets its own --hero-h and canvas box and wins there. */
+  :root {
+    --hero-peek: 144px;
+    --field-mask-end: calc(72svh - var(--hero-peek) + var(--field-rise) - var(--field-cream, 0px));
+  }
+  .intro {
+    height: calc(100svh - var(--hero-peek));
+  }
+
   /* ⚠️ CONTACT'S ARRIVAL IS TIGHTENED HERE, AND THE REASON IS VIEWPORT HEIGHT,
      NOT WIDTH — the page geometry is IDENTICAL at every width (measured: About's
      last line to Contact's heading is 461px at 1440, 1024 and 834 alike; the
@@ -225,7 +239,7 @@
   .page-field-canvas,
   .page-field-grain {
     width: 100vw;
-    height: calc(72svh + var(--field-rise) + 80px);
+    height: calc(72svh - var(--hero-peek) + var(--field-rise) + 80px);
     aspect-ratio: auto;
   }
 

@@ -1350,13 +1350,17 @@ function initHeroField() {
   const FIELD_TABLET = matchMedia('(max-width: 1024px)');
   const TABLET_REF = { w: 1440, h: 1440 / 1.6377, band: 0.72 * 900 };
   let fieldRisePx = null;
+  let heroPeekPx = null;
   function tabletBlob(b) {
     if (fieldRisePx == null) {
-      fieldRisePx = parseFloat(getComputedStyle(document.documentElement)
-        .getPropertyValue('--field-rise')) || 0;
+      const rs = getComputedStyle(document.documentElement);
+      fieldRisePx = parseFloat(rs.getPropertyValue('--field-rise')) || 0;
+      // The tablet landing is --hero-peek shorter (responsive.css 1024 tier),
+      // and the white ends that much higher — so the band is too.
+      heroPeekPx = parseFloat(rs.getPropertyValue('--hero-peek')) || 0;
     }
     const sx = boxW / TABLET_REF.w;
-    const sy = (0.72 * window.innerHeight) / TABLET_REF.band;
+    const sy = (0.72 * window.innerHeight - heroPeekPx) / TABLET_REF.band;
     // Weighted toward the band's HEIGHT (2/3 : 1/3, not an even geometric
     // mean): red paints at the bottom and fills whatever the others don't
     // reach, so in a tall portrait band an even mix left it at 51% of the
@@ -1562,6 +1566,8 @@ const topNav = document.querySelector('.top-nav');
 const WORK_IN = 8;
 // Below this the .intro-bar is display:none (responsive.css 680 tier).
 const NO_LANDING_BAR = window.matchMedia('(max-width: 680px)');
+// At and below this the first Work card peeks above the fold (responsive.css).
+const WORK_PEEKS = window.matchMedia('(max-width: 1024px)');
 const NAV_REVEAL_MAX = 400;
 // Where the "Selected work" nav click LANDS (sectionClickScrollY): the first
 // card's TOP EDGE one --gap-group below the nav. (It was shared with an
@@ -2769,7 +2775,10 @@ function updateScrollEffects() {
     // ≤680 there is no landing bar (fieldDockScroll stays 0), so the timed
     // fade-up never fired and the Work cards sat at opacity 0 on phones. There
     // the container is simply in; each card still has its own reveal.
-    html.classList.toggle('is-work-in', NO_LANDING_BAR.matches
+    // ≤1024 the first card PEEKS at rest (--hero-peek, responsive.css), so
+    // the container is in from the start there — a timed fade-up would leave
+    // the peek empty until the first scroll.
+    html.classList.toggle('is-work-in', NO_LANDING_BAR.matches || WORK_PEEKS.matches
       || (fieldDockScroll > 0 && window.scrollY > WORK_IN));
   }
   // REDESIGN: the docked bar takes over at the nav swap (navOut) —
