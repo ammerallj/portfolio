@@ -2464,34 +2464,55 @@ initWorkMasonry();
 // simply find no targets.
 function initWorkHoverMedia() {
   if (reducedMotion.matches) return;
+  // TOUCH (no hover — phones, tablets): the media plays once the WHOLE CARD is
+  // on screen (2026-09-28, Jenna) and goes back to the still once it is less
+  // than half visible — the gap keeps a small scroll from flickering it off.
+  // A card taller than the screen counts as "whole" once it fills 90% of it.
+  const touch = window.matchMedia('(hover: none)').matches;
+  const io = touch && 'IntersectionObserver' in window
+    ? new IntersectionObserver((entries) => {
+        entries.forEach((e) => {
+          const ctl = e.target.__hoverMedia;
+          if (!ctl) return;
+          const full = e.intersectionRatio >= 0.99
+            || e.intersectionRect.height >= window.innerHeight * 0.9;
+          if (full && !ctl.on) { ctl.on = true; ctl.play(); }
+          else if (ctl.on && e.intersectionRatio < 0.5) { ctl.on = false; ctl.stop(); }
+        });
+      }, { threshold: [0, 0.25, 0.5, 0.75, 0.9, 0.99, 1] })
+    : null;
   document.querySelectorAll('.work-card-hover[data-hover-src]').forEach((img) => {
     const link = img.closest('.work-card-link');
     if (!link) return;
     const src = img.dataset.hoverSrc;
+    let play, stop;
     // A <video> hover (MP4 — a fraction of a GIF's weight, full colour): the
-    // src lands on first hover, each hover restarts it from 0, and the class
+    // src lands on first play, each play restarts it from 0, and the class
     // that shows it waits for play() to resolve, so a slow first fetch still
-    // shows the still rather than an empty frame. Paused on leave.
+    // shows the still rather than an empty frame. Paused on stop.
     if (img.tagName === 'VIDEO') {
-      const playVideo = () => {
+      play = () => {
         if (!img.getAttribute('src')) img.src = src;
         img.currentTime = 0;
         const p = img.play();
         if (p && p.then) p.then(() => link.classList.add('is-hover-playing')).catch(() => {});
       };
-      const stopVideo = () => { link.classList.remove('is-hover-playing'); img.pause(); };
-      link.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') playVideo(); });
-      link.addEventListener('pointerleave', stopVideo);
-      link.addEventListener('focus', playVideo);
-      link.addEventListener('blur', stopVideo);
+      stop = () => { link.classList.remove('is-hover-playing'); img.pause(); };
+    } else {
+      // A GIF: src set on first play, re-set with a fresh #fragment each time,
+      // which restarts it from frame 1 without refetching.
+      let n = 0;
+      play = () => {
+        img.onload = () => link.classList.add('is-hover-playing');
+        img.src = src + '#' + (++n);
+      };
+      stop = () => link.classList.remove('is-hover-playing');
+    }
+    if (io) {
+      link.__hoverMedia = { play, stop, on: false };
+      io.observe(link);
       return;
     }
-    let n = 0;
-    const play = () => {
-      img.onload = () => link.classList.add('is-hover-playing');
-      img.src = src + '#' + (++n);
-    };
-    const stop = () => link.classList.remove('is-hover-playing');
     link.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') play(); });
     link.addEventListener('pointerleave', stop);
     link.addEventListener('focus', play);

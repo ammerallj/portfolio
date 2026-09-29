@@ -376,6 +376,10 @@ functions of scroll, the fades are timed class toggles):
   `align-self` (the grid's bottom-align meant right-align in a column), and
   About's entrance parallax is off ≤680 (its pull-up is bounded by the section
   gap, 64 there — it had lifted "About Me" to 4px under the last card).
+- **On touch (hover: none) the card media plays in view**: an
+  IntersectionObserver in `initWorkHoverMedia` starts a card's GIF/video once the
+  whole card is on screen (ratio ≥ 0.99, or it fills 90% of a short screen) and
+  returns it to the still below 50% visible. Mouse/keyboard devices keep hover.
 - **The Selected work / About me floatie stays tucked on the landing**: it
   appears once the hero's bottom is above mid-screen (the `is-tucked` state,
   homepage variant only).
