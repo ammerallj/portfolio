@@ -182,7 +182,7 @@ functions of scroll, the fades are timed class toggles):
   are the previous pass.
   **Third pass, same day (CURRENT)** — after Jenna's mentorship-page
   reference: ONE photo (`about-photo2-crop`, the Seoul portrait dropped), bio
-  6 columns (`min(50vw − 66px, 654px)`; was 7, narrowed again so the carded photo could grow) left and photo right, TOP-aligned, one empty grid column between (`8.333vw + 12.33px`, 132px at 1440);
+  5 columns (the shared `--width-right-column`; 7 → 6 → 5 so the photo could grow) left and photo right, TOP-aligned, one empty grid column between (`8.333vw + 12.33px`, 132px at 1440);
   then `.about-facts` moved OUT of the text column into its own
   `site-container` below as a 3-column grid (1 column ≤768), each column a
   hairline + 18px uppercase Hanken label + tight 14px entries.
