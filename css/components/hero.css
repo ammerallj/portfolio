@@ -921,6 +921,11 @@ html:not(.is-field-live) .intro-divider {
   color: var(--color-text);
   -webkit-text-stroke: 0;
   max-width: none;
+  /* BALANCED, so "designer" doesn't end a long line over a short one
+     (Jenna, 2026-09-29): the two lines after the name even out to "a product /
+     interaction" + "designer based in Seattle." The name is its own block, so
+     it balances separately and stays on line one. */
+  text-wrap: balance;
 }
 
 /* The lockup FADES OUT ON ITS OWN CLOCK once the reader starts scrolling —
