@@ -3004,7 +3004,16 @@ function updateScrollEffects() {
     const r = aboutSection.getBoundingClientRect();
     // Distance of the section's centre from the viewport's — 0 where it settles,
     // signed, so the lag flips with the approach direction on its own.
-    const d = (r.top + r.height / 2) - vh / 2;
+    // ⚠️ ANCHORED TO ABOUT'S RESTING SCROLL POSITION when there is one, not to
+    // the viewport's centre (2026-09-28). About is taller than a short window
+    // (measured at 1536x751), so at its resting position — heading one nav
+    // below the top — its centre is still well below the screen's, the peek was
+    // NOT 0 there, and clicking "About me" landed the heading 18px UNDER the
+    // bar. aboutRestY is where the nav click and the spy say About settles, so
+    // 0 lands exactly there. Same sign: positive while About is still below.
+    const d = aboutRestY != null
+      ? aboutRestY - window.scrollY
+      : (r.top + r.height / 2) - vh / 2;
     const span = Math.max(1, vh * ABOUT_PEEK.span);
     const n = Math.min(1, Math.abs(d) / span);
 
@@ -3462,6 +3471,7 @@ function setupLenis(Lenis) {
 // Fraction of a section's leftover space placed ABOVE its content when it
 // settles. 0.5 is a true centre; lower lifts the content.
 const SECTION_BIAS = { about: 0.34 };
+const SECTION_MIN_AIR = 40; // px between the nav and a section's content, at least
 
 function initSectionGeometry(lenis) {
   const sections = ['work-section', 'about', 'contact']
@@ -3516,7 +3526,10 @@ function initSectionGeometry(lenis) {
     // move with it. Those two must not cross: re-measure the margin after
     // changing this. See the note on --contact-lift.
     const bias = SECTION_BIAS[el.id] ?? 0.5;
-    const wantedTop = NAV_OFFSET + Math.max(0, (available - contentHeight) * bias);
+    // Floored at SECTION_MIN_AIR below the nav: when the content is taller than
+    // the window (About at 1536x751) the leftover is negative and the heading
+    // landed flush against the bar's bottom edge.
+    const wantedTop = NAV_OFFSET + Math.max(SECTION_MIN_AIR, (available - contentHeight) * bias);
     // contentDocTop is already a DOCUMENT coordinate, so no scrollY term here.
     const target = contentDocTop - wantedTop;
     // Clamp, or the last section asks for a position the page cannot reach.
