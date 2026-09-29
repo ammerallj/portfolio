@@ -384,6 +384,14 @@ functions of scroll, the fades are timed class toggles):
   appears once the hero's bottom is above mid-screen (the `is-tucked` state,
   homepage variant only).
 
+**Tablets (481–1024): the first Work card peeks too** (2026-09-28):
+`--hero-peek` (144px, responsive.css 1024 tier) shortens `.intro`, pulls the
+gradient's white end (`--field-mask-end`) and the tablet canvas box up by the
+same amount, and `tabletBlob` subtracts it from the orbs' band — so lockup and
+gradient move together. `WORK_PEEKS` (≤1024) sets `is-work-in` at rest, or the
+peek would be empty until the first scroll. Measured: 144px of card at 768x1024
+and 1024x768; desktop 1440 unchanged (no `--hero-peek`).
+
 **Open / not done (as of 2026-09-27):**
 - Phones (≤480) were not tuned for any of this — they keep their own mobile
   header, phone orb layout and still field.
