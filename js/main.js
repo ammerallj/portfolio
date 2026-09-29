@@ -1498,11 +1498,12 @@ function initHeroField() {
   })(prev);
 }
 
-// THE PHONE GRADIENT'S HEIGHT (≤480): 50svh (was 40), or 32px above the headline,
-// whichever is shorter (2026-09-28). The lockup is bottom-anchored in a hero of
+// THE PHONE GRADIENT'S HEIGHT (≤480): it ends PHONE_FIELD_GAP above the
+// headline (2026-09-28; was min(40svh → 50svh, headline − 32)). The lockup is bottom-anchored in a hero of
 // 100dvh − 184, so on a short phone the headline rises above 40% of the screen
 // (375x667: headline at 181, 40svh at 267) and the colour would sit behind it.
 // Set BEFORE initHeroField: phones draw one static frame, sized by this box.
+const PHONE_FIELD_GAP = 48;
 function measurePhoneField() {
   const root = document.documentElement;
   const h1 = document.querySelector('.intro-headline');
@@ -1516,7 +1517,9 @@ function measurePhoneField() {
   let top = 0;
   for (let n = h1; n; n = n.offsetParent) top += n.offsetTop;
   top += parseFloat(getComputedStyle(root).getPropertyValue('--hero-drop')) || 0;
-  const px = Math.round(Math.max(120, Math.min(window.innerHeight * 0.5, top - 32)));
+  // Ends a fixed PHONE_FIELD_GAP above the headline (Jenna: "move the gradient
+  // down"), no longer capped at a share of the screen.
+  const px = Math.round(Math.max(120, top - PHONE_FIELD_GAP));
   root.style.setProperty('--phone-field-h', px + 'px');
 }
 measurePhoneField();
