@@ -399,6 +399,16 @@ publishes `--stack-field-end` (48px above it, page px) for the 768 tier's mask
 and canvas box and for `tabletBlob`'s band. It had ended ~30px BELOW the
 headline's top at 740x1000 because the stacked lockup is taller.
 
+**The hero stacks BY LINE COUNT above 768** (2026-09-28, Jenna: "the moment
+the hero heading wraps to 4 lines"): `measureHeroStack` clears
+`html.is-hero-stacked`, counts the side-by-side headline's lines (offsetHeight /
+line-height) and sets the class if > 3; it re-runs on load, fonts, resize and
+once more 150ms after a resize settles (mid-resize it read the layout before the
+1024 tier's 56 → 44px type step and wrongly stacked 1024). Width alone can't
+decide it: at 56px the headline is 4 lines from ~1200 down to 1025, 3 again at
+1024 (44px), 4+ below ~1000. The class repeats the ≤768 stacking rules and makes
+the gradient's end follow the headline (`--stack-field-end`).
+
 **Open / not done (as of 2026-09-27):**
 - Phones (≤480) were not tuned for any of this — they keep their own mobile
   header, phone orb layout and still field.
