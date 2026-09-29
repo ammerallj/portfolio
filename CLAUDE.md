@@ -358,8 +358,8 @@ functions of scroll, the fades are timed class toggles):
   (`phoneBlob`, beside `tabletBlob`), the box being the colour band; the old
   hand-tuned `FIELD.phone` is no longer read.
 - **The header is transparent with white type over the gradient**
-  (`.site-header.is-header-on-field`, toggled above the is-loading return while
-  the gradient's solid part is still behind it): no frost, white clock, white
+  (`.site-header.is-header-on-field`, ≤680 — was ≤480 — toggled above the
+  is-loading return while the gradient's white end, less 112px, is below it): no frost, white clock, white
   "Say hello" pill. It becomes the frosted cream bar once the gradient passes.
 - **The wordmark is a CLOCK** on the homepage header (`<time class="site-name
   site-clock top-nav-clock">`, "Seattle" without JS; `initTopNav` fills every

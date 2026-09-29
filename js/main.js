@@ -2664,12 +2664,18 @@ function updateScrollEffects() {
   // fade) is still behind the header; after that the frosted cream bar returns,
   // or white type would sit on cream. Above the is-loading return, like the
   // flag above it, because the header is on screen through the load reveal.
+  // ≤680, everywhere this header is the nav (was ≤480 only; 481–680 kept the
+  // frosted band over the gradient). The white's end comes from the measured
+  // tokens — --phone-field-h (≤480) or --stack-field-end (481–768) — in page
+  // px; the header stays transparent while that end, less a fade's worth, is
+  // still below it.
   if (siteHeader) {
     let onField = false;
-    const cv = document.querySelector('.page-field-canvas');
-    if (cv && window.matchMedia('(max-width: 480px)').matches) {
-      const fade = parseFloat(getComputedStyle(cv).getPropertyValue('--field-fade')) || 112;
-      onField = cv.getBoundingClientRect().bottom - fade > siteHeader.getBoundingClientRect().bottom;
+    if (NO_LANDING_BAR.matches) {
+      const rs = document.documentElement.style;
+      const end = parseFloat(rs.getPropertyValue('--phone-field-h'))
+        || parseFloat(rs.getPropertyValue('--stack-field-end'));
+      if (end) onField = end - window.scrollY - 112 > siteHeader.getBoundingClientRect().bottom;
     }
     siteHeader.classList.toggle('is-header-on-field', onField);
   }
