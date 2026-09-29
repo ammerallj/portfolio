@@ -423,6 +423,14 @@ so the city never sits alone on the last line, and a `(max-width: 480px) and
 ⚠️ Measuring the headline with a RECT in the pane reads it 64px low for several
 seconds (the load reveal); use offsets.
 
+**THE SHADER RENDERS AT DEVICE RESOLUTION** (2026-09-29, `FIELD.renderScale` is
+now a CAP on devicePixelRatio, 2). At the old flat 1.0 a 2x display stretched the
+buffer 2x, softening the orbs and blowing the dither up into 2x2 blocks — reported
+as the hero looking like a "low quality image". Everything below that praises 1.0
+as an invisible fill-rate saving is superseded. Cost is 4x fill on 2x screens;
+if a slow GPU stutters, try 1.5 before going back to 1. Grain was also made finer
+and fainter the same day (baseFrequency 1.8 / 1 octave; opacities about −⅓).
+
 **Open / not done (as of 2026-09-27):**
 - Phones (≤480) were not tuned for any of this — they keep their own mobile
   header, phone orb layout and still field.
