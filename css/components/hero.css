@@ -391,7 +391,11 @@ html.is-field-live .page-field-grain { opacity: 0.15; }
   /* REDESIGN (exploration): the dissolve ends 72% down the fold (was 66%), so
      the bottom ~quarter is clean white for the lockup. Was
      calc(min(100%, calc(100svh + var(--field-rise))) - var(--field-cream, 0px)). */
-  --field-mask-end: calc(72svh + var(--field-rise) - var(--field-cream, 0px));
+  /* ...and never closer than 48px above the headline (2026-09-28): js/main.js
+     publishes --hero-field-end there. min(), so on desktop it only pulls the
+     white UP (short windows put the 72svh end behind the headline) and the
+     artwork's bottom edge stays under the white. */
+  --field-mask-end: calc(min(72svh, var(--hero-field-end, 72svh)) + var(--field-rise) - var(--field-cream, 0px));
   /* HOW TALL THE DISSOLVE IS, as a fraction of the room between the bio's last
      line and the bar. --field-gap is that room, published by measureFieldTuck;
      112px is the no-JS floor.

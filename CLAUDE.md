@@ -395,7 +395,7 @@ and 1024x768 — too much; now 88; desktop 1440 unchanged (no `--hero-peek`).
 **481–768 — the stacked hero** (2026-09-28): the bio sits under the headline at
 full width from the left edge (not indented to the nav's "Selected work"
 column), and the gradient's white end follows the headline: `measurePhoneField`
-publishes `--stack-field-end` (48px above it, page px) for the 768 tier's mask
+publishes `--hero-field-end` (48px above it, page px) for the 768 tier's mask
 and canvas box and for `tabletBlob`'s band. It had ended ~30px BELOW the
 headline's top at 740x1000 because the stacked lockup is taller.
 
@@ -407,7 +407,21 @@ once more 150ms after a resize settles (mid-resize it read the layout before the
 1024 tier's 56 → 44px type step and wrongly stacked 1024). Width alone can't
 decide it: at 56px the headline is 4 lines from ~1200 down to 1025, 3 again at
 1024 (44px), 4+ below ~1000. The class repeats the ≤768 stacking rules and makes
-the gradient's end follow the headline (`--stack-field-end`).
+the gradient's end follow the headline (`--hero-field-end`).
+
+**THE WHITE ENDS 48px ABOVE THE HEADLINE AT EVERY WIDTH** (2026-09-28, after a
+22-size sweep): `measurePhoneField` publishes `--hero-field-end` (renamed from
+`--stack-field-end`) at every width above 480, not only when stacked. ≤1024 and
+stacked it is used EXACTLY (the tablet canvas box is sized by it too — fixed
+195px of empty cream at 1024x1366); above 1024 the mask takes
+`min(72svh [− peek], --hero-field-end)`, so it only pulls the white UP (fixed it
+running 12–23px behind the headline at 1280x800 / 1366x768 / 1440x760) and never
+exposes the aspect-sized desktop canvas's bottom edge. Also: "in&nbsp;Seattle."
+so the city never sits alone on the last line, and a `(max-width: 480px) and
+(max-height: 700px)` block sets `--hero-h: 100svh − 120` so a 375x667 phone gets
+~215px of gradient (was ~150, and the header stayed frosted over it).
+⚠️ Measuring the headline with a RECT in the pane reads it 64px low for several
+seconds (the load reveal); use offsets.
 
 **Open / not done (as of 2026-09-27):**
 - Phones (≤480) were not tuned for any of this — they keep their own mobile

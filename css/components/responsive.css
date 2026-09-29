@@ -119,7 +119,7 @@
    measureHeroStack in js/main.js above 768; the ≤768 tier stacks by media
    query and repeats these rules there. Headline, then the bio at full width
    from the left; the gradient's white end follows the headline
-   (--stack-field-end, measurePhoneField).
+   (--hero-field-end, measurePhoneField).
    ============================================================ */
 html.is-hero-stacked .intro .intro-band {
   flex-direction: column;
@@ -138,7 +138,7 @@ html.is-hero-stacked .intro .intro-band-right {
   margin-left: 0;
 }
 html.is-hero-stacked {
-  --field-mask-end: calc(var(--stack-field-end, 72svh) + var(--field-rise) - var(--field-cream, 0px));
+  --field-mask-end: calc(var(--hero-field-end, 72svh) + var(--field-rise) - var(--field-cream, 0px));
 }
 
 /* ============================================================
@@ -154,7 +154,7 @@ html.is-hero-stacked {
 @media (max-width: 1376px) {
   :root {
     --hero-peek: 88px; /* was 144 — less card showing */
-    --field-mask-end: calc(72svh - var(--hero-peek) + var(--field-rise) - var(--field-cream, 0px));
+    --field-mask-end: calc(min(72svh - var(--hero-peek), var(--hero-field-end, 72svh)) + var(--field-rise) - var(--field-cream, 0px));
   }
   .intro {
     height: calc(100svh - var(--hero-peek));
@@ -176,7 +176,7 @@ html.is-hero-stacked {
   }
   html.is-hero-stacked .page-field-canvas,
   html.is-hero-stacked .page-field-grain {
-    height: calc(var(--stack-field-end, calc(72svh - var(--hero-peek))) + var(--field-rise) + 80px);
+    height: calc(var(--hero-field-end, calc(72svh - var(--hero-peek))) + var(--field-rise) + 80px);
   }
   html.is-hero-stacked .intro .intro-band-right {
     width: auto;
@@ -293,10 +293,18 @@ html.is-hero-stacked {
      down to the white's end (72svh, hero.css --field-mask-end) plus the rise,
      with 80px spare so the artwork's edge stays under the white. The ≤480
      tier restates its own box and wins there. */
+  /* The white ends EXACTLY 48px above the headline here (--hero-field-end,
+     js/main.js), not min()'d with 72svh as above 1024: the canvas box below is
+     sized by the same token, so the artwork's edge always stays under the
+     white, and a tall portrait iPad (1024x1366) no longer leaves ~195px of
+     empty cream between the gradient and the headline. */
+  :root {
+    --field-mask-end: calc(var(--hero-field-end, calc(72svh - var(--hero-peek))) + var(--field-rise) - var(--field-cream, 0px));
+  }
   .page-field-canvas,
   .page-field-grain {
     width: 100vw;
-    height: calc(72svh - var(--hero-peek) + var(--field-rise) + 80px);
+    height: calc(var(--hero-field-end, calc(72svh - var(--hero-peek))) + var(--field-rise) + 80px);
     aspect-ratio: auto;
   }
 
@@ -449,18 +457,18 @@ html.is-hero-stacked {
   /* THE STACKED HERO, 481–768 (2026-09-28, Jenna): the bio sits under the
      headline at FULL width from the left edge, like the phone — not indented to
      the nav's "Selected work" column. And the gradient's white end follows the
-     headline (--stack-field-end, measured in js/main.js, 48px above it) because
+     headline (--hero-field-end, measured in js/main.js, 48px above it) because
      the stacked lockup is taller and the headline starts above 72svh. */
   .intro .intro-band-right {
     width: auto;
     margin-left: 0;
   }
   :root {
-    --field-mask-end: calc(var(--stack-field-end, calc(72svh - var(--hero-peek))) + var(--field-rise) - var(--field-cream, 0px));
+    --field-mask-end: calc(var(--hero-field-end, calc(72svh - var(--hero-peek))) + var(--field-rise) - var(--field-cream, 0px));
   }
   .page-field-canvas,
   .page-field-grain {
-    height: calc(var(--stack-field-end, calc(72svh - var(--hero-peek))) + var(--field-rise) + 80px);
+    height: calc(var(--hero-field-end, calc(72svh - var(--hero-peek))) + var(--field-rise) + 80px);
   }
 
   /* About facts: one column per row once About stacks (redesign). */
@@ -1296,6 +1304,20 @@ html.is-hero-stacked {
   }
   .site-footer:not(.site-footer--plain) p {
     color: var(--color-text);
+  }
+}
+
+/* ============================================================
+   SHORT PHONES (≤480 wide, ≤700 tall — iPhone SE / 8-class, 375x667).
+   One rule: the hero ends 120px above the fold, not 184, so the lockup sits
+   64px lower and the gradient above it (48px above the headline, measured in
+   js/main.js) gets ~215px instead of ~150 — at 150 it read as a faint wash and
+   was too short for the header to go transparent over it. The Work card still
+   peeks, by ~56px instead of ~120.
+   ============================================================ */
+@media (max-width: 480px) and (max-height: 700px) {
+  :root {
+    --hero-h: calc(100svh - 120px);
   }
 }
 
