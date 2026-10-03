@@ -1351,3 +1351,73 @@ html.has-top-nav.is-work-in #work-section .site-container {
 }
 
 /* Width breakpoints for these sections live in css/components/responsive.css */
+
+
+/* LIGHTBOX (2026-10): a native modal <dialog> opened from a Work card
+   (initLightbox). The dialog is a transparent frame; the ::backdrop dims the
+   page. Click the backdrop, press Esc or tap the X to close. */
+.lightbox {
+  border: 0;
+  padding: 0;
+  /* The reset zeroes margins, which kills the dialog's auto centring. */
+  margin: auto;
+  background: transparent;
+  max-width: none;
+  max-height: none;
+  width: min(92vw, calc((100svh - 96px) * 1.4737));
+  overflow: visible;
+}
+
+.lightbox::backdrop {
+  background: rgba(0, 0, 0, 0.72);
+}
+
+.lightbox[open] {
+  animation: lightbox-in 0.25s ease both;
+}
+
+@keyframes lightbox-in {
+  from { opacity: 0; scale: 0.98; }
+  to { opacity: 1; scale: 1; }
+}
+
+.lightbox-media {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 3360 / 2280;
+  border-radius: 24px;
+  background: #fff;
+}
+
+.lightbox-close {
+  position: absolute;
+  /* Inside the media's top-right corner, inset 16px. */
+  top: 16px;
+  right: 16px;
+  z-index: 1;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92);
+  color: #000;
+  cursor: pointer;
+}
+
+.lightbox-close svg {
+  width: 20px;
+  height: 20px;
+}
+
+.lightbox-close:focus-visible {
+  outline: 2px solid #000;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lightbox[open] { animation: none; }
+}

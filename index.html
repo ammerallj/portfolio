@@ -161,7 +161,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,200;0,500;0,700;1,500&family=Inter:wght@400..700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=5013d60c" />
+  <link rel="stylesheet" href="style.css?v=211dd6fa" />
   <!-- The landing field's JPEG fallback — PHONES ONLY since 2026-09, so the
        preload is gated to match the <picture> in <main>. Without the media
        attribute this fetches 1.4MB on every desktop and tablet visit for an
@@ -483,6 +483,26 @@
             </a>
           </li>
 
+          <!-- Concept, not shipped. Parked like the other unlinked cards:
+               it opens a lightbox (initLightbox) rather than a page. Still is the PNG at 1920px q80; hover is MP4. -->
+          <li class="work-card" data-reveal-group>
+            <a class="work-card-link" href="#threadscape-lightbox" role="button" aria-haspopup="dialog" data-lightbox="threadscape-lightbox" data-reveal>
+              <div class="work-card-media" style="--media-ratio: 3360 / 2280">
+                <img class="work-card-cover" src="images/thread-card.jpg?v=1" width="1920" height="1303" alt="" loading="lazy" />
+                <video class="work-card-hover" data-hover-src="images/thread-card.mp4?v=1" width="3360" height="2280" muted loop playsinline preload="none" aria-hidden="true"></video>
+              </div>
+              <div class="work-card-text">
+                <div class="work-card-swap">
+                  <h2 class="work-card-title">Spatial History for Conversational AI</h2>
+                  <p class="work-card-description">Reimagining how emerging chat themes relate and how we navigate between them.</p>
+                </div>
+                <div class="work-card-meta">
+                  <span class="work-card-pill">Concept &middot; 2026</span>
+                </div>
+              </div>
+            </a>
+          </li>
+
         </ul>
       </div>
     </section>
@@ -577,6 +597,15 @@
   <!-- ============================================================
        SITE FOOTER
        ============================================================ -->
+  <!-- THREADSCAPE LIGHTBOX: a native modal <dialog> opened by the Threadscape
+       card (initLightbox, js/main.js). The video only gets its src on open. -->
+  <dialog class="lightbox" id="threadscape-lightbox" aria-label="Spatial History for Conversational AI">
+    <button type="button" class="lightbox-close" aria-label="Close">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>
+    </button>
+    <video class="lightbox-media" data-lightbox-src="images/thread-card.mp4?v=1" poster="images/thread-card.jpg?v=1" width="3360" height="2280" muted loop playsinline controls preload="none"></video>
+  </dialog>
+
   <footer class="site-footer" role="contentinfo">
     <div class="site-container">
       <p><span class="footer-owner">&copy; 2026 Jenna Ammerall</span><span class="footer-sep"> &middot; </span><span class="footer-credit">Human directed. AI built.</span></p>
@@ -591,6 +620,6 @@
   </div>
   <div class="wave-cursor" id="wave-cursor" aria-hidden="true">👋</div>
 
-  <script src="js/main.js?v=30aedb28" defer></script>
+  <script src="js/main.js?v=f0b6d6c8" defer></script>
 </body>
 </html>

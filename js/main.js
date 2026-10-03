@@ -2585,6 +2585,37 @@ function initWorkSkeleton() {
 }
 initWorkSkeleton();
 
+// Lightbox: a Work card with data-lightbox opens the <dialog> it names as a
+// modal. Esc and the X close it, and so does a click on the backdrop (a click
+// whose target is the dialog itself — the dialog is exactly the media's box).
+// Page scroll is held while it is open: Lenis listens on window, so a wheel
+// over the dialog would otherwise still scroll the page behind it.
+function initLightbox() {
+  document.querySelectorAll('[data-lightbox]').forEach((trigger) => {
+    const dlg = document.getElementById(trigger.dataset.lightbox);
+    if (!dlg || typeof dlg.showModal !== 'function') return;
+    const video = dlg.querySelector('video[data-lightbox-src]');
+    const close = () => dlg.close();
+    trigger.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (video) {
+        if (!video.getAttribute('src')) video.src = video.dataset.lightboxSrc;
+        video.currentTime = 0;
+      }
+      dlg.showModal();
+      if (window.__lenis) window.__lenis.stop();
+      if (video) { const p = video.play(); if (p && p.catch) p.catch(() => {}); }
+    });
+    dlg.querySelector('.lightbox-close').addEventListener('click', close);
+    dlg.addEventListener('click', (e) => { if (e.target === dlg) close(); });
+    dlg.addEventListener('close', () => {
+      if (video) video.pause();
+      if (window.__lenis) window.__lenis.start();
+    });
+  });
+}
+initLightbox();
+
 
 // ============================================================
 // IMAGE CAROUSEL — a crossfade between slides, used by the project pages'
