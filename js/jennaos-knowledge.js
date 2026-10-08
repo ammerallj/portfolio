@@ -1008,7 +1008,13 @@ window.JennaOSKnowledge = [
       "what are you working on right now",
       "what are you building lately"
     ],
-    "text": "I've been giving myself more room to make things without needing every experiment to turn into a polished case study. Building small ideas has helped me reconnect with the part of design I enjoy most: trying something, seeing what it teaches me, and following the next question.\n\nI'm still interested in systems and scale. I just don't want to lose the joy of making along the way."
+    "text": "I've been giving myself more room to make things without needing every experiment to turn into a polished case study. Building small ideas has helped me reconnect with the part of design I enjoy most: trying something, seeing what it teaches me, and following the next question.\n\nI'm still interested in systems and scale. I just don't want to lose the joy of making along the way.",
+    "links": [
+      {
+        "label": "View my GitHub",
+        "href": "https://github.com/ammerallj"
+      }
+    ]
   },
   {
     "id": "inspiration",
