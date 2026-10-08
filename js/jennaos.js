@@ -324,6 +324,17 @@
   }
   window.JennaOS.hint = ms => startHint(ms, true); // replay it (e.g. JennaOS.hint(20000) to inspect)
   ['pointerenter', 'focus', 'click'].forEach(ev => fab.addEventListener(ev, endHint));
-  const arrive = () => setTimeout(startHint, 1000);
+  // The load screen (html.is-intro) hides JennaOS; the hint waits for it to finish,
+  // plus the button's own fade-in (1.2s delay + 0.9s), so the pulse is seen.
+  const html = document.documentElement;
+  const afterIntro = cb => {
+    if (!html.classList.contains('is-intro')) return cb();
+    const mo = new MutationObserver(() => {
+      if (!html.classList.contains('is-intro')) { mo.disconnect(); cb(); }
+    });
+    mo.observe(html, { attributes: true, attributeFilter: ['class'] });
+  };
+  const INTRO_FADE_MS = 2100;
+  const arrive = () => afterIntro(() => setTimeout(startHint, html.classList.contains('has-intro') ? INTRO_FADE_MS + 400 : 1000));
   document.readyState === 'complete' ? arrive() : window.addEventListener('load', arrive, { once: true });
 })();
