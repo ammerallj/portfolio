@@ -1,0 +1,210 @@
+/* JennaOS — floating entry button + card shell (js/jennaos.js, markup at end of index.html) */
+.jenna-os {
+    --jos-ease-spring: cubic-bezier(.34, 1.4, .5, 1);
+    --jos-ink: #111;
+    --jos-muted: #8a8a85;
+    --jos-surface: #fff;
+    --jos-card-bg: #f7f7f5;
+    position: fixed; right: 24px; bottom: 24px; z-index: 2147483000;
+    font-family: var(--font-body, 'Inter', system-ui, sans-serif);
+  }
+
+  /* ---------- floating button ---------- */
+  .jos-fab {
+    all: unset; box-sizing: border-box;
+    position: relative; display: block;
+    width: 56px; height: 56px; border-radius: 50%;
+    background: var(--jos-surface);
+    box-shadow: 0 1px 2px rgba(0,0,0,.08), 0 8px 24px rgba(0,0,0,.14);
+    cursor: pointer;
+    transition: transform .35s var(--jos-ease-spring), box-shadow .25s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .jos-fab:hover { transform: scale(1.06); }
+  .jos-fab:active { transform: scale(.96); }
+  .jos-fab:focus-visible { outline: 2px solid var(--jos-ink); outline-offset: 3px; }
+
+  /* The dots sit in a gooey filter so the single dot splits like a droplet */
+  .jos-dots { position: absolute; inset: 0; filter: url(#jos-goo); pointer-events: none; }
+
+  /* Each ball hangs from a pivot above the button's center (a pendulum) */
+  .jos-pend {
+    --x: 0px;
+    position: absolute; left: 50%; top: calc(50% - 18px);
+    width: 0; height: 18px;
+    transform: translateX(var(--x));
+    transform-origin: 50% 0;
+    transition: transform .55s var(--jos-ease-spring);
+  }
+  .jos-ball {
+    position: absolute; left: -6px; bottom: -6px;
+    width: 12px; height: 12px; border-radius: 50%;
+    background: var(--jos-ink);
+    transition: transform .55s var(--jos-ease-spring);
+  }
+
+  /* Split: spread the balls out and shrink them */
+  .jos-fab:hover .jos-ball,
+  .jos-fab:focus-visible .jos-ball { transform: scale(.58); }
+  .jos-fab:hover .jos-pend:nth-child(1), .jos-fab:focus-visible .jos-pend:nth-child(1) { --x: -10px; }
+  .jos-fab:hover .jos-pend:nth-child(3), .jos-fab:focus-visible .jos-pend:nth-child(3) { --x: 10px; }
+
+  /* Morph: the middle dot drifts into the left dot, eases back, then into the
+     right dot. The goo filter fuses them into a blob where they overlap, and
+     the outer dots lean in a touch so the merge feels mutual. No swinging. */
+  @keyframes jos-mid {
+    0%, 100% { translate: 0 0; }
+    25%      { translate: -5px 0; }
+    50%      { translate: 0 0; }
+    75%      { translate: 5px 0; }
+  }
+  @keyframes jos-mid-ball {
+    0%, 50%, 100% { scale: 1 1; }
+    25%, 75%      { scale: 1.18 .88; }
+  }
+  @keyframes jos-lean-left {
+    0%, 50%, 100% { translate: 0 0; }
+    25%           { translate: 1.5px 0; }
+  }
+  @keyframes jos-lean-right {
+    0%, 25%, 100% { translate: 0 0; }
+    75%           { translate: -1.5px 0; }
+  }
+  .jos-fab:hover .jos-pend, .jos-fab:focus-visible .jos-pend {
+    animation-duration: 2.8s; animation-delay: .5s; animation-iteration-count: infinite;
+    animation-timing-function: ease-in-out; animation-fill-mode: both;
+  }
+  .jos-fab:hover .jos-pend:nth-child(1), .jos-fab:focus-visible .jos-pend:nth-child(1) { animation-name: jos-lean-left; }
+  .jos-fab:hover .jos-pend:nth-child(2), .jos-fab:focus-visible .jos-pend:nth-child(2) { animation-name: jos-mid; }
+  .jos-fab:hover .jos-pend:nth-child(3), .jos-fab:focus-visible .jos-pend:nth-child(3) { animation-name: jos-lean-right; }
+  .jos-fab:hover .jos-pend:nth-child(2) .jos-ball, .jos-fab:focus-visible .jos-pend:nth-child(2) .jos-ball {
+    animation: jos-mid-ball 2.8s .5s infinite ease-in-out both;
+  }
+
+  /* ---------- card ---------- */
+  .jos-card {
+    position: absolute; right: 0; bottom: 72px;
+    width: min(380px, calc(100vw - 48px)); min-height: 300px; box-sizing: border-box;
+    padding: 24px 24px 20px;
+    display: flex; flex-direction: column;
+    background: var(--jos-card-bg); border-radius: 28px;
+    box-shadow: 0 1px 2px rgba(0,0,0,.06), 0 24px 60px rgba(0,0,0,.18);
+    transform-origin: 100% 100%;
+    opacity: 0; transform: scale(.88) translateY(8px); pointer-events: none; visibility: hidden;
+    transition: opacity .2s, transform .45s var(--jos-ease-spring), visibility 0s .45s;
+  }
+  .jenna-os[data-open="true"] .jos-card {
+    opacity: 1; transform: none; pointer-events: auto; visibility: visible;
+    transition: opacity .2s, transform .45s var(--jos-ease-spring), visibility 0s;
+  }
+  .jos-title {
+    margin: 0; font: 500 24px/1.2 var(--font-heading, 'Hanken Grotesk', system-ui, sans-serif);
+    letter-spacing: -.01em; color: var(--jos-ink);
+  }
+  .jos-title span { color: var(--jos-muted); }
+  .jos-body { margin-top: 16px; font-size: 14px; line-height: 1.5; color: #333; }
+  .jos-body { max-height: clamp(120px, calc(100dvh - 420px), 320px); overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+  .jos-empty { margin: 0; color: var(--jos-muted); }
+
+  /* Scattered stack of floating cards: tiles keep their own proportions, tilt a
+     few degrees either way, overlap a little, and sit on a soft shadow. */
+  .jos-scatter { column-count: 2; column-gap: 0; padding: 8px 6px 14px; }
+  .jos-tile {
+    all: unset; box-sizing: border-box; display: block; cursor: pointer; overflow: hidden;
+    width: 88%; margin: 0 0 -6px; break-inside: avoid;
+    border-radius: 16px; background: #ececea;
+    box-shadow: 0 1px 2px rgba(0,0,0,.08), 0 10px 22px rgba(0,0,0,.14);
+    transition: transform .4s var(--jos-ease-spring), box-shadow .3s;
+  }
+  .jos-tile img { display: block; width: 100%; height: auto; }
+  .jos-tile:nth-child(6n+1) { rotate: -3deg;   margin-left: 2%; }
+  .jos-tile:nth-child(6n+2) { rotate: 2.5deg;  margin-left: 10%; margin-top: 18px; width: 82%; }
+  .jos-tile:nth-child(6n+3) { rotate: 1.5deg;  margin-left: 6%; width: 94%; }
+  .jos-tile:nth-child(6n+4) { rotate: -2deg;   margin-left: 4%; margin-top: 10px; width: 80%; }
+  .jos-tile:nth-child(6n+5) { rotate: 3deg;    margin-left: 0;  width: 90%; }
+  .jos-tile:nth-child(6n)   { rotate: -1.5deg; margin-left: 8%; margin-top: 14px; }
+  .jos-tile:hover { transform: translateY(-3px) scale(1.03); z-index: 1; box-shadow: 0 2px 4px rgba(0,0,0,.1), 0 16px 30px rgba(0,0,0,.2); }
+  .jos-tile:focus-visible { outline: 2px solid var(--jos-ink); outline-offset: 3px; }
+
+  .jos-viewer img { display: block; width: 100%; max-height: 240px; object-fit: contain; border-radius: 14px; background: #ececea; }
+  .jos-viewer-bar { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; }
+  .jos-viewer-nav { display: flex; align-items: center; gap: 4px; }
+  .jos-viewer-count { font-size: 12px; color: var(--jos-muted); min-width: 40px; text-align: center; }
+  .jos-viewer-btn {
+    all: unset; cursor: pointer; font-size: 12px; color: #333; padding: 6px 10px; border-radius: 999px; background: #ececea;
+  }
+  .jos-viewer-btn:hover { background: #e2e2df; }
+  .jos-viewer-btn:focus-visible { outline: 2px solid var(--jos-ink); outline-offset: 2px; }
+
+  .jos-intro { margin: 0 0 14px; }
+  .jos-apps { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0 0; padding: 0; list-style: none; }
+  .jos-apps button[aria-current="true"] { background: var(--jos-ink); color: #fff; }
+  .jos-apps button[aria-current="true"]:hover { background: var(--jos-ink); }
+  .jos-apps button {
+    all: unset; box-sizing: border-box; cursor: pointer;
+    padding: 8px 14px; border-radius: 999px; font-size: 13px; color: #333; background: #ececea;
+    transition: background .15s;
+  }
+  .jos-apps button:hover { background: #e2e2df; }
+  .jos-apps button:focus-visible { outline: 2px solid var(--jos-ink); outline-offset: 2px; }
+  /* Open state: the dots give way to one large black disc with a white X.
+     The disc is inset 12% from the button's edge, so a white ring shows around it. */
+  .jos-dots { transition: opacity .2s .1s; }
+  .jos-x {
+    position: absolute; inset: 12%; border-radius: 50%;
+    display: grid; place-items: center; background: var(--jos-ink); color: #fff;
+    transform: scale(.28); opacity: 0; pointer-events: none;
+    transition: transform .5s var(--jos-ease-spring), opacity .15s;
+  }
+  .jos-x svg { opacity: 0; transition: opacity .2s; }
+  .jenna-os[data-open="true"] .jos-x { transform: none; opacity: 1; }
+  .jenna-os[data-open="true"] .jos-x svg { opacity: 1; transition-delay: .12s; }
+  .jenna-os[data-open="true"] .jos-dots { opacity: 0; transition: opacity .1s; }
+  .jenna-os[data-open="true"] .jos-fab:hover .jos-pend,
+  .jenna-os[data-open="true"] .jos-fab:hover .jos-ball { animation: none; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .jos-fab:hover .jos-pend, .jos-fab:focus-visible .jos-pend,
+    .jos-fab:hover .jos-ball, .jos-fab:focus-visible .jos-ball { animation: none !important; }
+    .jenna-os *, .jenna-os { transition-duration: .01s !important; }
+  }
+
+/* ---------- chat input ---------- */
+.jenna-os .jos-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.jenna-os .jos-chat {
+  position: relative; display: flex; align-items: center; margin: 16px 0 0;
+  background: #ececea; border-radius: 999px; transition: box-shadow .15s;
+}
+.jenna-os .jos-chat:focus-within { box-shadow: 0 0 0 2px var(--jos-ink); }
+.jenna-os .jos-input {
+  all: unset; box-sizing: border-box; flex: 1; min-width: 0; padding: 13px 18px;
+  font: 400 16px/1.2 var(--font-body, 'Inter', system-ui, sans-serif); color: #111;
+}
+.jenna-os .jos-input::placeholder { color: #66665f; opacity: 1; } /* 4.7:1 on #ececea */
+.jenna-os .jos-send {
+  all: unset; box-sizing: border-box; cursor: pointer; flex: none; display: grid; place-items: center;
+  width: 30px; height: 30px; margin-right: 6px; border-radius: 50%; background: #111; color: #fff;
+}
+.jenna-os .jos-send[hidden] { display: none; }
+.jenna-os .jos-send:focus-visible { outline: 2px solid #111; outline-offset: 2px; }
+.jenna-os .jos-status { margin: 8px 4px 0; font-size: 12px; line-height: 1.4; color: #55554f; min-height: 0; }
+.jenna-os .jos-status:empty { display: none; }
+
+/* ---------- conversation ---------- */
+.jenna-os .jos-thread { display: grid; gap: 12px; }
+.jenna-os .jos-msg p { margin: 0; }
+.jenna-os .jos-msg p + p { margin-top: 8px; }
+.jenna-os .jos-msg.is-user {
+  justify-self: end; max-width: 85%; padding: 8px 14px; border-radius: 18px 18px 4px 18px;
+  background: var(--jos-ink); color: #fff;
+}
+.jenna-os .jos-msg.is-brain { justify-self: start; max-width: 100%; animation: jos-in .3s var(--jos-ease-spring) both; }
+@keyframes jos-in { from { opacity: 0; transform: translateY(6px); } }
+.jenna-os .jos-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.jenna-os .jos-chip {
+  all: unset; box-sizing: border-box; cursor: pointer; padding: 6px 12px; border-radius: 999px;
+  font-size: 12px; line-height: 1.2; color: #1a1a1a; background: #ececea; transition: background .15s;
+}
+.jenna-os .jos-chip:hover { background: #e2e2df; }
+.jenna-os .jos-chip:focus-visible { outline: 2px solid var(--jos-ink); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { .jenna-os .jos-msg.is-brain { animation: none; } }

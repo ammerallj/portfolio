@@ -161,7 +161,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,200;0,500;0,700;1,500&family=Inter:wght@400..700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=211dd6fa" />
+  <link rel="stylesheet" href="style.css?v=bf0d9043" />
   <!-- The landing field's JPEG fallback — PHONES ONLY since 2026-09, so the
        preload is gated to match the <picture> in <main>. Without the media
        attribute this fetches 1.4MB on every desktop and tablet visit for an
@@ -620,6 +620,41 @@
   </div>
   <div class="wave-cursor" id="wave-cursor" aria-hidden="true">👋</div>
 
+  <!-- JennaOS: floating entry button + card shell -->
+  <div class="jenna-os" id="jenna-os" data-open="false">
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+      <filter id="jos-goo" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+        <feGaussianBlur in="SourceGraphic" stdDeviation="0.9" result="b"/>
+        <feColorMatrix in="b" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 14 -6"/>
+      </filter>
+    </svg>
+
+    <section class="jos-card" id="jos-card" role="dialog" aria-label="JennaOS" aria-hidden="true">
+      <h2 class="jos-title" id="jos-title"></h2>
+      <div class="jos-body" id="jos-body" aria-live="polite"></div>
+      <ul class="jos-apps" id="jos-apps"></ul>
+      <form class="jos-chat" id="jos-chat" autocomplete="off">
+        <label class="jos-sr" for="jos-input">Ask JennaOS</label>
+        <input class="jos-input" id="jos-input" type="text" placeholder="Ask anything" enterkeyhint="send">
+        <button class="jos-send" id="jos-send" type="submit" aria-label="Send" hidden>
+          <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M8 13V3M3.5 7.5 8 3l4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </form>
+      <p class="jos-status" id="jos-status" role="status"></p>
+    </section>
+
+    <button class="jos-fab" id="jos-fab" type="button" aria-label="Open JennaOS" aria-expanded="false" aria-controls="jos-card">
+      <span class="jos-dots" aria-hidden="true">
+        <span class="jos-pend"><span class="jos-ball"></span></span>
+        <span class="jos-pend"><span class="jos-ball"></span></span>
+        <span class="jos-pend"><span class="jos-ball"></span></span>
+      </span>
+      <span class="jos-x" aria-hidden="true">
+        <svg viewBox="0 0 16 16" width="16" height="16"><path d="M4 4l8 8M12 4l-8 8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </span>
+    </button>
+  </div>
+  <script src="js/jennaos.js?v=12" defer></script>
   <script src="js/main.js?v=f0b6d6c8" defer></script>
 </body>
 </html>
