@@ -198,7 +198,14 @@
   justify-self: end; max-width: 85%; padding: 8px 14px; border-radius: 18px 18px 4px 18px;
   background: var(--jos-ink); color: #fff;
 }
-.jenna-os .jos-msg.is-brain { justify-self: start; max-width: 100%; animation: jos-in .3s var(--jos-ease-spring) both; }
+/* The OS's reply: a white bubble with the Work card's hairline. Same fill and
+   border tokens as .work-card-link; the squared corner mirrors the user's bubble. */
+.jenna-os .jos-msg.is-brain {
+  justify-self: start; max-width: 94%; box-sizing: border-box;
+  padding: 12px 14px; border-radius: 18px 18px 18px 4px;
+  background: #fff; border: 1px solid var(--color-border-light, rgba(0, 0, 0, 0.12));
+  animation: jos-in .3s var(--jos-ease-spring) both;
+}
 @keyframes jos-in { from { opacity: 0; transform: translateY(6px); } }
 .jenna-os .jos-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
 .jenna-os .jos-chip {
