@@ -104,6 +104,10 @@
   .jos-title span { color: var(--jos-muted); }
   .jos-body { margin-top: 16px; font-size: 14px; line-height: 1.5; color: #333; }
   .jos-body { max-height: clamp(120px, calc(100dvh - 420px), 320px); overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+  /* Gutter for the scrollbar: the box grows 14px into the card's own padding and
+     pads its content back by the same, so text and bubbles keep their width and
+     the scrollbar sits in the margin instead of on top of them. */
+  .jos-body { margin-right: -14px; padding-right: 14px; scrollbar-gutter: stable; scrollbar-color: rgba(0, 0, 0, .28) transparent; }
   .jos-empty { margin: 0; color: var(--jos-muted); }
 
   /* Scattered stack of floating cards: tiles keep their own proportions, tilt a
@@ -198,7 +202,14 @@
   justify-self: end; max-width: 85%; padding: 8px 14px; border-radius: 18px 18px 4px 18px;
   background: var(--jos-ink); color: #fff;
 }
-.jenna-os .jos-msg.is-brain { justify-self: start; max-width: 100%; animation: jos-in .3s var(--jos-ease-spring) both; }
+/* The OS's reply: a white bubble with the Work card's hairline. Same fill and
+   border tokens as .work-card-link; the squared corner mirrors the user's bubble. */
+.jenna-os .jos-msg.is-brain {
+  justify-self: start; max-width: 94%; box-sizing: border-box;
+  padding: 12px 14px; border-radius: 18px 18px 18px 4px;
+  background: #fff; border: 1px solid var(--color-border-light, rgba(0, 0, 0, 0.12));
+  animation: jos-in .3s var(--jos-ease-spring) both;
+}
 @keyframes jos-in { from { opacity: 0; transform: translateY(6px); } }
 .jenna-os .jos-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
 .jenna-os .jos-chip {
@@ -208,3 +219,37 @@
 .jenna-os .jos-chip:hover { background: #e2e2df; }
 .jenna-os .jos-chip:focus-visible { outline: 2px solid var(--jos-ink); outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) { .jenna-os .jos-msg.is-brain { animation: none; } }
+
+/* ---------- arrival hint: the dot pulses for 3s with a tooltip over it ---------- */
+.jenna-os .jos-hint {
+  position: absolute; right: 0; bottom: 68px; white-space: nowrap; pointer-events: none;
+  padding: 9px 14px; border-radius: 12px; background: #111; color: #fff;
+  font: 500 13px/1.2 var(--font-body, 'Inter', system-ui, sans-serif);
+  opacity: 0; transform: translateY(6px) scale(.96); transform-origin: 100% 100%;
+  transition: opacity .25s, transform .45s var(--jos-ease-spring);
+}
+.jenna-os .jos-hint::after { /* the little arrow, centered over the button */
+  content: ''; position: absolute; right: 22px; bottom: -4px; width: 10px; height: 10px;
+  background: #111; transform: rotate(45deg); border-radius: 2px;
+}
+.jenna-os.is-hinting .jos-hint { opacity: 1; transform: none; }
+.jenna-os.is-hinting .jos-dots { animation: jos-pulse 1s ease-in-out 3; }
+@keyframes jos-pulse {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.55); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .jenna-os.is-hinting .jos-dots { animation: none; } /* the tooltip alone carries the hint */
+}
+
+/* ---------- back (from a gallery to the conversation) ---------- */
+.jenna-os .jos-back {
+  all: unset; box-sizing: border-box; cursor: pointer; align-self: flex-start;
+  margin-top: 12px; padding: 5px 11px; border-radius: 999px;
+  font-size: 12px; line-height: 1.2; color: #1a1a1a; background: #ececea; transition: background .15s;
+}
+.jenna-os .jos-back::before { content: "←\00a0"; }
+.jenna-os .jos-back:hover { background: #e2e2df; }
+.jenna-os .jos-back:focus-visible { outline: 2px solid var(--jos-ink); outline-offset: 2px; }
+.jenna-os .jos-back[hidden] { display: none; }
+.jenna-os .jos-back + .jos-body { margin-top: 12px; }

@@ -161,7 +161,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,200;0,500;0,700;1,500&family=Inter:wght@400..700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=bf0d9043" />
+  <link rel="stylesheet" href="style.css?v=ce44301c" />
   <!-- The landing field's JPEG fallback — PHONES ONLY since 2026-09, so the
        preload is gated to match the <picture> in <main>. Without the media
        attribute this fetches 1.4MB on every desktop and tablet visit for an
@@ -629,7 +629,7 @@
       </filter>
     </svg>
 
-    <section class="jos-card" id="jos-card" role="dialog" aria-label="JennaOS" aria-hidden="true">
+    <section class="jos-card" id="jos-card" role="dialog" aria-label="JennaOS" aria-hidden="true" data-lenis-prevent>
       <h2 class="jos-title" id="jos-title"></h2>
       <div class="jos-body" id="jos-body" aria-live="polite"></div>
       <ul class="jos-apps" id="jos-apps"></ul>
@@ -643,6 +643,7 @@
       <p class="jos-status" id="jos-status" role="status"></p>
     </section>
 
+    <span class="jos-hint" id="jos-hint" aria-hidden="true">Tap here to chat with my OS</span>
     <button class="jos-fab" id="jos-fab" type="button" aria-label="Open JennaOS" aria-expanded="false" aria-controls="jos-card">
       <span class="jos-dots" aria-hidden="true">
         <span class="jos-pend"><span class="jos-ball"></span></span>
@@ -654,7 +655,7 @@
       </span>
     </button>
   </div>
-  <script src="js/jennaos.js?v=13" defer></script>
+  <script src="js/jennaos.js?v=18" defer></script>
   <script src="js/main.js?v=f0b6d6c8" defer></script>
 </body>
 </html>

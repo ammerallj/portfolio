@@ -128,5 +128,12 @@ for (const [q, exp] of cases) {
   const got = r.found ? r.entry.id : 'NONE';
   if (!exp.split('|').includes(got) && !SOFT.has(q)) { bad++; console.log('MISS ' + q.padEnd(52) + ' -> ' + got + '  (wanted ' + exp + ')'); }
 }
+// Every conversation-starter pill in js/jennaos.js must land on a real answer.
+const ui = fs.readFileSync(path.join(root, 'js/jennaos.js'), 'utf8');
+const starterBlock = ui.slice(ui.indexOf('const STARTERS = ['), ui.indexOf('];', ui.indexOf('const STARTERS = [')));
+for (const [, q] of starterBlock.matchAll(/'([^']+)'/g)) {
+  if (!window.JennaOSBrain.ask(q).found) { bad++; console.log('STARTER WITHOUT AN ANSWER: ' + q); }
+}
+
 console.log((cases.length - bad) + ' of ' + cases.length + ' answered as expected');
 process.exit(bad ? 1 : 0);
