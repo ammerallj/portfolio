@@ -84,7 +84,7 @@
   /* ---------- card ---------- */
   .jos-card {
     position: absolute; right: 0; bottom: 72px;
-    width: min(360px, calc(100vw - 48px)); min-height: 300px; box-sizing: border-box;
+    width: min(380px, calc(100vw - 48px)); min-height: 300px; box-sizing: border-box;
     padding: 24px 24px 20px;
     display: flex; flex-direction: column;
     background: var(--jos-card-bg); border-radius: 28px;
@@ -103,21 +103,28 @@
   }
   .jos-title span { color: var(--jos-muted); }
   .jos-body { margin-top: 16px; font-size: 14px; line-height: 1.5; color: #333; }
-  .jos-body { max-height: 300px; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+  .jos-body { max-height: clamp(120px, calc(100dvh - 420px), 320px); overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
   .jos-empty { margin: 0; color: var(--jos-muted); }
 
-  .jos-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
-  .jos-grid.is-masonry { display: block; column-count: 2; column-gap: 6px; }
+  /* Scattered stack of floating cards: tiles keep their own proportions, tilt a
+     few degrees either way, overlap a little, and sit on a soft shadow. */
+  .jos-scatter { column-count: 2; column-gap: 0; padding: 8px 6px 14px; }
   .jos-tile {
     all: unset; box-sizing: border-box; display: block; cursor: pointer; overflow: hidden;
-    border-radius: 12px; background: #ececea; aspect-ratio: 1;
-    transition: transform .3s var(--jos-ease-spring);
+    width: 88%; margin: 0 0 -6px; break-inside: avoid;
+    border-radius: 16px; background: #ececea;
+    box-shadow: 0 1px 2px rgba(0,0,0,.08), 0 10px 22px rgba(0,0,0,.14);
+    transition: transform .4s var(--jos-ease-spring), box-shadow .3s;
   }
-  .jos-tile img { display: block; width: 100%; height: 100%; object-fit: cover; }
-  .is-masonry .jos-tile { aspect-ratio: auto; margin-bottom: 6px; break-inside: avoid; }
-  .is-masonry .jos-tile img { height: auto; }
-  .jos-tile:hover { transform: scale(.97); }
-  .jos-tile:focus-visible { outline: 2px solid var(--jos-ink); outline-offset: 2px; }
+  .jos-tile img { display: block; width: 100%; height: auto; }
+  .jos-tile:nth-child(6n+1) { rotate: -3deg;   margin-left: 2%; }
+  .jos-tile:nth-child(6n+2) { rotate: 2.5deg;  margin-left: 10%; margin-top: 18px; width: 82%; }
+  .jos-tile:nth-child(6n+3) { rotate: 1.5deg;  margin-left: 6%; width: 94%; }
+  .jos-tile:nth-child(6n+4) { rotate: -2deg;   margin-left: 4%; margin-top: 10px; width: 80%; }
+  .jos-tile:nth-child(6n+5) { rotate: 3deg;    margin-left: 0;  width: 90%; }
+  .jos-tile:nth-child(6n)   { rotate: -1.5deg; margin-left: 8%; margin-top: 14px; }
+  .jos-tile:hover { transform: translateY(-3px) scale(1.03); z-index: 1; box-shadow: 0 2px 4px rgba(0,0,0,.1), 0 16px 30px rgba(0,0,0,.2); }
+  .jos-tile:focus-visible { outline: 2px solid var(--jos-ink); outline-offset: 3px; }
 
   .jos-viewer img { display: block; width: 100%; max-height: 240px; object-fit: contain; border-radius: 14px; background: #ececea; }
   .jos-viewer-bar { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; }
@@ -154,3 +161,24 @@
     .jos-fab:hover .jos-ball, .jos-fab:focus-visible .jos-ball { animation: none !important; }
     .jenna-os *, .jenna-os { transition-duration: .01s !important; }
   }
+
+/* ---------- chat input ---------- */
+.jenna-os .jos-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.jenna-os .jos-chat {
+  position: relative; display: flex; align-items: center; margin: 16px 0 0;
+  background: #ececea; border-radius: 999px; transition: box-shadow .15s;
+}
+.jenna-os .jos-chat:focus-within { box-shadow: 0 0 0 2px var(--jos-ink); }
+.jenna-os .jos-input {
+  all: unset; box-sizing: border-box; flex: 1; min-width: 0; padding: 13px 18px;
+  font: 400 16px/1.2 var(--font-body, 'Inter', system-ui, sans-serif); color: #111;
+}
+.jenna-os .jos-input::placeholder { color: #66665f; opacity: 1; } /* 4.7:1 on #ececea */
+.jenna-os .jos-send {
+  all: unset; box-sizing: border-box; cursor: pointer; flex: none; display: grid; place-items: center;
+  width: 30px; height: 30px; margin-right: 6px; border-radius: 50%; background: #111; color: #fff;
+}
+.jenna-os .jos-send[hidden] { display: none; }
+.jenna-os .jos-send:focus-visible { outline: 2px solid #111; outline-offset: 2px; }
+.jenna-os .jos-status { margin: 8px 4px 0; font-size: 12px; line-height: 1.4; color: #55554f; min-height: 0; }
+.jenna-os .jos-status:empty { display: none; }

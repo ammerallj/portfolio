@@ -78,11 +78,11 @@
   };
 
   // A grid of thumbnails; tapping one enlarges it inside the card, with a back
-  // button and prev/next. `masonry` flows the tiles at their natural heights.
-  function renderGallery(body, photos, { masonry = false, empty }) {
+  // button and prev/next. Tiles are laid out as a scattered stack of cards.
+  function renderGallery(body, photos, { empty }) {
     if (!photos.length) { body.appendChild(el('p', 'jos-empty', empty)); return; }
 
-    const grid = el('div', 'jos-grid' + (masonry ? ' is-masonry' : ''));
+    const grid = el('div', 'jos-scatter');
     photos.forEach((p, i) => {
       const b = el('button', 'jos-tile');
       b.type = 'button';
@@ -106,7 +106,7 @@
       const bar = el('div', 'jos-viewer-bar');
       const back = el('button', 'jos-viewer-btn', 'All photos');
       back.type = 'button';
-      back.addEventListener('click', () => { body.innerHTML = ''; renderGallery(body, photos, { masonry, empty }); });
+      back.addEventListener('click', () => { body.innerHTML = ''; renderGallery(body, photos, { empty }); });
       const nav = el('div', 'jos-viewer-nav');
       const prev = el('button', 'jos-viewer-btn', 'Prev'); prev.type = 'button';
       const next = el('button', 'jos-viewer-btn', 'Next'); next.type = 'button';
@@ -132,22 +132,50 @@
     label: 'Fashion',
     heading: 'Fashion.',
     subheading: 'What I’m saving lately.',
-    render: body => renderGallery(body, PHOTOS.fashion, { masonry: true, empty: 'The moodboard is on the way.' })
+    render: body => renderGallery(body, PHOTOS.fashion, { empty: 'The moodboard is on the way.' })
   });
 
-  // ---- ReadMe: the first app, and the one the OS opens into ----
+
+  // ---- Chat input: no model behind it yet. It routes to an app by name or
+  // keyword, and otherwise says so plainly. ----
+  const chat = document.getElementById('jos-chat');
+  const input = document.getElementById('jos-input');
+  const send = document.getElementById('jos-send');
+  const status = document.getElementById('jos-status');
+  const KEYWORDS = {
+    maeve: ['dog', 'dachshund', 'puppy', 'pet'],
+    fashion: ['style', 'outfit', 'trend', 'clothes', 'pinterest', 'moodboard'],
+    readme: ['help', 'start']
+  };
+  input.addEventListener('input', () => { send.hidden = !input.value.trim(); status.textContent = ''; });
+  chat.addEventListener('submit', e => {
+    e.preventDefault();
+    const q = input.value.trim().toLowerCase();
+    if (!q) return;
+    const hit = apps.find(a => q.includes(a.id) || q.includes(a.label.toLowerCase())) ||
+      apps.find(a => (KEYWORDS[a.id] || []).some(k => q.includes(k)));
+    if (hit) {
+      openApp(hit.id);
+      input.value = ''; send.hidden = true; status.textContent = '';
+    } else {
+      status.textContent = 'I can’t chat yet, but I can show you around. Try “' +
+        apps.slice(1).map(a => a.label).join('” or “') + '.”';
+    }
+  });
+
+  // ---- Start (the ReadMe): the first app, and the one the OS opens into ----
   window.JennaOS.registerApp({
     id: 'readme',
     first: true,
-    label: 'ReadMe',
-    heading: 'ReadMe.',
-    subheading: 'How to get around.',
+    label: 'Start',
+    heading: 'JennaOS.',
+    subheading: 'A small operating system for looking around.',
     render(el) {
       const ul = document.createElement('ul');
       ul.className = 'jos-readme';
       [
         ['Pick an app.', 'The pills below are apps. Tap one and it opens right here.'],
-        ['Come back any time.', 'ReadMe is always the first pill.'],
+        ['Come back any time.', 'Start is always the first pill.'],
         ['Close it.', 'Tap the dot again, hit Esc, or click anywhere outside.'],
         ['Keyboard.', 'Tab moves between pills. Enter opens one.']
       ].forEach(([lead, rest]) => {
