@@ -862,7 +862,9 @@ function startReveal() {
 let heroIris = null;
 // The sequence is chained off the iris: it grows for `iris` ms, holds `pause` ms
 // on the finished field, THEN the scrim rises and the content staggers in.
-const INTRO = { pause: 250, iris: 1400, cap: 9000, followMs: 900 };
+// `maxPause`: the hold on the finished field never runs past this, even if fonts or
+// the page aren't ready (they used to be able to stretch it to 9s).
+const INTRO = { pause: 250, maxPause: 850, iris: 1400, followMs: 900 };
 function runIntro() {
   // Scrolling is blocked from first paint by the inline <head> script (index.html);
   // this only puts the page back at the top when the loader ends.
@@ -902,7 +904,7 @@ function runIntro() {
       document.fonts ? document.fonts.ready : null
     ]);
     const held = new Promise(r => setTimeout(r, INTRO.iris + INTRO.pause));
-    const cap = new Promise(r => setTimeout(r, INTRO.cap));
+    const cap = new Promise(r => setTimeout(r, INTRO.iris + INTRO.maxPause));
     Promise.race([Promise.all([held, pageReady]), cap]).then(() => {
       if (siteRevealed) return;
       siteRevealed = true;
