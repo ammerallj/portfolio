@@ -63,7 +63,17 @@
   // images/fashion/). An empty list shows a "coming soon" note. ----
   const PHOTOS = {
     maeve: [],
-    fashion: []
+    fashion: [
+      { src: 'images/fashion/purple-leather-tote.jpg', alt: 'A soft plum leather tote with a folded flap and slim double handles, on a wooden dresser' },
+      { src: 'images/fashion/beige-layers.jpg', alt: 'An oversized beige blazer over a tiered, raw-edged sheer skirt, with a striped scarf, on a leaf-covered street' },
+      { src: 'images/fashion/sheer-red-skirt.jpg', alt: 'Close-up of a sheer red organza skirt with a split hem, under a blush silk top, on a runway' },
+      { src: 'images/fashion/black-leather-bomber.jpg', alt: 'A black leather bomber with a high collar and ruched cuffs, carrying a small black bag' },
+      { src: 'images/fashion/red-strappy-sandals.jpg', alt: 'Red leather sandals with thin knotted straps that tie around the ankle, on brown paper' },
+      { src: 'images/fashion/desk-loafers.jpg', alt: 'Black loafers with beige knit socks and wide-leg jeans, feet up on a steel desk next to a laptop of saved looks' },
+      { src: 'images/fashion/embroidered-organza-skirt.jpg', alt: 'A mauve-grey organza skirt embroidered with a trellis of leafy vines, with a ribbed cropped top, on a runway' },
+      { src: 'images/fashion/grey-zip-long-skirt.jpg', alt: 'Back view of an oversized grey zip sweatshirt with a long charcoal skirt, black kitten-heel mules and a black tote' },
+      { src: 'images/fashion/plaid-shirt-slip-skirt.jpg', alt: 'A burgundy and grey plaid oversized shirt over a pink slip skirt with a lace hem, with grey clogs, standing on sand' }
+    ]
   };
   window.JennaOS.photos = PHOTOS;
 
