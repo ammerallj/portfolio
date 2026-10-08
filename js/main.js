@@ -858,7 +858,7 @@ function startReveal() {
 // INTRO.hold ms, longer only if the page itself isn't ready, never past
 // INTRO.cap. Then is-intro comes off — the scrim rises (a CSS transition on
 // --intro) and the nav + hero fade in — and the sections below follow.
-const INTRO = { hold: 5000, cap: 9000, followMs: 900 };
+const INTRO = { hold: 1500, cap: 9000, followMs: 900 };
 function runIntro() {
   // initHeroField runs after initHero(); give it a beat, then check it drew.
   // No WebGL = no orbs to show, so skip the screen and reveal as usual.
@@ -1196,7 +1196,9 @@ const FIELD = {
   // ⚠️ ORDER SEQUENCES ALONG paintOrder, so `reverse` means cyan (top) first.
   // Timings are indexed by ORB, not by stack slot — reordering the stack must
   // not silently re-time the entrance.
-  entrance: { lead: 280, stagger: 240, duration: 320 },
+  // LOAD SCREEN: each orb GROWS from a point to full size (ease-out), staggered;
+  // all done by ~1.35s so the 1.5s hold ends on a finished field.
+  entrance: { lead: 0, stagger: 150, duration: 900 },
   // REDESIGN: speed 2.4 (was 1.85) — ~30% quicker drift and pulse, same travel.
   motion: { speed: 2.4, drift: 0.050, driftYRatio: 0.2, pulse: 0.30, warp: 0.55 },
   // Buffer size vs CSS px, as a CAP on devicePixelRatio (2026-09-29). It was a
@@ -1458,8 +1460,8 @@ function initHeroField() {
         : Math.max(0, Math.min(1, (entranceMs - entranceStarts[blobIdx]) / e.duration));
       blobData[slot * 4 + 0] = b.x;
       blobData[slot * 4 + 1] = b.y + (FIELD_STATIC.matches || tablet ? 0 : FIELD.offsetY);
-      blobData[slot * 4 + 2] = b.r;
-      blobData[slot * 4 + 3] = b.a * p;
+      blobData[slot * 4 + 2] = b.r * (1 - Math.pow(1 - p, 3));
+      blobData[slot * 4 + 3] = b.a;
       colData[slot * 3 + 0] = b.col[0];
       colData[slot * 3 + 1] = b.col[1];
       colData[slot * 3 + 2] = b.col[2];
