@@ -860,7 +860,9 @@ function startReveal() {
 // --intro) and the nav + hero fade in — and the sections below follow.
 // Set by runIntro when the iris starts growing; read by the field shader each frame.
 let heroIris = null;
-const INTRO = { hold: 1500, iris: 1400, cap: 9000, followMs: 900 };
+// The sequence is chained off the iris: it grows for `iris` ms, holds `pause` ms
+// on the finished field, THEN the scrim rises and the content staggers in.
+const INTRO = { pause: 250, iris: 1400, cap: 9000, followMs: 900 };
 function runIntro() {
   // Scrolling is blocked from first paint by the inline <head> script (index.html);
   // this only puts the page back at the top when the loader ends.
@@ -899,7 +901,7 @@ function runIntro() {
         : new Promise(r => window.addEventListener('load', r, { once: true })),
       document.fonts ? document.fonts.ready : null
     ]);
-    const held = new Promise(r => setTimeout(r, INTRO.hold));
+    const held = new Promise(r => setTimeout(r, INTRO.iris + INTRO.pause));
     const cap = new Promise(r => setTimeout(r, INTRO.cap));
     Promise.race([Promise.all([held, pageReady]), cap]).then(() => {
       if (siteRevealed) return;
