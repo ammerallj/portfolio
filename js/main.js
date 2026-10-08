@@ -850,7 +850,88 @@ function startReveal() {
     revealRestOfSite();
     return;
   }
+  if (html.classList.contains('is-intro')) { runIntro(); return; }
   setTimeout(revealSite, 200);
+}
+
+// LOAD SCREEN (hero.css, --intro): the orbs are shown alone for at least
+// INTRO.hold ms, longer only if the page itself isn't ready, never past
+// INTRO.cap. Then is-intro comes off — the scrim rises (a CSS transition on
+// --intro) and the nav + hero fade in — and the sections below follow.
+// Set by runIntro when the iris starts growing; read by the field shader each frame.
+let heroIris = null;
+// The sequence is chained off the iris: it grows for `iris` ms, holds `pause` ms
+// on the finished field, THEN the scrim rises and the content staggers in.
+// `maxPause`: the hold on the finished field never runs past this, even if fonts or
+// the page aren't ready (they used to be able to stretch it to 9s).
+// `overlap`: the scrim is released this many ms BEFORE the circle finishes. Outside
+// the circle is cream and so is the scrim, so the two meet seamlessly, and the
+// scrim's slow ease-in start is spent while the circle is still finishing.
+const INTRO = { overlap: 300, pause: 0, maxPause: 850, iris: 1400, followMs: 950 };
+function runIntro() {
+  // Scrolling is blocked from first paint by the inline <head> script (index.html);
+  // this only puts the page back at the top when the loader ends.
+  const unblock = () => {
+    if (window.__lenis) window.__lenis.scrollTo(0, { immediate: true });
+    window.scrollTo(0, 0);
+  };
+  window.scrollTo(0, 0);
+  // initHeroField runs after initHero(); give it a beat, then check it drew.
+  // No WebGL = no orbs to show, so skip the screen and reveal as usual.
+  setTimeout(() => {
+    if (!html.classList.contains('is-field-live')) {
+      html.classList.remove('is-intro');
+      unblock();
+      setTimeout(revealSite, 200);
+      return;
+    }
+    // Grow the artwork just enough to cover the viewport while it is dropped to
+    // the top. The drop (translate +rise) is NOT scaled but the box's own -rise
+    // offset is, so the bottom edge lands at (H - rise) * s + rise: solve for THAT,
+    // not for vh / H, which falls short in tall windows and leaves a hard cream
+    // strip along the bottom of the screen. 2% spare.
+    const box = document.querySelector('.page-field-canvas');
+    if (box && box.offsetHeight) {
+      const rise = parseFloat(getComputedStyle(html).getPropertyValue('--field-rise')) || 0;
+      const need = rise < box.offsetHeight
+        ? (window.innerHeight - rise) / (box.offsetHeight - rise) : window.innerHeight / box.offsetHeight;
+      let sc = Math.max(1, need) * 1.02;
+      html.style.setProperty('--intro-scale', sc.toFixed(4));
+      // Then CHECK it against the real box (no transition while is-intro) and
+      // grow it until the bottom edge is a few px past the screen, whatever the
+      // formula says — a short edge is a hard cream line along the bottom.
+      for (let i = 0; i < 5; i++) {
+        const r = box.getBoundingClientRect();
+        if (r.bottom >= window.innerHeight + 6 && r.top <= 0) break;
+        sc *= 1 + Math.max(0.01, (window.innerHeight + 10 - r.bottom) / Math.max(1, r.height));
+        html.style.setProperty('--intro-scale', sc.toFixed(4));
+      }
+    }
+    // IRIS: the field shader draws the orbs through a circle that grows from a 14px
+    // dot at the centre of the viewport until it clears the corners (irisUniform in
+    // initHeroField). Until this runs it holds at the dot.
+    heroIris = {
+      start: performance.now(),
+      dur: INTRO.iris,
+      R: Math.ceil(Math.hypot(window.innerWidth, window.innerHeight) / 2 * 1.06),
+    };
+    const pageReady = Promise.all([
+      document.readyState === 'complete'
+        ? null
+        : new Promise(r => window.addEventListener('load', r, { once: true })),
+      document.fonts ? document.fonts.ready : null
+    ]);
+    const held = new Promise(r => setTimeout(r, INTRO.iris - INTRO.overlap + INTRO.pause));
+    const cap = new Promise(r => setTimeout(r, INTRO.iris + INTRO.maxPause));
+    Promise.race([Promise.all([held, pageReady]), cap]).then(() => {
+      if (siteRevealed) return;
+      siteRevealed = true;
+      html.classList.remove('is-intro');
+      unblock();
+      html.classList.add('is-text-revealed');
+      setTimeout(revealRestOfSite, INTRO.followMs);
+    });
+  }, 200);
 }
 
 initHero();
@@ -1156,7 +1237,9 @@ const FIELD = {
   // ⚠️ ORDER SEQUENCES ALONG paintOrder, so `reverse` means cyan (top) first.
   // Timings are indexed by ORB, not by stack slot — reordering the stack must
   // not silently re-time the entrance.
-  entrance: { lead: 280, stagger: 240, duration: 320 },
+  // LOAD SCREEN: each orb GROWS from a point to full size (ease-out), staggered;
+  // all done by ~1.35s so the 1.5s hold ends on a finished field.
+  entrance: { lead: 0, stagger: 150, duration: 900 },
   // REDESIGN: speed 2.4 (was 1.85) — ~30% quicker drift and pulse, same travel.
   motion: { speed: 2.4, drift: 0.050, driftYRatio: 0.2, pulse: 0.30, warp: 0.55 },
   // Buffer size vs CSS px, as a CAP on devicePixelRatio (2026-09-29). It was a
@@ -1202,7 +1285,7 @@ function initHeroField() {
   const FRAG = [
     'precision highp float;',
     'uniform vec2 uRes,uAmp;uniform float uAspect,uTime,uWarp;',
-    'uniform vec4 uBlob[4];uniform vec3 uCol[4];uniform vec4 uRamp[4];',
+    'uniform vec4 uBlob[4];uniform vec3 uCol[4];uniform vec4 uRamp[4];uniform vec3 uIris;',
     // ⚠️ FIELD.layer is deliberately NOT emitted here. It was, as a dead constant
     // `LAYER` that no line of the shader body ever read — and being dead did not
     // make it harmless: the value is interpolated into GLSL source, so setting it
@@ -1275,6 +1358,11 @@ function initHeroField() {
     // banding step into imperceptible grain. Neither a JPEG ramp nor a video
     // encode can do this; it is the technical case for rendering the field.
     ' col+=(hash(gl_FragCoord.xy+fract(uTime)*71.3)-.5)/255.;',
+    // LOAD SCREEN IRIS: outside a circle (centre + radius in buffer px, radius < 0
+    // = off) the field is cream. Done here, in the pass that is already running,
+    // so the circle costs nothing extra and has an anti-aliased edge — a CSS
+    // clip-path on the canvas re-rasterised a full-screen WebGL layer every frame.
+    ' if(uIris.z>=0.){float d=length(vec2(gl_FragCoord.x,uRes.y-gl_FragCoord.y)-uIris.xy);col=mix(CREAM,col,1.-smoothstep(uIris.z-1.5,uIris.z+1.5,d));}',
     ' gl_FragColor=vec4(col,1.);}',
   ].join('\n');
 
@@ -1301,7 +1389,7 @@ function initHeroField() {
   gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
 
   const U = {};
-  ['uRes', 'uAspect', 'uTime', 'uWarp', 'uAmp', 'uBlob', 'uCol', 'uRamp']
+  ['uRes', 'uAspect', 'uTime', 'uWarp', 'uAmp', 'uBlob', 'uCol', 'uRamp', 'uIris']
     .forEach(n => { U[n] = gl.getUniformLocation(prog, n); });
 
   gl.uniform1f(U.uWarp, FIELD.motion.warp);
@@ -1406,6 +1494,32 @@ function initHeroField() {
     });
   }
 
+  // The load screen's iris, as [cx, cy, r] in BUFFER px (r = -1: off). The canvas is
+  // dropped and scaled while the intro runs, so the viewport's centre and the
+  // radius are converted into the canvas's own space from its live box.
+  const IRIS_OFF = new Float32Array([0, 0, -1]);
+  const irisOut = new Float32Array(3);
+  function irisUniform() {
+    const running = heroIris && performance.now() - heroIris.start < heroIris.dur;
+    // Once started, the iris runs to its end on its own clock (release can come
+    // before it finishes — see INTRO.overlap); before it starts it is held by is-intro.
+    if (heroIris ? !running : !html.classList.contains('is-intro')) return IRIS_OFF;
+    const R0 = 14;
+    let r = R0;
+    if (heroIris) {
+      const p = Math.min(1, (performance.now() - heroIris.start) / heroIris.dur);
+      const e = p * p * p; // easeInCubic: starts slow, ends at speed
+      r = R0 + (heroIris.R - R0) * e;
+    }
+    const rect = canvas.getBoundingClientRect();
+    const s = rect.width / canvas.offsetWidth || 1;
+    const k = canvas.width / canvas.offsetWidth;
+    irisOut[0] = (canvas.offsetWidth / 2) * k;
+    irisOut[1] = ((window.innerHeight / 2 - rect.top) / s) * k;
+    irisOut[2] = (r / s) * k;
+    return irisOut;
+  }
+
   function draw(t, entranceMs) {
     resize();
     const e = FIELD.entrance;
@@ -1414,12 +1528,13 @@ function initHeroField() {
       const b = FIELD_STATIC.matches ? phoneBlob(FIELD.blobs[blobIdx])
         : tablet ? tabletBlob(FIELD.blobs[blobIdx])
         : FIELD.blobs[blobIdx];
-      const p = entranceMs == null ? 1
-        : Math.max(0, Math.min(1, (entranceMs - entranceStarts[blobIdx]) / e.duration));
+      // LOAD SCREEN: the orbs are drawn fully formed — the reveal is the circular
+      // iris in runIntro(), not a per-orb entrance. (FIELD.entrance / entranceMs
+      // are now unused; left in place rather than ripped out of the draw loop.)
       blobData[slot * 4 + 0] = b.x;
       blobData[slot * 4 + 1] = b.y + (FIELD_STATIC.matches || tablet ? 0 : FIELD.offsetY);
       blobData[slot * 4 + 2] = b.r;
-      blobData[slot * 4 + 3] = b.a * p;
+      blobData[slot * 4 + 3] = b.a;
       colData[slot * 3 + 0] = b.col[0];
       colData[slot * 3 + 1] = b.col[1];
       colData[slot * 3 + 2] = b.col[2];
@@ -1436,6 +1551,7 @@ function initHeroField() {
     gl.uniform2f(U.uRes, canvas.width, canvas.height);
     gl.uniform1f(U.uAspect, canvas.width / canvas.height);
     gl.uniform1f(U.uTime, t);
+    gl.uniform3fv(U.uIris, irisUniform());
     gl.drawArrays(gl.TRIANGLES, 0, 3);
   }
 

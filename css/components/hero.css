@@ -138,6 +138,22 @@ html.is-field-live .page-field-grain { opacity: 0.1; } /* was 0.15 (2026-09-29: 
      read the token: the .intro-bar is display:none there, so there is no pinned
      bar to tuck behind, and the JS skips the whole block for the same reason. */
   transform: translate(-50%, calc(-1 * var(--field-rise, 0px) - var(--field-scroll, 0px)));
+  /* LOAD SCREEN (see the block at the end of this file): while html.is-intro the
+     artwork is dropped to the top and grown ~4% so it covers the screen. Uses the
+     individual `translate` / `scale` properties — NOT `transform`, which is
+     scroll-linked and must stay untransitioned — and plain class states rather
+     than calc() on --intro, so the settle is a simple delayed transition that
+     starts once the scrim is nearly home. Origin is top-LEFT on purpose: with
+     left: 50% and translate(-50%) that keeps the box centred while it scales. */
+  transform-origin: 0 0;
+  translate: 0 0;
+  scale: 1;
+  /* ⚠️ THE SETTLE MUST WAIT FOR THE SCRIM. The scrim (--intro, 1s) is an ease-in, so it
+     is still low on the screen for most of its run; the artwork's hard bottom edge
+     rising before it passes shows as a cutoff line. At 0.85s the scrim's end is
+     below ~770px and the artwork's bottom is still ~1000+, so the edge stays under
+     the white. If the scrim's duration or curve changes, move this with it. */
+  transition: translate 0.5s cubic-bezier(0.3, 0, 0.2, 1) 0.85s, scale 0.5s cubic-bezier(0.3, 0, 0.2, 1) 0.85s;
   /* images/hero-bkg.jpg, centered. FROZEN at its 1440 size (1639.44px = the
      113.85vw composition) for any narrower window: below the design width the
      field keeps its size and position and the viewport simply crops more of
@@ -381,7 +397,13 @@ html.is-field-live .page-field-grain { opacity: 0.1; } /* was 0.15 (2026-09-29: 
      REDESIGN: that wall is gone — the lockup sits on white now, not on the
      field — so the artwork rises 200px to bring the red up into the visible
      band and push more of the top blue off-screen. Was 30px, then 130. */
-  --field-rise: 200px;
+  --field-rise: 155px; /* was 200: lowered 45 with the scrim (below) so the artwork's bottom edge keeps its margin under the white */
+  /* SCRIM DROP (2026-10): the white's end sits this much LOWER on the page than the
+     lockup rule alone puts it. Added to every --field-mask-end. ⚠️ The ceiling is the
+     artwork's bottom edge (H − rise): at 1440x900 the margin under the white is
+     (879 − 155) − (648 + 60) = 16px; raise this only with --field-rise lowered
+     alongside, or the hard bottom edge shows. */
+  --scrim-drop: 60px;
   /* ⚠️ --field-cream (scroll-linked, js/main.js) moves the dissolve's END up the
      artwork. It equals the artwork's lag (--field-scroll is negative: the
      artwork sinks, slower than the page) plus the tuck's overhang, so on the
@@ -398,7 +420,7 @@ html.is-field-live .page-field-grain { opacity: 0.1; } /* was 0.15 (2026-09-29: 
      publishes --hero-field-end there. min(), so on desktop it only pulls the
      white UP (short windows put the 72svh end behind the headline) and the
      artwork's bottom edge stays under the white. */
-  --field-mask-end: calc(min(72svh, var(--hero-field-end, 72svh)) + var(--field-rise) - var(--field-cream, 0px));
+  --field-mask-end: calc(min(72svh, var(--hero-field-end, 72svh)) + var(--field-rise) - var(--field-cream, 0px) + var(--scrim-drop, 0px) + calc(var(--intro, 0) * 62svh));
   /* HOW TALL THE DISSOLVE IS, as a fraction of the room between the bio's last
      line and the bar. --field-gap is that room, published by measureFieldTuck;
      112px is the no-JS floor.
@@ -1794,4 +1816,88 @@ html.is-loading .site-footer {
 html.is-revealing .page-section,
 html.is-revealing .site-footer {
   transition: opacity 0.6s ease;
+}
+
+/* ============================================================
+   LOAD SCREEN                                       2026-10 (prototype)
+   --intro is 1 while the orbs are shown alone and 0 at rest. Pre-paint the
+   inline <head> script adds html.is-intro (motion on, >480 only); main.js
+   removes it ~5s later and the registered property below TRANSITIONS, so one
+   number drives three things in step:
+     · the white scrim (the field's mask end, +80svh at 1) rises from the bottom
+       of the viewport into its resting place,
+     · the artwork settles from covering the screen (dropped by --field-rise,
+       scaled up) back to its composed position,
+     · nothing else — the nav and hero content fade on their own timing below.
+   ⚠️ NOT scroll-linked, so a transition is allowed here (the standing "no
+   transition on scroll-linked values" rule does not apply to it).
+   ⚠️ @property is what lets the number animate; without support the scrim
+   simply snaps to rest and the content still fades.
+   ============================================================ */
+@property --intro {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0;
+}
+
+html {
+  transition: --intro 1s cubic-bezier(0.5, 0, 0.9, 0.55); /* ease-in: speeds up toward the end */
+}
+
+html.is-intro .page-field {
+  translate: 0 var(--field-rise, 0px);
+  scale: var(--intro-scale, 1.04);
+  /* No transition INTO the intro state (main.js sets --intro-scale a beat after
+     first paint); the settle transition lives on the resting rule above. */
+  transition: none;
+}
+
+html.is-intro {
+  --intro: 1;
+  /* No scrolling under the loader; the gutter keeps the width from jumping
+     when the scrollbar comes back. */
+  overflow: hidden;
+  scrollbar-gutter: stable;
+}
+
+/* Hidden, not just transparent: nothing here should be reachable by Tab while
+   the screen is orbs only. visibility interpolates discretely, so it flips to
+   visible at the START of the fade-in. */
+.top-nav,
+.intro-bar {
+  transition: opacity 0.9s ease 0.95s, visibility 0s;
+}
+
+html.is-intro .top-nav,
+html.is-intro .intro-bar {
+  opacity: 0;
+  visibility: hidden;
+  transition: none;
+}
+
+/* The hero's own entrance (headline rise, bio drop) already has a fade + rise.
+   While the intro runs it is switched OFF and hidden, so it STARTS when the class
+   comes off — and it is delayed here so the content lands AFTER the scrim has
+   swept under it, headline first, then the bio + meta line, then the nav above
+   (.top-nav, 0.85s). has-intro is set pre-paint with is-intro and never removed,
+   so phones and reduced motion keep the original delays. */
+html.is-intro .intro-headline,
+html.is-intro .intro-band-right {
+  animation: none;
+  opacity: 0;
+  visibility: hidden;
+}
+
+html.has-intro .intro-headline { animation-delay: 1.05s; }
+html.has-intro .intro-band-right { animation-delay: 1.25s; }
+
+/* The orbs are shown through a circle drawn IN THE FIELD SHADER (initHeroField,
+   uIris) — no clip-path. The grain layer is CSS and would speckle the cream
+   outside the circle, so it waits until the intro is over. */
+html.is-intro .page-field-grain {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { transition: none; }
 }
