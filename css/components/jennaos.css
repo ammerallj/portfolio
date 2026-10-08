@@ -87,11 +87,7 @@
     width: min(380px, calc(100vw - 48px)); min-height: 300px; box-sizing: border-box;
     padding: 24px 24px 20px;
     display: flex; flex-direction: column;
-    /* Frosted, like the nav: the same cream (251,252,248) over a soft blur, a touch
-       more see-through than the header's 0.9 so the page tints the card. */
-    background: rgba(251, 252, 248, 0.86);
-    -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
-    border-radius: 28px;
+    background: var(--jos-card-bg); border-radius: 28px;
     box-shadow: 0 1px 2px rgba(0,0,0,.06), 0 24px 60px rgba(0,0,0,.18);
     transform-origin: 100% 100%;
     opacity: 0; transform: scale(.88) translateY(8px); pointer-events: none; visibility: hidden;
@@ -101,23 +97,37 @@
     opacity: 1; transform: none; pointer-events: auto; visibility: visible;
     transition: opacity .2s, transform .45s var(--jos-ease-spring), visibility 0s;
   }
+  /* The header is the only frosted part of the card. It floats over the top of the
+     scroll area, so the conversation scrolls beneath it the way content passes
+     under the nav: a cream veil over a soft blur that fades out at its lower edge
+     instead of ending on a line. */
+  .jos-head {
+    position: absolute; top: 0; left: 0; right: 0; z-index: 2;
+    padding: 24px 24px 12px; border-radius: 28px 28px 0 0; pointer-events: none;
+  }
+  .jos-head::before {
+    content: ''; position: absolute; inset: 0; bottom: -18px; z-index: -1;
+    border-radius: 28px 28px 0 0;
+    background: rgba(247, 247, 245, 0.82);
+    -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+    -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 30px), transparent);
+    mask-image: linear-gradient(to bottom, #000 calc(100% - 30px), transparent);
+  }
+  .jos-head .jos-back { pointer-events: auto; }
   .jos-title {
     margin: 0; font: 500 24px/1.2 var(--font-heading, 'Hanken Grotesk', system-ui, sans-serif);
     letter-spacing: -.01em; color: var(--jos-ink);
   }
   .jos-title span { color: var(--jos-muted); }
-  .jos-body { margin-top: 16px; font-size: 14px; line-height: 1.5; color: #333; }
-  .jos-body { max-height: clamp(120px, calc(100dvh - 420px), 320px); overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
-  /* Without backdrop-filter the cream would be see-through and unblurred, so go solid. */
-  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-    .jos-card { background: var(--jos-card-bg); }
-  }
-  /* Soft edges, as on the nav's bleed: when there's more to scroll to, the content
-     fades out over the last 14px instead of being cut off by a hard line.
-     --ft / --fb are set from js/jennaos.js (0px at an end, so nothing is faded there). */
+  .jos-body { margin-top: -24px; padding-top: calc(var(--jos-head, 64px) + 4px); box-sizing: border-box; font-size: 14px; line-height: 1.5; color: #333; }
+  .jos-body { max-height: calc(var(--jos-head, 64px) + 4px + clamp(120px, calc(100dvh - 420px), 320px)); overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+  /* Soft bottom edge: while there's more to scroll to, the content fades out over
+     the last 14px instead of being cut off by a hard line. --fb comes from
+     js/jennaos.js (0px at the end, so nothing is faded there). The top edge needs
+     no fade: the frosted header already veils it. */
   .jos-body {
-    -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 var(--ft, 0px), #000 calc(100% - var(--fb, 0px)), transparent 100%);
-    mask-image: linear-gradient(to bottom, transparent 0, #000 var(--ft, 0px), #000 calc(100% - var(--fb, 0px)), transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - var(--fb, 0px)), transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 calc(100% - var(--fb, 0px)), transparent 100%);
   }
   /* Gutter for the scrollbar: the box grows 14px into the card's own padding and
      pads its content back by the same, so text and bubbles keep their width and
@@ -259,12 +269,11 @@
 
 /* ---------- back (from a gallery to the conversation) ---------- */
 .jenna-os .jos-back {
-  all: unset; box-sizing: border-box; cursor: pointer; align-self: flex-start;
-  margin-top: 12px; padding: 5px 11px; border-radius: 999px;
+  all: unset; box-sizing: border-box; cursor: pointer; display: block; width: fit-content;
+  margin-top: 10px; padding: 5px 11px; border-radius: 999px;
   font-size: 12px; line-height: 1.2; color: #1a1a1a; background: #ececea; transition: background .15s;
 }
 .jenna-os .jos-back::before { content: "←\00a0"; }
 .jenna-os .jos-back:hover { background: #e2e2df; }
 .jenna-os .jos-back:focus-visible { outline: 2px solid var(--jos-ink); outline-offset: 2px; }
 .jenna-os .jos-back[hidden] { display: none; }
-.jenna-os .jos-back + .jos-body { margin-top: 12px; }

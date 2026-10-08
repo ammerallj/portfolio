@@ -3,6 +3,7 @@
   const fab = document.getElementById('jos-fab');
   const card = document.getElementById('jos-card');
   const titleEl = document.getElementById('jos-title');
+  const headEl = document.getElementById('jos-head');
   const bodyEl = document.getElementById('jos-body');
   const appList = document.getElementById('jos-apps');
   const apps = [];
@@ -43,7 +44,11 @@
   backBtn.type = 'button'; backBtn.className = 'jos-back'; backBtn.hidden = true;
   backBtn.textContent = 'Back';
   backBtn.addEventListener('click', () => openApp(thread.length ? 'chat' : 'start'));
-  bodyEl.parentNode.insertBefore(backBtn, bodyEl);
+  headEl.appendChild(backBtn);
+  // The header floats over the scroll area, so the area needs to know how tall it is.
+  const syncHead = () => card.style.setProperty('--jos-head', headEl.offsetHeight + 'px');
+  new ResizeObserver(syncHead).observe(headEl);
+  syncHead();
 
   // Conversation starters. Tapping one asks the brain; asked ones are swapped
   // for the next unused question. Each should match a question in
@@ -287,14 +292,14 @@
   });
   renderStarters(false);
 
-  // ---- Soft scroll edges: fade the top/bottom of the scroll area only while
-  // there's content beyond that edge (see --ft / --fb in the CSS). ----
+  // ---- Soft bottom edge: fade the end of the scroll area only while there's
+  // more beyond it (see --fb in the CSS). ----
   const FADE = 14;
   function updateFades() {
     const max = bodyEl.scrollHeight - bodyEl.clientHeight;
-    bodyEl.style.setProperty('--ft', bodyEl.scrollTop > 2 ? FADE + 'px' : '0px');
     bodyEl.style.setProperty('--fb', bodyEl.scrollTop < max - 2 ? FADE + 'px' : '0px');
   }
+  new ResizeObserver(updateFades).observe(bodyEl);
   bodyEl.addEventListener('scroll', updateFades, { passive: true });
   bodyEl.addEventListener('load', updateFades, true); // gallery images changing the height
   new MutationObserver(updateFades).observe(bodyEl, { childList: true, subtree: true });
