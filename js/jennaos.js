@@ -57,13 +57,88 @@
   window.JennaOS = {
     open: () => set(true), close: () => set(false), toggle: () => set(!isOpen()),
     openApp,
-    registerApp(app) { apps.push(app); renderPills(); },
+    // `first: true` pins an app to the front (ReadMe) and makes it the landing app.
+    registerApp(app) { app.first ? apps.unshift(app) : apps.push(app); renderPills(); },
     card
   };
+
+  // ---- Photos: add { src, alt } entries here (files live in images/maeve/ and
+  // images/fashion/). An empty list shows a "coming soon" note. ----
+  const PHOTOS = {
+    maeve: [],
+    fashion: []
+  };
+  window.JennaOS.photos = PHOTOS;
+
+  const el = (tag, cls, text) => {
+    const n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text) n.textContent = text;
+    return n;
+  };
+
+  // A grid of thumbnails; tapping one enlarges it inside the card, with a back
+  // button and prev/next. `masonry` flows the tiles at their natural heights.
+  function renderGallery(body, photos, { masonry = false, empty }) {
+    if (!photos.length) { body.appendChild(el('p', 'jos-empty', empty)); return; }
+
+    const grid = el('div', 'jos-grid' + (masonry ? ' is-masonry' : ''));
+    photos.forEach((p, i) => {
+      const b = el('button', 'jos-tile');
+      b.type = 'button';
+      b.setAttribute('aria-label', 'Enlarge photo ' + (i + 1) + ' of ' + photos.length + (p.alt ? ': ' + p.alt : ''));
+      const img = el('img');
+      img.src = p.src; img.alt = ''; img.loading = 'lazy'; img.decoding = 'async';
+      b.appendChild(img);
+      b.addEventListener('click', () => show(i));
+      grid.appendChild(b);
+    });
+    body.appendChild(grid);
+
+    function show(i) {
+      const n = photos.length;
+      i = (i + n) % n;
+      body.innerHTML = '';
+      const view = el('div', 'jos-viewer');
+      const img = el('img');
+      img.src = photos[i].src; img.alt = photos[i].alt || '';
+      view.appendChild(img);
+      const bar = el('div', 'jos-viewer-bar');
+      const back = el('button', 'jos-viewer-btn', 'All photos');
+      back.type = 'button';
+      back.addEventListener('click', () => { body.innerHTML = ''; renderGallery(body, photos, { masonry, empty }); });
+      const nav = el('div', 'jos-viewer-nav');
+      const prev = el('button', 'jos-viewer-btn', 'Prev'); prev.type = 'button';
+      const next = el('button', 'jos-viewer-btn', 'Next'); next.type = 'button';
+      prev.addEventListener('click', () => show(i - 1));
+      next.addEventListener('click', () => show(i + 1));
+      nav.append(prev, el('span', 'jos-viewer-count', (i + 1) + ' / ' + n), next);
+      bar.append(back, nav);
+      body.append(view, bar);
+      back.focus();
+    }
+  }
+
+  window.JennaOS.registerApp({
+    id: 'maeve',
+    label: 'Maeve',
+    heading: 'Maeve.',
+    subheading: 'My dachshund.',
+    render: body => renderGallery(body, PHOTOS.maeve, { empty: 'Photos of Maeve are on the way.' })
+  });
+
+  window.JennaOS.registerApp({
+    id: 'fashion',
+    label: 'Fashion',
+    heading: 'Fashion.',
+    subheading: 'What I’m saving lately.',
+    render: body => renderGallery(body, PHOTOS.fashion, { masonry: true, empty: 'The moodboard is on the way.' })
+  });
 
   // ---- ReadMe: the first app, and the one the OS opens into ----
   window.JennaOS.registerApp({
     id: 'readme',
+    first: true,
     label: 'ReadMe',
     heading: 'ReadMe.',
     subheading: 'How to get around.',
