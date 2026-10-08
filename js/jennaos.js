@@ -287,6 +287,19 @@
   });
   renderStarters(false);
 
+  // ---- Soft scroll edges: fade the top/bottom of the scroll area only while
+  // there's content beyond that edge (see --ft / --fb in the CSS). ----
+  const FADE = 14;
+  function updateFades() {
+    const max = bodyEl.scrollHeight - bodyEl.clientHeight;
+    bodyEl.style.setProperty('--ft', bodyEl.scrollTop > 2 ? FADE + 'px' : '0px');
+    bodyEl.style.setProperty('--fb', bodyEl.scrollTop < max - 2 ? FADE + 'px' : '0px');
+  }
+  bodyEl.addEventListener('scroll', updateFades, { passive: true });
+  bodyEl.addEventListener('load', updateFades, true); // gallery images changing the height
+  new MutationObserver(updateFades).observe(bodyEl, { childList: true, subtree: true });
+  window.addEventListener('resize', updateFades);
+
   // ---- Arrival hint: once per visit, the dot pulses for 3s with a tooltip over
   // it. Any interaction (hover, focus, tap) ends it early, and it never shows
   // while the card is open. sessionStorage keeps a reload from nagging. ----
