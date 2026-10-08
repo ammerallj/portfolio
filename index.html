@@ -629,12 +629,14 @@
        SITE FOOTER
        ============================================================ -->
   <!-- THREADSCAPE LIGHTBOX: a native modal <dialog> opened by the Threadscape
-       card (initLightbox, js/main.js). The video only gets its src on open. -->
+       card (initLightbox, js/main.js). The video only gets its src on open.
+       It plays the full 54s demo (thread-demo.mp4); the card's hover loop is the short cut
+       (thread-card.mp4). -->
   <dialog class="lightbox" id="threadscape-lightbox" aria-label="Spatial History for Conversational AI">
     <button type="button" class="lightbox-close" aria-label="Close">
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>
     </button>
-    <video class="lightbox-media" data-lightbox-src="images/thread-card.mp4?v=2" poster="images/thread-card.jpg?v=2" width="3360" height="2280" muted loop playsinline controls preload="none"></video>
+    <video class="lightbox-media" data-lightbox-src="images/thread-demo.mp4?v=1" poster="images/thread-card.jpg?v=2" width="3360" height="2280" muted loop playsinline controls preload="none"></video>
   </dialog>
 
   <footer class="site-footer" role="contentinfo">
@@ -689,6 +691,6 @@
     </button>
   </div>
   <script src="js/jennaos.js?v=21" defer></script>
-  <script src="js/main.js?v=671dc7b9" defer></script>
+  <script src="js/main.js?v=a2e540ca" defer></script>
 </body>
 </html>
