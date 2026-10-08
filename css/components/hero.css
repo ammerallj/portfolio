@@ -1830,7 +1830,7 @@ html.is-revealing .site-footer {
 }
 
 html {
-  transition: --intro 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: --intro 1.5s cubic-bezier(0.5, 0, 0.9, 0.55); /* ease-in: speeds up toward the end */
 }
 
 html.is-intro .page-field {
@@ -1854,7 +1854,7 @@ html.is-intro {
    visible at the START of the fade-in. */
 .top-nav,
 .intro-bar {
-  transition: opacity 0.9s ease 0.5s, visibility 0s;
+  transition: opacity 0.9s ease 1.45s, visibility 0s;
 }
 
 html.is-intro .top-nav,
@@ -1877,8 +1877,8 @@ html.is-intro .intro-band-right {
   visibility: hidden;
 }
 
-html.has-intro .intro-headline { animation-delay: 0.6s; }
-html.has-intro .intro-band-right { animation-delay: 0.8s; }
+html.has-intro .intro-headline { animation-delay: 1.55s; }
+html.has-intro .intro-band-right { animation-delay: 1.75s; }
 
 /* The orbs are shown through a circle drawn IN THE FIELD SHADER (initHeroField,
    uIris) — no clip-path. The grain layer is CSS and would speckle the cream
