@@ -1880,11 +1880,11 @@ html.is-intro .intro-band-right {
 html.has-intro .intro-headline { animation-delay: 1.05s; }
 html.has-intro .intro-band-right { animation-delay: 1.3s; }
 
-/* The orbs are shown through a circle that main.js grows (runIntro). Held at a
-   14px dot pre-paint so the first frame is never the whole field. */
-html.is-intro .page-field-canvas,
+/* The orbs are shown through a circle drawn IN THE FIELD SHADER (initHeroField,
+   uIris) — no clip-path. The grain layer is CSS and would speckle the cream
+   outside the circle, so it waits until the intro is over. */
 html.is-intro .page-field-grain {
-  clip-path: circle(14px at 50% 50svh);
+  opacity: 0;
 }
 
 @media (prefers-reduced-motion: reduce) {

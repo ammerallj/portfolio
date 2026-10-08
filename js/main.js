@@ -858,6 +858,8 @@ function startReveal() {
 // INTRO.hold ms, longer only if the page itself isn't ready, never past
 // INTRO.cap. Then is-intro comes off — the scrim rises (a CSS transition on
 // --intro) and the nav + hero fade in — and the sections below follow.
+// Set by runIntro when the iris starts growing; read by the field shader each frame.
+let heroIris = null;
 const INTRO = { hold: 1500, iris: 1400, cap: 9000, followMs: 900 };
 function runIntro() {
   // Scrolling is blocked from first paint by the inline <head> script (index.html);
@@ -883,17 +885,14 @@ function runIntro() {
       html.style.setProperty('--intro-scale',
         (Math.max(1, window.innerHeight / box.offsetHeight) * 1.01).toFixed(4));
     }
-    // IRIS: the orbs are shown through a circle that grows from a small dot at
-    // the centre of the viewport until it clears the corners. Pre-paint the CSS
-    // holds it at 14px (html.is-intro .page-field-*); this animates it on, and
-    // release cancels it (the CSS rule goes with the class, so the field is whole).
-    const irisR = Math.ceil(Math.hypot(window.innerWidth, window.innerHeight) / 2 * 1.05);
-    const irisY = window.innerHeight / 2;
-    const irises = Array.from(document.querySelectorAll('.page-field-canvas, .page-field-grain'))
-      .map(el => el.animate(
-        [{ clipPath: `circle(14px at 50% ${irisY}px)` },
-         { clipPath: `circle(${irisR}px at 50% ${irisY}px)` }],
-        { duration: INTRO.iris, easing: 'cubic-bezier(0.65, 0, 0.2, 1)', fill: 'forwards' }));
+    // IRIS: the field shader draws the orbs through a circle that grows from a 14px
+    // dot at the centre of the viewport until it clears the corners (irisUniform in
+    // initHeroField). Until this runs it holds at the dot.
+    heroIris = {
+      start: performance.now(),
+      dur: INTRO.iris,
+      R: Math.ceil(Math.hypot(window.innerWidth, window.innerHeight) / 2 * 1.06),
+    };
     const pageReady = Promise.all([
       document.readyState === 'complete'
         ? null
@@ -907,7 +906,7 @@ function runIntro() {
       siteRevealed = true;
       html.classList.remove('is-intro');
       unblock();
-      irises.forEach(a => a.cancel());
+      heroIris = null;
       html.classList.add('is-text-revealed');
       setTimeout(revealRestOfSite, INTRO.followMs);
     });
@@ -1265,7 +1264,7 @@ function initHeroField() {
   const FRAG = [
     'precision highp float;',
     'uniform vec2 uRes,uAmp;uniform float uAspect,uTime,uWarp;',
-    'uniform vec4 uBlob[4];uniform vec3 uCol[4];uniform vec4 uRamp[4];',
+    'uniform vec4 uBlob[4];uniform vec3 uCol[4];uniform vec4 uRamp[4];uniform vec3 uIris;',
     // ⚠️ FIELD.layer is deliberately NOT emitted here. It was, as a dead constant
     // `LAYER` that no line of the shader body ever read — and being dead did not
     // make it harmless: the value is interpolated into GLSL source, so setting it
@@ -1338,6 +1337,11 @@ function initHeroField() {
     // banding step into imperceptible grain. Neither a JPEG ramp nor a video
     // encode can do this; it is the technical case for rendering the field.
     ' col+=(hash(gl_FragCoord.xy+fract(uTime)*71.3)-.5)/255.;',
+    // LOAD SCREEN IRIS: outside a circle (centre + radius in buffer px, radius < 0
+    // = off) the field is cream. Done here, in the pass that is already running,
+    // so the circle costs nothing extra and has an anti-aliased edge — a CSS
+    // clip-path on the canvas re-rasterised a full-screen WebGL layer every frame.
+    ' if(uIris.z>=0.){float d=length(vec2(gl_FragCoord.x,uRes.y-gl_FragCoord.y)-uIris.xy);col=mix(CREAM,col,1.-smoothstep(uIris.z-1.5,uIris.z+1.5,d));}',
     ' gl_FragColor=vec4(col,1.);}',
   ].join('\n');
 
@@ -1364,7 +1368,7 @@ function initHeroField() {
   gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
 
   const U = {};
-  ['uRes', 'uAspect', 'uTime', 'uWarp', 'uAmp', 'uBlob', 'uCol', 'uRamp']
+  ['uRes', 'uAspect', 'uTime', 'uWarp', 'uAmp', 'uBlob', 'uCol', 'uRamp', 'uIris']
     .forEach(n => { U[n] = gl.getUniformLocation(prog, n); });
 
   gl.uniform1f(U.uWarp, FIELD.motion.warp);
@@ -1469,6 +1473,30 @@ function initHeroField() {
     });
   }
 
+  // The load screen's iris, as [cx, cy, r] in BUFFER px (r = -1: off). The canvas is
+  // dropped and scaled while the intro runs, so the viewport's centre and the
+  // radius are converted into the canvas's own space from its live box.
+  const IRIS_OFF = new Float32Array([0, 0, -1]);
+  const irisOut = new Float32Array(3);
+  function irisUniform() {
+    const running = heroIris && performance.now() - heroIris.start < heroIris.dur;
+    if (!html.classList.contains('is-intro') || (heroIris && !running)) return IRIS_OFF;
+    const R0 = 14;
+    let r = R0;
+    if (heroIris) {
+      const p = Math.min(1, (performance.now() - heroIris.start) / heroIris.dur);
+      const e = p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2; // easeInOutCubic
+      r = R0 + (heroIris.R - R0) * e;
+    }
+    const rect = canvas.getBoundingClientRect();
+    const s = rect.width / canvas.offsetWidth || 1;
+    const k = canvas.width / canvas.offsetWidth;
+    irisOut[0] = (canvas.offsetWidth / 2) * k;
+    irisOut[1] = ((window.innerHeight / 2 - rect.top) / s) * k;
+    irisOut[2] = (r / s) * k;
+    return irisOut;
+  }
+
   function draw(t, entranceMs) {
     resize();
     const e = FIELD.entrance;
@@ -1500,6 +1528,7 @@ function initHeroField() {
     gl.uniform2f(U.uRes, canvas.width, canvas.height);
     gl.uniform1f(U.uAspect, canvas.width / canvas.height);
     gl.uniform1f(U.uTime, t);
+    gl.uniform3fv(U.uIris, irisUniform());
     gl.drawArrays(gl.TRIANGLES, 0, 3);
   }
 
