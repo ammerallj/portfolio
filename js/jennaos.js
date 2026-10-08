@@ -145,7 +145,7 @@
   const KEYWORDS = {
     maeve: ['dog', 'dachshund', 'puppy', 'pet'],
     fashion: ['style', 'outfit', 'trend', 'clothes', 'pinterest', 'moodboard'],
-    readme: ['help', 'start']
+    start: ['help']
   };
   input.addEventListener('input', () => { send.hidden = !input.value.trim(); status.textContent = ''; });
   chat.addEventListener('submit', e => {
@@ -163,29 +163,39 @@
     }
   });
 
-  // ---- Start (the ReadMe): the first app, and the one the OS opens into ----
+  // ---- Start: the first app and the one the OS opens into. It says what
+  // JennaOS is (a map of how Jenna thinks) rather than how to operate it. ----
   window.JennaOS.registerApp({
-    id: 'readme',
+    id: 'start',
     first: true,
     label: 'Start',
     heading: 'JennaOS.',
-    subheading: 'A small operating system for looking around.',
-    render(el) {
-      const ul = document.createElement('ul');
-      ul.className = 'jos-readme';
-      [
-        ['Pick an app.', 'The pills below are apps. Tap one and it opens right here.'],
-        ['Come back any time.', 'Start is always the first pill.'],
-        ['Close it.', 'Tap the dot again, hit Esc, or click anywhere outside.'],
-        ['Keyboard.', 'Tab moves between pills. Enter opens one.']
-      ].forEach(([lead, rest]) => {
-        const li = document.createElement('li');
-        const b = document.createElement('b');
-        b.textContent = lead;
-        li.append(b, ' ' + rest);
-        ul.appendChild(li);
-      });
-      el.appendChild(ul);
+    subheading: 'My brain, as an operating system.',
+    render(body) {
+      const intro = el('p', 'jos-intro',
+        'A look inside how I think. Poke around to learn about me, what I’m into, and how I approach design.');
+      const list = el('ul', 'jos-start');
+
+      const row = (lead, ...parts) => {
+        const li = el('li');
+        li.appendChild(el('b', '', lead));
+        li.append(' ');
+        parts.forEach(p => li.append(p));
+        list.appendChild(li);
+      };
+      const link = (label, id) => {
+        const b = el('button', 'jos-link', label);
+        b.type = 'button';
+        b.addEventListener('click', () => openApp(id));
+        return b;
+      };
+
+      row('About.', 'Product and interaction designer in Seattle. Nine years across Microsoft and Meta.');
+      row('Interests.', 'Music, art exhibitions, fashion, and a dachshund named ', link('Maeve', 'maeve'),
+        '. See what I’m saving in ', link('Fashion', 'fashion'), '.');
+      row('Design thinking.', 'I’m drawn to the seams: the shared patterns that help products fit together, without losing the details that give each one its character.');
+
+      body.append(intro, list);
     }
   });
 })();

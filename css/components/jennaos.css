@@ -136,8 +136,15 @@
   .jos-viewer-btn:hover { background: #e2e2df; }
   .jos-viewer-btn:focus-visible { outline: 2px solid var(--jos-ink); outline-offset: 2px; }
 
-  .jos-readme { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; }
-  .jos-readme b { font-weight: 600; color: var(--jos-ink); }
+  .jos-intro { margin: 0 0 14px; }
+  .jos-start { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; }
+  .jos-start b { font-weight: 600; color: var(--jos-ink); }
+  .jos-link {
+    all: unset; cursor: pointer; color: var(--jos-ink); text-decoration: underline;
+    text-decoration-color: #b9b9b3; text-underline-offset: 2px; border-radius: 3px;
+  }
+  .jos-link:hover { text-decoration-color: var(--jos-ink); }
+  .jos-link:focus-visible { outline: 2px solid var(--jos-ink); outline-offset: 2px; }
   .jos-apps { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0 0; padding: 0; list-style: none; }
   .jos-apps button[aria-current="true"] { background: var(--jos-ink); color: #fff; }
   .jos-apps button[aria-current="true"]:hover { background: var(--jos-ink); }
