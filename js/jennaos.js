@@ -174,28 +174,7 @@
     render(body) {
       const intro = el('p', 'jos-intro',
         'A look inside how I think. Poke around to learn about me, what I’m into, and how I approach design.');
-      const list = el('ul', 'jos-start');
-
-      const row = (lead, ...parts) => {
-        const li = el('li');
-        li.appendChild(el('b', '', lead));
-        li.append(' ');
-        parts.forEach(p => li.append(p));
-        list.appendChild(li);
-      };
-      const link = (label, id) => {
-        const b = el('button', 'jos-link', label);
-        b.type = 'button';
-        b.addEventListener('click', () => openApp(id));
-        return b;
-      };
-
-      row('About.', 'Product and interaction designer in Seattle. Nine years across Microsoft and Meta.');
-      row('Interests.', 'Music, art exhibitions, fashion, and a dachshund named ', link('Maeve', 'maeve'),
-        '. See what I’m saving in ', link('Fashion', 'fashion'), '.');
-      row('Design thinking.', 'I’m drawn to the seams: the shared patterns that help products fit together, without losing the details that give each one its character.');
-
-      body.append(intro, list);
+      body.append(intro);
     }
   });
 })();
