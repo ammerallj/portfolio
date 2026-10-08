@@ -403,8 +403,9 @@ TOPIC: Learning through making
 ID: learning
 TAGS: learning, growth, evolving, practice, experiments, improve, career, curiosity
 ASKED AS: what are you learning lately | how has your design practice changed | how do you keep growing | what are you curious about right now | what are you working on these days | what are you working on right now | what are you building lately
-NAME IT: 
-OPEN: 
+NAME IT:
+LINK: View my GitHub | https://github.com/ammerallj
+OPEN:
 ANSWER:
 I've been giving myself more room to make things without needing every experiment to turn into a polished case study. Building small ideas has helped me reconnect with the part of design I enjoy most: trying something, seeing what it teaches me, and following the next question.
 
