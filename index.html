@@ -161,7 +161,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,200;0,500;0,700;1,500&family=Inter:wght@400..700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=5013d60c" />
+  <link rel="stylesheet" href="style.css?v=7c981e5d" />
   <!-- The landing field's JPEG fallback — PHONES ONLY since 2026-09, so the
        preload is gated to match the <picture> in <main>. Without the media
        attribute this fetches 1.4MB on every desktop and tablet visit for an
@@ -591,6 +591,37 @@
   </div>
   <div class="wave-cursor" id="wave-cursor" aria-hidden="true">👋</div>
 
+  <!-- RoseOS: floating entry button + card shell -->
+  <div class="rose-os" id="rose-os" data-open="false">
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+      <filter id="ros-goo" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+        <feGaussianBlur in="SourceGraphic" stdDeviation="0.9" result="b"/>
+        <feColorMatrix in="b" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 14 -6"/>
+      </filter>
+    </svg>
+
+    <section class="ros-card" id="ros-card" role="dialog" aria-label="RoseOS" aria-hidden="true">
+      <h2 class="ros-title">RoseOS. <span>A small operating system for looking around.</span></h2>
+      <ul class="ros-apps" id="ros-apps"></ul>
+      <div class="ros-foot">
+        <svg class="ros-mark" viewBox="0 0 32 32" aria-hidden="true">
+          <g fill="#111"><circle cx="16" cy="16" r="3.2"/></g>
+        </svg>
+        <button class="ros-close" type="button" id="ros-close" tabindex="-1">Close</button>
+      </div>
+    </section>
+
+    <button class="ros-fab" id="ros-fab" type="button" aria-label="Open RoseOS" aria-expanded="false" aria-controls="ros-card">
+      <span class="ros-dots" aria-hidden="true">
+        <span class="ros-pend"><span class="ros-ball"></span></span>
+        <span class="ros-pend"><span class="ros-ball"></span></span>
+        <span class="ros-pend"><span class="ros-ball"></span></span>
+        <span class="ros-pend"><span class="ros-ball"></span></span>
+        <span class="ros-pend"><span class="ros-ball"></span></span>
+      </span>
+    </button>
+  </div>
+  <script src="js/roseos.js" defer></script>
   <script src="js/main.js?v=30aedb28" defer></script>
 </body>
 </html>

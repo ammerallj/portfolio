@@ -1,0 +1,115 @@
+/* RoseOS — floating entry button + card shell (js/roseos.js, markup at end of index.html) */
+.rose-os {
+    --ros-ease-spring: cubic-bezier(.34, 1.4, .5, 1);
+    --ros-ink: #111;
+    --ros-muted: #8a8a85;
+    --ros-surface: #fff;
+    --ros-card-bg: #f7f7f5;
+    position: fixed; right: 24px; bottom: 24px; z-index: 2147483000;
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+
+  /* ---------- floating button ---------- */
+  .ros-fab {
+    all: unset; box-sizing: border-box;
+    position: relative; display: block;
+    width: 56px; height: 56px; border-radius: 50%;
+    background: var(--ros-surface);
+    box-shadow: 0 1px 2px rgba(0,0,0,.08), 0 8px 24px rgba(0,0,0,.14);
+    cursor: pointer;
+    transition: transform .35s var(--ros-ease-spring), box-shadow .25s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .ros-fab:hover { transform: scale(1.06); }
+  .ros-fab:active { transform: scale(.96); }
+  .ros-fab:focus-visible { outline: 2px solid var(--ros-ink); outline-offset: 3px; }
+
+  /* The dots sit in a gooey filter so the single dot splits like a droplet */
+  .ros-dots { position: absolute; inset: 0; filter: url(#ros-goo); pointer-events: none; }
+
+  /* Each ball hangs from a pivot above the button's center (a pendulum) */
+  .ros-pend {
+    --x: 0px;
+    position: absolute; left: 50%; top: calc(50% - 18px);
+    width: 0; height: 18px;
+    transform: translateX(var(--x));
+    transform-origin: 50% 0;
+    transition: transform .55s var(--ros-ease-spring);
+  }
+  .ros-ball {
+    position: absolute; left: -6px; bottom: -6px;
+    width: 12px; height: 12px; border-radius: 50%;
+    background: var(--ros-ink);
+    transition: transform .55s var(--ros-ease-spring);
+  }
+
+  /* Split: spread the balls out and shrink them */
+  .ros-fab:hover .ros-ball,
+  .ros-fab:focus-visible .ros-ball { transform: scale(.5); }
+  .ros-fab:hover .ros-pend:nth-child(1), .ros-fab:focus-visible .ros-pend:nth-child(1) { --x: -19px; }
+  .ros-fab:hover .ros-pend:nth-child(2), .ros-fab:focus-visible .ros-pend:nth-child(2) { --x: -9.5px; }
+  .ros-fab:hover .ros-pend:nth-child(4), .ros-fab:focus-visible .ros-pend:nth-child(4) { --x: 9.5px; }
+  .ros-fab:hover .ros-pend:nth-child(5), .ros-fab:focus-visible .ros-pend:nth-child(5) { --x: 19px; }
+
+  /* Newton's cradle: left ball swings in, right ball swings out, and back */
+  @keyframes ros-swing-left {
+    0%   { rotate: -42deg; animation-timing-function: cubic-bezier(.45, 0, .9, .6); }
+    25%  { rotate: 0deg; }
+    75%  { rotate: 0deg; animation-timing-function: cubic-bezier(.1, .4, .55, 1); }
+    100% { rotate: -42deg; }
+  }
+  @keyframes ros-swing-right {
+    0%   { rotate: 0deg; }
+    25%  { rotate: 0deg; animation-timing-function: cubic-bezier(.1, .4, .55, 1); }
+    50%  { rotate: 42deg; animation-timing-function: cubic-bezier(.45, 0, .9, .6); }
+    75%  { rotate: 0deg; }
+    100% { rotate: 0deg; }
+  }
+  .ros-fab:hover .ros-pend:nth-child(1), .ros-fab:focus-visible .ros-pend:nth-child(1) {
+    animation: ros-swing-left 1.5s .45s infinite both;
+  }
+  .ros-fab:hover .ros-pend:nth-child(5), .ros-fab:focus-visible .ros-pend:nth-child(5) {
+    animation: ros-swing-right 1.5s .45s infinite both;
+  }
+
+  /* ---------- card ---------- */
+  .ros-card {
+    position: absolute; right: 0; bottom: 72px;
+    width: min(360px, calc(100vw - 48px)); min-height: 300px; box-sizing: border-box;
+    padding: 24px 24px 20px;
+    display: flex; flex-direction: column;
+    background: var(--ros-card-bg); border-radius: 28px;
+    box-shadow: 0 1px 2px rgba(0,0,0,.06), 0 24px 60px rgba(0,0,0,.18);
+    transform-origin: 100% 100%;
+    opacity: 0; transform: scale(.88) translateY(8px); pointer-events: none; visibility: hidden;
+    transition: opacity .2s, transform .45s var(--ros-ease-spring), visibility 0s .45s;
+  }
+  .rose-os[data-open="true"] .ros-card {
+    opacity: 1; transform: none; pointer-events: auto; visibility: visible;
+    transition: opacity .2s, transform .45s var(--ros-ease-spring), visibility 0s;
+  }
+  .ros-title {
+    margin: 0; font: 400 24px/1.2 "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+    letter-spacing: -.01em; color: var(--ros-ink);
+  }
+  .ros-title span { color: var(--ros-muted); }
+  .ros-apps { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0 0; padding: 0; list-style: none; }
+  .ros-apps button {
+    all: unset; box-sizing: border-box; cursor: pointer;
+    padding: 8px 14px; border-radius: 999px; font-size: 13px; color: #333; background: #ececea;
+    transition: background .15s;
+  }
+  .ros-apps button:hover { background: #e2e2df; }
+  .ros-apps button:focus-visible { outline: 2px solid var(--ros-ink); outline-offset: 2px; }
+  .ros-foot { margin-top: auto; padding-top: 24px; display: flex; align-items: center; justify-content: space-between; }
+  .ros-mark { width: 32px; height: 32px; display: block; }
+  .ros-close {
+    all: unset; cursor: pointer; font-size: 12px; color: var(--ros-muted); padding: 6px 10px; border-radius: 999px;
+  }
+  .ros-close:hover { color: var(--ros-ink); background: #ececea; }
+  .ros-close:focus-visible { outline: 2px solid var(--ros-ink); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ros-fab:hover .ros-pend, .ros-fab:focus-visible .ros-pend { animation: none !important; }
+    .rose-os *, .rose-os { transition-duration: .01s !important; }
+  }
