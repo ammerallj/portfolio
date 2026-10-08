@@ -147,13 +147,21 @@
   }
   .jos-apps button:hover { background: #e2e2df; }
   .jos-apps button:focus-visible { outline: 2px solid var(--jos-ink); outline-offset: 2px; }
-  .jos-foot { margin-top: auto; padding-top: 24px; display: flex; align-items: center; justify-content: space-between; }
-  .jos-mark { width: 32px; height: 32px; display: block; }
-  .jos-close {
-    all: unset; cursor: pointer; font-size: 12px; color: var(--jos-muted); padding: 6px 10px; border-radius: 999px;
+  /* Open state: the dots give way to one large black disc with a white X.
+     The disc is inset 12% from the button's edge, so a white ring shows around it. */
+  .jos-dots { transition: opacity .2s .1s; }
+  .jos-x {
+    position: absolute; inset: 12%; border-radius: 50%;
+    display: grid; place-items: center; background: var(--jos-ink); color: #fff;
+    transform: scale(.28); opacity: 0; pointer-events: none;
+    transition: transform .5s var(--jos-ease-spring), opacity .15s;
   }
-  .jos-close:hover { color: var(--jos-ink); background: #ececea; }
-  .jos-close:focus-visible { outline: 2px solid var(--jos-ink); }
+  .jos-x svg { opacity: 0; transition: opacity .2s; }
+  .jenna-os[data-open="true"] .jos-x { transform: none; opacity: 1; }
+  .jenna-os[data-open="true"] .jos-x svg { opacity: 1; transition-delay: .12s; }
+  .jenna-os[data-open="true"] .jos-dots { opacity: 0; transition: opacity .1s; }
+  .jenna-os[data-open="true"] .jos-fab:hover .jos-pend,
+  .jenna-os[data-open="true"] .jos-fab:hover .jos-ball { animation: none; }
 
   @media (prefers-reduced-motion: reduce) {
     .jos-fab:hover .jos-pend, .jos-fab:focus-visible .jos-pend,

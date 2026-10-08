@@ -2,7 +2,6 @@
   const root = document.getElementById('jenna-os');
   const fab = document.getElementById('jos-fab');
   const card = document.getElementById('jos-card');
-  const closeBtn = document.getElementById('jos-close');
   const titleEl = document.getElementById('jos-title');
   const bodyEl = document.getElementById('jos-body');
   const appList = document.getElementById('jos-apps');
@@ -15,14 +14,12 @@
     fab.setAttribute('aria-expanded', String(open));
     fab.setAttribute('aria-label', open ? 'Close JennaOS' : 'Open JennaOS');
     card.setAttribute('aria-hidden', String(!open));
-    closeBtn.tabIndex = open ? 0 : -1;
     // The OS always lands on an app: the first one (ReadMe) until the visitor picks another.
     if (open && !activeId && apps.length) openApp(apps[0].id);
     // keep focus on the button; Tab moves into the card naturally
   }
 
   fab.addEventListener('click', () => set(!isOpen()));
-  closeBtn.addEventListener('click', () => { set(false); fab.focus(); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && isOpen()) { set(false); fab.focus(); } });
   document.addEventListener('pointerdown', e => { if (isOpen() && !root.contains(e.target)) set(false); });
 
