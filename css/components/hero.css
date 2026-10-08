@@ -148,7 +148,7 @@ html.is-field-live .page-field-grain { opacity: 0.1; } /* was 0.15 (2026-09-29: 
   transform-origin: 0 0;
   translate: 0 0;
   scale: 1;
-  transition: translate 0.5s cubic-bezier(0.3, 0, 0.2, 1) 1.4s, scale 0.5s cubic-bezier(0.3, 0, 0.2, 1) 1.4s;
+  transition: translate 0.5s cubic-bezier(0.3, 0, 0.2, 1) 1s, scale 0.5s cubic-bezier(0.3, 0, 0.2, 1) 1s;
   /* images/hero-bkg.jpg, centered. FROZEN at its 1440 size (1639.44px = the
      113.85vw composition) for any narrower window: below the design width the
      field keeps its size and position and the viewport simply crops more of
@@ -409,7 +409,7 @@ html.is-field-live .page-field-grain { opacity: 0.1; } /* was 0.15 (2026-09-29: 
      publishes --hero-field-end there. min(), so on desktop it only pulls the
      white UP (short windows put the 72svh end behind the headline) and the
      artwork's bottom edge stays under the white. */
-  --field-mask-end: calc(min(72svh, var(--hero-field-end, 72svh)) + var(--field-rise) - var(--field-cream, 0px) + calc(var(--intro, 0) * 80svh));
+  --field-mask-end: calc(min(72svh, var(--hero-field-end, 72svh)) + var(--field-rise) - var(--field-cream, 0px) + calc(var(--intro, 0) * 62svh));
   /* HOW TALL THE DISSOLVE IS, as a fraction of the room between the bio's last
      line and the bar. --field-gap is that room, published by measureFieldTuck;
      112px is the no-JS floor.
@@ -1830,7 +1830,7 @@ html.is-revealing .site-footer {
 }
 
 html {
-  transition: --intro 1.9s cubic-bezier(0.7, 0, 0.2, 1);
+  transition: --intro 1.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 html.is-intro .page-field {
@@ -1854,7 +1854,7 @@ html.is-intro {
    visible at the START of the fade-in. */
 .top-nav,
 .intro-bar {
-  transition: opacity 1s ease 0.85s, visibility 0s;
+  transition: opacity 0.9s ease 0.5s, visibility 0s;
 }
 
 html.is-intro .top-nav,
@@ -1877,8 +1877,8 @@ html.is-intro .intro-band-right {
   visibility: hidden;
 }
 
-html.has-intro .intro-headline { animation-delay: 1.05s; }
-html.has-intro .intro-band-right { animation-delay: 1.3s; }
+html.has-intro .intro-headline { animation-delay: 0.6s; }
+html.has-intro .intro-band-right { animation-delay: 0.8s; }
 
 /* The orbs are shown through a circle drawn IN THE FIELD SHADER (initHeroField,
    uIris) — no clip-path. The grain layer is CSS and would speckle the cream

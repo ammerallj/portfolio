@@ -864,7 +864,7 @@ let heroIris = null;
 // on the finished field, THEN the scrim rises and the content staggers in.
 // `maxPause`: the hold on the finished field never runs past this, even if fonts or
 // the page aren't ready (they used to be able to stretch it to 9s).
-const INTRO = { pause: 250, maxPause: 850, iris: 1400, followMs: 900 };
+const INTRO = { pause: 100, maxPause: 850, iris: 1400, followMs: 600 };
 function runIntro() {
   // Scrolling is blocked from first paint by the inline <head> script (index.html);
   // this only puts the page back at the top when the loader ends.
