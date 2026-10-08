@@ -104,6 +104,7 @@
   .jos-head {
     position: absolute; top: 0; left: 0; right: 0; z-index: 2;
     padding: 24px 24px 12px; border-radius: 28px 28px 0 0; pointer-events: none;
+    display: flex; align-items: flex-start; gap: 10px;
   }
   .jos-head::before {
     content: ''; position: absolute; inset: 0; bottom: -18px; z-index: -1;
@@ -113,9 +114,8 @@
     -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 30px), transparent);
     mask-image: linear-gradient(to bottom, #000 calc(100% - 30px), transparent);
   }
-  .jos-head .jos-back { pointer-events: auto; }
   .jos-title {
-    margin: 0; font: 500 24px/1.2 var(--font-heading, 'Hanken Grotesk', system-ui, sans-serif);
+    flex: 1; min-width: 0; margin: 0; font: 500 24px/1.2 var(--font-heading, 'Hanken Grotesk', system-ui, sans-serif);
     letter-spacing: -.01em; color: var(--jos-ink);
   }
   .jos-title span { color: var(--jos-muted); }
@@ -268,12 +268,15 @@
 }
 
 /* ---------- back (from a gallery to the conversation) ---------- */
+/* A round arrow to the left of the heading. ⚠️ pointer-events: auto has to be set HERE,
+   after `all: unset`: the header ignores the pointer (so the thread can scroll under
+   it) and `all: unset` makes this button inherit that, which silently killed clicks. */
 .jenna-os .jos-back {
-  all: unset; box-sizing: border-box; cursor: pointer; display: block; width: fit-content;
-  margin-top: 10px; padding: 5px 11px; border-radius: 999px;
-  font-size: 12px; line-height: 1.2; color: #1a1a1a; background: #ececea; transition: background .15s;
+  all: unset; box-sizing: border-box; cursor: pointer; pointer-events: auto; flex: none;
+  display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%;
+  color: #1a1a1a; background: #ececea; transition: background .15s;
 }
-.jenna-os .jos-back::before { content: "←\00a0"; }
+.jenna-os .jos-back svg { display: block; }
 .jenna-os .jos-back:hover { background: #e2e2df; }
 .jenna-os .jos-back:focus-visible { outline: 2px solid var(--jos-ink); outline-offset: 2px; }
 .jenna-os .jos-back[hidden] { display: none; }

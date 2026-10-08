@@ -38,13 +38,14 @@
     app.render(bodyEl);
     // Galleries (Maeve, Fashion) get a way back to where the visitor was.
     backBtn.hidden = id === 'start' || id === 'chat';
+    backBtn.setAttribute('aria-label', thread.length ? 'Back to the conversation' : 'Back to the start');
   }
 
   const backBtn = document.createElement('button');
   backBtn.type = 'button'; backBtn.className = 'jos-back'; backBtn.hidden = true;
-  backBtn.textContent = 'Back';
+  backBtn.innerHTML = '<svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M13 8H3M7.5 3.5 3 8l4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   backBtn.addEventListener('click', () => openApp(thread.length ? 'chat' : 'start'));
-  headEl.appendChild(backBtn);
+  headEl.insertBefore(backBtn, titleEl); // the arrow sits to the left of the heading
   // The header floats over the scroll area, so the area needs to know how tall it is.
   const syncHead = () => card.style.setProperty('--jos-head', headEl.offsetHeight + 'px');
   new ResizeObserver(syncHead).observe(headEl);
@@ -216,7 +217,7 @@
     if (m.app) {
       const target = apps.find(x => x.id === m.app);
       if (target) {
-        const b = el('button', 'jos-chip', m.app === 'start' ? 'Back to start' : 'Open ' + target.label);
+        const b = el('button', 'jos-chip', m.app === 'start' ? 'Back to start' : 'Show me ' + target.label);
         b.type = 'button';
         b.addEventListener('click', () => openApp(m.app));
         chips.appendChild(b);
