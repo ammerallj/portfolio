@@ -19,7 +19,7 @@
     job: 'experience', employer: 'experience', career: 'experience', cv: 'resume', resume: 'experience',
     fb: 'facebook', ms: 'microsoft', m365: 'microsoft', a11y: 'accessibility', accessible: 'accessibility',
     puppy: 'dog', doxie: 'dachshund', pup: 'dog',
-    clothes: 'fashion', clothing: 'fashion', outfit: 'fashion', style: 'fashion',
+    clothes: 'fashion', clothing: 'fashion', outfit: 'fashion',
     hobby: 'interest', hobbies: 'interest', passion: 'interest',
     reach: 'contact', hire: 'contact', hiring: 'contact', email: 'contact', linkedin: 'contact'
   };
@@ -49,7 +49,8 @@
       ];
       const toks = [];
       fields.forEach(([t, weight]) => { const ts = tokens(t || ''); for (let i = 0; i < weight; i++) toks.push(...ts); });
-      return { entry: e, toks, anchors: new Set(tokens((e.anchors || []).join(' '))),
+      const strong = new Set(tokens([e.title, (e.tags || []).join(' '), (e.questions || []).join(' ')].join(' ')));
+      return { entry: e, toks, strong, anchors: (e.anchors || []).map(a => tokens(a)).filter(a => a.length),
         tf: toks.reduce((m, t) => (m[t] = (m[t] || 0) + 1, m), {}) };
     });
     const df = {};
@@ -63,17 +64,19 @@
     const { docs, df, N, avgLen } = index;
     const k1 = 1.2, b = 0.3; // low b: long answers aren't punished for being thorough
     return docs.map(d => {
-      let s = 0, hits = 0;
+      let s = 0, hits = 0, strongHit = false;
       new Set(qToks).forEach(t => {
         const f = d.tf[t];
         if (!f) return;
         hits++;
+        if (d.strong.has(t)) strongHit = true;
         const idf = Math.log(1 + (N - df[t] + 0.5) / (df[t] + 0.5));
         s += idf * (f * (k1 + 1)) / (f + k1 * (1 - b + b * d.toks.length / avgLen));
       });
       // Naming a topic outright ("Loop", "Maeve") beats any generic word.
-      new Set(qToks).forEach(t => { if (d.anchors.has(t)) { s += 5; hits++; } });
-      return { entry: d.entry, score: s, hits };
+      const qSet = new Set(qToks);
+      d.anchors.forEach(a => { if (a.every(t => qSet.has(t))) { s += 5; hits++; strongHit = true; } });
+      return { entry: d.entry, score: s, hits, strongHit };
     }).sort((a, b2) => b2.score - a.score);
   }
 
@@ -104,7 +107,9 @@
     const ranked = qToks.length ? score(qToks) : [];
     const top = ranked[0];
     // Confident enough: a real match, not a stray common word.
-    if (top && top.hits >= 1 && top.score >= 1.6) {
+    // ...and it has to hit the topic's name, tags, example questions or an anchor,
+    // not just a stray word in the answer text ("favorite", "old").
+    if (top && top.hits >= 1 && top.score >= 1.6 && top.strongHit) {
       const e = top.entry;
       return { found: true, entry: e, text: e.text, links: e.links || [], app: e.app || null };
     }
