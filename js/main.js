@@ -858,7 +858,7 @@ function startReveal() {
 // INTRO.hold ms, longer only if the page itself isn't ready, never past
 // INTRO.cap. Then is-intro comes off — the scrim rises (a CSS transition on
 // --intro) and the nav + hero fade in — and the sections below follow.
-const INTRO = { hold: 1500, cap: 9000, followMs: 900 };
+const INTRO = { hold: 1500, iris: 1400, cap: 9000, followMs: 900 };
 function runIntro() {
   // initHeroField runs after initHero(); give it a beat, then check it drew.
   // No WebGL = no orbs to show, so skip the screen and reveal as usual.
@@ -875,6 +875,17 @@ function runIntro() {
       html.style.setProperty('--intro-scale',
         (Math.max(1, window.innerHeight / box.offsetHeight) * 1.01).toFixed(4));
     }
+    // IRIS: the orbs are shown through a circle that grows from a small dot at
+    // the centre of the viewport until it clears the corners. Pre-paint the CSS
+    // holds it at 14px (html.is-intro .page-field-*); this animates it on, and
+    // release cancels it (the CSS rule goes with the class, so the field is whole).
+    const irisR = Math.ceil(Math.hypot(window.innerWidth, window.innerHeight) / 2 * 1.05);
+    const irisY = window.innerHeight / 2;
+    const irises = Array.from(document.querySelectorAll('.page-field-canvas, .page-field-grain'))
+      .map(el => el.animate(
+        [{ clipPath: `circle(14px at 50% ${irisY}px)` },
+         { clipPath: `circle(${irisR}px at 50% ${irisY}px)` }],
+        { duration: INTRO.iris, easing: 'cubic-bezier(0.65, 0, 0.2, 1)', fill: 'forwards' }));
     const pageReady = Promise.all([
       document.readyState === 'complete'
         ? null
@@ -887,6 +898,7 @@ function runIntro() {
       if (siteRevealed) return;
       siteRevealed = true;
       html.classList.remove('is-intro');
+      irises.forEach(a => a.cancel());
       html.classList.add('is-text-revealed');
       setTimeout(revealRestOfSite, INTRO.followMs);
     });
@@ -1456,11 +1468,12 @@ function initHeroField() {
       const b = FIELD_STATIC.matches ? phoneBlob(FIELD.blobs[blobIdx])
         : tablet ? tabletBlob(FIELD.blobs[blobIdx])
         : FIELD.blobs[blobIdx];
-      const p = entranceMs == null ? 1
-        : Math.max(0, Math.min(1, (entranceMs - entranceStarts[blobIdx]) / e.duration));
+      // LOAD SCREEN: the orbs are drawn fully formed — the reveal is the circular
+      // iris in runIntro(), not a per-orb entrance. (FIELD.entrance / entranceMs
+      // are now unused; left in place rather than ripped out of the draw loop.)
       blobData[slot * 4 + 0] = b.x;
       blobData[slot * 4 + 1] = b.y + (FIELD_STATIC.matches || tablet ? 0 : FIELD.offsetY);
-      blobData[slot * 4 + 2] = b.r * (1 - Math.pow(1 - p, 3));
+      blobData[slot * 4 + 2] = b.r;
       blobData[slot * 4 + 3] = b.a;
       colData[slot * 3 + 0] = b.col[0];
       colData[slot * 3 + 1] = b.col[1];

@@ -1853,17 +1853,38 @@ html.is-intro {
    the screen is orbs only. visibility interpolates discretely, so it flips to
    visible at the START of the fade-in. */
 .top-nav,
-.intro,
 .intro-bar {
-  transition: opacity 1.1s ease 0.55s, visibility 0s;
+  transition: opacity 1s ease 0.85s, visibility 0s;
 }
 
 html.is-intro .top-nav,
-html.is-intro .intro,
 html.is-intro .intro-bar {
   opacity: 0;
   visibility: hidden;
   transition: none;
+}
+
+/* The hero's own entrance (headline rise, bio drop) already has a fade + rise.
+   While the intro runs it is switched OFF and hidden, so it STARTS when the class
+   comes off — and it is delayed here so the content lands AFTER the scrim has
+   swept under it, headline first, then the bio + meta line, then the nav above
+   (.top-nav, 0.85s). has-intro is set pre-paint with is-intro and never removed,
+   so phones and reduced motion keep the original delays. */
+html.is-intro .intro-headline,
+html.is-intro .intro-band-right {
+  animation: none;
+  opacity: 0;
+  visibility: hidden;
+}
+
+html.has-intro .intro-headline { animation-delay: 1.05s; }
+html.has-intro .intro-band-right { animation-delay: 1.3s; }
+
+/* The orbs are shown through a circle that main.js grows (runIntro). Held at a
+   14px dot pre-paint so the first frame is never the whole field. */
+html.is-intro .page-field-canvas,
+html.is-intro .page-field-grain {
+  clip-path: circle(14px at 50% 50svh);
 }
 
 @media (prefers-reduced-motion: reduce) {
