@@ -137,18 +137,18 @@ html.is-field-live .page-field-grain { opacity: 0.1; } /* was 0.15 (2026-09-29: 
      ⚠️ The ≤480 tier REPLACES this transform outright and deliberately does not
      read the token: the .intro-bar is display:none there, so there is no pinned
      bar to tuck behind, and the JS skips the whole block for the same reason. */
-  transform: translate(-50%, calc(-1 * var(--field-rise, 0px) - var(--field-scroll, 0px) + min(1, calc(var(--intro, 0) * 16)) * var(--field-rise, 0px)));
-  /* LOAD SCREEN (--intro, below): the field is dropped back to the top of the
-     screen and grown ~4% so it covers the whole viewport, then settles. Origin
-     is the top-LEFT on purpose — with left: 50% and translate(-50%) that keeps
-     the box centred horizontally while it scales. */
+  transform: translate(-50%, calc(-1 * var(--field-rise, 0px) - var(--field-scroll, 0px)));
+  /* LOAD SCREEN (see the block at the end of this file): while html.is-intro the
+     artwork is dropped to the top and grown ~4% so it covers the screen. Uses the
+     individual `translate` / `scale` properties — NOT `transform`, which is
+     scroll-linked and must stay untransitioned — and plain class states rather
+     than calc() on --intro, so the settle is a simple delayed transition that
+     starts once the scrim is nearly home. Origin is top-LEFT on purpose: with
+     left: 50% and translate(-50%) that keeps the box centred while it scales. */
   transform-origin: 0 0;
-  scale: calc(1 + min(1, calc(var(--intro, 0) * 16)) * (var(--intro-scale, 1.04) - 1));
-  /* ⚠️ min(1, intro × 16): the drop and scale HOLD until the scrim is nearly home
-     (intro < 1/16) and only then settle. Moved in step with --intro, the
-     artwork's own hard bottom edge rose faster than the scrim and showed as a
-     white line sweeping up the screen. Held, that edge stays below the scrim's
-     end the whole way. */
+  translate: 0 0;
+  scale: 1;
+  transition: translate 0.5s cubic-bezier(0.3, 0, 0.2, 1) 1.4s, scale 0.5s cubic-bezier(0.3, 0, 0.2, 1) 1.4s;
   /* images/hero-bkg.jpg, centered. FROZEN at its 1440 size (1639.44px = the
      113.85vw composition) for any narrower window: below the design width the
      field keeps its size and position and the viewport simply crops more of
@@ -1831,6 +1831,14 @@ html.is-revealing .site-footer {
 
 html {
   transition: --intro 1.9s cubic-bezier(0.7, 0, 0.2, 1);
+}
+
+html.is-intro .page-field {
+  translate: 0 var(--field-rise, 0px);
+  scale: var(--intro-scale, 1.04);
+  /* No transition INTO the intro state (main.js sets --intro-scale a beat after
+     first paint); the settle transition lives on the resting rule above. */
+  transition: none;
 }
 
 html.is-intro {
