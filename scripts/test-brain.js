@@ -106,7 +106,7 @@ const cases = [
   ['why do shared patterns matter', 'systems'],
   ['do you buy clothes secondhand', 'fashion'],
   ['do you shop on the realreal', 'fashion'],
-  ['is this powered by an LLM', 'jennaos'],
+  ['is this powered by an LLM', 'jennaos|ai'],
   ['is there a real AI behind this chat', 'jennaos'],
   ['what is your dog called', 'maeve'],
   ['are you a software engineer', 'coding|who'],

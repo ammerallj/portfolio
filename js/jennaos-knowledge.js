@@ -797,7 +797,7 @@ window.JennaOSKnowledge = [
       "is there a real ai behind this chat",
       "is this a real ai"
     ],
-    "text": "JennaOS is a little experiment in turning my portfolio into something you can explore by asking questions. It's part introduction, part collection of work and interests, and part peek into how my brain connects things.\n\nThere's no LLM behind this chat. I wrote the answers, and the site matches your question to the closest topic. It's deliberately simple: more of an interactive self-portrait than an AI pretending to be me.",
+    "text": "JennaOS is a little experiment in turning my portfolio into something you can explore by asking questions. It's part introduction, part collection of work and interests, and part peek into how my brain connects things.",
     "app": "start"
   },
   {
