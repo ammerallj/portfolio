@@ -7,7 +7,13 @@
     --jos-card-bg: #f7f7f5;
     position: fixed; right: 24px; bottom: 24px; z-index: 2147483000;
     font-family: var(--font-body, 'Inter', system-ui, sans-serif);
+    /* Arrives after the load screen, with the nav: fades in once is-intro comes off,
+       delayed so it lands after the scrim has swept (same beat as .top-nav). */
+    transition: opacity 0.9s ease 1.2s, visibility 0s;
   }
+  /* LOAD SCREEN: html.is-intro (hero.css) holds the page back while the orbs play
+     alone. JennaOS is held back with it: invisible, unfocusable, unclickable. */
+  html.is-intro .jenna-os { opacity: 0; visibility: hidden; pointer-events: none; transition: none; }
 
   /* ---------- floating button ---------- */
   .jos-fab {
