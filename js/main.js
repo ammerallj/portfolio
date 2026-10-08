@@ -864,7 +864,10 @@ let heroIris = null;
 // on the finished field, THEN the scrim rises and the content staggers in.
 // `maxPause`: the hold on the finished field never runs past this, even if fonts or
 // the page aren't ready (they used to be able to stretch it to 9s).
-const INTRO = { pause: 0, maxPause: 850, iris: 1400, followMs: 950 };
+// `overlap`: the scrim is released this many ms BEFORE the circle finishes. Outside
+// the circle is cream and so is the scrim, so the two meet seamlessly, and the
+// scrim's slow ease-in start is spent while the circle is still finishing.
+const INTRO = { overlap: 300, pause: 0, maxPause: 850, iris: 1400, followMs: 950 };
 function runIntro() {
   // Scrolling is blocked from first paint by the inline <head> script (index.html);
   // this only puts the page back at the top when the loader ends.
@@ -918,14 +921,13 @@ function runIntro() {
         : new Promise(r => window.addEventListener('load', r, { once: true })),
       document.fonts ? document.fonts.ready : null
     ]);
-    const held = new Promise(r => setTimeout(r, INTRO.iris + INTRO.pause));
+    const held = new Promise(r => setTimeout(r, INTRO.iris - INTRO.overlap + INTRO.pause));
     const cap = new Promise(r => setTimeout(r, INTRO.iris + INTRO.maxPause));
     Promise.race([Promise.all([held, pageReady]), cap]).then(() => {
       if (siteRevealed) return;
       siteRevealed = true;
       html.classList.remove('is-intro');
       unblock();
-      heroIris = null;
       html.classList.add('is-text-revealed');
       setTimeout(revealRestOfSite, INTRO.followMs);
     });
@@ -1499,7 +1501,9 @@ function initHeroField() {
   const irisOut = new Float32Array(3);
   function irisUniform() {
     const running = heroIris && performance.now() - heroIris.start < heroIris.dur;
-    if (!html.classList.contains('is-intro') || (heroIris && !running)) return IRIS_OFF;
+    // Once started, the iris runs to its end on its own clock (release can come
+    // before it finishes — see INTRO.overlap); before it starts it is held by is-intro.
+    if (heroIris ? !running : !html.classList.contains('is-intro')) return IRIS_OFF;
     const R0 = 14;
     let r = R0;
     if (heroIris) {
