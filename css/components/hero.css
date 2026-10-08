@@ -137,7 +137,13 @@ html.is-field-live .page-field-grain { opacity: 0.1; } /* was 0.15 (2026-09-29: 
      ⚠️ The ≤480 tier REPLACES this transform outright and deliberately does not
      read the token: the .intro-bar is display:none there, so there is no pinned
      bar to tuck behind, and the JS skips the whole block for the same reason. */
-  transform: translate(-50%, calc(-1 * var(--field-rise, 0px) - var(--field-scroll, 0px)));
+  transform: translate(-50%, calc(-1 * var(--field-rise, 0px) - var(--field-scroll, 0px) + var(--intro, 0) * var(--field-rise, 0px)));
+  /* LOAD SCREEN (--intro, below): the field is dropped back to the top of the
+     screen and grown ~4% so it covers the whole viewport, then settles. Origin
+     is the top-LEFT on purpose — with left: 50% and translate(-50%) that keeps
+     the box centred horizontally while it scales. */
+  transform-origin: 0 0;
+  scale: calc(1 + var(--intro, 0) * (var(--intro-scale, 1.04) - 1));
   /* images/hero-bkg.jpg, centered. FROZEN at its 1440 size (1639.44px = the
      113.85vw composition) for any narrower window: below the design width the
      field keeps its size and position and the viewport simply crops more of
@@ -398,7 +404,7 @@ html.is-field-live .page-field-grain { opacity: 0.1; } /* was 0.15 (2026-09-29: 
      publishes --hero-field-end there. min(), so on desktop it only pulls the
      white UP (short windows put the 72svh end behind the headline) and the
      artwork's bottom edge stays under the white. */
-  --field-mask-end: calc(min(72svh, var(--hero-field-end, 72svh)) + var(--field-rise) - var(--field-cream, 0px));
+  --field-mask-end: calc(min(72svh, var(--hero-field-end, 72svh)) + var(--field-rise) - var(--field-cream, 0px) + calc(var(--intro, 0) * 80svh));
   /* HOW TALL THE DISSOLVE IS, as a fraction of the room between the bio's last
      line and the bar. --field-gap is that room, published by measureFieldTuck;
      112px is the no-JS floor.
@@ -1794,4 +1800,59 @@ html.is-loading .site-footer {
 html.is-revealing .page-section,
 html.is-revealing .site-footer {
   transition: opacity 0.6s ease;
+}
+
+/* ============================================================
+   LOAD SCREEN                                       2026-10 (prototype)
+   --intro is 1 while the orbs are shown alone and 0 at rest. Pre-paint the
+   inline <head> script adds html.is-intro (motion on, >480 only); main.js
+   removes it ~5s later and the registered property below TRANSITIONS, so one
+   number drives three things in step:
+     · the white scrim (the field's mask end, +80svh at 1) rises from the bottom
+       of the viewport into its resting place,
+     · the artwork settles from covering the screen (dropped by --field-rise,
+       scaled up) back to its composed position,
+     · nothing else — the nav and hero content fade on their own timing below.
+   ⚠️ NOT scroll-linked, so a transition is allowed here (the standing "no
+   transition on scroll-linked values" rule does not apply to it).
+   ⚠️ @property is what lets the number animate; without support the scrim
+   simply snaps to rest and the content still fades.
+   ============================================================ */
+@property --intro {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0;
+}
+
+html {
+  transition: --intro 1.9s cubic-bezier(0.7, 0, 0.2, 1);
+}
+
+html.is-intro {
+  --intro: 1;
+  /* No scrolling under the loader; the gutter keeps the width from jumping
+     when the scrollbar comes back. */
+  overflow: hidden;
+  scrollbar-gutter: stable;
+}
+
+/* Hidden, not just transparent: nothing here should be reachable by Tab while
+   the screen is orbs only. visibility interpolates discretely, so it flips to
+   visible at the START of the fade-in. */
+.top-nav,
+.intro,
+.intro-bar {
+  transition: opacity 1.1s ease 0.55s, visibility 0s;
+}
+
+html.is-intro .top-nav,
+html.is-intro .intro,
+html.is-intro .intro-bar {
+  opacity: 0;
+  visibility: hidden;
+  transition: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { transition: none; }
 }

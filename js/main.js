@@ -850,7 +850,47 @@ function startReveal() {
     revealRestOfSite();
     return;
   }
+  if (html.classList.contains('is-intro')) { runIntro(); return; }
   setTimeout(revealSite, 200);
+}
+
+// LOAD SCREEN (hero.css, --intro): the orbs are shown alone for at least
+// INTRO.hold ms, longer only if the page itself isn't ready, never past
+// INTRO.cap. Then is-intro comes off — the scrim rises (a CSS transition on
+// --intro) and the nav + hero fade in — and the sections below follow.
+const INTRO = { hold: 5000, cap: 9000, followMs: 900 };
+function runIntro() {
+  // initHeroField runs after initHero(); give it a beat, then check it drew.
+  // No WebGL = no orbs to show, so skip the screen and reveal as usual.
+  setTimeout(() => {
+    if (!html.classList.contains('is-field-live')) {
+      html.classList.remove('is-intro');
+      setTimeout(revealSite, 200);
+      return;
+    }
+    // Grow the artwork just enough to cover the viewport while it is dropped to
+    // the top (its box is up to ~8% shorter than the screen on tall tablets).
+    const box = document.querySelector('.page-field-canvas');
+    if (box && box.offsetHeight) {
+      html.style.setProperty('--intro-scale',
+        (Math.max(1, window.innerHeight / box.offsetHeight) * 1.01).toFixed(4));
+    }
+    const pageReady = Promise.all([
+      document.readyState === 'complete'
+        ? null
+        : new Promise(r => window.addEventListener('load', r, { once: true })),
+      document.fonts ? document.fonts.ready : null
+    ]);
+    const held = new Promise(r => setTimeout(r, INTRO.hold));
+    const cap = new Promise(r => setTimeout(r, INTRO.cap));
+    Promise.race([Promise.all([held, pageReady]), cap]).then(() => {
+      if (siteRevealed) return;
+      siteRevealed = true;
+      html.classList.remove('is-intro');
+      html.classList.add('is-text-revealed');
+      setTimeout(revealRestOfSite, INTRO.followMs);
+    });
+  }, 200);
 }
 
 initHero();

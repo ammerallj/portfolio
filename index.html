@@ -161,7 +161,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,200;0,500;0,700;1,500&family=Inter:wght@400..700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=5013d60c" />
+  <link rel="stylesheet" href="style.css?v=3ac901d4" />
   <!-- The landing field's JPEG fallback — PHONES ONLY since 2026-09, so the
        preload is gated to match the <picture> in <main>. Without the media
        attribute this fetches 1.4MB on every desktop and tablet visit for an
@@ -191,7 +191,16 @@
       } catch (e) {}
       if (!window.scrollY) root.classList.add('is-at-page-top');
       root.classList.add('is-loading');
-      setTimeout(function () { root.classList.remove('is-loading'); }, 4000);
+      // LOAD SCREEN: orbs alone until main.js releases it (~5s). Motion on and
+      // >480 only — phones draw a single static frame, so there is nothing to watch.
+      var intro = root.classList.contains('is-motion') &&
+        window.matchMedia('(min-width: 481px)').matches;
+      if (intro) root.classList.add('is-intro');
+      // Failsafe if main.js never runs.
+      setTimeout(function () {
+        root.classList.remove('is-loading');
+        root.classList.remove('is-intro');
+      }, intro ? 10000 : 4000);
     })();
   </script>
 </head>
@@ -591,6 +600,6 @@
   </div>
   <div class="wave-cursor" id="wave-cursor" aria-hidden="true">👋</div>
 
-  <script src="js/main.js?v=30aedb28" defer></script>
+  <script src="js/main.js?v=b7b8644a" defer></script>
 </body>
 </html>
