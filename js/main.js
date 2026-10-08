@@ -892,7 +892,17 @@ function runIntro() {
       const rise = parseFloat(getComputedStyle(html).getPropertyValue('--field-rise')) || 0;
       const need = rise < box.offsetHeight
         ? (window.innerHeight - rise) / (box.offsetHeight - rise) : window.innerHeight / box.offsetHeight;
-      html.style.setProperty('--intro-scale', (Math.max(1, need) * 1.02).toFixed(4));
+      let sc = Math.max(1, need) * 1.02;
+      html.style.setProperty('--intro-scale', sc.toFixed(4));
+      // Then CHECK it against the real box (no transition while is-intro) and
+      // grow it until the bottom edge is a few px past the screen, whatever the
+      // formula says — a short edge is a hard cream line along the bottom.
+      for (let i = 0; i < 5; i++) {
+        const r = box.getBoundingClientRect();
+        if (r.bottom >= window.innerHeight + 6 && r.top <= 0) break;
+        sc *= 1 + Math.max(0.01, (window.innerHeight + 10 - r.bottom) / Math.max(1, r.height));
+        html.style.setProperty('--intro-scale', sc.toFixed(4));
+      }
     }
     // IRIS: the field shader draws the orbs through a circle that grows from a 14px
     // dot at the centre of the viewport until it clears the corners (irisUniform in
