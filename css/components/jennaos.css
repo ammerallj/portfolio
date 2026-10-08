@@ -216,6 +216,28 @@
 .jenna-os .jos-chip:focus-visible { outline: 2px solid var(--jos-ink); outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) { .jenna-os .jos-msg.is-brain { animation: none; } }
 
+/* ---------- arrival hint: the dot pulses for 3s with a tooltip over it ---------- */
+.jenna-os .jos-hint {
+  position: absolute; right: 0; bottom: 68px; white-space: nowrap; pointer-events: none;
+  padding: 9px 14px; border-radius: 12px; background: #111; color: #fff;
+  font: 500 13px/1.2 var(--font-body, 'Inter', system-ui, sans-serif);
+  opacity: 0; transform: translateY(6px) scale(.96); transform-origin: 100% 100%;
+  transition: opacity .25s, transform .45s var(--jos-ease-spring);
+}
+.jenna-os .jos-hint::after { /* the little arrow, centered over the button */
+  content: ''; position: absolute; right: 22px; bottom: -4px; width: 10px; height: 10px;
+  background: #111; transform: rotate(45deg); border-radius: 2px;
+}
+.jenna-os.is-hinting .jos-hint { opacity: 1; transform: none; }
+.jenna-os.is-hinting .jos-dots { animation: jos-pulse 1s ease-in-out 3; }
+@keyframes jos-pulse {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.55); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .jenna-os.is-hinting .jos-dots { animation: none; } /* the tooltip alone carries the hint */
+}
+
 /* ---------- back (from a gallery to the conversation) ---------- */
 .jenna-os .jos-back {
   all: unset; box-sizing: border-box; cursor: pointer; align-self: flex-start;

@@ -286,4 +286,25 @@
     }
   });
   renderStarters(false);
+
+  // ---- Arrival hint: once per visit, the dot pulses for 3s with a tooltip over
+  // it. Any interaction (hover, focus, tap) ends it early, and it never shows
+  // while the card is open. sessionStorage keeps a reload from nagging. ----
+  const HINT_KEY = 'jennaos-hint-seen';
+  const HINT_MS = 3000;
+  let hintTimer = null;
+  const endHint = () => { clearTimeout(hintTimer); root.classList.remove('is-hinting'); };
+  function startHint(ms = HINT_MS, replay = false) {
+    if (!replay) {
+      try { if (sessionStorage.getItem(HINT_KEY)) return; sessionStorage.setItem(HINT_KEY, '1'); } catch (e) { /* storage blocked: show it anyway */ }
+    }
+    if (isOpen()) return;
+    clearTimeout(hintTimer);
+    root.classList.add('is-hinting');
+    hintTimer = setTimeout(endHint, ms);
+  }
+  window.JennaOS.hint = ms => startHint(ms, true); // replay it (e.g. JennaOS.hint(20000) to inspect)
+  ['pointerenter', 'focus', 'click'].forEach(ev => fab.addEventListener(ev, endHint));
+  const arrive = () => setTimeout(startHint, 1000);
+  document.readyState === 'complete' ? arrive() : window.addEventListener('load', arrive, { once: true });
 })();
