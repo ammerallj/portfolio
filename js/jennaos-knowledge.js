@@ -738,7 +738,7 @@ window.JennaOSKnowledge = [
       "fashion",
       "pinterest"
     ],
-    "text": "Fashion is one of my favorite ways to express myself. I love exploring trends, finding ways to shop more sustainably, and hunting for my next piece on Pinterest or The RealReal.\n\nHalf the fun is discovering something I didn't know I was looking for.",
+    "text": "Fashion is one of my favorite ways to express myself. I love exploring trends, finding ways to shop more sustainably, and hunting for my next piece on Pinterest or The RealReal.\n\nLately I keep saving the same things: sheer layers, a single red accent, soft leather, and clothes with some slouch to them. There's a board of it under Fashion.\n\nHalf the fun is discovering something I didn't know I was looking for.",
     "app": "fashion"
   },
   {
