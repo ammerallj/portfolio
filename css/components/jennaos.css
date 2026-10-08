@@ -104,6 +104,10 @@
   .jos-title span { color: var(--jos-muted); }
   .jos-body { margin-top: 16px; font-size: 14px; line-height: 1.5; color: #333; }
   .jos-body { max-height: clamp(120px, calc(100dvh - 420px), 320px); overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+  /* Gutter for the scrollbar: the box grows 14px into the card's own padding and
+     pads its content back by the same, so text and bubbles keep their width and
+     the scrollbar sits in the margin instead of on top of them. */
+  .jos-body { margin-right: -14px; padding-right: 14px; scrollbar-gutter: stable; scrollbar-color: rgba(0, 0, 0, .28) transparent; }
   .jos-empty { margin: 0; color: var(--jos-muted); }
 
   /* Scattered stack of floating cards: tiles keep their own proportions, tilt a
