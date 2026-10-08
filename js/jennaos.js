@@ -41,7 +41,7 @@
 
   function renderPills() {
     appList.innerHTML = '';
-    apps.forEach(a => {
+    apps.filter(a => !a.hidden).forEach(a => {
       const li = document.createElement('li');
       const b = document.createElement('button');
       b.type = 'button'; b.textContent = a.label; b.dataset.app = a.id;
@@ -133,30 +133,102 @@
   });
 
 
-  // ---- Chat input: no model behind it yet. It routes to an app by name or
-  // keyword, and otherwise says so plainly. ----
+  // ---- Chat: the brain. Questions are answered by js/jennaos-brain.js from
+  // js/jennaos-knowledge.js (retrieval, no model, no network). Both files load
+  // the first time someone asks, so the page doesn't pay for them up front. ----
   const chat = document.getElementById('jos-chat');
   const input = document.getElementById('jos-input');
   const send = document.getElementById('jos-send');
   const status = document.getElementById('jos-status');
-  const KEYWORDS = {
-    maeve: ['dog', 'dachshund', 'puppy', 'pet'],
-    fashion: ['style', 'outfit', 'trend', 'clothes', 'pinterest', 'moodboard'],
-    start: ['help']
-  };
-  input.addEventListener('input', () => { send.hidden = !input.value.trim(); status.textContent = ''; });
-  chat.addEventListener('submit', e => {
-    e.preventDefault();
-    const q = input.value.trim().toLowerCase();
+  const thread = [];
+  let threadEl = null;
+
+  const SELF = document.currentScript && document.currentScript.src;
+  let brainReady = null;
+  function loadBrain() {
+    if (window.JennaOSBrain && window.JennaOSKnowledge) return Promise.resolve();
+    if (brainReady) return brainReady;
+    const base = SELF ? SELF.replace(/[^/?]*(\?.*)?$/, '') : 'js/';
+    const query = SELF && SELF.includes('?') ? SELF.slice(SELF.indexOf('?')) : '';
+    const add = name => new Promise((res, rej) => {
+      const t = document.createElement('script');
+      t.src = base + name + query; t.onload = res; t.onerror = rej;
+      document.head.appendChild(t);
+    });
+    brainReady = add('jennaos-knowledge.js').then(() => add('jennaos-brain.js'))
+      .catch(err => { brainReady = null; throw err; });
+    return brainReady;
+  }
+
+  function messageEl(m) {
+    const wrap = el('div', 'jos-msg ' + (m.role === 'user' ? 'is-user' : 'is-brain'));
+    if (m.role === 'user') { wrap.textContent = m.text; return wrap; }
+    m.text.split('\n\n').forEach(par => wrap.appendChild(el('p', '', par)));
+    const chips = el('div', 'jos-chips');
+    (m.links || []).forEach(l => {
+      const a = el('a', 'jos-chip', l.label);
+      a.href = l.href;
+      if (/^https?:/.test(l.href)) { a.target = '_blank'; a.rel = 'noopener noreferrer'; }
+      chips.appendChild(a);
+    });
+    if (m.app) {
+      const target = apps.find(x => x.id === m.app);
+      if (target) {
+        const b = el('button', 'jos-chip', m.app === 'start' ? 'Back to start' : 'Open ' + target.label);
+        b.type = 'button';
+        b.addEventListener('click', () => openApp(m.app));
+        chips.appendChild(b);
+      }
+    }
+    (m.suggestions || []).forEach(q => {
+      const b = el('button', 'jos-chip', q);
+      b.type = 'button';
+      b.addEventListener('click', () => ask(q));
+      chips.appendChild(b);
+    });
+    if (chips.childNodes.length) wrap.appendChild(chips);
+    return wrap;
+  }
+
+  function push(m) {
+    thread.push(m);
+    if (activeId !== 'chat') { openApp('chat'); return; }
+    threadEl.appendChild(messageEl(m));
+    bodyEl.scrollTop = bodyEl.scrollHeight;
+  }
+
+  async function ask(question) {
+    const q = question.trim();
     if (!q) return;
-    const hit = apps.find(a => q.includes(a.id) || q.includes(a.label.toLowerCase())) ||
-      apps.find(a => (KEYWORDS[a.id] || []).some(k => q.includes(k)));
-    if (hit) {
-      openApp(hit.id);
-      input.value = ''; send.hidden = true; status.textContent = '';
-    } else {
-      status.textContent = 'I can’t chat yet, but I can show you around. Try “' +
-        apps.slice(1).map(a => a.label).join('” or “') + '.”';
+    input.value = ''; send.hidden = true; status.textContent = '';
+    push({ role: 'user', text: q });
+    try {
+      await loadBrain();
+      const r = window.JennaOSBrain.ask(q);
+      push({ role: 'brain', text: r.text, links: r.links, app: r.app, suggestions: r.suggestions });
+    } catch (err) {
+      push({ role: 'brain', text: 'My brain didn’t load just now. Try again in a moment, or email me.',
+        links: [{ label: 'ammerallj@gmail.com', href: 'mailto:ammerallj@gmail.com' }] });
+    }
+  }
+
+  input.addEventListener('input', () => { send.hidden = !input.value.trim(); });
+  chat.addEventListener('submit', e => { e.preventDefault(); ask(input.value); });
+
+  // The conversation is a view, not a pill: it opens when you ask, and Start
+  // takes you back.
+  window.JennaOS.registerApp({
+    id: 'chat',
+    hidden: true,
+    heading: 'JennaOS.',
+    subheading: 'Ask me anything.',
+    render(body) {
+      threadEl = el('div', 'jos-thread');
+      threadEl.setAttribute('role', 'log');
+      threadEl.setAttribute('aria-live', 'polite');
+      thread.forEach(m => threadEl.appendChild(messageEl(m)));
+      body.appendChild(threadEl);
+      body.scrollTop = body.scrollHeight;
     }
   });
 

@@ -189,3 +189,22 @@
 .jenna-os .jos-send:focus-visible { outline: 2px solid #111; outline-offset: 2px; }
 .jenna-os .jos-status { margin: 8px 4px 0; font-size: 12px; line-height: 1.4; color: #55554f; min-height: 0; }
 .jenna-os .jos-status:empty { display: none; }
+
+/* ---------- conversation ---------- */
+.jenna-os .jos-thread { display: grid; gap: 12px; }
+.jenna-os .jos-msg p { margin: 0; }
+.jenna-os .jos-msg p + p { margin-top: 8px; }
+.jenna-os .jos-msg.is-user {
+  justify-self: end; max-width: 85%; padding: 8px 14px; border-radius: 18px 18px 4px 18px;
+  background: var(--jos-ink); color: #fff;
+}
+.jenna-os .jos-msg.is-brain { justify-self: start; max-width: 100%; animation: jos-in .3s var(--jos-ease-spring) both; }
+@keyframes jos-in { from { opacity: 0; transform: translateY(6px); } }
+.jenna-os .jos-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.jenna-os .jos-chip {
+  all: unset; box-sizing: border-box; cursor: pointer; padding: 6px 12px; border-radius: 999px;
+  font-size: 12px; line-height: 1.2; color: #1a1a1a; background: #ececea; transition: background .15s;
+}
+.jenna-os .jos-chip:hover { background: #e2e2df; }
+.jenna-os .jos-chip:focus-visible { outline: 2px solid var(--jos-ink); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { .jenna-os .jos-msg.is-brain { animation: none; } }
