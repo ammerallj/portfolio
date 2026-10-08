@@ -6,7 +6,7 @@
     --jos-surface: #fff;
     --jos-card-bg: #f7f7f5;
     position: fixed; right: 24px; bottom: 24px; z-index: 2147483000;
-    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-family: var(--font-body, 'Inter', system-ui, sans-serif);
   }
 
   /* ---------- floating button ---------- */
@@ -98,7 +98,7 @@
     transition: opacity .2s, transform .45s var(--jos-ease-spring), visibility 0s;
   }
   .jos-title {
-    margin: 0; font: 400 24px/1.2 "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+    margin: 0; font: 500 24px/1.2 var(--font-heading, 'Hanken Grotesk', system-ui, sans-serif);
     letter-spacing: -.01em; color: var(--jos-ink);
   }
   .jos-title span { color: var(--jos-muted); }
