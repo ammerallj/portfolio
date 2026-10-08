@@ -864,7 +864,7 @@ let heroIris = null;
 // on the finished field, THEN the scrim rises and the content staggers in.
 // `maxPause`: the hold on the finished field never runs past this, even if fonts or
 // the page aren't ready (they used to be able to stretch it to 9s).
-const INTRO = { pause: 100, maxPause: 850, iris: 1400, followMs: 600 };
+const INTRO = { pause: 0, maxPause: 850, iris: 1400, followMs: 600 };
 function runIntro() {
   // Scrolling is blocked from first paint by the inline <head> script (index.html);
   // this only puts the page back at the top when the loader ends.
@@ -1489,7 +1489,7 @@ function initHeroField() {
     let r = R0;
     if (heroIris) {
       const p = Math.min(1, (performance.now() - heroIris.start) / heroIris.dur);
-      const e = p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2; // easeInOutCubic
+      const e = p * p * p; // easeInCubic: starts slow, ends at speed
       r = R0 + (heroIris.R - R0) * e;
     }
     const rect = canvas.getBoundingClientRect();
