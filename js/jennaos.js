@@ -14,8 +14,8 @@
     fab.setAttribute('aria-expanded', String(open));
     fab.setAttribute('aria-label', open ? 'Close JennaOS' : 'Open JennaOS');
     card.setAttribute('aria-hidden', String(!open));
-    // The OS always lands on an app: the first one (ReadMe) until the visitor picks another.
-    if (open && !activeId && apps.length) openApp(apps[0].id);
+    // First open lands on the intro (or the conversation, if there is one).
+    if (open && !activeId) openApp(thread.length ? 'chat' : 'start');
     // keep focus on the button; Tab moves into the card naturally
   }
 
@@ -35,27 +35,52 @@
     titleEl.appendChild(sub);
     bodyEl.innerHTML = '';
     app.render(bodyEl);
-    appList.querySelectorAll('button').forEach(b =>
-      b.setAttribute('aria-current', String(b.dataset.app === id)));
+    // Galleries (Maeve, Fashion) get a way back to where the visitor was.
+    backBtn.hidden = id === 'start' || id === 'chat';
   }
 
-  function renderPills() {
+  const backBtn = document.createElement('button');
+  backBtn.type = 'button'; backBtn.className = 'jos-back'; backBtn.hidden = true;
+  backBtn.textContent = 'Back';
+  backBtn.addEventListener('click', () => openApp(thread.length ? 'chat' : 'start'));
+  bodyEl.parentNode.insertBefore(backBtn, bodyEl);
+
+  // Conversation starters. Tapping one asks the brain; asked ones are swapped
+  // for the next unused question. Each should match a question in
+  // jennaos-brain.txt so it lands on a real answer. Three show at a time.
+  const STARTERS = [
+    'What do you do?',
+    'Who is Maeve?',
+    'What are you saving on Pinterest?',
+    'How do you think about design?',
+    'What are you most proud of?',
+    'What is Threadscape?',
+    'What are you working on these days?',
+    'What do you want to work on next?',
+    'How can I contact you?'
+  ];
+  const asked = new Set();
+
+  function renderStarters(focusFirst) {
     appList.innerHTML = '';
-    apps.filter(a => !a.hidden).forEach(a => {
+    appList.setAttribute('aria-label', 'Conversation starters');
+    STARTERS.filter(q => !asked.has(q)).slice(0, 3).forEach(q => {
       const li = document.createElement('li');
       const b = document.createElement('button');
-      b.type = 'button'; b.textContent = a.label; b.dataset.app = a.id;
-      b.setAttribute('aria-current', String(a.id === activeId));
-      b.addEventListener('click', () => openApp(a.id));
+      b.type = 'button'; b.textContent = q;
+      b.addEventListener('click', () => ask(q, true));
       li.appendChild(b); appList.appendChild(li);
     });
+    if (focusFirst) {
+      const first = appList.querySelector('button');
+      (first || input).focus({ preventScroll: true });
+    }
   }
 
   window.JennaOS = {
     open: () => set(true), close: () => set(false), toggle: () => set(!isOpen()),
     openApp,
-    // `first: true` pins an app to the front (ReadMe) and makes it the landing app.
-    registerApp(app) { app.first ? apps.unshift(app) : apps.push(app); renderPills(); },
+    registerApp(app) { apps.push(app); },
     card
   };
 
@@ -128,6 +153,7 @@
 
   window.JennaOS.registerApp({
     id: 'maeve',
+    hidden: true,
     label: 'Maeve',
     heading: 'Maeve.',
     subheading: 'My dachshund.',
@@ -136,6 +162,7 @@
 
   window.JennaOS.registerApp({
     id: 'fashion',
+    hidden: true,
     label: 'Fashion',
     heading: 'Fashion.',
     subheading: 'What I’m saving lately.',
@@ -207,9 +234,11 @@
     bodyEl.scrollTop = bodyEl.scrollHeight;
   }
 
-  async function ask(question) {
+  async function ask(question, fromStarter) {
     const q = question.trim();
     if (!q) return;
+    asked.add(q);
+    renderStarters(fromStarter);
     input.value = ''; send.hidden = true; status.textContent = '';
     push({ role: 'user', text: q });
     try {
@@ -246,7 +275,7 @@
   // JennaOS is (a map of how Jenna thinks) rather than how to operate it. ----
   window.JennaOS.registerApp({
     id: 'start',
-    first: true,
+    hidden: true,
     label: 'Start',
     heading: 'JennaOS.',
     subheading: 'My brain, as an operating system.',
@@ -256,4 +285,5 @@
       body.append(intro);
     }
   });
+  renderStarters(false);
 })();

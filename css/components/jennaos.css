@@ -208,3 +208,15 @@
 .jenna-os .jos-chip:hover { background: #e2e2df; }
 .jenna-os .jos-chip:focus-visible { outline: 2px solid var(--jos-ink); outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) { .jenna-os .jos-msg.is-brain { animation: none; } }
+
+/* ---------- back (from a gallery to the conversation) ---------- */
+.jenna-os .jos-back {
+  all: unset; box-sizing: border-box; cursor: pointer; align-self: flex-start;
+  margin-top: 12px; padding: 5px 11px; border-radius: 999px;
+  font-size: 12px; line-height: 1.2; color: #1a1a1a; background: #ececea; transition: background .15s;
+}
+.jenna-os .jos-back::before { content: "←\00a0"; }
+.jenna-os .jos-back:hover { background: #e2e2df; }
+.jenna-os .jos-back:focus-visible { outline: 2px solid var(--jos-ink); outline-offset: 2px; }
+.jenna-os .jos-back[hidden] { display: none; }
+.jenna-os .jos-back + .jos-body { margin-top: 12px; }
