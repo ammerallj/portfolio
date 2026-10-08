@@ -883,11 +883,16 @@ function runIntro() {
       return;
     }
     // Grow the artwork just enough to cover the viewport while it is dropped to
-    // the top (its box is up to ~8% shorter than the screen on tall tablets).
+    // the top. The drop (translate +rise) is NOT scaled but the box's own -rise
+    // offset is, so the bottom edge lands at (H - rise) * s + rise: solve for THAT,
+    // not for vh / H, which falls short in tall windows and leaves a hard cream
+    // strip along the bottom of the screen. 2% spare.
     const box = document.querySelector('.page-field-canvas');
     if (box && box.offsetHeight) {
-      html.style.setProperty('--intro-scale',
-        (Math.max(1, window.innerHeight / box.offsetHeight) * 1.01).toFixed(4));
+      const rise = parseFloat(getComputedStyle(html).getPropertyValue('--field-rise')) || 0;
+      const need = rise < box.offsetHeight
+        ? (window.innerHeight - rise) / (box.offsetHeight - rise) : window.innerHeight / box.offsetHeight;
+      html.style.setProperty('--intro-scale', (Math.max(1, need) * 1.02).toFixed(4));
     }
     // IRIS: the field shader draws the orbs through a circle that grows from a 14px
     // dot at the centre of the viewport until it clears the corners (irisUniform in
