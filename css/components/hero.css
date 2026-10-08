@@ -397,7 +397,13 @@ html.is-field-live .page-field-grain { opacity: 0.1; } /* was 0.15 (2026-09-29: 
      REDESIGN: that wall is gone — the lockup sits on white now, not on the
      field — so the artwork rises 200px to bring the red up into the visible
      band and push more of the top blue off-screen. Was 30px, then 130. */
-  --field-rise: 200px;
+  --field-rise: 170px; /* was 200: lowered 30 with the scrim (below) so the artwork's bottom edge keeps its margin under the white */
+  /* SCRIM DROP (2026-10): the white's end sits this much LOWER on the page than the
+     lockup rule alone puts it. Added to every --field-mask-end. ⚠️ The ceiling is the
+     artwork's bottom edge (H − rise): at 1440x900 the margin under the white is
+     (879 − 170) − (648 + 40) = 21px; raise this only with --field-rise lowered
+     alongside, or the hard bottom edge shows. */
+  --scrim-drop: 40px;
   /* ⚠️ --field-cream (scroll-linked, js/main.js) moves the dissolve's END up the
      artwork. It equals the artwork's lag (--field-scroll is negative: the
      artwork sinks, slower than the page) plus the tuck's overhang, so on the
@@ -414,7 +420,7 @@ html.is-field-live .page-field-grain { opacity: 0.1; } /* was 0.15 (2026-09-29: 
      publishes --hero-field-end there. min(), so on desktop it only pulls the
      white UP (short windows put the 72svh end behind the headline) and the
      artwork's bottom edge stays under the white. */
-  --field-mask-end: calc(min(72svh, var(--hero-field-end, 72svh)) + var(--field-rise) - var(--field-cream, 0px) + calc(var(--intro, 0) * 62svh));
+  --field-mask-end: calc(min(72svh, var(--hero-field-end, 72svh)) + var(--field-rise) - var(--field-cream, 0px) + var(--scrim-drop, 0px) + calc(var(--intro, 0) * 62svh));
   /* HOW TALL THE DISSOLVE IS, as a fraction of the room between the bio's last
      line and the bar. --field-gap is that room, published by measureFieldTuck;
      112px is the no-JS floor.
