@@ -1,0 +1,115 @@
+/* JennaOS — floating entry button + card shell (js/jennaos.js, markup at end of index.html) */
+.jenna-os {
+    --jos-ease-spring: cubic-bezier(.34, 1.4, .5, 1);
+    --jos-ink: #111;
+    --jos-muted: #8a8a85;
+    --jos-surface: #fff;
+    --jos-card-bg: #f7f7f5;
+    position: fixed; right: 24px; bottom: 24px; z-index: 2147483000;
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+
+  /* ---------- floating button ---------- */
+  .jos-fab {
+    all: unset; box-sizing: border-box;
+    position: relative; display: block;
+    width: 56px; height: 56px; border-radius: 50%;
+    background: var(--jos-surface);
+    box-shadow: 0 1px 2px rgba(0,0,0,.08), 0 8px 24px rgba(0,0,0,.14);
+    cursor: pointer;
+    transition: transform .35s var(--jos-ease-spring), box-shadow .25s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .jos-fab:hover { transform: scale(1.06); }
+  .jos-fab:active { transform: scale(.96); }
+  .jos-fab:focus-visible { outline: 2px solid var(--jos-ink); outline-offset: 3px; }
+
+  /* The dots sit in a gooey filter so the single dot splits like a droplet */
+  .jos-dots { position: absolute; inset: 0; filter: url(#jos-goo); pointer-events: none; }
+
+  /* Each ball hangs from a pivot above the button's center (a pendulum) */
+  .jos-pend {
+    --x: 0px;
+    position: absolute; left: 50%; top: calc(50% - 18px);
+    width: 0; height: 18px;
+    transform: translateX(var(--x));
+    transform-origin: 50% 0;
+    transition: transform .55s var(--jos-ease-spring);
+  }
+  .jos-ball {
+    position: absolute; left: -6px; bottom: -6px;
+    width: 12px; height: 12px; border-radius: 50%;
+    background: var(--jos-ink);
+    transition: transform .55s var(--jos-ease-spring);
+  }
+
+  /* Split: spread the balls out and shrink them */
+  .jos-fab:hover .jos-ball,
+  .jos-fab:focus-visible .jos-ball { transform: scale(.5); }
+  .jos-fab:hover .jos-pend:nth-child(1), .jos-fab:focus-visible .jos-pend:nth-child(1) { --x: -19px; }
+  .jos-fab:hover .jos-pend:nth-child(2), .jos-fab:focus-visible .jos-pend:nth-child(2) { --x: -9.5px; }
+  .jos-fab:hover .jos-pend:nth-child(4), .jos-fab:focus-visible .jos-pend:nth-child(4) { --x: 9.5px; }
+  .jos-fab:hover .jos-pend:nth-child(5), .jos-fab:focus-visible .jos-pend:nth-child(5) { --x: 19px; }
+
+  /* Newton's cradle: left ball swings in, right ball swings out, and back */
+  @keyframes jos-swing-left {
+    0%   { rotate: -42deg; animation-timing-function: cubic-bezier(.45, 0, .9, .6); }
+    25%  { rotate: 0deg; }
+    75%  { rotate: 0deg; animation-timing-function: cubic-bezier(.1, .4, .55, 1); }
+    100% { rotate: -42deg; }
+  }
+  @keyframes jos-swing-right {
+    0%   { rotate: 0deg; }
+    25%  { rotate: 0deg; animation-timing-function: cubic-bezier(.1, .4, .55, 1); }
+    50%  { rotate: 42deg; animation-timing-function: cubic-bezier(.45, 0, .9, .6); }
+    75%  { rotate: 0deg; }
+    100% { rotate: 0deg; }
+  }
+  .jos-fab:hover .jos-pend:nth-child(1), .jos-fab:focus-visible .jos-pend:nth-child(1) {
+    animation: jos-swing-left 1.5s .45s infinite both;
+  }
+  .jos-fab:hover .jos-pend:nth-child(5), .jos-fab:focus-visible .jos-pend:nth-child(5) {
+    animation: jos-swing-right 1.5s .45s infinite both;
+  }
+
+  /* ---------- card ---------- */
+  .jos-card {
+    position: absolute; right: 0; bottom: 72px;
+    width: min(360px, calc(100vw - 48px)); min-height: 300px; box-sizing: border-box;
+    padding: 24px 24px 20px;
+    display: flex; flex-direction: column;
+    background: var(--jos-card-bg); border-radius: 28px;
+    box-shadow: 0 1px 2px rgba(0,0,0,.06), 0 24px 60px rgba(0,0,0,.18);
+    transform-origin: 100% 100%;
+    opacity: 0; transform: scale(.88) translateY(8px); pointer-events: none; visibility: hidden;
+    transition: opacity .2s, transform .45s var(--jos-ease-spring), visibility 0s .45s;
+  }
+  .jenna-os[data-open="true"] .jos-card {
+    opacity: 1; transform: none; pointer-events: auto; visibility: visible;
+    transition: opacity .2s, transform .45s var(--jos-ease-spring), visibility 0s;
+  }
+  .jos-title {
+    margin: 0; font: 400 24px/1.2 "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+    letter-spacing: -.01em; color: var(--jos-ink);
+  }
+  .jos-title span { color: var(--jos-muted); }
+  .jos-apps { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0 0; padding: 0; list-style: none; }
+  .jos-apps button {
+    all: unset; box-sizing: border-box; cursor: pointer;
+    padding: 8px 14px; border-radius: 999px; font-size: 13px; color: #333; background: #ececea;
+    transition: background .15s;
+  }
+  .jos-apps button:hover { background: #e2e2df; }
+  .jos-apps button:focus-visible { outline: 2px solid var(--jos-ink); outline-offset: 2px; }
+  .jos-foot { margin-top: auto; padding-top: 24px; display: flex; align-items: center; justify-content: space-between; }
+  .jos-mark { width: 32px; height: 32px; display: block; }
+  .jos-close {
+    all: unset; cursor: pointer; font-size: 12px; color: var(--jos-muted); padding: 6px 10px; border-radius: 999px;
+  }
+  .jos-close:hover { color: var(--jos-ink); background: #ececea; }
+  .jos-close:focus-visible { outline: 2px solid var(--jos-ink); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .jos-fab:hover .jos-pend, .jos-fab:focus-visible .jos-pend { animation: none !important; }
+    .jenna-os *, .jenna-os { transition-duration: .01s !important; }
+  }

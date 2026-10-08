@@ -1,16 +1,16 @@
 (() => {
-  const root = document.getElementById('rose-os');
-  const fab = document.getElementById('ros-fab');
-  const card = document.getElementById('ros-card');
-  const closeBtn = document.getElementById('ros-close');
-  const appList = document.getElementById('ros-apps');
+  const root = document.getElementById('jenna-os');
+  const fab = document.getElementById('jos-fab');
+  const card = document.getElementById('jos-card');
+  const closeBtn = document.getElementById('jos-close');
+  const appList = document.getElementById('jos-apps');
   const apps = [];
 
   const isOpen = () => root.dataset.open === 'true';
   function set(open) {
     root.dataset.open = String(open);
     fab.setAttribute('aria-expanded', String(open));
-    fab.setAttribute('aria-label', open ? 'Close RoseOS' : 'Open RoseOS');
+    fab.setAttribute('aria-label', open ? 'Close JennaOS' : 'Open JennaOS');
     card.setAttribute('aria-hidden', String(!open));
     closeBtn.tabIndex = open ? 0 : -1;
     if (!open) return;
@@ -22,7 +22,7 @@
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && isOpen()) { set(false); fab.focus(); } });
   document.addEventListener('pointerdown', e => { if (isOpen() && !root.contains(e.target)) set(false); });
 
-  // Extension point for the OS: RoseOS.registerApp({ id, label, open() })
+  // Extension point for the OS: JennaOS.registerApp({ id, label, open() })
   function render() {
     appList.innerHTML = '';
     apps.forEach(a => {
@@ -33,12 +33,12 @@
       li.appendChild(b); appList.appendChild(li);
     });
   }
-  window.RoseOS = {
+  window.JennaOS = {
     open: () => set(true), close: () => set(false), toggle: () => set(!isOpen()),
     registerApp(app) { apps.push(app); render(); },
     card
   };
 
   ['ReadMe', 'Library', 'Artindex', 'Compressor', 'iPod', 'QuoteClub'].forEach(label =>
-    window.RoseOS.registerApp({ id: label.toLowerCase(), label }));
+    window.JennaOS.registerApp({ id: label.toLowerCase(), label }));
 })();
