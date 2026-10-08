@@ -2720,7 +2720,12 @@ function initLightbox() {
       }
       dlg.showModal();
       if (window.__lenis) window.__lenis.stop();
-      if (video) { const p = video.play(); if (p && p.catch) p.catch(() => {}); }
+      if (video) {
+        const go = () => { const p = video.play(); if (p && p.catch) p.catch(() => {}); };
+        go();
+        // A cold first open of a large file can lose that play(); start it once it can run.
+        video.addEventListener('canplay', () => { if (dlg.open && video.paused) go(); }, { once: true });
+      }
     });
     dlg.querySelector('.lightbox-close').addEventListener('click', close);
     dlg.addEventListener('click', (e) => { if (e.target === dlg) close(); });
