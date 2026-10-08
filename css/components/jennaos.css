@@ -45,11 +45,9 @@
 
   /* Split: spread the balls out and shrink them */
   .jos-fab:hover .jos-ball,
-  .jos-fab:focus-visible .jos-ball { transform: scale(.5); }
-  .jos-fab:hover .jos-pend:nth-child(1), .jos-fab:focus-visible .jos-pend:nth-child(1) { --x: -19px; }
-  .jos-fab:hover .jos-pend:nth-child(2), .jos-fab:focus-visible .jos-pend:nth-child(2) { --x: -9.5px; }
-  .jos-fab:hover .jos-pend:nth-child(4), .jos-fab:focus-visible .jos-pend:nth-child(4) { --x: 9.5px; }
-  .jos-fab:hover .jos-pend:nth-child(5), .jos-fab:focus-visible .jos-pend:nth-child(5) { --x: 19px; }
+  .jos-fab:focus-visible .jos-ball { transform: scale(.58); }
+  .jos-fab:hover .jos-pend:nth-child(1), .jos-fab:focus-visible .jos-pend:nth-child(1) { --x: -10px; }
+  .jos-fab:hover .jos-pend:nth-child(3), .jos-fab:focus-visible .jos-pend:nth-child(3) { --x: 10px; }
 
   /* Newton's cradle: left ball swings in, right ball swings out, and back */
   @keyframes jos-swing-left {
@@ -68,7 +66,7 @@
   .jos-fab:hover .jos-pend:nth-child(1), .jos-fab:focus-visible .jos-pend:nth-child(1) {
     animation: jos-swing-left 1.5s .45s infinite both;
   }
-  .jos-fab:hover .jos-pend:nth-child(5), .jos-fab:focus-visible .jos-pend:nth-child(5) {
+  .jos-fab:hover .jos-pend:nth-child(3), .jos-fab:focus-visible .jos-pend:nth-child(3) {
     animation: jos-swing-right 1.5s .45s infinite both;
   }
 
