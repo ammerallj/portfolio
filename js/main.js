@@ -860,11 +860,28 @@ function startReveal() {
 // --intro) and the nav + hero fade in — and the sections below follow.
 const INTRO = { hold: 1500, iris: 1400, cap: 9000, followMs: 900 };
 function runIntro() {
+  // No scrolling under the loader. overflow: hidden stops the browser, but Lenis
+  // drives scroll programmatically and ignores it, so wheel/touch/keys that
+  // arrive during the intro would move the page and leave the reader mid-page
+  // (at Work) when it opens. Swallowed here, restored at release.
+  const block = e => {
+    if (e.type === 'keydown' && !['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Home', 'End', ' ', 'Spacebar'].includes(e.key)) return;
+    e.preventDefault();
+  };
+  const blocked = ['wheel', 'touchmove', 'keydown'];
+  blocked.forEach(t => window.addEventListener(t, block, { passive: false, capture: true }));
+  const unblock = () => {
+    blocked.forEach(t => window.removeEventListener(t, block, { capture: true }));
+    if (window.__lenis) window.__lenis.scrollTo(0, { immediate: true });
+    window.scrollTo(0, 0);
+  };
+  window.scrollTo(0, 0);
   // initHeroField runs after initHero(); give it a beat, then check it drew.
   // No WebGL = no orbs to show, so skip the screen and reveal as usual.
   setTimeout(() => {
     if (!html.classList.contains('is-field-live')) {
       html.classList.remove('is-intro');
+      unblock();
       setTimeout(revealSite, 200);
       return;
     }
@@ -898,6 +915,7 @@ function runIntro() {
       if (siteRevealed) return;
       siteRevealed = true;
       html.classList.remove('is-intro');
+      unblock();
       irises.forEach(a => a.cancel());
       html.classList.add('is-text-revealed');
       setTimeout(revealRestOfSite, INTRO.followMs);

@@ -195,7 +195,13 @@
       // >480 only — phones draw a single static frame, so there is nothing to watch.
       var intro = root.classList.contains('is-motion') &&
         window.matchMedia('(min-width: 481px)').matches;
-      if (intro) root.classList.add('is-intro', 'has-intro');
+      if (intro) {
+        root.classList.add('is-intro', 'has-intro');
+        // The intro always plays from the top: don't let the browser restore a
+        // previous scroll position (it was landing the reader at Work on reload).
+        try { history.scrollRestoration = 'manual'; } catch (e) {}
+        window.scrollTo(0, 0);
+      }
       // Failsafe if main.js never runs.
       setTimeout(function () {
         root.classList.remove('is-loading');
@@ -600,6 +606,6 @@
   </div>
   <div class="wave-cursor" id="wave-cursor" aria-hidden="true">👋</div>
 
-  <script src="js/main.js?v=01fca0b5" defer></script>
+  <script src="js/main.js?v=01eb6f06" defer></script>
 </body>
 </html>
