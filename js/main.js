@@ -860,18 +860,9 @@ function startReveal() {
 // --intro) and the nav + hero fade in — and the sections below follow.
 const INTRO = { hold: 1500, iris: 1400, cap: 9000, followMs: 900 };
 function runIntro() {
-  // No scrolling under the loader. overflow: hidden stops the browser, but Lenis
-  // drives scroll programmatically and ignores it, so wheel/touch/keys that
-  // arrive during the intro would move the page and leave the reader mid-page
-  // (at Work) when it opens. Swallowed here, restored at release.
-  const block = e => {
-    if (e.type === 'keydown' && !['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Home', 'End', ' ', 'Spacebar'].includes(e.key)) return;
-    e.preventDefault();
-  };
-  const blocked = ['wheel', 'touchmove', 'keydown'];
-  blocked.forEach(t => window.addEventListener(t, block, { passive: false, capture: true }));
+  // Scrolling is blocked from first paint by the inline <head> script (index.html);
+  // this only puts the page back at the top when the loader ends.
   const unblock = () => {
-    blocked.forEach(t => window.removeEventListener(t, block, { capture: true }));
     if (window.__lenis) window.__lenis.scrollTo(0, { immediate: true });
     window.scrollTo(0, 0);
   };

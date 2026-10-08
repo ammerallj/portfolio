@@ -201,6 +201,22 @@
         // previous scroll position (it was landing the reader at Work on reload).
         try { history.scrollRestoration = 'manual'; } catch (e) {}
         window.scrollTo(0, 0);
+        // No scrolling while the loader runs, from the very first frame: wheel,
+        // touch and scroll keys are swallowed for as long as is-intro is set
+        // (the listeners stay, but are no-ops once it comes off), and anything
+        // that still moves the page (scrollbar drag, Lenis, anchors) is put back.
+        var KEYS = ['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Home', 'End', ' ', 'Spacebar'];
+        var stop = function (e) {
+          if (!root.classList.contains('is-intro')) return;
+          if (e.type === 'keydown' && KEYS.indexOf(e.key) < 0) return;
+          e.preventDefault();
+        };
+        ['wheel', 'touchmove', 'keydown'].forEach(function (t) {
+          window.addEventListener(t, stop, { passive: false, capture: true });
+        });
+        window.addEventListener('scroll', function () {
+          if (root.classList.contains('is-intro') && window.scrollY) window.scrollTo(0, 0);
+        }, { passive: true });
       }
       // Failsafe if main.js never runs.
       setTimeout(function () {
@@ -606,6 +622,6 @@
   </div>
   <div class="wave-cursor" id="wave-cursor" aria-hidden="true">👋</div>
 
-  <script src="js/main.js?v=01eb6f06" defer></script>
+  <script src="js/main.js?v=12250550" defer></script>
 </body>
 </html>
