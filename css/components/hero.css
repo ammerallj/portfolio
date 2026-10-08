@@ -148,7 +148,12 @@ html.is-field-live .page-field-grain { opacity: 0.1; } /* was 0.15 (2026-09-29: 
   transform-origin: 0 0;
   translate: 0 0;
   scale: 1;
-  transition: translate 0.35s cubic-bezier(0.3, 0, 0.2, 1) 0.65s, scale 0.35s cubic-bezier(0.3, 0, 0.2, 1) 0.65s;
+  /* ⚠️ THE SETTLE MUST WAIT FOR THE SCRIM. The scrim (--intro, 1s) is an ease-in, so it
+     is still low on the screen for most of its run; the artwork's hard bottom edge
+     rising before it passes shows as a cutoff line. At 0.85s the scrim's end is
+     below ~770px and the artwork's bottom is still ~1000+, so the edge stays under
+     the white. If the scrim's duration or curve changes, move this with it. */
+  transition: translate 0.5s cubic-bezier(0.3, 0, 0.2, 1) 0.85s, scale 0.5s cubic-bezier(0.3, 0, 0.2, 1) 0.85s;
   /* images/hero-bkg.jpg, centered. FROZEN at its 1440 size (1639.44px = the
      113.85vw composition) for any narrower window: below the design width the
      field keeps its size and position and the viewport simply crops more of
