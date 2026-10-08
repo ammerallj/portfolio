@@ -397,13 +397,13 @@ html.is-field-live .page-field-grain { opacity: 0.1; } /* was 0.15 (2026-09-29: 
      REDESIGN: that wall is gone — the lockup sits on white now, not on the
      field — so the artwork rises 200px to bring the red up into the visible
      band and push more of the top blue off-screen. Was 30px, then 130. */
-  --field-rise: 170px; /* was 200: lowered 30 with the scrim (below) so the artwork's bottom edge keeps its margin under the white */
+  --field-rise: 155px; /* was 200: lowered 45 with the scrim (below) so the artwork's bottom edge keeps its margin under the white */
   /* SCRIM DROP (2026-10): the white's end sits this much LOWER on the page than the
      lockup rule alone puts it. Added to every --field-mask-end. ⚠️ The ceiling is the
      artwork's bottom edge (H − rise): at 1440x900 the margin under the white is
-     (879 − 170) − (648 + 40) = 21px; raise this only with --field-rise lowered
+     (879 − 155) − (648 + 60) = 16px; raise this only with --field-rise lowered
      alongside, or the hard bottom edge shows. */
-  --scrim-drop: 40px;
+  --scrim-drop: 60px;
   /* ⚠️ --field-cream (scroll-linked, js/main.js) moves the dissolve's END up the
      artwork. It equals the artwork's lag (--field-scroll is negative: the
      artwork sinks, slower than the page) plus the tuck's overhang, so on the
