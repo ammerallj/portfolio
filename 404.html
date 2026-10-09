@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Page not found | Jenna Ammerall</title>
+  <meta name="description" content="That page doesn't exist." />
+  <meta name="robots" content="noindex" />
+  <link rel="icon" href="/favicon.svg?v=3" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,200;0,500;0,700;1,500&family=Inter:wght@400..700&display=swap" rel="stylesheet" />
+
+  <!-- SELF-CONTAINED ON PURPOSE. GitHub Pages serves this file for ANY missing URL
+       (/foo, /work/nope/bar), so a relative style.css or main.js would resolve
+       against the missing path and 404 itself. Everything this page needs is inline;
+       the only root-absolute references are the favicon, the home link, and the
+       no-JS fallback image. The field below is the hero's shader (js/main.js,
+       FIELD / initHeroField) at its desktop colours, recomposed for a centred
+       lockup instead of the fold. -->
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #FBFCF8;
+      --ink: #000;
+      --gutter: clamp(20px, 3.9vw, 56px);
+    }
+
+    html, body { height: 100%; }
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 1.125rem;
+      line-height: 1.4;
+      -webkit-font-smoothing: antialiased;
+      overflow: hidden;
+    }
+
+    /* The orbs. Fixed, full-bleed, and covered by the cream sheet below, so they
+       are only visible THROUGH the numerals. */
+    .field, .grain, .sheet {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+    .field { opacity: 0; transition: opacity 0.8s ease; }
+    html.is-field-live .field { opacity: 1; }
+
+    /* Same speck as the hero's grain (.page-field-grain), so the colour reads as
+       the same material. It sits between the field and the sheet, i.e. inside the
+       letters only. */
+    .grain {
+      pointer-events: none;
+      opacity: 0.1;
+      mix-blend-mode: overlay;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='g' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.8' numOctaves='1' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='discrete' tableValues='0 1'/%3E%3CfeFuncG type='discrete' tableValues='0 1'/%3E%3CfeFuncB type='discrete' tableValues='0 1'/%3E%3CfeFuncA type='linear' slope='0' intercept='1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23g)'/%3E%3C/svg%3E");
+    }
+
+    /* The cream sheet with "404" cut out of it. */
+    .sheet { pointer-events: none; display: block; }
+    .sheet text {
+      font-family: 'Hanken Grotesk', system-ui, sans-serif;
+      font-weight: 700;
+      /* Before the script fits it: a width-bound size that is right on phones
+         and close on desktop. */
+      font-size: min(54vw, 80vh);
+    }
+
+    .page {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 100%;
+      padding: 24px var(--gutter);
+    }
+
+    .wordmark {
+      align-self: flex-start;
+      font-family: 'Hanken Grotesk', system-ui, sans-serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+      text-decoration: none;
+    }
+
+    .foot {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+    .foot p { letter-spacing: -0.01em; }
+
+    .home {
+      display: inline-flex;
+      align-items: center;
+      height: 36px;
+      padding: 0 20px;
+      border-radius: 100px;
+      background: #000;
+      color: #fff;
+      font-size: 1rem;
+      letter-spacing: -0.01em;
+      text-decoration: none;
+      white-space: nowrap;
+      transition: background-color 0.15s ease;
+    }
+    .home:hover { background: rgba(0, 0, 0, 0.75); }
+
+    a:focus-visible { outline: 2px solid #4A45FF; outline-offset: 3px; border-radius: 4px; }
+
+    .visually-hidden {
+      position: absolute; width: 1px; height: 1px; overflow: hidden;
+      clip: rect(0 0 0 0); white-space: nowrap;
+    }
+
+    /* No JS or no WebGL: the hero's own JPEG shows through the numerals instead. */
+    html.no-field body { background: var(--bg) url("/images/hero-bkg.jpg?v=4") 50% 30% / cover no-repeat; }
+    html.no-field .field, html.no-field .grain { display: none; }
+  </style>
+  <noscript>
+    <style>
+      body { background: var(--bg) url("/images/hero-bkg.jpg?v=4") 50% 30% / cover no-repeat; }
+      .field, .grain { display: none; }
+    </style>
+  </noscript>
+</head>
+<body>
+
+  <canvas class="field" id="field" aria-hidden="true"></canvas>
+  <div class="grain" aria-hidden="true"></div>
+
+  <!-- Cream over everything, with the numerals knocked out: the orbs are visible
+       only inside the letters. -->
+  <svg class="sheet" aria-hidden="true" focusable="false">
+    <defs>
+      <mask id="cut" maskUnits="userSpaceOnUse" x="0" y="0" width="100%" height="100%">
+        <rect width="100%" height="100%" fill="#fff" />
+        <text id="num" x="50%" y="50%" text-anchor="middle" fill="#000">404</text>
+      </mask>
+    </defs>
+    <rect width="100%" height="100%" fill="#FBFCF8" mask="url(#cut)" />
+  </svg>
+
+  <main class="page">
+    <a class="wordmark" href="/">Jenna Ammerall.</a>
+    <h1 class="visually-hidden">404, page not found</h1>
+    <div class="foot">
+      <p>That page doesn't exist.</p>
+      <a class="home" href="/">Back to home</a>
+    </div>
+  </main>
+
+  <script>
+  (function () {
+    var html = document.documentElement;
+    var canvas = document.getElementById('field');
+    var num = document.getElementById('num');
+    var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // ---- Fit the numerals ------------------------------------------------
+    // Sized so the word fills ~94% of the width, capped so it never exceeds
+    // ~72% of the height; placed by its INK box (digits have no descenders, so
+    // the em box would sit it low). Returns the ink rect for the orbs.
+    var ink = { cx: 0.5, cy: 0.5, w: 0.9, h: 0.4 };
+    function fit() {
+      var W = innerWidth, H = innerHeight;
+      var ctx = document.createElement('canvas').getContext('2d');
+      var probe = 200;
+      ctx.font = '700 ' + probe + 'px "Hanken Grotesk", system-ui, sans-serif';
+      var m = ctx.measureText('404');
+      var w1 = m.width / probe;
+      var h1 = (m.actualBoundingBoxAscent + m.actualBoundingBoxDescent) / probe;
+      var size = Math.min((W * 0.94) / w1, (H * 0.72) / h1);
+      var asc = (m.actualBoundingBoxAscent / probe) * size;
+      var desc = (m.actualBoundingBoxDescent / probe) * size;
+      var cy = H * 0.5;
+      num.style.fontSize = size + 'px';
+      num.setAttribute('y', cy + (asc - desc) / 2);
+      ink = { cx: 0.5, cy: cy / H, w: (w1 * size) / W, h: ((asc + desc)) / H };
+    }
+
+    // ---- The field -------------------------------------------------------
+    // Colours, ramp, paint order and motion are the hero's (js/main.js FIELD).
+    // Placement is NOT: the hero's is drawn against the fold, so here the orbs
+    // are placed relative to the numerals' ink box (units of its width), which
+    // keeps all four hues inside the letters at any window shape.
+    var CREAM = [0.984, 0.988, 0.973];
+    var RAMP = { mid: 0.524038, midAlpha: 0.5, white: 0 };
+    var MOTION = { speed: 2.4, drift: 0.05, driftYRatio: 0.2, pulse: 0.3, warp: 0.55 };
+    var ORBS = [
+      // col, radius (x ink width), dx, dy (x ink width / height), ramp, pulse
+      { col: [0.8392, 0.3020, 0.8078], r: 0.34, dx: -0.30, dy: 0.10, ramp: { mid: 0.60, midAlpha: 0.65 } },   // magenta
+      { col: [0.5725, 0.2196, 0.8902], r: 0.30, dx:  0.38, dy: -0.10, ramp: { mid: 0.60, midAlpha: 0.65 } },  // violet
+      { col: [0.9765, 0.2471, 0.2471], r: 0.40, dx:  0.02, dy:  0.34, ramp: { mid: 0.62, midAlpha: 0.72 } },  // red
+      { col: [0.0039, 0.6235, 0.8471], r: 0.30, dx: -0.04, dy: -0.34, pulse: 0.15 }                           // cyan
+    ];
+    var PAINT = [1, 0, 2, 3]; // red above violet and magenta (it's the lightest orb and gets buried at the bottom), cyan on top
+
+    function startField() {
+      var gl = canvas.getContext('webgl', { antialias: false, alpha: false, powerPreference: 'low-power' });
+      if (!gl) throw new Error('no webgl');
+
+      var VERT = 'attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}';
+      var FRAG = [
+        'precision highp float;',
+        'uniform vec2 uRes,uAmp;uniform float uAspect,uTime,uWarp;',
+        'uniform vec4 uBlob[4];uniform vec3 uCol[4];uniform vec4 uRamp[4];',
+        'const vec3 CREAM=vec3(' + CREAM.join(',') + ');',
+        'float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453123);}',
+        'float noise(vec2 p){vec2 i=floor(p),f=fract(p);vec2 u=f*f*(3.-2.*f);',
+        ' return mix(mix(hash(i),hash(i+vec2(1,0)),u.x),mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),u.x),u.y);}',
+        'float fbm(vec2 p){float v=0.,a=.5;for(int i=0;i<4;i++){v+=a*noise(p);p*=2.;a*=.5;}return v;}',
+        'vec2 ramp(float t,vec2 m){if(t>=1.)return vec2(0.,1.);',
+        ' if(t<=m.x)return vec2(1.+(m.y-1.)*(t/m.x),0.);',
+        ' float u=(t-m.x)/(1.-m.x);return vec2(m.y*(1.-u),u);}',
+        'void main(){vec2 uv=gl_FragCoord.xy/uRes;uv.y=1.-uv.y;',
+        ' vec2 q=vec2(fbm(uv*2.4+vec2(0.,uTime*.16)),fbm(uv*2.4+vec2(5.2,1.3-uTime*.13)));',
+        ' vec2 w=uv+uWarp*.22*(q-.5);',
+        ' vec3 col=CREAM;',
+        ' for(int i=0;i<4;i++){float fi=float(i);',
+        '  float ax=uAmp.x*(.62*sin(uTime*(.130+fi*.028)+fi*1.7)+.38*sin(uTime*(.077+fi*.019)+fi*4.1));',
+        '  float ay=uAmp.y*cos(uTime*(.110+fi*.024)+fi*2.3);',
+        '  vec2 c=uBlob[i].xy+vec2(ax,ay);',
+        '  float rad=uBlob[i].z*(1.+uRamp[i].z*(.5+.5*sin(uTime*(.075+fi*.017)+fi)));',
+        '  vec2 d=vec2(w.x-c.x,(w.y-c.y)/uAspect);',
+        '  vec2 ra=ramp(length(d)/rad,uRamp[i].xy);float a=ra.x*uBlob[i].w;',
+        '  if(a<=0.)continue;',
+        '  col=col*(1.-a)+mix(uCol[i],vec3(1.),ra.y*uRamp[i].w)*a;}',
+        ' col+=(hash(gl_FragCoord.xy+fract(uTime)*71.3)-.5)/255.;',
+        ' gl_FragColor=vec4(col,1.);}'
+      ].join('\n');
+
+      function compile(type, src) {
+        var sh = gl.createShader(type);
+        gl.shaderSource(sh, src);
+        gl.compileShader(sh);
+        if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(sh));
+        return sh;
+      }
+      var prog = gl.createProgram();
+      gl.attachShader(prog, compile(gl.VERTEX_SHADER, VERT));
+      gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, FRAG));
+      gl.linkProgram(prog);
+      if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(prog));
+      gl.useProgram(prog);
+
+      gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+      var aPos = gl.getAttribLocation(prog, 'p');
+      gl.enableVertexAttribArray(aPos);
+      gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
+
+      var U = {};
+      ['uRes', 'uAspect', 'uTime', 'uWarp', 'uAmp', 'uBlob', 'uCol', 'uRamp'].forEach(function (n) {
+        U[n] = gl.getUniformLocation(prog, n);
+      });
+      gl.uniform1f(U.uWarp, MOTION.warp);
+      gl.uniform2f(U.uAmp, MOTION.drift, MOTION.drift * MOTION.driftYRatio);
+
+      var blobData = new Float32Array(16), colData = new Float32Array(12), rampData = new Float32Array(16);
+
+      function draw(t) {
+        var scale = Math.min(devicePixelRatio || 1, 2);
+        var w = Math.max(1, Math.round(innerWidth * scale));
+        var h = Math.max(1, Math.round(innerHeight * scale));
+        if (canvas.width !== w || canvas.height !== h) {
+          canvas.width = w; canvas.height = h;
+          gl.viewport(0, 0, w, h);
+        }
+        var aspect = w / h;
+        PAINT.forEach(function (idx, slot) {
+          var o = ORBS[idx];
+          // x, r in units of the canvas width; the shader divides dy by aspect.
+          var x = ink.cx + o.dx * ink.w;
+          var y = ink.cy + o.dy * ink.h;
+          blobData.set([x, y, o.r * ink.w, 1], slot * 4);
+          colData.set(o.col, slot * 3);
+          var rp = Object.assign({}, RAMP, o.ramp);
+          rampData.set([rp.mid, rp.midAlpha, o.pulse != null ? o.pulse : MOTION.pulse, rp.white], slot * 4);
+        });
+        gl.uniform4fv(U.uBlob, blobData);
+        gl.uniform3fv(U.uCol, colData);
+        gl.uniform4fv(U.uRamp, rampData);
+        gl.uniform2f(U.uRes, w, h);
+        gl.uniform1f(U.uAspect, aspect);
+        gl.uniform1f(U.uTime, t);
+        gl.drawArrays(gl.TRIANGLES, 0, 3);
+      }
+
+      draw(0);
+      html.classList.add('is-field-live');
+      addEventListener('resize', function () { fit(); draw(last); });
+
+      var last = 0;
+      if (reduced) return;
+      var t0 = performance.now(), prev = t0, sim = 0, visible = true;
+      document.addEventListener('visibilitychange', function () { visible = !document.hidden; prev = performance.now(); });
+      (function loop(now) {
+        requestAnimationFrame(loop);
+        if (!visible) return;
+        sim += Math.min(now - prev, 100) / 1000 * MOTION.speed; // dt capped, like the hero
+        prev = now;
+        last = sim;
+        draw(sim);
+      })(t0);
+    }
+
+    function go() {
+      fit();
+      try { startField(); } catch (e) { html.classList.add('no-field'); }
+    }
+    if (document.fonts && document.fonts.load) {
+      Promise.all([document.fonts.load('700 100px "Hanken Grotesk"', '404'), document.fonts.ready])
+        .then(go, go);
+    } else go();
+  })();
+  </script>
+</body>
+</html>
