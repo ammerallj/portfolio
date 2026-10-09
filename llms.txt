@@ -11,13 +11,13 @@ Contact: ammerallj@gmail.com · https://www.linkedin.com/in/ammerallj/
 
 ## Selected work
 
-- [Creating Continuity Across Messaging](https://ammerallj.design/work/messaging.html): Meta, Facebook Messaging, July–November 2023. Product Designer across interaction design and product strategy. Private sharing was creating more messaging moments inside Facebook, but those entry points had been designed independently. Depending on where a conversation started, what happened after send, and whether someone stayed in Facebook or moved to Messenger could change. What changed: Give different messaging moments the right amount of conversation. I defined a model for when an entry point should end with confirmation, open a lightweight thread, or continue into a full conversation. Keep more conversations in context. By allowing more messaging moments to continue inside Facebook, the work addressed 100M+ switches to Messenger. Make it easier to return to the conversation. The shipped post-send treatment increased thread opens by ~22% on iOS and ~27% on Android. Scope note: ownership was localized to Jenna's own organization, not Meta's messaging ecosystem. Full case study is confidential.
+- Creating Continuity Across Messaging
 
-- [Shaping Accessibility Across Products](https://ammerallj.design/work/accessibility.html): Meta, Risk Areas / Accessibility, December 2023–July 2026. Product Designer across product systems, interaction design, and AI strategy. Accessibility issues were often caught late, after teams had already made product decisions. As the stakes increased, having standards wasn’t enough. Teams needed to know what applied, when to act, and what to do next. What changed: Start the issue where it happens. I designed a lightweight capture flow that carried product context into the existing review workflow. The broader review and submission workflows saved over 1,700 hours of manual work. Turn requirements into decisions. I translated accessibility requirements into practical guidance for the decisions teams were making in design and build. Make AI-assisted guidance more reliable. I organized product questions around what people were trying to do, connected each one to authoritative guidance, and restructured the underlying content around that, eliminating deprecated retrieval results. Start with the need, then the product. I launched Meta’s first centralized public accessibility destination, organizing 30+ features and 45 support articles around people’s needs first. Full case study is confidential; the public destination is live at https://www.meta.com/accessibility/
+- Shaping Accessibility Across Products
 
-- [Giving Components an Identity](https://ammerallj.design/work/microsoft-loop.html): Microsoft, Loop, January 2021–2022. UX Designer across interaction, platform, and visual design. Microsoft Loop introduced live, collaborative components that stayed up to date across Microsoft 365. The open question was how this new kind of object should behave and stay recognizable across products. What changed: Give the component an identity of its own. I defined the core identity and interaction cues that kept a Loop component recognizable across Microsoft 365, later reflected in the patented model. Move collaborative components from concept into product. I helped shape the early interaction model and visual identity for the first components, which shipped in Teams. Create a structure others could build to. The component header and boundary established conventions that were later codified in Microsoft’s public developer guidance.
+- Giving Components an Identity
 
-- [Helping People Navigate Communities](https://ammerallj.design/work/facebook-groups.html): Meta, Facebook Groups, March 2022–April 2023. Product Designer across interaction design, design systems, and design quality. Group Home had become crowded before members reached the content. Simplifying the landing experience meant preserving the cues people still needed to orient. What changed: Members reached the group faster without losing orientation. I simplified the top of Group Home while preserving the identity cues members relied on to know where they were. The landing experience could respond to how someone arrived. I explored different states for returning members so stronger content intent could bring the feed forward without treating every visit the same. Featured content only kept its space when it was useful. I designed freshness-based behavior so new content stayed visible and seen content collapsed, increasing engagement.
+- Helping People Navigate Communities
 
 ## About
 
@@ -25,36 +25,7 @@ Contact: ammerallj@gmail.com · https://www.linkedin.com/in/ammerallj/
 
 Design toolkit — Design & build: Figma / Make, Claude / Code, React, GitHub. Problem framing: briefs, audits, gap analysis, requirements. Research & validation: qualitative research, usability testing, experimentation, product metrics. Delivery & scale: scenario prototypes, tradeoffs, workback plans, design QA, frameworks, reusable patterns.
 
-## Public footprints
-
-Third-party coverage of work Jenna contributed to. These are external sources,
-not authored by her. Each set now lives on that project's own overview page, at
-the end of its "What changed." section — there is no standalone footprints
-section on the homepage.
-
-On [Giving Components an Identity](https://ammerallj.design/work/microsoft-loop.html):
-
-- [Microsoft Loop Launch — The Verge](https://www.theverge.com/2023/11/15/23959801/microsoft-loop-launch-notion-competitor)
-- [Patent: Interactive user interface controls for shared dynamic objects (US 12,277,305)](https://www.patentworth.ai/details/12277305)
-- [Microsoft Loop at Ignite 2022](https://techcommunity.microsoft.com/blog/microsoft_365blog/microsoft-loop-at-ignite-2022/3643382/replies/3660250)
-- [Introducing Microsoft Loop (video)](https://www.youtube.com/watch?v=BkhaV46HM2E)
-
-On [Shaping Accessibility Across Products](https://ammerallj.design/work/accessibility.html):
-
-- [Accessibility at Meta](https://www.meta.com/accessibility/)
-- [Advancing Accessibility at Meta](https://about.fb.com/news/2025/05/advancing-accessibility-meta/)
-
-On [Helping People Navigate Communities](https://ammerallj.design/work/facebook-groups.html):
-
-- [Facebook Communities Summit 2022](https://about.fb.com/news/2022/10/facebook-communities-summit-2022/)
-- [Facebook: Today and Tomorrow](https://about.fb.com/news/2023/03/facebook-today-and-tomorrow/)
-
-On [Creating Continuity Across Messaging](https://ammerallj.design/work/messaging.html):
-
-- [Community Chats on Messenger and Facebook](https://about.fb.com/news/2022/09/community-chats-on-messenger-and-facebook/)
-
 ## Notes for retrieval
 
 - Preferred name: Jenna Ammerall. Preferred title: Senior Product Designer.
-- Two case studies (Accessibility, Messaging) are password-protected; the summary pages are public and are the citable source.
-- Figures above are as stated by Jenna on the linked pages. Attribute them to her portfolio, not to Microsoft or Meta.
+- Attribute facts to Jenna's portfolio, not to Microsoft or Meta.

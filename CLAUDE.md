@@ -2620,6 +2620,16 @@ returning plausible numbers.** It prints a red warning; heed it.
 | Anything mobile/tablet (any breakpoint) | `responsive.css` | — |
 | Project Overview pages | `project-overview.css` | `work/*.html` |
 
+## ⚠️ PROJECT PAGES ARCHIVED (2026-10-08)
+The four `work/*.html` Project Overview pages were REMOVED from the public site at
+Jenna's ask and now live, intact, in `archive/project-pages-2026-10/` (`work/` plus
+their four `og-*.jpg` share cards; `archive/` is excluded from the build, so they
+404 live). Also taken out: their sitemap entries, `llms.txt`'s page links and
+Public-footprints section, and the `url`s in the homepage ItemList (its `@id`s are
+now `/#work-*`). The two locked Work cards still link to the Figma deck; the other
+two cards link nowhere. **Everything below this heading describes those pages and
+is kept as the record — to restore, `git mv` the folder back and undo the above.**
+
 ## Project Overview Pages
 The standard entry point for every project: an editorial executive summary a
 recruiter can read in under a minute, sitting between a homepage Work card and
