@@ -30,7 +30,7 @@ h1 em{font-style:italic;font-weight:500}
 p{margin-top:18px;font-family:'Inter',sans-serif;font-size:30px;letter-spacing:-0.01em;color:rgba(0,0,0,.7)}
 </style></head><body>
 <canvas id="field"></canvas><div class="scrim"></div>
-<div class="t"><h1><em>Jenna</em> Ammerall</h1><p>Senior Product Designer · Seattle</p></div>
+<div class="t"><h1 id="h"><em>Jenna</em> Ammerall</h1><p id="sub">Senior Product Designer · Seattle</p></div>
 <svg style="display:none"><text id="num"></text></svg>
 <script>
   (function () {
@@ -168,7 +168,8 @@ p{margin-top:18px;font-family:'Inter',sans-serif;font-size:30px;letter-spacing:-
         gl.drawArrays(gl.TRIANGLES, 0, 3);
       }
 
-      draw(6);
+      var Q=new URLSearchParams(location.search);if(Q.get('title')){document.getElementById('h').textContent=Q.get('title');document.getElementById('h').style.fontSize='72px';document.getElementById('h').style.maxWidth='1000px';document.getElementById('h').style.lineHeight='1.05';document.getElementById('sub').textContent='Jenna Ammerall · Senior Product Designer'}
+      draw(parseFloat(Q.get('t')||6));
       html.classList.add('is-field-live');
       
 
