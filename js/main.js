@@ -3984,9 +3984,8 @@ if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
     }
   });
 
-  // Per-project glow colour. Each project maps a URL fragment (shared by its
-  // homepage Work-card link and its overview page path) to a .cursor-glow
-  // modifier class defined in global.css.
+  // Per-project glow colour. Each project maps a URL fragment (its overview
+  // page path) to a .cursor-glow modifier class defined in global.css.
   const GLOW_VARIANTS = [
     { match: 'accessibility',   cls: 'is-accessibility' }, // pink
     { match: 'messaging',       cls: 'is-messaging' },     // blue
@@ -4004,19 +4003,9 @@ if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
   const pageVariant = GLOW_VARIANTS.find(v => location.pathname.includes(v.match)) || null;
   setGlowVariant(pageVariant ? pageVariant.cls : null);
 
-  // Homepage Work cards: colour the glow to the card being hovered, reverting to
-  // the page default on leave. (Overview pages have no .work-card, so this is a
-  // no-op there.)
-  document.querySelectorAll('.work-card').forEach(card => {
-    const link = card.querySelector('a.work-card-link');
-    // data-href FIRST: it names the project page even on the two locked cards,
-    // whose real href is the external Figma deck (see index.html).
-    const href = link ? link.dataset.href || link.getAttribute('href') || '' : '';
-    const variant = GLOW_VARIANTS.find(v => href.includes(v.match));
-    if (!variant) return;
-    card.addEventListener('mouseenter', () => setGlowVariant(variant.cls));
-    card.addEventListener('mouseleave', () => setGlowVariant(pageVariant ? pageVariant.cls : null));
-  });
+  // Homepage Work cards no longer recolour the glow (removed 2026-10-08): it stays
+  // the default white while a card is hovered. The per-project colour above now
+  // applies only on that project's own overview page.
 
   // Show the 👋 cursor over the blue panel (Contact on the homepage).
   if (darkPanel && waveCursor) {
