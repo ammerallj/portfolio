@@ -199,10 +199,10 @@
       // col, radius (x ink width), dx, dy (x ink width / height), ramp, pulse
       { col: [0.8392, 0.3020, 0.8078], r: 0.34, dx: -0.30, dy: 0.10, ramp: { mid: 0.60, midAlpha: 0.65 } },   // magenta
       { col: [0.5725, 0.2196, 0.8902], r: 0.30, dx:  0.38, dy: -0.10, ramp: { mid: 0.60, midAlpha: 0.65 } },  // violet
-      { col: [0.9765, 0.2471, 0.2471], r: 0.46, dx:  0.00, dy:  0.34, ramp: { mid: 0.62, midAlpha: 0.72 } },  // red
+      { col: [0.9765, 0.2471, 0.2471], r: 0.40, dx:  0.02, dy:  0.34, ramp: { mid: 0.62, midAlpha: 0.72 } },  // red
       { col: [0.0039, 0.6235, 0.8471], r: 0.30, dx: -0.04, dy: -0.34, pulse: 0.15 }                           // cyan
     ];
-    var PAINT = [2, 1, 0, 3]; // red at the bottom, cyan on top — the hero's order
+    var PAINT = [1, 0, 2, 3]; // red above violet and magenta (it's the lightest orb and gets buried at the bottom), cyan on top
 
     function startField() {
       var gl = canvas.getContext('webgl', { antialias: false, alpha: false, powerPreference: 'low-power' });
