@@ -626,7 +626,7 @@ function measureContactArrival() {
     docTop - (document.documentElement.scrollHeight - window.innerHeight));
 }
 
-const LEDGE_BIAS = 1.7;
+const LEDGE_BIAS = 1; // plain smoothstep, the hero's scrim curve (was 1.7 — biased); must match sections.css .contact-section::before
 
 // Contact's fill alpha at a viewport y — the ledge's smoothstep above the
 // panel, solid below it. Shared by the bar's fill and by blueBehindBar.
@@ -3415,24 +3415,30 @@ function updateScrollEffects() {
       const flipToWhite = liveLedge > 0
         ? contactAlphaAt(contactGlyphMid, blue, liveLedge) >= DARK_TEXT_ALPHA
         : mix >= DARK_TEXT_AT;
-      stickyBars.forEach(bar => bar.classList.toggle('is-over-dark', flipToWhite));
-      // Blue behind the bar but not yet swapped: labels go FULL black (hero.css
-      // .is-over-ramp) — the resting 0.8 black fails AA on the deep ramp.
-      stickyBars.forEach(bar => bar.classList.toggle('is-over-ramp', !flipToWhite && covered > 0));
       // THE NAV STEPS OUT WHILE THE BLUE RAMP PASSES BEHIND IT (2026-10, Jenna). In that
       // window — blue behind the bar but the labels not yet able to swap — neither
-      // black nor white reads well on a bar that is mid-gradient, so the labels
-      // hide and come back, already in their white-on-blue form, the moment
-      // Contact's solid colour meets the bar (hero.css .is-nav-away). The 0.03
-      // threshold keeps a faint ramp tail from hiding the nav early. Scrolling up
-      // plays it backwards.
-      // The ramp counts from the moment it shows anywhere in the bar's WHOLE glass —
-      // the bar plus its bleed below — not only behind the bar itself; the frost's
-      // own copy of the ramp is what stepped against the page's (hero.css, the last
-      // block), so the bar has to be out before the blue reaches it.
+      // black nor white reads well on a bar that is mid-gradient, so the whole bar
+      // hides (hero.css, the last block) and comes back the moment Contact's solid
+      // colour meets it. The 0.03 threshold keeps a faint ramp tail from hiding the
+      // nav early. The ramp counts from the moment it shows anywhere in the bar's
+      // WHOLE glass — the bar plus its bleed — because the frost's own copy of the
+      // ramp is what stepped against the page's. Scrolling up plays it backwards.
       const rampInGlass = contactAlphaAt(barHeight + BAR_BLEED, blue, liveLedge) > 0.03;
-      stickyBars.forEach(bar => bar.classList.toggle('is-nav-away',
-        !flipToWhite && (covered > 0.03 || rampInGlass)));
+      const navAway = !flipToWhite && (covered > 0.03 || rampInGlass);
+      // NO COLOUR FLASH ON THE WAY BACK IN (Jenna: "it quickly flashes from black nav
+      // text to white — drop that"). The labels used to change colour in the same
+      // frame the bar faded back in, so the swap was seen. While the bar is away
+      // they now take the colour of the side they will come back on — white once
+      // the blue is past the middle of the glyphs (arriving at Contact), black
+      // otherwise (leaving it upward) — so the colour is already right, unseen,
+      // when the bar returns.
+      const midBlue = liveLedge > 0 ? contactAlphaAt(contactGlyphMid, blue, liveLedge) : mix;
+      const whiteNow = flipToWhite || (navAway && midBlue >= 0.45);
+      stickyBars.forEach(bar => bar.classList.toggle('is-over-dark', whiteNow));
+      // Blue behind the bar but not yet swapped: labels go FULL black (hero.css
+      // .is-over-ramp) — the resting 0.8 black fails AA on the deep ramp.
+      stickyBars.forEach(bar => bar.classList.toggle('is-over-ramp', !whiteNow && !flipToWhite && covered > 0));
+      stickyBars.forEach(bar => bar.classList.toggle('is-nav-away', navAway));
 
       // CLIP THE FROST TO CONTACT'S TOP EDGE. The bar's glass bleeds BAR_BLEED
       // past its own bottom so it melts into the page instead of ending on a

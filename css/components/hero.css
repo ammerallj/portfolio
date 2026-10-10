@@ -2117,3 +2117,14 @@ html.is-intro .page-field-grain {
   opacity: 0;
   transition-duration: 0.2s;
 }
+
+/* NO COLOUR CHANGE IN SIGHT (2026-10): while the bar is away its labels may swap
+   between black and white (js/main.js picks the colour of the side they will come
+   back on). Going UP that swap used to start in the same frame as the 0.2s
+   fade-out, so it was seen. Delaying the colour change by the fade's own length
+   lets it happen only once the labels are gone. */
+.intro-bar.is-nav-away .intro-bar-name,
+.intro-bar.is-nav-away .intro-bar-links a,
+.intro-bar.is-nav-away .intro-bar-cta {
+  transition-delay: 0.2s;
+}
