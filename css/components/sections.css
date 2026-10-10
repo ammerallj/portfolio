@@ -19,9 +19,9 @@
      with its own --gap-group below the lockup, so the masonry cards start right
      at the section's top. ≤480 keeps its own (responsive.css). */
   padding-top: 0;
-  padding-bottom: 144px;
-  /* No hairline into About. The 240px of air across this seam (144 below the
-     cards + 96 above the About heading) already separates them, and with the
+  padding-bottom: 48px; /* was 144 (2026-10, Jenna: shorten the gap into About) */
+  /* No hairline into About. The 144px of air across this seam (48 below the
+     cards + 96 above the About heading; it was 240) already separates them, and with the
      section now coming to rest composed under the nav (initSectionGeometry), a
      rule sitting mid-viewport read as a lid on the cards rather than as a
      join between two sections.
