@@ -267,7 +267,7 @@
      ⚠️ RAISE THE TAIL, NOT THE RESTING LEDGE, to get more cream: if both move
      together the geometry is IDENTICAL and all that happens is Contact is pushed
      further down the page for nothing. */
-  --contact-ledge-rest: 160px;
+  --contact-ledge-rest: 96px; /* was 160 (2026-10, Jenna: shorten About's bottom gap) */
   /* ⚠️ THE LEDGE PAINTS PAST THE PANEL'S TOP EDGE BY THIS MUCH, and it is the
      same fix the landing bar's ::before already carries for the same reason.
      Contact's top does NOT land on a whole pixel — it is the sum of everything
@@ -280,7 +280,7 @@
      ⚠️ THE HEIGHT ADDS THE SAME AMOUNT so the ledge's TOP does not move; only its
      bottom crosses into the panel, where nothing can see it. */
   --contact-ledge-overlap: 2px;
-  --about-tail: calc(var(--contact-ledge-rest) + var(--gap-section) / 2); /* clear cream under About's copy halved, 96 -> 48 (2026-10, Jenna) */
+  --about-tail: calc(var(--contact-ledge-rest) + var(--gap-section) / 3); /* clear cream under About's copy 96 -> 48 -> 32 (2026-10, Jenna) */
 
   /* Height of the site footer. A DEFAULT, not the truth: initSectionGeometry
      measures the real footer and rewrites this on load and resize, so the value
