@@ -287,10 +287,10 @@ html.has-top-nav.is-work-in #work-section .site-container {
   color: var(--color-text);
 }
 
-/* "Project name / Year": the year trails the name in the same face, ExtraLight
-   so the name leads (full black — a 200 stroke is already light enough). It is part of the heading text, so it is read with it. */
+/* "Project name / Year": the year trails the name in the same face, Light
+   so the name leads (full black — a light stroke is already quiet enough). It is part of the heading text, so it is read with it. */
 .work-card-year {
-  font-weight: 200; /* Hanken ExtraLight — loaded for this and the pill */
+  font-weight: 300; /* Hanken Light — loaded for this and the pill (200 was too thin) */
 }
 
 .work-card-description {
@@ -411,9 +411,8 @@ html.has-top-nav.is-work-in #work-section .site-container {
   min-height: calc(2em + 1px); /* the text pills' height, so an icon-only (lock) pill matches */
   font-family: var(--font-heading);
   font-size: var(--size-xs); /* 13px — the site's eyebrow/meta size */
-  font-weight: 200;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
+  font-weight: 300;
+  letter-spacing: 0; /* sentence case (2026-10) — the tracking was for caps */
   color: var(--color-text);
   white-space: nowrap;
 }
