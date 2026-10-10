@@ -251,10 +251,11 @@ html.has-top-nav.is-work-in #work-section .site-container {
   align-items: flex-end;
   justify-content: center; /* the content is CENTRED in the card (2026-10, trial) */
   gap: 12px;
-  /* LOWER (2026-10): the text sits nearer the card's bottom edge — 62.5% of the
-     card padding (20 / 17.5 / 12.5px by tier). The hover description reads the
-     same token so it lands on the same line. */
-  --work-card-pad-bottom: calc(var(--work-card-pad) * 0.625);
+  /* The text's distance from the card's bottom edge: 150% of the card padding
+     (30 / 27 / 21px by tier). It was lowered to 62.5% (2026-10) and read as too
+     close to the edge, so it came back UP. The hover description reads the same
+     token so it lands on the same line. */
+  --work-card-pad-bottom: calc(var(--work-card-pad) * 1.5);
   padding: var(--work-card-pad);
   padding-bottom: var(--work-card-pad-bottom);
   padding-top: 0;
