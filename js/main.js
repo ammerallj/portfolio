@@ -2033,10 +2033,10 @@ initHeadlineMorph();
 // cross-fade. Measured, not guessed — counted off the animations each pair
 // actually creates:
 //
-//   Contact -> Connect    c/o/n/t/c travel (the strongest slide)
-//   Work    -> Worth it   w/o/r/t travel
-//   About   -> Who am I?  few letters shared, so mostly a cross-fade
-//   (Chosen for shared letters, not yet counted like the earlier trio.)
+//   Work    -> What shipped
+//   About   -> Who is Jenna
+//   Contact -> Say hello
+//   (Not yet counted for travelling letters like the earlier trio.)
 //
 // The spring IS the reference's default (stiffness 280, damping 18, mass 0.3),
 // solved here once rather than carried as a runtime dependency: omega0 = 30.55
@@ -2063,9 +2063,9 @@ function initNavMorph() {
   const MORPHS = [
     // REDESIGN: the top nav's items take the same morph, which is also what
     // sizes each one to fit its wider label — so the two navs' items match.
-    { selector: '.intro-bar-links a[href$="#work-section"], .top-nav-link[href$="#work-section"]', rest: 'Work', hover: 'Worth it' },
-    { selector: '.intro-bar-links a[href$="#about"], .top-nav-link[href$="#about"]', rest: 'About', hover: 'Who am I?' },
-    { selector: '.intro-bar-cta, .top-nav-cta', rest: 'Contact', hover: 'Connect' },
+    { selector: '.intro-bar-links a[href$="#work-section"], .top-nav-link[href$="#work-section"]', rest: 'Work', hover: 'What shipped' },
+    { selector: '.intro-bar-links a[href$="#about"], .top-nav-link[href$="#about"]', rest: 'About', hover: 'Who is Jenna' },
+    { selector: '.intro-bar-cta, .top-nav-cta', rest: 'Contact', hover: 'Say hello' },
   ];
 
   const DURATION = 285; // ms — the spring's own settle time, see above
