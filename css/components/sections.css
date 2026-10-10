@@ -100,7 +100,7 @@ html.has-top-nav.is-work-in #work-section .site-container {
   flex-direction: column;
   border-radius: var(--work-card-radius);
   /* The hairline is back (2026-10) in a lighter grey than the old 12% black. */
-  border: 1px solid rgba(0, 0, 0, 0.07);
+  border: 1px solid var(--color-hairline);
   /* REDESIGN: white (was rgba(0,0,0,0.025) — a cream panel). */
   background-color: #fff;
   overflow: hidden;
@@ -1339,7 +1339,7 @@ html.has-top-nav.is-work-in #work-section .site-container {
 }
 
 .about-facts-row {
-  border-top: 1px solid var(--color-border);
+  border-top: 1px solid var(--color-hairline); /* the same grey as the Work cards' outline */
   padding-top: var(--gap-content);
   display: flex;
   flex-direction: column;
