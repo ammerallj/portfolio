@@ -1633,6 +1633,7 @@ function initHeroField() {
 // (375x667: headline at 181, 40svh at 267) and the colour would sit behind it.
 // Set BEFORE initHeroField: phones draw one static frame, sized by this box.
 const PHONE_FIELD_GAP = 48;
+const WIDE_FIELD_GAP = 0; // ≥1377: the white ends at the headline's top
 function measurePhoneField() {
   const root = document.documentElement;
   const h1 = document.querySelector('.intro-headline');
@@ -1650,7 +1651,10 @@ function measurePhoneField() {
   if (aboveMobile) {
     let t = 0;
     for (let n = h1; n; n = n.offsetParent) t += n.offsetTop;
-    root.style.setProperty('--hero-field-end', Math.round(Math.max(160, t - PHONE_FIELD_GAP)) + 'px');
+    // ≥1377 the white runs right down to the headline's top (Jenna, 2026-10:
+    // "move the scrim down"); below it keeps the 48px gap.
+    const gap = window.matchMedia('(min-width: 1377px)').matches ? WIDE_FIELD_GAP : PHONE_FIELD_GAP;
+    root.style.setProperty('--hero-field-end', Math.round(Math.max(160, t - gap)) + 'px');
   } else {
     root.style.removeProperty('--hero-field-end');
   }
