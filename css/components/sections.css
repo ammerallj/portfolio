@@ -99,7 +99,7 @@ html.has-top-nav.is-work-in #work-section .site-container {
   display: flex;
   flex-direction: column;
   border-radius: var(--work-card-radius);
-  border: 1px solid var(--color-border-light);
+  /* No outline (2026-10): the white card stands on the page by its fill alone. */
   /* REDESIGN: white (was rgba(0,0,0,0.025) — a cream panel). */
   background-color: #fff;
   overflow: hidden;
