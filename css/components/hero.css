@@ -934,9 +934,17 @@ html:not(.is-field-live) .intro-divider {
      524.2 at the 1025 floor. With the 5-column right block and one gutter the
      row fills all 12. Deliberately NOT --width-title-column (6 cols), which the
      Work card titles share. */
-  flex: 0 1 clamp(524.2px, 58.333vw - 73.67px, 766.33px);
+  flex: 1 1 auto;
   min-width: 0;
   margin-right: auto;
+}
+
+/* The intro is ONE headline now (2026-10): the bio and the "previously" line
+   joined it, muted so the first sentence still leads. */
+.intro-headline-rest {
+  /* 45% black on the cream is ~3.4:1 — enough for 56px (large) type, which
+     wants 3:1. Don't go lighter. */
+  color: rgba(0, 0, 0, 0.45);
 }
 
 .intro-headline {
@@ -950,7 +958,7 @@ html:not(.is-field-live) .intro-divider {
      (Jenna, 2026-09-29): the two lines after the name even out to "a product /
      interaction" + "designer based in Seattle." The name is its own block, so
      it balances separately and stays on line one. */
-  text-wrap: balance;
+  text-wrap: pretty; /* full width (2026-10); balance narrowed it to half */
 }
 
 /* The lockup FADES OUT ON ITS OWN CLOCK once the reader starts scrolling —

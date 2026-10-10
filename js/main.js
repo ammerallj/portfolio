@@ -772,7 +772,7 @@ function measureFieldTuck() {
   const barRest = pageTop(intro) + intro.offsetHeight
     + parseFloat(getComputedStyle(introBar).marginTop || '0');
   if (barRest <= 0) return;
-  const bio = document.querySelector('.intro-bio');
+  const bio = document.querySelector('.intro-bio') || document.querySelector('.intro-headline');
   if (bio) setFieldGap(Math.max(0, Math.round(barRest - (pageTop(bio) + bio.offsetHeight))));
   // ⚠️ THE TARGET IS THE BAR'S TOP, NOT ITS BOTTOM. Aiming at the bottom is the
   // obvious reading of "don't bleed past the bar" and it leaves the artwork
@@ -1679,6 +1679,8 @@ function measureHeroStack() {
   const root = document.documentElement;
   const h1 = document.querySelector('.intro-headline');
   root.classList.remove('is-hero-stacked');
+  // One-column intro (no right block): there is nothing to stack.
+  if (!document.querySelector('.intro-band-right')) return;
   if (!h1 || window.matchMedia('(max-width: 768px)').matches) return;
   const lh = parseFloat(getComputedStyle(h1).lineHeight) || 1;
   root.classList.toggle('is-hero-stacked', Math.round(h1.offsetHeight / lh) > 3);
