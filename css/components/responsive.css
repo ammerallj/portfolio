@@ -152,8 +152,18 @@ html.is-hero-stacked {
    padding can make it flush there.
    ============================================================ */
 @media (min-width: 1377px) {
+  /* The headline's size here: 72px at 1440, growing with the window up to the
+     site's 96px display size. One token so the padding below follows it. */
+  :root {
+    --hero-headline-size: clamp(64px, 5vw, var(--display-size));
+  }
+
+  .intro-headline {
+    font-size: var(--hero-headline-size);
+  }
+
   .intro-band {
-    padding-bottom: calc(24px - 0.184 * var(--section-title-size));
+    padding-bottom: calc(24px - 0.184 * var(--hero-headline-size));
   }
 
   /* ONE FLOWING PARAGRAPH with an indented first line (2026-10, after Jenna's
