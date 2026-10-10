@@ -947,16 +947,12 @@ html:not(.is-field-live) .intro-divider {
   color: var(--color-text);
 }
 
-/* OUTLINED, THEN FILLED (2026-10, Jenna): the sentence after the name rests as a
-   black OUTLINE with no fill; hovering fills it in. Each word's fill is a
-   single alpha, --hw-a (0 at rest), written by initHeadlineFill from the
-   cursor's position through the sentence. The outline is an explicit black —
-   -webkit-text-stroke defaults to currentColor, which would fade with the fill.
-   The long ease is what makes it read as fluid. 0.02em scales with the type
-   (1.4px at 72px). Touch devices (no hover) keep the outline. */
+/* Each word's ink is a single alpha, --hw-a, which initHeadlineFill writes from
+   the cursor's position through the sentence (0.45 at rest, up to ~0.88 at the
+   cursor — a grey-black, never full black). The long ease is what makes it
+   read as fluid: the words trail the pointer instead of snapping to it. */
 .intro-headline .hw {
-  color: rgba(0, 0, 0, var(--hw-a, 0));
-  -webkit-text-stroke: 0.02em var(--color-text);
+  color: rgba(0, 0, 0, var(--hw-a, 0.45));
   transition: color 0.55s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
