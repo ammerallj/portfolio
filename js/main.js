@@ -437,7 +437,7 @@ function setContactPeek(px) {
 // settled compositions are unchanged. Pure functions of scroll; the fade is a
 // timed class toggle, like the lockup's.
 const CONTACT_LAG = { k: 0.5 };    // BACK ON, alone (2026-10, Jenna: "blue arrives like the gradient leaves"). It was switched off 2026-09-28 ("it pulls") together with CONTACT_SHORTEN, ABOUT_LIFT.speed and CONTACT_COPY.ride, which stay OFF — this part only pulls the blue ahead of the panel and tapers to full speed at the landing
-const ABOUT_LIFT = { speed: 0, fadeAt: 0.5, gap: 16 }; // lift OFF (was 0.8); fade + gap still live
+const ABOUT_LIFT = { speed: 0.5, fadeAt: 0.5, gap: 16 }; // lift back ON at 0.5 (2026-10; was 0.8, then 0): About's copy leaves faster than the scroll, the mirror of HERO_TEXT.speed
 // Contact's copy RIDES the blue on the way in: its heading holds `ride` px
 // under the blue's top, then settles into its centred resting place as the page
 // lands — so the blue never arrives as an empty band ahead of the content.
@@ -448,7 +448,7 @@ let contactQ = 1;
 // down by --contact-push at About's rest, and the push unwinds on the hero's own
 // cubic ease-out (1 − q)³ — so Contact rises fastest on the first gesture past
 // About and lands at exactly 1x. The mirror of HERO_SHORTEN.
-const CONTACT_SHORTEN = { px: 0, cap: 0.5 }; // OFF — this was the sudden pull (was 500)
+const CONTACT_SHORTEN = { px: 260, cap: 0.5 }; // back ON, gentler (2026-10, Jenna: mirror the hero -> Work slide). Was 500 (the sudden pull), then 0.
 let contactShorten = 0;
 let aboutRestY = null;
 let lastContactPush = -1;
