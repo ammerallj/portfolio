@@ -1785,6 +1785,27 @@ html.has-top-nav.is-bar-docked .intro-bar {
    - ≤768 (homepage) / ≤1024 (project pages) revert to the content-width flex
      cluster (responsive.css): the content stacks there, so there is no right
      column to align to. */
+/* THE NAV STEPS OUT WHILE THE BLUE RAMP PASSES BEHIND IT (js/main.js, is-nav-away).
+   Only the CONTENT hides — the wordmark, links and CTA — not the frost, which is
+   already fading with --dark-mix. It fades out quickly and back in a little
+   slower, in its white-on-blue state (is-over-dark lands in the same frame it
+   returns). visibility follows the fade so a hidden nav is not focusable or
+   clickable. */
+.intro-bar-name,
+.intro-bar-links,
+.intro-bar-cta-wrap {
+  transition: opacity 0.35s ease, visibility 0s;
+}
+
+.intro-bar.is-nav-away .intro-bar-name,
+.intro-bar.is-nav-away .intro-bar-links,
+.intro-bar.is-nav-away .intro-bar-cta-wrap {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.2s ease, visibility 0s 0.2s;
+}
+
 .intro-bar-name {
   justify-self: start;
   font-family: var(--font-heading);

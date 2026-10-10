@@ -3293,7 +3293,7 @@ function updateScrollEffects() {
     if (contactRect.height === 0) {
       // Contact is hidden (dropped at the mobile tier) — there's no blue panel to
       // invert over, so keep the bars in their normal (cream) state.
-      stickyBars.forEach(bar => bar.classList.remove('is-over-dark', 'is-over-ramp'));
+      stickyBars.forEach(bar => bar.classList.remove('is-over-dark', 'is-over-ramp', 'is-nav-away'));
       setBarBleed(BAR_BLEED);
       setDarkMix(0);
       setBarFill('');
@@ -3419,6 +3419,14 @@ function updateScrollEffects() {
       // Blue behind the bar but not yet swapped: labels go FULL black (hero.css
       // .is-over-ramp) — the resting 0.8 black fails AA on the deep ramp.
       stickyBars.forEach(bar => bar.classList.toggle('is-over-ramp', !flipToWhite && covered > 0));
+      // THE NAV STEPS OUT WHILE THE BLUE RAMP PASSES BEHIND IT (2026-10, Jenna). In that
+      // window — blue behind the bar but the labels not yet able to swap — neither
+      // black nor white reads well on a bar that is mid-gradient, so the labels
+      // hide and come back, already in their white-on-blue form, the moment
+      // Contact's solid colour meets the bar (hero.css .is-nav-away). The 0.03
+      // threshold keeps a faint ramp tail from hiding the nav early. Scrolling up
+      // plays it backwards.
+      stickyBars.forEach(bar => bar.classList.toggle('is-nav-away', !flipToWhite && covered > 0.03));
 
       // CLIP THE FROST TO CONTACT'S TOP EDGE. The bar's glass bleeds BAR_BLEED
       // past its own bottom so it melts into the page instead of ending on a
