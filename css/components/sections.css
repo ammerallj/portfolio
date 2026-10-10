@@ -287,6 +287,12 @@ html.has-top-nav.is-work-in #work-section .site-container {
   color: var(--color-text);
 }
 
+/* "Project name / Year": the year trails the name in the same type, muted so the
+   name leads. It is part of the heading text, so it is read with it. */
+.work-card-year {
+  color: var(--color-text-70);
+}
+
 .work-card-description {
   align-self: end;
   font-family: var(--font-body);
@@ -381,9 +387,10 @@ html.has-top-nav.is-work-in #work-section .site-container {
   color: var(--color-text);
 }
 
-/* Per-card pill, on the title's row (2026-10): ONE pill — the year, with the lock
-   in front where the full case study is gated, "Concept ·" / "Coming soon ·" where
-   those apply. "Shipped" and the ↗ arrow are gone. It is centred on the title's
+/* Per-card pill, on the title's row (2026-10): ONE pill on the right saying what
+   kind of thing the card is — the lock where the full case study is gated,
+   "Concept", or "Coming soon". The year moved left, into the title
+   ("Project / 2023"); "Shipped" and the ↗ arrow are gone. It is centred on the title's
    line (--pill-nudge, from .work-card-text) rather than on the whole swap cell,
    which is taller when a two-line description is on show. */
 .work-card-meta {
