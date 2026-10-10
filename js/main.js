@@ -2297,8 +2297,9 @@ initNavMorph();
 
 // THE HEADLINE FILLS AS YOU READ (2026-10, Jenna). Only the name is black; the
 // rest of the sentence rests grey (hero.css). Moving the cursor through the text
-// writes a per-word ink level (--hw-a): a grey-black peak (PEAK) at the cursor,
-// easing back to a softer dark (BEHIND) over the words it has passed, and a
+// writes a per-word FILL level (--hw-a; the words rest as black outlines at 0):
+// full black (PEAK) at the cursor,
+// easing back to a softer fill (BEHIND) over the words it has passed, and a
 // short soft lead just ahead of it; everything further on stays at rest. The
 // position is CONTINUOUS (word index + how far across the word the pointer is),
 // and the CSS transition's long ease does the rest — so it flows rather than
@@ -2329,7 +2330,7 @@ function initHeadlineFill() {
   });
   if (!words.length) return;
 
-  const REST = 0.45, BEHIND = 0.7, PEAK = 0.88;
+  const REST = 0, BEHIND = 0.85, PEAK = 1;
   let pos = null, raf = 0;
   const paint = () => {
     raf = 0;
