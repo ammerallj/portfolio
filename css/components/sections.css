@@ -153,6 +153,15 @@ html.has-top-nav.is-work-in #work-section .site-container {
      frame has no horizontal padding or border, so its width is unchanged. */
   box-sizing: content-box;
   padding-bottom: var(--work-extra, 0px);
+  /* A CARD IS NEVER TALLER THAN THE SCREEN BELOW THE NAV (2026-10, Jenna): the
+     frame stops at 100svh - the nav (--nav-offset, 64px) - the text area under it
+     (two reserved text lines + the bottom padding + the 2px border) - any levelling
+     stretch, so media + text always fits one view. The ratios still vary the
+     heights; this only binds on short windows (at 1440x900 the tallest card,
+     Messaging at ~720px, is already under it). The floor keeps a very short window
+     from collapsing the art. svh, never dvh, like the rest of the page. */
+  --work-text-h: calc(var(--size-base) * 1.4 * 2 + var(--work-card-pad) * 1.5 + 2px);
+  max-height: max(200px, calc(100svh - var(--nav-offset) - var(--work-text-h) - var(--work-extra, 0px)));
   overflow: hidden;
   display: flex;
   align-items: center;
