@@ -3627,7 +3627,7 @@ own version, separate from the `style.css?v=` / `@import` CSS bump below).
   add it **everywhere**, even to pages that don't use it — the `@font-face` rules
   cost ~1.7KB of CSS there and download no woff2, because a face is only fetched
   where it actually renders. Current request (worktree-redesign):
-  `Hanken+Grotesk:wght@200;500;700` + `Inter:wght@400..700`.
+  `Hanken+Grotesk:wght@200;500;600;700` + `Inter:wght@400..700` (600 is the Work-card titles).
   **No italic face is loaded** (2026-10): the hero's italic name was removed, so
   `1,500` and the `ital` axis came out of both pages' links (index.html and
   404.html — keep them byte-identical). Anything set in `font-style: italic` now

@@ -271,14 +271,15 @@ html.has-top-nav.is-work-in #work-section .site-container {
     translate 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* The title is BODY TEXT, semibold (2026-10, Jenna) — one step under the site's
-   18px body, --size-base (16px): same face, size, leading and
-   tracking as the description it swaps with, so hover changes only the weight
+/* The title is BODY-SIZED, semibold (2026-10, Jenna) — one step under the site's
+   18px body, --size-base (16px), in Hanken Grotesk 600 (the 600 weight was added
+   to both pages' font link for it); the description it swaps with is Inter at the
+   same size, leading and tracking, so hover changes only the weight
    (600 -> 400) and the words, never the size. (It was a 32/28/24 heading in
    Hanken before.) */
 .work-card-title {
   align-self: end;
-  font-family: var(--font-body);
+  font-family: var(--font-heading);
   font-size: var(--size-base);
   font-weight: 600;
   letter-spacing: -0.02em;
