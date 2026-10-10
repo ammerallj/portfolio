@@ -87,45 +87,6 @@ html.has-top-nav.is-work-in #work-section .site-container {
   align-items: start;
 }
 
-/* WORK <> PLAY SWITCH (2026-10) — a segmented control above the grid that picks
-   which collection of cards is on show (initWorkSwitch). The same hairline pill
-   as the card chips, with the active segment solid black like the nav's CTA.
-   Hidden by the `hidden` attribute until JS runs. */
-.work-switch {
-  display: inline-flex;
-  gap: 4px;
-  padding: 4px;
-  margin-bottom: var(--gap-group);
-  border: 0.5px solid rgba(0, 0, 0, 0.22);
-  border-radius: 100px;
-  background-color: rgba(251, 252, 248, 0.9);
-}
-
-.work-switch[hidden] {
-  display: none;
-}
-
-.work-switch-btn {
-  appearance: none;
-  border: 0;
-  border-radius: 100px;
-  padding: 8px 20px;
-  background: transparent;
-  font: inherit;
-  font-family: var(--font-body);
-  font-size: var(--size-base);
-  font-weight: 500;
-  line-height: 20px;
-  color: var(--color-text-70);
-  cursor: pointer;
-  transition: background-color 0.25s ease, color 0.25s ease;
-}
-
-.work-switch-btn.is-active {
-  background-color: #000;
-  color: #fff;
-}
-
 .work-grid.is-masonry {
   grid-auto-rows: 1px;
   row-gap: 0;

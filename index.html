@@ -158,7 +158,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,200;0,500;0,700;1,500&family=Inter:wght@400..700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=03386bef" />
+  <link rel="stylesheet" href="style.css?v=4de6d02e" />
   <!-- The landing field's JPEG fallback — PHONES ONLY since 2026-09, so the
        preload is gated to match the <picture> in <main>. Without the media
        attribute this fetches 1.4MB on every desktop and tablet visit for an
@@ -237,10 +237,10 @@
       <time class="site-name site-clock top-nav-clock" id="site-name">Seattle</time>
       <nav class="site-nav-bar" aria-label="Primary navigation">
         <div class="site-nav-group site-nav-left">
-          <a href="#work-section" id="nav-work" data-collection="work">Work</a>
+          <a href="#work-section" id="nav-work">Work</a>
         </div>
         <div class="site-nav-group site-nav-center">
-          <a href="#work-section" data-collection="play">Play</a>
+          <a href="#about">About</a>
         </div>
         <div class="site-nav-group site-nav-right">
           <a href="#contact">Contact</a>
@@ -298,8 +298,8 @@
        Overview/Process/Impact floatie. Contact is the top-right overlay trigger.
        ============================================================ -->
   <nav class="section-pills section-pills--site-nav" aria-label="Sections">
-    <a href="#work-section" class="is-active" aria-current="true" data-collection="work">Work</a>
-    <a href="#work-section" data-collection="play">Play</a>
+    <a href="#work-section" class="is-active" aria-current="true">Work</a>
+    <a href="#about">About</a>
   </nav>
 
   <!-- ============================================================
@@ -366,8 +366,8 @@
         <time class="top-nav-clock">Pacific Time</time>
         <span class="top-nav-rule" aria-hidden="true"></span>
       </div>
-      <a class="top-nav-link" href="#work-section" data-collection="work">Work</a>
-      <a class="top-nav-link" href="#work-section" data-collection="play">Play</a>
+      <a class="top-nav-link" href="#work-section">Work</a>
+      <a class="top-nav-link" href="#about">About</a>
       <a class="top-nav-cta" href="#contact">Contact</a>
     </nav>
 
@@ -396,8 +396,8 @@
       <span class="intro-bar-feather" aria-hidden="true"></span>
       <p class="intro-bar-name">Jenna Ammerall.</p>
       <div class="intro-bar-links">
-        <div class="intro-bar-group"><a href="#work-section" data-collection="work">Work</a></div>
-        <div class="intro-bar-group"><a href="#work-section" data-collection="play">Play</a></div>
+        <div class="intro-bar-group"><a href="#work-section">Work</a></div>
+        <div class="intro-bar-group"><a href="#about">About</a></div>
       </div>
       <div class="intro-bar-cta-wrap"><a class="intro-bar-cta" href="#contact">Contact</a></div>
     </nav>
@@ -414,13 +414,6 @@
          description in, in the same slot (sections.css). -->
     <section class="page-section" aria-labelledby="work-heading" id="work-section">
       <div class="site-container">
-        <!-- Work <> Play: one grid, two collections (data-collection on each card).
-             Driven by initWorkSwitch and the nav links that carry
-             data-collection. Hidden until JS runs — without it every card shows. -->
-        <div class="work-switch" role="group" aria-label="Show" hidden>
-          <button type="button" class="work-switch-btn is-active" data-collection="work" aria-pressed="true">Work</button>
-          <button type="button" class="work-switch-btn" data-collection="play" aria-pressed="false">Play</button>
-        </div>
         <ul class="work-grid" role="list">
 
           <!-- ⚠️ CARDS ARE NOT LINKS YET (2026-09-28): the project pages are being
@@ -432,7 +425,7 @@
                password-protected Figma case-study deck (Jenna, 2026-09-28).
                They keep data-href too: the cursor glow reads it for the card's
                colour. -->
-          <li class="work-card" data-reveal-group data-collection="work">
+          <li class="work-card" data-reveal-group>
             <a class="work-card-link" href="https://www.figma.com/deck/3ID7RXQRZUqKIDq6cGxGnY/Jenna-Portfolio-%E2%80%94-Portfolio-2026-B?node-id=1-42&amp;viewport=-129%2C-110%2C0.69&amp;t=REUsrarH3k2S5FDV-1&amp;scaling=min-zoom&amp;content-scaling=fixed&amp;page-id=0%3A1" target="_blank" rel="noopener" data-href="work/messaging.html" data-reveal>
               <!-- The art's own ratio: two phone screens, near-square, so a 5:4
                    frame would crop their status and nav bars. -->
@@ -453,7 +446,7 @@
             </a>
           </li>
 
-          <li class="work-card" data-reveal-group data-collection="work">
+          <li class="work-card" data-reveal-group>
             <a class="work-card-link" data-reveal>
               <div class="work-card-media" style="--media-ratio: 16 / 10">
                 <!-- At rest the still; on hover the GIF (loaded on first hover
@@ -476,7 +469,7 @@
 
           <!-- Concept, not shipped. Parked like the other unlinked cards:
                it opens a lightbox (initLightbox) rather than a page. Still is the PNG at 1920px q80; hover is MP4. -->
-          <li class="work-card" data-reveal-group data-collection="play">
+          <li class="work-card" data-reveal-group>
             <a class="work-card-link" href="#threadscape-lightbox" role="button" aria-haspopup="dialog" data-lightbox="threadscape-lightbox" data-reveal>
               <div class="work-card-media" style="--media-ratio: 3360 / 2280">
                 <img class="work-card-cover" src="images/thread-card.jpg?v=2" width="1920" height="1303" alt="" loading="lazy" />
@@ -494,7 +487,7 @@
             </a>
           </li>
 
-          <li class="work-card" data-reveal-group data-collection="work">
+          <li class="work-card" data-reveal-group>
             <a class="work-card-link" data-reveal>
               <!-- One tall phone (974x1848) on white: CONTAINED in the 5:4 frame,
                    not cropped — its white margin blends into the white card.
@@ -517,7 +510,7 @@
             </a>
           </li>
 
-          <li class="work-card" data-reveal-group data-collection="work">
+          <li class="work-card" data-reveal-group>
             <a class="work-card-link" href="https://www.figma.com/deck/3ID7RXQRZUqKIDq6cGxGnY/Jenna-Portfolio-%E2%80%94-Portfolio-2026-B?node-id=1-42&amp;viewport=-129%2C-110%2C0.69&amp;t=REUsrarH3k2S5FDV-1&amp;scaling=min-zoom&amp;content-scaling=fixed&amp;page-id=0%3A1" target="_blank" rel="noopener" data-href="work/accessibility.html" data-reveal>
               <!-- The art's own ratio: a full-width page capture, so 16:10 would
                    clip the nav's right-hand icons. -->
@@ -695,6 +688,6 @@
     </button>
   </div>
   <script src="js/jennaos.js?v=23" defer></script>
-  <script src="js/main.js?v=b90b9366" defer></script>
+  <script src="js/main.js?v=3c10429b" defer></script>
 </body>
 </html>
