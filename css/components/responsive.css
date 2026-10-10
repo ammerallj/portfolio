@@ -264,7 +264,7 @@ html.is-hero-stacked {
     --project-block-title-size: 2.25rem; /* 36px — one notch under the 44 above */
     --next-case-title-size: 1.75rem; /* 28px — one notch under the block heading */
     --next-case-radius: 48px;
-    --work-card-title-size: 1.75rem; /* 28px */
+    --work-card-title-size: 1.375rem; /* 22px (was 28) */
     --work-card-radius: 32px;
     --work-card-pad: 28px;
     /* LOCKED across the whole 1024→481 band — no clamp. The global token is
@@ -850,7 +850,7 @@ html.is-hero-stacked {
        move at every tier (the radius below does, because it's a shape, not type). */
     --next-case-title-size: 1.75rem; /* 28px — held, not stepped */
     --next-case-radius: 24px;
-    --work-card-title-size: 1.5rem; /* 24px */
+    --work-card-title-size: 1.375rem; /* 22px (was 24); stays above the 18px description */
     --work-card-radius: 24px;
     --work-card-pad: 20px;
 
