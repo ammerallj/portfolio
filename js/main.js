@@ -437,18 +437,18 @@ function setContactPeek(px) {
 // settled compositions are unchanged. Pure functions of scroll; the fade is a
 // timed class toggle, like the lockup's.
 const CONTACT_LAG = { k: 0.5 };    // BACK ON, alone (2026-10, Jenna: "blue arrives like the gradient leaves"). It was switched off 2026-09-28 ("it pulls") together with CONTACT_SHORTEN, ABOUT_LIFT.speed and CONTACT_COPY.ride, which stay OFF — this part only pulls the blue ahead of the panel and tapers to full speed at the landing
-const ABOUT_LIFT = { speed: 0.5, fadeAt: 0.5, gap: 16 }; // lift back ON at 0.5 (2026-10; was 0.8, then 0): About's copy leaves faster than the scroll, the mirror of HERO_TEXT.speed
+const ABOUT_LIFT = { speed: 0.55, fadeAt: 0.5, gap: 16 }; // lift ON at 0.55 (was 0.8: with the tug starting at the fade it peaked at 3.7x) (2026-10, Jenna: "I need the tug"): About's copy leaves faster than the scroll, the mirror of HERO_TEXT.speed
 // Contact's copy RIDES the blue on the way in: its heading holds `ride` px
 // under the blue's top, then settles into its centred resting place as the page
 // lands — so the blue never arrives as an empty band ahead of the content.
-const CONTACT_COPY = { ride: null, navRamp: 200 }; // ride OFF (was 128): the copy reveals in order instead. navRamp 96 -> 200 (2026-10): the nav is hidden while the blue passes it now, so the scrim keeps its hero-like stretch instead of being squeezed to sweep by
+const CONTACT_COPY = { ride: null, navRamp: 120 }; // ride OFF (was 128): the copy reveals in order instead. navRamp 96 -> 200 -> 120 (2026-10): the nav is hidden while the blue passes it, so the stretch is kept — but not so long that the nav is missing for ~200px of scroll
 let contactQ = 1;
 // ...and the fourth part, the one that sets the PACE: Contact is laid out
 // SHORTER by `px` (capped at `cap` of the About → Contact scroll), pulled back
 // down by --contact-push at About's rest, and the push unwinds on the hero's own
 // cubic ease-out (1 − q)³ — so Contact rises fastest on the first gesture past
 // About and lands at exactly 1x. The mirror of HERO_SHORTEN.
-const CONTACT_SHORTEN = { px: 260, cap: 0.5 }; // back ON, gentler (2026-10, Jenna: mirror the hero -> Work slide). Was 500 (the sudden pull), then 0.
+const CONTACT_SHORTEN = { px: 380, start: 0.35, cap: 0.5 }; // ON at the full 500 (2026-10, Jenna: "I need the tug — it's awkward when the nav doesn't appear"): Contact rises fast on the first gesture so the nav's absence is brief. It was switched off once for pulling; she asked for it back.
 let contactShorten = 0;
 let aboutRestY = null;
 let lastContactPush = -1;
@@ -3199,7 +3199,13 @@ function updateScrollEffects() {
     // land after it change the page's height, and a stale distance left the
     // push short of 0 at the bottom — Contact never reached its locked view.
     const floorY = document.documentElement.scrollHeight - window.innerHeight;
-    const q = Math.max(0, Math.min(1, (window.scrollY - aboutRestY) / Math.max(1, floorY - aboutRestY)));
+    // THE TUG STARTS WHEN ABOUT FADES, NOT AT ABOUT'S REST (2026-10, Jenna: "as About
+    // fades out, that's when the tug pulls you to the end of the site"). The push
+    // sits at full until `start` of the way to the floor, so the page moves at
+    // exactly 1x while About is being read, and the unwind — the fast first
+    // gesture — begins as the blue takes over the screen.
+    const p = (window.scrollY - aboutRestY) / Math.max(1, floorY - aboutRestY);
+    const q = Math.max(0, Math.min(1, (p - CONTACT_SHORTEN.start) / (1 - CONTACT_SHORTEN.start)));
     contactQ = q;
     setContactPush(Math.round(contactShorten * (1 - q) * (1 - q) * (1 - q)));
   } else {
@@ -3423,8 +3429,17 @@ function updateScrollEffects() {
       // nav early. The ramp counts from the moment it shows anywhere in the bar's
       // WHOLE glass — the bar plus its bleed — because the frost's own copy of the
       // ramp is what stepped against the page's. Scrolling up plays it backwards.
-      const rampInGlass = contactAlphaAt(barHeight + BAR_BLEED, blue, liveLedge) > 0.03;
-      const navAway = !flipToWhite && (covered > 0.03 || rampInGlass);
+      // LOOK-AHEAD: the blue now arrives fast, and the bar takes 0.2s to fade, so it
+      // has to start leaving while the ramp is still ~90px short of the glass —
+      // otherwise the black labels were caught fading over the incoming blue (the
+      // "awkward overlap").
+      const rampInGlass = contactAlphaAt(barHeight + BAR_BLEED + 90, blue, liveLedge) > 0.03;
+      // ...and it comes back as soon as Contact's SOLID colour is over most of the bar
+      // (its top within 3/4 of the bar's height), without waiting for the labels'
+      // 0.86 swap test: that kept the nav missing for the last ~40px of the pass
+      // (Jenna: "it's awkward when the nav doesn't appear").
+      const solidAtBar = blue <= barHeight * 0.75;
+      const navAway = !flipToWhite && !solidAtBar && (covered > 0.03 || rampInGlass);
       // NO COLOUR FLASH ON THE WAY BACK IN (Jenna: "it quickly flashes from black nav
       // text to white — drop that"). The labels used to change colour in the same
       // frame the bar faded back in, so the swap was seen. While the bar is away
@@ -3433,7 +3448,7 @@ function updateScrollEffects() {
       // otherwise (leaving it upward) — so the colour is already right, unseen,
       // when the bar returns.
       const midBlue = liveLedge > 0 ? contactAlphaAt(contactGlyphMid, blue, liveLedge) : mix;
-      const whiteNow = flipToWhite || (navAway && midBlue >= 0.45);
+      const whiteNow = flipToWhite || solidAtBar || (navAway && midBlue >= 0.45);
       stickyBars.forEach(bar => bar.classList.toggle('is-over-dark', whiteNow));
       // Blue behind the bar but not yet swapped: labels go FULL black (hero.css
       // .is-over-ramp) — the resting 0.8 black fails AA on the deep ramp.

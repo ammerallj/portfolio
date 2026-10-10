@@ -56,6 +56,27 @@ that branch again if more Work-section work lands there. Much of the landing doc
 the PRE-redesign hero and is superseded here wherever the two disagree.
 
 
+**ABOUT → CONTACT, CURRENT (2026-10, Jenna: "Boom that is it!") — supersedes the
+"PARED BACK" note below.** The reverse of hero → Work, tuned by measuring both:
+- The tug is ON but starts when About FADES, not at its rest: `CONTACT_SHORTEN`
+  `{ px: 380, start: 0.35 }` (js/main.js) holds the push at full until 35% of the
+  way to the floor, so the page moves ~1.2× while About is read, then the blue
+  jumps to ~2.9× at the fade and eases to 1× at the landing. `ABOUT_LIFT.speed`
+  0.55 (peaks ~2.9×), `CONTACT_LAG.k` 0.5. Starting the tug at About's rest felt
+  like being yanked to the footer.
+- The scrim is the hero's: a PLAIN smoothstep (`LEDGE_BIAS` 1, sections.css
+  `.contact-section::before` is 33 stops), `--contact-ledge-rest` =
+  `clamp(180px, 26svh, 300px)` (≈ the hero's `--field-fade`), appended to About's
+  bottom via `--about-tail` = rest + 32px of clear cream. `CONTACT_COPY.navRamp` 120.
+- The nav steps out while the blue passes: `is-nav-away` (the whole bar — labels,
+  frost, progressive blur, grain, glass — fades, hero.css last block) from when the
+  ramp is within ~90px of the glass (`BAR_BLEED + 90` look-ahead) until Contact's
+  solid colour is over 3/4 of the bar (`solidAtBar`). Labels swap black↔white only
+  while hidden (class `is-over-dark` is set during the away window by which side the
+  bar will return on). The bar's glass is a PROGRESSIVE blur (`.intro-bar-blur`, 7
+  layers 12 → 0.3px, `BAR_BLEED` 16) under a 0.8 cream tint; keep `BAR_BLEED`, the
+  CSS `--bar-bleed` fallbacks, `CONTACT.frost` and `fillDepth` in step.
+
 **HERO LOCKUP, CURRENT (2026-10, supersedes the two-column description below):**
 one `h1` and nothing else — no right column, no bio, no "previously" line.
 "Jenna Ammerall" is its own first line (`.intro-headline-name`, `display: block`,
