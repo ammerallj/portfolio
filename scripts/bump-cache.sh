@@ -29,10 +29,15 @@ CSSV=$(cat css/components/*.css | shasum -a 1 | cut -c1-8)
 # JS version = hash of the one script file.
 JSV=$(shasum -a 1 js/main.js | cut -c1-8)
 
+# HTML pages to stamp: the homepage, plus any project pages that exist (work/ was
+# archived 2026-10, and an unmatched work/*.html glob made sed abort).
+PAGES=(index.html)
+for f in work/*.html; do [ -e "$f" ] && PAGES+=("$f"); done
+
 # Stamp CSS refs (the <link> in every HTML page + every @import in style.css).
-sed -i '' "s|\.css?v=[0-9a-f]*|.css?v=$CSSV|g" index.html style.css work/*.html
+sed -i '' "s|\.css?v=[0-9a-f]*|.css?v=$CSSV|g" "${PAGES[@]}" style.css
 
 # Stamp the js/main.js <script> ref in every HTML page.
-sed -i '' "s|main\.js?v=[0-9a-f]*|main.js?v=$JSV|g" index.html work/*.html
+sed -i '' "s|main\.js?v=[0-9a-f]*|main.js?v=$JSV|g" "${PAGES[@]}"
 
 echo "cache-busters stamped:  css=$CSSV  js=$JSV"

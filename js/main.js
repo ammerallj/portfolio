@@ -33,7 +33,6 @@ if (siteName && siteName.getAttribute('href') === '#') {
 // here ever runs to clear it.
 const navSections = [
   { link: navWork, el: document.getElementById('work-section') },
-  { link: document.querySelector('.site-nav-bar a[href="#about"]'), el: document.getElementById('about') },
   { link: document.querySelector('.site-nav-bar a[href="#contact"]'), el: document.getElementById('contact') },
 ].filter(s => s.link && s.el);
 
@@ -41,7 +40,6 @@ const navSections = [
 // site-header nav above only exists on ≤480 / project pages).
 const introBarSections = [
   { sel: '#work-section', id: 'work-section' },
-  { sel: '#about', id: 'about' },
   { sel: '#contact', id: 'contact' },
 ]
   .map(({ sel, id }) => ({
@@ -50,6 +48,32 @@ const introBarSections = [
   }))
   .filter(s => s.link && s.el);
 navSections.push(...introBarSections);
+
+// ABOUT HAS NO NAV LINK (Work / Play / Contact), but it is still a stop for the
+// spy: without an entry here Work would stay lit all the way down through About.
+// The detached anchor takes the active class and nobody sees it.
+{
+  const aboutStop = document.getElementById('about');
+  if (aboutStop) navSections.push({ link: document.createElement('a'), el: aboutStop });
+}
+
+// WORK <> PLAY. Work and Play are two COLLECTIONS of one grid (initWorkSwitch),
+// and every nav link that carries data-collection points at #work-section. The
+// scroll-spy can only say "Work section is active", so which of the two links
+// lights is decided here, from the collection on show. `workCollection` is
+// declared this high for the same TDZ reason as sectionClickScrollY below.
+let workCollection = 'work';
+const collectionLinks = Array.from(document.querySelectorAll(
+  '.top-nav-link[data-collection], .intro-bar-links a[data-collection], ' +
+  '.site-nav-bar a[data-collection], .section-pills a[data-collection]'));
+function syncCollectionLinks(workActive) {
+  collectionLinks.forEach((link) => {
+    const on = workActive && link.dataset.collection === workCollection;
+    link.classList.toggle('is-active', on);
+    if (on) link.setAttribute('aria-current', 'true');
+    else link.removeAttribute('aria-current');
+  });
+}
 
 // Where each settling section comes to rest, published by initSectionGeometry so
 // the anchor handler in setupLenis can aim at the SAME place. Returns null for
@@ -1742,7 +1766,9 @@ const NAV_REVEAL_MAX = 400;
 // link is the reveal's transform target.
 function workLandingScrollY() {
   const bar = document.querySelector('.intro-bar');
-  const title = document.querySelector('#work-section .work-card');
+  // The Work <> Play switch leads the section, so it is what lands under the nav.
+  const title = document.querySelector('#work-section .work-switch:not([hidden])')
+    || document.querySelector('#work-section .work-card:not([hidden])');
   if (!topNav || !bar || !title) return null;
   let y = 0;
   for (let n = title; n; n = n.offsetParent) y += n.offsetTop;
@@ -2033,13 +2059,11 @@ initHeadlineMorph();
 // cross-fade. Measured, not guessed — counted off the animations each pair
 // actually creates:
 //
-//   Say hello     -> Why hello!    7 of 10 travel  (the strongest of the three:
-//                                  the "h" of "hello" slides left to become the
-//                                  "h" of "Why", a second "h" fades in behind it)
-//   About me      -> Who am I?     4 travel, 5 in, 4 out
-//   Selected work -> What I made   5 travel, 6 in, 8 out (the weakest — the two
-//                                  share little but t/space/w/d/e, so it reads
-//                                  more as a cross-fade than a slide)
+//   Contact -> Connect    c/o/n/t/c travel (the strongest slide)
+//   Work    -> Worth it   w/o/r/t travel
+//   Play    -> Playful    all four travel, the rest fade in
+//   (Measured for the earlier Say hello / About me / Selected work trio; these
+//   are chosen for shared letters but not yet counted.)
 //
 // The spring IS the reference's default (stiffness 280, damping 18, mass 0.3),
 // solved here once rather than carried as a runtime dependency: omega0 = 30.55
@@ -2066,9 +2090,9 @@ function initNavMorph() {
   const MORPHS = [
     // REDESIGN: the top nav's items take the same morph, which is also what
     // sizes each one to fit its wider label — so the two navs' items match.
-    { selector: '.intro-bar-links a[href$="#work-section"], .top-nav-link[href$="#work-section"]', rest: 'Selected work', hover: 'What I made' },
-    { selector: '.intro-bar-links a[href$="#about"], .top-nav-link[href$="#about"]', rest: 'About me', hover: 'Who am I?' },
-    { selector: '.intro-bar-cta, .top-nav-cta', rest: 'Say hello', hover: 'Why hello!' },
+    { selector: '.intro-bar-links a[data-collection="work"], .top-nav-link[data-collection="work"]', rest: 'Work', hover: 'Worth it' },
+    { selector: '.intro-bar-links a[data-collection="play"], .top-nav-link[data-collection="play"]', rest: 'Play', hover: 'Playful' },
+    { selector: '.intro-bar-cta, .top-nav-cta', rest: 'Contact', hover: 'Connect' },
   ];
 
   const DURATION = 285; // ms — the spring's own settle time, see above
@@ -2537,7 +2561,8 @@ function initWorkMasonry() {
   const grid = document.querySelector('.work-grid');
   if (!grid || !('ResizeObserver' in window)) return; // project pages have none
   // A card with `hidden` is out of the layout, not a zero-height slot.
-  const cards = Array.from(grid.children).filter((card) => !card.hidden);
+  // `let`: the Work <> Play switch changes which cards are in the layout.
+  let cards = Array.from(grid.children).filter((card) => !card.hidden);
 
   // Each card's height WITHOUT the stretch below. The stretch lives on the card
   // (as padding under its media), so its own height includes it; subtracting
@@ -2616,8 +2641,61 @@ function initWorkMasonry() {
   cards.forEach((card) => ro.observe(card));
   ro.observe(grid);
   layout();
+
+  // initWorkSwitch fires this after hiding/showing cards: forget the old set,
+  // clear every span (a card coming back must not carry a stale one), re-observe.
+  grid.addEventListener('work-collection', () => {
+    ro.disconnect();
+    Array.from(grid.children).forEach((card) => {
+      card.style.gridRowEnd = '';
+      setExtra(card, 0);
+    });
+    cards = Array.from(grid.children).filter((card) => !card.hidden);
+    cards.forEach((card) => ro.observe(card));
+    ro.observe(grid);
+    layout();
+  });
 }
 initWorkMasonry();
+
+// WORK <> PLAY (2026-10). One grid, two collections: each .work-card carries
+// data-collection="work|play", and exactly one collection is on show. Three
+// things drive it — the segmented switch above the grid, the nav links that
+// carry data-collection (Work / Play, all pointing at #work-section), and a
+// #play / #work hash. The nav's active state follows via syncCollectionLinks.
+// Without JS every card shows and the switch stays hidden.
+function initWorkSwitch() {
+  const grid = document.querySelector('.work-grid');
+  const sw = document.querySelector('.work-switch');
+  if (!grid || !sw) return;
+  const buttons = Array.from(sw.querySelectorAll('[data-collection]'));
+  const cards = Array.from(grid.children);
+
+  function show(name) {
+    if (!cards.some((c) => c.dataset.collection === name)) return;
+    workCollection = name;
+    cards.forEach((c) => { c.hidden = c.dataset.collection !== name; });
+    buttons.forEach((b) => {
+      const on = b.dataset.collection === name;
+      b.classList.toggle('is-active', on);
+      b.setAttribute('aria-pressed', String(on));
+    });
+    grid.dispatchEvent(new Event('work-collection'));
+    // Newly shown cards reveal off the reveal system's resize hook.
+    window.dispatchEvent(new Event('resize'));
+    syncCollectionLinks(true);
+  }
+
+  sw.hidden = false;
+  show('work');
+  buttons.forEach((b) => b.addEventListener('click', () => show(b.dataset.collection)));
+  // Nav links: switch FIRST, then let the shared anchor handler scroll. This
+  // listener is bound before setupLenis's (that one waits on the CDN import),
+  // so the collection is already swapped when the landing position is read.
+  collectionLinks.forEach((l) => l.addEventListener('click', () => show(l.dataset.collection)));
+  if (location.hash === '#play') show('play');
+}
+initWorkSwitch();
 
 // Work cards with hover media: the still at rest, the GIF on hover. The GIF's
 // src is set on first hover (and re-set with a fresh fragment each time, which
@@ -3107,6 +3185,7 @@ function updateScrollEffects() {
       sectionPillBar.classList.toggle('is-tucked', footerIn || !!onLanding);
     }
   }
+  syncCollectionLinks(activeEl === document.getElementById('work-section'));
 
   // Invert the sticky bar to blue/white once the Contact panel slides
   // beneath it; stays inverted through the (also-blue) footer to page end
