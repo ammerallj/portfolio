@@ -172,6 +172,12 @@ html.has-top-nav.is-work-in #work-section .site-container {
   /* --media-fit (per card, inline): `contain` shows the whole art inside the
      frame instead of cropping it — Facebook Groups, a single tall phone. */
   object-fit: var(--media-fit, cover);
+  /* --media-zoom (per card, inline) scales the art up inside the frame, about
+     --media-origin, for art with a wide white margin of its own (Loop's windows
+     fill ~77% x 72% of the file). The still and the hover GIF share the rule, so
+     they stay in register; the frame's overflow: hidden clips the rest. */
+  transform: scale(var(--media-zoom, 1));
+  transform-origin: var(--media-origin, 50% 50%);
 }
 
 /* HOVER MEDIA: a card can carry a still (.work-card-cover) and an animated
