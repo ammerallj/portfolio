@@ -168,6 +168,14 @@ html.is-hero-stacked {
   .intro-headline-name {
     display: inline;
   }
+
+  /* KEEP THE BUTTON'S CORNER CLEAR. The Jenna OS button is 56px wide, 24px in
+     from the right (jennaos.css), and the last line now sits on its row — so a
+     line that runs long would slide under it. The band already pads 56px; this
+     adds 48 more, which stops the text 24px short of the button's left edge. */
+  .intro-band-left {
+    padding-right: 48px;
+  }
 }
 
 /* ============================================================
