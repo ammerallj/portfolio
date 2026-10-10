@@ -244,7 +244,7 @@ const CONTACT = {
   // as --color-accent / --color-accent-rgb.
   //
   // ⚠️ THIS IS A SAMPLED SMOOTHSTEP NOW, not the old four-stop piecewise line.
-  // The cream holds 0.95 to the lowest nav item (50px) and eases to 0 across the
+  // The cream holds 0.70 (was 0.95) to the lowest nav item (50px) and eases to 0 across the
   // rest of the box (166px at full bleed). contactFrostAt interpolates linearly
   // between these, so the count is how faithfully the curve is reproduced —
   // eighths track it to well under a code value.
@@ -253,7 +253,7 @@ const CONTACT = {
   // hold, putting the JS 8 code values under the CSS right at the nav item's
   // bottom — the one place the two must agree, since that is where the bar's
   // fill is repairing the most opaque part of the frost.
-  frost: [[0, 0.95], [50, 0.95], [58.0, 0.9092], [66.0, 0.8016], [74.0, 0.6494], [82.0, 0.475], [90.0, 0.3006], [98.0, 0.1484], [106.0, 0.0408], [114.0, 0.0]],
+  frost: [[0, 0.7], [50, 0.7], [58.0, 0.6699], [66.0, 0.5906], [74.0, 0.4785], [82.0, 0.35], [90.0, 0.2215], [98.0, 0.1094], [106.0, 0.0301], [114.0, 0.0]],
   // How far past the bar the fill is built. The bar's ::before runs
   // --bar-bleed + 2px past its own box, and BAR_BLEED is its 48px maximum.
   fillDepth: 124, // box height (64 + BAR_BLEED + 2) + 10
@@ -2039,7 +2039,7 @@ initHeadlineMorph();
 // cross-fade. Measured, not guessed — counted off the animations each pair
 // actually creates:
 //
-//   Work    -> What shipped
+//   Work    -> Selected work
 //   About   -> Who is Jenna
 //   Contact -> Say hello
 //   (Not yet counted for travelling letters like the earlier trio.)
@@ -2069,7 +2069,7 @@ function initNavMorph() {
   const MORPHS = [
     // REDESIGN: the top nav's items take the same morph, which is also what
     // sizes each one to fit its wider label — so the two navs' items match.
-    { selector: '.intro-bar-links a[href$="#work-section"], .top-nav-link[href$="#work-section"]', rest: 'Work', hover: 'What shipped' },
+    { selector: '.intro-bar-links a[href$="#work-section"], .top-nav-link[href$="#work-section"]', rest: 'Work', hover: 'Selected work' },
     { selector: '.intro-bar-links a[href$="#about"], .top-nav-link[href$="#about"]', rest: 'About', hover: 'Who is Jenna' },
     { selector: '.intro-bar-cta, .top-nav-cta', rest: 'Contact', hover: 'Say hello' },
   ];
