@@ -436,7 +436,7 @@ function setContactPeek(px) {
 // All three are 0 at both resting positions (About's and Contact's), so both
 // settled compositions are unchanged. Pure functions of scroll; the fade is a
 // timed class toggle, like the lockup's.
-const CONTACT_LAG = { k: 0 };      // OFF (2026-09-28, Jenna: "it pulls") — was 0.5
+const CONTACT_LAG = { k: 0.5 };    // BACK ON, alone (2026-10, Jenna: "blue arrives like the gradient leaves"). It was switched off 2026-09-28 ("it pulls") together with CONTACT_SHORTEN, ABOUT_LIFT.speed and CONTACT_COPY.ride, which stay OFF — this part only pulls the blue ahead of the panel and tapers to full speed at the landing
 const ABOUT_LIFT = { speed: 0, fadeAt: 0.5, gap: 16 }; // lift OFF (was 0.8); fade + gap still live
 // Contact's copy RIDES the blue on the way in: its heading holds `ride` px
 // under the blue's top, then settles into its centred resting place as the page
