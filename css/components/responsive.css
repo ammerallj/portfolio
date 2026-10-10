@@ -156,16 +156,17 @@ html.is-hero-stacked {
     padding-bottom: calc(24px - 0.184 * var(--section-title-size));
   }
 
-  /* THE STAGGERED LOCKUP (2026-10, after Jenna's reference): every line of the
-     headline is its own block, indented by --indent percent of the column
-     (set per line in index.html). Lines never wrap here — the indents were
-     tuned so the longest, "balancing product behavior and visual craft.",
-     still fits at 1377. Below this width the lines stay inline and flow as one
-     paragraph: the indents need the room. */
-  .intro-headline-line {
-    display: block;
-    white-space: nowrap;
-    margin-left: calc(var(--indent, 0) * 1%);
+  /* ONE FLOWING PARAGRAPH with an indented first line (2026-10, after Jenna's
+     Waka Waka / Jakob Lindberg references). The name stops being its own
+     block so it sits in line one, which text-indent pushes in. A per-line
+     stagger was built first (each line its own indented block) and replaced
+     by this. Below 1377 the name keeps its own first line, unindented. */
+  .intro-headline {
+    text-indent: 16%;
+  }
+
+  .intro-headline-name {
+    display: inline;
   }
 }
 
