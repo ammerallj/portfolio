@@ -239,12 +239,11 @@ html.has-top-nav.is-work-in #work-section .site-container {
   /* THE PILL SHARES THE TITLE'S ROW (2026-10): title/description on the left, the
      year (and the lock, where gated) on the right. Bottom-aligned, because the
      title rests on the swap cell's bottom edge. */
-  --status-nudge: calc((var(--size-base) * 1.4 - 1.5 * var(--size-xs)) / 2);
+  --status-nudge: calc((var(--size-base) * 1.4 - 2 * var(--size-xs) - 1px) / 2);
   display: flex;
   flex-direction: row;
   align-items: flex-end;
-  justify-content: space-between;
-  gap: var(--gap-content);
+  gap: 12px;
   padding: var(--work-card-pad);
   padding-top: 0;
 }
@@ -385,8 +384,8 @@ html.has-top-nav.is-work-in #work-section .site-container {
   color: var(--color-text);
 }
 
-/* Per-card status, on the title's row (2026-10): ONE bare label on the right (the
-   pill container was dropped) saying what
+/* Per-card status, on the title's row (2026-10): ONE hairline pill, IN FRONT of the
+   title (the pill was on the right, went bare, and came back on the left), saying what
    kind of thing the card is — the lock where the full case study is gated,
    "Concept", or "Coming soon". The year moved left, into the title
    ("Project / 2023"); "Shipped" and the ↗ arrow are gone. It is centred on the title's
@@ -394,6 +393,7 @@ html.has-top-nav.is-work-in #work-section .site-container {
    which is taller when a two-line description is on show. */
 .work-card-meta {
   flex: none;
+  order: -1; /* in front of the title (2026-10), whatever the DOM order */
   display: flex;
   align-items: center;
   margin-bottom: var(--status-nudge);
@@ -402,7 +402,13 @@ html.has-top-nav.is-work-in #work-section .site-container {
 .work-card-status {
   display: inline-flex;
   align-items: center;
-  min-height: 1.5em; /* one text line, so the lock icon centres like the words do */
+  gap: 0.4em;
+  /* 0.5px — a true hairline on 2x displays (1x rounds it up to one pixel). */
+  border: 0.5px solid rgba(0, 0, 0, 0.22);
+  border-radius: 100px;
+  padding: 0.25em 0.7em; /* 27px tall at 13px type */
+  min-height: calc(2em + 1px); /* the text pills' height, so the icon-only lock matches */
+  background-color: #fff; /* the card's own white */
   font-family: var(--font-heading);
   font-size: var(--size-xs); /* 13px — the site's eyebrow/meta size */
   font-weight: 400;
@@ -411,7 +417,15 @@ html.has-top-nav.is-work-in #work-section .site-container {
   white-space: nowrap;
 }
 
-/* The lock, bare (no container), where the full case study is gated. Gated projects only
+/* The locked pill is a CIRCLE: icon only, as wide as the pill is tall. */
+.work-card-status--lock {
+  width: calc(2em + 1px);
+  padding: 0;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+/* The lock, inside its circular pill, where the full case study is gated. Gated projects only
    (Accessibility, Messaging, and Loop's parked card); Groups and the concept
    have nothing gated and must not get one.
 
