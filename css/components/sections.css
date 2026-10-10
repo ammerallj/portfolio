@@ -272,21 +272,21 @@ html.has-top-nav.is-work-in #work-section .site-container {
 }
 
 /* The title is BODY-SIZED (2026-10, Jenna) — one step under the site's 18px body,
-   --size-base (16px), in Hanken Grotesk 400; the description it swaps with is Inter at
-   the same size, leading and tracking, so hover changes the face and the words, never the size or weight. (It was a 32/28/24 heading in
+   --size-base (16px), in Hanken Grotesk 500 (400 read as no weight next to the description); the description it swaps with is Inter at
+   the same size, leading and tracking, so hover changes the face, the weight (500 -> 400) and the words, never the size. (It was a 32/28/24 heading in
    Hanken before.) */
 .work-card-title {
   align-self: end;
   font-family: var(--font-heading);
   font-size: var(--size-base);
-  font-weight: 400;
+  font-weight: 500;
   letter-spacing: -0.02em;
   line-height: 1.4;
   color: var(--color-text-70); /* card content is grey, not black (2026-10) */
 }
 
 /* "Project name / Year": the year trails the name in the same face and the SAME
-   weight (400). It is part of the heading text, so it is read with it. */
+   weight (500). It is part of the heading text, so it is read with it. */
 .work-card-year {
   font-weight: inherit; /* one weight for the name and the year */
 }
