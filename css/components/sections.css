@@ -239,7 +239,7 @@ html.has-top-nav.is-work-in #work-section .site-container {
   /* THE PILL SHARES THE TITLE'S ROW (2026-10): title/description on the left, the
      year (and the lock, where gated) on the right. Bottom-aligned, because the
      title rests on the swap cell's bottom edge. */
-  --pill-nudge: calc((var(--size-base) * 1.4 - 2 * var(--size-xs) - 1px) / 2);
+  --status-nudge: calc((var(--size-base) * 1.4 - 1.5 * var(--size-xs)) / 2);
   display: flex;
   flex-direction: row;
   align-items: flex-end;
@@ -272,25 +272,23 @@ html.has-top-nav.is-work-in #work-section .site-container {
 }
 
 /* The title is BODY-SIZED (2026-10, Jenna) — one step under the site's 18px body,
-   --size-base (16px), in Hanken Grotesk 500 (already loaded; 600 was tried and
-   its font-link weight removed again); the description it swaps with is Inter at
-   the same size, leading and tracking, so hover changes only the weight
-   (500 -> 400) and the words, never the size. (It was a 32/28/24 heading in
+   --size-base (16px), in Hanken Grotesk 400; the description it swaps with is Inter at
+   the same size, leading and tracking, so hover changes the face and the words, never the size or weight. (It was a 32/28/24 heading in
    Hanken before.) */
 .work-card-title {
   align-self: end;
   font-family: var(--font-heading);
   font-size: var(--size-base);
-  font-weight: 500;
+  font-weight: 400;
   letter-spacing: -0.02em;
   line-height: 1.4;
   color: var(--color-text-70); /* card content is grey, not black (2026-10) */
 }
 
-/* "Project name / Year": the year trails the name in the same face, Light
-   so the name leads (full black — a light stroke is already quiet enough). It is part of the heading text, so it is read with it. */
+/* "Project name / Year": the year trails the name in the same face and the SAME
+   weight (400). It is part of the heading text, so it is read with it. */
 .work-card-year {
-  font-weight: 300; /* Hanken Light — loaded for this and the pill (200 was too thin) */
+  font-weight: inherit; /* one weight for the name and the year */
 }
 
 .work-card-description {
@@ -337,7 +335,7 @@ html.has-top-nav.is-work-in #work-section .site-container {
   }
   .work-card-meta {
     margin-bottom: 0;
-    margin-top: var(--pill-nudge);
+    margin-top: var(--status-nudge);
   }
   .work-card-swap {
     display: flex;
@@ -387,51 +385,33 @@ html.has-top-nav.is-work-in #work-section .site-container {
   color: var(--color-text);
 }
 
-/* Per-card pill, on the title's row (2026-10): ONE pill on the right saying what
+/* Per-card status, on the title's row (2026-10): ONE bare label on the right (the
+   pill container was dropped) saying what
    kind of thing the card is — the lock where the full case study is gated,
    "Concept", or "Coming soon". The year moved left, into the title
    ("Project / 2023"); "Shipped" and the ↗ arrow are gone. It is centred on the title's
-   line (--pill-nudge, from .work-card-text) rather than on the whole swap cell,
+   line (--status-nudge, from .work-card-text) rather than on the whole swap cell,
    which is taller when a two-line description is on show. */
 .work-card-meta {
   flex: none;
   display: flex;
   align-items: center;
-  margin-bottom: var(--pill-nudge);
+  margin-bottom: var(--status-nudge);
 }
 
-.work-card-pill {
+.work-card-status {
   display: inline-flex;
   align-items: center;
-  gap: 0.4em;
-  /* 0.5px — a true hairline on 2x displays (1x rounds it up to one pixel). */
-  border: 0.5px solid rgba(0, 0, 0, 0.22);
-  border-radius: 100px;
-  padding: 0.25em 0.7em; /* tight — 27px tall at 13px type (was 0.4em 0.85em, 32px) */
-  min-height: calc(2em + 1px); /* the text pills' height, so an icon-only (lock) pill matches */
+  min-height: 1.5em; /* one text line, so the lock icon centres like the words do */
   font-family: var(--font-heading);
   font-size: var(--size-xs); /* 13px — the site's eyebrow/meta size */
   font-weight: 400;
-  letter-spacing: 0; /* sentence case (2026-10) — the tracking was for caps */
+  letter-spacing: 0;
   color: var(--color-text-70);
   white-space: nowrap;
 }
 
-/* WHITE CHIP — the pill is the card's own white inside a 0.5px hairline (it was
-   page cream at 0.9 before the cards went white). */
-.work-card-pill {
-  background-color: #fff; /* the card's own white */
-}
-
-/* The locked pill is a CIRCLE: icon only, as wide as the pill is tall. */
-.work-card-pill--lock {
-  width: calc(2em + 1px);
-  padding: 0;
-  justify-content: center;
-  border-radius: 50%;
-}
-
-/* The lock, inside the pill, in front of the year. Gated projects only
+/* The lock, bare (no container), where the full case study is gated. Gated projects only
    (Accessibility, Messaging, and Loop's parked card); Groups and the concept
    have nothing gated and must not get one.
 
