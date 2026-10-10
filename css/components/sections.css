@@ -243,14 +243,17 @@ html.has-top-nav.is-work-in #work-section .site-container {
   display: flex;
   flex-direction: row;
   align-items: flex-end;
+  justify-content: center; /* the content is CENTRED in the card (2026-10, trial) */
   gap: 12px;
   padding: var(--work-card-pad);
   padding-top: 0;
 }
 
 .work-card-swap {
-  flex: 1 1 auto;
+  flex: 0 1 auto; /* hugs its content so the row can centre */
   min-width: 0;
+  justify-items: center;
+  text-align: center;
 }
 
 /* TITLE ↔ DESCRIPTION — one slot, two layers. Both sit in the SAME grid cell,
@@ -303,6 +306,26 @@ html.has-top-nav.is-work-in #work-section .site-container {
   translate: 0 8px;
 }
 
+/* CENTRED CONTENT (2026-10, trial): on true-hover devices the swap slot is as wide
+   as the TITLE only, so the pill + title can centre in the card as one unit. The
+   description is lifted out of the grid and floated centred over the title, up to
+   28em wide; the slot reserves two lines of height so a two-line description never
+   grows the card on hover (it would reflow the masonry under the pointer). */
+@media (hover: hover) {
+  .work-card-swap {
+    position: relative;
+    min-height: calc(var(--size-base) * 1.4 * 2);
+  }
+  .work-card-description {
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    width: max-content;
+    max-width: 28em;
+    transform: translateX(-50%);
+  }
+}
+
 /* Hover (true-hover devices only — a tapped :hover sticks on touch) and
    KEYBOARD focus: the title fades out, the description fades up into its
    place. The meta row stays put. */
@@ -331,6 +354,9 @@ html.has-top-nav.is-work-in #work-section .site-container {
 @media (hover: none) {
   .work-card-text {
     align-items: flex-start;
+  }
+  .work-card-swap {
+    align-items: center;
   }
   .work-card-meta {
     margin-bottom: 0;
