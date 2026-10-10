@@ -166,15 +166,11 @@ html.is-hero-stacked {
     padding-bottom: calc(24px - 0.184 * var(--hero-headline-size));
   }
 
-  /* THE NAME IS LINE ONE (2026-10, Jenna): "Jenna Ammerall" sits alone on an
-     indented first line (display: block comes from hero.css), and the sentence
-     proceeds from the line below, flush left. text-indent here lands on the
-     name's line only. Below 1377 the name is also its own line, unindented. */
-  .intro-headline {
-    text-indent: var(--name-indent, 16%); /* measured: the left edge of "designer" (initNameAlign) */
-  }
-
-  /* ...and set larger than the sentence (1.5x: 108px at 1440, 144 at the 96px
+  /* THE NAME IS LINE ONE, FLUSH LEFT (2026-10, Jenna): "Jenna Ammerall" sits
+     alone on the first line (display: block comes from hero.css) and the
+     sentence runs below it — everything left-aligned. The indent and the
+     measured alignment with "designer" were both removed. */
+  /* The name is set larger than the sentence (1.5x: 108px at 1440, 144 at the 96px
      cap). The em is the headline's, so it scales with the same clamp. */
   .intro-headline-name {
     font-size: 1.5em;
