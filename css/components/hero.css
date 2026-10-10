@@ -947,14 +947,13 @@ html:not(.is-field-live) .intro-divider {
   color: var(--color-text);
 }
 
+/* Each word's ink is a single alpha, --hw-a, which initHeadlineFill writes from
+   the cursor's position through the sentence (0.45 at rest, up to ~0.88 at the
+   cursor — a grey-black, never full black). The long ease is what makes it
+   read as fluid: the words trail the pointer instead of snapping to it. */
 .intro-headline .hw {
-  color: inherit;
-  transition: color 0.2s ease;
-  transition-delay: var(--hw-delay, 0ms);
-}
-
-.intro-headline .hw.is-lit {
-  color: var(--color-text);
+  color: rgba(0, 0, 0, var(--hw-a, 0.45));
+  transition: color 0.55s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 @media (prefers-reduced-motion: reduce) {

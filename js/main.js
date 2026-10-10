@@ -2296,12 +2296,14 @@ function initNavMorph() {
 initNavMorph();
 
 // THE HEADLINE FILLS AS YOU READ (2026-10, Jenna). Only the name is black; the
-// rest of the sentence rests grey (hero.css). Hovering the text fills the words
-// from the start up to the one under the cursor, so the cursor "reads" the
-// sentence. Words are wrapped in .hw (spaces stay plain text, so the heading
-// still reads as one string). Each word newly lit gets a short delay by how far
-// the fill has to travel, so a sweep reads as a fill, not a blink.
-// Mouse-only (hover: hover); touch and reduced-motion keep the resting state.
+// rest of the sentence rests grey (hero.css). Moving the cursor through the text
+// writes a per-word ink level (--hw-a): a grey-black peak (PEAK) at the cursor,
+// easing back to a softer dark (BEHIND) over the words it has passed, and a
+// short soft lead just ahead of it; everything further on stays at rest. The
+// position is CONTINUOUS (word index + how far across the word the pointer is),
+// and the CSS transition's long ease does the rest — so it flows rather than
+// switching. Words are wrapped in .hw (spaces stay plain text, so the heading
+// still reads as one string). Mouse-only (hover: hover).
 function initHeadlineFill() {
   const h1 = document.querySelector('.intro-headline');
   if (!h1 || !window.matchMedia('(hover: hover)').matches) return;
@@ -2327,23 +2329,34 @@ function initHeadlineFill() {
   });
   if (!words.length) return;
 
-  let active = -1;
-  const lightTo = (idx) => {
-    if (idx === active) return;
-    const from = active;
+  const REST = 0.45, BEHIND = 0.7, PEAK = 0.88;
+  let pos = null, raf = 0;
+  const paint = () => {
+    raf = 0;
     words.forEach((w, i) => {
-      const on = i <= idx;
-      // Filling forward: stagger by distance past the old edge. Emptying: at once.
-      w.style.setProperty('--hw-delay', on && i > from ? ((i - from - 1) * 16) + 'ms' : '0ms');
-      w.classList.toggle('is-lit', on);
+      let a = REST;
+      if (pos !== null) {
+        const d = pos - i; // > 0: the cursor has passed this word
+        a = d >= 0
+          ? BEHIND + (PEAK - BEHIND) * Math.exp(-d / 2.2)
+          : REST + (PEAK - REST) * Math.exp(d / 0.8);
+      }
+      w.style.setProperty('--hw-a', a.toFixed(3));
     });
-    active = idx;
   };
-  h1.addEventListener('mouseover', (e) => {
+  const queue = () => { if (!raf) raf = requestAnimationFrame(paint); };
+
+  h1.addEventListener('mousemove', (e) => {
     const w = e.target.closest && e.target.closest('.hw');
-    if (w) lightTo(words.indexOf(w));
+    if (!w) return; // over a space or the name: hold the last position
+    const r = w.getBoundingClientRect();
+    pos = words.indexOf(w) + Math.min(1, Math.max(0, (e.clientX - r.left) / (r.width || 1)));
+    queue();
   });
-  h1.addEventListener('mouseleave', () => lightTo(-1));
+  h1.addEventListener('mouseleave', () => {
+    pos = null;
+    queue();
+  });
 }
 initHeadlineFill();
 // REDESIGN: after the morph has sized the top nav's items. Fonts change those
