@@ -236,11 +236,22 @@ html.has-top-nav.is-work-in #work-section .site-container {
 }
 
 .work-card-text {
+  /* THE PILL SHARES THE TITLE'S ROW (2026-10): title/description on the left, the
+     year (and the lock, where gated) on the right. Bottom-aligned, because the
+     title rests on the swap cell's bottom edge. */
+  --pill-nudge: calc((var(--size-lg) * 1.4 - 2.3 * var(--size-xs) - 1px) / 2);
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  align-items: flex-end;
+  justify-content: space-between;
   gap: var(--gap-content);
   padding: var(--work-card-pad);
   padding-top: 0;
+}
+
+.work-card-swap {
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 /* TITLE ↔ DESCRIPTION — one slot, two layers. Both sit in the SAME grid cell,
@@ -313,6 +324,13 @@ html.has-top-nav.is-work-in #work-section .site-container {
 /* NO HOVER (phones, tablets): nothing to reveal it, so the description simply
    sits under the title, always visible. */
 @media (hover: none) {
+  .work-card-text {
+    align-items: flex-start;
+  }
+  .work-card-meta {
+    margin-bottom: 0;
+    margin-top: var(--pill-nudge);
+  }
   .work-card-swap {
     display: flex;
     flex-direction: column;
@@ -361,14 +379,16 @@ html.has-top-nav.is-work-in #work-section .site-container {
   color: var(--color-text);
 }
 
-/* Per-card meta row, under the title: the lock badge (gated projects only) and
-   one "SHIPPED · 2023 ↗" pill. The company stamp that sat beside the pill was
-   dropped 2026-09; the year moved into the pill. */
+/* Per-card pill, on the title's row (2026-10): ONE pill — the year, with the lock
+   in front where the full case study is gated, "Concept ·" / "Coming soon ·" where
+   those apply. "Shipped" and the ↗ arrow are gone. It is centred on the title's
+   line (--pill-nudge, from .work-card-text) rather than on the whole swap cell,
+   which is taller when a two-line description is on show. */
 .work-card-meta {
+  flex: none;
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 0.7rem;
+  margin-bottom: var(--pill-nudge);
 }
 
 .work-card-pill {
@@ -388,64 +408,27 @@ html.has-top-nav.is-work-in #work-section .site-container {
   white-space: nowrap;
 }
 
-/* CREAM CHIPS — every piece of the meta row (the pills, "Coming soon" and the
-   lock circle) is the page's own cream (--color-bg, #FBFCF8, written as rgb so
-   it can be part-transparent) at 0.9, inside the same 0.5px hairline. No blur:
-   the chips sit on the card's flat panel, so there was nothing behind them to
-   frost. "Coming soon" (Loop, Groups) is the same chip with no arrow or year;
-   it opens the row, in the slot the lock takes on the gated cards, because both
-   qualify what is behind the card. */
-.work-card-pill,
-.work-card-lock {
+/* CREAM CHIP — the pill is the page's own cream (--color-bg, #FBFCF8, written as
+   rgb so it can be part-transparent) at 0.9, inside the same 0.5px hairline. No
+   blur: it sits on the card's flat panel, so there was nothing behind it to frost. */
+.work-card-pill {
   background-color: rgba(251, 252, 248, 0.9);
 }
 
-.work-card-pill-arrow {
-  font-size: 1.15em;
-  line-height: 0;
-}
+/* The lock, inside the pill, in front of the year. Gated projects only
+   (Accessibility, Messaging, and Loop's parked card); Groups and the concept
+   have nothing gated and must not get one.
 
-/* Lock badge — OPENS the meta row on the two projects whose FULL CASE STUDY is
-   password-gated (Accessibility, Messaging). Loop and Groups have nothing gated
-   and must not get one. First position, so the row reads lock → SHIPPED ↗ →
-   Meta · 2026: the gate is the qualifier on everything after it, not a footnote
-   trailing the provenance.
-
-   ⚠️ WHAT IT CLAIMS. The card itself is not locked: it links to a project
-   overview page that is entirely public. The gate is one step further in, on the
-   Figma deck that page's "Full case study" card points to. That is why the
-   accessible name is "Full case study locked" and not "Locked" — the site's
-   standing rule is that a lock names the thing that IS locked (see the section
-   pill that lost its chip in 2026-08 for the same mistake made the other way).
-   Keep the badge and its label together if this moves.
-
-   THE CIRCLE IS THE PILL'S BOX, restated. Same hairline, same 13px scale, same
-   0.4em padding — so it stands exactly as tall as "SHIPPED ↗" beside it and
-   tracks it automatically if that type ever changes tier. The height is spelled
-   out as its parts rather than hard-coded to 31.9px for that reason:
-     1.5em  the line box (--size-xs x the body's 1.5 line-height)
-   + 0.8em  the pill's 0.4em padding, top and bottom
-   + 1px    both 0.5px hairlines */
-.work-card-lock {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex: none;
-  width: calc(1.5em + 0.8em + 1px);
-  height: calc(1.5em + 0.8em + 1px);
-  border: 0.5px solid rgba(0, 0, 0, 0.22); /* the pill's hairline, not --color-border */
-  border-radius: 50%;
-  font-size: var(--size-xs);
-  color: var(--color-text-70);
-}
-
-/* 1.15em ≈ 15px against .next-case-lock's 1em — a touch larger because it sits
-   inside a ring here rather than beside text, and reads small otherwise. Same
-   24-unit viewBox and 1.5 stroke as that one: ONE padlock on the site. */
+   ⚠️ WHAT IT CLAIMS. The card itself is not locked: the gate is the Figma deck.
+   That is why the hidden label beside it reads "Full case study locked" and not
+   "Locked" — a lock names the thing that IS locked. Keep the icon and its label
+   together if this moves. Same 24-unit viewBox and 1.5 stroke as
+   .next-case-lock: ONE padlock on the site. */
 .work-card-lock-icon {
-  width: 1.15em;
-  height: 1.15em;
+  width: 1.1em;
+  height: 1.1em;
   display: block;
+  flex: none;
 }
 
 /* ============================================================
