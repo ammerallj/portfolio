@@ -245,7 +245,12 @@ html.has-top-nav.is-work-in #work-section .site-container {
   align-items: flex-end;
   justify-content: center; /* the content is CENTRED in the card (2026-10, trial) */
   gap: 12px;
+  /* LOWER (2026-10): the text sits nearer the card's bottom edge — 62.5% of the
+     card padding (20 / 17.5 / 12.5px by tier). The hover description reads the
+     same token so it lands on the same line. */
+  --work-card-pad-bottom: calc(var(--work-card-pad) * 0.625);
   padding: var(--work-card-pad);
+  padding-bottom: var(--work-card-pad-bottom);
   padding-top: 0;
 }
 
@@ -309,8 +314,8 @@ html.has-top-nav.is-work-in #work-section .site-container {
 /* CENTRED CONTENT (2026-10): at rest the pill + title centre in the card as one
    unit (the swap slot is as wide as the TITLE only). On hover the whole unit —
    pill included — is REPLACED by the description, which is lifted out of the grid
-   and centred on the CARD (its containing block is .work-card-text, not the
-   slot), up to 28em wide. The slot reserves two lines of height so a two-line
+   and spans the card's FULL inner width (its containing block is .work-card-text,
+   not the slot), centred. The slot reserves two lines of height so a two-line
    description never grows the card on hover (it would reflow the masonry under
    the pointer). */
 @media (hover: hover) {
@@ -322,11 +327,10 @@ html.has-top-nav.is-work-in #work-section .site-container {
   }
   .work-card-description {
     position: absolute;
-    left: 50%;
-    bottom: var(--work-card-pad);
-    width: max-content;
-    max-width: 28em;
-    transform: translateX(-50%);
+    left: var(--work-card-pad);
+    right: var(--work-card-pad);
+    bottom: var(--work-card-pad-bottom);
+    text-align: center;
   }
   .work-card-meta {
     transition:
