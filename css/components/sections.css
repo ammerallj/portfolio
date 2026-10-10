@@ -181,6 +181,11 @@ html.has-top-nav.is-work-in #work-section .site-container {
    hover; it fades in only once it has loaded, so the frame never flashes
    empty. Touch and reduced motion keep the still. */
 .work-card-hover {
+  /* --hover-lift (per card, inline): brightens the hover layer so its white matches
+     the card's. Loop's GIF is encoded with its white at 252 (palette rounding),
+     the still and the card are 255, and the 3-level step showed as a horizontal
+     edge across the card on hover. 1.012 x 252 = 255. */
+  filter: brightness(var(--hover-lift, 1));
   opacity: 0;
   transition: opacity 0.25s ease;
   pointer-events: none;
