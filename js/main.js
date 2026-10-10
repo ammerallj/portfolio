@@ -121,10 +121,10 @@ const siteFooter = document.querySelector('.site-footer');
 // pages end on cream, so this is null there and both features simply stay off.
 const darkPanel = document.getElementById('contact');
 // How far the sticky bar's frosted glass reaches past its own bottom edge. Must
-// match the `24px` fallback in hero.css's .intro-bar::before — that fallback is
+// match the `36px` fallback in hero.css's .intro-bar::before — that fallback is
 // what a no-JS visitor gets, and it is the correct value everywhere except the
 // approach to Contact.
-const BAR_BLEED = 24; // was 100, then 48 — shortened 2026-10; keep in step with hero.css's --bar-bleed fallback
+const BAR_BLEED = 36; // was 100, then 48, then 24 — shortened 2026-10; keep in step with hero.css's --bar-bleed fallback
 // How much approach the bar's colour change is spread over, in px of scroll, and
 // the point in it where the LABELS switch.
 //
@@ -253,10 +253,10 @@ const CONTACT = {
   // hold, putting the JS 8 code values under the CSS right at the nav item's
   // bottom — the one place the two must agree, since that is where the bar's
   // fill is repairing the most opaque part of the frost.
-  frost: [[0, 0.7], [50, 0.7], [55.0, 0.6699], [60.0, 0.5906], [65.0, 0.4785], [70.0, 0.35], [75.0, 0.2215], [80.0, 0.1094], [85.0, 0.0301], [90.0, 0.0]],
+  frost: [[0, 0.7], [50, 0.7], [56.5, 0.6699], [63.0, 0.5906], [69.5, 0.4785], [76.0, 0.35], [82.5, 0.2215], [89.0, 0.1094], [95.5, 0.0301], [102.0, 0.0]],
   // How far past the bar the fill is built. The bar's ::before runs
-  // --bar-bleed + 2px past its own box, and BAR_BLEED is its 24px maximum.
-  fillDepth: 100, // box height (64 + BAR_BLEED + 2) + 10
+  // --bar-bleed + 2px past its own box, and BAR_BLEED is its 36px maximum.
+  fillDepth: 112, // box height (64 + BAR_BLEED + 2) + 10
   peek: {
     // Parallax distance as a fraction of the window, and its ceiling in px.
     rate: 0.5,
