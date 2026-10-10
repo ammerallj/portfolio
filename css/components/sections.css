@@ -99,7 +99,8 @@ html.has-top-nav.is-work-in #work-section .site-container {
   display: flex;
   flex-direction: column;
   border-radius: var(--work-card-radius);
-  /* No outline (2026-10): the white card stands on the page by its fill alone. */
+  /* The hairline is back (2026-10) in a lighter grey than the old 12% black. */
+  border: 1px solid rgba(0, 0, 0, 0.07);
   /* REDESIGN: white (was rgba(0,0,0,0.025) — a cream panel). */
   background-color: #fff;
   overflow: hidden;
