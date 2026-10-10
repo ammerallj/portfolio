@@ -1266,7 +1266,7 @@ html.has-top-nav.is-bar-docked .intro-bar {
      now sits below the overlap, over the panel, where it cannot be seen.
      ⚠️ Moving the BAR down instead would open the same gap at the top of the
      viewport once it docks. Paint lower, don't sit lower. */
-  bottom: calc((var(--bar-bleed, 48px) + 2px) * -1);
+  bottom: calc((var(--bar-bleed, 24px) + 2px) * -1);
   z-index: -1;
   /* Frosted overlay that BLEEDS: the cream fill is a top→bottom GRADIENT — opaque
      behind the nav row (so the items stay legible over busy content) fading to 0
@@ -1284,7 +1284,7 @@ html.has-top-nav.is-bar-docked .intro-bar {
 
      ⚠️ THE FADE NOW STARTS AT THE LOWEST NAV ITEM (50px — the "Say hello" pill's
      bottom, measured; the wordmark ends at 47 and the links at 44) AND RUNS TO 0
-     ACROSS THE WHOLE REMAINING BOX (114px at full bleed; was 166 — shortened 2026-10, Jenna: "the nav blur extends too far down"). It used to hold ~full
+     ACROSS THE WHOLE REMAINING BOX (90px at full bleed; was 166 — shortened 2026-10, Jenna: "the nav blur extends too far down"). It used to hold ~full
      to 69px — 19px BELOW the type — and then drop 0.92 → 0 in 43px, which is
      what read as the cream ending on a line: full strength level with nothing,
      then a short steep ramp.
@@ -1340,22 +1340,22 @@ html.has-top-nav.is-bar-docked .intro-bar {
     linear-gradient(to bottom,
       rgba(251, 252, 248, 0.70) 0,
       rgba(251, 252, 248, 0.7000) 50.0px,
-      rgba(251, 252, 248, 0.6921) 54.0px,
-      rgba(251, 252, 248, 0.6699) 58.0px,
-      rgba(251, 252, 248, 0.6354) 62.0px,
-      rgba(251, 252, 248, 0.5906) 66.0px,
-      rgba(251, 252, 248, 0.5376) 70.0px,
-      rgba(251, 252, 248, 0.4785) 74.0px,
-      rgba(251, 252, 248, 0.4153) 78.0px,
-      rgba(251, 252, 248, 0.3500) 82.0px,
-      rgba(251, 252, 248, 0.2847) 86.0px,
-      rgba(251, 252, 248, 0.2215) 90.0px,
-      rgba(251, 252, 248, 0.1624) 94.0px,
-      rgba(251, 252, 248, 0.1094) 98.0px,
-      rgba(251, 252, 248, 0.0646) 102.0px,
-      rgba(251, 252, 248, 0.0301) 106.0px,
-      rgba(251, 252, 248, 0.0079) 110.0px,
-      rgba(251, 252, 248, 0.0000) 114.0px);
+      rgba(251, 252, 248, 0.6921) 52.5px,
+      rgba(251, 252, 248, 0.6699) 55.0px,
+      rgba(251, 252, 248, 0.6354) 57.5px,
+      rgba(251, 252, 248, 0.5906) 60.0px,
+      rgba(251, 252, 248, 0.5376) 62.5px,
+      rgba(251, 252, 248, 0.4785) 65.0px,
+      rgba(251, 252, 248, 0.4153) 67.5px,
+      rgba(251, 252, 248, 0.3500) 70.0px,
+      rgba(251, 252, 248, 0.2847) 72.5px,
+      rgba(251, 252, 248, 0.2215) 75.0px,
+      rgba(251, 252, 248, 0.1624) 77.5px,
+      rgba(251, 252, 248, 0.1094) 80.0px,
+      rgba(251, 252, 248, 0.0646) 82.5px,
+      rgba(251, 252, 248, 0.0301) 85.0px,
+      rgba(251, 252, 248, 0.0079) 87.5px,
+      rgba(251, 252, 248, 0.0000) 90.0px);
   /* THE CREAM IS LIGHT (peak 0.70, was 0.95 — 2026-10, Jenna: "I still see the nav
      cream line. I want a blur effect"): the 16px backdrop blur does the work and
      the page shows through it; a near-opaque cream hid the page and ended on an
@@ -1381,33 +1381,33 @@ html.has-top-nav.is-bar-docked .intro-bar {
      stops are fractions of the (variable) bleed + 1px. */
   -webkit-mask-image: linear-gradient(to bottom,
     #000 0,
-    #000 calc(100% - var(--bar-bleed, 48px) - 1px),
-    rgba(0, 0, 0, 0.9803) calc(100% - var(--bar-bleed, 48px) - 1px + (var(--bar-bleed, 48px) + 1px) * 0.0833),
-    rgba(0, 0, 0, 0.9259) calc(100% - var(--bar-bleed, 48px) - 1px + (var(--bar-bleed, 48px) + 1px) * 0.1667),
-    rgba(0, 0, 0, 0.8438) calc(100% - var(--bar-bleed, 48px) - 1px + (var(--bar-bleed, 48px) + 1px) * 0.2500),
-    rgba(0, 0, 0, 0.7407) calc(100% - var(--bar-bleed, 48px) - 1px + (var(--bar-bleed, 48px) + 1px) * 0.3333),
-    rgba(0, 0, 0, 0.6238) calc(100% - var(--bar-bleed, 48px) - 1px + (var(--bar-bleed, 48px) + 1px) * 0.4167),
-    rgba(0, 0, 0, 0.5000) calc(100% - var(--bar-bleed, 48px) - 1px + (var(--bar-bleed, 48px) + 1px) * 0.5000),
-    rgba(0, 0, 0, 0.3762) calc(100% - var(--bar-bleed, 48px) - 1px + (var(--bar-bleed, 48px) + 1px) * 0.5833),
-    rgba(0, 0, 0, 0.2593) calc(100% - var(--bar-bleed, 48px) - 1px + (var(--bar-bleed, 48px) + 1px) * 0.6667),
-    rgba(0, 0, 0, 0.1562) calc(100% - var(--bar-bleed, 48px) - 1px + (var(--bar-bleed, 48px) + 1px) * 0.7500),
-    rgba(0, 0, 0, 0.0741) calc(100% - var(--bar-bleed, 48px) - 1px + (var(--bar-bleed, 48px) + 1px) * 0.8333),
-    rgba(0, 0, 0, 0.0197) calc(100% - var(--bar-bleed, 48px) - 1px + (var(--bar-bleed, 48px) + 1px) * 0.9167),
+    #000 calc(100% - var(--bar-bleed, 24px) - 1px),
+    rgba(0, 0, 0, 0.9803) calc(100% - var(--bar-bleed, 24px) - 1px + (var(--bar-bleed, 24px) + 1px) * 0.0833),
+    rgba(0, 0, 0, 0.9259) calc(100% - var(--bar-bleed, 24px) - 1px + (var(--bar-bleed, 24px) + 1px) * 0.1667),
+    rgba(0, 0, 0, 0.8438) calc(100% - var(--bar-bleed, 24px) - 1px + (var(--bar-bleed, 24px) + 1px) * 0.2500),
+    rgba(0, 0, 0, 0.7407) calc(100% - var(--bar-bleed, 24px) - 1px + (var(--bar-bleed, 24px) + 1px) * 0.3333),
+    rgba(0, 0, 0, 0.6238) calc(100% - var(--bar-bleed, 24px) - 1px + (var(--bar-bleed, 24px) + 1px) * 0.4167),
+    rgba(0, 0, 0, 0.5000) calc(100% - var(--bar-bleed, 24px) - 1px + (var(--bar-bleed, 24px) + 1px) * 0.5000),
+    rgba(0, 0, 0, 0.3762) calc(100% - var(--bar-bleed, 24px) - 1px + (var(--bar-bleed, 24px) + 1px) * 0.5833),
+    rgba(0, 0, 0, 0.2593) calc(100% - var(--bar-bleed, 24px) - 1px + (var(--bar-bleed, 24px) + 1px) * 0.6667),
+    rgba(0, 0, 0, 0.1562) calc(100% - var(--bar-bleed, 24px) - 1px + (var(--bar-bleed, 24px) + 1px) * 0.7500),
+    rgba(0, 0, 0, 0.0741) calc(100% - var(--bar-bleed, 24px) - 1px + (var(--bar-bleed, 24px) + 1px) * 0.8333),
+    rgba(0, 0, 0, 0.0197) calc(100% - var(--bar-bleed, 24px) - 1px + (var(--bar-bleed, 24px) + 1px) * 0.9167),
     transparent 100%);
   mask-image: linear-gradient(to bottom,
     #000 0,
-    #000 calc(100% - var(--bar-bleed, 48px) - 1px),
-    rgba(0, 0, 0, 0.9803) calc(100% - var(--bar-bleed, 48px) - 1px + (var(--bar-bleed, 48px) + 1px) * 0.0833),
-    rgba(0, 0, 0, 0.9259) calc(100% - var(--bar-bleed, 48px) - 1px + (var(--bar-bleed, 48px) + 1px) * 0.1667),
-    rgba(0, 0, 0, 0.8438) calc(100% - var(--bar-bleed, 48px) - 1px + (var(--bar-bleed, 48px) + 1px) * 0.2500),
-    rgba(0, 0, 0, 0.7407) calc(100% - var(--bar-bleed, 48px) - 1px + (var(--bar-bleed, 48px) + 1px) * 0.3333),
-    rgba(0, 0, 0, 0.6238) calc(100% - var(--bar-bleed, 48px) - 1px + (var(--bar-bleed, 48px) + 1px) * 0.4167),
-    rgba(0, 0, 0, 0.5000) calc(100% - var(--bar-bleed, 48px) - 1px + (var(--bar-bleed, 48px) + 1px) * 0.5000),
-    rgba(0, 0, 0, 0.3762) calc(100% - var(--bar-bleed, 48px) - 1px + (var(--bar-bleed, 48px) + 1px) * 0.5833),
-    rgba(0, 0, 0, 0.2593) calc(100% - var(--bar-bleed, 48px) - 1px + (var(--bar-bleed, 48px) + 1px) * 0.6667),
-    rgba(0, 0, 0, 0.1562) calc(100% - var(--bar-bleed, 48px) - 1px + (var(--bar-bleed, 48px) + 1px) * 0.7500),
-    rgba(0, 0, 0, 0.0741) calc(100% - var(--bar-bleed, 48px) - 1px + (var(--bar-bleed, 48px) + 1px) * 0.8333),
-    rgba(0, 0, 0, 0.0197) calc(100% - var(--bar-bleed, 48px) - 1px + (var(--bar-bleed, 48px) + 1px) * 0.9167),
+    #000 calc(100% - var(--bar-bleed, 24px) - 1px),
+    rgba(0, 0, 0, 0.9803) calc(100% - var(--bar-bleed, 24px) - 1px + (var(--bar-bleed, 24px) + 1px) * 0.0833),
+    rgba(0, 0, 0, 0.9259) calc(100% - var(--bar-bleed, 24px) - 1px + (var(--bar-bleed, 24px) + 1px) * 0.1667),
+    rgba(0, 0, 0, 0.8438) calc(100% - var(--bar-bleed, 24px) - 1px + (var(--bar-bleed, 24px) + 1px) * 0.2500),
+    rgba(0, 0, 0, 0.7407) calc(100% - var(--bar-bleed, 24px) - 1px + (var(--bar-bleed, 24px) + 1px) * 0.3333),
+    rgba(0, 0, 0, 0.6238) calc(100% - var(--bar-bleed, 24px) - 1px + (var(--bar-bleed, 24px) + 1px) * 0.4167),
+    rgba(0, 0, 0, 0.5000) calc(100% - var(--bar-bleed, 24px) - 1px + (var(--bar-bleed, 24px) + 1px) * 0.5000),
+    rgba(0, 0, 0, 0.3762) calc(100% - var(--bar-bleed, 24px) - 1px + (var(--bar-bleed, 24px) + 1px) * 0.5833),
+    rgba(0, 0, 0, 0.2593) calc(100% - var(--bar-bleed, 24px) - 1px + (var(--bar-bleed, 24px) + 1px) * 0.6667),
+    rgba(0, 0, 0, 0.1562) calc(100% - var(--bar-bleed, 24px) - 1px + (var(--bar-bleed, 24px) + 1px) * 0.7500),
+    rgba(0, 0, 0, 0.0741) calc(100% - var(--bar-bleed, 24px) - 1px + (var(--bar-bleed, 24px) + 1px) * 0.8333),
+    rgba(0, 0, 0, 0.0197) calc(100% - var(--bar-bleed, 24px) - 1px + (var(--bar-bleed, 24px) + 1px) * 0.9167),
     transparent 100%);
   opacity: 0;
   /* opacity only. background-color has not changed here since the fill became a
@@ -1442,11 +1442,11 @@ html.has-top-nav.is-bar-docked .intro-bar {
   left: 0;
   right: 0;
   top: 0;
-  bottom: calc((var(--bar-bleed, 48px) + 2px) * -1);
+  bottom: calc((var(--bar-bleed, 24px) + 2px) * -1);
   z-index: -2;
   pointer-events: none;
   --bar: 64px;
-  --b: var(--bar-bleed, 48px);
+  --b: var(--bar-bleed, 24px);
   --dm: calc(1 - var(--dark-mix, 0));
 }
 
@@ -1495,7 +1495,7 @@ html.has-top-nav.is-bar-docked .intro-bar {
   /* The grain's own tail is shorter than the blur's, and it takes the same clip:
      min() means it keeps its 40px until --bar-bleed drops below that, then
      shrinks with it. Nothing to publish separately. */
-  bottom: calc(min(40px, var(--bar-bleed, 48px)) * -1);
+  bottom: calc(min(40px, var(--bar-bleed, 24px)) * -1);
   z-index: -1;
   background-image: var(--nav-grain);
   background-size: 160px 160px;
@@ -1511,35 +1511,35 @@ html.has-top-nav.is-bar-docked .intro-bar {
   -webkit-mask-image:
     linear-gradient(to bottom,
       #000 0,
-      #000 calc(100% - min(40px, var(--bar-bleed, 48px))),
-      rgba(0, 0, 0, 0.9803) calc(100% - min(40px, var(--bar-bleed, 48px)) + min(40px, var(--bar-bleed, 48px)) * 0.0833),
-      rgba(0, 0, 0, 0.9259) calc(100% - min(40px, var(--bar-bleed, 48px)) + min(40px, var(--bar-bleed, 48px)) * 0.1667),
-      rgba(0, 0, 0, 0.8438) calc(100% - min(40px, var(--bar-bleed, 48px)) + min(40px, var(--bar-bleed, 48px)) * 0.2500),
-      rgba(0, 0, 0, 0.7407) calc(100% - min(40px, var(--bar-bleed, 48px)) + min(40px, var(--bar-bleed, 48px)) * 0.3333),
-      rgba(0, 0, 0, 0.6238) calc(100% - min(40px, var(--bar-bleed, 48px)) + min(40px, var(--bar-bleed, 48px)) * 0.4167),
-      rgba(0, 0, 0, 0.5000) calc(100% - min(40px, var(--bar-bleed, 48px)) + min(40px, var(--bar-bleed, 48px)) * 0.5000),
-      rgba(0, 0, 0, 0.3762) calc(100% - min(40px, var(--bar-bleed, 48px)) + min(40px, var(--bar-bleed, 48px)) * 0.5833),
-      rgba(0, 0, 0, 0.2593) calc(100% - min(40px, var(--bar-bleed, 48px)) + min(40px, var(--bar-bleed, 48px)) * 0.6667),
-      rgba(0, 0, 0, 0.1562) calc(100% - min(40px, var(--bar-bleed, 48px)) + min(40px, var(--bar-bleed, 48px)) * 0.7500),
-      rgba(0, 0, 0, 0.0741) calc(100% - min(40px, var(--bar-bleed, 48px)) + min(40px, var(--bar-bleed, 48px)) * 0.8333),
-      rgba(0, 0, 0, 0.0197) calc(100% - min(40px, var(--bar-bleed, 48px)) + min(40px, var(--bar-bleed, 48px)) * 0.9167),
+      #000 calc(100% - min(40px, var(--bar-bleed, 24px))),
+      rgba(0, 0, 0, 0.9803) calc(100% - min(40px, var(--bar-bleed, 24px)) + min(40px, var(--bar-bleed, 24px)) * 0.0833),
+      rgba(0, 0, 0, 0.9259) calc(100% - min(40px, var(--bar-bleed, 24px)) + min(40px, var(--bar-bleed, 24px)) * 0.1667),
+      rgba(0, 0, 0, 0.8438) calc(100% - min(40px, var(--bar-bleed, 24px)) + min(40px, var(--bar-bleed, 24px)) * 0.2500),
+      rgba(0, 0, 0, 0.7407) calc(100% - min(40px, var(--bar-bleed, 24px)) + min(40px, var(--bar-bleed, 24px)) * 0.3333),
+      rgba(0, 0, 0, 0.6238) calc(100% - min(40px, var(--bar-bleed, 24px)) + min(40px, var(--bar-bleed, 24px)) * 0.4167),
+      rgba(0, 0, 0, 0.5000) calc(100% - min(40px, var(--bar-bleed, 24px)) + min(40px, var(--bar-bleed, 24px)) * 0.5000),
+      rgba(0, 0, 0, 0.3762) calc(100% - min(40px, var(--bar-bleed, 24px)) + min(40px, var(--bar-bleed, 24px)) * 0.5833),
+      rgba(0, 0, 0, 0.2593) calc(100% - min(40px, var(--bar-bleed, 24px)) + min(40px, var(--bar-bleed, 24px)) * 0.6667),
+      rgba(0, 0, 0, 0.1562) calc(100% - min(40px, var(--bar-bleed, 24px)) + min(40px, var(--bar-bleed, 24px)) * 0.7500),
+      rgba(0, 0, 0, 0.0741) calc(100% - min(40px, var(--bar-bleed, 24px)) + min(40px, var(--bar-bleed, 24px)) * 0.8333),
+      rgba(0, 0, 0, 0.0197) calc(100% - min(40px, var(--bar-bleed, 24px)) + min(40px, var(--bar-bleed, 24px)) * 0.9167),
       transparent 100%),
     linear-gradient(rgba(0, 0, 0, calc(1 - var(--dark-mix, 0))), rgba(0, 0, 0, calc(1 - var(--dark-mix, 0))));
   mask-image:
     linear-gradient(to bottom,
       #000 0,
-      #000 calc(100% - min(40px, var(--bar-bleed, 48px))),
-      rgba(0, 0, 0, 0.9803) calc(100% - min(40px, var(--bar-bleed, 48px)) + min(40px, var(--bar-bleed, 48px)) * 0.0833),
-      rgba(0, 0, 0, 0.9259) calc(100% - min(40px, var(--bar-bleed, 48px)) + min(40px, var(--bar-bleed, 48px)) * 0.1667),
-      rgba(0, 0, 0, 0.8438) calc(100% - min(40px, var(--bar-bleed, 48px)) + min(40px, var(--bar-bleed, 48px)) * 0.2500),
-      rgba(0, 0, 0, 0.7407) calc(100% - min(40px, var(--bar-bleed, 48px)) + min(40px, var(--bar-bleed, 48px)) * 0.3333),
-      rgba(0, 0, 0, 0.6238) calc(100% - min(40px, var(--bar-bleed, 48px)) + min(40px, var(--bar-bleed, 48px)) * 0.4167),
-      rgba(0, 0, 0, 0.5000) calc(100% - min(40px, var(--bar-bleed, 48px)) + min(40px, var(--bar-bleed, 48px)) * 0.5000),
-      rgba(0, 0, 0, 0.3762) calc(100% - min(40px, var(--bar-bleed, 48px)) + min(40px, var(--bar-bleed, 48px)) * 0.5833),
-      rgba(0, 0, 0, 0.2593) calc(100% - min(40px, var(--bar-bleed, 48px)) + min(40px, var(--bar-bleed, 48px)) * 0.6667),
-      rgba(0, 0, 0, 0.1562) calc(100% - min(40px, var(--bar-bleed, 48px)) + min(40px, var(--bar-bleed, 48px)) * 0.7500),
-      rgba(0, 0, 0, 0.0741) calc(100% - min(40px, var(--bar-bleed, 48px)) + min(40px, var(--bar-bleed, 48px)) * 0.8333),
-      rgba(0, 0, 0, 0.0197) calc(100% - min(40px, var(--bar-bleed, 48px)) + min(40px, var(--bar-bleed, 48px)) * 0.9167),
+      #000 calc(100% - min(40px, var(--bar-bleed, 24px))),
+      rgba(0, 0, 0, 0.9803) calc(100% - min(40px, var(--bar-bleed, 24px)) + min(40px, var(--bar-bleed, 24px)) * 0.0833),
+      rgba(0, 0, 0, 0.9259) calc(100% - min(40px, var(--bar-bleed, 24px)) + min(40px, var(--bar-bleed, 24px)) * 0.1667),
+      rgba(0, 0, 0, 0.8438) calc(100% - min(40px, var(--bar-bleed, 24px)) + min(40px, var(--bar-bleed, 24px)) * 0.2500),
+      rgba(0, 0, 0, 0.7407) calc(100% - min(40px, var(--bar-bleed, 24px)) + min(40px, var(--bar-bleed, 24px)) * 0.3333),
+      rgba(0, 0, 0, 0.6238) calc(100% - min(40px, var(--bar-bleed, 24px)) + min(40px, var(--bar-bleed, 24px)) * 0.4167),
+      rgba(0, 0, 0, 0.5000) calc(100% - min(40px, var(--bar-bleed, 24px)) + min(40px, var(--bar-bleed, 24px)) * 0.5000),
+      rgba(0, 0, 0, 0.3762) calc(100% - min(40px, var(--bar-bleed, 24px)) + min(40px, var(--bar-bleed, 24px)) * 0.5833),
+      rgba(0, 0, 0, 0.2593) calc(100% - min(40px, var(--bar-bleed, 24px)) + min(40px, var(--bar-bleed, 24px)) * 0.6667),
+      rgba(0, 0, 0, 0.1562) calc(100% - min(40px, var(--bar-bleed, 24px)) + min(40px, var(--bar-bleed, 24px)) * 0.7500),
+      rgba(0, 0, 0, 0.0741) calc(100% - min(40px, var(--bar-bleed, 24px)) + min(40px, var(--bar-bleed, 24px)) * 0.8333),
+      rgba(0, 0, 0, 0.0197) calc(100% - min(40px, var(--bar-bleed, 24px)) + min(40px, var(--bar-bleed, 24px)) * 0.9167),
       transparent 100%),
     linear-gradient(rgba(0, 0, 0, calc(1 - var(--dark-mix, 0))), rgba(0, 0, 0, calc(1 - var(--dark-mix, 0))));
   /* webkit spells `intersect` as `source-in`; both are needed. */
