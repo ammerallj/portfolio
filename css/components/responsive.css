@@ -265,7 +265,8 @@ html.is-hero-stacked {
     --next-case-title-size: 1.75rem; /* 28px — one notch under the block heading */
     --next-case-radius: 48px;
     --work-card-radius: 32px;
-    --work-card-pad: 28px;
+    --work-card-pad: 18px; /* was 28 */
+    --work-gap: 20px;      /* was --gap-group (48) */
     /* LOCKED across the whole 1024→481 band — no clamp. The global token is
        fluid (6.67vw), which slid the display from 68.3px at 1024 down to 56 by
        768: the headline changed size and, because it's bottom-anchored to the
@@ -850,7 +851,8 @@ html.is-hero-stacked {
     --next-case-title-size: 1.75rem; /* 28px — held, not stepped */
     --next-case-radius: 24px;
     --work-card-radius: 24px;
-    --work-card-pad: 20px;
+    --work-card-pad: 14px; /* was 20 */
+    --work-gap: 16px;      /* was --gap-group (40) */
 
     /* SPACING SCALE, phone step — the tightest, and where the scale was
        derived (see the block at the top of this file). Group and section both

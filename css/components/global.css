@@ -97,7 +97,8 @@
      masonry card and the project pages' pager answer to different things.
      Radius and inner padding step with it in each responsive.css :root. */
   --work-card-radius: 40px;
-  --work-card-pad: 32px;
+  --work-card-pad: 20px; /* was 32 — tighter (2026-10) */
+  --work-gap: 24px;      /* masonry gap, columns and rows; was --gap-group (60) */
 
   --space-xs: 0.5rem;
   --space-sm: 1rem;

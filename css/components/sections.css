@@ -78,7 +78,7 @@ html.has-top-nav.is-work-in #work-section .site-container {
    grid's negative bottom margin hands back the one trailing gap the last card
    in each column carries. */
 .work-grid {
-  --work-gap: var(--gap-group);
+  /* --work-gap is a root token now (24 / 20 / 16 by tier) */
   list-style: none;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
