@@ -1351,8 +1351,7 @@ html.has-top-nav.is-work-in #work-section .site-container {
   font-size: var(--size-lg);
   font-weight: 500;
   line-height: 1.2;
-  text-transform: uppercase;
-  letter-spacing: 0;
+  letter-spacing: 0; /* first letter capitalised, no longer all caps (2026-10) */
   margin-bottom: 6px;
 }
 
