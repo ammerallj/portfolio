@@ -2089,3 +2089,31 @@ html.is-intro .page-field-grain {
 @media (prefers-reduced-motion: reduce) {
   html { transition: none; }
 }
+
+/* ============================================================
+   THE WHOLE BAR STEPS OUT WHILE THE BLUE RAMP PASSES BEHIND IT (2026-10, Jenna:
+   "this is still awkward — it doesn't happen when the hero scrolls down to Work").
+   The bar's frost and fill each paint their own version of the ramp, and they do
+   not match the page's own ramp exactly, so a step showed at the bar's bottom edge
+   (and a lighter band under it). Going hero -> Work there is nothing to match,
+   because the bar isn't there while the gradient passes. So the same here: during
+   is-nav-away (js/main.js) the frost, the progressive blur, the grain and the
+   upward glass all fade with the labels, leaving only the page's ramp on screen.
+   They return together when Contact's solid colour meets the bar.
+   Written LAST, with both state classes, so it outranks the docked/over-dark
+   opacity rules above regardless of their order.
+   ============================================================ */
+.intro-bar-blur,
+.intro-bar-feather {
+  transition: opacity 0.35s ease;
+}
+
+.intro-bar.is-nav-away::before,
+.intro-bar.is-nav-away.is-docked::before,
+.intro-bar.is-nav-away::after,
+.intro-bar.is-nav-away.is-docked::after,
+.intro-bar.is-nav-away .intro-bar-blur,
+.intro-bar.is-nav-away .intro-bar-feather {
+  opacity: 0;
+  transition-duration: 0.2s;
+}

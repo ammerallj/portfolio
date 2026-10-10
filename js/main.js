@@ -3426,7 +3426,13 @@ function updateScrollEffects() {
       // Contact's solid colour meets the bar (hero.css .is-nav-away). The 0.03
       // threshold keeps a faint ramp tail from hiding the nav early. Scrolling up
       // plays it backwards.
-      stickyBars.forEach(bar => bar.classList.toggle('is-nav-away', !flipToWhite && covered > 0.03));
+      // The ramp counts from the moment it shows anywhere in the bar's WHOLE glass —
+      // the bar plus its bleed below — not only behind the bar itself; the frost's
+      // own copy of the ramp is what stepped against the page's (hero.css, the last
+      // block), so the bar has to be out before the blue reaches it.
+      const rampInGlass = contactAlphaAt(barHeight + BAR_BLEED, blue, liveLedge) > 0.03;
+      stickyBars.forEach(bar => bar.classList.toggle('is-nav-away',
+        !flipToWhite && (covered > 0.03 || rampInGlass)));
 
       // CLIP THE FROST TO CONTACT'S TOP EDGE. The bar's glass bleeds BAR_BLEED
       // past its own bottom so it melts into the page instead of ending on a
