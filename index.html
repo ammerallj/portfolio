@@ -158,7 +158,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@200;400;500;700&family=Inter:wght@400..700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=a9fbd766" />
+  <link rel="stylesheet" href="style.css?v=fa7f39c7" />
   <!-- The landing field's JPEG fallback — PHONES ONLY since 2026-09, so the
        preload is gated to match the <picture> in <main>. Without the media
        attribute this fetches 1.4MB on every desktop and tablet visit for an
@@ -588,19 +588,17 @@
       <div class="contact-bg" aria-hidden="true"></div>
       <div class="site-container contact-inner" data-reveal-group>
         <div class="contact-hero" data-reveal>
-          <!-- The <br> is a deliberate editorial break: the line lands after
-               "here" at every width. Left to wrap on its own the wider tiers
-               break after "resonated," instead, which splits the clause. The
-               space before it collapses at the line end, so the text still
-               reads as one sentence to a screen reader. -->
-          <h2 class="contact-email" id="contact-heading">If something here <br>resonated, say hello.</h2>
+          <!-- The headline IS the email link (2026-10): "Say hello" on line one, the
+               address and an outward arrow on line two. The <br> is the editorial
+               break; the whole thing reads as one link name to a screen reader. -->
+          <h2 class="contact-email" id="contact-heading"><a href="mailto:ammerallj@gmail.com">Say hello<br>ammerallj@gmail.com<svg class="contact-email-arrow" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M6 18L18 6M8.5 6H18V15.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a></h2>
         </div>
         <div class="contact-meta">
           <div class="contact-meta-group contact-meta-connect" data-reveal>
-            <h3 class="section-label">Connect</h3>
+            <h3 class="section-label">Elsewhere</h3>
             <div class="contact-connect-links">
-              <a href="mailto:ammerallj@gmail.com">ammerallj@gmail.com<span class="visually-hidden"> (email)</span></a>
               <a href="https://www.linkedin.com/in/ammerallj/" target="_blank" rel="noopener noreferrer">LinkedIn<span class="visually-hidden"> (opens in new tab)</span></a>
+              <a href="https://github.com/ammerallj" target="_blank" rel="noopener noreferrer">GitHub<span class="visually-hidden"> (opens in new tab)</span></a>
             </div>
           </div>
           <div class="contact-mind" data-reveal>

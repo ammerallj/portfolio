@@ -1017,6 +1017,34 @@ html.has-top-nav.is-work-in #work-section .site-container {
   display: block;
 }
 
+/* The headline is the mailto link: it keeps the display type and the page's white,
+   with no underline; the arrow is an inline SVG (a text arrow at this size falls
+   back to a system font) at 0.5em, sitting on the baseline after the address. */
+.contact-email a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.contact-email-arrow {
+  display: inline-block;
+  width: 0.5em;
+  height: 0.5em;
+  margin-left: 0.14em;
+  vertical-align: baseline;
+  transition: translate 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (hover: hover) {
+  .contact-email a:hover .contact-email-arrow {
+    translate: 0.06em -0.06em;
+  }
+}
+
+.contact-email a:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 0.1em;
+}
+
 .contact-meta {
   display: flex;
   justify-content: space-between;
