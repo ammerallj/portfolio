@@ -287,10 +287,10 @@ html.has-top-nav.is-work-in #work-section .site-container {
   color: var(--color-text);
 }
 
-/* "Project name / Year": the year trails the name in the same type, muted so the
-   name leads. It is part of the heading text, so it is read with it. */
+/* "Project name / Year": the year trails the name in the same face, ExtraLight
+   so the name leads (full black — a 200 stroke is already light enough). It is part of the heading text, so it is read with it. */
 .work-card-year {
-  color: var(--color-text-70);
+  font-weight: 200; /* Hanken ExtraLight — loaded for this and the pill */
 }
 
 .work-card-description {
@@ -409,20 +409,27 @@ html.has-top-nav.is-work-in #work-section .site-container {
   border-radius: 100px;
   padding: 0.25em 0.7em; /* tight — 27px tall at 13px type (was 0.4em 0.85em, 32px) */
   min-height: calc(2em + 1px); /* the text pills' height, so an icon-only (lock) pill matches */
-  font-family: var(--font-body);
+  font-family: var(--font-heading);
   font-size: var(--size-xs); /* 13px — the site's eyebrow/meta size */
-  font-weight: 500;
+  font-weight: 200;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: var(--color-text-70);
+  color: var(--color-text);
   white-space: nowrap;
 }
 
-/* CREAM CHIP — the pill is the page's own cream (--color-bg, #FBFCF8, written as
-   rgb so it can be part-transparent) at 0.9, inside the same 0.5px hairline. No
-   blur: it sits on the card's flat panel, so there was nothing behind it to frost. */
+/* WHITE CHIP — the pill is the card's own white inside a 0.5px hairline (it was
+   page cream at 0.9 before the cards went white). */
 .work-card-pill {
-  background-color: rgba(251, 252, 248, 0.9);
+  background-color: #fff; /* the card's own white */
+}
+
+/* The locked pill is a CIRCLE: icon only, as wide as the pill is tall. */
+.work-card-pill--lock {
+  width: calc(2em + 1px);
+  padding: 0;
+  justify-content: center;
+  border-radius: 50%;
 }
 
 /* The lock, inside the pill, in front of the year. Gated projects only
