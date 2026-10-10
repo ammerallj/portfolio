@@ -168,13 +168,9 @@ html.is-hero-stacked {
 
   /* THE NAME IS LINE ONE, FLUSH LEFT (2026-10, Jenna): "Jenna Ammerall" sits
      alone on the first line (display: block comes from hero.css) and the
-     sentence runs below it — everything left-aligned. The indent and the
-     measured alignment with "designer" were both removed. */
-  /* The name is set larger than the sentence (1.5x: 108px at 1440, 144 at the 96px
-     cap). The em is the headline's, so it scales with the same clamp. */
-  .intro-headline-name {
-    font-size: 1.5em;
-  }
+     sentence runs below it — everything left-aligned, ONE size. (The name was
+     1.5x the sentence for a while; it read as disconnected from it, so it came
+     back to 1x — only the colour differs.) */
 
   /* KEEP THE BUTTON'S CORNER CLEAR. The Jenna OS button is 56px wide, 24px in
      from the right (jennaos.css), and the last line now sits on its row — so a

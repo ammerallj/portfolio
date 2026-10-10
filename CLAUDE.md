@@ -55,6 +55,27 @@ stage it until she says so. **It also carries the masonry Work section**:
 that branch again if more Work-section work lands there. Much of the landing documentation below describes
 the PRE-redesign hero and is superseded here wherever the two disagree.
 
+
+**HERO LOCKUP, CURRENT (2026-10, supersedes the two-column description below):**
+one `h1` and nothing else — no right column, no bio, no "previously" line.
+"Jenna Ammerall" is its own first line (`.intro-headline-name`, `display: block`,
+upright, 1.5× the sentence at ≥1377); the sentence "designs how products fit
+together through intentional behavior and craft." runs below it, everything
+left-aligned at the page gutter. The sentence rests at 45% black
+(`rgba(0,0,0,.45)`, ~3.4:1, large type) and **`initHeadlineFill`** wraps its words
+in `.hw` and writes a per-word ink level `--hw-a` from the cursor's position — a
+continuous grey-black ramp (peak 0.88 at the cursor, 0.70 behind it, a short
+lead ahead), with a 0.55s ease. Mouse only. An outlined-then-filled version was
+built and reverted (hard to read) — `git show b89affd`.
+At **≥1377** (`responsive.css`, before the ≤1376 block): headline
+`--hero-headline-size: clamp(64px, 5vw, 96px)`; the last line's BASELINE sits
+flush with the Jenna OS button's bottom (`.intro-band` padding-bottom =
+`24px − 0.184 × size`), the column stops 24px short of the button, and the
+gradient's white ends at the headline's top (`WIDE_FIELD_GAP` 0 in js/main.js;
+48px below 1377). ≤1376 the first Work card peeks, so none of the flush logic
+applies there. Copy history lives in `git log`; the metadata, About bio and
+llms.txt were NOT updated to match (ask before cascading).
+
 **The landing now (desktop/tablet, >680):**
 - **Hero lockup in the white lower part of the fold**, reference-style: `h1`
   "I’m Jenna Ammerall, a product / interaction designer based in Seattle."
@@ -3606,13 +3627,12 @@ own version, separate from the `style.css?v=` / `@import` CSS bump below).
   add it **everywhere**, even to pages that don't use it — the `@font-face` rules
   cost ~1.7KB of CSS there and download no woff2, because a face is only fetched
   where it actually renders. Current request (worktree-redesign):
-  `Hanken+Grotesk:ital,wght@0,200;0,500;0,700;1,500` + `Inter:wght@400..700`.
-  **The ONE italic face is Hanken 500 italic**, used by the hero's
-  `.intro-headline-italic` (the name, "Jenna Ammerall"). Any other weight or family in
-  italic still renders as a browser-sheared oblique — add its axis to **all
-  five** links first. If the hero drops the italic, take `1,500` out again
-  (it was added and removed once before, in 2026-08); don't leave an unused
-  face behind.
+  `Hanken+Grotesk:wght@200;500;700` + `Inter:wght@400..700`.
+  **No italic face is loaded** (2026-10): the hero's italic name was removed, so
+  `1,500` and the `ital` axis came out of both pages' links (index.html and
+  404.html — keep them byte-identical). Anything set in `font-style: italic` now
+  renders as a browser-sheared oblique — add the axis back to **both** links
+  first. Don't leave an unused face behind.
 - ⚠️ **AFTER A DEPLOY, HARD-RELOAD BEFORE JUDGING ANYTHING.** `index.html` has no
   cache-buster of its own (correctly — see the `?v=` entry below), so a browser
   that already has the page keeps serving the OLD html, which still names the OLD

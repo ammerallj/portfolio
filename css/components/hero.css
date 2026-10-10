@@ -1031,17 +1031,12 @@ html.is-hero-text-out .intro-band {
   display: none; /* the ≤768 scrim is for white type on the field */
 }
 
-/* "I’m Jenna Ammerall," always on its own first line (display: block makes
-   the break; the space after the span keeps the heading's text correct for
-   screen readers and crawlers). Only the NAME is italic — "I’m" and the comma
-   stay upright — in the REAL Hanken Grotesk 500 italic, loaded on all five
-   pages' font link as 1,500 (a bare font-style would be a sheared oblique). */
+/* The NAME is its own first line (display: block makes the break; the space
+   after the span keeps the heading's text correct for screen readers and
+   crawlers). It is upright — the italic was tried and removed 2026-10, along
+   with the Hanken 500 italic face on both pages' font link. */
 .intro-headline-name {
   display: block;
-}
-
-.intro-headline-italic {
-  font-style: italic;
 }
 
 .intro-previously {
