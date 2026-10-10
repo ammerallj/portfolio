@@ -284,7 +284,7 @@ html.has-top-nav.is-work-in #work-section .site-container {
   font-weight: 500;
   letter-spacing: -0.02em;
   line-height: 1.4;
-  color: var(--color-text);
+  color: var(--color-text-70); /* card content is grey, not black (2026-10) */
 }
 
 /* "Project name / Year": the year trails the name in the same face, Light
@@ -300,7 +300,7 @@ html.has-top-nav.is-work-in #work-section .site-container {
   font-weight: 400;
   letter-spacing: -0.02em;
   line-height: 1.4;
-  color: var(--color-text);
+  color: var(--color-text-70);
   max-width: none;
   opacity: 0;
   translate: 0 8px;
@@ -411,9 +411,9 @@ html.has-top-nav.is-work-in #work-section .site-container {
   min-height: calc(2em + 1px); /* the text pills' height, so an icon-only (lock) pill matches */
   font-family: var(--font-heading);
   font-size: var(--size-xs); /* 13px — the site's eyebrow/meta size */
-  font-weight: 300;
+  font-weight: 400;
   letter-spacing: 0; /* sentence case (2026-10) — the tracking was for caps */
-  color: var(--color-text);
+  color: var(--color-text-70);
   white-space: nowrap;
 }
 
