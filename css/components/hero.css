@@ -1039,6 +1039,13 @@ html.is-hero-text-out .intro-band {
   display: block;
 }
 
+/* No I-beam over the headline (2026-10): it is a hover effect, not text to
+   select, so the pointer stays the plain arrow. */
+.intro-headline,
+.intro-headline .hw {
+  cursor: default;
+}
+
 .intro-previously {
   margin: var(--gap-content) 0 0; /* was --gap-group; one block with the bio */
   font-size: var(--size-lg);
