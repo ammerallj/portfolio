@@ -155,6 +155,18 @@ html.is-hero-stacked {
   .intro-band {
     padding-bottom: calc(24px - 0.184 * var(--section-title-size));
   }
+
+  /* THE STAGGERED LOCKUP (2026-10, after Jenna's reference): every line of the
+     headline is its own block, indented by --indent percent of the column
+     (set per line in index.html). Lines never wrap here — the indents were
+     tuned so the longest, "balancing product behavior and visual craft.",
+     still fits at 1377. Below this width the lines stay inline and flow as one
+     paragraph: the indents need the room. */
+  .intro-headline-line {
+    display: block;
+    white-space: nowrap;
+    margin-left: calc(var(--indent, 0) * 1%);
+  }
 }
 
 /* ============================================================
