@@ -267,7 +267,7 @@
      ⚠️ RAISE THE TAIL, NOT THE RESTING LEDGE, to get more cream: if both move
      together the geometry is IDENTICAL and all that happens is Contact is pushed
      further down the page for nothing. */
-  --contact-ledge-rest: 160px; /* back to 160 (2026-10): the scrim is long again, the GAP is what was shortened — see --about-tail */
+  --contact-ledge-rest: clamp(180px, 26svh, 300px); /* the hero's stretch, in reverse (2026-10, Jenna): the white-to-blue scrim is APPENDED to About's bottom and is as long as the landing's own scrim — 234px at 900 tall (hero: --field-fade ~229). svh, like the hero. */
   /* ⚠️ THE LEDGE PAINTS PAST THE PANEL'S TOP EDGE BY THIS MUCH, and it is the
      same fix the landing bar's ::before already carries for the same reason.
      Contact's top does NOT land on a whole pixel — it is the sum of everything
@@ -280,7 +280,7 @@
      ⚠️ THE HEIGHT ADDS THE SAME AMOUNT so the ledge's TOP does not move; only its
      bottom crosses into the panel, where nothing can see it. */
   --contact-ledge-overlap: 2px;
-  --about-tail: calc(var(--contact-ledge-rest) - 32px); /* 128px: the SCRIM is 160 tall but its top 32px overlaps About's own bottom padding (the curve is ~transparent there), so the gap from About's last block to solid blue is 128 while the fade stays long (2026-10, Jenna: 'longer scrim?') */
+  --about-tail: calc(var(--contact-ledge-rest) + 32px); /* the scrim, then 32px of clear cream between About's last block and its top */
 
   /* Height of the site footer. A DEFAULT, not the truth: initSectionGeometry
      measures the real footer and rewrites this on load and resize, so the value

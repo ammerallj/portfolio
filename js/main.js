@@ -441,7 +441,7 @@ const ABOUT_LIFT = { speed: 0, fadeAt: 0.5, gap: 16 }; // lift OFF (was 0.8); fa
 // Contact's copy RIDES the blue on the way in: its heading holds `ride` px
 // under the blue's top, then settles into its centred resting place as the page
 // lands — so the blue never arrives as an empty band ahead of the content.
-const CONTACT_COPY = { ride: null, navRamp: 96 }; // ride OFF (was 128): the copy reveals in order instead
+const CONTACT_COPY = { ride: null, navRamp: 200 }; // ride OFF (was 128): the copy reveals in order instead. navRamp 96 -> 200 (2026-10): the nav is hidden while the blue passes it now, so the scrim keeps its hero-like stretch instead of being squeezed to sweep by
 let contactQ = 1;
 // ...and the fourth part, the one that sets the PACE: Contact is laid out
 // SHORTER by `px` (capped at `cap` of the About → Contact scroll), pulled back
