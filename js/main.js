@@ -2294,6 +2294,58 @@ function initNavMorph() {
 }
 
 initNavMorph();
+
+// THE HEADLINE FILLS AS YOU READ (2026-10, Jenna). Only the name is black; the
+// rest of the sentence rests grey (hero.css). Hovering the text fills the words
+// from the start up to the one under the cursor, so the cursor "reads" the
+// sentence. Words are wrapped in .hw (spaces stay plain text, so the heading
+// still reads as one string). Each word newly lit gets a short delay by how far
+// the fill has to travel, so a sweep reads as a fill, not a blink.
+// Mouse-only (hover: hover); touch and reduced-motion keep the resting state.
+function initHeadlineFill() {
+  const h1 = document.querySelector('.intro-headline');
+  if (!h1 || !window.matchMedia('(hover: hover)').matches) return;
+  const name = h1.querySelector('.intro-headline-name');
+  const words = [];
+  const walker = document.createTreeWalker(h1, NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  while (walker.nextNode()) nodes.push(walker.currentNode);
+  nodes.forEach((node) => {
+    if (name && name.contains(node)) return; // the name is always black
+    const frag = document.createDocumentFragment();
+    // Split on plain spaces only: the headline's &nbsp;s keep words together.
+    node.textContent.split(/( +)/).forEach((part) => {
+      if (!part) return;
+      if (part[0] === ' ') { frag.appendChild(document.createTextNode(part)); return; }
+      const w = document.createElement('span');
+      w.className = 'hw';
+      w.textContent = part;
+      words.push(w);
+      frag.appendChild(w);
+    });
+    node.parentNode.replaceChild(frag, node);
+  });
+  if (!words.length) return;
+
+  let active = -1;
+  const lightTo = (idx) => {
+    if (idx === active) return;
+    const from = active;
+    words.forEach((w, i) => {
+      const on = i <= idx;
+      // Filling forward: stagger by distance past the old edge. Emptying: at once.
+      w.style.setProperty('--hw-delay', on && i > from ? ((i - from - 1) * 16) + 'ms' : '0ms');
+      w.classList.toggle('is-lit', on);
+    });
+    active = idx;
+  };
+  h1.addEventListener('mouseover', (e) => {
+    const w = e.target.closest && e.target.closest('.hw');
+    if (w) lightTo(words.indexOf(w));
+  });
+  h1.addEventListener('mouseleave', () => lightTo(-1));
+}
+initHeadlineFill();
 // REDESIGN: after the morph has sized the top nav's items. Fonts change those
 // widths, so measure again once they land (and re-derive the field tuck, which
 // reads the bio's position).

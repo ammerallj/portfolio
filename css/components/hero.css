@@ -939,19 +939,35 @@ html:not(.is-field-live) .intro-divider {
   margin-right: auto;
 }
 
-/* The intro is ONE headline now (2026-10): the bio and the "previously" line
-   joined it, muted so the first sentence still leads. */
-.intro-headline-rest {
-  /* 45% black on the cream is ~3.4:1 — enough for 56px (large) type, which
-     wants 3:1. Don't go lighter. */
-  color: rgba(0, 0, 0, 0.45);
+/* The intro is ONE headline (2026-10): only the name is black; everything
+   after it rests grey. initHeadlineFill wraps the words and, on hover, fills
+   them black from the start up to the word under the cursor. 45% black on the
+   cream is ~3.4:1 — enough for large type (3:1). Don't go lighter. */
+.intro-headline-name {
+  color: var(--color-text);
+}
+
+.intro-headline .hw {
+  color: inherit;
+  transition: color 0.2s ease;
+  transition-delay: var(--hw-delay, 0ms);
+}
+
+.intro-headline .hw.is-lit {
+  color: var(--color-text);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .intro-headline .hw {
+    transition: none;
+  }
 }
 
 .intro-headline {
   font-weight: 500;
   font-size: var(--section-title-size); /* one step under --display-size: 56/44/32 */
   line-height: 1.05;
-  color: var(--color-text);
+  color: rgba(0, 0, 0, 0.45); /* rests grey; only the name is black (see .intro-headline-name) */
   -webkit-text-stroke: 0;
   max-width: none;
   /* BALANCED, so "designer" doesn't end a long line over a short one
