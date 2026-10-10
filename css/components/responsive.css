@@ -1236,11 +1236,10 @@ html.is-hero-stacked {
     padding: 8px 10px;
   }
 
-  /* Phone work cards: one column (from the 768 tier), and the 17px Figma
-     description size. */
+  /* Phone work cards: one column (from the 768 tier). The description follows
+     the body token (16px) so it cannot drift from the title. */
   /* "Prev. at Meta and Microsoft." shares the card text size on phones
      (2026-09-28, Jenna) — one rule, so the two cannot drift apart. */
-  .work-card-description,
   .intro-previously {
     font-size: 17px; /* Figma */
   }
