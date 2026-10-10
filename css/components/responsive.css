@@ -166,17 +166,12 @@ html.is-hero-stacked {
     padding-bottom: calc(24px - 0.184 * var(--hero-headline-size));
   }
 
-  /* ONE FLOWING PARAGRAPH with an indented first line (2026-10, after Jenna's
-     Waka Waka / Jakob Lindberg references). The name stops being its own
-     block so it sits in line one, which text-indent pushes in. A per-line
-     stagger was built first (each line its own indented block) and replaced
-     by this. Below 1377 the name keeps its own first line, unindented. */
+  /* THE NAME IS LINE ONE (2026-10, Jenna): "Jenna Ammerall" sits alone on an
+     indented first line (display: block comes from hero.css), and the sentence
+     proceeds from the line below, flush left. text-indent here lands on the
+     name's line only. Below 1377 the name is also its own line, unindented. */
   .intro-headline {
     text-indent: 16%;
-  }
-
-  .intro-headline-name {
-    display: inline;
   }
 
   /* KEEP THE BUTTON'S CORNER CLEAR. The Jenna OS button is 56px wide, 24px in
