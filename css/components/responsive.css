@@ -142,6 +142,22 @@ html.is-hero-stacked {
 }
 
 /* ============================================================
+   ≥1377 — THE HEADLINE'S LAST LINE SITS FLUSH WITH THE JENNA OS BUTTON
+   (2026-10, Jenna). The button is fixed 24px up from the viewport's bottom; the
+   hero ends on the fold here (no peek), so the band's bottom padding is that 24px
+   less the gap between the last line's baseline and its line box — 0.184em of the
+   headline's size (measured, Hanken 500 at line-height 1.05). The last line is
+   "Meta and Microsoft." — no descenders — so the baseline IS the visual bottom.
+   ≤1376 the first Work card peeks and the hero ends above the fold, so no
+   padding can make it flush there.
+   ============================================================ */
+@media (min-width: 1377px) {
+  .intro-band {
+    padding-bottom: calc(24px - 0.184 * var(--section-title-size));
+  }
+}
+
+/* ============================================================
    ≤1376 — THE FIRST WORK CARD PEEKS (2026-09-28, Jenna). Tablets up to the 13"
    iPad Pro (1032 portrait / 1376 landscape) — and so laptops up to 1376 too —
    take the phone's presentation: the landing is --hero-peek shorter than the
