@@ -2359,6 +2359,43 @@ function initHeadlineFill() {
   });
 }
 initHeadlineFill();
+
+// THE NAME ALIGNS WITH "designer" (2026-10, Jenna). At ≥1377 "Jenna Ammerall"
+// sits alone on the headline's first line, indented so its left edge lands on
+// the word "designer" in the sentence below. Where that word falls depends on
+// the window, so it is MEASURED: the headline's --name-indent (read by the
+// ≥1377 block in responsive.css as text-indent) is the word's left offset from
+// the headline's own left edge. Below 1377 the variable is cleared.
+function initNameAlign() {
+  const h1 = document.querySelector('.intro-headline');
+  const name = h1 && h1.querySelector('.intro-headline-name');
+  if (!h1 || !name) return;
+  const wide = window.matchMedia('(min-width: 1377px)');
+  const measure = () => {
+    h1.style.removeProperty('--name-indent');
+    if (!wide.matches) return;
+    const walker = document.createTreeWalker(h1, NodeFilter.SHOW_TEXT);
+    while (walker.nextNode()) {
+      const node = walker.currentNode;
+      if (name.contains(node)) continue;
+      const at = node.textContent.indexOf('designer');
+      if (at < 0) continue;
+      const range = document.createRange();
+      range.setStart(node, at);
+      range.setEnd(node, at + 'designer'.length);
+      // Layout is horizontal-only here and the load reveal only translates
+      // vertically, so a rect's left is safe.
+      const left = range.getBoundingClientRect().left - h1.getBoundingClientRect().left;
+      if (left >= 0) h1.style.setProperty('--name-indent', Math.round(left) + 'px');
+      return;
+    }
+  };
+  measure();
+  window.addEventListener('resize', measure);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(measure);
+  window.addEventListener('load', measure);
+}
+initNameAlign();
 // REDESIGN: after the morph has sized the top nav's items. Fonts change those
 // widths, so measure again once they land (and re-derive the field tuck, which
 // reads the bio's position).
