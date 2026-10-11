@@ -383,28 +383,37 @@ html.has-top-nav.is-work-in #work-section .site-container {
 /* NO HOVER (phones, tablets): nothing to reveal it, so the description simply
    sits under the title, always visible. */
 @media (hover: none) {
+  /* TOUCH LAYOUT (2026-10, fixed after "it's not responsive"): there is no hover to
+     swap the title for the description, so both show, LEFT-aligned: one row of
+     [status pill][title / year], then the description full width underneath.
+     (The desktop's centred, hug-the-title row let the description set the slot's
+     width, which left the pill ~50px adrift from a centred title.) The swap slot
+     dissolves (display: contents) so the title and description become items of the
+     text row itself; the description takes its own line with a 100% basis. */
   .work-card-text {
+    flex-wrap: wrap;
+    justify-content: flex-start;
     align-items: flex-start;
+    column-gap: 12px;
+    row-gap: 10px;
   }
   .work-card-swap {
-    align-items: center;
+    display: contents;
   }
   .work-card-meta {
     margin-bottom: 0;
     margin-top: var(--status-nudge);
   }
-  .work-card-swap {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-xs);
-  }
-  /* align-self: end is the grid's BOTTOM-align above; in this column it would
-     mean RIGHT-align, which pushed the titles to the card's right edge. */
-  .work-card-title,
-  .work-card-description {
+  .work-card-title {
+    flex: 1 1 0;
+    min-width: 0;
     align-self: auto;
+    text-align: left;
   }
   .work-card-description {
+    flex: 0 0 100%;
+    align-self: auto;
+    text-align: left;
     opacity: 1;
     translate: none;
   }
@@ -1013,7 +1022,11 @@ html.has-top-nav.is-work-in #work-section .site-container {
 
 .contact-email {
   font-family: var(--font-heading);
-  font-size: var(--display-size); /* shared bookend display size */
+  /* The shared bookend display size, CAPPED so the address line — "ammerallj@gmail.com"
+     plus its arrow, about 10.3em wide in this face — always fits the column. Without
+     the cap it overflowed (clipped, arrow wrapped) between ~481 and ~715px wide,
+     where the display size is still 64px. 10.6 leaves a little slack. */
+  font-size: min(var(--display-size), calc((100vw - 2 * var(--page-gutter)) / 10.6));
   font-weight: 700;
   letter-spacing: -0.02em;
   line-height: 1;
