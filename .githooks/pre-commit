@@ -69,7 +69,8 @@ fi
 if git diff --cached --name-only | grep -qE '^(css/components/.+\.css|js/main\.js)$'; then
 
   # Every file bump-cache.sh rewrites. Keep in step with the two sed lines there.
-  stamp_files=(index.html style.css work/*.html)
+  stamp_files=(index.html style.css)
+  for f in work/*.html; do [ -e "$f" ] && stamp_files+=("$f"); done
 
   # -------------------------------------------------------------------------
   # Guard: refuse to sweep somebody else's work into this commit.

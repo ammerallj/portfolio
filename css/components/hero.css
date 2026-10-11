@@ -934,23 +934,46 @@ html:not(.is-field-live) .intro-divider {
      524.2 at the 1025 floor. With the 5-column right block and one gutter the
      row fills all 12. Deliberately NOT --width-title-column (6 cols), which the
      Work card titles share. */
-  flex: 0 1 clamp(524.2px, 58.333vw - 73.67px, 766.33px);
+  flex: 1 1 auto;
   min-width: 0;
   margin-right: auto;
+}
+
+/* The intro is ONE headline (2026-10): only the name is black; everything
+   after it rests grey. initHeadlineFill wraps the words and, on hover, fills
+   them black from the start up to the word under the cursor. 45% black on the
+   cream is ~3.4:1 — enough for large type (3:1). Don't go lighter. */
+.intro-headline-name {
+  color: var(--color-text);
+}
+
+/* Each word's ink is a single alpha, --hw-a, which initHeadlineFill writes from
+   the cursor's position through the sentence (0.45 at rest, up to ~0.88 at the
+   cursor — a grey-black, never full black). The long ease is what makes it
+   read as fluid: the words trail the pointer instead of snapping to it. */
+.intro-headline .hw {
+  color: rgba(0, 0, 0, var(--hw-a, 0.45));
+  transition: color 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .intro-headline .hw {
+    transition: none;
+  }
 }
 
 .intro-headline {
   font-weight: 500;
   font-size: var(--section-title-size); /* one step under --display-size: 56/44/32 */
   line-height: 1.05;
-  color: var(--color-text);
+  color: rgba(0, 0, 0, 0.45); /* rests grey; only the name is black (see .intro-headline-name) */
   -webkit-text-stroke: 0;
   max-width: none;
   /* BALANCED, so "designer" doesn't end a long line over a short one
      (Jenna, 2026-09-29): the two lines after the name even out to "a product /
      interaction" + "designer based in Seattle." The name is its own block, so
      it balances separately and stays on line one. */
-  text-wrap: balance;
+  text-wrap: pretty; /* full width (2026-10); balance narrowed it to half */
 }
 
 /* The lockup FADES OUT ON ITS OWN CLOCK once the reader starts scrolling —
@@ -1008,17 +1031,19 @@ html.is-hero-text-out .intro-band {
   display: none; /* the ≤768 scrim is for white type on the field */
 }
 
-/* "I’m Jenna Ammerall," always on its own first line (display: block makes
-   the break; the space after the span keeps the heading's text correct for
-   screen readers and crawlers). Only the NAME is italic — "I’m" and the comma
-   stay upright — in the REAL Hanken Grotesk 500 italic, loaded on all five
-   pages' font link as 1,500 (a bare font-style would be a sheared oblique). */
+/* The NAME is its own first line (display: block makes the break; the space
+   after the span keeps the heading's text correct for screen readers and
+   crawlers). It is upright — the italic was tried and removed 2026-10, along
+   with the Hanken 500 italic face on both pages' font link. */
 .intro-headline-name {
   display: block;
 }
 
-.intro-headline-italic {
-  font-style: italic;
+/* No I-beam over the headline (2026-10): it is a hover effect, not text to
+   select, so the pointer stays the plain arrow. */
+.intro-headline,
+.intro-headline .hw {
+  cursor: default;
 }
 
 .intro-previously {
@@ -1241,7 +1266,7 @@ html.has-top-nav.is-bar-docked .intro-bar {
      now sits below the overlap, over the panel, where it cannot be seen.
      ⚠️ Moving the BAR down instead would open the same gap at the top of the
      viewport once it docks. Paint lower, don't sit lower. */
-  bottom: calc((var(--bar-bleed, 100px) + 2px) * -1);
+  bottom: calc((var(--bar-bleed, 16px) + 2px) * -1);
   z-index: -1;
   /* Frosted overlay that BLEEDS: the cream fill is a top→bottom GRADIENT — opaque
      behind the nav row (so the items stay legible over busy content) fading to 0
@@ -1259,7 +1284,7 @@ html.has-top-nav.is-bar-docked .intro-bar {
 
      ⚠️ THE FADE NOW STARTS AT THE LOWEST NAV ITEM (50px — the "Say hello" pill's
      bottom, measured; the wordmark ends at 47 and the links at 44) AND RUNS TO 0
-     ACROSS THE WHOLE REMAINING BOX (166px at full bleed). It used to hold ~full
+     ACROSS THE WHOLE REMAINING BOX (82px at full bleed; was 166 — shortened 2026-10, Jenna: "the nav blur extends too far down"). It used to hold ~full
      to 69px — 19px BELOW the type — and then drop 0.92 → 0 in 43px, which is
      what read as the cream ending on a line: full strength level with nothing,
      then a short steep ramp.
@@ -1313,24 +1338,29 @@ html.has-top-nav.is-bar-docked .intro-bar {
       rgba(var(--color-accent-rgb), var(--dark-mix, 0)) 0,
       rgba(var(--color-accent-rgb), var(--dark-mix, 0)) 100%)),
     linear-gradient(to bottom,
-      rgba(251, 252, 248, 0.95) 0,
-      rgba(251, 252, 248, 0.9500) 50.0px,
-      rgba(251, 252, 248, 0.9393) 57.2px,
-      rgba(251, 252, 248, 0.9092) 64.5px,
-      rgba(251, 252, 248, 0.8623) 71.8px,
-      rgba(251, 252, 248, 0.8016) 79.0px,
-      rgba(251, 252, 248, 0.7297) 86.2px,
-      rgba(251, 252, 248, 0.6494) 93.5px,
-      rgba(251, 252, 248, 0.5636) 100.8px,
-      rgba(251, 252, 248, 0.4750) 108.0px,
-      rgba(251, 252, 248, 0.3864) 115.2px,
-      rgba(251, 252, 248, 0.3006) 122.5px,
-      rgba(251, 252, 248, 0.2203) 129.8px,
-      rgba(251, 252, 248, 0.1484) 137.0px,
-      rgba(251, 252, 248, 0.0877) 144.2px,
-      rgba(251, 252, 248, 0.0408) 151.5px,
-      rgba(251, 252, 248, 0.0107) 158.8px,
-      rgba(251, 252, 248, 0.0000) 166.0px);
+      rgba(251, 252, 248, 0.80) 0,
+      rgba(251, 252, 248, 0.8000) 50.0px,
+      rgba(251, 252, 248, 0.7910) 52.0px,
+      rgba(251, 252, 248, 0.7656) 54.0px,
+      rgba(251, 252, 248, 0.7262) 56.0px,
+      rgba(251, 252, 248, 0.6750) 58.0px,
+      rgba(251, 252, 248, 0.6145) 60.0px,
+      rgba(251, 252, 248, 0.5469) 62.0px,
+      rgba(251, 252, 248, 0.4746) 64.0px,
+      rgba(251, 252, 248, 0.4000) 66.0px,
+      rgba(251, 252, 248, 0.3254) 68.0px,
+      rgba(251, 252, 248, 0.2531) 70.0px,
+      rgba(251, 252, 248, 0.1855) 72.0px,
+      rgba(251, 252, 248, 0.1250) 74.0px,
+      rgba(251, 252, 248, 0.0738) 76.0px,
+      rgba(251, 252, 248, 0.0344) 78.0px,
+      rgba(251, 252, 248, 0.0090) 80.0px,
+      rgba(251, 252, 248, 0.0000) 82.0px);
+  /* THE CREAM IS LIGHT (peak 0.80, was 0.95 — 2026-10, Jenna: "I still see the nav
+     cream line. I want a blur effect"): the 16px backdrop blur does the work and
+     the page shows through it; a near-opaque cream hid the page and ended on an
+     edge. The JS copy of this curve (CONTACT.frost) is scaled to match.
+  */
   /* THE FROST FADES OUT AS THE STRIP GOES SOLID, and it has to.
      A blur samples a radius around each pixel, so at the element's bottom edge it
      reaches ABOVE Contact's top and pulls cream down into the blue — which is
@@ -1340,14 +1370,45 @@ html.has-top-nav.is-bar-docked .intro-bar {
      sampling across the seam and the ramp row resolves to the panel's own colour.
      Written as one expression rather than a switch so it stays continuous with
      everything else in the approach. */
-  -webkit-backdrop-filter:
-    blur(calc(16px * (1 - var(--dark-mix, 0))))
-    saturate(calc(1 + 0.15 * (1 - var(--dark-mix, 0))));
-  backdrop-filter:
-    blur(calc(16px * (1 - var(--dark-mix, 0))))
-    saturate(calc(1 + 0.15 * (1 - var(--dark-mix, 0))));
-  -webkit-mask-image: linear-gradient(to bottom, #000 0, #000 calc(100% - var(--bar-bleed, 100px) - 1px), transparent 100%);
-  mask-image: linear-gradient(to bottom, #000 0, #000 calc(100% - var(--bar-bleed, 100px) - 1px), transparent 100%);
+  /* THE BLUR MOVED OUT (2026-10, Jenna: "the edge should blur out — we tried using
+     the gradient to mimic that"). This layer is now only the cream tint and the
+     accent fill; the blur is .intro-bar-blur below, a PROGRESSIVE blur whose
+     radius itself tapers, instead of one constant 16px blur faded by a mask. */
+  /* A SMOOTHSTEP, NOT TWO LINEAR STOPS (2026-10, Jenna: "I still see the harsh line of
+     the nav container"). The straight ramp had a slope corner exactly at the bar's
+     bottom edge, and the eye reads that as the container's edge. 12 segments, zero
+     slope at both ends, the same finding as every other fade on this site. The
+     stops are fractions of the (variable) bleed + 1px. */
+  -webkit-mask-image: linear-gradient(to bottom,
+    #000 0,
+    #000 calc(100% - var(--bar-bleed, 16px) - 1px),
+    rgba(0, 0, 0, 0.9803) calc(100% - var(--bar-bleed, 16px) - 1px + (var(--bar-bleed, 16px) + 1px) * 0.0833),
+    rgba(0, 0, 0, 0.9259) calc(100% - var(--bar-bleed, 16px) - 1px + (var(--bar-bleed, 16px) + 1px) * 0.1667),
+    rgba(0, 0, 0, 0.8438) calc(100% - var(--bar-bleed, 16px) - 1px + (var(--bar-bleed, 16px) + 1px) * 0.2500),
+    rgba(0, 0, 0, 0.7407) calc(100% - var(--bar-bleed, 16px) - 1px + (var(--bar-bleed, 16px) + 1px) * 0.3333),
+    rgba(0, 0, 0, 0.6238) calc(100% - var(--bar-bleed, 16px) - 1px + (var(--bar-bleed, 16px) + 1px) * 0.4167),
+    rgba(0, 0, 0, 0.5000) calc(100% - var(--bar-bleed, 16px) - 1px + (var(--bar-bleed, 16px) + 1px) * 0.5000),
+    rgba(0, 0, 0, 0.3762) calc(100% - var(--bar-bleed, 16px) - 1px + (var(--bar-bleed, 16px) + 1px) * 0.5833),
+    rgba(0, 0, 0, 0.2593) calc(100% - var(--bar-bleed, 16px) - 1px + (var(--bar-bleed, 16px) + 1px) * 0.6667),
+    rgba(0, 0, 0, 0.1562) calc(100% - var(--bar-bleed, 16px) - 1px + (var(--bar-bleed, 16px) + 1px) * 0.7500),
+    rgba(0, 0, 0, 0.0741) calc(100% - var(--bar-bleed, 16px) - 1px + (var(--bar-bleed, 16px) + 1px) * 0.8333),
+    rgba(0, 0, 0, 0.0197) calc(100% - var(--bar-bleed, 16px) - 1px + (var(--bar-bleed, 16px) + 1px) * 0.9167),
+    transparent 100%);
+  mask-image: linear-gradient(to bottom,
+    #000 0,
+    #000 calc(100% - var(--bar-bleed, 16px) - 1px),
+    rgba(0, 0, 0, 0.9803) calc(100% - var(--bar-bleed, 16px) - 1px + (var(--bar-bleed, 16px) + 1px) * 0.0833),
+    rgba(0, 0, 0, 0.9259) calc(100% - var(--bar-bleed, 16px) - 1px + (var(--bar-bleed, 16px) + 1px) * 0.1667),
+    rgba(0, 0, 0, 0.8438) calc(100% - var(--bar-bleed, 16px) - 1px + (var(--bar-bleed, 16px) + 1px) * 0.2500),
+    rgba(0, 0, 0, 0.7407) calc(100% - var(--bar-bleed, 16px) - 1px + (var(--bar-bleed, 16px) + 1px) * 0.3333),
+    rgba(0, 0, 0, 0.6238) calc(100% - var(--bar-bleed, 16px) - 1px + (var(--bar-bleed, 16px) + 1px) * 0.4167),
+    rgba(0, 0, 0, 0.5000) calc(100% - var(--bar-bleed, 16px) - 1px + (var(--bar-bleed, 16px) + 1px) * 0.5000),
+    rgba(0, 0, 0, 0.3762) calc(100% - var(--bar-bleed, 16px) - 1px + (var(--bar-bleed, 16px) + 1px) * 0.5833),
+    rgba(0, 0, 0, 0.2593) calc(100% - var(--bar-bleed, 16px) - 1px + (var(--bar-bleed, 16px) + 1px) * 0.6667),
+    rgba(0, 0, 0, 0.1562) calc(100% - var(--bar-bleed, 16px) - 1px + (var(--bar-bleed, 16px) + 1px) * 0.7500),
+    rgba(0, 0, 0, 0.0741) calc(100% - var(--bar-bleed, 16px) - 1px + (var(--bar-bleed, 16px) + 1px) * 0.8333),
+    rgba(0, 0, 0, 0.0197) calc(100% - var(--bar-bleed, 16px) - 1px + (var(--bar-bleed, 16px) + 1px) * 0.9167),
+    transparent 100%);
   opacity: 0;
   /* opacity only. background-color has not changed here since the fill became a
      background LAYER driven by --dark-mix, and a transition on a scroll-linked
@@ -1366,6 +1427,84 @@ html.has-top-nav.is-bar-docked .intro-bar {
   opacity: 1;
 }
 
+/* THE PROGRESSIVE BLUR (2026-10). Seven stacked backdrop-filter layers whose radius
+   falls down the bleed — 16 / 9 / 5.5 / 3.2 / 1.8 / 1 / 0.5px — each shown only in
+   its own TRIANGULAR band (neighbouring bands overlap, so the weights sum to a
+   smooth slope with no step where the blur ends), so the blur genuinely gets weaker toward the bottom and
+   dissolves, instead of one constant blur being faded out by a mask (which leaves a
+   visible band). It sits UNDER ::before (z -2 against ::before's -1) so the cream
+   tint and the accent fill paint on top, unblurred, exactly as before.
+   Bands are fractions of the variable bleed (--bar-bleed, which the script clips to
+   Contact's edge), measured from the bar's bottom (64px); at a bleed of 0 they
+   collapse and only the bar's own 16px remains. The blur and the saturation lift
+   fade with --dark-mix, as ::before's did. */
+.intro-bar-blur {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: calc((var(--bar-bleed, 16px) + 2px) * -1);
+  z-index: -2;
+  pointer-events: none;
+  --bar: 64px;
+  --b: var(--bar-bleed, 16px);
+  --dm: calc(1 - var(--dark-mix, 0));
+}
+
+.intro-bar-blur i {
+  position: absolute;
+  inset: 0;
+}
+
+.intro-bar-blur i:nth-child(1) {
+  -webkit-backdrop-filter: blur(calc(12px * var(--dm))) saturate(calc(1 + 0.15 * var(--dm)));
+  backdrop-filter: blur(calc(12px * var(--dm))) saturate(calc(1 + 0.15 * var(--dm)));
+  -webkit-mask-image: linear-gradient(to bottom, #000 0, #000 var(--bar), transparent calc(var(--bar) + var(--b) * 0.1667));
+  mask-image: linear-gradient(to bottom, #000 0, #000 var(--bar), transparent calc(var(--bar) + var(--b) * 0.1667));
+}
+
+.intro-bar-blur i:nth-child(2) {
+  -webkit-backdrop-filter: blur(calc(7px * var(--dm)));
+  backdrop-filter: blur(calc(7px * var(--dm)));
+  -webkit-mask-image: linear-gradient(to bottom, transparent calc(var(--bar) + var(--b) * 0.0000), #000 calc(var(--bar) + var(--b) * 0.1667), transparent calc(var(--bar) + var(--b) * 0.3333));
+  mask-image: linear-gradient(to bottom, transparent calc(var(--bar) + var(--b) * 0.0000), #000 calc(var(--bar) + var(--b) * 0.1667), transparent calc(var(--bar) + var(--b) * 0.3333));
+}
+
+.intro-bar-blur i:nth-child(3) {
+  -webkit-backdrop-filter: blur(calc(4px * var(--dm)));
+  backdrop-filter: blur(calc(4px * var(--dm)));
+  -webkit-mask-image: linear-gradient(to bottom, transparent calc(var(--bar) + var(--b) * 0.1667), #000 calc(var(--bar) + var(--b) * 0.3333), transparent calc(var(--bar) + var(--b) * 0.5000));
+  mask-image: linear-gradient(to bottom, transparent calc(var(--bar) + var(--b) * 0.1667), #000 calc(var(--bar) + var(--b) * 0.3333), transparent calc(var(--bar) + var(--b) * 0.5000));
+}
+
+.intro-bar-blur i:nth-child(4) {
+  -webkit-backdrop-filter: blur(calc(2.2px * var(--dm)));
+  backdrop-filter: blur(calc(2.2px * var(--dm)));
+  -webkit-mask-image: linear-gradient(to bottom, transparent calc(var(--bar) + var(--b) * 0.3333), #000 calc(var(--bar) + var(--b) * 0.5000), transparent calc(var(--bar) + var(--b) * 0.6667));
+  mask-image: linear-gradient(to bottom, transparent calc(var(--bar) + var(--b) * 0.3333), #000 calc(var(--bar) + var(--b) * 0.5000), transparent calc(var(--bar) + var(--b) * 0.6667));
+}
+
+.intro-bar-blur i:nth-child(5) {
+  -webkit-backdrop-filter: blur(calc(1.2px * var(--dm)));
+  backdrop-filter: blur(calc(1.2px * var(--dm)));
+  -webkit-mask-image: linear-gradient(to bottom, transparent calc(var(--bar) + var(--b) * 0.5000), #000 calc(var(--bar) + var(--b) * 0.6667), transparent calc(var(--bar) + var(--b) * 0.8333));
+  mask-image: linear-gradient(to bottom, transparent calc(var(--bar) + var(--b) * 0.5000), #000 calc(var(--bar) + var(--b) * 0.6667), transparent calc(var(--bar) + var(--b) * 0.8333));
+}
+
+.intro-bar-blur i:nth-child(6) {
+  -webkit-backdrop-filter: blur(calc(0.6px * var(--dm)));
+  backdrop-filter: blur(calc(0.6px * var(--dm)));
+  -webkit-mask-image: linear-gradient(to bottom, transparent calc(var(--bar) + var(--b) * 0.6667), #000 calc(var(--bar) + var(--b) * 0.8333), transparent calc(var(--bar) + var(--b) * 1.0000));
+  mask-image: linear-gradient(to bottom, transparent calc(var(--bar) + var(--b) * 0.6667), #000 calc(var(--bar) + var(--b) * 0.8333), transparent calc(var(--bar) + var(--b) * 1.0000));
+}
+
+.intro-bar-blur i:nth-child(7) {
+  -webkit-backdrop-filter: blur(calc(0.3px * var(--dm)));
+  backdrop-filter: blur(calc(0.3px * var(--dm)));
+  -webkit-mask-image: linear-gradient(to bottom, transparent calc(var(--bar) + var(--b) * 0.8333), #000 calc(var(--bar) + var(--b) * 1.0000), transparent calc(var(--bar) + var(--b) + 2px));
+  mask-image: linear-gradient(to bottom, transparent calc(var(--bar) + var(--b) * 0.8333), #000 calc(var(--bar) + var(--b) * 1.0000), transparent calc(var(--bar) + var(--b) + 2px));
+}
+
 /* Grain on its OWN layer so it fades out FASTER than the blur — otherwise the
    film grain lingered as a visible band down the long bleed. It sits on top of
    the ::before frost (painted after, same z), holds across the bar, then is gone
@@ -1378,7 +1517,7 @@ html.has-top-nav.is-bar-docked .intro-bar {
   /* The grain's own tail is shorter than the blur's, and it takes the same clip:
      min() means it keeps its 40px until --bar-bleed drops below that, then
      shrinks with it. Nothing to publish separately. */
-  bottom: calc(min(40px, var(--bar-bleed, 100px)) * -1);
+  bottom: calc(min(40px, var(--bar-bleed, 16px)) * -1);
   z-index: -1;
   background-image: var(--nav-grain);
   background-size: 160px 160px;
@@ -1392,10 +1531,38 @@ html.has-top-nav.is-bar-docked .intro-bar {
      ::before's 0.35s glass. On a mask layer the thinning is untransitioned by
      construction, which frees `opacity` to be the docking fade alone. */
   -webkit-mask-image:
-    linear-gradient(to bottom, #000 0, #000 calc(100% - min(40px, var(--bar-bleed, 100px))), transparent 100%),
+    linear-gradient(to bottom,
+      #000 0,
+      #000 calc(100% - min(40px, var(--bar-bleed, 16px))),
+      rgba(0, 0, 0, 0.9803) calc(100% - min(40px, var(--bar-bleed, 16px)) + min(40px, var(--bar-bleed, 16px)) * 0.0833),
+      rgba(0, 0, 0, 0.9259) calc(100% - min(40px, var(--bar-bleed, 16px)) + min(40px, var(--bar-bleed, 16px)) * 0.1667),
+      rgba(0, 0, 0, 0.8438) calc(100% - min(40px, var(--bar-bleed, 16px)) + min(40px, var(--bar-bleed, 16px)) * 0.2500),
+      rgba(0, 0, 0, 0.7407) calc(100% - min(40px, var(--bar-bleed, 16px)) + min(40px, var(--bar-bleed, 16px)) * 0.3333),
+      rgba(0, 0, 0, 0.6238) calc(100% - min(40px, var(--bar-bleed, 16px)) + min(40px, var(--bar-bleed, 16px)) * 0.4167),
+      rgba(0, 0, 0, 0.5000) calc(100% - min(40px, var(--bar-bleed, 16px)) + min(40px, var(--bar-bleed, 16px)) * 0.5000),
+      rgba(0, 0, 0, 0.3762) calc(100% - min(40px, var(--bar-bleed, 16px)) + min(40px, var(--bar-bleed, 16px)) * 0.5833),
+      rgba(0, 0, 0, 0.2593) calc(100% - min(40px, var(--bar-bleed, 16px)) + min(40px, var(--bar-bleed, 16px)) * 0.6667),
+      rgba(0, 0, 0, 0.1562) calc(100% - min(40px, var(--bar-bleed, 16px)) + min(40px, var(--bar-bleed, 16px)) * 0.7500),
+      rgba(0, 0, 0, 0.0741) calc(100% - min(40px, var(--bar-bleed, 16px)) + min(40px, var(--bar-bleed, 16px)) * 0.8333),
+      rgba(0, 0, 0, 0.0197) calc(100% - min(40px, var(--bar-bleed, 16px)) + min(40px, var(--bar-bleed, 16px)) * 0.9167),
+      transparent 100%),
     linear-gradient(rgba(0, 0, 0, calc(1 - var(--dark-mix, 0))), rgba(0, 0, 0, calc(1 - var(--dark-mix, 0))));
   mask-image:
-    linear-gradient(to bottom, #000 0, #000 calc(100% - min(40px, var(--bar-bleed, 100px))), transparent 100%),
+    linear-gradient(to bottom,
+      #000 0,
+      #000 calc(100% - min(40px, var(--bar-bleed, 16px))),
+      rgba(0, 0, 0, 0.9803) calc(100% - min(40px, var(--bar-bleed, 16px)) + min(40px, var(--bar-bleed, 16px)) * 0.0833),
+      rgba(0, 0, 0, 0.9259) calc(100% - min(40px, var(--bar-bleed, 16px)) + min(40px, var(--bar-bleed, 16px)) * 0.1667),
+      rgba(0, 0, 0, 0.8438) calc(100% - min(40px, var(--bar-bleed, 16px)) + min(40px, var(--bar-bleed, 16px)) * 0.2500),
+      rgba(0, 0, 0, 0.7407) calc(100% - min(40px, var(--bar-bleed, 16px)) + min(40px, var(--bar-bleed, 16px)) * 0.3333),
+      rgba(0, 0, 0, 0.6238) calc(100% - min(40px, var(--bar-bleed, 16px)) + min(40px, var(--bar-bleed, 16px)) * 0.4167),
+      rgba(0, 0, 0, 0.5000) calc(100% - min(40px, var(--bar-bleed, 16px)) + min(40px, var(--bar-bleed, 16px)) * 0.5000),
+      rgba(0, 0, 0, 0.3762) calc(100% - min(40px, var(--bar-bleed, 16px)) + min(40px, var(--bar-bleed, 16px)) * 0.5833),
+      rgba(0, 0, 0, 0.2593) calc(100% - min(40px, var(--bar-bleed, 16px)) + min(40px, var(--bar-bleed, 16px)) * 0.6667),
+      rgba(0, 0, 0, 0.1562) calc(100% - min(40px, var(--bar-bleed, 16px)) + min(40px, var(--bar-bleed, 16px)) * 0.7500),
+      rgba(0, 0, 0, 0.0741) calc(100% - min(40px, var(--bar-bleed, 16px)) + min(40px, var(--bar-bleed, 16px)) * 0.8333),
+      rgba(0, 0, 0, 0.0197) calc(100% - min(40px, var(--bar-bleed, 16px)) + min(40px, var(--bar-bleed, 16px)) * 0.9167),
+      transparent 100%),
     linear-gradient(rgba(0, 0, 0, calc(1 - var(--dark-mix, 0))), rgba(0, 0, 0, calc(1 - var(--dark-mix, 0))));
   /* webkit spells `intersect` as `source-in`; both are needed. */
   -webkit-mask-composite: source-in;
@@ -1618,6 +1785,27 @@ html.has-top-nav.is-bar-docked .intro-bar {
    - ≤768 (homepage) / ≤1024 (project pages) revert to the content-width flex
      cluster (responsive.css): the content stacks there, so there is no right
      column to align to. */
+/* THE NAV STEPS OUT WHILE THE BLUE RAMP PASSES BEHIND IT (js/main.js, is-nav-away).
+   Only the CONTENT hides — the wordmark, links and CTA — not the frost, which is
+   already fading with --dark-mix. It fades out quickly and back in a little
+   slower, in its white-on-blue state (is-over-dark lands in the same frame it
+   returns). visibility follows the fade so a hidden nav is not focusable or
+   clickable. */
+.intro-bar-name,
+.intro-bar-links,
+.intro-bar-cta-wrap {
+  transition: opacity 0.35s ease, visibility 0s;
+}
+
+.intro-bar.is-nav-away .intro-bar-name,
+.intro-bar.is-nav-away .intro-bar-links,
+.intro-bar.is-nav-away .intro-bar-cta-wrap {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.2s ease, visibility 0s 0.2s;
+}
+
 .intro-bar-name {
   justify-self: start;
   font-family: var(--font-heading);
@@ -1900,4 +2088,43 @@ html.is-intro .page-field-grain {
 
 @media (prefers-reduced-motion: reduce) {
   html { transition: none; }
+}
+
+/* ============================================================
+   THE WHOLE BAR STEPS OUT WHILE THE BLUE RAMP PASSES BEHIND IT (2026-10, Jenna:
+   "this is still awkward — it doesn't happen when the hero scrolls down to Work").
+   The bar's frost and fill each paint their own version of the ramp, and they do
+   not match the page's own ramp exactly, so a step showed at the bar's bottom edge
+   (and a lighter band under it). Going hero -> Work there is nothing to match,
+   because the bar isn't there while the gradient passes. So the same here: during
+   is-nav-away (js/main.js) the frost, the progressive blur, the grain and the
+   upward glass all fade with the labels, leaving only the page's ramp on screen.
+   They return together when Contact's solid colour meets the bar.
+   Written LAST, with both state classes, so it outranks the docked/over-dark
+   opacity rules above regardless of their order.
+   ============================================================ */
+.intro-bar-blur,
+.intro-bar-feather {
+  transition: opacity 0.35s ease;
+}
+
+.intro-bar.is-nav-away::before,
+.intro-bar.is-nav-away.is-docked::before,
+.intro-bar.is-nav-away::after,
+.intro-bar.is-nav-away.is-docked::after,
+.intro-bar.is-nav-away .intro-bar-blur,
+.intro-bar.is-nav-away .intro-bar-feather {
+  opacity: 0;
+  transition-duration: 0.2s;
+}
+
+/* NO COLOUR CHANGE IN SIGHT (2026-10): while the bar is away its labels may swap
+   between black and white (js/main.js picks the colour of the side they will come
+   back on). Going UP that swap used to start in the same frame as the 0.2s
+   fade-out, so it was seen. Delaying the colour change by the fade's own length
+   lets it happen only once the labels are gone. */
+.intro-bar.is-nav-away .intro-bar-name,
+.intro-bar.is-nav-away .intro-bar-links a,
+.intro-bar.is-nav-away .intro-bar-cta {
+  transition-delay: 0.2s;
 }

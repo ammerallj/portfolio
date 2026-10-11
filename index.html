@@ -4,11 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="Jenna Ammerall is a senior product designer with nine years at Microsoft and Meta, designing how products behave to create more connected experiences across products." />
-  <title>Jenna Ammerall — Senior Product Designer</title>
+  <title>Jenna Ammerall</title>
   <link rel="canonical" href="https://ammerallj.design/" />
   <meta name="robots" content="index, follow" />
   <meta name="theme-color" content="#4A45FF" />
-  <link rel="icon" href="favicon.svg?v=4" type="image/svg+xml" />
+  <link rel="icon" href="favicon.svg?v=5" type="image/svg+xml" />
   <!-- Open Graph / social sharing previews -->
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Jenna Ammerall" />
@@ -157,8 +157,8 @@
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,200;0,500;0,700;1,500&family=Inter:wght@400..700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=4de6d02e" />
+  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@200;400;500;700&family=Inter:wght@400..700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css?v=25bf9957" />
   <!-- The landing field's JPEG fallback — PHONES ONLY since 2026-09, so the
        preload is gated to match the <picture> in <main>. Without the media
        attribute this fetches 1.4MB on every desktop and tablet visit for an
@@ -298,8 +298,8 @@
        Overview/Process/Impact floatie. Contact is the top-right overlay trigger.
        ============================================================ -->
   <nav class="section-pills section-pills--site-nav" aria-label="Sections">
-    <a href="#work-section" class="is-active" aria-current="true">Selected work</a>
-    <a href="#about">About me</a>
+    <a href="#work-section" class="is-active" aria-current="true">Work</a>
+    <a href="#about">About</a>
   </nav>
 
   <!-- ============================================================
@@ -366,9 +366,9 @@
         <time class="top-nav-clock">Pacific Time</time>
         <span class="top-nav-rule" aria-hidden="true"></span>
       </div>
-      <a class="top-nav-link" href="#work-section">Selected work</a>
-      <a class="top-nav-link" href="#about">About me</a>
-      <a class="top-nav-cta" href="#contact">Say hello</a>
+      <a class="top-nav-link" href="#work-section">Work</a>
+      <a class="top-nav-link" href="#about">About</a>
+      <a class="top-nav-cta" href="#contact">Contact</a>
     </nav>
 
     <!-- REDESIGN (exploration): the lockup drops into the white lower third —
@@ -377,11 +377,7 @@
     <section class="intro" aria-labelledby="intro-heading">
       <div class="intro-band">
         <div class="intro-band-left">
-          <h1 class="intro-headline" id="intro-heading" data-static><span class="intro-headline-name">I’m <span class="intro-headline-italic">Jenna Ammerall</span>,</span> a product&nbsp;/ interaction designer based in&nbsp;Seattle.</h1>
-        </div>
-        <div class="intro-band-right">
-          <p class="intro-bio">I care about how things fit together, balancing product behavior and visual craft.</p>
-          <p class="intro-previously">Prev. at Meta and Microsoft.</p>
+          <h1 class="intro-headline" id="intro-heading" data-static><span class="intro-headline-name">Jenna Ammerall</span> designs how products fit together through intentional behavior and craft.</h1>
         </div>
       </div>
     </section>
@@ -394,12 +390,13 @@
          mobile header + floatie carry navigation instead. -->
     <nav class="intro-bar" aria-label="Site navigation">
       <span class="intro-bar-feather" aria-hidden="true"></span>
+      <span class="intro-bar-blur" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
       <p class="intro-bar-name">Jenna Ammerall.</p>
       <div class="intro-bar-links">
-        <div class="intro-bar-group"><a href="#work-section">Selected work</a></div>
-        <div class="intro-bar-group"><a href="#about">About me</a></div>
+        <div class="intro-bar-group"><a href="#work-section">Work</a></div>
+        <div class="intro-bar-group"><a href="#about">About</a></div>
       </div>
-      <div class="intro-bar-cta-wrap"><a class="intro-bar-cta" href="#contact">Say hello</a></div>
+      <div class="intro-bar-cta-wrap"><a class="intro-bar-cta" href="#contact">Contact</a></div>
     </nav>
 
     <!-- SELECTED WORK -->
@@ -429,18 +426,17 @@
             <a class="work-card-link" href="https://www.figma.com/deck/3ID7RXQRZUqKIDq6cGxGnY/Jenna-Portfolio-%E2%80%94-Portfolio-2026-B?node-id=1-42&amp;viewport=-129%2C-110%2C0.69&amp;t=REUsrarH3k2S5FDV-1&amp;scaling=min-zoom&amp;content-scaling=fixed&amp;page-id=0%3A1" target="_blank" rel="noopener" data-href="work/messaging.html" data-reveal>
               <!-- The art's own ratio: two phone screens, near-square, so a 5:4
                    frame would crop their status and nav bars. -->
-              <div class="work-card-media" style="--media-ratio: 1866 / 1846; --media-shift: 8px">
+              <div class="work-card-media" style="--media-ratio: 1866 / 1846; --media-shift: 8px; --media-fit: contain">
                 <img class="work-card-cover" src="images/messaging-card.jpg?v=1" width="1866" height="1846" alt="" loading="lazy" />
                 <img class="work-card-hover" data-hover-src="images/messaging-card.gif?v=6" width="1100" height="1088" alt="" aria-hidden="true" />
               </div>
               <div class="work-card-text">
                 <div class="work-card-swap">
-                  <h2 class="work-card-title" id="work-heading">Facebook Messaging</h2>
+                  <h2 class="work-card-title" id="work-heading">Facebook Messaging <span class="work-card-year">/ 2023</span></h2>
                   <p class="work-card-description">Defining how conversations adapt to intent and context.</p>
                 </div>
                 <div class="work-card-meta">
-                  <span class="work-card-lock"><svg class="work-card-lock-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><rect x="4" y="9" width="16" height="12" rx="4" stroke="currentColor" stroke-width="1.5"/><path d="M12 16L12 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 9V7C16 4.79086 14.2091 3 12 3C9.79086 3 8 4.79086 8 7L8 9" stroke="currentColor" stroke-width="1.5"/></svg><span class="visually-hidden">Full case study locked, opens in a new tab</span></span>
-                  <span class="work-card-pill">Shipped &middot; 2023 <span class="work-card-pill-arrow" aria-hidden="true">&#8599;</span></span>
+                  <span class="work-card-status work-card-status--lock"><svg class="work-card-lock-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><rect x="4" y="9" width="16" height="12" rx="4" stroke="currentColor" stroke-width="1.5"/><path d="M12 16L12 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 9V7C16 4.79086 14.2091 3 12 3C9.79086 3 8 4.79086 8 7L8 9" stroke="currentColor" stroke-width="1.5"/></svg><span class="visually-hidden">Full case study locked, opens in a new tab. </span></span>
                 </div>
               </div>
             </a>
@@ -448,7 +444,7 @@
 
           <li class="work-card" data-reveal-group>
             <a class="work-card-link" data-reveal>
-              <div class="work-card-media" style="--media-ratio: 16 / 10">
+              <div class="work-card-media" style="--media-ratio: 17 / 10; --hover-lift: 1.012">
                 <!-- At rest the still; on hover the GIF (loaded on first hover
                      only, restarted each time — initWorkHoverMedia). -->
                 <img class="work-card-cover" src="images/loop-cover-card.jpg?v=1" width="2040" height="1200" alt="" loading="lazy" />
@@ -456,12 +452,11 @@
               </div>
               <div class="work-card-text">
                 <div class="work-card-swap">
-                  <h2 class="work-card-title">Microsoft Loop</h2>
+                  <h2 class="work-card-title">Microsoft Loop <span class="work-card-year">/ 2022</span></h2>
                   <p class="work-card-description">Designing 0&rarr;1 collaborative primitive that works across apps.</p>
                 </div>
                 <div class="work-card-meta">
-                  <span class="work-card-lock"><svg class="work-card-lock-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><rect x="4" y="9" width="16" height="12" rx="4" stroke="currentColor" stroke-width="1.5"/><path d="M12 16L12 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 9V7C16 4.79086 14.2091 3 12 3C9.79086 3 8 4.79086 8 7L8 9" stroke="currentColor" stroke-width="1.5"/></svg><span class="visually-hidden">Full case study locked</span></span>
-                  <span class="work-card-pill">Shipped &middot; 2022<span class="work-card-pill-arrow" aria-hidden="true">&#8599;</span></span>
+                  <span class="work-card-status work-card-status--lock"><svg class="work-card-lock-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><rect x="4" y="9" width="16" height="12" rx="4" stroke="currentColor" stroke-width="1.5"/><path d="M12 16L12 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 9V7C16 4.79086 14.2091 3 12 3C9.79086 3 8 4.79086 8 7L8 9" stroke="currentColor" stroke-width="1.5"/></svg><span class="visually-hidden">Full case study locked. </span></span>
                 </div>
               </div>
             </a>
@@ -477,11 +472,11 @@
               </div>
               <div class="work-card-text">
                 <div class="work-card-swap">
-                  <h2 class="work-card-title">Spatial History for Conversational AI</h2>
-                  <p class="work-card-description">Reimagining how emerging chat themes relate and how we navigate between them.</p>
+                  <h2 class="work-card-title">Spatial History for Conversational AI <span class="work-card-year">/ 2026</span></h2>
+                  <p class="work-card-description">Reimagining how we explore and connect conversations beyond linear chat history.</p>
                 </div>
                 <div class="work-card-meta">
-                  <span class="work-card-pill">Concept &middot; 2026</span>
+                  <span class="work-card-status">Concept</span>
                 </div>
               </div>
             </a>
@@ -499,12 +494,11 @@
               </div>
               <div class="work-card-text">
                 <div class="work-card-swap">
-                  <h2 class="work-card-title">Facebook Groups</h2>
+                  <h2 class="work-card-title">Facebook Groups <span class="work-card-year">/ 2023</span></h2>
                   <p class="work-card-description">Adapting Group Home around how members arrive and what's new.</p>
                 </div>
                 <div class="work-card-meta">
-                  <span class="work-card-pill">Coming soon</span>
-                  <span class="work-card-pill">Shipped &middot; 2023 <span class="work-card-pill-arrow" aria-hidden="true">&#8599;</span></span>
+                  <span class="work-card-status">Coming soon</span>
                 </div>
               </div>
             </a>
@@ -520,12 +514,11 @@
               </div>
               <div class="work-card-text">
                 <div class="work-card-swap">
-                  <h2 class="work-card-title">Accessibility on meta.com</h2>
+                  <h2 class="work-card-title">Accessibility on meta.com <span class="work-card-year">/ 2026</span></h2>
                   <p class="work-card-description">Organizing accessibility features and support around people’s needs.</p>
                 </div>
                 <div class="work-card-meta">
-                  <span class="work-card-lock"><svg class="work-card-lock-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><rect x="4" y="9" width="16" height="12" rx="4" stroke="currentColor" stroke-width="1.5"/><path d="M12 16L12 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 9V7C16 4.79086 14.2091 3 12 3C9.79086 3 8 4.79086 8 7L8 9" stroke="currentColor" stroke-width="1.5"/></svg><span class="visually-hidden">Full case study locked, opens in a new tab</span></span>
-                  <span class="work-card-pill">Shipped &middot; 2026 <span class="work-card-pill-arrow" aria-hidden="true">&#8599;</span></span>
+                  <span class="work-card-status work-card-status--lock"><svg class="work-card-lock-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><rect x="4" y="9" width="16" height="12" rx="4" stroke="currentColor" stroke-width="1.5"/><path d="M12 16L12 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 9V7C16 4.79086 14.2091 3 12 3C9.79086 3 8 4.79086 8 7L8 9" stroke="currentColor" stroke-width="1.5"/></svg><span class="visually-hidden">Full case study locked, opens in a new tab. </span></span>
                 </div>
               </div>
             </a>
@@ -595,19 +588,17 @@
       <div class="contact-bg" aria-hidden="true"></div>
       <div class="site-container contact-inner" data-reveal-group>
         <div class="contact-hero" data-reveal>
-          <!-- The <br> is a deliberate editorial break: the line lands after
-               "here" at every width. Left to wrap on its own the wider tiers
-               break after "resonated," instead, which splits the clause. The
-               space before it collapses at the line end, so the text still
-               reads as one sentence to a screen reader. -->
-          <h2 class="contact-email" id="contact-heading">If something here <br>resonated, say hello.</h2>
+          <!-- The headline IS the email link (2026-10): "Say hello" on line one, the
+               address and an outward arrow on line two. The <br> is the editorial
+               break; the whole thing reads as one link name to a screen reader. -->
+          <h2 class="contact-email" id="contact-heading"><a href="mailto:ammerallj@gmail.com">Say hello<br>ammerallj@gmail.com<svg class="contact-email-arrow" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M6 18L18 6M8.5 6H18V15.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a></h2>
         </div>
         <div class="contact-meta">
           <div class="contact-meta-group contact-meta-connect" data-reveal>
-            <h3 class="section-label">Connect</h3>
+            <h3 class="section-label">Elsewhere</h3>
             <div class="contact-connect-links">
-              <a href="mailto:ammerallj@gmail.com">ammerallj@gmail.com<span class="visually-hidden"> (email)</span></a>
               <a href="https://www.linkedin.com/in/ammerallj/" target="_blank" rel="noopener noreferrer">LinkedIn<span class="visually-hidden"> (opens in new tab)</span></a>
+              <a href="https://github.com/ammerallj" target="_blank" rel="noopener noreferrer">GitHub<span class="visually-hidden"> (opens in new tab)</span></a>
             </div>
           </div>
           <div class="contact-mind" data-reveal>
@@ -688,6 +679,6 @@
     </button>
   </div>
   <script src="js/jennaos.js?v=23" defer></script>
-  <script src="js/main.js?v=72f3eebb" defer></script>
+  <script src="js/main.js?v=c768e706" defer></script>
 </body>
 </html>

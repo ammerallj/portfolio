@@ -55,6 +55,48 @@ stage it until she says so. **It also carries the masonry Work section**:
 that branch again if more Work-section work lands there. Much of the landing documentation below describes
 the PRE-redesign hero and is superseded here wherever the two disagree.
 
+
+**ABOUT → CONTACT, CURRENT (2026-10, Jenna: "Boom that is it!") — supersedes the
+"PARED BACK" note below.** The reverse of hero → Work, tuned by measuring both:
+- The tug is ON but starts when About FADES, not at its rest: `CONTACT_SHORTEN`
+  `{ px: 380, start: 0.35 }` (js/main.js) holds the push at full until 35% of the
+  way to the floor, so the page moves ~1.2× while About is read, then the blue
+  jumps to ~2.9× at the fade and eases to 1× at the landing. `ABOUT_LIFT.speed`
+  0.55 (peaks ~2.9×), `CONTACT_LAG.k` 0.5. Starting the tug at About's rest felt
+  like being yanked to the footer.
+- The scrim is the hero's: a PLAIN smoothstep (`LEDGE_BIAS` 1, sections.css
+  `.contact-section::before` is 33 stops), `--contact-ledge-rest` =
+  `clamp(180px, 26svh, 300px)` (≈ the hero's `--field-fade`), appended to About's
+  bottom via `--about-tail` = rest + 32px of clear cream. `CONTACT_COPY.navRamp` 120.
+- The nav steps out while the blue passes: `is-nav-away` (the whole bar — labels,
+  frost, progressive blur, grain, glass — fades, hero.css last block) from when the
+  ramp is within ~90px of the glass (`BAR_BLEED + 90` look-ahead) until Contact's
+  solid colour is over 3/4 of the bar (`solidAtBar`). Labels swap black↔white only
+  while hidden (class `is-over-dark` is set during the away window by which side the
+  bar will return on). The bar's glass is a PROGRESSIVE blur (`.intro-bar-blur`, 7
+  layers 12 → 0.3px, `BAR_BLEED` 16) under a 0.8 cream tint; keep `BAR_BLEED`, the
+  CSS `--bar-bleed` fallbacks, `CONTACT.frost` and `fillDepth` in step.
+
+**HERO LOCKUP, CURRENT (2026-10, supersedes the two-column description below):**
+one `h1` and nothing else — no right column, no bio, no "previously" line.
+"Jenna Ammerall" is its own first line (`.intro-headline-name`, `display: block`,
+upright, 1.5× the sentence at ≥1377); the sentence "designs how products fit
+together through intentional behavior and craft." runs below it, everything
+left-aligned at the page gutter. The sentence rests at 45% black
+(`rgba(0,0,0,.45)`, ~3.4:1, large type) and **`initHeadlineFill`** wraps its words
+in `.hw` and writes a per-word ink level `--hw-a` from the cursor's position — a
+continuous grey-black ramp (peak 0.88 at the cursor, 0.70 behind it, a short
+lead ahead), with a 0.55s ease. Mouse only. An outlined-then-filled version was
+built and reverted (hard to read) — `git show b89affd`.
+At **≥1377** (`responsive.css`, before the ≤1376 block): headline
+`--hero-headline-size: clamp(64px, 5vw, 96px)`; the last line's BASELINE sits
+flush with the Jenna OS button's bottom (`.intro-band` padding-bottom =
+`24px − 0.184 × size`), the column stops 24px short of the button, and the
+gradient's white ends at the headline's top (`WIDE_FIELD_GAP` 0 in js/main.js;
+48px below 1377). ≤1376 the first Work card peeks, so none of the flush logic
+applies there. Copy history lives in `git log`; the metadata, About bio and
+llms.txt were NOT updated to match (ask before cascading).
+
 **The landing now (desktop/tablet, >680):**
 - **Hero lockup in the white lower part of the fold**, reference-style: `h1`
   "I’m Jenna Ammerall, a product / interaction designer based in Seattle."
@@ -3606,13 +3648,12 @@ own version, separate from the `style.css?v=` / `@import` CSS bump below).
   add it **everywhere**, even to pages that don't use it — the `@font-face` rules
   cost ~1.7KB of CSS there and download no woff2, because a face is only fetched
   where it actually renders. Current request (worktree-redesign):
-  `Hanken+Grotesk:ital,wght@0,200;0,500;0,700;1,500` + `Inter:wght@400..700`.
-  **The ONE italic face is Hanken 500 italic**, used by the hero's
-  `.intro-headline-italic` (the name, "Jenna Ammerall"). Any other weight or family in
-  italic still renders as a browser-sheared oblique — add its axis to **all
-  five** links first. If the hero drops the italic, take `1,500` out again
-  (it was added and removed once before, in 2026-08); don't leave an unused
-  face behind.
+  `Hanken+Grotesk:wght@200;400;500;700` + `Inter:wght@400..700` (500 is the Work-card title and year, 400 its status; 200 is only the mobile menu's dash).
+  **No italic face is loaded** (2026-10): the hero's italic name was removed, so
+  `1,500` and the `ital` axis came out of both pages' links (index.html and
+  404.html — keep them byte-identical). Anything set in `font-style: italic` now
+  renders as a browser-sheared oblique — add the axis back to **both** links
+  first. Don't leave an unused face behind.
 - ⚠️ **AFTER A DEPLOY, HARD-RELOAD BEFORE JUDGING ANYTHING.** `index.html` has no
   cache-buster of its own (correctly — see the `?v=` entry below), so a browser
   that already has the page keeps serving the OLD html, which still names the OLD

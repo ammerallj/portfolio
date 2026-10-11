@@ -142,6 +142,46 @@ html.is-hero-stacked {
 }
 
 /* ============================================================
+   ≥1377 — THE HEADLINE'S LAST LINE SITS FLUSH WITH THE JENNA OS BUTTON
+   (2026-10, Jenna). The button is fixed 24px up from the viewport's bottom; the
+   hero ends on the fold here (no peek), so the band's bottom padding is that 24px
+   less the gap between the last line's baseline and its line box — 0.184em of the
+   headline's size (measured, Hanken 500 at line-height 1.05). The last line is
+   "Meta and Microsoft." — no descenders — so the baseline IS the visual bottom.
+   ≤1376 the first Work card peeks and the hero ends above the fold, so no
+   padding can make it flush there.
+   ============================================================ */
+@media (min-width: 1377px) {
+  /* The headline's size here: 72px at 1440, growing with the window up to the
+     site's 96px display size. One token so the padding below follows it. */
+  :root {
+    --hero-headline-size: clamp(64px, 5vw, var(--display-size));
+  }
+
+  .intro-headline {
+    font-size: var(--hero-headline-size);
+  }
+
+  .intro-band {
+    padding-bottom: calc(24px - 0.184 * var(--hero-headline-size));
+  }
+
+  /* THE NAME IS LINE ONE, FLUSH LEFT (2026-10, Jenna): "Jenna Ammerall" sits
+     alone on the first line (display: block comes from hero.css) and the
+     sentence runs below it — everything left-aligned, ONE size. (The name was
+     1.5x the sentence for a while; it read as disconnected from it, so it came
+     back to 1x — only the colour differs.) */
+
+  /* KEEP THE BUTTON'S CORNER CLEAR. The Jenna OS button is 56px wide, 24px in
+     from the right (jennaos.css), and the last line now sits on its row — so a
+     line that runs long would slide under it. The band already pads 56px; this
+     adds 48 more, which stops the text 24px short of the button's left edge. */
+  .intro-band-left {
+    padding-right: 48px;
+  }
+}
+
+/* ============================================================
    ≤1376 — THE FIRST WORK CARD PEEKS (2026-09-28, Jenna). Tablets up to the 13"
    iPad Pro (1032 portrait / 1376 landscape) — and so laptops up to 1376 too —
    take the phone's presentation: the landing is --hero-peek shorter than the
@@ -224,9 +264,9 @@ html.is-hero-stacked {
     --project-block-title-size: 2.25rem; /* 36px — one notch under the 44 above */
     --next-case-title-size: 1.75rem; /* 28px — one notch under the block heading */
     --next-case-radius: 48px;
-    --work-card-title-size: 1.75rem; /* 28px */
     --work-card-radius: 32px;
-    --work-card-pad: 28px;
+    --work-card-pad: 18px; /* was 28 */
+    --work-gap: 20px;      /* was --gap-group (48) */
     /* LOCKED across the whole 1024→481 band — no clamp. The global token is
        fluid (6.67vw), which slid the display from 68.3px at 1024 down to 56 by
        768: the headline changed size and, because it's bottom-anchored to the
@@ -810,9 +850,9 @@ html.is-hero-stacked {
        move at every tier (the radius below does, because it's a shape, not type). */
     --next-case-title-size: 1.75rem; /* 28px — held, not stepped */
     --next-case-radius: 24px;
-    --work-card-title-size: 1.5rem; /* 24px */
     --work-card-radius: 24px;
-    --work-card-pad: 20px;
+    --work-card-pad: 14px; /* was 20 */
+    --work-gap: 16px;      /* was --gap-group (40) */
 
     /* SPACING SCALE, phone step — the tightest, and where the scale was
        derived (see the block at the top of this file). Group and section both
@@ -1198,11 +1238,10 @@ html.is-hero-stacked {
     padding: 8px 10px;
   }
 
-  /* Phone work cards: one column (from the 768 tier), and the 17px Figma
-     description size. */
+  /* Phone work cards: one column (from the 768 tier). The description follows
+     the body token (16px) so it cannot drift from the title. */
   /* "Prev. at Meta and Microsoft." shares the card text size on phones
      (2026-09-28, Jenna) — one rule, so the two cannot drift apart. */
-  .work-card-description,
   .intro-previously {
     font-size: 17px; /* Figma */
   }

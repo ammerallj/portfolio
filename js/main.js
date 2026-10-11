@@ -121,10 +121,10 @@ const siteFooter = document.querySelector('.site-footer');
 // pages end on cream, so this is null there and both features simply stay off.
 const darkPanel = document.getElementById('contact');
 // How far the sticky bar's frosted glass reaches past its own bottom edge. Must
-// match the `100px` fallback in hero.css's .intro-bar::before — that fallback is
+// match the `16px` fallback in hero.css's .intro-bar::before — that fallback is
 // what a no-JS visitor gets, and it is the correct value everywhere except the
 // approach to Contact.
-const BAR_BLEED = 100;
+const BAR_BLEED = 16; // was 100, 48, 24, 36 — shortened 2026-10; keep in step with hero.css's --bar-bleed fallback
 // How much approach the bar's colour change is spread over, in px of scroll, and
 // the point in it where the LABELS switch.
 //
@@ -244,7 +244,7 @@ const CONTACT = {
   // as --color-accent / --color-accent-rgb.
   //
   // ⚠️ THIS IS A SAMPLED SMOOTHSTEP NOW, not the old four-stop piecewise line.
-  // The cream holds 0.95 to the lowest nav item (50px) and eases to 0 across the
+  // The cream holds 0.70 (was 0.95) to the lowest nav item (50px) and eases to 0 across the
   // rest of the box (166px at full bleed). contactFrostAt interpolates linearly
   // between these, so the count is how faithfully the curve is reproduced —
   // eighths track it to well under a code value.
@@ -253,10 +253,10 @@ const CONTACT = {
   // hold, putting the JS 8 code values under the CSS right at the nav item's
   // bottom — the one place the two must agree, since that is where the bar's
   // fill is repairing the most opaque part of the frost.
-  frost: [[0, 0.95], [50, 0.95], [64.5, 0.9092], [79.0, 0.8016], [93.5, 0.6494], [108.0, 0.475], [122.5, 0.3006], [137.0, 0.1484], [151.5, 0.0408], [166.0, 0.0]],
+  frost: [[0, 0.8], [50, 0.8], [54.0, 0.7656], [58.0, 0.675], [62.0, 0.5469], [66.0, 0.4], [70.0, 0.2531], [74.0, 0.125], [78.0, 0.0344], [82.0, 0.0]],
   // How far past the bar the fill is built. The bar's ::before runs
-  // --bar-bleed + 2px past its own box, and BAR_BLEED is its 100px maximum.
-  fillDepth: 176,
+  // --bar-bleed + 2px past its own box, and BAR_BLEED is its 16px maximum.
+  fillDepth: 92, // box height (64 + BAR_BLEED + 2) + 10
   peek: {
     // Parallax distance as a fraction of the window, and its ceiling in px.
     rate: 0.5,
@@ -436,19 +436,19 @@ function setContactPeek(px) {
 // All three are 0 at both resting positions (About's and Contact's), so both
 // settled compositions are unchanged. Pure functions of scroll; the fade is a
 // timed class toggle, like the lockup's.
-const CONTACT_LAG = { k: 0 };      // OFF (2026-09-28, Jenna: "it pulls") — was 0.5
-const ABOUT_LIFT = { speed: 0, fadeAt: 0.5, gap: 16 }; // lift OFF (was 0.8); fade + gap still live
+const CONTACT_LAG = { k: 0.5 };    // BACK ON, alone (2026-10, Jenna: "blue arrives like the gradient leaves"). It was switched off 2026-09-28 ("it pulls") together with CONTACT_SHORTEN, ABOUT_LIFT.speed and CONTACT_COPY.ride, which stay OFF — this part only pulls the blue ahead of the panel and tapers to full speed at the landing
+const ABOUT_LIFT = { speed: 0.55, fadeAt: 0.5, gap: 16 }; // lift ON at 0.55 (was 0.8: with the tug starting at the fade it peaked at 3.7x) (2026-10, Jenna: "I need the tug"): About's copy leaves faster than the scroll, the mirror of HERO_TEXT.speed
 // Contact's copy RIDES the blue on the way in: its heading holds `ride` px
 // under the blue's top, then settles into its centred resting place as the page
 // lands — so the blue never arrives as an empty band ahead of the content.
-const CONTACT_COPY = { ride: null, navRamp: 96 }; // ride OFF (was 128): the copy reveals in order instead
+const CONTACT_COPY = { ride: null, navRamp: 120 }; // ride OFF (was 128): the copy reveals in order instead. navRamp 96 -> 200 -> 120 (2026-10): the nav is hidden while the blue passes it, so the stretch is kept — but not so long that the nav is missing for ~200px of scroll
 let contactQ = 1;
 // ...and the fourth part, the one that sets the PACE: Contact is laid out
 // SHORTER by `px` (capped at `cap` of the About → Contact scroll), pulled back
 // down by --contact-push at About's rest, and the push unwinds on the hero's own
 // cubic ease-out (1 − q)³ — so Contact rises fastest on the first gesture past
 // About and lands at exactly 1x. The mirror of HERO_SHORTEN.
-const CONTACT_SHORTEN = { px: 0, cap: 0.5 }; // OFF — this was the sudden pull (was 500)
+const CONTACT_SHORTEN = { px: 380, start: 0.35, cap: 0.5 }; // ON at the full 500 (2026-10, Jenna: "I need the tug — it's awkward when the nav doesn't appear"): Contact rises fast on the first gesture so the nav's absence is brief. It was switched off once for pulling; she asked for it back.
 let contactShorten = 0;
 let aboutRestY = null;
 let lastContactPush = -1;
@@ -626,7 +626,7 @@ function measureContactArrival() {
     docTop - (document.documentElement.scrollHeight - window.innerHeight));
 }
 
-const LEDGE_BIAS = 1.7;
+const LEDGE_BIAS = 1; // plain smoothstep, the hero's scrim curve (was 1.7 — biased); must match sections.css .contact-section::before
 
 // Contact's fill alpha at a viewport y — the ledge's smoothstep above the
 // panel, solid below it. Shared by the bar's fill and by blueBehindBar.
@@ -772,7 +772,7 @@ function measureFieldTuck() {
   const barRest = pageTop(intro) + intro.offsetHeight
     + parseFloat(getComputedStyle(introBar).marginTop || '0');
   if (barRest <= 0) return;
-  const bio = document.querySelector('.intro-bio');
+  const bio = document.querySelector('.intro-bio') || document.querySelector('.intro-headline');
   if (bio) setFieldGap(Math.max(0, Math.round(barRest - (pageTop(bio) + bio.offsetHeight))));
   // ⚠️ THE TARGET IS THE BAR'S TOP, NOT ITS BOTTOM. Aiming at the bottom is the
   // obvious reading of "don't bleed past the bar" and it leaves the artwork
@@ -1633,6 +1633,7 @@ function initHeroField() {
 // (375x667: headline at 181, 40svh at 267) and the colour would sit behind it.
 // Set BEFORE initHeroField: phones draw one static frame, sized by this box.
 const PHONE_FIELD_GAP = 48;
+const WIDE_FIELD_GAP = 0; // ≥1377: the white ends at the headline's top
 function measurePhoneField() {
   const root = document.documentElement;
   const h1 = document.querySelector('.intro-headline');
@@ -1650,7 +1651,10 @@ function measurePhoneField() {
   if (aboveMobile) {
     let t = 0;
     for (let n = h1; n; n = n.offsetParent) t += n.offsetTop;
-    root.style.setProperty('--hero-field-end', Math.round(Math.max(160, t - PHONE_FIELD_GAP)) + 'px');
+    // ≥1377 the white runs right down to the headline's top (Jenna, 2026-10:
+    // "move the scrim down"); below it keeps the 48px gap.
+    const gap = window.matchMedia('(min-width: 1377px)').matches ? WIDE_FIELD_GAP : PHONE_FIELD_GAP;
+    root.style.setProperty('--hero-field-end', Math.round(Math.max(160, t - gap)) + 'px');
   } else {
     root.style.removeProperty('--hero-field-end');
   }
@@ -1679,6 +1683,8 @@ function measureHeroStack() {
   const root = document.documentElement;
   const h1 = document.querySelector('.intro-headline');
   root.classList.remove('is-hero-stacked');
+  // One-column intro (no right block): there is nothing to stack.
+  if (!document.querySelector('.intro-band-right')) return;
   if (!h1 || window.matchMedia('(max-width: 768px)').matches) return;
   const lh = parseFloat(getComputedStyle(h1).lineHeight) || 1;
   root.classList.toggle('is-hero-stacked', Math.round(h1.offsetHeight / lh) > 3);
@@ -2033,13 +2039,10 @@ initHeadlineMorph();
 // cross-fade. Measured, not guessed — counted off the animations each pair
 // actually creates:
 //
-//   Say hello     -> Why hello!    7 of 10 travel  (the strongest of the three:
-//                                  the "h" of "hello" slides left to become the
-//                                  "h" of "Why", a second "h" fades in behind it)
-//   About me      -> Who am I?     4 travel, 5 in, 4 out
-//   Selected work -> What I made   5 travel, 6 in, 8 out (the weakest — the two
-//                                  share little but t/space/w/d/e, so it reads
-//                                  more as a cross-fade than a slide)
+//   Work    -> Selected work
+//   About   -> Who is Jenna
+//   Contact -> Say hello
+//   (Not yet counted for travelling letters like the earlier trio.)
 //
 // The spring IS the reference's default (stiffness 280, damping 18, mass 0.3),
 // solved here once rather than carried as a runtime dependency: omega0 = 30.55
@@ -2066,9 +2069,9 @@ function initNavMorph() {
   const MORPHS = [
     // REDESIGN: the top nav's items take the same morph, which is also what
     // sizes each one to fit its wider label — so the two navs' items match.
-    { selector: '.intro-bar-links a[href$="#work-section"], .top-nav-link[href$="#work-section"]', rest: 'Selected work', hover: 'What I made' },
-    { selector: '.intro-bar-links a[href$="#about"], .top-nav-link[href$="#about"]', rest: 'About me', hover: 'Who am I?' },
-    { selector: '.intro-bar-cta, .top-nav-cta', rest: 'Say hello', hover: 'Why hello!' },
+    { selector: '.intro-bar-links a[href$="#work-section"], .top-nav-link[href$="#work-section"]', rest: 'Work', hover: 'Selected work' },
+    { selector: '.intro-bar-links a[href$="#about"], .top-nav-link[href$="#about"]', rest: 'About', hover: 'Who is Jenna' },
+    { selector: '.intro-bar-cta, .top-nav-cta', rest: 'Contact', hover: 'Say hello' },
   ];
 
   const DURATION = 285; // ms — the spring's own settle time, see above
@@ -2291,6 +2294,71 @@ function initNavMorph() {
 }
 
 initNavMorph();
+
+// THE HEADLINE FILLS AS YOU READ (2026-10, Jenna). Only the name is black; the
+// rest of the sentence rests grey (hero.css). Moving the cursor through the text
+// writes a per-word ink level (--hw-a): a grey-black peak (PEAK) at the cursor,
+// easing back to a softer dark (BEHIND) over the words it has passed, and a
+// short soft lead just ahead of it; everything further on stays at rest. The
+// position is CONTINUOUS (word index + how far across the word the pointer is),
+// and the CSS transition's long ease does the rest — so it flows rather than
+// switching. Words are wrapped in .hw (spaces stay plain text, so the heading
+// still reads as one string). Mouse-only (hover: hover).
+function initHeadlineFill() {
+  const h1 = document.querySelector('.intro-headline');
+  if (!h1 || !window.matchMedia('(hover: hover)').matches) return;
+  const name = h1.querySelector('.intro-headline-name');
+  const words = [];
+  const walker = document.createTreeWalker(h1, NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  while (walker.nextNode()) nodes.push(walker.currentNode);
+  nodes.forEach((node) => {
+    if (name && name.contains(node)) return; // the name is always black
+    const frag = document.createDocumentFragment();
+    // Split on plain spaces only: the headline's &nbsp;s keep words together.
+    node.textContent.split(/( +)/).forEach((part) => {
+      if (!part) return;
+      if (part[0] === ' ') { frag.appendChild(document.createTextNode(part)); return; }
+      const w = document.createElement('span');
+      w.className = 'hw';
+      w.textContent = part;
+      words.push(w);
+      frag.appendChild(w);
+    });
+    node.parentNode.replaceChild(frag, node);
+  });
+  if (!words.length) return;
+
+  const REST = 0.45, BEHIND = 0.7, PEAK = 0.88;
+  let pos = null, raf = 0;
+  const paint = () => {
+    raf = 0;
+    words.forEach((w, i) => {
+      let a = REST;
+      if (pos !== null) {
+        const d = pos - i; // > 0: the cursor has passed this word
+        a = d >= 0
+          ? BEHIND + (PEAK - BEHIND) * Math.exp(-d / 2.2)
+          : REST + (PEAK - REST) * Math.exp(d / 0.8);
+      }
+      w.style.setProperty('--hw-a', a.toFixed(3));
+    });
+  };
+  const queue = () => { if (!raf) raf = requestAnimationFrame(paint); };
+
+  h1.addEventListener('mousemove', (e) => {
+    const w = e.target.closest && e.target.closest('.hw');
+    if (!w) return; // over a space or the name: hold the last position
+    const r = w.getBoundingClientRect();
+    pos = words.indexOf(w) + Math.min(1, Math.max(0, (e.clientX - r.left) / (r.width || 1)));
+    queue();
+  });
+  h1.addEventListener('mouseleave', () => {
+    pos = null;
+    queue();
+  });
+}
+initHeadlineFill();
 // REDESIGN: after the morph has sized the top nav's items. Fonts change those
 // widths, so measure again once they land (and re-derive the field tuck, which
 // reads the bio's position).
@@ -3131,7 +3199,13 @@ function updateScrollEffects() {
     // land after it change the page's height, and a stale distance left the
     // push short of 0 at the bottom — Contact never reached its locked view.
     const floorY = document.documentElement.scrollHeight - window.innerHeight;
-    const q = Math.max(0, Math.min(1, (window.scrollY - aboutRestY) / Math.max(1, floorY - aboutRestY)));
+    // THE TUG STARTS WHEN ABOUT FADES, NOT AT ABOUT'S REST (2026-10, Jenna: "as About
+    // fades out, that's when the tug pulls you to the end of the site"). The push
+    // sits at full until `start` of the way to the floor, so the page moves at
+    // exactly 1x while About is being read, and the unwind — the fast first
+    // gesture — begins as the blue takes over the screen.
+    const p = (window.scrollY - aboutRestY) / Math.max(1, floorY - aboutRestY);
+    const q = Math.max(0, Math.min(1, (p - CONTACT_SHORTEN.start) / (1 - CONTACT_SHORTEN.start)));
     contactQ = q;
     setContactPush(Math.round(contactShorten * (1 - q) * (1 - q) * (1 - q)));
   } else {
@@ -3225,7 +3299,7 @@ function updateScrollEffects() {
     if (contactRect.height === 0) {
       // Contact is hidden (dropped at the mobile tier) — there's no blue panel to
       // invert over, so keep the bars in their normal (cream) state.
-      stickyBars.forEach(bar => bar.classList.remove('is-over-dark', 'is-over-ramp'));
+      stickyBars.forEach(bar => bar.classList.remove('is-over-dark', 'is-over-ramp', 'is-nav-away'));
       setBarBleed(BAR_BLEED);
       setDarkMix(0);
       setBarFill('');
@@ -3347,10 +3421,39 @@ function updateScrollEffects() {
       const flipToWhite = liveLedge > 0
         ? contactAlphaAt(contactGlyphMid, blue, liveLedge) >= DARK_TEXT_ALPHA
         : mix >= DARK_TEXT_AT;
-      stickyBars.forEach(bar => bar.classList.toggle('is-over-dark', flipToWhite));
+      // THE NAV STEPS OUT WHILE THE BLUE RAMP PASSES BEHIND IT (2026-10, Jenna). In that
+      // window — blue behind the bar but the labels not yet able to swap — neither
+      // black nor white reads well on a bar that is mid-gradient, so the whole bar
+      // hides (hero.css, the last block) and comes back the moment Contact's solid
+      // colour meets it. The 0.03 threshold keeps a faint ramp tail from hiding the
+      // nav early. The ramp counts from the moment it shows anywhere in the bar's
+      // WHOLE glass — the bar plus its bleed — because the frost's own copy of the
+      // ramp is what stepped against the page's. Scrolling up plays it backwards.
+      // LOOK-AHEAD: the blue now arrives fast, and the bar takes 0.2s to fade, so it
+      // has to start leaving while the ramp is still ~90px short of the glass —
+      // otherwise the black labels were caught fading over the incoming blue (the
+      // "awkward overlap").
+      const rampInGlass = contactAlphaAt(barHeight + BAR_BLEED + 90, blue, liveLedge) > 0.03;
+      // ...and it comes back as soon as Contact's SOLID colour is over most of the bar
+      // (its top within 3/4 of the bar's height), without waiting for the labels'
+      // 0.86 swap test: that kept the nav missing for the last ~40px of the pass
+      // (Jenna: "it's awkward when the nav doesn't appear").
+      const solidAtBar = blue <= barHeight * 0.75;
+      const navAway = !flipToWhite && !solidAtBar && (covered > 0.03 || rampInGlass);
+      // NO COLOUR FLASH ON THE WAY BACK IN (Jenna: "it quickly flashes from black nav
+      // text to white — drop that"). The labels used to change colour in the same
+      // frame the bar faded back in, so the swap was seen. While the bar is away
+      // they now take the colour of the side they will come back on — white once
+      // the blue is past the middle of the glyphs (arriving at Contact), black
+      // otherwise (leaving it upward) — so the colour is already right, unseen,
+      // when the bar returns.
+      const midBlue = liveLedge > 0 ? contactAlphaAt(contactGlyphMid, blue, liveLedge) : mix;
+      const whiteNow = flipToWhite || solidAtBar || (navAway && midBlue >= 0.45);
+      stickyBars.forEach(bar => bar.classList.toggle('is-over-dark', whiteNow));
       // Blue behind the bar but not yet swapped: labels go FULL black (hero.css
       // .is-over-ramp) — the resting 0.8 black fails AA on the deep ramp.
-      stickyBars.forEach(bar => bar.classList.toggle('is-over-ramp', !flipToWhite && covered > 0));
+      stickyBars.forEach(bar => bar.classList.toggle('is-over-ramp', !whiteNow && !flipToWhite && covered > 0));
+      stickyBars.forEach(bar => bar.classList.toggle('is-nav-away', navAway));
 
       // CLIP THE FROST TO CONTACT'S TOP EDGE. The bar's glass bleeds BAR_BLEED
       // past its own bottom so it melts into the page instead of ending on a

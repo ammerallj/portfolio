@@ -12,6 +12,7 @@
   --color-bg: #FBFCF8;
   --color-text: #000000;
   --color-text-70: rgba(0, 0, 0, 0.7);
+  --color-hairline: rgba(0, 0, 0, 0.07); /* the Work cards' outline and the About rules — one grey */
   --color-accent: #4A45FF;
   /* The same colour as an rgb triplet, so it can be given a variable alpha —
      rgba() takes components, and a hex token cannot be part-way transparent.
@@ -96,9 +97,9 @@
      Its own token rather than --next-case-title-size: same number today, but a
      masonry card and the project pages' pager answer to different things.
      Radius and inner padding step with it in each responsive.css :root. */
-  --work-card-title-size: 2rem;   /* 32px */
   --work-card-radius: 40px;
-  --work-card-pad: 32px;
+  --work-card-pad: 20px; /* was 32 — tighter (2026-10) */
+  --work-gap: 24px;      /* masonry gap, columns and rows; was --gap-group (60) */
 
   --space-xs: 0.5rem;
   --space-sm: 1rem;
@@ -266,7 +267,7 @@
      ⚠️ RAISE THE TAIL, NOT THE RESTING LEDGE, to get more cream: if both move
      together the geometry is IDENTICAL and all that happens is Contact is pushed
      further down the page for nothing. */
-  --contact-ledge-rest: 160px;
+  --contact-ledge-rest: clamp(180px, 26svh, 300px); /* the hero's stretch, in reverse (2026-10, Jenna): the white-to-blue scrim is APPENDED to About's bottom and is as long as the landing's own scrim — 234px at 900 tall (hero: --field-fade ~229). svh, like the hero. */
   /* ⚠️ THE LEDGE PAINTS PAST THE PANEL'S TOP EDGE BY THIS MUCH, and it is the
      same fix the landing bar's ::before already carries for the same reason.
      Contact's top does NOT land on a whole pixel — it is the sum of everything
@@ -279,7 +280,7 @@
      ⚠️ THE HEIGHT ADDS THE SAME AMOUNT so the ledge's TOP does not move; only its
      bottom crosses into the panel, where nothing can see it. */
   --contact-ledge-overlap: 2px;
-  --about-tail: calc(var(--contact-ledge-rest) + var(--gap-section));
+  --about-tail: calc(var(--contact-ledge-rest) + 32px); /* the scrim, then 32px of clear cream between About's last block and its top */
 
   /* Height of the site footer. A DEFAULT, not the truth: initSectionGeometry
      measures the real footer and rewrites this on load and resize, so the value
@@ -498,12 +499,14 @@ body {
 }
 
 /* Eyebrow — one shared small uppercase label used across every section
-   (section labels, the project pages' footprint group titles). The Work cards
+   (section labels, the project pages' footprint group titles, and — since
+   2026-10 — About's Experience / Education / Patents labels). The Work cards
    used to share it
    via .work-card-meta; that line was removed 2026-08-04 — the project
    overview masthead carries the metadata instead. */
 .section-label,
-.footprint-group-title {
+.footprint-group-title,
+.about-facts dt {
   font-family: var(--font-body);
   font-size: var(--size-xs);
   font-weight: 500;

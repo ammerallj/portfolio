@@ -19,9 +19,9 @@
      with its own --gap-group below the lockup, so the masonry cards start right
      at the section's top. ≤480 keeps its own (responsive.css). */
   padding-top: 0;
-  padding-bottom: 144px;
-  /* No hairline into About. The 240px of air across this seam (144 below the
-     cards + 96 above the About heading) already separates them, and with the
+  padding-bottom: 48px; /* was 144 (2026-10, Jenna: shorten the gap into About) */
+  /* No hairline into About. The 144px of air across this seam (48 below the
+     cards + 96 above the About heading; it was 240) already separates them, and with the
      section now coming to rest composed under the nav (initSectionGeometry), a
      rule sitting mid-viewport read as a lid on the cards rather than as a
      join between two sections.
@@ -78,7 +78,7 @@ html.has-top-nav.is-work-in #work-section .site-container {
    grid's negative bottom margin hands back the one trailing gap the last card
    in each column carries. */
 .work-grid {
-  --work-gap: var(--gap-group);
+  /* --work-gap is a root token now (24 / 20 / 16 by tier) */
   list-style: none;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -99,7 +99,8 @@ html.has-top-nav.is-work-in #work-section .site-container {
   display: flex;
   flex-direction: column;
   border-radius: var(--work-card-radius);
-  border: 1px solid var(--color-border-light);
+  /* The hairline is back (2026-10) in a lighter grey than the old 12% black. */
+  border: 1px solid var(--color-hairline);
   /* REDESIGN: white (was rgba(0,0,0,0.025) — a cream panel). */
   background-color: #fff;
   overflow: hidden;
@@ -152,6 +153,15 @@ html.has-top-nav.is-work-in #work-section .site-container {
      frame has no horizontal padding or border, so its width is unchanged. */
   box-sizing: content-box;
   padding-bottom: var(--work-extra, 0px);
+  /* A CARD IS NEVER TALLER THAN THE SCREEN BELOW THE NAV (2026-10, Jenna): the
+     frame stops at 100svh - the nav (--nav-offset, 64px) - the text area under it
+     (two reserved text lines + the bottom padding + the 2px border) - any levelling
+     stretch, so media + text always fits one view. The ratios still vary the
+     heights; this only binds on short windows (at 1440x900 the tallest card,
+     Messaging at ~720px, is already under it). The floor keeps a very short window
+     from collapsing the art. svh, never dvh, like the rest of the page. */
+  --work-text-h: calc(var(--size-base) * 1.4 * 2 + var(--work-card-pad) * 1.5 + 2px);
+  max-height: max(200px, calc(100svh - var(--nav-offset) - var(--work-text-h) - var(--work-extra, 0px)));
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -180,6 +190,11 @@ html.has-top-nav.is-work-in #work-section .site-container {
    hover; it fades in only once it has loaded, so the frame never flashes
    empty. Touch and reduced motion keep the still. */
 .work-card-hover {
+  /* --hover-lift (per card, inline): brightens the hover layer so its white matches
+     the card's. Loop's GIF is encoded with its white at 252 (palette rounding),
+     the still and the card are 255, and the 3-level step showed as a horizontal
+     edge across the card on hover. 1.012 x 252 = 255. */
+  filter: brightness(var(--hover-lift, 1));
   opacity: 0;
   transition: opacity 0.25s ease;
   pointer-events: none;
@@ -236,11 +251,30 @@ html.has-top-nav.is-work-in #work-section .site-container {
 }
 
 .work-card-text {
+  /* THE PILL SHARES THE TITLE'S ROW (2026-10): title/description on the left, the
+     year (and the lock, where gated) on the right. Bottom-aligned, because the
+     title rests on the swap cell's bottom edge. */
+  --status-nudge: calc((var(--size-base) * 1.4 - 2 * var(--size-xs) - 1px) / 2);
   display: flex;
-  flex-direction: column;
-  gap: var(--gap-content);
+  flex-direction: row;
+  align-items: flex-end;
+  justify-content: center; /* the content is CENTRED in the card (2026-10, trial) */
+  gap: 12px;
+  /* The text's distance from the card's bottom edge: 150% of the card padding
+     (30 / 27 / 21px by tier). It was lowered to 62.5% (2026-10) and read as too
+     close to the edge, so it came back UP. The hover description reads the same
+     token so it lands on the same line. */
+  --work-card-pad-bottom: calc(var(--work-card-pad) * 1.5);
   padding: var(--work-card-pad);
+  padding-bottom: var(--work-card-pad-bottom);
   padding-top: 0;
+}
+
+.work-card-swap {
+  flex: 0 1 auto; /* hugs its content so the row can centre */
+  min-width: 0;
+  justify-items: center;
+  text-align: center;
 }
 
 /* TITLE ↔ DESCRIPTION — one slot, two layers. Both sit in the SAME grid cell,
@@ -260,34 +294,73 @@ html.has-top-nav.is-work-in #work-section .site-container {
     translate 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+/* The title is BODY-SIZED (2026-10, Jenna) — one step under the site's 18px body,
+   --size-base (16px), in Hanken Grotesk 500 (400 read as no weight next to the description); the description it swaps with is Inter at
+   the same size, leading and tracking, so hover changes the face, the weight (500 -> 400) and the words, never the size. (It was a 32/28/24 heading in
+   Hanken before.) */
 .work-card-title {
   align-self: end;
   font-family: var(--font-heading);
-  font-size: var(--work-card-title-size);
+  font-size: var(--size-base);
   font-weight: 500;
   letter-spacing: -0.02em;
-  line-height: 1.05;
-  color: var(--color-text);
+  line-height: 1.4;
+  color: var(--color-text-70); /* card content is grey, not black (2026-10) */
+}
+
+/* "Project name / Year": the year trails the name in the same face and the SAME
+   weight (500). It is part of the heading text, so it is read with it. */
+.work-card-year {
+  font-weight: inherit; /* one weight for the name and the year */
 }
 
 .work-card-description {
   align-self: end;
   font-family: var(--font-body);
-  font-size: var(--size-lg);
+  font-size: var(--size-base);
   font-weight: 400;
   letter-spacing: -0.02em;
   line-height: 1.4;
-  color: var(--color-text);
+  color: var(--color-text-70);
   max-width: none;
   opacity: 0;
   translate: 0 8px;
+}
+
+/* CENTRED CONTENT (2026-10): at rest the pill + title centre in the card as one
+   unit (the swap slot is as wide as the TITLE only). On hover the whole unit —
+   pill included — is REPLACED by the description, which is lifted out of the grid
+   and spans the card's FULL inner width (its containing block is .work-card-text,
+   not the slot), centred. The slot reserves two lines of height so a two-line
+   description never grows the card on hover (it would reflow the masonry under
+   the pointer). */
+@media (hover: hover) {
+  .work-card-text {
+    position: relative;
+  }
+  .work-card-swap {
+    min-height: calc(var(--size-base) * 1.4 * 2);
+  }
+  .work-card-description {
+    position: absolute;
+    left: var(--work-card-pad);
+    right: var(--work-card-pad);
+    bottom: var(--work-card-pad-bottom);
+    text-align: center;
+  }
+  .work-card-meta {
+    transition:
+      opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+      translate 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  }
 }
 
 /* Hover (true-hover devices only — a tapped :hover sticks on touch) and
    KEYBOARD focus: the title fades out, the description fades up into its
    place. The meta row stays put. */
 @media (hover: hover) {
-  .work-card-link:hover .work-card-title {
+  .work-card-link:hover .work-card-title,
+  .work-card-link:hover .work-card-meta {
     opacity: 0;
     translate: 0 -8px;
   }
@@ -297,7 +370,8 @@ html.has-top-nav.is-work-in #work-section .site-container {
   }
 }
 
-.work-card-link:focus-visible .work-card-title {
+.work-card-link:focus-visible .work-card-title,
+.work-card-link:focus-visible .work-card-meta {
   opacity: 0;
   translate: 0 -8px;
 }
@@ -309,6 +383,16 @@ html.has-top-nav.is-work-in #work-section .site-container {
 /* NO HOVER (phones, tablets): nothing to reveal it, so the description simply
    sits under the title, always visible. */
 @media (hover: none) {
+  .work-card-text {
+    align-items: flex-start;
+  }
+  .work-card-swap {
+    align-items: center;
+  }
+  .work-card-meta {
+    margin-bottom: 0;
+    margin-top: var(--status-nudge);
+  }
   .work-card-swap {
     display: flex;
     flex-direction: column;
@@ -324,7 +408,8 @@ html.has-top-nav.is-work-in #work-section .site-container {
     opacity: 1;
     translate: none;
   }
-  .work-card-link:focus-visible .work-card-title {
+  .work-card-link:focus-visible .work-card-title,
+  .work-card-link:focus-visible .work-card-meta {
     opacity: 1;
     translate: none;
   }
@@ -332,6 +417,7 @@ html.has-top-nav.is-work-in #work-section .site-container {
 
 @media (prefers-reduced-motion: reduce) {
   .work-card-title,
+  .work-card-meta,
   .work-card-description {
     transition: none;
     translate: none;
@@ -357,91 +443,61 @@ html.has-top-nav.is-work-in #work-section .site-container {
   color: var(--color-text);
 }
 
-/* Per-card meta row, under the title: the lock badge (gated projects only) and
-   one "SHIPPED · 2023 ↗" pill. The company stamp that sat beside the pill was
-   dropped 2026-09; the year moved into the pill. */
+/* Per-card status, on the title's row (2026-10): ONE hairline pill, IN FRONT of the
+   title (the pill was on the right, went bare, and came back on the left), saying what
+   kind of thing the card is — the lock where the full case study is gated,
+   "Concept", or "Coming soon". The year moved left, into the title
+   ("Project / 2023"); "Shipped" and the ↗ arrow are gone. It is centred on the title's
+   line (--status-nudge, from .work-card-text) rather than on the whole swap cell,
+   which is taller when a two-line description is on show. */
 .work-card-meta {
+  flex: none;
+  order: -1; /* in front of the title (2026-10), whatever the DOM order */
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 0.7rem;
+  margin-bottom: var(--status-nudge);
 }
 
-.work-card-pill {
+.work-card-status {
   display: inline-flex;
   align-items: center;
   gap: 0.4em;
   /* 0.5px — a true hairline on 2x displays (1x rounds it up to one pixel). */
   border: 0.5px solid rgba(0, 0, 0, 0.22);
   border-radius: 100px;
-  padding: 0.4em 0.85em;
-  font-family: var(--font-body);
+  padding: 0.25em 0.7em; /* 27px tall at 13px type */
+  min-height: calc(2em + 1px); /* the text pills' height, so the icon-only lock matches */
+  background-color: #fff; /* the card's own white */
+  font-family: var(--font-heading);
   font-size: var(--size-xs); /* 13px — the site's eyebrow/meta size */
-  font-weight: 500;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
+  font-weight: 400;
+  letter-spacing: 0;
   color: var(--color-text-70);
   white-space: nowrap;
 }
 
-/* CREAM CHIPS — every piece of the meta row (the pills, "Coming soon" and the
-   lock circle) is the page's own cream (--color-bg, #FBFCF8, written as rgb so
-   it can be part-transparent) at 0.9, inside the same 0.5px hairline. No blur:
-   the chips sit on the card's flat panel, so there was nothing behind them to
-   frost. "Coming soon" (Loop, Groups) is the same chip with no arrow or year;
-   it opens the row, in the slot the lock takes on the gated cards, because both
-   qualify what is behind the card. */
-.work-card-pill,
-.work-card-lock {
-  background-color: rgba(251, 252, 248, 0.9);
-}
-
-.work-card-pill-arrow {
-  font-size: 1.15em;
-  line-height: 0;
-}
-
-/* Lock badge — OPENS the meta row on the two projects whose FULL CASE STUDY is
-   password-gated (Accessibility, Messaging). Loop and Groups have nothing gated
-   and must not get one. First position, so the row reads lock → SHIPPED ↗ →
-   Meta · 2026: the gate is the qualifier on everything after it, not a footnote
-   trailing the provenance.
-
-   ⚠️ WHAT IT CLAIMS. The card itself is not locked: it links to a project
-   overview page that is entirely public. The gate is one step further in, on the
-   Figma deck that page's "Full case study" card points to. That is why the
-   accessible name is "Full case study locked" and not "Locked" — the site's
-   standing rule is that a lock names the thing that IS locked (see the section
-   pill that lost its chip in 2026-08 for the same mistake made the other way).
-   Keep the badge and its label together if this moves.
-
-   THE CIRCLE IS THE PILL'S BOX, restated. Same hairline, same 13px scale, same
-   0.4em padding — so it stands exactly as tall as "SHIPPED ↗" beside it and
-   tracks it automatically if that type ever changes tier. The height is spelled
-   out as its parts rather than hard-coded to 31.9px for that reason:
-     1.5em  the line box (--size-xs x the body's 1.5 line-height)
-   + 0.8em  the pill's 0.4em padding, top and bottom
-   + 1px    both 0.5px hairlines */
-.work-card-lock {
-  display: inline-flex;
-  align-items: center;
+/* The locked pill is a CIRCLE: icon only, as wide as the pill is tall. */
+.work-card-status--lock {
+  width: calc(2em + 1px);
+  padding: 0;
   justify-content: center;
-  flex: none;
-  width: calc(1.5em + 0.8em + 1px);
-  height: calc(1.5em + 0.8em + 1px);
-  border: 0.5px solid rgba(0, 0, 0, 0.22); /* the pill's hairline, not --color-border */
   border-radius: 50%;
-  font-size: var(--size-xs);
-  color: var(--color-text-70);
 }
 
-/* 1.15em ≈ 15px against .next-case-lock's 1em — a touch larger because it sits
-   inside a ring here rather than beside text, and reads small otherwise. Same
-   24-unit viewBox and 1.5 stroke as that one: ONE padlock on the site. */
+/* The lock, inside its circular pill, where the full case study is gated. Gated projects only
+   (Accessibility, Messaging, and Loop's parked card); Groups and the concept
+   have nothing gated and must not get one.
+
+   ⚠️ WHAT IT CLAIMS. The card itself is not locked: the gate is the Figma deck.
+   That is why the hidden label beside it reads "Full case study locked" and not
+   "Locked" — a lock names the thing that IS locked. Keep the icon and its label
+   together if this moves. Same 24-unit viewBox and 1.5 stroke as
+   .next-case-lock: ONE padlock on the site. */
 .work-card-lock-icon {
-  width: 1.15em;
-  height: 1.15em;
+  width: 1.1em;
+  height: 1.1em;
   display: block;
+  flex: none;
 }
 
 /* ============================================================
@@ -619,39 +675,44 @@ html.has-top-nav.is-work-in #work-section .site-container {
    the ledge with a grey halo. Holding the hue and moving only alpha is what
    keeps it clean. */
 .contact-section::before {
+  /* THE HERO'S SCRIM CURVE (2026-10, Jenna: "look at the scrim for the hero, apply that
+     for Contact"): a PLAIN smoothstep, no bias — the same even fade the landing
+     uses to dissolve its colour into cream (hero.css, --field-fade). It was a biased
+     ss(t^1.7) that held nearly clear for the first half and then came in steeply,
+     which read as short next to the hero. js/main.js LEDGE_BIAS is 1 to match. */
   background-image: linear-gradient(to bottom,
     rgba(var(--color-accent-rgb), 0.0000) 0.00%,
-    rgba(var(--color-accent-rgb), 0.0000) 3.12%,
-    rgba(var(--color-accent-rgb), 0.0002) 6.25%,
-    rgba(var(--color-accent-rgb), 0.0009) 9.38%,
-    rgba(var(--color-accent-rgb), 0.0025) 12.50%,
-    rgba(var(--color-accent-rgb), 0.0053) 15.62%,
-    rgba(var(--color-accent-rgb), 0.0097) 18.75%,
-    rgba(var(--color-accent-rgb), 0.0162) 21.88%,
-    rgba(var(--color-accent-rgb), 0.0252) 25.00%,
-    rgba(var(--color-accent-rgb), 0.0371) 28.12%,
-    rgba(var(--color-accent-rgb), 0.0522) 31.25%,
-    rgba(var(--color-accent-rgb), 0.0709) 34.38%,
-    rgba(var(--color-accent-rgb), 0.0934) 37.50%,
-    rgba(var(--color-accent-rgb), 0.1201) 40.62%,
-    rgba(var(--color-accent-rgb), 0.1510) 43.75%,
-    rgba(var(--color-accent-rgb), 0.1862) 46.88%,
-    rgba(var(--color-accent-rgb), 0.2259) 50.00%,
-    rgba(var(--color-accent-rgb), 0.2698) 53.12%,
-    rgba(var(--color-accent-rgb), 0.3178) 56.25%,
-    rgba(var(--color-accent-rgb), 0.3697) 59.38%,
-    rgba(var(--color-accent-rgb), 0.4249) 62.50%,
-    rgba(var(--color-accent-rgb), 0.4830) 65.62%,
-    rgba(var(--color-accent-rgb), 0.5433) 68.75%,
-    rgba(var(--color-accent-rgb), 0.6049) 71.88%,
-    rgba(var(--color-accent-rgb), 0.6669) 75.00%,
-    rgba(var(--color-accent-rgb), 0.7281) 78.12%,
-    rgba(var(--color-accent-rgb), 0.7873) 81.25%,
-    rgba(var(--color-accent-rgb), 0.8428) 84.38%,
-    rgba(var(--color-accent-rgb), 0.8930) 87.50%,
-    rgba(var(--color-accent-rgb), 0.9361) 90.62%,
-    rgba(var(--color-accent-rgb), 0.9699) 93.75%,
-    rgba(var(--color-accent-rgb), 0.9920) 96.88%,
+    rgba(var(--color-accent-rgb), 0.0029) 3.12%,
+    rgba(var(--color-accent-rgb), 0.0112) 6.25%,
+    rgba(var(--color-accent-rgb), 0.0247) 9.38%,
+    rgba(var(--color-accent-rgb), 0.0430) 12.50%,
+    rgba(var(--color-accent-rgb), 0.0656) 15.62%,
+    rgba(var(--color-accent-rgb), 0.0923) 18.75%,
+    rgba(var(--color-accent-rgb), 0.1226) 21.88%,
+    rgba(var(--color-accent-rgb), 0.1562) 25.00%,
+    rgba(var(--color-accent-rgb), 0.1928) 28.12%,
+    rgba(var(--color-accent-rgb), 0.2319) 31.25%,
+    rgba(var(--color-accent-rgb), 0.2733) 34.38%,
+    rgba(var(--color-accent-rgb), 0.3164) 37.50%,
+    rgba(var(--color-accent-rgb), 0.3610) 40.62%,
+    rgba(var(--color-accent-rgb), 0.4067) 43.75%,
+    rgba(var(--color-accent-rgb), 0.4532) 46.88%,
+    rgba(var(--color-accent-rgb), 0.5000) 50.00%,
+    rgba(var(--color-accent-rgb), 0.5468) 53.12%,
+    rgba(var(--color-accent-rgb), 0.5933) 56.25%,
+    rgba(var(--color-accent-rgb), 0.6390) 59.38%,
+    rgba(var(--color-accent-rgb), 0.6836) 62.50%,
+    rgba(var(--color-accent-rgb), 0.7267) 65.62%,
+    rgba(var(--color-accent-rgb), 0.7681) 68.75%,
+    rgba(var(--color-accent-rgb), 0.8072) 71.88%,
+    rgba(var(--color-accent-rgb), 0.8438) 75.00%,
+    rgba(var(--color-accent-rgb), 0.8774) 78.12%,
+    rgba(var(--color-accent-rgb), 0.9077) 81.25%,
+    rgba(var(--color-accent-rgb), 0.9344) 84.38%,
+    rgba(var(--color-accent-rgb), 0.9570) 87.50%,
+    rgba(var(--color-accent-rgb), 0.9753) 90.62%,
+    rgba(var(--color-accent-rgb), 0.9888) 93.75%,
+    rgba(var(--color-accent-rgb), 0.9971) 96.88%,
     rgba(var(--color-accent-rgb), 1.0000) 100.00%);
 }
 
@@ -959,6 +1020,34 @@ html.has-top-nav.is-work-in #work-section .site-container {
   color: #fff;
   text-decoration: none;
   display: block;
+}
+
+/* The headline is the mailto link: it keeps the display type and the page's white,
+   with no underline; the arrow is an inline SVG (a text arrow at this size falls
+   back to a system font) at 0.5em, sitting on the baseline after the address. */
+.contact-email a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.contact-email-arrow {
+  display: inline-block;
+  width: 0.5em;
+  height: 0.5em;
+  margin-left: 0.14em;
+  vertical-align: baseline;
+  transition: translate 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (hover: hover) {
+  .contact-email a:hover .contact-email-arrow {
+    translate: 0.06em -0.06em;
+  }
+}
+
+.contact-email a:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 0.1em;
 }
 
 .contact-meta {
@@ -1292,21 +1381,19 @@ html.has-top-nav.is-work-in #work-section .site-container {
 }
 
 .about-facts-row {
-  border-top: 1px solid var(--color-border);
+  border-top: 1px solid var(--color-hairline); /* the same grey as the Work cards' outline */
   padding-top: var(--gap-content);
   display: flex;
   flex-direction: column;
   gap: 10px; /* entry → entry */
 }
 
+/* The label type is the shared EYEBROW (global.css: .section-label et al — 13px Inter,
+   uppercase, 0.05em), not its own heading style (2026-10, Jenna). Only the spacing
+   under it is set here. */
 .about-facts dt {
-  font-family: var(--font-heading);
-  font-size: var(--size-lg);
-  font-weight: 500;
   line-height: 1.2;
-  text-transform: uppercase;
-  letter-spacing: 0;
-  margin-bottom: 6px;
+  margin-bottom: 10px;
 }
 
 .about-facts dd {
