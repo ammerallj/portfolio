@@ -499,12 +499,14 @@ body {
 }
 
 /* Eyebrow — one shared small uppercase label used across every section
-   (section labels, the project pages' footprint group titles). The Work cards
+   (section labels, the project pages' footprint group titles, and — since
+   2026-10 — About's Experience / Education / Patents labels). The Work cards
    used to share it
    via .work-card-meta; that line was removed 2026-08-04 — the project
    overview masthead carries the metadata instead. */
 .section-label,
-.footprint-group-title {
+.footprint-group-title,
+.about-facts dt {
   font-family: var(--font-body);
   font-size: var(--size-xs);
   font-weight: 500;

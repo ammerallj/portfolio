@@ -1388,13 +1388,12 @@ html.has-top-nav.is-work-in #work-section .site-container {
   gap: 10px; /* entry → entry */
 }
 
+/* The label type is the shared EYEBROW (global.css: .section-label et al — 13px Inter,
+   uppercase, 0.05em), not its own heading style (2026-10, Jenna). Only the spacing
+   under it is set here. */
 .about-facts dt {
-  font-family: var(--font-heading);
-  font-size: var(--size-lg);
-  font-weight: 500;
   line-height: 1.2;
-  letter-spacing: 0; /* first letter capitalised, no longer all caps (2026-10) */
-  margin-bottom: 6px;
+  margin-bottom: 10px;
 }
 
 .about-facts dd {
