@@ -15,6 +15,15 @@
      alone. JennaOS is held back with it: invisible, unfocusable, unclickable. */
   html.is-intro .jenna-os { opacity: 0; visibility: hidden; pointer-events: none; transition: none; }
 
+  /* THE "SAY HELLO" MENU COVERS THE PAGE, SO THE OS STEPS OUT (2026-10, Jenna). The
+     button sits above everything (z-index 2147483000), so without this it floated
+     over the open overlay. html.is-menu-open is set by initMobileMenu (js/main.js)
+     while the overlay is open. html.os-quick is set the first time it opens and stays,
+     so the OS fades back in quickly afterwards instead of replaying the load-screen
+     entrance (0.9s fade after a 1.2s delay). */
+  html.is-menu-open .jenna-os { opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 0.2s ease, visibility 0s 0.2s; }
+  html.os-quick .jenna-os { transition: opacity 0.25s ease, visibility 0s; }
+
   /* ---------- floating button ---------- */
   .jos-fab {
     all: unset; box-sizing: border-box;

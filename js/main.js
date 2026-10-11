@@ -4169,6 +4169,9 @@ if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
     // Re-opening mid-exit: clear the closing state so the entrance plays clean.
     if (finishClose) finishClose();
     menu.classList.add('is-open');
+    // The JennaOS button floats above everything, including this overlay: hide it
+    // while the menu is open (jennaos.css). os-quick keeps its return fast.
+    document.documentElement.classList.add('is-menu-open', 'os-quick');
     menu.setAttribute('aria-hidden', 'false');
     toggle.setAttribute('aria-expanded', 'true');
     // Lock the background scroll. Prefer stopping Lenis when it's running;
@@ -4186,6 +4189,7 @@ if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
   function close() {
     if (!menu.classList.contains('is-open')) return;
     menu.classList.remove('is-open');
+    document.documentElement.classList.remove('is-menu-open');
     // Reverse of the entrance: .is-closing plays menu-slide-out and keeps the
     // panel display:flex until it lands (responsive.css); removing the class is
     // what actually hides it. animationend does that removal; the timeout is a
