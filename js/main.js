@@ -1601,6 +1601,18 @@ function initHeroField() {
     ).observe(canvas);
   }
 
+  // THE FIELD HOLDS STILL WHILE THE PAGE IS SCROLLING (2026-10, Jenna: "the scrolling is
+  // super janky"). Measured on a scripted hero -> Work scroll at 1440x900: with the
+  // canvas redrawing every frame, 17 of ~110 frames dropped (p95 33ms); with the
+  // canvas hidden, 1 did; hiding only the nav's glass, 5 did. The cause is the
+  // nav's backdrop-filter blur sitting over a surface that changes every frame, so
+  // the browser re-blurs it every frame of the scroll. The field's drift is ±72px
+  // over 16-44s, so freezing it for the length of a scroll (and 140ms after) is
+  // invisible, and the blur then has a static backdrop it can cache. `clock` only
+  // advances on drawn frames, so it resumes from where it stopped, without a jump.
+  let lastScrollAt = -1e9;
+  window.addEventListener('scroll', () => { lastScrollAt = performance.now(); }, { passive: true });
+
   let clock = 0;
   let entranceT = runEntrance ? 0 : null;
   let prev = performance.now();
@@ -1617,6 +1629,7 @@ function initHeroField() {
     // per-frame one, and re-checking a matchMedia every frame is the kind of cost
     // this change exists to remove.
     if (!onScreen || document.hidden) return;
+    if (performance.now() - lastScrollAt < 140) return; // frozen while scrolling (see above)
     clock += dt * FIELD.motion.speed;
     // Shares the same capped dt, so a resuming background tab cannot jump the
     // entrance either — it picks up where it left off rather than snapping.
