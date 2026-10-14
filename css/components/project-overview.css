@@ -56,8 +56,11 @@ main:has(.next-case-section) .page-section {
   border-bottom: none;
 }
 
+/* FAINT, from the style guide: --color-border-light (12% black), not the
+   full-strength --color-border (2026-10, Jenna). The line still marks the one real
+   seam — the project ends here — but quietly; the air around it does the work. */
 main:has(.next-case-section) .page-section:has(+ .next-case-section) {
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border-light);
 }
 
 
