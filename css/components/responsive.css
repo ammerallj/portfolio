@@ -191,6 +191,70 @@ html.is-hero-stacked {
    WORK_PEEKS in js/main.js uses this same query. The ≤480 tier sets its own
    --hero-h and canvas box and wins there.
    ============================================================ */
+/* ------------------------------------------------------------
+   Left RAIL — the case-study template's in-page nav on wide screens.
+   `.section-pills--rail` is the same element and the same scroll-spy as the
+   phone's floating pills; here it becomes a plain vertical list pinned to the
+   left gutter and centred on the viewport's height. The rail's column is
+   reserved by padding `main`, so it never sits on the hero or the copy.
+   Below 1280 it falls back to the ordinary (phone-only) pills.
+   ------------------------------------------------------------ */
+@media (min-width: 1280px) {
+  .section-pills.section-pills--rail {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+    left: var(--page-gutter);
+    bottom: auto;
+    top: 50%;
+    transform: translateY(-50%);
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
+  .section-pills--rail.is-tucked {
+    transform: translateY(-50%);
+  }
+
+  .section-pills--rail a {
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    font-family: var(--font-heading, var(--font-body));
+    font-size: 1.125rem;
+    letter-spacing: 0;
+    color: rgba(0, 0, 0, 0.4);
+  }
+
+  .section-pills--rail a.is-active,
+  .section-pills--rail a.is-active:hover {
+    background: none;
+    color: var(--color-text);
+    font-weight: 500;
+  }
+
+  .section-pills--rail a:not(.is-active):hover {
+    color: rgba(0, 0, 0, 0.75);
+    border-color: transparent;
+  }
+
+  body:has(.section-pills--rail) main {
+    padding-left: 168px;
+  }
+
+  /* The hero is a sibling of the sections, so it takes the same inset. */
+  body:has(.section-pills--rail) .site-container,
+  body:has(.section-pills--rail) .project-hero {
+    padding-left: var(--page-gutter);
+  }
+}
+
 @media (max-width: 1376px) {
   :root {
     --hero-peek: 88px; /* was 144 — less card showing */
