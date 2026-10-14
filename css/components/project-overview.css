@@ -1089,3 +1089,40 @@ a.intro-bar-name {
   line-height: 1.4;
   color: var(--color-text-70);
 }
+
+
+/* ------------------------------------------------------------
+   FACTS ROW — the front-loaded template's masthead metadata. One horizontal
+   row of EQUAL columns (grid-auto-flow: column + 1fr tracks, so deleting a
+   column re-divides the row instead of leaving a hole). Label is muted, the
+   entries stack beneath it. 2-up at 768, one column at 480 (responsive.css).
+   ------------------------------------------------------------ */
+.project-result {
+  max-width: var(--width-right-column);
+}
+
+.project-facts {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: var(--gap-group) var(--gap-content);
+  margin: 0;
+}
+
+.project-facts-col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  min-width: 0;
+}
+
+.project-facts-col dt {
+  color: var(--color-text-70);
+  font-size: 1rem;
+}
+
+.project-facts-col dd {
+  margin: 0;
+  font-size: 1.125rem;
+  line-height: 1.3;
+}

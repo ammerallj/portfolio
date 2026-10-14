@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@200;400;500;700&family=Inter:wght@400..700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../style.css?v=2138b3f8" />
+  <link rel="stylesheet" href="../style.css?v=1f6da3e5" />
   <script>
     (function () {
       try {
@@ -93,37 +93,40 @@
     <section class="page-section" id="overview" aria-labelledby="project-title">
       <div class="site-container project-masthead" data-reveal-group>
 
-        <div class="project-masthead-cols">
-          <div class="project-masthead-left">
-            <h1 class="section-title" id="project-title" data-reveal data-reveal-order="0">[Case Study Title]</h1>
-            <!-- The direct result: what changed, with the number if there is one.
-                 One or two sentences. This is the line a screener reads first. -->
-            <div class="about-body" data-reveal data-reveal-order="1">
-              <p>[Direct result: what changed, for whom, by how much.]</p>
-            </div>
-          </div>
+        <!-- Title runs the full width; the direct result sits under it; then the
+             facts run as one horizontal row of EQUAL columns. Delete a column you
+             don't have and the rest re-divide the row. One <dd> per entry. -->
+        <h1 class="section-title" id="project-title" data-reveal data-reveal-order="0">[Case Study Title]</h1>
 
-          <div class="project-masthead-right" data-reveal data-reveal-order="2">
-            <dl class="project-meta-list">
-              <div class="project-meta-row">
-                <dt>Duration</dt>
-                <dd>[Month Year&ndash;Month Year]</dd>
-              </div>
-              <div class="project-meta-row">
-                <dt>Role</dt>
-                <dd>[Your role]</dd>
-              </div>
-              <div class="project-meta-row">
-                <dt>Scope</dt>
-                <dd>[What you owned, in one line]</dd>
-              </div>
-              <div class="project-meta-row">
-                <dt>Team</dt>
-                <dd>[Disciplines, or names with permission]</dd>
-              </div>
-            </dl>
-          </div>
+        <div class="about-body project-result" data-reveal data-reveal-order="1">
+          <p>[Direct result: what changed, for whom, by how much.]</p>
         </div>
+
+        <dl class="project-facts" data-reveal data-reveal-order="2">
+          <div class="project-facts-col">
+            <dt>Timeline</dt>
+            <dd>[Month&ndash;Month Year]</dd>
+          </div>
+          <div class="project-facts-col">
+            <dt>Role</dt>
+            <dd>[Your role]</dd>
+          </div>
+          <div class="project-facts-col">
+            <dt>Team</dt>
+            <dd>[Name or discipline]</dd>
+            <dd>[Name or discipline]</dd>
+          </div>
+          <div class="project-facts-col">
+            <dt>Tools</dt>
+            <dd>[Tool]</dd>
+            <dd>[Tool]</dd>
+          </div>
+          <div class="project-facts-col">
+            <dt>Skills</dt>
+            <dd>[Skill]</dd>
+            <dd>[Skill]</dd>
+          </div>
+        </dl>
 
       </div>
     </section>
