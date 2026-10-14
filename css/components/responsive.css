@@ -196,7 +196,8 @@ html.is-hero-stacked {
    `.section-pills--rail` is the same element and the same scroll-spy as the
    phone's floating pills; here it becomes a plain vertical list pinned to the
    left gutter and centred on the viewport's height. The rail's column is
-   reserved by padding `main`, so it never sits on the hero or the copy.
+   reserved by padding every section after the full-width summary, so it never
+   sits on the copy; it appears once the reader scrolls past the summary.
    Below 1280 it falls back to the ordinary (phone-only) pills.
    ------------------------------------------------------------ */
 @media (min-width: 1280px) {
@@ -244,14 +245,16 @@ html.is-hero-stacked {
     border-color: transparent;
   }
 
-  body:has(.section-pills--rail) main {
+  /* The summary section is full width; every section after it makes room for
+     the rail. */
+  body:has(.section-pills--rail) main > section:not(#overview) {
     padding-left: 168px;
   }
 
-  /* The hero is a sibling of the sections, so it takes the same inset. */
-  body:has(.section-pills--rail) .site-container,
-  body:has(.section-pills--rail) .project-hero {
-    padding-left: var(--page-gutter);
+  /* Hidden (not just transparent) until the reader is past the summary. */
+  .section-pills--rail.is-tucked {
+    visibility: hidden;
+    transition: opacity 0.35s ease, visibility 0s 0.35s;
   }
 }
 

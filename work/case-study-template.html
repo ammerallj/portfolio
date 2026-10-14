@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@200;400;500;700&family=Inter:wght@400..700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../style.css?v=1f6da3e5" />
+  <link rel="stylesheet" href="../style.css?v=18fff901" />
   <script>
     (function () {
       try {
@@ -81,28 +81,29 @@
          ======================================================== -->
 
     <!-- 1. EXECUTIVE SUMMARY ------------------------------------------------>
-    <!-- Hero: .project-hero is inset to the page gutters and rounded (the Work
-         card's own shape), 3.2:1. For video swap the <img> for a <video muted
-         loop playsinline autoplay> with a poster; keep the width/height. -->
-    <div class="project-hero" data-reveal-group>
-      <div class="project-hero-figure" data-reveal>
-        <img src="../images/[hero-image].jpg" width="2660" height="830" alt="[Describe what the image shows]" />
-      </div>
-    </div>
-
+    <!-- One full-width section: title, then the hero, then the direct result and
+         the facts row. The left rail is NOT shown here — it appears once the
+         reader scrolls past this section (main.js, the rail branch of the pill
+         spy), and the sections after it are inset to make room for it. For video
+         swap the <img> for a <video muted loop playsinline autoplay> with a
+         poster; keep the width/height. -->
     <section class="page-section" id="overview" aria-labelledby="project-title">
       <div class="site-container project-masthead" data-reveal-group>
 
-        <!-- Title runs the full width; the direct result sits under it; then the
-             facts run as one horizontal row of EQUAL columns. Delete a column you
+        <!-- Title, hero, direct result, then the facts as one horizontal row of
+             EQUAL columns. Delete a column you
              don't have and the rest re-divide the row. One <dd> per entry. -->
         <h1 class="section-title" id="project-title" data-reveal data-reveal-order="0">[Case Study Title]</h1>
 
-        <div class="about-body project-result" data-reveal data-reveal-order="1">
+        <div class="project-hero-figure" data-reveal data-reveal-order="1">
+          <img src="../images/[hero-image].jpg" width="2660" height="830" alt="[Describe what the image shows]" />
+        </div>
+
+        <div class="about-body project-result" data-reveal data-reveal-order="2">
           <p>[Direct result: what changed, for whom, by how much.]</p>
         </div>
 
-        <dl class="project-facts" data-reveal data-reveal-order="2">
+        <dl class="project-facts" data-reveal data-reveal-order="3">
           <div class="project-facts-col">
             <dt>Timeline</dt>
             <dd>[Month&ndash;Month Year]</dd>
@@ -227,6 +228,6 @@
   </div>
   <div class="wave-cursor" id="wave-cursor" aria-hidden="true">👋</div>
 
-  <script src="../js/main.js?v=aaa7b708" defer></script>
+  <script src="../js/main.js?v=772a03a3" defer></script>
 </body>
 </html>
