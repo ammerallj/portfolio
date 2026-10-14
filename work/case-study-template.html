@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@200;400;500;700&family=Inter:wght@400..700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../style.css?v=8b9d5fc9" />
+  <link rel="stylesheet" href="../style.css?v=e11a711b" />
   <script>
     (function () {
       try {
@@ -64,9 +64,8 @@
 
   <nav class="section-pills section-pills--rail" aria-label="On this page">
     <a href="#overview" class="is-active" aria-current="true">Overview</a>
-    <a href="#challenge">Challenge</a>
+    <a href="#problem">Problem</a>
     <a href="#solution">Solution</a>
-    <a href="#impact">Impact</a>
   </nav>
 
   <main id="main-content">
@@ -100,7 +99,7 @@
         <h1 class="section-title" id="project-title" data-reveal data-reveal-order="1">[Case Study Title]</h1>
 
         <div class="about-body project-result" data-reveal data-reveal-order="2">
-          <p>[Direct result: what changed, for whom, by how much.]</p>
+          <p>[What you accomplished, with the quantified impact.]</p>
         </div>
 
         <dl class="project-facts" data-reveal data-reveal-order="3">
@@ -110,7 +109,7 @@
           </div>
           <div class="project-facts-col">
             <dt>Role</dt>
-            <dd>[Your role]</dd>
+            <dd>[Your role and scope]</dd>
           </div>
           <div class="project-facts-col">
             <dt>Results</dt>
@@ -136,17 +135,18 @@
       </div>
     </section>
 
-    <!-- 2. CHALLENGE (the screening gap) ---------------------------------------------------->
-    <section class="page-section" id="challenge" aria-labelledby="challenge-heading">
+    <!-- 2. PROBLEM (the screening gap) ---------------------------------------------------->
+    <section class="page-section" id="problem" aria-labelledby="problem-heading">
       <div class="site-container">
         <div class="project-block" data-reveal-group>
           <div class="project-block-left">
-            <h2 class="section-title" id="challenge-heading" data-reveal data-reveal-order="0">Challenge</h2>
+            <h2 class="section-title" id="problem-heading" data-reveal data-reveal-order="0">Problem</h2>
           </div>
           <div class="project-block-right" data-reveal data-reveal-order="2">
             <div class="about-body">
-              <p>[Background: two sentences of context. Who the users are and what the product does.]</p>
-              <p>[Problem: what wasn&rsquo;t working, for whom, and why it mattered.]</p>
+              <p>[What wasn&rsquo;t working, and for whom. One or two sentences of context so it makes sense.]</p>
+              <p>[Why it mattered: the cost to the business and to users.]</p>
+              <p>[The constraints or tensions that made it hard.]</p>
             </div>
           </div>
         </div>
@@ -168,8 +168,13 @@
           </div>
           <div class="project-block-right" data-reveal data-reveal-order="2">
             <div class="about-body">
-              <p>[Solution: the one idea, in a sentence or two.]</p>
+              <p>[What you designed and how it works, in a sentence or two.]</p>
             </div>
+            <ul class="project-impact-list" role="list">
+              <li><strong>[Decision one.]</strong> [Why you made it.]</li>
+              <li><strong>[Decision two.]</strong> [Why you made it.]</li>
+              <li><strong>[Decision three.]</strong> [Why you made it.]</li>
+            </ul>
           </div>
         </div>
 
@@ -196,27 +201,6 @@
             <div class="project-bento-media"><img src="../images/[artifact-5].jpg" width="800" height="600" alt="[Describe artifact 5]" loading="lazy" /></div>
             <figcaption class="project-bento-caption">[Artifact 5: what it is.]</figcaption>
           </figure>
-        </div>
-      </div>
-    </section>
-
-    <!-- 4. IMPACT ------------------------------------------------------------->
-    <!-- Outcome in bold, explanation under it. Two to four rows; put the number
-         in the outcome. Evidence links go inline on a natural phrase, never
-         inside <strong>. Closes with the Full case study card. -->
-    <section class="page-section" id="impact" aria-labelledby="impact-heading">
-      <div class="site-container">
-        <div class="project-block" data-reveal-group>
-          <div class="project-block-left">
-            <h2 class="section-title" id="impact-heading" data-reveal data-reveal-order="0">Impact</h2>
-          </div>
-          <div class="project-block-right" data-reveal data-reveal-order="2">
-            <ul class="project-impact-list project-impact-list--stacked" role="list">
-              <li><strong>[Outcome one.]</strong> [What you did and the evidence for it.]</li>
-              <li><strong>[Outcome two.]</strong> [What you did and the evidence for it.]</li>
-              <li><strong>[Outcome three.]</strong> [What you did and the evidence for it.]</li>
-            </ul>
-          </div>
         </div>
 
         <!-- FULL CASE STUDY CARD — closes the page, above the Next case pager.
