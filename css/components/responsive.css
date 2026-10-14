@@ -246,8 +246,10 @@ html.is-hero-stacked {
   }
 
   /* Every section, summary included, shares one left edge: the rail's column is
-     reserved on all of them, so the page reads as a single indented column. */
-  body:has(.section-pills--rail) main > section {
+     reserved on all of them, so the page reads as a single indented column.
+     The closing invitation is the exception: it runs the full width, below the
+     rail's column rather than beside it. */
+  body:has(.section-pills--rail) main > section:not(.case-closing-section) {
     padding-left: 168px;
   }
 
