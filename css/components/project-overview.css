@@ -1097,8 +1097,13 @@ a.intro-bar-name {
    column re-divides the row instead of leaving a hole). Label is muted, the
    entries stack beneath it. 2-up at 768, one column at 480 (responsive.css).
    ------------------------------------------------------------ */
+/* The result runs the full width of the section (no measure cap), like the title
+   above it and the facts row below it. */
 .project-result {
-  max-width: var(--width-right-column);
+  max-width: none;
+}
+.project-result p {
+  max-width: none;
 }
 
 .project-facts {
