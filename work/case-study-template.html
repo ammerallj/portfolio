@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@200;400;500;700&family=Inter:wght@400..700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../style.css?v=e11a711b" />
+  <link rel="stylesheet" href="../style.css?v=fe070c9d" />
   <script>
     (function () {
       try {
@@ -202,23 +202,22 @@
             <figcaption class="project-bento-caption">[Artifact 5: what it is.]</figcaption>
           </figure>
         </div>
+      </div>
+    </section>
 
-        <!-- FULL CASE STUDY CARD — closes the page, above the Next case pager.
-             Delete it if there is no deeper version. It is a <div>, not an <a>,
-             because it carries a second link (the mailto); the title's link
-             stretches an overlay across the card. The Figma deck's share setting
-             MUST be "Anyone with password" — verify in a private window before
-             putting the URL here, and never put the password in the page. -->
-        <div class="next-case next-case--outline next-case--locked" data-reveal-group data-reveal>
-          <span class="next-case-label"><svg class="next-case-lock" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><rect x="4" y="9" width="16" height="12" rx="4" stroke="currentColor" stroke-width="1.5"/><path d="M12 16L12 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 9V7C16 4.79086 14.2091 3 12 3C9.79086 3 8 4.79086 8 7L8 9" stroke="currentColor" stroke-width="1.5"/></svg>Full case study</span>
-          <span class="next-case-body">
-            <span class="next-case-text">
-              <span class="next-case-title"><a class="next-case-link" href="[Figma deck URL]" target="_blank" rel="noopener noreferrer">Go deeper into the work<span class="visually-hidden"> (opens in new tab)</span></a></span>
-              <span class="next-case-description">Need access? Request the password at <a class="next-case-aside-link" href="mailto:ammerallj@gmail.com?subject=[Project]%20case%20study%20password">ammerallj@gmail.com</a></span>
-            </span>
-            <span class="next-case-arrow" aria-hidden="true">&rarr;</span>
-          </span>
-        </div>
+    <!-- CLOSING INVITATION — the page ends on an invitation to ask for the full
+         study, set in the homepage Contact lockup (same type, size, weight and
+         arrow) but in the page's ink instead of white. The heading IS the mailto
+         link, like Contact's. Delete the block if there is no deeper version.
+         If a password-gated Figma deck exists, link it from the sentence below,
+         never the password itself, and first confirm in a private window that
+         the deck prompts for one ("Anyone with password", not "Anyone with the
+         link"). -->
+    <section class="page-section case-closing-section" aria-labelledby="closing-heading">
+      <div class="site-container case-closing" data-reveal-group>
+        <span class="case-closing-bar" aria-hidden="true" data-reveal></span>
+        <h2 class="case-closing-heading" id="closing-heading" data-reveal><a href="mailto:ammerallj@gmail.com?subject=[Project]%20case%20study">[Want to see more?]<br>ammerallj@gmail.com<svg class="case-closing-arrow" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M6 18L18 6M8.5 6H18V15.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a></h2>
+        <p class="case-closing-text" data-reveal>[One line: the full study is available; reach out and set a time to talk.]</p>
       </div>
     </section>
 
