@@ -140,8 +140,14 @@
     <section class="page-section" id="problem" aria-labelledby="problem-heading">
       <div class="site-container">
         <div class="project-block" data-reveal-group>
+          <!-- The left column holds an ARTIFACT, not a heading: the rail already
+               names the section. The h2 stays for screen readers and the outline. -->
           <div class="project-block-left">
-            <h2 class="section-title" id="problem-heading" data-reveal data-reveal-order="0">Problem</h2>
+            <h2 class="visually-hidden" id="problem-heading">Problem</h2>
+            <figure class="project-bento-tile project-problem-artifact" data-reveal data-reveal-order="0">
+              <div class="project-bento-media"><img src="../images/[problem-artifact].jpg" width="800" height="600" alt="[Describe the artifact]" loading="lazy" /></div>
+              <figcaption class="project-bento-caption">[Artifact: what it shows.]</figcaption>
+            </figure>
           </div>
           <div class="project-block-right" data-reveal data-reveal-order="2">
             <div class="about-body">
