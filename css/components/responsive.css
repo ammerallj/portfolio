@@ -494,6 +494,17 @@ html.is-hero-stacked {
    Work imagery shrinks; the hero headline and intro paragraph go full width.
    ========================================================================== */
 @media (max-width: 768px) {
+  /* Bento: three columns' worth collapses to two, then one at 480. */
+  .project-bento {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .project-bento-tile,
+  .project-bento-tile--half { grid-column: span 1; }
+  .project-bento-tile--wide,
+  .project-bento-tile--full { grid-column: 1 / -1; }
+  .project-bento-tile--tall { grid-row: auto; }
+  .project-bento-tile--tall .project-bento-media { aspect-ratio: 4 / 3; min-height: 0; }
+
   /* THE STACKED HERO, 481–768 (2026-09-28, Jenna): the bio sits under the
      headline at FULL width from the left edge, like the phone — not indented to
      the nav's "Selected work" column. And the gradient's white end follows the
@@ -833,6 +844,12 @@ html.is-hero-stacked {
    the footer copyright row stacks.
    ========================================================================== */
 @media (max-width: 480px) {
+  .project-bento { grid-template-columns: minmax(0, 1fr); }
+  .project-bento-tile,
+  .project-bento-tile--half,
+  .project-bento-tile--wide,
+  .project-bento-tile--full { grid-column: 1 / -1; }
+
   :root {
     --display-size: 44px; /* bookend display (hero + contact) steps down here */
     --section-title-size: 2rem; /* 32px — section headings step down here */

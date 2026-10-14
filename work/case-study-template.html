@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@200;400;500;700&family=Inter:wght@400..700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../style.css?v=f950e024" />
+  <link rel="stylesheet" href="../style.css?v=edae5b53" />
   <script>
     (function () {
       try {
@@ -63,120 +63,131 @@
   </div>
 
   <nav class="section-pills" aria-label="On this page">
-    <a href="#overview" class="is-active" aria-current="true">Overview</a>
-    <a href="#process">Approach</a>
-    <a href="#impact">What changed</a>
+    <a href="#overview" class="is-active" aria-current="true">Summary</a>
+    <a href="#gap">Gap</a>
+    <a href="#solution">Solution</a>
   </nav>
 
   <main id="main-content">
 
     <!-- ========================================================
-         FRONT-LOADED SCREENING FRAMEWORK
-         Everything a screener needs to decide, above the first scroll:
-           1. what it is        → title
-           2. who/when/how big  → metadata (Duration · Role · Scope · Team)
-           3. the problem       → one sentence
-           4. the outcome       → one sentence, with the number if there is one
-         Everything below it is depth for the reader who chose to stay.
-         DELETE any row you don't have. Never leave one blank or guess.
+         FRONT-LOADED SCREENING FRAMEWORK — three sections:
+           1. Executive summary  full-width image or video, then the masthead
+                                 with the DIRECT RESULT in the first sentence
+           2. Screening gap      brief background + the problem
+           3. Solution           bento grid of artifacts
+         A screener should have the title, role, scope and result before the
+         first scroll. DELETE any metadata row you don't have; never guess.
          ======================================================== -->
+
+    <!-- 1. EXECUTIVE SUMMARY ------------------------------------------------>
+    <!-- Hero: .project-hero is inset to the page gutters and rounded (the Work
+         card's own shape), 3.2:1. For video swap the <img> for a <video muted
+         loop playsinline autoplay> with a poster; keep the width/height. -->
+    <div class="project-hero" data-reveal-group>
+      <div class="project-hero-figure" data-reveal>
+        <img src="../images/[hero-image].jpg" width="2660" height="830" alt="[Describe what the image shows]" />
+      </div>
+    </div>
+
     <section class="page-section" id="overview" aria-labelledby="project-title">
-      <div class="site-container project-masthead project-masthead--split" data-reveal-group>
+      <div class="site-container project-masthead" data-reveal-group>
 
-        <div class="project-masthead-top">
-
+        <div class="project-masthead-cols">
           <div class="project-masthead-left">
-
-            <div class="project-masthead-head">
-              <h1 class="section-title" id="project-title" data-reveal data-reveal-order="0">[Case Study Title]</h1>
+            <h1 class="section-title" id="project-title" data-reveal data-reveal-order="0">[Case Study Title]</h1>
+            <!-- The direct result: what changed, with the number if there is one.
+                 One or two sentences. This is the line a screener reads first. -->
+            <div class="about-body" data-reveal data-reveal-order="1">
+              <p>[Direct result: what changed, for whom, by how much.]</p>
             </div>
+          </div>
 
-            <div class="project-masthead-foot">
-              <dl class="project-meta-list">
-                <div class="project-meta-row">
-                  <dt>Duration</dt>
-                  <dd>[Month Year&ndash;Month Year]</dd>
-                </div>
-                <div class="project-meta-row">
-                  <dt>Role</dt>
-                  <dd>[Your role]</dd>
-                </div>
-                <div class="project-meta-row">
-                  <dt>Scope</dt>
-                  <dd>[What you owned, in one line]</dd>
-                </div>
-                <div class="project-meta-row">
-                  <dt>Team</dt>
-                  <dd>[Disciplines, or names with permission]</dd>
-                </div>
-              </dl>
-
-              <div class="project-overview-text about-body" data-reveal data-reveal-order="3">
-                <p>[Problem: one sentence on what wasn&rsquo;t working and for whom.]</p>
-                <p>[Outcome: one sentence on what changed, with the number if there is one.]</p>
+          <div class="project-masthead-right" data-reveal data-reveal-order="2">
+            <dl class="project-meta-list">
+              <div class="project-meta-row">
+                <dt>Duration</dt>
+                <dd>[Month Year&ndash;Month Year]</dd>
               </div>
-            </div>
+              <div class="project-meta-row">
+                <dt>Role</dt>
+                <dd>[Your role]</dd>
+              </div>
+              <div class="project-meta-row">
+                <dt>Scope</dt>
+                <dd>[What you owned, in one line]</dd>
+              </div>
+              <div class="project-meta-row">
+                <dt>Team</dt>
+                <dd>[Disciplines, or names with permission]</dd>
+              </div>
+            </dl>
           </div>
-
-          <div class="project-masthead-right" data-reveal data-reveal-order="1">
-            <!-- One hero image, 1100x1400. Add a width/height and real alt text.
-                 For a multi-image masthead, copy the data-carousel block from
-                 archive/project-pages-2026-10/work/microsoft-loop.html. -->
-            <div class="project-figure">
-              <img src="../images/[hero-image].jpg" width="1100" height="1400" alt="[Describe what the image shows]" />
-            </div>
-          </div>
-
         </div>
 
       </div>
     </section>
 
-    <!-- ========================================================
-         APPROACH — one statement of the shift you made. Add a principles list
-         (.project-impact-list) only if the work really was a set of rules.
-         ======================================================== -->
-    <section class="page-section" id="process" aria-labelledby="approach-heading">
+    <!-- 2. SCREENING GAP ---------------------------------------------------->
+    <section class="page-section" id="gap" aria-labelledby="gap-heading">
       <div class="site-container">
         <div class="project-block" data-reveal-group>
           <div class="project-block-left">
-            <h2 class="section-title" id="approach-heading" data-reveal data-reveal-order="0">Approach</h2>
+            <h2 class="section-title" id="gap-heading" data-reveal data-reveal-order="0">Screening gap</h2>
           </div>
           <div class="project-block-right" data-reveal data-reveal-order="2">
             <div class="about-body">
-              <p>[Approach: the one decision or shift that shaped the work.]</p>
+              <p>[Background: two sentences of context. Who the users are and what the product does.]</p>
+              <p>[Problem: what wasn&rsquo;t working, for whom, and why it mattered.]</p>
             </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- ========================================================
-         WHAT CHANGED — outcome in bold, explanation under it. Two to four rows.
-         Evidence links go inline on a natural phrase, never inside <strong>.
-         ======================================================== -->
-    <section class="page-section" id="impact" aria-labelledby="impact-heading">
+    <!-- 3. SOLUTION --------------------------------------------------------->
+    <!-- Bento: the heading sits in the usual left column; the grid runs the full
+         container width below it. Tile classes (6-column grid):
+           (none) 2 wide · --half 3 · --wide 4 · --full 6 · --tall spans 2 rows
+         A row must add to 6. Every tile needs a caption saying what it is and
+         what it shows; give each image real alt text. Tiles collapse to 2
+         columns at 768 and 1 at 480. -->
+    <section class="page-section" id="solution" aria-labelledby="solution-heading">
       <div class="site-container">
         <div class="project-block" data-reveal-group>
           <div class="project-block-left">
-            <h2 class="section-title" id="impact-heading" data-reveal data-reveal-order="0">What changed</h2>
+            <h2 class="section-title" id="solution-heading" data-reveal data-reveal-order="0">Solution</h2>
           </div>
           <div class="project-block-right" data-reveal data-reveal-order="2">
-            <ul class="project-impact-list project-impact-list--stacked" role="list">
-              <li><strong>[Outcome one.]</strong> [What you did and the evidence for it.]</li>
-              <li><strong>[Outcome two.]</strong> [What you did and the evidence for it.]</li>
-              <li><strong>[Outcome three.]</strong> [What you did and the evidence for it.]</li>
-            </ul>
-
-            <!-- Optional. Third-party coverage of this project only. Delete the
-                 whole block if there is none. -->
-            <div class="footprint-group">
-              <h3 class="footprint-group-title">Public footprints</h3>
-              <ul class="footprint-list" role="list">
-                <li><a href="[URL]" target="_blank" rel="noopener noreferrer">[Source — Title]<span class="visually-hidden"> (opens in new tab)</span></a></li>
-              </ul>
+            <div class="about-body">
+              <p>[Solution: the one idea, in a sentence or two.]</p>
             </div>
           </div>
+        </div>
+
+        <div class="project-bento" data-reveal-group>
+          <!-- Row 1: 4 + 2 -->
+          <figure class="project-bento-tile project-bento-tile--wide" data-reveal>
+            <div class="project-bento-media"><img src="../images/[artifact-1].jpg" width="1600" height="900" alt="[Describe artifact 1]" loading="lazy" /></div>
+            <figcaption class="project-bento-caption">[Artifact 1: what it is.]</figcaption>
+          </figure>
+          <figure class="project-bento-tile" data-reveal>
+            <div class="project-bento-media"><img src="../images/[artifact-2].jpg" width="800" height="600" alt="[Describe artifact 2]" loading="lazy" /></div>
+            <figcaption class="project-bento-caption">[Artifact 2: what it is.]</figcaption>
+          </figure>
+          <!-- Row 2: 2 + 2 + 2 -->
+          <figure class="project-bento-tile" data-reveal>
+            <div class="project-bento-media"><img src="../images/[artifact-3].jpg" width="800" height="600" alt="[Describe artifact 3]" loading="lazy" /></div>
+            <figcaption class="project-bento-caption">[Artifact 3: what it is.]</figcaption>
+          </figure>
+          <figure class="project-bento-tile" data-reveal>
+            <div class="project-bento-media"><img src="../images/[artifact-4].jpg" width="800" height="600" alt="[Describe artifact 4]" loading="lazy" /></div>
+            <figcaption class="project-bento-caption">[Artifact 4: what it is.]</figcaption>
+          </figure>
+          <figure class="project-bento-tile" data-reveal>
+            <div class="project-bento-media"><img src="../images/[artifact-5].jpg" width="800" height="600" alt="[Describe artifact 5]" loading="lazy" /></div>
+            <figcaption class="project-bento-caption">[Artifact 5: what it is.]</figcaption>
+          </figure>
         </div>
       </div>
     </section>

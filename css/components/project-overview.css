@@ -1032,3 +1032,60 @@ a.intro-bar-name {
   height: 1em;
   flex: none;
 }
+
+
+/* ------------------------------------------------------------
+   BENTO — the Solution grid on the front-loaded case study template.
+   Six columns so tiles can be 2, 3, 4 or 6 wide and still tile a row; a tile
+   may also be --tall (two rows). Each tile is a <figure>: media in a rounded
+   frame, caption under it. The frame's neutral fill shows until the asset is
+   saved, so the layout can be judged with placeholders. Radius steps with
+   --work-card-radius's smaller sibling: 24px here, the same as the 768-tier
+   radius the hero already lands on.
+   ------------------------------------------------------------ */
+.project-bento {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: var(--gap-content);
+}
+
+.project-bento-tile {
+  grid-column: span 2;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  margin: 0;
+  min-width: 0;
+}
+
+.project-bento-tile--wide { grid-column: span 4; }
+.project-bento-tile--half { grid-column: span 3; }
+.project-bento-tile--full { grid-column: 1 / -1; }
+.project-bento-tile--tall { grid-row: span 2; }
+
+.project-bento-media {
+  flex: 1 1 auto;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: 24px;
+  background-color: #d9d9d9;
+}
+
+.project-bento-tile--wide .project-bento-media,
+.project-bento-tile--full .project-bento-media { aspect-ratio: 16 / 9; }
+
+.project-bento-tile--tall .project-bento-media { aspect-ratio: auto; min-height: 320px; }
+
+.project-bento-media img,
+.project-bento-media video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.project-bento-caption {
+  font-size: var(--size-sm, 14px);
+  line-height: 1.4;
+  color: var(--color-text-70);
+}
