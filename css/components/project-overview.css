@@ -1148,7 +1148,7 @@ a.intro-bar-name {
 
 /* ------------------------------------------------------------
    CLOSING INVITATION — the front-loaded template's last block before the pager.
-   Centred: a short grey bar, then the Contact lockup (sections.css
+   Centred: the Contact lockup (sections.css
    .contact-email — same display size with the same cap, weight, tracking and
    arrow) in the page's ink, then one muted line. Colour is the only thing not
    borrowed: Contact is white on blue, this is --color-text on cream.
@@ -1159,13 +1159,6 @@ a.intro-bar-name {
   align-items: center;
   text-align: center;
   gap: var(--gap-content);
-}
-
-.case-closing-bar {
-  width: 100px;
-  height: 6px;
-  border-radius: 3px;
-  background-color: var(--color-border-light);
 }
 
 .case-closing-heading {
