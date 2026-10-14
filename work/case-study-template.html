@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@200;400;500;700&family=Inter:wght@400..700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../style.css?v=69a70569" />
+  <link rel="stylesheet" href="../style.css?v=3b143a6d" />
   <script>
     (function () {
       try {
@@ -167,20 +167,16 @@
          columns at 768 and 1 at 480. -->
     <section class="page-section" id="solution" aria-labelledby="solution-heading">
       <div class="site-container">
-        <div class="project-block" data-reveal-group>
-          <div class="project-block-left">
-            <h2 class="section-title" id="solution-heading" data-reveal data-reveal-order="0">Solution</h2>
-          </div>
-          <div class="project-block-right" data-reveal data-reveal-order="2">
-            <div class="about-body">
-              <p>[What you designed and how it works, in a sentence or two.]</p>
-            </div>
-            <ul class="project-impact-list" role="list">
-              <li><strong>[Decision one.]</strong> [Why you made it.]</li>
-              <li><strong>[Decision two.]</strong> [Why you made it.]</li>
-              <li><strong>[Decision three.]</strong> [Why you made it.]</li>
-            </ul>
-          </div>
+        <!-- The STATEMENT is the section's headline (the rail already names the
+             section): full width, set at the chapter-heading size. Under it the
+             decisions run as three equal columns, then the artifacts. -->
+        <div data-reveal-group>
+          <h2 class="project-statement" id="solution-heading" data-reveal data-reveal-order="0">[What you designed and how it works, in a sentence or two. This is the section&rsquo;s headline.]</h2>
+          <ul class="project-impact-list project-impact-list--stacked project-decisions" role="list" data-reveal data-reveal-order="1">
+            <li><strong>[Decision one.]</strong> [Why you made it.]</li>
+            <li><strong>[Decision two.]</strong> [Why you made it.]</li>
+            <li><strong>[Decision three.]</strong> [Why you made it.]</li>
+          </ul>
         </div>
 
         <div class="project-bento" data-reveal-group>

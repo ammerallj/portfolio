@@ -1210,3 +1210,40 @@ a.intro-bar-name {
   line-height: 1.4;
   color: var(--color-text-70);
 }
+
+
+/* ------------------------------------------------------------
+   SOLUTION STATEMENT + DECISIONS — the front-loaded template's Solution opens
+   on its own statement, full width, in the chapter-heading size (the rail names
+   the section, so there is no separate title). The decisions sit under it as
+   three equal columns, each a hairline on top, then the bento. Stacks to one
+   column at 768 (responsive.css).
+   ------------------------------------------------------------ */
+.project-statement {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: var(--project-block-title-size);
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--color-text);
+}
+
+.project-decisions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--gap-group) var(--gap-content);
+  margin: var(--gap-group) 0 var(--gap-group);
+  padding: 0;
+}
+
+.project-decisions li,
+.project-decisions li:last-child {
+  padding: var(--gap-content) 0 0;
+  border-top: 1px solid var(--color-border-light);
+  border-bottom: none;
+}
+
+.project-statement + .project-decisions {
+  margin-top: var(--gap-group);
+}
