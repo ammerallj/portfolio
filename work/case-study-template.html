@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@200;400;500;700&family=Inter:wght@400..700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../style.css?v=84e8df97" />
+  <link rel="stylesheet" href="../style.css?v=8b9d5fc9" />
   <script>
     (function () {
       try {
@@ -63,9 +63,10 @@
   </div>
 
   <nav class="section-pills section-pills--rail" aria-label="On this page">
-    <a href="#overview" class="is-active" aria-current="true">Summary</a>
-    <a href="#gap">Screening gap</a>
+    <a href="#overview" class="is-active" aria-current="true">Overview</a>
+    <a href="#challenge">Challenge</a>
     <a href="#solution">Solution</a>
+    <a href="#impact">Impact</a>
   </nav>
 
   <main id="main-content">
@@ -80,7 +81,7 @@
          first scroll. DELETE any metadata row you don't have; never guess.
          ======================================================== -->
 
-    <!-- 1. EXECUTIVE SUMMARY ------------------------------------------------>
+    <!-- 1. OVERVIEW (executive summary) ------------------------------------------------>
     <!-- One section: the hero, then the title, the direct result and the facts
          row. On wide screens every section shares one left edge, inset to leave
          the rail's column. The rail sits in that column from the top. For video
@@ -135,12 +136,12 @@
       </div>
     </section>
 
-    <!-- 2. SCREENING GAP ---------------------------------------------------->
-    <section class="page-section" id="gap" aria-labelledby="gap-heading">
+    <!-- 2. CHALLENGE (the screening gap) ---------------------------------------------------->
+    <section class="page-section" id="challenge" aria-labelledby="challenge-heading">
       <div class="site-container">
         <div class="project-block" data-reveal-group>
           <div class="project-block-left">
-            <h2 class="section-title" id="gap-heading" data-reveal data-reveal-order="0">Screening gap</h2>
+            <h2 class="section-title" id="challenge-heading" data-reveal data-reveal-order="0">Challenge</h2>
           </div>
           <div class="project-block-right" data-reveal data-reveal-order="2">
             <div class="about-body">
@@ -195,6 +196,27 @@
             <div class="project-bento-media"><img src="../images/[artifact-5].jpg" width="800" height="600" alt="[Describe artifact 5]" loading="lazy" /></div>
             <figcaption class="project-bento-caption">[Artifact 5: what it is.]</figcaption>
           </figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. IMPACT ------------------------------------------------------------->
+    <!-- Outcome in bold, explanation under it. Two to four rows; put the number
+         in the outcome. Evidence links go inline on a natural phrase, never
+         inside <strong>. Closes with the Full case study card. -->
+    <section class="page-section" id="impact" aria-labelledby="impact-heading">
+      <div class="site-container">
+        <div class="project-block" data-reveal-group>
+          <div class="project-block-left">
+            <h2 class="section-title" id="impact-heading" data-reveal data-reveal-order="0">Impact</h2>
+          </div>
+          <div class="project-block-right" data-reveal data-reveal-order="2">
+            <ul class="project-impact-list project-impact-list--stacked" role="list">
+              <li><strong>[Outcome one.]</strong> [What you did and the evidence for it.]</li>
+              <li><strong>[Outcome two.]</strong> [What you did and the evidence for it.]</li>
+              <li><strong>[Outcome three.]</strong> [What you did and the evidence for it.]</li>
+            </ul>
+          </div>
         </div>
 
         <!-- FULL CASE STUDY CARD — closes the page, above the Next case pager.
