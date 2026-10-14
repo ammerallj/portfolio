@@ -3185,12 +3185,7 @@ function updateScrollEffects() {
       const heroEl = sectionPillBar.classList.contains('section-pills--site-nav')
         ? document.querySelector('.intro') : null;
       const onLanding = heroEl && heroEl.getBoundingClientRect().bottom > window.innerHeight * 0.5;
-      // The case-study template's left RAIL (wide screens only) stays away until
-      // the reader is past the full-width summary section above it.
-      const inSummary = sectionPillBar.classList.contains('section-pills--rail')
-        && window.matchMedia('(min-width: 1280px)').matches
-        && sectionPills[0].el.getBoundingClientRect().bottom > window.innerHeight * 0.5;
-      sectionPillBar.classList.toggle('is-tucked', footerIn || !!onLanding || inSummary);
+      sectionPillBar.classList.toggle('is-tucked', footerIn || !!onLanding);
     }
   }
 
