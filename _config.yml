@@ -15,4 +15,5 @@ exclude:
   - scripts/
   - archive/
   - lab/
+  - work/case-study-template.html
   - jennaos-brain.txt

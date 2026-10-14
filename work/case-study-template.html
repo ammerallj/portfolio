@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- TEMPLATE — not linked from anywhere, not in the sitemap, noindex. When
+       this becomes a real page: copy it, rename it, replace every [Placeholder],
+       swap robots to "index, follow", then add the canonical, Open Graph and
+       JSON-LD blocks (copy them from archive/project-pages-2026-10/work/).
+       Structured data restates visible copy only, so write the page first. -->
+  <title>[Case Study Title] — Jenna Ammerall</title>
+  <meta name="description" content="[One sentence: the problem and the outcome.]" />
+  <meta name="robots" content="noindex, nofollow" />
+  <meta name="theme-color" content="#4A45FF" />
+  <link rel="icon" href="../favicon.svg?v=4" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@200;400;500;700&family=Inter:wght@400..700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../style.css?v=f950e024" />
+  <script>
+    (function () {
+      try {
+        if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          document.documentElement.classList.add('is-motion');
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body>
+
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  <nav class="intro-bar intro-bar--page" aria-label="Site navigation">
+    <a class="intro-bar-name" href="../index.html" id="site-name">Jenna Ammerall.</a>
+    <div class="intro-bar-links">
+      <div class="intro-bar-group"><a href="../index.html#work-section" id="nav-work" class="is-active" aria-current="true">Selected work</a></div>
+      <div class="intro-bar-group"><a href="../index.html#about">About me</a></div>
+    </div>
+    <div class="intro-bar-cta-wrap"><a class="intro-bar-cta" href="../index.html#contact">Say hello</a></div>
+    <button class="mobile-menu-toggle" type="button" aria-expanded="false" aria-controls="mobile-menu">Say hello</button>
+  </nav>
+
+  <div class="mobile-menu" id="mobile-menu" role="dialog" aria-modal="true" aria-label="Navigation and contact" aria-hidden="true">
+    <p class="mobile-menu-name">Jenna Ammerall.</p>
+    <nav class="mobile-menu-nav" aria-label="Mobile navigation">
+      <a href="../index.html#work-section"><span class="mobile-menu-dash">&mdash;</span> Work</a>
+      <a href="../index.html#about"><span class="mobile-menu-dash">&mdash;</span> About</a>
+    </nav>
+    <div class="mobile-menu-connect">
+      <p class="mobile-menu-connect-heading">If something here resonated, say hello.</p>
+      <div class="mobile-menu-connect-links">
+        <a href="mailto:ammerallj@gmail.com">ammerallj@gmail.com<span class="visually-hidden"> (email)</span></a>
+        <a href="https://www.linkedin.com/in/ammerallj/" target="_blank" rel="noopener noreferrer">LinkedIn<span class="visually-hidden"> (opens in new tab)</span></a>
+      </div>
+    </div>
+    <button class="mobile-menu-close" type="button" aria-label="Close">
+      <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+        <line x1="4" y1="4" x2="16" y2="16" />
+        <line x1="16" y1="4" x2="4" y2="16" />
+      </svg>
+    </button>
+  </div>
+
+  <nav class="section-pills" aria-label="On this page">
+    <a href="#overview" class="is-active" aria-current="true">Overview</a>
+    <a href="#process">Approach</a>
+    <a href="#impact">What changed</a>
+  </nav>
+
+  <main id="main-content">
+
+    <!-- ========================================================
+         FRONT-LOADED SCREENING FRAMEWORK
+         Everything a screener needs to decide, above the first scroll:
+           1. what it is        → title
+           2. who/when/how big  → metadata (Duration · Role · Scope · Team)
+           3. the problem       → one sentence
+           4. the outcome       → one sentence, with the number if there is one
+         Everything below it is depth for the reader who chose to stay.
+         DELETE any row you don't have. Never leave one blank or guess.
+         ======================================================== -->
+    <section class="page-section" id="overview" aria-labelledby="project-title">
+      <div class="site-container project-masthead project-masthead--split" data-reveal-group>
+
+        <div class="project-masthead-top">
+
+          <div class="project-masthead-left">
+
+            <div class="project-masthead-head">
+              <h1 class="section-title" id="project-title" data-reveal data-reveal-order="0">[Case Study Title]</h1>
+            </div>
+
+            <div class="project-masthead-foot">
+              <dl class="project-meta-list">
+                <div class="project-meta-row">
+                  <dt>Duration</dt>
+                  <dd>[Month Year&ndash;Month Year]</dd>
+                </div>
+                <div class="project-meta-row">
+                  <dt>Role</dt>
+                  <dd>[Your role]</dd>
+                </div>
+                <div class="project-meta-row">
+                  <dt>Scope</dt>
+                  <dd>[What you owned, in one line]</dd>
+                </div>
+                <div class="project-meta-row">
+                  <dt>Team</dt>
+                  <dd>[Disciplines, or names with permission]</dd>
+                </div>
+              </dl>
+
+              <div class="project-overview-text about-body" data-reveal data-reveal-order="3">
+                <p>[Problem: one sentence on what wasn&rsquo;t working and for whom.]</p>
+                <p>[Outcome: one sentence on what changed, with the number if there is one.]</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="project-masthead-right" data-reveal data-reveal-order="1">
+            <!-- One hero image, 1100x1400. Add a width/height and real alt text.
+                 For a multi-image masthead, copy the data-carousel block from
+                 archive/project-pages-2026-10/work/microsoft-loop.html. -->
+            <div class="project-figure">
+              <img src="../images/[hero-image].jpg" width="1100" height="1400" alt="[Describe what the image shows]" />
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ========================================================
+         APPROACH — one statement of the shift you made. Add a principles list
+         (.project-impact-list) only if the work really was a set of rules.
+         ======================================================== -->
+    <section class="page-section" id="process" aria-labelledby="approach-heading">
+      <div class="site-container">
+        <div class="project-block" data-reveal-group>
+          <div class="project-block-left">
+            <h2 class="section-title" id="approach-heading" data-reveal data-reveal-order="0">Approach</h2>
+          </div>
+          <div class="project-block-right" data-reveal data-reveal-order="2">
+            <div class="about-body">
+              <p>[Approach: the one decision or shift that shaped the work.]</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================
+         WHAT CHANGED — outcome in bold, explanation under it. Two to four rows.
+         Evidence links go inline on a natural phrase, never inside <strong>.
+         ======================================================== -->
+    <section class="page-section" id="impact" aria-labelledby="impact-heading">
+      <div class="site-container">
+        <div class="project-block" data-reveal-group>
+          <div class="project-block-left">
+            <h2 class="section-title" id="impact-heading" data-reveal data-reveal-order="0">What changed</h2>
+          </div>
+          <div class="project-block-right" data-reveal data-reveal-order="2">
+            <ul class="project-impact-list project-impact-list--stacked" role="list">
+              <li><strong>[Outcome one.]</strong> [What you did and the evidence for it.]</li>
+              <li><strong>[Outcome two.]</strong> [What you did and the evidence for it.]</li>
+              <li><strong>[Outcome three.]</strong> [What you did and the evidence for it.]</li>
+            </ul>
+
+            <!-- Optional. Third-party coverage of this project only. Delete the
+                 whole block if there is none. -->
+            <div class="footprint-group">
+              <h3 class="footprint-group-title">Public footprints</h3>
+              <ul class="footprint-list" role="list">
+                <li><a href="[URL]" target="_blank" rel="noopener noreferrer">[Source — Title]<span class="visually-hidden"> (opens in new tab)</span></a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- NEXT CASE STUDY — point at the next project in the homepage Work order. -->
+    <section class="page-section next-case-section" aria-label="Next case study">
+      <div class="site-container">
+        <a class="next-case" href="[next-page].html" data-reveal-group data-reveal>
+          <span class="next-case-label">Next case study</span>
+          <span class="next-case-body">
+            <span class="next-case-text">
+              <span class="next-case-title">[Next project title]</span>
+              <span class="next-case-description">[One-line teaser]</span>
+            </span>
+            <span class="next-case-arrow" aria-hidden="true">&rarr;</span>
+          </span>
+        </a>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer site-footer--plain" role="contentinfo">
+    <div class="site-container">
+      <p><span class="footer-owner">&copy; 2026 Jenna Ammerall</span><span class="footer-sep"> &middot; </span><span class="footer-credit">Human directed. AI built.</span></p>
+    </div>
+  </footer>
+
+  <div class="meta-cursor" id="meta-cursor" aria-hidden="true">
+    <img src="../meta-logo.svg" alt="" />
+  </div>
+  <div class="ms-cursor" id="ms-cursor" aria-hidden="true">
+    <img src="../microsoft-logo.svg" alt="" />
+  </div>
+  <div class="wave-cursor" id="wave-cursor" aria-hidden="true">👋</div>
+
+  <script src="../js/main.js?v=aaa7b708" defer></script>
+</body>
+</html>
