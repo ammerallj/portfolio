@@ -1126,3 +1126,10 @@ a.intro-bar-name {
   font-size: 1.125rem;
   line-height: 1.3;
 }
+
+/* The Full case study card closing the front-loaded template's Solution: it
+   follows the bento grid, not a .project-block, so it takes the same
+   --gap-group seam. */
+.project-bento + .next-case {
+  margin-top: var(--gap-group);
+}

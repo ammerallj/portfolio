@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@200;400;500;700&family=Inter:wght@400..700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../style.css?v=18fff901" />
+  <link rel="stylesheet" href="../style.css?v=1b8b1cde" />
   <script>
     (function () {
       try {
@@ -113,6 +113,10 @@
             <dd>[Your role]</dd>
           </div>
           <div class="project-facts-col">
+            <dt>Results</dt>
+            <dd>[Headline metric]</dd>
+          </div>
+          <div class="project-facts-col">
             <dt>Team</dt>
             <dd>[Name or discipline]</dd>
             <dd>[Name or discipline]</dd>
@@ -192,6 +196,23 @@
             <div class="project-bento-media"><img src="../images/[artifact-5].jpg" width="800" height="600" alt="[Describe artifact 5]" loading="lazy" /></div>
             <figcaption class="project-bento-caption">[Artifact 5: what it is.]</figcaption>
           </figure>
+        </div>
+
+        <!-- FULL CASE STUDY CARD — closes the page, above the Next case pager.
+             Delete it if there is no deeper version. It is a <div>, not an <a>,
+             because it carries a second link (the mailto); the title's link
+             stretches an overlay across the card. The Figma deck's share setting
+             MUST be "Anyone with password" — verify in a private window before
+             putting the URL here, and never put the password in the page. -->
+        <div class="next-case next-case--outline next-case--locked" data-reveal-group data-reveal>
+          <span class="next-case-label"><svg class="next-case-lock" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><rect x="4" y="9" width="16" height="12" rx="4" stroke="currentColor" stroke-width="1.5"/><path d="M12 16L12 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 9V7C16 4.79086 14.2091 3 12 3C9.79086 3 8 4.79086 8 7L8 9" stroke="currentColor" stroke-width="1.5"/></svg>Full case study</span>
+          <span class="next-case-body">
+            <span class="next-case-text">
+              <span class="next-case-title"><a class="next-case-link" href="[Figma deck URL]" target="_blank" rel="noopener noreferrer">Go deeper into the work<span class="visually-hidden"> (opens in new tab)</span></a></span>
+              <span class="next-case-description">Need access? Request the password at <a class="next-case-aside-link" href="mailto:ammerallj@gmail.com?subject=[Project]%20case%20study%20password">ammerallj@gmail.com</a></span>
+            </span>
+            <span class="next-case-arrow" aria-hidden="true">&rarr;</span>
+          </span>
         </div>
       </div>
     </section>
