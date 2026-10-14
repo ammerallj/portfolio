@@ -3185,7 +3185,13 @@ function updateScrollEffects() {
       const heroEl = sectionPillBar.classList.contains('section-pills--site-nav')
         ? document.querySelector('.intro') : null;
       const onLanding = heroEl && heroEl.getBoundingClientRect().bottom > window.innerHeight * 0.5;
-      sectionPillBar.classList.toggle('is-tucked', footerIn || !!onLanding);
+      // The case-study template's left RAIL (wide screens only) steps away once
+      // its last section is mostly out of the viewport — its bottom edge above
+      // the screen's middle — so it doesn't sit beside the closing invitation.
+      const pastLast = sectionPillBar.classList.contains('section-pills--rail')
+        && window.matchMedia('(min-width: 1280px)').matches
+        && sectionPills[sectionPills.length - 1].el.getBoundingClientRect().bottom < window.innerHeight * 0.5;
+      sectionPillBar.classList.toggle('is-tucked', footerIn || !!onLanding || pastLast);
     }
   }
 

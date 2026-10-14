@@ -197,7 +197,8 @@ html.is-hero-stacked {
    phone's floating pills; here it becomes a plain vertical list pinned to the
    left gutter and centred on the viewport's height. The rail's column is
    reserved by padding every section, so it never sits on the copy; it is
-   visible from the top and tucks away over the footer.
+   visible from the top and tucks away once its last section is mostly out of
+   view (main.js).
    Below 1280 it falls back to the ordinary (phone-only) pills.
    ------------------------------------------------------------ */
 @media (min-width: 1280px) {
