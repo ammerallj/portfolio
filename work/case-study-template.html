@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@200;400;500;700&family=Inter:wght@400..700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../style.css?v=708e7c9e" />
+  <link rel="stylesheet" href="../style.css?v=49f39a02" />
   <script>
     (function () {
       try {
@@ -221,10 +221,13 @@
       </div>
     </section>
 
-    <!-- NEXT CASE STUDY — point at the next project in the homepage Work order. -->
+    <!-- NEXT CASE STUDY — point at the next project in the homepage Work order.
+         Bare on cream at rest; a gradient field fades in on hover/focus
+         (.next-case--field + the canvas; initNextCaseField in main.js). -->
     <section class="page-section next-case-section" aria-label="Next case study">
       <div class="site-container">
-        <a class="next-case" href="[next-page].html" data-reveal-group data-reveal>
+        <a class="next-case next-case--field" href="[next-page].html" data-reveal-group data-reveal>
+          <canvas class="next-case-field" aria-hidden="true"></canvas>
           <span class="next-case-label">Next case study</span>
           <span class="next-case-body">
             <span class="next-case-text">
@@ -253,6 +256,6 @@
   </div>
   <div class="wave-cursor" id="wave-cursor" aria-hidden="true">👋</div>
 
-  <script src="../js/main.js?v=f43cb7ba" defer></script>
+  <script src="../js/main.js?v=158ca7c6" defer></script>
 </body>
 </html>

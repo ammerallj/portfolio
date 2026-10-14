@@ -1240,3 +1240,42 @@ a.intro-bar-name {
 .project-statement + .project-decisions {
   margin-top: var(--gap-group);
 }
+
+
+/* ------------------------------------------------------------
+   NEXT-CASE FIELD — the pager as a card whose gradient appears on hover.
+   Bare cream at rest (the canvas is transparent-by-opacity); on hover or
+   keyboard focus a WebGL gradient (initNextCaseField, js/main.js) fades in
+   behind the text. Same card shape as .next-case--image: 60px padding on the
+   spacing scale, the pager radius, and overflow clipped to it. Text stays
+   --color-text; the shader caps its alpha so the type keeps its contrast.
+   No JS / no WebGL / touch: the canvas simply never shows.
+   ------------------------------------------------------------ */
+.next-case--field {
+  position: relative;
+  padding: var(--gap-group);
+  border-radius: var(--next-case-radius);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.next-case-field {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+}
+
+.next-case--field.is-field-on .next-case-field {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .next-case-field {
+    transition: none;
+  }
+}

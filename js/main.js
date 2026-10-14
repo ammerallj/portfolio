@@ -2782,6 +2782,120 @@ function initWorkSkeleton() {
 }
 initWorkSkeleton();
 
+// ============================================================
+// NEXT-CASE FIELD — the pager's hover gradient (`.next-case--field`).
+// A small cousin of the hero field: the same four hues (violet, magenta, red,
+// cyan) as soft orbs that fade out in their OWN hue, composited bottom to top in
+// the hero's paint order (red, magenta, violet, cyan), drifting slowly while the
+// card is hovered or focused. It is created on FIRST hover, so a reader who never
+// touches the card never pays for a WebGL context; the canvas fades in over the
+// cream (CSS) and the loop stops once it has faded out again. Mouse and keyboard
+// only (touch has no hover to reveal it). Reduced motion keeps the gradient and
+// drops the drift: one static frame. Alpha is capped below 1 so the black text
+// on top keeps its contrast. Failure = nothing happens (decorative).
+// ============================================================
+function initNextCaseField() {
+  document.querySelectorAll('.next-case--field').forEach((card) => {
+    const canvas = card.querySelector('.next-case-field');
+    if (!canvas || !window.matchMedia('(hover: hover)').matches) return;
+    let gl = null, U = null, raf = 0, stopTimer = 0, t0 = 0;
+    const FADE_MS = 520;
+
+    function setup() {
+      gl = canvas.getContext('webgl', { antialias: false, alpha: false, powerPreference: 'low-power' });
+      if (!gl) return false;
+      const sh = (type, src) => {
+        const s = gl.createShader(type);
+        gl.shaderSource(s, src);
+        gl.compileShader(s);
+        if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s));
+        return s;
+      };
+      const prog = gl.createProgram();
+      gl.attachShader(prog, sh(gl.VERTEX_SHADER, 'attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}'));
+      gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, [
+        'precision highp float;',
+        'uniform vec2 uRes;uniform float uTime;',
+        // orb: centre, radius (in card-heights), colour; alpha ramps 1 -> .5 at
+        // .524 of the radius -> 0 at the edge, then is capped so text stays legible.
+        'vec3 orb(vec3 base,vec2 p,vec2 c,float r,vec3 col){',
+        ' float d=length((p-c)*vec2(uRes.x/uRes.y,1.))/r;',
+        ' float a=d<.524?mix(1.,.5,smoothstep(0.,.524,d)):.5*(1.-smoothstep(.524,1.,d));',
+        ' return mix(base,col,a*.72);}',
+        'float hash(vec2 p){return fract(sin(dot(p,vec2(12.9898,78.233)))*43758.5453);}',
+        'void main(){',
+        ' vec2 p=gl_FragCoord.xy/uRes;float t=uTime*.25;',
+        ' vec3 c=vec3(.984,.988,.973);',
+        ' c=orb(c,p,vec2(.78+.06*sin(t*1.3),.30+.12*cos(t*.9)),1.00,vec3(.976,.247,.247));',  // red
+        ' c=orb(c,p,vec2(.22+.07*sin(t*1.1+1.),.62+.10*cos(t*1.4)),1.10,vec3(.839,.302,.808));', // magenta
+        ' c=orb(c,p,vec2(.52+.08*cos(t*.8),.88+.08*sin(t*1.2)),.95,vec3(.573,.220,.890));',      // violet
+        ' c=orb(c,p,vec2(.90+.05*sin(t*.7+2.),.82+.08*cos(t*1.0)),.80,vec3(.004,.624,.847));',   // cyan
+        ' c+=(hash(gl_FragCoord.xy+fract(uTime)*71.3)-.5)/255.;',
+        ' gl_FragColor=vec4(c,1.);}',
+      ].join('\n')));
+      gl.linkProgram(prog);
+      if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(prog));
+      gl.useProgram(prog);
+      gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+      const a = gl.getAttribLocation(prog, 'p');
+      gl.enableVertexAttribArray(a);
+      gl.vertexAttribPointer(a, 2, gl.FLOAT, false, 0, 0);
+      U = { res: gl.getUniformLocation(prog, 'uRes'), time: gl.getUniformLocation(prog, 'uTime') };
+      return true;
+    }
+
+    function draw(now) {
+      const r = canvas.getBoundingClientRect();
+      const s = Math.min(window.devicePixelRatio || 1, 2);
+      const w = Math.max(1, Math.round(r.width * s)), h = Math.max(1, Math.round(r.height * s));
+      if (canvas.width !== w || canvas.height !== h) {
+        canvas.width = w; canvas.height = h;
+        gl.viewport(0, 0, w, h);
+      }
+      gl.uniform2f(U.res, w, h);
+      gl.uniform1f(U.time, reducedMotion.matches ? 0 : (now - t0) / 1000);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+    }
+
+    function loop(now) {
+      draw(now);
+      if (!reducedMotion.matches) raf = requestAnimationFrame(loop);
+    }
+
+    function show() {
+      clearTimeout(stopTimer);
+      try {
+        if (!gl && !setup()) return;
+      } catch (e) {
+        console.warn('Next-case field unavailable:', e);
+        return;
+      }
+      cancelAnimationFrame(raf);
+      t0 = performance.now();
+      loop(t0);
+      card.classList.add('is-field-on');
+    }
+
+    function hide() {
+      card.classList.remove('is-field-on');
+      clearTimeout(stopTimer);
+      // Keep drawing until the CSS fade has finished, then stop the loop.
+      stopTimer = setTimeout(() => cancelAnimationFrame(raf), FADE_MS + 80);
+    }
+
+    card.addEventListener('mouseenter', show);
+    card.addEventListener('mouseleave', hide);
+    card.addEventListener('focusin', (e) => { if (e.target.matches(':focus-visible')) show(); });
+    card.addEventListener('focusout', hide);
+  });
+}
+try {
+  initNextCaseField();
+} catch (e) {
+  console.warn('Next-case field unavailable:', e);
+}
+
 // Lightbox: a Work card with data-lightbox opens the <dialog> it names as a
 // modal. Esc and the X close it, and so does a click on the backdrop (a click
 // whose target is the dialog itself — the dialog is exactly the media's box).
