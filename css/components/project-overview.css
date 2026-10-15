@@ -1332,7 +1332,7 @@ a.intro-bar-name {
   width: 29cqw;
   display: flex;
   flex-direction: column;
-  gap: 3cqw;
+  gap: 5cqw;
   flex: 0 0 auto;
 }
 
