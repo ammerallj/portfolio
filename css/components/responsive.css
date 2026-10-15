@@ -584,6 +584,7 @@ html.is-hero-stacked {
   .project-bento-tile,
   .project-bento-tile--half { grid-column: span 1; }
   .project-bento-tile--wide,
+  .project-bento-tile--solo,
   .project-bento-tile--full { grid-column: 1 / -1; }
   .project-bento-tile--tall { grid-row: auto; }
   .project-bento-tile--tall .project-bento-media { aspect-ratio: 4 / 3; min-height: 0; }

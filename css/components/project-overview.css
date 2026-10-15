@@ -1065,6 +1065,9 @@ a.intro-bar-name {
 .project-bento-tile--half { grid-column: span 3; }
 .project-bento-tile--full { grid-column: 1 / -1; }
 .project-bento-tile--tall { grid-row: span 2; }
+/* (--solo has no rule here: it only acts in responsive.css, where a small tile takes
+   a whole row once the grid drops to two columns at 768, so an odd count of tiles
+   never strands one beside an empty cell.) */
 
 .project-bento-media {
   flex: 1 1 auto;
