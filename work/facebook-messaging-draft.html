@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@200;400;500;700&family=Inter:wght@400..700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../style.css?v=3349aa32" />
+  <link rel="stylesheet" href="../style.css?v=9471fbb2" />
   <script>
     (function () {
       try {
@@ -173,15 +173,10 @@
     <section class="page-section" id="solution" aria-labelledby="solution-heading">
       <div class="site-container">
         <!-- The STATEMENT is the section's headline (the rail already names the
-             section): full width, set at the chapter-heading size. Under it the
-             decisions run as three equal columns, then the artifacts. -->
+             section): full width, set at the chapter-heading size. Then the
+             artifacts, then the decisions as three equal columns. -->
         <div data-reveal-group>
           <h2 class="project-statement" id="solution-heading" data-reveal data-reveal-order="0">I defined a shared in-Facebook messaging model that mapped each entry point to the right conversation experience based on intent.</h2>
-          <ul class="project-impact-list project-impact-list--stacked project-decisions" role="list" data-reveal data-reveal-order="1">
-            <li><strong>Defined post-send continuation.</strong> Designed feedback and re-entry behavior so people could continue the conversation after Send.</li>
-            <li><strong>Mapped thread type to intent.</strong> Set when entry points should use lightweight versus full-thread experiences.</li>
-            <li><strong>Standardized entry-point behavior.</strong> Created a shared rule for how messaging destinations should behave across Facebook.</li>
-          </ul>
         </div>
 
         <div class="project-bento" data-reveal-group>
@@ -192,6 +187,7 @@
               <img class="entry-card entry-card--story" src="../images/messaging-entry-story.webp?v=2" width="754" height="1486" alt="A Facebook story with a &ldquo;Send message&hellip;&rdquo; field and reaction buttons along the bottom." loading="lazy" />
               <img class="entry-card entry-card--experts" src="../images/messaging-entry-experts.png?v=2" width="750" height="402" alt="A Group experts list: Maya Bennett with an add-friend button, Andre Coleman with a Messenger button and Cassandra Taylor with an add-friend button." loading="lazy" />
               </div>
+
               <div class="entry-col entry-col--3">
               <img class="entry-card entry-card--sharesheet" src="../images/messaging-entry-sharesheet.png?v=2" width="750" height="592" alt="The share sheet&rsquo;s Send in Messenger panel: a row of recipients with Cassandra Taylor selected, a message field and a blue Send button." loading="lazy" />
               <div class="entry-card entry-card--hang">
@@ -218,6 +214,14 @@
             <div class="project-bento-media"><img src="../images/messaging-toast.jpg?v=2" width="890" height="670" alt="The bottom of a phone showing Facebook&rsquo;s post-send toast over the feed: &ldquo;Message sent to Cassandra Taylor&rdquo; with a See chat action above the tab bar." loading="lazy" /></div>
             <figcaption class="project-bento-caption">Return to the conversation from post-send feedback.</figcaption>
           </figure>
+        </div>
+        <!-- The three decisions run under the mosaic, as three equal columns. -->
+        <div data-reveal-group>
+          <ul class="project-impact-list project-impact-list--stacked project-decisions" role="list" data-reveal data-reveal-order="0">
+            <li><strong>Defined post-send continuation.</strong> Designed feedback and re-entry behavior so people could continue the conversation after Send.</li>
+            <li><strong>Mapped thread type to intent.</strong> Set when entry points should use lightweight versus full-thread experiences.</li>
+            <li><strong>Standardized entry-point behavior.</strong> Created a shared rule for how messaging destinations should behave across Facebook.</li>
+          </ul>
         </div>
       </div>
     </section>

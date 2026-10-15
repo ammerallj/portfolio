@@ -1276,7 +1276,7 @@ a.intro-bar-name {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--gap-group) var(--gap-content);
-  margin: var(--gap-group) 0 var(--gap-group);
+  margin: var(--gap-group) 0 0;
   padding: 0;
 }
 
@@ -1287,7 +1287,9 @@ a.intro-bar-name {
   border-bottom: none;
 }
 
-.project-statement + .project-decisions {
+/* Order on the page: statement, mosaic (bento), then the decisions: each block
+   sits one --gap-group (60px) under the one above it. */
+.project-bento {
   margin-top: var(--gap-group);
 }
 
