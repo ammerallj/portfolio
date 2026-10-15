@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@200;400;500;700&family=Inter:wght@400..700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../style.css?v=560de1d6" />
+  <link rel="stylesheet" href="../style.css?v=8a874573" />
   <script>
     (function () {
       try {
@@ -181,9 +181,9 @@
 
         <!-- THE FRAMING PARAGRAPH + THE THREAD-TYPES DIAGRAM as a two-column row (the
              Problem section's structure, flipped: text left, image right, the two
-             centred on each other). The diagram's two phones are EMPTY PLACEHOLDERS,
-             meant to be replaced by the real lightweight-thread and full-thread
-             recordings. -->
+             centred on each other). The right column is a short animated diagram
+             (the entry point branching to a lightweight thread and a full thread),
+             played once each time it scrolls into view. -->
         <div class="project-block project-block--center project-thread-row" data-reveal-group>
           <div class="project-block-left">
             <div class="about-body" data-reveal data-reveal-order="0">
@@ -192,7 +192,7 @@
           </div>
           <div class="project-block-right" data-reveal data-reveal-order="1">
             <figure class="project-diagram">
-              <img src="../images/messaging-thread-types.png" width="748" height="844" alt="A diagram: a Messaging entry point branches to two phones, a Lightweight thread on the left and a Full thread on the right. The phones are blank placeholders." loading="lazy" />
+              <video class="project-bento-video" src="../images/messaging-thread-types.mp4" poster="../images/messaging-thread-types-poster.jpg" width="2634" height="2176" muted playsinline preload="metadata" data-play-once aria-label="A diagram builds: a Messaging entry point branches to two phones, which fill in with a lightweight thread on the left and a full thread on the right."></video>
             </figure>
           </div>
         </div>

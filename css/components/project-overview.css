@@ -1519,7 +1519,8 @@ a.intro-bar-name {
   border-radius: 24px;
 }
 
-.project-diagram img {
+.project-diagram img,
+.project-diagram video {
   display: block;
   width: 100%;
   height: auto;
