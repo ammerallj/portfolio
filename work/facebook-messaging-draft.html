@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@200;400;500;700&family=Inter:wght@400..700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../style.css?v=77384f73" />
+  <link rel="stylesheet" href="../style.css?v=138a0bd9" />
   <script>
     (function () {
       try {
@@ -216,6 +216,14 @@
           </figure>
         </div>
 
+        <!-- The framing paragraph sits directly under the mosaic, with extra padding
+             above and below (a section step, 96px), then the thread-types diagram. -->
+        <div class="project-solution-text" data-reveal-group>
+          <div class="about-body" data-reveal data-reveal-order="0">
+            <p>I focused the model around three decisions: how people re-entered a conversation after Send, when messaging should stay lightweight versus open a full thread, and how entry points should map to a predictable destination.</p>
+          </div>
+        </div>
+
         <!-- THREAD TYPES — a full-width diagram: one messaging entry point branching
              to a lightweight thread and a full thread. The two phones are EMPTY
              PLACEHOLDERS for now; they are meant to be replaced by the real
@@ -223,17 +231,6 @@
         <figure class="project-diagram" data-reveal>
           <img src="../images/messaging-thread-types.png" width="748" height="844" alt="A diagram: a Messaging entry point branches to two phones, a Lightweight thread on the left and a Full thread on the right. The phones are blank placeholders." loading="lazy" />
         </figure>
-      </div>
-    </section>
-
-    <!-- CLOSING PARAGRAPH — its own section, with a full section's breathing room
-         (96px above and below), not a block tucked under the mosaic. No heading and
-         no rail label; aria-label names it for assistive tech. -->
-    <section class="page-section" aria-label="How the model was framed">
-      <div class="site-container" data-reveal-group>
-        <div class="about-body project-solution-text" data-reveal data-reveal-order="0">
-          <p>I focused the model around three decisions: how people re-entered a conversation after Send, when messaging should stay lightweight versus open a full thread, and how entry points should map to a predictable destination.</p>
-        </div>
       </div>
     </section>
 

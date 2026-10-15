@@ -1482,11 +1482,19 @@ a.intro-bar-name {
   color: var(--color-text-70);
 }
 
-/* A single paragraph that closes the Solution as a section of its own (the
-   .page-section padding supplies the breathing room), full width of the column. */
+/* The paragraph under the Solution mosaic: full width, with a section step
+   (--gap-section, 96px) of extra padding above and below it. The diagram's own
+   top margin is zeroed after it so the space below is that one 96px, not two. */
+.project-solution-text {
+  padding-block: var(--gap-section);
+}
 
 .project-solution-text p {
   max-width: none;
+}
+
+.project-solution-text + .project-diagram {
+  margin-top: 0;
 }
 
 /* A full-width diagram (the lightweight vs full thread placeholder under the
