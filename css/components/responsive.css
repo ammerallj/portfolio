@@ -250,8 +250,14 @@ html.is-hero-stacked {
      reserved on all of them, so the page reads as a single indented column.
      The closing invitation is the exception: it runs the full width, below the
      rail's column rather than beside it. */
+  /* The rail's column is TWO COLUMNS OF THE SITE GRID (12 columns, 56px margins,
+     20px gutters): one step is a column plus a gutter, (100vw − 332px)/12 + 20px,
+     so two steps is (100vw − 332px)/6 + 40px — 224.67px at 1440. The content
+     therefore starts on the grid's third column line (x = 280.67 at 1440, 254 at
+     1280), and the 77px rail leaves a 148px gap at 1440. It was a flat 168px,
+     which put the content between column lines. */
   body:has(.section-pills--rail) main > section:not(.case-closing-section) {
-    padding-left: 168px;
+    padding-left: calc((100vw - 332px) / 6 + 40px);
   }
 
   /* Hidden (not just transparent) until the reader is past the summary. */
