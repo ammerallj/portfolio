@@ -2950,7 +2950,7 @@ function initBentoTooltips() {
   if (!window.matchMedia('(hover: hover)').matches) return;
   const GAP_X = 14, GAP_Y = 18, PAD = 8;
   const TAU = 85; // ms; larger = floatier, smaller = tighter
-  document.querySelectorAll('.project-bento-tile').forEach((tile) => {
+  document.querySelectorAll('.project-bento-tile, [data-tip]').forEach((tile) => {
     const cap = tile.querySelector('.project-bento-caption');
     if (!cap) return;
     let raf = 0, last = 0;

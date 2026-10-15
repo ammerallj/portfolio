@@ -1125,11 +1125,19 @@ a.intro-bar-name {
 }
 
 .project-bento-tile:hover .project-bento-caption,
-.project-bento-tile:focus-within .project-bento-caption {
+.project-bento-tile:focus-within .project-bento-caption,
+[data-tip]:hover .project-bento-caption {
   opacity: 1;
 }
 
+/* The same tooltip on a landing Work card ([data-tip] on the card link, init in
+   initBentoTooltips). It lives in the link, anchored to the whole card. */
+[data-tip] { position: relative; }
+.work-card-tip { z-index: 5; white-space: nowrap; }
+
 @media (hover: none) {
+  /* A tappable card needs no hint: the landing's tip stays off on touch. */
+  .work-card-tip { display: none; }
   /* No cursor to follow: a static toast along the bottom, always shown. */
   .project-bento-caption {
     left: 12px;
