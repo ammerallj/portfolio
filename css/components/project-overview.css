@@ -1544,3 +1544,9 @@ a.intro-bar-name {
   line-height: 1.4;
   color: var(--color-text);
 }
+
+/* Solution order: statement, the routing-rule row (text + diagram), then the mosaic
+   as the closing artifact of the case study: each a section step apart. */
+.project-thread-row + .project-bento {
+  margin-top: var(--gap-section);
+}
