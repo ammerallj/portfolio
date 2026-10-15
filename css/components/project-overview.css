@@ -1488,3 +1488,17 @@ a.intro-bar-name {
 .project-solution-text p {
   max-width: none;
 }
+
+/* A full-width diagram (the lightweight vs full thread placeholder under the
+   Solution mosaic): the image fills the column and takes the bento's 24px radius. */
+.project-diagram {
+  margin: var(--gap-group) 0 0;
+  overflow: hidden;
+  border-radius: 24px;
+}
+
+.project-diagram img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
