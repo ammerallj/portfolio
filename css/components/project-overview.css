@@ -1399,3 +1399,39 @@ a.intro-bar-name {
   height: auto;
   margin: -10% 0 0 -4.2%;
 }
+
+
+/* ------------------------------------------------------------
+   WIDE CARD — a full-width (16:9) demo video under the masthead, with a centred
+   one-line caption beneath it in the site's small caption type (the same
+   --size-sm / 70% ink as .project-bento-caption, centred). The frame is the
+   bento's rounded grey frame at the same 24px radius; the video fills it.
+   ------------------------------------------------------------ */
+.project-wide-card {
+  margin: 0; /* the masthead's own column gap (--gap-group) already spaces it */
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.project-wide-card-media {
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: 24px;
+  background-color: #e8e8e8;
+}
+
+.project-wide-card-media video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.project-wide-card-caption {
+  margin: 0;
+  text-align: center;
+  font-size: var(--size-sm, 14px);
+  line-height: 1.4;
+  color: var(--color-text-70);
+}
