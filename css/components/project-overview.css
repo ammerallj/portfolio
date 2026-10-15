@@ -56,8 +56,11 @@ main:has(.next-case-section) .page-section {
   border-bottom: none;
 }
 
+/* FAINT, from the style guide: --color-border-light (12% black), not the
+   full-strength --color-border (2026-10, Jenna). The line still marks the one real
+   seam — the project ends here — but quietly; the air around it does the work. */
 main:has(.next-case-section) .page-section:has(+ .next-case-section) {
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border-light);
 }
 
 
@@ -1031,4 +1034,268 @@ a.intro-bar-name {
   width: 1em;
   height: 1em;
   flex: none;
+}
+
+
+/* ------------------------------------------------------------
+   BENTO — the Solution grid on the front-loaded case study template.
+   Six columns so tiles can be 2, 3, 4 or 6 wide and still tile a row; a tile
+   may also be --tall (two rows). Each tile is a <figure>: media in a rounded
+   frame, caption under it. The frame's neutral fill shows until the asset is
+   saved, so the layout can be judged with placeholders. Radius steps with
+   --work-card-radius's smaller sibling: 24px here, the same as the 768-tier
+   radius the hero already lands on.
+   ------------------------------------------------------------ */
+.project-bento {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: var(--gap-content);
+}
+
+.project-bento-tile {
+  grid-column: span 2;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  margin: 0;
+  min-width: 0;
+}
+
+.project-bento-tile--wide { grid-column: span 4; }
+.project-bento-tile--half { grid-column: span 3; }
+.project-bento-tile--full { grid-column: 1 / -1; }
+.project-bento-tile--tall { grid-row: span 2; }
+
+.project-bento-media {
+  flex: 1 1 auto;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: 24px;
+  background-color: #d9d9d9;
+}
+
+.project-bento-tile--wide .project-bento-media,
+.project-bento-tile--full .project-bento-media { aspect-ratio: 16 / 9; }
+
+.project-bento-tile--tall .project-bento-media { aspect-ratio: auto; min-height: 320px; }
+
+.project-bento-media img,
+.project-bento-media video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.project-bento-caption {
+  font-size: var(--size-sm, 14px);
+  line-height: 1.4;
+  color: var(--color-text-70);
+}
+
+
+/* ------------------------------------------------------------
+   FACTS ROW — the front-loaded template's masthead metadata. One horizontal
+   row of EQUAL columns (grid-auto-flow: column + 1fr tracks, so deleting a
+   column re-divides the row instead of leaving a hole). Label is muted, the
+   entries stack beneath it. 2-up at 768, one column at 480 (responsive.css).
+   ------------------------------------------------------------ */
+/* The result runs the full width of the section (no measure cap), like the title
+   above it and the facts row below it. */
+.project-result {
+  max-width: none;
+}
+.project-result p {
+  max-width: none;
+}
+
+.project-facts {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: var(--gap-group) var(--gap-content);
+  margin: 0;
+}
+
+.project-facts-col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  min-width: 0;
+}
+
+/* The masthead is EYEBROW TYPE: the label is .section-label's 13px / 500 /
+   uppercase / +0.05em, in the muted 70% ink, and the values are the same 13px in
+   sentence case and full black, the pairing the old .project-meta-row used.
+   Tracking on the values is normal: negative tracking is tuned for display
+   sizes and closes up the letterfit at 13px. */
+.project-facts-col dt {
+  font-family: var(--font-body);
+  font-size: var(--size-xs);
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-text-70);
+}
+
+.project-facts-col dd {
+  margin: 0;
+  font-size: var(--size-xs);
+  letter-spacing: normal;
+  line-height: 1.4;
+  color: var(--color-text);
+}
+
+
+
+
+/* ------------------------------------------------------------
+   CLOSING INVITATION — the front-loaded template's last block before the pager.
+   Centred: the Contact lockup (sections.css
+   .contact-email — same display size with the same cap, weight, tracking and
+   arrow) in the page's ink, then one muted line. Colour is the only thing not
+   borrowed: Contact is white on blue, this is --color-text on cream.
+   ------------------------------------------------------------ */
+.case-closing {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--gap-content);
+}
+
+.case-closing-heading {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: min(var(--display-size), calc((100vw - 2 * var(--page-gutter)) / 10.6));
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  color: var(--color-text);
+}
+
+.case-closing-heading a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.case-closing-arrow {
+  display: inline-block;
+  width: 0.5em;
+  height: 0.5em;
+  margin-left: 0.14em;
+  vertical-align: baseline;
+  transition: translate 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (hover: hover) {
+  .case-closing-heading a:hover .case-closing-arrow {
+    translate: 0.06em -0.06em;
+  }
+}
+
+.case-closing-heading a:focus-visible {
+  outline: 2px solid var(--color-text);
+  outline-offset: 0.1em;
+}
+
+.case-closing-text {
+  margin: 0;
+  max-width: var(--width-right-column);
+  font-size: var(--size-lg, 1.125rem);
+  line-height: 1.4;
+  color: var(--color-text-70);
+}
+
+
+/* ------------------------------------------------------------
+   SOLUTION STATEMENT + DECISIONS — the front-loaded template's Solution opens
+   on its own statement, full width, in the chapter-heading size (the rail names
+   the section, so there is no separate title). The decisions sit under it as
+   three equal columns, each a hairline on top, then the bento. Stacks to one
+   column at 768 (responsive.css).
+   ------------------------------------------------------------ */
+.project-statement {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: var(--project-block-title-size);
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--color-text);
+}
+
+.project-decisions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--gap-group) var(--gap-content);
+  margin: var(--gap-group) 0 var(--gap-group);
+  padding: 0;
+}
+
+.project-decisions li,
+.project-decisions li:last-child {
+  padding: var(--gap-content) 0 0;
+  border-top: 1px solid var(--color-border-light);
+  border-bottom: none;
+}
+
+.project-statement + .project-decisions {
+  margin-top: var(--gap-group);
+}
+
+
+/* ------------------------------------------------------------
+   NEXT-CASE FIELD — the pager as a card whose gradient appears on hover.
+   Bare cream at rest (the canvas is transparent-by-opacity); on hover or
+   keyboard focus a WebGL gradient (initNextCaseField, js/main.js) fades in
+   behind the text. Same card shape as .next-case--image: 60px padding on the
+   spacing scale, the pager radius, and overflow clipped to it. Text stays
+   --color-text; the shader caps its alpha so the type keeps its contrast.
+   No JS / no WebGL / touch: the canvas simply never shows.
+   ------------------------------------------------------------ */
+.next-case--field {
+  position: relative;
+  padding: var(--gap-group);
+  border-radius: var(--next-case-radius);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.next-case-field {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+}
+
+.next-case--field.is-field-on .next-case-field {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .next-case-field {
+    transition: none;
+  }
+}
+
+/* A portrait artifact (a phone) in the Problem column: the frame takes the
+   image's own ratio so nothing is cropped, instead of the default 4:3. */
+.project-problem-artifact--portrait {
+  max-width: 360px;
+}
+
+.project-problem-artifact--portrait .project-bento-media {
+  aspect-ratio: 834 / 1450;
+}
+
+/* Centre the two columns on each other (the text beside a tall artifact sits at
+   the artifact's vertical middle instead of its top). Only matters while the
+   columns are side by side; stacked, they are full-width blocks either way. */
+.project-block--center {
+  align-items: center;
 }
