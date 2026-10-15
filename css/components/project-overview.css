@@ -1587,19 +1587,19 @@ a.intro-bar-name {
 }
 
 /* CROPPED DIAGRAM VIDEO: the animation has a wide margin of glow around the diagram
-   (it fills only the middle ~60% of the frame), so the frame shows just that
-   middle: the video is scaled to 166.7% of the frame's width and shifted so the
-   crop is x 20-80%, y 14-76% of the video. The diagram is ~1.7x larger in the same
-   column. All offsets are percentages of the frame's WIDTH (margins resolve
-   against it), so the crop holds at every size. */
+   (the diagram itself fills only the middle ~38% x 49% of the frame), so the frame
+   shows just a tight window on it: x 26-74%, y 16-72.5% of the video. The video is
+   scaled to 208.3% of the frame's width and shifted to that window, so the diagram
+   is ~2.1x larger in the same column. All offsets are percentages of the frame's
+   WIDTH (margins resolve against it), so the crop holds at every size. */
 .project-diagram--crop {
   position: relative;
-  aspect-ratio: 100 / 85.4;
+  aspect-ratio: 100 / 97.2;
 }
 
 .project-diagram--crop video {
-  width: 166.667%;
+  width: 208.333%;
   max-width: none;
   height: auto;
-  margin: -19.28% 0 0 -33.333%;
+  margin: -27.54% 0 0 -54.167%;
 }
