@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@200;400;500;700&family=Inter:wght@400..700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../style.css?v=560de1d6" />
+  <link rel="stylesheet" href="../style.css?v=0e729ed4" />
   <script>
     (function () {
       try {
@@ -71,37 +71,34 @@
   <main id="main-content">
 
     <!-- ========================================================
-         FRONT-LOADED SCREENING FRAMEWORK — three sections:
-           1. Executive summary  full-width image or video, then the masthead
-                                 with the DIRECT RESULT in the first sentence
-           2. Screening gap      brief background + the problem
-           3. Solution           bento grid of artifacts
-         A screener should have the title, role, scope and result before the
-         first scroll. DELETE any metadata row you don't have; never guess.
+         FRONT-LOADED SCREENING FRAMEWORK. The page runs, in order:
+           1. Overview   title, the result with its quantified impact, the facts
+                         row, then ONE wide demo card (video + a one-line caption)
+           2. Problem    an artifact beside what wasn't working and why it mattered
+           3. Solution   the statement (the headline), a two-column row (the rule or
+                         model in words + a diagram), then the MOSAIC of artifacts
+                         that closes the case study
+           then the closing invitation (your email) and Additional Work, two Work
+           cards to explore next.
+         A screener should have the title, role, scope and result before the first
+         scroll. DELETE any facts row you don't have; never guess. The left rail
+         (Overview / Problem / Solution) is the in-page nav on wide screens.
          ======================================================== -->
 
-    <!-- 1. OVERVIEW (executive summary) ------------------------------------------------>
-    <!-- One section: the hero, then the title, the direct result and the facts
-         row. On wide screens every section shares one left edge, inset to leave
-         the rail's column. The rail sits in that column from the top. For video
-         swap the <img> for a <video muted loop playsinline autoplay> with a
-         poster; keep the width/height. -->
+    <!-- 1. OVERVIEW -------------------------------------------------------------->
     <section class="page-section" id="overview" aria-labelledby="project-title">
       <div class="site-container project-masthead" data-reveal-group>
 
-        <!-- Hero, then the title, the result, then the facts as one horizontal row
-             of EQUAL columns. Timeline, Role and Results are ONE <dd> (a single
-             line; Timeline reads "N months &middot; Year"). TEAM and SKILLS are
-             LISTS: one <dd> per entry, stacked. Delete a column you don't have and the rest
-             re-divide the row. -->
-        <div class="project-hero-figure" data-reveal data-reveal-order="0">
-          <img src="../images/[hero-image].jpg" width="2660" height="830" alt="[Describe what the image shows]" />
-        </div>
-
-        <h1 class="section-title" id="project-title" data-reveal data-reveal-order="1">[Case Study Title]</h1>
+        <!-- The title, the result, then the facts as one horizontal row of EQUAL
+             columns. Timeline, Role and Results are ONE <dd> (a single line;
+             Timeline reads "N months &middot; Year"). TEAM and SKILLS are LISTS: one
+             <dd> per entry, stacked. Delete a column you don't have and the rest
+             re-divide the row. The labels are eyebrow type (13px uppercase). -->
+        <h1 class="section-title" id="project-title" data-reveal data-reveal-order="0">[Case Study Title]</h1>
 
         <div class="about-body project-result" data-reveal data-reveal-order="2">
           <p>[What you accomplished, with the quantified impact.]</p>
+          <p>[Optional: what you focused on within it.]</p>
         </div>
 
         <dl class="project-facts" data-reveal data-reveal-order="3">
@@ -131,76 +128,100 @@
           </div>
         </dl>
 
+        <!-- WIDE CARD: a full-width (16:9) demo with one centred caption line in the
+             small caption style. data-play-once: the clip plays ONCE each time it
+             scrolls into view (and again if you scroll away and back); it has no
+             loop. Remove the attribute and add `loop` for a looping clip. -->
+        <figure class="project-wide-card" data-reveal data-reveal-order="4">
+          <div class="project-wide-card-media">
+            <video class="project-bento-video" src="../images/[wide-demo].mp4" poster="../images/[wide-demo-poster].jpg" width="1920" height="1080" muted playsinline preload="metadata" data-play-once aria-label="[Describe what the recording shows]"></video>
+          </div>
+          <figcaption class="project-wide-card-caption">[One line that frames the demo.]</figcaption>
+        </figure>
+
       </div>
     </section>
 
-    <!-- 2. PROBLEM (the screening gap) ---------------------------------------------------->
+    <!-- 2. PROBLEM ---------------------------------------------------------------->
     <section class="page-section" id="problem" aria-labelledby="problem-heading">
       <div class="site-container">
         <div class="project-block project-block--center" data-reveal-group>
-          <!-- The left column holds an ARTIFACT, not a heading: the rail already
-               names the section. The h2 stays for screen readers and the outline. -->
+          <!-- The left column holds an ARTIFACT, not a visible heading: the rail
+               already names the section. The h2 stays (visually hidden) for screen
+               readers and the outline. The artifact is a PORTRAIT phone video
+               (1190x2064) capped at 360px wide; the text beside it centres on it.
+               For a still, use an <img> in the same frame. -->
           <div class="project-block-left">
             <h2 class="visually-hidden" id="problem-heading">Problem</h2>
-            <figure class="project-bento-tile project-problem-artifact" data-reveal data-reveal-order="0">
-              <div class="project-bento-media"><img src="../images/[problem-artifact].jpg" width="800" height="600" alt="[Describe the artifact]" loading="lazy" /></div>
-              <figcaption class="project-bento-caption">[Artifact: what it shows.]</figcaption>
+            <figure class="project-bento-tile project-problem-artifact project-problem-artifact--portrait" data-reveal data-reveal-order="0">
+              <div class="project-bento-media"><video class="project-bento-video" src="../images/[problem-demo].mp4" poster="../images/[problem-demo-poster].jpg" width="1190" height="2064" muted loop playsinline preload="metadata" aria-label="[Describe what the recording shows]"></video></div>
             </figure>
           </div>
           <div class="project-block-right" data-reveal data-reveal-order="2">
             <div class="about-body">
               <p>[What wasn&rsquo;t working, and for whom. One or two sentences of context so it makes sense.]</p>
-              <p>[Why it mattered: the cost to the business and to users.]</p>
-              <p>[The constraints or tensions that made it hard.]</p>
+              <p>[Why it mattered, and the constraint or tension that made it hard.]</p>
             </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- 3. SOLUTION --------------------------------------------------------->
-    <!-- Bento: the heading sits in the usual left column; the grid runs the full
-         container width below it. Tile classes (6-column grid):
-           (none) 2 wide · --half 3 · --wide 4 · --full 6 · --tall spans 2 rows
-         A row must add to 6. Every tile needs a caption saying what it is and
-         what it shows; give each image real alt text. Tiles collapse to 2
-         columns at 768 and 1 at 480. -->
+    <!-- 3. SOLUTION --------------------------------------------------------------->
     <section class="page-section" id="solution" aria-labelledby="solution-heading">
       <div class="site-container">
+
         <!-- The STATEMENT is the section's headline (the rail already names the
-             section): full width, set at the chapter-heading size. Under it the
-             decisions run as three equal columns, then the artifacts. -->
+             section): full width, at the chapter-heading size. -->
         <div data-reveal-group>
-          <h2 class="project-statement" id="solution-heading" data-reveal data-reveal-order="0">[What you designed and how it works, in a sentence or two. This is the section&rsquo;s headline.]</h2>
-          <ul class="project-impact-list project-impact-list--stacked project-decisions" role="list" data-reveal data-reveal-order="1">
-            <li><strong>[Decision one.]</strong> [Why you made it.]</li>
-            <li><strong>[Decision two.]</strong> [Why you made it.]</li>
-            <li><strong>[Decision three.]</strong> [Why you made it.]</li>
-          </ul>
+          <h2 class="project-statement" id="solution-heading" data-reveal data-reveal-order="0">[What you designed, in one sentence. This is the section&rsquo;s headline.]</h2>
         </div>
 
+        <!-- THE RULE IN WORDS + A DIAGRAM: the Problem section's two-column
+             structure flipped (text left, image right, centred on each other).
+             Stacks at 1024. The diagram fills the shared 542px right column. -->
+        <div class="project-block project-block--center project-thread-row" data-reveal-group>
+          <div class="project-block-left">
+            <div class="about-body" data-reveal data-reveal-order="0">
+              <p>[The rule or model that tied the work together, in a sentence or two.]</p>
+            </div>
+          </div>
+          <div class="project-block-right" data-reveal data-reveal-order="1">
+            <figure class="project-diagram">
+              <img src="../images/[diagram].png" width="748" height="844" alt="[Describe the diagram]" loading="lazy" />
+            </figure>
+          </div>
+        </div>
+
+        <!-- THE MOSAIC closes the case study: a 6-column bento (tile classes: none
+             = 2 wide, --half 3, --wide 4, --full 6, --tall spans 2 rows, --solo
+             takes a full row at 768). A row must add to 6. This one is 4 + 2 with a
+             tall tile spanning both rows, then 2 + 2 under the wide tile.
+             CAPTIONS ARE TOOLTIPS: each figcaption is hidden until the tile is
+             hovered, then follows the cursor in a blurred black pill sized to its
+             text (touch screens show it as a bar along the bottom). Keep them to a
+             few words. Give every image real alt text and every video an
+             aria-label. Videos play while on screen (muted, looping). -->
         <div class="project-bento" data-reveal-group>
-          <!-- Row 1: 4 + 2 -->
+          <!-- Row 1: wide (4) + tall (2, spans rows 1-2). The wide tile can hold a
+               single image, or a collage of UI fragments (see the Facebook
+               Messaging draft). -->
           <figure class="project-bento-tile project-bento-tile--wide" data-reveal>
             <div class="project-bento-media"><img src="../images/[artifact-1].jpg" width="1600" height="900" alt="[Describe artifact 1]" loading="lazy" /></div>
-            <figcaption class="project-bento-caption">[Artifact 1: what it is.]</figcaption>
+            <figcaption class="project-bento-caption">[Short label]</figcaption>
+          </figure>
+          <figure class="project-bento-tile project-bento-tile--tall project-bento-tile--solo" data-reveal>
+            <div class="project-bento-media"><video class="project-bento-video" src="../images/[artifact-2].mp4" poster="../images/[artifact-2-poster].jpg" width="1190" height="2064" muted loop playsinline preload="metadata" aria-label="[Describe what the recording shows]"></video></div>
+            <figcaption class="project-bento-caption">[Short label]</figcaption>
+          </figure>
+          <!-- Row 2: 2 + 2 (under the wide tile; the tall tile fills the right) -->
+          <figure class="project-bento-tile" data-reveal>
+            <div class="project-bento-media"><video class="project-bento-video" src="../images/[artifact-3].mp4" poster="../images/[artifact-3-poster].jpg" width="1190" height="2064" muted loop playsinline preload="metadata" aria-label="[Describe what the recording shows]"></video></div>
+            <figcaption class="project-bento-caption">[Short label]</figcaption>
           </figure>
           <figure class="project-bento-tile" data-reveal>
-            <div class="project-bento-media"><img src="../images/[artifact-2].jpg" width="800" height="600" alt="[Describe artifact 2]" loading="lazy" /></div>
-            <figcaption class="project-bento-caption">[Artifact 2: what it is.]</figcaption>
-          </figure>
-          <!-- Row 2: 2 + 2 + 2 -->
-          <figure class="project-bento-tile" data-reveal>
-            <div class="project-bento-media"><img src="../images/[artifact-3].jpg" width="800" height="600" alt="[Describe artifact 3]" loading="lazy" /></div>
-            <figcaption class="project-bento-caption">[Artifact 3: what it is.]</figcaption>
-          </figure>
-          <figure class="project-bento-tile" data-reveal>
-            <div class="project-bento-media"><img src="../images/[artifact-4].jpg" width="800" height="600" alt="[Describe artifact 4]" loading="lazy" /></div>
-            <figcaption class="project-bento-caption">[Artifact 4: what it is.]</figcaption>
-          </figure>
-          <figure class="project-bento-tile" data-reveal>
-            <div class="project-bento-media"><img src="../images/[artifact-5].jpg" width="800" height="600" alt="[Describe artifact 5]" loading="lazy" /></div>
-            <figcaption class="project-bento-caption">[Artifact 5: what it is.]</figcaption>
+            <div class="project-bento-media"><img src="../images/[artifact-4].jpg" width="890" height="670" alt="[Describe artifact 4]" loading="lazy" /></div>
+            <figcaption class="project-bento-caption">[Short label]</figcaption>
           </figure>
         </div>
       </div>

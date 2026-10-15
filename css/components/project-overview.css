@@ -1283,6 +1283,11 @@ a.intro-bar-name {
   line-height: 1.2;
   letter-spacing: -0.02em;
   color: var(--color-text);
+  /* Breathing room, centred between the sections around it: above it sits the
+     previous section's bottom padding + this section's top padding (2 × gap),
+     below it only the row's own top margin (1 × gap), so the extra goes
+     1 × above and 2 × below and both sides land on 3 × --gap-section. */
+  padding: var(--gap-section) 0 calc(var(--gap-section) * 2);
 }
 
 .project-decisions {
@@ -1519,7 +1524,8 @@ a.intro-bar-name {
   border-radius: 24px;
 }
 
-.project-diagram img {
+.project-diagram img,
+.project-diagram video {
   display: block;
   width: 100%;
   height: auto;
@@ -1583,4 +1589,39 @@ a.intro-bar-name {
 .additional-work .section-title {
   margin: 0 0 var(--gap-group);
   font-size: var(--project-block-title-size);
+}
+
+/* CROPPED DIAGRAM VIDEO: the animation has a wide margin of glow around the diagram
+   (the diagram itself fills only the middle ~38% x 49% of the frame), so the frame
+   shows just a tight window on it: x 28.5-71.5%, y 16-72.5% of the video (the
+   phones' outer edges sit at ~31% and ~69%, so ~2.5% of margin either side). The
+   video is scaled to 232.6% of the frame's width and shifted to that window. All
+   offsets are percentages of the frame's WIDTH (margins resolve against it), so
+   the crop holds at every size. */
+.project-diagram--crop {
+  position: relative;
+  aspect-ratio: 100 / 108.5;
+}
+
+.project-diagram--crop video {
+  width: 232.558%;
+  max-width: none;
+  height: auto;
+  margin: -30.74% 0 0 -66.279%;
+}
+
+/* A WIDER right column for the routing row (desktop only: below 1025 the row stacks
+   and the column is full width anyway). The diagram is the star of this row, so it
+   takes 56% of the row (618px at 1440, up from the shared 542px column) and the gap
+   between text and image drops from the 186px column gap to one --gap-group (60px).
+   Scoped to 1025+ because flex-basis would otherwise act on HEIGHT once stacked. */
+@media (min-width: 1025px) {
+  .project-thread-row {
+    gap: var(--gap-group);
+  }
+
+  .project-thread-row .project-block-right {
+    flex: 0 0 56%;
+    width: auto;
+  }
 }
