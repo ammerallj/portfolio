@@ -158,7 +158,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@200;400;500;700&family=Inter:wght@400..700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=0e729ed4" />
+  <link rel="stylesheet" href="style.css?v=fde830f5" />
   <!-- The landing field's JPEG fallback — PHONES ONLY since 2026-09, so the
        preload is gated to match the <picture> in <main>. Without the media
        attribute this fetches 1.4MB on every desktop and tablet visit for an
@@ -425,7 +425,7 @@
                They keep data-href too: the cursor glow reads it for the card's
                colour. -->
           <li class="work-card" data-reveal-group>
-            <a class="work-card-link" href="work/facebook-messaging-draft.html" data-href="work/messaging.html" data-reveal>
+            <a class="work-card-link" href="work/facebook-messaging-draft.html" data-href="work/messaging.html" data-tip data-reveal>
               <!-- The art's own ratio: two phone screens, near-square, so a 5:4
                    frame would crop their status and nav bars. -->
               <div class="work-card-media" style="--media-ratio: 1866 / 1846; --media-shift: 8px; --media-fit: contain">
@@ -438,6 +438,7 @@
                   <p class="work-card-description">Defining how conversations adapt to intent and context.</p>
                 </div>
               </div>
+              <span class="project-bento-caption work-card-tip" aria-hidden="true">Click to learn more&nbsp;&#8599;</span>
             </a>
           </li>
 
@@ -678,6 +679,6 @@
     </button>
   </div>
   <script src="js/jennaos.js?v=23" defer></script>
-  <script src="js/main.js?v=ca28a2e7" defer></script>
+  <script src="js/main.js?v=27cb01bc" defer></script>
 </body>
 </html>
