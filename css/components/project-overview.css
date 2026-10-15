@@ -1283,6 +1283,11 @@ a.intro-bar-name {
   line-height: 1.2;
   letter-spacing: -0.02em;
   color: var(--color-text);
+  /* Breathing room, centred between the sections around it: above it sits the
+     previous section's bottom padding + this section's top padding (2 × gap),
+     below it only the row's own top margin (1 × gap), so the extra goes
+     1 × above and 2 × below and both sides land on 3 × --gap-section. */
+  padding: var(--gap-section) 0 calc(var(--gap-section) * 2);
 }
 
 .project-decisions {
