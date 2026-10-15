@@ -11,7 +11,7 @@
 const navWork = document.getElementById('nav-work');
 
 // Clicking the name/logo smooth-scrolls back to the top (hero). On the project
-// pages the name is a real link home (href="../index.html"), so only hijack the
+// pages the name is a real link home (href="../"), so only hijack the
 // click when it's the homepage's own in-page "#" anchor.
 // Prefer Lenis when it's running so the motion matches the rest of the page.
 const siteName = document.getElementById('site-name');
