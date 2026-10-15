@@ -1482,11 +1482,8 @@ a.intro-bar-name {
   color: var(--color-text-70);
 }
 
-/* A single paragraph under the Solution mosaic: full width, one --gap-group below
-   it (the same step the mosaic takes under the statement). */
-.project-solution-text {
-  margin-top: var(--gap-group);
-}
+/* A single paragraph that closes the Solution as a section of its own (the
+   .page-section padding supplies the breathing room), full width of the column. */
 
 .project-solution-text p {
   max-width: none;
