@@ -1355,11 +1355,13 @@ a.intro-bar-name {
 
 /* The profile card sits at the BOTTOM of the tile and its white continues past the
    bottom edge: a white wrapper (it carries the halo) is taller than the image, and
-   the tile crops it. The image is cut at 642 of 656px so its own grey bottom
+   the tile crops it. The image is cut at 736 of 750px so its own grey bottom
    outline never shows as a seam inside the white. */
 .entry-col--3 {
   align-self: flex-end;
-  margin-bottom: -10cqw;
+  /* image bottom sits 4cqw above the tile's bottom edge (wrapper padding 12cqw
+     minus this 8cqw) */
+  margin-bottom: -8cqw;
 }
 
 .entry-card--hang {
@@ -1369,7 +1371,7 @@ a.intro-bar-name {
 }
 
 .entry-card--hang .entry-card--profile {
-  aspect-ratio: 756 / 642;
+  aspect-ratio: 756 / 736;
   object-fit: cover;
   object-position: center top;
   box-shadow: none;
