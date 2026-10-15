@@ -1286,7 +1286,7 @@ a.intro-bar-name {
 /* A portrait artifact (a phone) in the Problem column: the frame takes the
    image's own ratio so nothing is cropped, instead of the default 4:3. */
 .project-problem-artifact--portrait {
-  max-width: 320px;
+  max-width: 360px;
 }
 
 .project-problem-artifact--portrait .project-bento-media {
