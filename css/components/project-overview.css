@@ -1588,25 +1588,26 @@ a.intro-bar-name {
 
 /* CROPPED DIAGRAM VIDEO: the animation has a wide margin of glow around the diagram
    (the diagram itself fills only the middle ~38% x 49% of the frame), so the frame
-   shows just a tight window on it: x 26-74%, y 16-72.5% of the video. The video is
-   scaled to 208.3% of the frame's width and shifted to that window, so the diagram
-   is ~2.1x larger in the same column. All offsets are percentages of the frame's
-   WIDTH (margins resolve against it), so the crop holds at every size. */
+   shows just a tight window on it: x 28.5-71.5%, y 16-72.5% of the video (the
+   phones' outer edges sit at ~31% and ~69%, so ~2.5% of margin either side). The
+   video is scaled to 232.6% of the frame's width and shifted to that window. All
+   offsets are percentages of the frame's WIDTH (margins resolve against it), so
+   the crop holds at every size. */
 .project-diagram--crop {
   position: relative;
-  aspect-ratio: 100 / 97.2;
+  aspect-ratio: 100 / 108.5;
 }
 
 .project-diagram--crop video {
-  width: 208.333%;
+  width: 232.558%;
   max-width: none;
   height: auto;
-  margin: -27.54% 0 0 -54.167%;
+  margin: -30.74% 0 0 -66.279%;
 }
 
 /* A WIDER right column for the routing row (desktop only: below 1025 the row stacks
    and the column is full width anyway). The diagram is the star of this row, so it
-   takes 64% of the row (706px at 1440, up from the shared 542px column) and the gap
+   takes 56% of the row (618px at 1440, up from the shared 542px column) and the gap
    between text and image drops from the 186px column gap to one --gap-group (60px).
    Scoped to 1025+ because flex-basis would otherwise act on HEIGHT once stacked. */
 @media (min-width: 1025px) {
@@ -1615,7 +1616,7 @@ a.intro-bar-name {
   }
 
   .project-thread-row .project-block-right {
-    flex: 0 0 64%;
+    flex: 0 0 56%;
     width: auto;
   }
 }
