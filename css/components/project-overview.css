@@ -1352,10 +1352,10 @@ a.intro-bar-name {
 /* HANGING CARDS: the story and Marketplace start ABOVE the tile's top edge, so the
    tile crops them (no top border, no top shadow): the bottom of each card, where
    the composer and Send are, is what stays in view. The negative margin is the
-   amount cut off: story 15.5cqw (~27% of its height), Marketplace 3cqw (~6%), which
+   amount cut off: story 15.5cqw (~27% of its height), Marketplace 10.8cqw (~23%), which
    leaves the same ~8cqw of space under the last card in both columns. */
 .project-entry-collage .entry-card--story { margin-top: -15.5cqw; }
-.project-entry-collage .entry-card--marketplace { margin-top: -3cqw; }
+.project-entry-collage .entry-card--marketplace { margin-top: -10.8cqw; }
 
 /* The profile card sits at the BOTTOM of the tile and its white continues past the
    bottom edge: a white wrapper (it carries the halo) is taller than the image, and
