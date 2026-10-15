@@ -1116,6 +1116,7 @@ a.intro-bar-name {
   opacity: 0;
   transform: translate(var(--tx, 8px), var(--ty, 8px));
   pointer-events: none;
+  will-change: transform, opacity;
   transition: opacity 0.2s ease;
 }
 

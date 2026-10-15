@@ -2934,38 +2934,69 @@ function initArtifactVideos() {
 }
 // ============================================================
 // BENTO TOOLTIPS: each mosaic tile's caption (`.project-bento-caption`) is a
-// tooltip that follows the cursor while the tile is hovered. It is placed just
-// below-right of the pointer, flipped to the other side of it when that would
-// run past the tile's right or bottom edge, and clamped so it always stays inside
-// the tile (the tile clips it). Position goes through --tx / --ty (a transform, so
-// no layout work per move). Touch has no cursor: the CSS shows a static toast.
+// tooltip that follows the cursor while the tile is hovered. The TARGET is just
+// below-right of the pointer, flipped to the other side of it when that would run
+// past the tile's right or bottom edge, and clamped so it always stays inside the
+// tile (the tile clips it). The tooltip does not jump to the target: each frame
+// it eases toward it (exponential smoothing, TAU ms time constant, so it feels the
+// same at 60 and 120Hz) — that is what makes the motion glide instead of stepping
+// with every mouse event, and a flip to the other side of the cursor slides across
+// rather than snapping. On entering a tile it STARTS at the target (no sliding in
+// from wherever it was last). Position goes through --tx / --ty (a transform: no
+// layout work per frame). Reduced motion: no easing, it tracks the pointer
+// directly. Touch has no cursor: the CSS shows a static toast.
 // ============================================================
 function initBentoTooltips() {
   if (!window.matchMedia('(hover: hover)').matches) return;
   const GAP_X = 14, GAP_Y = 18, PAD = 8;
+  const TAU = 85; // ms; larger = floatier, smaller = tighter
   document.querySelectorAll('.project-bento-tile').forEach((tile) => {
     const cap = tile.querySelector('.project-bento-caption');
     if (!cap) return;
-    let raf = 0, px = 0, py = 0;
-    const place = () => {
-      raf = 0;
+    let raf = 0, last = 0;
+    let px = 0, py = 0;               // pointer, viewport px
+    let tx = 0, ty = 0;               // target, tile px
+    let cx = 0, cy = 0;               // current (what is painted), tile px
+    const target = () => {
       const t = tile.getBoundingClientRect();
       const w = cap.offsetWidth, h = cap.offsetHeight;
       let x = px - t.left + GAP_X;
       let y = py - t.top + GAP_Y;
       if (x + w > t.width - PAD) x = px - t.left - GAP_X - w;   // flip left of the cursor
       if (y + h > t.height - PAD) y = py - t.top - GAP_Y - h;   // flip above the cursor
-      x = Math.min(Math.max(PAD, x), Math.max(PAD, t.width - w - PAD));
-      y = Math.min(Math.max(PAD, y), Math.max(PAD, t.height - h - PAD));
-      cap.style.setProperty('--tx', x + 'px');
-      cap.style.setProperty('--ty', y + 'px');
+      tx = Math.min(Math.max(PAD, x), Math.max(PAD, t.width - w - PAD));
+      ty = Math.min(Math.max(PAD, y), Math.max(PAD, t.height - h - PAD));
     };
-    const move = (e) => {
+    const paint = () => {
+      cap.style.setProperty('--tx', cx.toFixed(2) + 'px');
+      cap.style.setProperty('--ty', cy.toFixed(2) + 'px');
+    };
+    const tick = (now) => {
+      raf = 0;
+      const dt = Math.min(64, last ? now - last : 16);
+      last = now;
+      const k = reducedMotion.matches ? 1 : 1 - Math.exp(-dt / TAU);
+      cx += (tx - cx) * k;
+      cy += (ty - cy) * k;
+      paint();
+      if (Math.abs(tx - cx) > 0.05 || Math.abs(ty - cy) > 0.05) {
+        raf = requestAnimationFrame(tick);
+      } else {
+        cx = tx; cy = ty; paint(); last = 0;
+      }
+    };
+    const kick = () => { if (!raf) raf = requestAnimationFrame(tick); };
+    tile.addEventListener('pointerenter', (e) => {
       px = e.clientX; py = e.clientY;
-      if (!raf) raf = requestAnimationFrame(place);
-    };
-    tile.addEventListener('pointerenter', move);
-    tile.addEventListener('pointermove', move);
+      target();
+      cx = tx; cy = ty;           // start AT the pointer, don't slide in
+      paint();
+    });
+    tile.addEventListener('pointermove', (e) => {
+      px = e.clientX; py = e.clientY;
+      target();
+      kick();
+    });
   });
 }
 try {
