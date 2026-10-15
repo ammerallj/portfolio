@@ -1260,7 +1260,8 @@ a.intro-bar-name {
 
 .case-closing-text {
   margin: 0;
-  max-width: var(--width-right-column);
+  max-width: none; /* full width: one line wherever it fits */
+  text-wrap: balance; /* and where it must wrap (phones), balanced, never a lone word */
   font-size: var(--size-lg, 1.125rem);
   line-height: 1.4;
   color: var(--color-text-70);
