@@ -1603,3 +1603,19 @@ a.intro-bar-name {
   height: auto;
   margin: -27.54% 0 0 -54.167%;
 }
+
+/* A WIDER right column for the routing row (desktop only: below 1025 the row stacks
+   and the column is full width anyway). The diagram is the star of this row, so it
+   takes 64% of the row (706px at 1440, up from the shared 542px column) and the gap
+   between text and image drops from the 186px column gap to one --gap-group (60px).
+   Scoped to 1025+ because flex-basis would otherwise act on HEIGHT once stacked. */
+@media (min-width: 1025px) {
+  .project-thread-row {
+    gap: var(--gap-group);
+  }
+
+  .project-thread-row .project-block-right {
+    flex: 0 0 64%;
+    width: auto;
+  }
+}
