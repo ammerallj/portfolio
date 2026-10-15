@@ -1091,10 +1091,53 @@ a.intro-bar-name {
 }
 
 .project-bento-caption {
+  /* A TOOLTIP, not a line of text under the card: the caption rides over the bottom
+     of the media on a slightly opaque black, blurred "toast" (the same family as the
+     post-send toast in the artwork) and fades in while the tile is hovered. It stays
+     in the DOM (opacity, not display) so screen readers always read it. Where there
+     is no hover (touch) it is simply shown. */
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  z-index: 2;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.6);
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  backdrop-filter: blur(16px) saturate(1.2);
+  color: #fff;
   font-size: var(--size-sm, 14px);
   line-height: 1.4;
-  color: var(--color-text-70);
   text-align: center;
+  opacity: 0;
+  transform: translateY(6px);
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.project-bento-tile {
+  position: relative;
+}
+
+.project-bento-tile:hover .project-bento-caption,
+.project-bento-tile:focus-within .project-bento-caption {
+  opacity: 1;
+  transform: none;
+}
+
+@media (hover: none) {
+  .project-bento-caption {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .project-bento-caption {
+    transition: none;
+    transform: none;
+  }
 }
 
 
