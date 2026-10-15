@@ -256,7 +256,7 @@ html.is-hero-stacked {
      therefore starts on the grid's third column line (x = 280.67 at 1440, 254 at
      1280), and the 77px rail leaves a 148px gap at 1440. It was a flat 168px,
      which put the content between column lines. */
-  body:has(.section-pills--rail) main > section:not(.case-closing-section) {
+  body:has(.section-pills--rail) main > section:not(.case-closing-section):not(.additional-work) {
     padding-left: calc((100vw - 332px) / 6 + 40px);
   }
 
@@ -570,6 +570,8 @@ html.is-hero-stacked {
    Work imagery shrinks; the hero headline and intro paragraph go full width.
    ========================================================================== */
 @media (max-width: 768px) {
+  .additional-work-grid { grid-template-columns: minmax(0, 1fr); }
+
   .project-decisions { grid-template-columns: minmax(0, 1fr); }
 
   .project-facts {
@@ -584,6 +586,7 @@ html.is-hero-stacked {
   .project-bento-tile,
   .project-bento-tile--half { grid-column: span 1; }
   .project-bento-tile--wide,
+  .project-bento-tile--solo,
   .project-bento-tile--full { grid-column: 1 / -1; }
   .project-bento-tile--tall { grid-row: auto; }
   .project-bento-tile--tall .project-bento-media { aspect-ratio: 4 / 3; min-height: 0; }

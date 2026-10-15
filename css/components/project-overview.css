@@ -1065,6 +1065,9 @@ a.intro-bar-name {
 .project-bento-tile--half { grid-column: span 3; }
 .project-bento-tile--full { grid-column: 1 / -1; }
 .project-bento-tile--tall { grid-row: span 2; }
+/* (--solo has no rule here: it only acts in responsive.css, where a small tile takes
+   a whole row once the grid drops to two columns at 768, so an odd count of tiles
+   never strands one beside an empty cell.) */
 
 .project-bento-media {
   flex: 1 1 auto;
@@ -1088,9 +1091,65 @@ a.intro-bar-name {
 }
 
 .project-bento-caption {
+  /* A TOOLTIP that follows the cursor (initBentoTooltips, js/main.js): a slightly
+     opaque black, blurred "toast" (the post-send toast's family), only as wide as
+     its text (capped, so a long caption wraps instead of running across the
+     tile) and kept inside the tile. Hidden until the tile is hovered; kept in the
+     DOM (opacity, not display) so screen readers always read it. JS writes its
+     position as --tx / --ty; with no JS it parks at the tile's top-left. Where
+     there is no hover (touch) it is a static toast along the bottom instead. */
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 2;
+  width: max-content;
+  max-width: calc(100% - 16px); /* as wide as its text, never wider than the tile */
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.6);
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  backdrop-filter: blur(16px) saturate(1.2);
+  color: #fff;
   font-size: var(--size-sm, 14px);
   line-height: 1.4;
-  color: var(--color-text-70);
+  text-align: left;
+  opacity: 0;
+  transform: translate(var(--tx, 8px), var(--ty, 8px));
+  pointer-events: none;
+  will-change: transform, opacity;
+  transition: opacity 0.2s ease;
+}
+
+.project-bento-tile {
+  position: relative;
+}
+
+.project-bento-tile:hover .project-bento-caption,
+.project-bento-tile:focus-within .project-bento-caption {
+  opacity: 1;
+}
+
+@media (hover: none) {
+  /* No cursor to follow: a static toast along the bottom, always shown. */
+  .project-bento-caption {
+    left: 12px;
+    right: 12px;
+    top: auto;
+    bottom: 12px;
+    width: auto;
+    max-width: none;
+    padding: 10px 14px;
+    border-radius: 12px;
+    text-align: center;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .project-bento-caption {
+    transition: none;
+  }
 }
 
 
@@ -1201,7 +1260,8 @@ a.intro-bar-name {
 
 .case-closing-text {
   margin: 0;
-  max-width: var(--width-right-column);
+  max-width: none; /* full width: one line wherever it fits */
+  text-wrap: balance; /* and where it must wrap (phones), balanced, never a lone word */
   font-size: var(--size-lg, 1.125rem);
   line-height: 1.4;
   color: var(--color-text-70);
@@ -1229,7 +1289,7 @@ a.intro-bar-name {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--gap-group) var(--gap-content);
-  margin: var(--gap-group) 0 var(--gap-group);
+  margin: var(--gap-group) 0 0;
   padding: 0;
 }
 
@@ -1240,7 +1300,9 @@ a.intro-bar-name {
   border-bottom: none;
 }
 
-.project-statement + .project-decisions {
+/* Order on the page: statement, mosaic (bento), then the decisions: each block
+   sits one --gap-group (60px) under the one above it. */
+.project-bento {
   margin-top: var(--gap-group);
 }
 
@@ -1290,7 +1352,7 @@ a.intro-bar-name {
 }
 
 .project-problem-artifact--portrait .project-bento-media {
-  aspect-ratio: 834 / 1450;
+  aspect-ratio: 1153 / 2000;
 }
 
 /* Centre the two columns on each other (the text beside a tall artifact sits at
@@ -1298,4 +1360,227 @@ a.intro-bar-name {
    columns are side by side; stacked, they are full-width blocks either way. */
 .project-block--center {
   align-items: center;
+}
+
+
+/* ------------------------------------------------------------
+   ENTRY-POINT COLLAGE — the wide bento tile on the Facebook Messaging draft:
+   six UI fragments (places a message can start) in three staggered columns on
+   #ECECEC, each with the ambient halo (0 0 50px 6px at 18%, no direction).
+   Everything is sized in container-query units off the tile's width, so the
+   composition scales as one picture and never reflows; the tile keeps overflow
+   hidden. The frame is taller than the default 16:9 to give the stack room.
+   ------------------------------------------------------------ */
+.project-bento-tile--wide .project-entry-collage {
+  aspect-ratio: 729 / 500;
+  background-color: #ececec;
+  container-type: inline-size;
+  display: flex;
+  justify-content: center;
+  /* the story and Marketplace columns hang from the top edge; the profile column
+     centres itself (below) so the three stagger against each other */
+  align-items: flex-start;
+  /* percentages, not cqw: a container's OWN cqw resolve against the container
+     above it (here the viewport), only its children see this one */
+  gap: 3.25%;
+  padding: 0;
+  overflow: hidden;
+}
+
+.entry-col {
+  width: 29cqw;
+  display: flex;
+  flex-direction: column;
+  gap: 3.25cqw;
+  flex: 0 0 auto;
+}
+
+
+.project-entry-collage .entry-card {
+  display: block;
+  width: 100%;
+  /* the global img reset caps images at their container; the cards set their own
+     widths (below) and may be wider than their column */
+  max-width: none;
+  height: auto;
+  border-radius: 8px;
+  /* ambient: an even halo all round */
+  box-shadow: 0 0 50px 6px rgba(0, 0, 0, 0.18);
+}
+
+/* HANGING CARDS: the story and Marketplace start ABOVE the tile's top edge, so the
+   tile crops them (no top border, no top shadow): the bottom of each card, where
+   the composer and Send are, is what stays in view. The negative margin is the
+   amount cut off: story 15.5cqw (~27% of its height), Marketplace 10.8cqw (~23%), which
+   leaves the same ~8cqw of space under the last card in both columns. */
+.project-entry-collage .entry-card--story { margin-top: -15.5cqw; }
+.project-entry-collage .entry-card--marketplace { margin-top: -10.8cqw; }
+
+/* The profile card sits at the BOTTOM of the tile and its white continues past the
+   bottom edge: a white wrapper (it carries the halo) is taller than the image, and
+   the tile crops it. The image is cut at 736 of 750px so its own grey bottom
+   outline never shows as a seam inside the white. */
+.entry-col--3 {
+  align-self: flex-end;
+  /* image bottom sits 2.5cqw above the tile's bottom edge (wrapper padding 12cqw
+     minus this 9.5cqw) */
+  margin-bottom: -9.5cqw;
+}
+
+.project-entry-collage .entry-card--hang {
+  background: #fff;
+  border-radius: 8px 8px 0 0;
+  padding-bottom: 12cqw;
+}
+
+.project-entry-collage .entry-card--hang .entry-card--profile {
+  aspect-ratio: 756 / 736;
+  object-fit: cover;
+  object-position: center top;
+  box-shadow: none;
+  border-radius: 8px 8px 0 0;
+}
+
+/* EVEN SPACING: one gap, 3.25 units, between every pair of neighbouring cards AND
+   on the left and right: 3 columns of 29cqw + 4 gaps of 3.25 = 100, so the side
+   padding equals the space between columns equals the space between a column's
+   cards. Nothing overlaps or is nudged. The space is meant: the examples hang from the tile's edges (story
+   and Marketplace from the top, the Profile from the bottom) and breathe between. */
+
+
+/* A phone video shown as its TOP in a 4:3 tile (the lightweight-thread sheet): the
+   video is scaled to ~108% of the tile's width and pulled up so the phone's top sits
+   ~12% down the tile, the way the still crop was framed. Percent margins resolve
+   against the tile's width, so it holds at every tile size. */
+.project-bento-media .project-bento-video--top {
+  width: 108.5%;
+  max-width: none;
+  height: auto;
+  margin: -10% 0 0 -4.2%;
+}
+
+
+/* ------------------------------------------------------------
+   WIDE CARD — a full-width (16:9) demo video under the masthead, with a centred
+   one-line caption beneath it in the site's small caption type (the same
+   --size-sm / 70% ink as .project-bento-caption, centred). The frame is the
+   bento's rounded grey frame at the same 24px radius; the video fills it.
+   ------------------------------------------------------------ */
+.project-wide-card {
+  margin: 0; /* the masthead's own column gap (--gap-group) already spaces it */
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.project-wide-card-media {
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: 24px;
+  background-color: #e8e8e8;
+}
+
+.project-wide-card-media video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.project-wide-card-caption {
+  margin: 0;
+  text-align: center;
+  font-size: var(--size-sm, 14px);
+  line-height: 1.4;
+  color: var(--color-text-70);
+}
+
+/* The Solution's closing row: the framing paragraph (left) beside the thread-types
+   diagram (right), centred on each other: the Problem section's two-column
+   structure, flipped. A section step (--gap-section, 96px) above it. The
+   diagram fills the right column, which is the shared 542px column. */
+.project-thread-row {
+  margin-top: var(--gap-section);
+}
+
+.project-thread-row .project-diagram {
+  margin: 0;
+}
+
+.project-thread-row .about-body p {
+  max-width: none;
+}
+
+/* A full-width diagram (the lightweight vs full thread placeholder under the
+   Solution mosaic): the image fills the column and takes the bento's 24px radius. */
+.project-diagram {
+  margin: var(--gap-group) 0 0;
+  overflow: hidden;
+  border-radius: 24px;
+}
+
+.project-diagram img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* NUMBERED LIST: the Solution's three decisions as a plain 1. / 2. / 3. list under
+   their lead-in sentence: the browser's own decimal markers, set in the body size
+   and weight, no badge. */
+.project-numbered {
+  list-style: decimal;
+  margin: var(--gap-content) 0 0;
+  padding: 0 0 0 1.5em;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.project-numbered li {
+  display: list-item;
+  padding-left: 0.25em;
+  font-size: var(--size-lg);
+  letter-spacing: -0.02em;
+  line-height: 1.4;
+  color: var(--color-text);
+}
+
+/* Solution order: statement, the routing-rule row (text + diagram), then the mosaic
+   as the closing artifact of the case study: each a section step apart. */
+.project-thread-row + .project-bento {
+  margin-top: var(--gap-section);
+}
+
+
+/* ------------------------------------------------------------
+   ADDITIONAL WORK — the closing block of a case study: an h2 headline over two of the homepage's Work cards at EQUAL width (a plain two-column grid on
+   the same --work-gap; deliberately not the homepage's masonry: two cards of one
+   width AND one height, side by side). It runs the full page
+   width (not inset for the rail). One column at 768 (responsive.css).
+   ------------------------------------------------------------ */
+.additional-work-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: var(--work-gap);
+  row-gap: var(--work-gap);
+  align-items: stretch;
+}
+
+/* Equal width AND equal height: both cards use the same media ratio (3:2, set
+   inline) and the card fills its grid cell, so a line of text more or less can't
+   make one taller than the other. */
+.additional-work-grid .work-card,
+.additional-work-grid .work-card-link {
+  height: 100%;
+}
+
+/* The headline is a real h2 at the case-study chapter-heading size (the same token
+   as Problem / Solution: 40 -> 36 -> 32), not the small uppercase eyebrow. */
+.additional-work .section-title {
+  margin: 0 0 var(--gap-group);
+  font-size: var(--project-block-title-size);
 }

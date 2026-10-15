@@ -2890,6 +2890,127 @@ function initNextCaseField() {
     card.addEventListener('focusout', hide);
   });
 }
+// ============================================================
+// ARTIFACT VIDEOS (`video.project-bento-video`): a muted demo inside an
+// artifact frame (looping, or once per view with `data-play-once`). It plays only while at least 40% of it is on screen and pauses
+// when it leaves, so an off-screen clip costs nothing. Under reduced motion it
+// never autoplays — the poster shows and the native controls appear instead, so
+// the reader starts it themselves. Without JS it is simply the poster frame.
+// ============================================================
+function initArtifactVideos() {
+  const videos = document.querySelectorAll('video.project-bento-video');
+  if (!videos.length) return;
+  if (reducedMotion.matches || !('IntersectionObserver' in window)) {
+    videos.forEach((v) => { v.controls = true; });
+    return;
+  }
+  // Observe the video's FRAME, not the video: a video can be larger than the frame
+  // that crops it (the lightweight-thread tile shows only the top ~37% of its
+  // video), and the video's own visible ratio would never reach the threshold.
+  const byFrame = new Map();
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((e) => {
+      const v = byFrame.get(e.target);
+      if (!v) return;
+      // data-play-once: no loop. Each time the frame scrolls into view the clip
+      // starts from the top and plays through once; leaving rewinds it, so
+      // scrolling away and back plays it once more.
+      const once = v.hasAttribute('data-play-once');
+      if (e.isIntersecting) {
+        if (once) v.currentTime = 0;
+        const p = v.play();
+        if (p && p.catch) p.catch(() => {});
+      } else {
+        v.pause();
+        if (once) v.currentTime = 0;
+      }
+    });
+  }, { threshold: 0.4 });
+  videos.forEach((v) => {
+    const frame = v.parentElement || v;
+    byFrame.set(frame, v);
+    io.observe(frame);
+  });
+}
+// ============================================================
+// BENTO TOOLTIPS: each mosaic tile's caption (`.project-bento-caption`) is a
+// tooltip that follows the cursor while the tile is hovered. The TARGET is just
+// below-right of the pointer, flipped to the other side of it when that would run
+// past the tile's right or bottom edge, and clamped so it always stays inside the
+// tile (the tile clips it). The tooltip does not jump to the target: each frame
+// it eases toward it (exponential smoothing, TAU ms time constant, so it feels the
+// same at 60 and 120Hz) — that is what makes the motion glide instead of stepping
+// with every mouse event, and a flip to the other side of the cursor slides across
+// rather than snapping. On entering a tile it STARTS at the target (no sliding in
+// from wherever it was last). Position goes through --tx / --ty (a transform: no
+// layout work per frame). Reduced motion: no easing, it tracks the pointer
+// directly. Touch has no cursor: the CSS shows a static toast.
+// ============================================================
+function initBentoTooltips() {
+  if (!window.matchMedia('(hover: hover)').matches) return;
+  const GAP_X = 14, GAP_Y = 18, PAD = 8;
+  const TAU = 85; // ms; larger = floatier, smaller = tighter
+  document.querySelectorAll('.project-bento-tile').forEach((tile) => {
+    const cap = tile.querySelector('.project-bento-caption');
+    if (!cap) return;
+    let raf = 0, last = 0;
+    let px = 0, py = 0;               // pointer, viewport px
+    let tx = 0, ty = 0;               // target, tile px
+    let cx = 0, cy = 0;               // current (what is painted), tile px
+    const target = () => {
+      const t = tile.getBoundingClientRect();
+      const w = cap.offsetWidth, h = cap.offsetHeight;
+      let x = px - t.left + GAP_X;
+      let y = py - t.top + GAP_Y;
+      if (x + w > t.width - PAD) x = px - t.left - GAP_X - w;   // flip left of the cursor
+      if (y + h > t.height - PAD) y = py - t.top - GAP_Y - h;   // flip above the cursor
+      tx = Math.min(Math.max(PAD, x), Math.max(PAD, t.width - w - PAD));
+      ty = Math.min(Math.max(PAD, y), Math.max(PAD, t.height - h - PAD));
+    };
+    const paint = () => {
+      cap.style.setProperty('--tx', cx.toFixed(2) + 'px');
+      cap.style.setProperty('--ty', cy.toFixed(2) + 'px');
+    };
+    const tick = (now) => {
+      raf = 0;
+      const dt = Math.min(64, last ? now - last : 16);
+      last = now;
+      const k = reducedMotion.matches ? 1 : 1 - Math.exp(-dt / TAU);
+      cx += (tx - cx) * k;
+      cy += (ty - cy) * k;
+      paint();
+      if (Math.abs(tx - cx) > 0.05 || Math.abs(ty - cy) > 0.05) {
+        raf = requestAnimationFrame(tick);
+      } else {
+        cx = tx; cy = ty; paint(); last = 0;
+      }
+    };
+    const kick = () => { if (!raf) raf = requestAnimationFrame(tick); };
+    tile.addEventListener('pointerenter', (e) => {
+      px = e.clientX; py = e.clientY;
+      target();
+      cx = tx; cy = ty;           // start AT the pointer, don't slide in
+      paint();
+    });
+    tile.addEventListener('pointermove', (e) => {
+      px = e.clientX; py = e.clientY;
+      target();
+      kick();
+    });
+  });
+}
+try {
+  initBentoTooltips();
+} catch (e) {
+  console.warn('Bento tooltips unavailable:', e);
+}
+
+try {
+  initArtifactVideos();
+} catch (e) {
+  console.warn('Artifact videos unavailable:', e);
+}
+
 try {
   initNextCaseField();
 } catch (e) {
@@ -4206,7 +4327,12 @@ if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
   const cursorGlow = document.createElement('div');
   cursorGlow.className = 'cursor-glow';
   cursorGlow.setAttribute('aria-hidden', 'true');
-  document.body.appendChild(cursorGlow);
+  // A page can opt out of the orb with <html data-no-cursor-orb> (the case-study
+  // pages do: the page is full of product UI the orb would sit over). The element
+  // is still created so the handlers below stay unchanged; it is just never added.
+  if (!document.documentElement.hasAttribute('data-no-cursor-orb')) {
+    document.body.appendChild(cursorGlow);
+  }
 
   document.addEventListener('mousemove', (e) => {
     cursorGlow.style.left = e.clientX + 'px';
