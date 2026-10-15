@@ -1387,3 +1387,15 @@ a.intro-bar-name {
    padding equals the space between columns equals the space between a column's
    cards. Nothing overlaps or is nudged. The space is meant: the examples hang from the tile's edges (story
    and Marketplace from the top, the Profile from the bottom) and breathe between. */
+
+
+/* A phone video shown as its TOP in a 4:3 tile (the lightweight-thread sheet): the
+   video is scaled to ~108% of the tile's width and pulled up so the phone's top sits
+   ~12% down the tile, the way the still crop was framed. Percent margins resolve
+   against the tile's width, so it holds at every tile size. */
+.project-bento-media .project-bento-video--top {
+  width: 108.5%;
+  max-width: none;
+  height: auto;
+  margin: -10% 0 0 -4.2%;
+}
