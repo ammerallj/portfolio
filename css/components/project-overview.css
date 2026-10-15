@@ -1482,19 +1482,20 @@ a.intro-bar-name {
   color: var(--color-text-70);
 }
 
-/* The paragraph under the Solution mosaic: full width, with a section step
-   (--gap-section, 96px) of extra padding above and below it. The diagram's own
-   top margin is zeroed after it so the space below is that one 96px, not two. */
-.project-solution-text {
-  padding-block: var(--gap-section);
+/* The Solution's closing row: the framing paragraph (left) beside the thread-types
+   diagram (right), centred on each other: the Problem section's two-column
+   structure, flipped. A section step (--gap-section, 96px) above it. The
+   diagram fills the right column, which is the shared 542px column. */
+.project-thread-row {
+  margin-top: var(--gap-section);
 }
 
-.project-solution-text p {
+.project-thread-row .project-diagram {
+  margin: 0;
+}
+
+.project-thread-row .about-body p {
   max-width: none;
-}
-
-.project-solution-text + .project-diagram {
-  margin-top: 0;
 }
 
 /* A full-width diagram (the lightweight vs full thread placeholder under the

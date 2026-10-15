@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@200;400;500;700&family=Inter:wght@400..700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../style.css?v=138a0bd9" />
+  <link rel="stylesheet" href="../style.css?v=85d3fb91" />
   <script>
     (function () {
       try {
@@ -216,22 +216,22 @@
           </figure>
         </div>
 
-        <!-- The framing paragraph sits directly under the mosaic, with extra padding
-             above and below (a section step, 96px), then the thread-types diagram. -->
-        <div class="project-solution-text" data-reveal-group>
-          <div class="about-body" data-reveal data-reveal-order="0">
-            <p>I focused the model around three decisions: how people re-entered a conversation after Send, when messaging should stay lightweight versus open a full thread, and how entry points should map to a predictable destination.</p>
+        <!-- THE FRAMING PARAGRAPH + THE THREAD-TYPES DIAGRAM as a two-column row (the
+             Problem section's structure, flipped: text left, image right, the two
+             centred on each other). The diagram's two phones are EMPTY PLACEHOLDERS,
+             meant to be replaced by the real lightweight-thread and full-thread
+             recordings. -->
+        <div class="project-block project-block--center project-thread-row" data-reveal-group>
+          <div class="project-block-left">
+            <div class="about-body" data-reveal data-reveal-order="0">
+              <p>I focused the model around three decisions: how people re-entered a conversation after Send, when messaging should stay lightweight versus open a full thread, and how entry points should map to a predictable destination.</p>
+            </div>
           </div>
-        </div>
-
-        <!-- THREAD TYPES — a full-width diagram: one messaging entry point branching
-             to a lightweight thread and a full thread. The two phones are EMPTY
-             PLACEHOLDERS for now; they are meant to be replaced by the real
-             lightweight-thread and full-thread recordings. -->
-        <div data-reveal-group>
-        <figure class="project-diagram" data-reveal data-reveal-order="0">
-          <img src="../images/messaging-thread-types.png" width="748" height="844" alt="A diagram: a Messaging entry point branches to two phones, a Lightweight thread on the left and a Full thread on the right. The phones are blank placeholders." loading="lazy" />
-        </figure>
+          <div class="project-block-right" data-reveal data-reveal-order="1">
+            <figure class="project-diagram">
+              <img src="../images/messaging-thread-types.png" width="748" height="844" alt="A diagram: a Messaging entry point branches to two phones, a Lightweight thread on the left and a Full thread on the right. The phones are blank placeholders." loading="lazy" />
+            </figure>
+          </div>
         </div>
       </div>
     </section>
