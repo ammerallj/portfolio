@@ -1318,12 +1318,14 @@ a.intro-bar-name {
   container-type: inline-size;
   display: flex;
   justify-content: center;
-  /* centred, so the columns of different heights stagger against each other */
-  align-items: center;
+  /* the story and Marketplace columns hang from the top edge; the profile column
+     centres itself (below) so the three stagger against each other */
+  align-items: flex-start;
   /* percentages, not cqw: a container's OWN cqw resolve against the container
      above it (here the viewport), only its children see this one */
   gap: 4%;
-  padding: 4% 0;
+  padding: 0;
+  overflow: hidden;
 }
 
 .entry-col {
@@ -1344,17 +1346,11 @@ a.intro-bar-name {
   box-shadow: 0 0 50px 6px rgba(0, 0, 0, 0.18);
 }
 
-/* Cropped cards: the part that matters (the composer, the Send bar) is at the
-   BOTTOM, so the top of the tall cards is cut off and the bottom kept. The ratio
-   states the visible slice (story: bottom 72%, marketplace: bottom 75%). */
-.entry-card--story {
-  aspect-ratio: 754 / 1070;
-  object-fit: cover;
-  object-position: center bottom;
-}
+/* HANGING CARDS: the story and Marketplace start ABOVE the tile's top edge, so the
+   tile crops them (no top border, no top shadow): the bottom of each card, where
+   the composer and Send are, is what stays in view. The negative margin is the
+   amount cut off: story 12cqw (~25% of its height), Marketplace 6.5cqw (~14%). */
+.entry-card--story { margin-top: -12cqw; }
+.entry-card--marketplace { margin-top: -6.5cqw; }
 
-.entry-card--marketplace {
-  aspect-ratio: 756 / 930;
-  object-fit: cover;
-  object-position: center bottom;
-}
+.entry-col--3 { align-self: center; }
