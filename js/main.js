@@ -2904,9 +2904,14 @@ function initArtifactVideos() {
     videos.forEach((v) => { v.controls = true; });
     return;
   }
+  // Observe the video's FRAME, not the video: a video can be larger than the frame
+  // that crops it (the lightweight-thread tile shows only the top ~37% of its
+  // video), and the video's own visible ratio would never reach the threshold.
+  const byFrame = new Map();
   const io = new IntersectionObserver((entries) => {
     entries.forEach((e) => {
-      const v = e.target;
+      const v = byFrame.get(e.target);
+      if (!v) return;
       if (e.isIntersecting) {
         const p = v.play();
         if (p && p.catch) p.catch(() => {});
@@ -2915,7 +2920,11 @@ function initArtifactVideos() {
       }
     });
   }, { threshold: 0.4 });
-  videos.forEach((v) => io.observe(v));
+  videos.forEach((v) => {
+    const frame = v.parentElement || v;
+    byFrame.set(frame, v);
+    io.observe(frame);
+  });
 }
 try {
   initArtifactVideos();
