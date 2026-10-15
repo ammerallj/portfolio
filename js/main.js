@@ -2932,6 +2932,48 @@ function initArtifactVideos() {
     io.observe(frame);
   });
 }
+// ============================================================
+// BENTO TOOLTIPS: each mosaic tile's caption (`.project-bento-caption`) is a
+// tooltip that follows the cursor while the tile is hovered. It is placed just
+// below-right of the pointer, flipped to the other side of it when that would
+// run past the tile's right or bottom edge, and clamped so it always stays inside
+// the tile (the tile clips it). Position goes through --tx / --ty (a transform, so
+// no layout work per move). Touch has no cursor: the CSS shows a static toast.
+// ============================================================
+function initBentoTooltips() {
+  if (!window.matchMedia('(hover: hover)').matches) return;
+  const GAP_X = 14, GAP_Y = 18, PAD = 8;
+  document.querySelectorAll('.project-bento-tile').forEach((tile) => {
+    const cap = tile.querySelector('.project-bento-caption');
+    if (!cap) return;
+    let raf = 0, px = 0, py = 0;
+    const place = () => {
+      raf = 0;
+      const t = tile.getBoundingClientRect();
+      const w = cap.offsetWidth, h = cap.offsetHeight;
+      let x = px - t.left + GAP_X;
+      let y = py - t.top + GAP_Y;
+      if (x + w > t.width - PAD) x = px - t.left - GAP_X - w;   // flip left of the cursor
+      if (y + h > t.height - PAD) y = py - t.top - GAP_Y - h;   // flip above the cursor
+      x = Math.min(Math.max(PAD, x), Math.max(PAD, t.width - w - PAD));
+      y = Math.min(Math.max(PAD, y), Math.max(PAD, t.height - h - PAD));
+      cap.style.setProperty('--tx', x + 'px');
+      cap.style.setProperty('--ty', y + 'px');
+    };
+    const move = (e) => {
+      px = e.clientX; py = e.clientY;
+      if (!raf) raf = requestAnimationFrame(place);
+    };
+    tile.addEventListener('pointerenter', move);
+    tile.addEventListener('pointermove', move);
+  });
+}
+try {
+  initBentoTooltips();
+} catch (e) {
+  console.warn('Bento tooltips unavailable:', e);
+}
+
 try {
   initArtifactVideos();
 } catch (e) {
