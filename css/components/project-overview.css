@@ -1359,9 +1359,9 @@ a.intro-bar-name {
    outline never shows as a seam inside the white. */
 .entry-col--3 {
   align-self: flex-end;
-  /* image bottom sits 4cqw above the tile's bottom edge (wrapper padding 12cqw
-     minus this 8cqw) */
-  margin-bottom: -8cqw;
+  /* image bottom sits 2.5cqw above the tile's bottom edge (wrapper padding 12cqw
+     minus this 9.5cqw) */
+  margin-bottom: -9.5cqw;
 }
 
 .entry-card--hang {
