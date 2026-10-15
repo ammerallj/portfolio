@@ -1550,14 +1550,3 @@ a.intro-bar-name {
 .project-thread-row + .project-bento {
   margin-top: var(--gap-section);
 }
-
-/* The single paragraph under the Solution mosaic: one --gap-group (60px) below it,
-   full width of the column, centred. */
-.project-after-mosaic {
-  margin-top: var(--gap-group);
-}
-
-.project-after-mosaic p {
-  max-width: none;
-  text-align: center;
-}
