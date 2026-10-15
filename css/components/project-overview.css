@@ -1313,12 +1313,13 @@ a.intro-bar-name {
    hidden. The frame is taller than the default 16:9 to give the stack room.
    ------------------------------------------------------------ */
 .project-bento-tile--wide .project-entry-collage {
-  aspect-ratio: 729 / 545;
+  aspect-ratio: 729 / 500;
   background-color: #ececec;
   container-type: inline-size;
   display: flex;
   justify-content: center;
-  align-items: flex-start;
+  /* centred, so the columns of different heights stagger against each other */
+  align-items: center;
   /* percentages, not cqw: a container's OWN cqw resolve against the container
      above it (here the viewport), only its children see this one */
   gap: 4%;
@@ -1333,8 +1334,6 @@ a.intro-bar-name {
   flex: 0 0 auto;
 }
 
-.entry-col--1 { margin-top: 7cqw; }
-.entry-col--3 { margin-top: 3cqw; }
 
 .entry-card {
   display: block;
@@ -1343,4 +1342,19 @@ a.intro-bar-name {
   border-radius: 1.4cqw;
   /* ambient: an even halo all round */
   box-shadow: 0 0 50px 6px rgba(0, 0, 0, 0.18);
+}
+
+/* Cropped cards: the part that matters (the composer, the Send bar) is at the
+   BOTTOM, so the top of the tall cards is cut off and the bottom kept. The ratio
+   states the visible slice (story: bottom 72%, marketplace: bottom 75%). */
+.entry-card--story {
+  aspect-ratio: 754 / 1070;
+  object-fit: cover;
+  object-position: center bottom;
+}
+
+.entry-card--marketplace {
+  aspect-ratio: 756 / 930;
+  object-fit: cover;
+  object-position: center bottom;
 }
