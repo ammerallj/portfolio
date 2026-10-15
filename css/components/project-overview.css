@@ -1094,6 +1094,7 @@ a.intro-bar-name {
   font-size: var(--size-sm, 14px);
   line-height: 1.4;
   color: var(--color-text-70);
+  text-align: center;
 }
 
 
