@@ -1337,9 +1337,12 @@ a.intro-bar-name {
 }
 
 
-.entry-card {
+.project-entry-collage .entry-card {
   display: block;
   width: 100%;
+  /* the global img reset caps images at their container; the cards set their own
+     widths (below) and may be wider than their column */
+  max-width: none;
   height: auto;
   border-radius: 1.4cqw;
   /* ambient: an even halo all round */
@@ -1350,8 +1353,8 @@ a.intro-bar-name {
    tile crops them (no top border, no top shadow): the bottom of each card, where
    the composer and Send are, is what stays in view. The negative margin is the
    amount cut off: story 12cqw (~25% of its height), Marketplace 6.5cqw (~14%). */
-.entry-card--story { margin-top: -12cqw; }
-.entry-card--marketplace { margin-top: -6.5cqw; }
+.project-entry-collage .entry-card--story { margin-top: -8cqw; }
+.project-entry-collage .entry-card--marketplace { margin-top: -9.7cqw; }
 
 /* The profile card sits at the BOTTOM of the tile and its white continues past the
    bottom edge: a white wrapper (it carries the halo) is taller than the image, and
@@ -1364,16 +1367,37 @@ a.intro-bar-name {
   margin-bottom: -9.5cqw;
 }
 
-.entry-card--hang {
+.project-entry-collage .entry-card--hang {
   background: #fff;
   border-radius: 1.4cqw 1.4cqw 0 0;
   padding-bottom: 12cqw;
 }
 
-.entry-card--hang .entry-card--profile {
+.project-entry-collage .entry-card--hang .entry-card--profile {
   aspect-ratio: 756 / 736;
   object-fit: cover;
   object-position: center top;
   box-shadow: none;
   border-radius: 1.4cqw 1.4cqw 0 0;
 }
+
+/* VISUAL RANDOMNESS (first pass): the cards are no longer one width on one line.
+   Each has its own width (26-31cqw), a few are nudged sideways off their column's
+   line, the gaps differ column to column, and the birthday card overlaps the
+   bottom of Marketplace by ~8px (the halos make the overlap read as layers).
+   Cards are deliberately NOT cut off at the sides: every one has an avatar or a
+   Send / Message button near its left or right edge. Widths are in cqw, so the
+   whole composition still scales as one picture. Heights follow from each width;
+   the hanging margins above were re-derived to keep the same slice visible. */
+.entry-col--1 { gap: 5cqw; }
+.entry-col--3 { gap: 6.5cqw; }
+.entry-col--2 { gap: 4cqw; }
+
+.project-entry-collage .entry-card--story       { width: 27cqw; margin-left: 1cqw; }
+.project-entry-collage .entry-card--experts     { width: 31cqw; margin-left: -2cqw; }
+
+.project-entry-collage .entry-card--sharesheet  { width: 29cqw; margin-left: -1.5cqw; }
+.project-entry-collage .entry-card--hang        { width: 30.5cqw; margin-left: -0.5cqw; }
+
+.project-entry-collage .entry-card--marketplace { width: 31cqw; margin-left: -1cqw; }
+.project-entry-collage .entry-card--birthday    { width: 27cqw; margin-left: 3cqw; margin-top: -5.1cqw; }
