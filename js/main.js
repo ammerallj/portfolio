@@ -2890,6 +2890,39 @@ function initNextCaseField() {
     card.addEventListener('focusout', hide);
   });
 }
+// ============================================================
+// ARTIFACT VIDEOS (`video.project-bento-video`): a muted, looping demo inside an
+// artifact frame. It plays only while at least 40% of it is on screen and pauses
+// when it leaves, so an off-screen clip costs nothing. Under reduced motion it
+// never autoplays — the poster shows and the native controls appear instead, so
+// the reader starts it themselves. Without JS it is simply the poster frame.
+// ============================================================
+function initArtifactVideos() {
+  const videos = document.querySelectorAll('video.project-bento-video');
+  if (!videos.length) return;
+  if (reducedMotion.matches || !('IntersectionObserver' in window)) {
+    videos.forEach((v) => { v.controls = true; });
+    return;
+  }
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((e) => {
+      const v = e.target;
+      if (e.isIntersecting) {
+        const p = v.play();
+        if (p && p.catch) p.catch(() => {});
+      } else {
+        v.pause();
+      }
+    });
+  }, { threshold: 0.4 });
+  videos.forEach((v) => io.observe(v));
+}
+try {
+  initArtifactVideos();
+} catch (e) {
+  console.warn('Artifact videos unavailable:', e);
+}
+
 try {
   initNextCaseField();
 } catch (e) {
