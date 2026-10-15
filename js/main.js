@@ -4327,7 +4327,12 @@ if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
   const cursorGlow = document.createElement('div');
   cursorGlow.className = 'cursor-glow';
   cursorGlow.setAttribute('aria-hidden', 'true');
-  document.body.appendChild(cursorGlow);
+  // A page can opt out of the orb with <html data-no-cursor-orb> (the case-study
+  // pages do: the page is full of product UI the orb would sit over). The element
+  // is still created so the handlers below stay unchanged; it is just never added.
+  if (!document.documentElement.hasAttribute('data-no-cursor-orb')) {
+    document.body.appendChild(cursorGlow);
+  }
 
   document.addEventListener('mousemove', (e) => {
     cursorGlow.style.left = e.clientX + 'px';
