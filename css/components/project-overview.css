@@ -1323,16 +1323,16 @@ a.intro-bar-name {
   align-items: flex-start;
   /* percentages, not cqw: a container's OWN cqw resolve against the container
      above it (here the viewport), only its children see this one */
-  gap: 5%;
+  gap: 3.25%;
   padding: 0;
   overflow: hidden;
 }
 
 .entry-col {
-  width: 28cqw;
+  width: 29cqw;
   display: flex;
   flex-direction: column;
-  gap: 5cqw;
+  gap: 3.25cqw;
   flex: 0 0 auto;
 }
 
@@ -1352,9 +1352,9 @@ a.intro-bar-name {
 /* HANGING CARDS: the story and Marketplace start ABOVE the tile's top edge, so the
    tile crops them (no top border, no top shadow): the bottom of each card, where
    the composer and Send are, is what stays in view. The negative margin is the
-   amount cut off: story 15cqw (~27% of its height), Marketplace 3cqw (~6%), which
-   leaves the same 8.4cqw of space under the last card in both columns. */
-.project-entry-collage .entry-card--story { margin-top: -15cqw; }
+   amount cut off: story 15.5cqw (~27% of its height), Marketplace 3cqw (~6%), which
+   leaves the same ~8cqw of space under the last card in both columns. */
+.project-entry-collage .entry-card--story { margin-top: -15.5cqw; }
 .project-entry-collage .entry-card--marketplace { margin-top: -3cqw; }
 
 /* The profile card sits at the BOTTOM of the tile and its white continues past the
@@ -1382,8 +1382,8 @@ a.intro-bar-name {
   border-radius: 1.4cqw 1.4cqw 0 0;
 }
 
-/* EVEN SPACING: one gap, 5 units, between every pair of neighbouring cards:
-   across (5% of the tile = 5cqw between the columns) and down (5cqw between a
-   column's cards). All cards are the column's width (28cqw); nothing overlaps or
-   is nudged. The space is meant: the examples hang from the tile's edges (story
+/* EVEN SPACING: one gap, 3.25 units, between every pair of neighbouring cards AND
+   on the left and right: 3 columns of 29cqw + 4 gaps of 3.25 = 100, so the side
+   padding equals the space between columns equals the space between a column's
+   cards. Nothing overlaps or is nudged. The space is meant: the examples hang from the tile's edges (story
    and Marketplace from the top, the Profile from the bottom) and breathe between. */
