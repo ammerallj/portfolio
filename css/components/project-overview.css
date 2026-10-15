@@ -1511,3 +1511,45 @@ a.intro-bar-name {
   width: 100%;
   height: auto;
 }
+
+/* NUMBERED LIST: the Solution's three decisions as 1 / 2 / 3 badges under their
+   lead-in sentence. A counter draws the number in a small outlined circle (the
+   13px eyebrow type); the list keeps its <ol> semantics for assistive tech. */
+.project-numbered {
+  list-style: none;
+  counter-reset: item;
+  margin: var(--gap-content) 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.project-numbered li {
+  counter-increment: item;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  font-size: var(--size-lg);
+  letter-spacing: -0.02em;
+  line-height: 1.4;
+  color: var(--color-text);
+}
+
+.project-numbered li::before {
+  content: counter(item);
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  margin-top: 0.05rem;
+  border: 1px solid var(--color-text);
+  border-radius: 50%;
+  font-family: var(--font-body);
+  font-size: var(--size-xs);
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 1;
+}
