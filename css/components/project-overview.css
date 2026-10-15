@@ -1292,3 +1292,10 @@ a.intro-bar-name {
 .project-problem-artifact--portrait .project-bento-media {
   aspect-ratio: 834 / 1450;
 }
+
+/* Centre the two columns on each other (the text beside a tall artifact sits at
+   the artifact's vertical middle instead of its top). Only matters while the
+   columns are side by side; stacked, they are full-width blocks either way. */
+.project-block--center {
+  align-items: center;
+}
