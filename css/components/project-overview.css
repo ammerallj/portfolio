@@ -1323,13 +1323,13 @@ a.intro-bar-name {
   align-items: flex-start;
   /* percentages, not cqw: a container's OWN cqw resolve against the container
      above it (here the viewport), only its children see this one */
-  gap: 4%;
+  gap: 5%;
   padding: 0;
   overflow: hidden;
 }
 
 .entry-col {
-  width: 29cqw;
+  width: 28cqw;
   display: flex;
   flex-direction: column;
   gap: 5cqw;
@@ -1352,9 +1352,10 @@ a.intro-bar-name {
 /* HANGING CARDS: the story and Marketplace start ABOVE the tile's top edge, so the
    tile crops them (no top border, no top shadow): the bottom of each card, where
    the composer and Send are, is what stays in view. The negative margin is the
-   amount cut off: story 12cqw (~25% of its height), Marketplace 6.5cqw (~14%). */
-.project-entry-collage .entry-card--story { margin-top: -8cqw; }
-.project-entry-collage .entry-card--marketplace { margin-top: -9.7cqw; }
+   amount cut off: story 15cqw (~27% of its height), Marketplace 3cqw (~6%), which
+   leaves the same 8.4cqw of space under the last card in both columns. */
+.project-entry-collage .entry-card--story { margin-top: -15cqw; }
+.project-entry-collage .entry-card--marketplace { margin-top: -3cqw; }
 
 /* The profile card sits at the BOTTOM of the tile and its white continues past the
    bottom edge: a white wrapper (it carries the halo) is taller than the image, and
@@ -1381,23 +1382,8 @@ a.intro-bar-name {
   border-radius: 1.4cqw 1.4cqw 0 0;
 }
 
-/* VISUAL RANDOMNESS (first pass): the cards are no longer one width on one line.
-   Each has its own width (26-31cqw), a few are nudged sideways off their column's
-   line, the gaps differ column to column, and the birthday card overlaps the
-   bottom of Marketplace by ~8px (the halos make the overlap read as layers).
-   Cards are deliberately NOT cut off at the sides: every one has an avatar or a
-   Send / Message button near its left or right edge. Widths are in cqw, so the
-   whole composition still scales as one picture. Heights follow from each width;
-   the hanging margins above were re-derived to keep the same slice visible. */
-.entry-col--1 { gap: 5cqw; }
-.entry-col--3 { gap: 6.5cqw; }
-.entry-col--2 { gap: 4cqw; }
-
-.project-entry-collage .entry-card--story       { width: 27cqw; margin-left: 1cqw; }
-.project-entry-collage .entry-card--experts     { width: 31cqw; margin-left: -2cqw; }
-
-.project-entry-collage .entry-card--sharesheet  { width: 29cqw; margin-left: -1.5cqw; }
-.project-entry-collage .entry-card--hang        { width: 30.5cqw; margin-left: -0.5cqw; }
-
-.project-entry-collage .entry-card--marketplace { width: 31cqw; margin-left: -1cqw; }
-.project-entry-collage .entry-card--birthday    { width: 27cqw; margin-left: 3cqw; margin-top: -5.1cqw; }
+/* EVEN SPACING: one gap, 5 units, between every pair of neighbouring cards:
+   across (5% of the tile = 5cqw between the columns) and down (5cqw between a
+   column's cards). All cards are the column's width (28cqw); nothing overlaps or
+   is nudged. The space is meant: the examples hang from the tile's edges (story
+   and Marketplace from the top, the Profile from the bottom) and breathe between. */
