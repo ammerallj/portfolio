@@ -1,16 +1,16 @@
 /* style.css - Master Compiler */
-/* NOTE: keep the ?v= on each @import in sync with the style.css?v=81ac80ac in
+/* NOTE: keep the ?v= on each @import in sync with the style.css?v=f1d8bbcc in
    index.html. Browsers cache @import URLs independently, so bumping only the
    <link> does NOT refetch these component files — the version must be on the
    imports too. */
-@import url('css/components/global.css?v=81ac80ac');
-@import url('css/components/header.css?v=81ac80ac');
-@import url('css/components/hero.css?v=81ac80ac');
-@import url('css/components/sections.css?v=81ac80ac');
-@import url('css/components/footer.css?v=81ac80ac');
-@import url('css/components/project-overview.css?v=81ac80ac');
-@import url('css/components/mobile-menu.css?v=81ac80ac');
-@import url('css/components/jennaos.css?v=81ac80ac');
+@import url('css/components/global.css?v=f1d8bbcc');
+@import url('css/components/header.css?v=f1d8bbcc');
+@import url('css/components/hero.css?v=f1d8bbcc');
+@import url('css/components/sections.css?v=f1d8bbcc');
+@import url('css/components/footer.css?v=f1d8bbcc');
+@import url('css/components/project-overview.css?v=f1d8bbcc');
+@import url('css/components/mobile-menu.css?v=f1d8bbcc');
+@import url('css/components/jennaos.css?v=f1d8bbcc');
 
 /* ALWAYS LAST: Media breakpoints override desktop styles */
-@import url('css/components/responsive.css?v=81ac80ac');
+@import url('css/components/responsive.css?v=f1d8bbcc');

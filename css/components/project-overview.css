@@ -1302,3 +1302,45 @@ a.intro-bar-name {
 .project-block--center {
   align-items: center;
 }
+
+
+/* ------------------------------------------------------------
+   ENTRY-POINT COLLAGE — the wide bento tile on the Facebook Messaging draft:
+   six UI fragments (places a message can start) in three staggered columns on
+   #ECECEC, each with the ambient halo (0 0 50px 6px at 18%, no direction).
+   Everything is sized in container-query units off the tile's width, so the
+   composition scales as one picture and never reflows; the tile keeps overflow
+   hidden. The frame is taller than the default 16:9 to give the stack room.
+   ------------------------------------------------------------ */
+.project-bento-tile--wide .project-entry-collage {
+  aspect-ratio: 729 / 545;
+  background-color: #ececec;
+  container-type: inline-size;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  /* percentages, not cqw: a container's OWN cqw resolve against the container
+     above it (here the viewport), only its children see this one */
+  gap: 4%;
+  padding: 4% 0;
+}
+
+.entry-col {
+  width: 29cqw;
+  display: flex;
+  flex-direction: column;
+  gap: 3cqw;
+  flex: 0 0 auto;
+}
+
+.entry-col--1 { margin-top: 7cqw; }
+.entry-col--3 { margin-top: 3cqw; }
+
+.entry-card {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 1.4cqw;
+  /* ambient: an even halo all round */
+  box-shadow: 0 0 50px 6px rgba(0, 0, 0, 0.18);
+}
