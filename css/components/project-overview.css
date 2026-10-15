@@ -1282,3 +1282,9 @@ a.intro-bar-name {
     transition: none;
   }
 }
+
+/* A portrait artifact (a phone) in the Problem column: the frame takes the
+   image's own ratio so nothing is cropped, instead of the default 4:3. */
+.project-problem-artifact--portrait .project-bento-media {
+  aspect-ratio: 834 / 1450;
+}
