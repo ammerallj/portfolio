@@ -2891,8 +2891,8 @@ function initNextCaseField() {
   });
 }
 // ============================================================
-// ARTIFACT VIDEOS (`video.project-bento-video`): a muted, looping demo inside an
-// artifact frame. It plays only while at least 40% of it is on screen and pauses
+// ARTIFACT VIDEOS (`video.project-bento-video`): a muted demo inside an
+// artifact frame (looping, or once per view with `data-play-once`). It plays only while at least 40% of it is on screen and pauses
 // when it leaves, so an off-screen clip costs nothing. Under reduced motion it
 // never autoplays — the poster shows and the native controls appear instead, so
 // the reader starts it themselves. Without JS it is simply the poster frame.
@@ -2912,11 +2912,17 @@ function initArtifactVideos() {
     entries.forEach((e) => {
       const v = byFrame.get(e.target);
       if (!v) return;
+      // data-play-once: no loop. Each time the frame scrolls into view the clip
+      // starts from the top and plays through once; leaving rewinds it, so
+      // scrolling away and back plays it once more.
+      const once = v.hasAttribute('data-play-once');
       if (e.isIntersecting) {
+        if (once) v.currentTime = 0;
         const p = v.play();
         if (p && p.catch) p.catch(() => {});
       } else {
         v.pause();
+        if (once) v.currentTime = 0;
       }
     });
   }, { threshold: 0.4 });
