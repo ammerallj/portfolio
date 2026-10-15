@@ -1556,8 +1556,8 @@ a.intro-bar-name {
 /* ------------------------------------------------------------
    ADDITIONAL WORK — the closing block of a case study: a small eyebrow headline
    over two of the homepage's Work cards at EQUAL width (a plain two-column grid on
-   the same --work-gap; deliberately not the homepage's masonry, so the two cards
-   simply sit side by side and keep their own heights). It runs the full page
+   the same --work-gap; deliberately not the homepage's masonry: two cards of one
+   width AND one height, side by side). It runs the full page
    width (not inset for the rail). One column at 768 (responsive.css).
    ------------------------------------------------------------ */
 .additional-work-grid {
@@ -1568,7 +1568,15 @@ a.intro-bar-name {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   column-gap: var(--work-gap);
   row-gap: var(--work-gap);
-  align-items: start;
+  align-items: stretch;
+}
+
+/* Equal width AND equal height: both cards use the same media ratio (3:2, set
+   inline) and the card fills its grid cell, so a line of text more or less can't
+   make one taller than the other. */
+.additional-work-grid .work-card,
+.additional-work-grid .work-card-link {
+  height: 100%;
 }
 
 .additional-work .section-label {
