@@ -1554,8 +1554,7 @@ a.intro-bar-name {
 
 
 /* ------------------------------------------------------------
-   ADDITIONAL WORK — the closing block of a case study: a small eyebrow headline
-   over two of the homepage's Work cards at EQUAL width (a plain two-column grid on
+   ADDITIONAL WORK — the closing block of a case study: an h2 headline over two of the homepage's Work cards at EQUAL width (a plain two-column grid on
    the same --work-gap; deliberately not the homepage's masonry: two cards of one
    width AND one height, side by side). It runs the full page
    width (not inset for the rail). One column at 768 (responsive.css).
@@ -1579,6 +1578,9 @@ a.intro-bar-name {
   height: 100%;
 }
 
-.additional-work .section-label {
-  margin-bottom: var(--space-md);
+/* The headline is a real h2 at the case-study chapter-heading size (the same token
+   as Problem / Solution: 40 -> 36 -> 32), not the small uppercase eyebrow. */
+.additional-work .section-title {
+  margin: 0 0 var(--gap-group);
+  font-size: var(--project-block-title-size);
 }
