@@ -1551,3 +1551,26 @@ a.intro-bar-name {
 .project-thread-row + .project-bento {
   margin-top: var(--gap-section);
 }
+
+
+/* ------------------------------------------------------------
+   ADDITIONAL WORK — the closing block of a case study: a small eyebrow headline
+   over two of the homepage's Work cards at EQUAL width (a plain two-column grid on
+   the same --work-gap; deliberately not the homepage's masonry, so the two cards
+   simply sit side by side and keep their own heights). It runs the full page
+   width (not inset for the rail). One column at 768 (responsive.css).
+   ------------------------------------------------------------ */
+.additional-work-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: var(--work-gap);
+  row-gap: var(--work-gap);
+  align-items: start;
+}
+
+.additional-work .section-label {
+  margin-bottom: var(--space-md);
+}

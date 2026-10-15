@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@200;400;500;700&family=Inter:wght@400..700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../style.css?v=b503f963" />
+  <link rel="stylesheet" href="../style.css?v=696c1217" />
   <script>
     (function () {
       try {
@@ -221,22 +221,53 @@
       </div>
     </section>
 
-    <!-- NEXT CASE STUDY — point at the next project in the homepage Work order.
-         Bare on cream at rest; a gradient field fades in on hover/focus
-         (.next-case--field + the canvas; initNextCaseField in main.js). -->
-    <section class="page-section next-case-section" aria-label="Next case study">
+    <!-- ADDITIONAL WORK — replaces the single "Next case study" pager: two of the
+         homepage's Work cards, side by side at equal width, as the case studies to
+         explore next. Same card markup and behaviour as the homepage (hover media
+         loads on first hover; the Accessibility card opens its password-protected
+         deck in a new tab; Loop is parked, as on the homepage). It keeps the
+         .next-case-section class so the faint hairline above it still applies. -->
+    <section class="page-section next-case-section additional-work" aria-labelledby="additional-work-heading">
       <div class="site-container">
-        <a class="next-case next-case--field" href="[next-page].html" data-reveal-group data-reveal>
-          <canvas class="next-case-field" aria-hidden="true"></canvas>
-          <span class="next-case-label">Next case study</span>
-          <span class="next-case-body">
-            <span class="next-case-text">
-              <span class="next-case-title">[Next project title]</span>
-              <span class="next-case-description">[One-line teaser]</span>
-            </span>
-            <span class="next-case-arrow" aria-hidden="true">&rarr;</span>
-          </span>
-        </a>
+        <h2 class="section-label" id="additional-work-heading">Additional Work</h2>
+        <ul class="additional-work-grid" role="list">
+          <li class="work-card" data-reveal-group>
+            <a class="work-card-link" data-reveal>
+              <div class="work-card-media" style="--media-ratio: 17 / 10; --hover-lift: 1.012">
+                <img class="work-card-cover" src="../images/loop-cover-card.jpg?v=1" width="2040" height="1200" alt="" loading="lazy" />
+                <img class="work-card-hover" data-hover-src="../images/loop-cover-card.gif?v=1" width="2040" height="1200" alt="" aria-hidden="true" />
+              </div>
+              <div class="work-card-text">
+                <div class="work-card-swap">
+                  <h2 class="work-card-title">Microsoft Loop <span class="work-card-year">/ 2022</span></h2>
+                  <p class="work-card-description">Designing 0&rarr;1 collaborative primitive that works across apps.</p>
+                </div>
+                <div class="work-card-meta">
+                  <span class="work-card-status work-card-status--lock"><svg class="work-card-lock-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><rect x="4" y="9" width="16" height="12" rx="4" stroke="currentColor" stroke-width="1.5"/><path d="M12 16L12 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 9V7C16 4.79086 14.2091 3 12 3C9.79086 3 8 4.79086 8 7L8 9" stroke="currentColor" stroke-width="1.5"/></svg><span class="visually-hidden">Full case study locked. </span></span>
+                </div>
+              </div>
+            </a>
+          </li>
+
+          <li class="work-card" data-reveal-group>
+            <a class="work-card-link" href="https://www.figma.com/deck/3ID7RXQRZUqKIDq6cGxGnY/Jenna-Portfolio-%E2%80%94-Portfolio-2026-B?node-id=1-42&amp;viewport=-129%2C-110%2C0.69&amp;t=REUsrarH3k2S5FDV-1&amp;scaling=min-zoom&amp;content-scaling=fixed&amp;page-id=0%3A1" target="_blank" rel="noopener" data-reveal>
+              <div class="work-card-media" style="--media-ratio: 1500 / 1018">
+                <img class="work-card-cover" src="../images/ax-card.jpg?v=3" width="1920" height="1303" alt="" loading="lazy" />
+                <img class="work-card-hover" data-hover-src="../images/ax-card.gif?v=3" width="1500" height="1018" alt="" aria-hidden="true" />
+              </div>
+              <div class="work-card-text">
+                <div class="work-card-swap">
+                  <h2 class="work-card-title">Accessibility on meta.com <span class="work-card-year">/ 2026</span></h2>
+                  <p class="work-card-description">Organizing accessibility features and support around people’s needs.</p>
+                </div>
+                <div class="work-card-meta">
+                  <span class="work-card-status work-card-status--lock"><svg class="work-card-lock-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><rect x="4" y="9" width="16" height="12" rx="4" stroke="currentColor" stroke-width="1.5"/><path d="M12 16L12 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 9V7C16 4.79086 14.2091 3 12 3C9.79086 3 8 4.79086 8 7L8 9" stroke="currentColor" stroke-width="1.5"/></svg><span class="visually-hidden">Full case study locked, opens in a new tab. </span></span>
+                </div>
+              </div>
+            </a>
+          </li>
+
+        </ul>
       </div>
     </section>
 
