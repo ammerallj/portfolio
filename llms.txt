@@ -11,7 +11,7 @@ Contact: ammerallj@gmail.com · https://www.linkedin.com/in/ammerallj/
 
 ## Selected work
 
-- Creating Continuity Across Messaging
+- [Facebook Messaging](https://ammerallj.design/work/facebook-messaging): As Meta scaled back 140M+ app switches from Facebook to Messenger and invested further in private sharing, Jenna aligned the cross-functional team on a shared in-app messaging model to unify 40+ fragmented entry points around consistent destinations and behavior, and focused on the post-send experience. Lead Product Designer, 5 months, 2023.
 
 - Shaping Accessibility Across Products
 
