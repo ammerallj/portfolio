@@ -925,19 +925,66 @@ window.JennaOSKnowledge = [
       "navigation",
       "orb",
       "themes",
-      "conversations"
+      "conversations",
+      "prototype",
+      "gemma",
+      "canvas",
+      "synthesis",
+      "conversational ai"
     ],
     "questions": [
       "what is threadscape",
       "tell me about threadscape",
       "what are you building for conversational ai",
       "what is spatial history",
-      "why rethink chat history"
+      "why rethink chat history",
+      "what is the ai conversation project",
+      "can I try threadscape",
+      "how does threadscape work",
+      "did you test it with people",
+      "what did you build with ai"
     ],
     "anchors": [
-      "threadscape"
+      "threadscape",
+      "spatial history",
+      "ai conversation"
     ],
-    "text": "Threadscape is an experiment in spatial history for conversational AI. Most chat tools organize conversations as a linear list of sessions. I'm exploring what happens when you navigate by themes and the relationships between ideas instead.\n\nThe interesting question for me isn't just how to find an old chat. It's whether the interface can help you reconnect the thinking that developed across many conversations. It's an exploration, not a shipped product."
+    "text": "Threadscape is an experiment in spatial history for conversational AI. Most chat tools organize conversations as a linear list of sessions. I'm exploring what happens when you navigate by themes and the relationships between ideas instead. Each idea is its own space, and a new thought finds its way back to the right one.\n\nI designed and built a working prototype with Claude Code, React and TypeScript over about five weeks. Typing previews which theme your message will land in, a theme keeps a running account of what you've figured out, and leaving a thread folds it back in. The public demo runs Gemma 4 behind a small server that holds its rules and limits each visitor to 10 exchanges.\n\nIt's an exploration, not a shipped product, and I haven't tested it with people yet. The case study covers how I got from a sketch in my Notes app to the prototype, and what I'd want to validate next.",
+    "links": [
+      {
+        "label": "Threadscape case study",
+        "href": "work/AI-conversation"
+      }
+    ]
+  },
+  {
+    "id": "gemma",
+    "title": "Why Gemma 4",
+    "tags": [
+      "gemma",
+      "gemma 4",
+      "cloudflare",
+      "workers ai",
+      "why gemma"
+    ],
+    "questions": [
+      "why gemma 4",
+      "why did you use gemma",
+      "which model does threadscape use",
+      "what model does the threadscape demo run on",
+      "why not claude for the threadscape demo"
+    ],
+    "anchors": [
+      "gemma",
+      "gemma 4"
+    ],
+    "text": "The demo is open to anyone, so it had to cost me nothing and be hard to run up a bill on. Gemma 4 runs on Cloudflare's free tier with no API key anywhere, and when the free allowance runs out it stops instead of charging me.\n\nI chose a mid-size one on purpose. The smallest models are cheaper but worse at sticking to a system prompt, and sticking to the rules is the whole job here. The biggest would burn through the free allowance in a few dozen replies.\n\nIt was a bet, not a benchmark, and the model isn't the point of the project. The rules and limits live in a small server in front of it, so swapping the model is one setting.",
+    "links": [
+      {
+        "label": "Threadscape case study",
+        "href": "work/AI-conversation"
+      }
+    ]
   },
   {
     "id": "record-prototype",

@@ -3,14 +3,77 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <!-- Published at /work/AI-conversation (2026-10-21; drafted as threadscape.html). Linked from the homepage Work card. Still noindex and
-       not in the sitemap on purpose. To launch it for search: swap robots to "index, follow", add canonical, Open Graph and
-       JSON-LD (copy from archive/project-pages-2026-10/work/), and add it to sitemap.xml and llms.txt. -->
+  <!-- Published at /work/AI-conversation (2026-10-21; drafted as threadscape.html). Linked from the homepage Work card. Launched for search 2026-10-21:
+       index, follow, canonical, Open Graph and JSON-LD below, plus sitemap.xml, llms.txt and the JennaOS brain. -->
   <title>Spatial History for Conversational AI — Jenna Ammerall</title>
   <meta name="description" content="Chat history is a list of threads. I prototyped a canvas of themes that keep a running account of what you have figured out, built with Claude and verified, not yet tested with people." />
-  <meta name="robots" content="noindex, nofollow" />
+  <link rel="canonical" href="https://ammerallj.design/work/AI-conversation" />
+  <meta name="robots" content="index, follow" />
   <meta name="theme-color" content="#4A45FF" />
   <link rel="icon" href="../favicon.svg?v=4" type="image/svg+xml" />
+  <!-- Open Graph / social sharing previews -->
+  <meta property="og:type" content="article" />
+  <meta property="og:site_name" content="Jenna Ammerall" />
+  <meta property="og:title" content="Spatial History for Conversational AI — Jenna Ammerall" />
+  <meta property="og:description" content="Chat history is a list of threads. I prototyped a canvas of themes that keep a running account of what you have figured out, built with Claude and verified, not yet tested with people." />
+  <meta property="og:url" content="https://ammerallj.design/work/AI-conversation" />
+  <meta property="og:image" content="https://ammerallj.design/images/og-ai-conversation.jpg?v=1" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:locale" content="en_US" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Spatial History for Conversational AI — Jenna Ammerall" />
+  <meta name="twitter:description" content="Chat history is a list of threads. I prototyped a canvas of themes that keep a running account of what you have figured out, built with Claude and verified, not yet tested with people." />
+  <meta name="twitter:image" content="https://ammerallj.design/images/og-ai-conversation.jpg?v=1" />
+  <meta name="author" content="Jenna Ammerall" />
+  <!-- Structured data restates visible copy only (Overview text and facts row); the @id ties this page to the Person and
+       WebSite in index.html. -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "CreativeWork",
+        "@id": "https://ammerallj.design/work/AI-conversation#case-study",
+        "name": "Spatial History for Conversational AI",
+        "alternateName": "Threadscape",
+        "headline": "Spatial History for Conversational AI",
+        "url": "https://ammerallj.design/work/AI-conversation",
+        "description": "Chat history is a list of threads. I prototyped a canvas of themes that keep a running account of what you have figured out, built with Claude and verified, not yet tested with people.",
+        "abstract": "I designed and built Threadscape, a functional prototype that reimagines linear AI chat history as a spatial canvas of connected themes. Powered by Gemma 4, it explores how people can connect related conversations, trace how their thinking evolves, and return to ideas without starting from scratch. I designed a flexible information architecture that organizes conversations by theme, reveals relationships between ideas, and supports continuity as thoughts evolve over time.",
+        "image": "https://ammerallj.design/images/og-ai-conversation.jpg?v=1",
+        "inLanguage": "en-US",
+        "temporalCoverage": "2026",
+        "creditText": "Product Designer",
+        "keywords": "conversational AI, chat history, spatial interface, interaction design, AI prototyping",
+        "author": {
+          "@id": "https://ammerallj.design/#jenna"
+        },
+        "isPartOf": {
+          "@id": "https://ammerallj.design/#website"
+        },
+        "mainEntityOfPage": "https://ammerallj.design/work/AI-conversation"
+      },
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://ammerallj.design/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Spatial History for Conversational AI",
+            "item": "https://ammerallj.design/work/AI-conversation"
+          }
+        ]
+      }
+    ]
+  }
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@200;400;500;700&family=Inter:wght@400..700&display=swap" rel="stylesheet" />
