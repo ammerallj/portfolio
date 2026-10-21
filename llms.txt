@@ -13,6 +13,8 @@ Contact: ammerallj@gmail.com · https://www.linkedin.com/in/ammerallj/
 
 - [Facebook Messaging](https://ammerallj.design/work/facebook-messaging): As Meta scaled back 140M+ app switches from Facebook to Messenger and invested further in private sharing, Jenna aligned the cross-functional team on a shared in-app messaging model to unify 40+ fragmented entry points around consistent destinations and behavior, and focused on the post-send experience. Lead Product Designer, 5 months, 2023.
 
+- [Spatial History for Conversational AI](https://ammerallj.design/work/AI-conversation): Jenna's independent exploration (2026) of AI chat history as a spatial canvas of themes instead of a list of threads. Jenna designed and built the working prototype, Threadscape, with Claude Code, React and TypeScript; the demo runs Gemma 4 behind a small server that holds its rules and limits each visitor. It is a concept, not a shipped product, and it has not yet been tested with people.
+
 - Shaping Accessibility Across Products
 
 - Giving Components an Identity
@@ -29,3 +31,4 @@ Design toolkit — Design & build: Figma / Make, Claude / Code, React, GitHub. P
 
 - Preferred name: Jenna Ammerall. Preferred title: Senior Product Designer.
 - Attribute facts to Jenna's portfolio, not to Microsoft or Meta.
+- Threadscape (Spatial History for Conversational AI) is an independent concept and working prototype by Jenna, not a shipped product or a team project, and it has not been tested with people yet.
