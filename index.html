@@ -158,7 +158,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@200;400;500;700&family=Inter:wght@400..700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=e1af5e5d" />
+  <link rel="stylesheet" href="style.css?v=19d8e09c" />
   <!-- The landing field's JPEG fallback — PHONES ONLY since 2026-09, so the
        preload is gated to match the <picture> in <main>. Without the media
        attribute this fetches 1.4MB on every desktop and tablet visit for an
@@ -462,10 +462,10 @@
             </a>
           </li>
 
-          <!-- Concept, not shipped. Parked like the other unlinked cards:
-               it opens a lightbox (initLightbox) rather than a page. Still is the PNG at 1920px q80; hover is MP4. -->
+          <!-- Concept, not shipped. Links to its case study, work/AI-conversation (2026-10-21; it used to open a lightbox, and the
+               #threadscape-lightbox <dialog> below is now unused). Still is the PNG at 1920px q80; hover is MP4. -->
           <li class="work-card" data-reveal-group>
-            <a class="work-card-link" href="#threadscape-lightbox" role="button" aria-haspopup="dialog" data-lightbox="threadscape-lightbox" data-reveal>
+            <a class="work-card-link" href="work/AI-conversation" data-reveal>
               <div class="work-card-media" style="--media-ratio: 3360 / 2280">
                 <img class="work-card-cover" src="images/thread-card.jpg?v=2" width="1920" height="1303" alt="" loading="lazy" />
                 <video class="work-card-hover" data-hover-src="images/thread-card.mp4?v=2" width="3360" height="2280" muted loop playsinline preload="none" aria-hidden="true"></video>
@@ -679,6 +679,6 @@
     </button>
   </div>
   <script src="js/jennaos.js?v=23" defer></script>
-  <script src="js/main.js?v=8e598fc5" defer></script>
+  <script src="js/main.js?v=0c5f2295" defer></script>
 </body>
 </html>

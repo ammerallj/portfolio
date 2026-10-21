@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en" data-no-cursor-orb>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Published at /work/AI-conversation (2026-10-21; drafted as threadscape.html). Linked from the homepage Work card. Still noindex and
+       not in the sitemap on purpose. To launch it for search: swap robots to "index, follow", add canonical, Open Graph and
+       JSON-LD (copy from archive/project-pages-2026-10/work/), and add it to sitemap.xml and llms.txt. -->
+  <title>Spatial History for Conversational AI — Jenna Ammerall</title>
+  <meta name="description" content="Chat history is a list of threads. I prototyped a canvas of themes that keep a running account of what you have figured out, built with Claude and verified, not yet tested with people." />
+  <meta name="robots" content="noindex, nofollow" />
+  <meta name="theme-color" content="#4A45FF" />
+  <link rel="icon" href="../favicon.svg?v=4" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@200;400;500;700&family=Inter:wght@400..700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../style.css?v=19d8e09c" />
+  <script>
+    (function () {
+      try {
+        if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          document.documentElement.classList.add('is-motion');
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body>
+
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  <nav class="intro-bar intro-bar--page" aria-label="Site navigation">
+    <span class="intro-bar-feather" aria-hidden="true"></span>
+    <span class="intro-bar-blur" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+    <a class="intro-bar-name" href="../" id="site-name">Jenna Ammerall.</a>
+    <div class="intro-bar-links">
+      <div class="intro-bar-group"><a href="../#work-section" id="nav-work" class="is-active" aria-current="true">Work</a></div>
+      <div class="intro-bar-group"><a href="../#about">About</a></div>
+    </div>
+    <div class="intro-bar-cta-wrap"><a class="intro-bar-cta" href="../#contact">Contact</a></div>
+    <button class="mobile-menu-toggle" type="button" aria-expanded="false" aria-controls="mobile-menu">Say hello</button>
+  </nav>
+
+  <div class="mobile-menu" id="mobile-menu" role="dialog" aria-modal="true" aria-label="Navigation and contact" aria-hidden="true">
+    <p class="mobile-menu-name">Jenna Ammerall.</p>
+    <nav class="mobile-menu-nav" aria-label="Mobile navigation">
+      <a href="../#work-section"><span class="mobile-menu-dash">&mdash;</span> Work</a>
+      <a href="../#about"><span class="mobile-menu-dash">&mdash;</span> About</a>
+    </nav>
+    <div class="mobile-menu-connect">
+      <p class="mobile-menu-connect-heading">If something here resonated, say hello.</p>
+      <div class="mobile-menu-connect-links">
+        <a href="mailto:ammerallj@gmail.com">ammerallj@gmail.com<span class="visually-hidden"> (email)</span></a>
+        <a href="https://www.linkedin.com/in/ammerallj/" target="_blank" rel="noopener noreferrer">LinkedIn<span class="visually-hidden"> (opens in new tab)</span></a>
+      </div>
+    </div>
+    <button class="mobile-menu-close" type="button" aria-label="Close">
+      <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+        <line x1="4" y1="4" x2="16" y2="16" />
+        <line x1="16" y1="4" x2="4" y2="16" />
+      </svg>
+    </button>
+  </div>
+
+  <nav class="section-pills section-pills--rail" aria-label="On this page">
+    <a href="#overview" class="is-active" aria-current="true">Overview</a>
+    <a href="#problem">Problem</a>
+    <a href="#process">Process</a>
+    <a href="#design">Design</a>
+  </nav>
+
+  <main id="main-content">
+
+    <!-- ========================================================
+         FRONT-LOADED SCREENING FRAMEWORK. The page runs, in order:
+           1. Overview   title, the result with its quantified impact, the facts
+                         row, then ONE wide demo card (video + a one-line caption)
+           2. Problem    an artifact beside what wasn't working and why it mattered
+           3. Solution   the statement (the headline), a two-column row (the rule or
+                         model in words + a diagram), then the MOSAIC of artifacts
+                         that closes the case study
+           then the closing invitation (your email) and Additional Work, two Work
+           cards to explore next.
+         A screener should have the title, role, scope and result before the first
+         scroll. DELETE any facts row you don't have; never guess. The left rail
+         (Overview / Problem / Solution) is the in-page nav on wide screens.
+         ======================================================== -->
+
+    <!-- 1. OVERVIEW -------------------------------------------------------------->
+    <section class="page-section" id="overview" aria-labelledby="project-title">
+      <div class="site-container project-masthead" data-reveal-group>
+
+        <!-- The title, the result, then the facts as one horizontal row of EQUAL
+             columns. Timeline, Role and Results are ONE <dd> (a single line;
+             Timeline reads "N months &middot; Year"). TEAM and SKILLS are LISTS: one
+             <dd> per entry, stacked. Delete a column you don't have and the rest
+             re-divide the row. The labels are eyebrow type (13px uppercase). -->
+        <h1 class="section-title" id="project-title" data-reveal data-reveal-order="0">Spatial History for Conversational AI</h1>
+
+        <div class="about-body project-result" data-reveal data-reveal-order="2">
+          <p>I designed and built Threadscape, a functional prototype that reimagines linear AI chat history as a spatial canvas of connected themes. Powered by <a href="https://deepmind.google/models/gemma/gemma-4/" target="_blank" rel="noopener">Gemma 4<span class="visually-hidden"> (opens in new tab)</span></a>, it explores how people can connect related conversations, trace how their thinking evolves, and return to ideas without starting from scratch.</p>
+          <p>I designed a flexible information architecture that organizes conversations by theme, reveals relationships between ideas, and supports continuity as thoughts evolve over time.</p>
+        </div>
+
+        <dl class="project-facts" data-reveal data-reveal-order="3">
+          <div class="project-facts-col">
+            <dt>Timeline</dt>
+            <dd>5 weeks &middot; 2026</dd>
+          </div>
+          <div class="project-facts-col">
+            <dt>Role</dt>
+            <dd>Product Designer</dd>
+          </div>
+          <div class="project-facts-col">
+            <dt>Project</dt>
+            <dd>Independent exploration</dd>
+          </div>
+          <div class="project-facts-col">
+            <dt>Built With</dt>
+            <dd>Claude Code</dd>
+            <dd>React</dd>
+            <dd>TypeScript</dd>
+            <dd>Gemma 4</dd>
+          </div>
+          <div class="project-facts-col">
+            <dt>Skills</dt>
+            <dd>Interaction</dd>
+            <dd>Systems</dd>
+            <dd>AI Prototyping</dd>
+          </div>
+        </dl>
+
+        <!-- WIDE CARD: the live prototype, so people can try it straight away. A poster and a "Try the
+             prototype" button; the iframe is only created on click (initEmbed in js/main.js), so scrolling
+             past costs nothing. At 768px and under the button opens the demo in a new tab. Poster:
+             ../images/threadscape-embed-poster.jpg (16:9); without it the frame stays grey. -->
+        <figure class="project-wide-card" data-reveal data-reveal-order="4">
+          <div class="project-wide-card-media project-embed" data-embed data-src="https://ammerallj.github.io/threadscape-demo/">
+            <img class="project-embed-poster" src="../images/threadscape-embed-poster.jpg" width="1920" height="1080" alt="The Threadscape canvas: themes as orbs, with the input below." onerror="this.remove()" />
+            <button class="project-embed-btn" type="button">Try the prototype</button>
+          </div>
+          <figcaption class="project-wide-card-caption">The core loop: type, talk, leave. <a href="https://ammerallj.github.io/threadscape-demo/" target="_blank" rel="noopener">Open full screen<span class="visually-hidden"> (opens in new tab)</span></a></figcaption>
+        </figure>
+
+      </div>
+    </section>
+
+    <!-- 2. PROBLEM ---------------------------------------------------------------->
+    <section class="page-section" id="problem" aria-labelledby="problem-heading">
+      <div class="site-container">
+        <div class="project-block project-block--center" data-reveal-group>
+          <!-- The left column holds an ARTIFACT, not a visible heading: the rail
+               already names the section. The h2 stays (visually hidden) for screen
+               readers and the outline. The artifact is a PORTRAIT chat sidebar, built as live
+               HTML (.problem-sidebar, sized in cqw so it scales sharply) (1333x2000) capped at 360px wide; the text beside it centres on it. -->
+          <div class="project-block-left">
+            <h2 class="visually-hidden" id="problem-heading">Problem</h2>
+            <figure class="project-bento-tile project-problem-artifact project-problem-artifact--portrait" data-reveal data-reveal-order="0">
+              <div class="project-bento-media"><div class="problem-sidebar" role="img" aria-label="A chat app&rsquo;s sidebar: five project folders (Work, Personal Projects, Travel, Home, Finances) above a long Recents list of loose threads, such as &ldquo;Rewrite portfolio case study intro&rdquo;, &ldquo;Compare two job opportunities&rdquo; and &ldquo;Plan Japan trip budget&rdquo;.">
+<span class="ps-panel" style="left:25.731cqw;top:12.978cqw;width:48.837cqw;height:124.006cqw"></span>
+<span class="ps-label" style="left:30.008cqw;top:18.830cqw">Projects<svg class="ps-chev" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6l5 5 5-5"/></svg></span>
+<span class="ps-hl" style="left:27.982cqw;top:28.582cqw;width:44.411cqw;height:6.302cqw"></span>
+<span class="ps-folder" style="left:30.383cqw;top:24.906cqw"><svg class="ps-icon" viewBox="0 0 24 22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 6.2c0-1.5 1.1-2.4 2.5-2.4h4.1c.6 0 1.1.3 1.5.8l.9 1.1h7.5c1.4 0 2.5.9 2.5 2.4v8.3c0 1.5-1.1 2.4-2.5 2.4H5c-1.4 0-2.5-.9-2.5-2.4z"/><path d="M2.5 9h19"/></svg><span class="ps-text">Work</span></span>
+<span class="ps-folder" style="left:30.383cqw;top:31.808cqw"><svg class="ps-icon" viewBox="0 0 24 22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 6.2c0-1.5 1.1-2.4 2.5-2.4h4.1c.6 0 1.1.3 1.5.8l.9 1.1h7.5c1.4 0 2.5.9 2.5 2.4v8.3c0 1.5-1.1 2.4-2.5 2.4H5c-1.4 0-2.5-.9-2.5-2.4z"/><path d="M2.5 9h19"/></svg><span class="ps-text">Personal Projects</span></span>
+<span class="ps-folder" style="left:30.383cqw;top:38.785cqw"><svg class="ps-icon" viewBox="0 0 24 22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 6.2c0-1.5 1.1-2.4 2.5-2.4h4.1c.6 0 1.1.3 1.5.8l.9 1.1h7.5c1.4 0 2.5.9 2.5 2.4v8.3c0 1.5-1.1 2.4-2.5 2.4H5c-1.4 0-2.5-.9-2.5-2.4z"/><path d="M2.5 9h19"/></svg><span class="ps-text">Travel</span></span>
+<span class="ps-folder" style="left:30.383cqw;top:45.536cqw"><svg class="ps-icon" viewBox="0 0 24 22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 6.2c0-1.5 1.1-2.4 2.5-2.4h4.1c.6 0 1.1.3 1.5.8l.9 1.1h7.5c1.4 0 2.5.9 2.5 2.4v8.3c0 1.5-1.1 2.4-2.5 2.4H5c-1.4 0-2.5-.9-2.5-2.4z"/><path d="M2.5 9h19"/></svg><span class="ps-text">Home</span></span>
+<span class="ps-folder" style="left:30.383cqw;top:52.213cqw"><svg class="ps-icon" viewBox="0 0 24 22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 6.2c0-1.5 1.1-2.4 2.5-2.4h4.1c.6 0 1.1.3 1.5.8l.9 1.1h7.5c1.4 0 2.5.9 2.5 2.4v8.3c0 1.5-1.1 2.4-2.5 2.4H5c-1.4 0-2.5-.9-2.5-2.4z"/><path d="M2.5 9h19"/></svg><span class="ps-text">Finances</span></span>
+<span class="ps-act" style="left:61.815cqw;top:31.808cqw"><svg class="ps-dots" viewBox="0 0 24 8" fill="currentColor" aria-hidden="true"><circle cx="3" cy="4" r="2.2"/><circle cx="12" cy="4" r="2.2"/><circle cx="21" cy="4" r="2.2"/></svg></span><span class="ps-act" style="left:67.667cqw;top:31.808cqw"><svg class="ps-edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H6.5A2.5 2.5 0 0 0 4 6.5v11A2.5 2.5 0 0 0 6.5 20h11a2.5 2.5 0 0 0 2.5-2.5V13"/><path d="M17.5 3.5a2.1 2.1 0 0 1 3 3L12 15l-4 1 1-4z"/></svg></span>
+<span class="ps-label ps-label--small" style="left:30.458cqw;top:61.590cqw">Recents</span>
+<span class="ps-thread" style="left:30.458cqw;top:66.992cqw">Rewrite portfolio case study intro</span>
+<span class="ps-thread" style="left:30.458cqw;top:71.943cqw">Compare two job opportunities</span>
+<span class="ps-thread" style="left:30.458cqw;top:77.494cqw">Plan Japan trip budget</span>
+<span class="ps-thread" style="left:30.458cqw;top:82.971cqw">Summarize notes on AI memory</span>
+<span class="ps-thread" style="left:30.458cqw;top:88.522cqw">Figure out condo repair options</span>
+<span class="ps-thread" style="left:30.458cqw;top:94.074cqw">Draft follow-up message to recruiter</span>
+<span class="ps-thread" style="left:30.458cqw;top:99.625cqw">Brainstorm side project ideas</span>
+<span class="ps-thread" style="left:30.458cqw;top:105.251cqw">Research hearing aid features</span>
+<span class="ps-thread" style="left:30.458cqw;top:110.878cqw">Meal prep ideas for the week</span>
+<span class="ps-thread" style="left:30.458cqw;top:116.579cqw">Update apartment organization plan</span>
+<span class="ps-thread" style="left:30.458cqw;top:122.281cqw">Reading list for product design</span>
+<span class="ps-thread" style="left:30.458cqw;top:127.907cqw">Check flight options to Tokyo</span>
+</div></div>
+            </figure>
+          </div>
+          <div class="project-block-right" data-reveal data-reveal-order="2">
+            <div class="about-body">
+              <p>AI chat history makes it difficult to reconnect ideas across conversations. As I used AI to explore design concepts, research, and personal interests, I found myself creating new threads for related ideas and struggling to remember where earlier thinking lived.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RESEARCH. Added for the exploration case study; the template has no research slot. One
+         source: Whittaker et al., "Am I wasting my time organizing email?", CHI 2011 (345 users).
+         Notes in docs/research-ai-chat-usage.md in the Threadscape repo. -->
+    <section class="page-section" aria-labelledby="research-heading">
+      <div class="site-container">
+        <div class="project-block project-block--wide-left" data-reveal-group>
+          <div class="project-block-left">
+            <h2 class="section-title" id="research-heading" data-reveal data-reveal-order="0">What if AI chat history organized itself around ideas,&nbsp;not&nbsp;threads?</h2>
+          </div>
+          <div class="project-block-right" data-reveal data-reveal-order="2">
+            <div class="about-body">
+              <p>A study of 345 people found that frequent filers weren&rsquo;t better at finding information again, while automatic grouping helped. (Whittaker et al., 2011)</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- EXPLORATION. Added for the exploration case study. A full-width carousel (no visible heading;
+         the carousel says it): one 16:9 frame per decision with its description below (the
+         .project-explore* styles and initExploreCarousel are new, for this page). Each slide's
+         "Visual:" comment says what to film. Source: section 8 of docs/case-study-decisions.md. -->
+    <section class="page-section" id="process" aria-labelledby="exploration-heading">
+      <div class="site-container">
+        <h2 class="visually-hidden" id="exploration-heading">Process</h2>
+
+        <noscript><style>.project-explore-slide:first-child{opacity:1;visibility:visible}</style></noscript>
+        <div class="project-explore" data-explore data-reveal-group>
+          <div class="project-explore-track" data-reveal tabindex="0" role="group" aria-roledescription="carousel" aria-label="Process">
+            <!-- Visual: the phone-note sketch and the notes that went with it (cropped screenshots, three portrait panels) -->
+            <figure class="project-explore-slide" id="explore-slide-1" role="group" aria-roledescription="slide" aria-label="1 of 4">
+              <div class="project-explore-media project-explore-media--notes">
+                <div class="project-explore-notes">
+                  <img src="../images/threadscape-notes-1.jpg" width="923" height="1668" alt="A phone-note sketch on a black canvas: five white hand-drawn orbs of different sizes and one wide input bar drawn in blue." loading="lazy" />
+                  <img src="../images/threadscape-notes-2.jpg" width="923" height="1668" alt="Notes titled Reimagining AI Conversations: each circle represents a collection or theme of thoughts on an expansive canvas, with a text input as the primary interface." loading="lazy" />
+                  <img src="../images/threadscape-notes-3.jpg" width="923" height="1668" alt="Notes on visualized cues and state transitions: typing dims the background orbs, and when the system recognizes a similar orb it presents a cue and highlights it." loading="lazy" />
+                </div>
+              </div>
+              <figcaption class="project-explore-text">
+                <h3 class="project-explore-title"><span>01 &mdash;</span> <span>Starting with a sketch and notes</span> <span class="project-explore-mirror" aria-hidden="true">01 &mdash;</span></h3>
+                <p>I started in my Notes app with orbs as themes on an open canvas and one text input. My&nbsp;notes&nbsp;already&nbsp;described&nbsp;dimming the other orbs while typing and highlighting a matched one.</p>
+              </figcaption>
+            </figure>
+            <!-- Visual: the Figma Make editor (the prompt in its sidebar, from a screenshot) behind the prototype running in a browser window (a recording) -->
+            <figure class="project-explore-slide" id="explore-slide-2" role="group" aria-roledescription="slide" aria-label="2 of 4">
+              <div class="project-explore-media project-explore-media--stack">
+                <div class="project-explore-editor">
+                  <img src="../images/threadscape-process-figma-editor.jpg" width="1800" height="1047" alt="The Figma Make editor: the brief entered as a prompt in the sidebar, with the sketch among the reference thumbnails." loading="lazy" />
+                  <span class="project-explore-editor-url" aria-hidden="true">localhost:8443</span>
+                  <video class="project-bento-video" src="../images/threadscape-process-figmamake-canvas.mp4" poster="../images/threadscape-process-figmamake-canvas-poster.jpg" width="1750" height="1383" muted loop playsinline preload="metadata" aria-label="The Figma Make prototype running in the editor's preview: the canvas fills with orbs, typing about a career direction matches the Career direction orb and shows a cue offering to continue the earlier thought or start fresh, and continuing opens that conversation."></video>
+                </div>
+              </div>
+              <figcaption class="project-explore-text">
+                <h3 class="project-explore-title"><span>02 &mdash;</span> <span>A lo-fi prototype in Figma Make</span> <span class="project-explore-mirror" aria-hidden="true">02 &mdash;</span></h3>
+                <p>I turned the brief into a first prototype in Figma Make, with my sketch as the composition reference. It&nbsp;proved&nbsp;the&nbsp;cue:&nbsp;type, see a matching theme, choose Continue or Start fresh. It also showed what it couldn&rsquo;t do: it had no motion, and every layer replaced the canvas.</p>
+              </figcaption>
+            </figure>
+            <!-- Visual: Claude Code beside the running prototype, with the lab's state bar (a trimmed screen recording) -->
+            <figure class="project-explore-slide" id="explore-slide-3" role="group" aria-roledescription="slide" aria-label="3 of 4">
+              <div class="project-explore-media project-explore-media--stack">
+                <div class="project-explore-cc" role="group" aria-label="Claude Code beside the running prototype">
+                  <div class="project-explore-cc-chat" aria-hidden="true">
+                    <div class="cc-head">
+                      <span class="cc-dots"><i></i><i></i><i></i></span>
+                      <svg class="cc-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="12" height="10" rx="2"/><path d="M6 3v10"/></svg>
+                      <svg class="cc-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M13 8H3m4-4L3 8l4 4"/></svg>
+                      <span class="cc-title">Threadscape <svg viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l4 4 4-4"/></svg></span>
+                      <span class="cc-head-end"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><rect x="2.5" y="2.5" width="11" height="11" rx="2"/><path d="M8 5v4M6 7h4M6 11h4"/></svg><span class="cc-pane-btn"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><circle cx="8" cy="8" r="6"/><path d="M2 8h12M8 2c2 2 2 10 0 12M8 2c-2 2-2 10 0 12"/></svg></span><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"><path d="M2 4.5A1.5 1.5 0 0 1 3.5 3h3l1.5 1.5h4.5A1.5 1.5 0 0 1 14 6v6a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 2 12z"/></svg><svg viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="3.5" r="1.1"/><circle cx="8" cy="8" r="1.1"/><circle cx="8" cy="12.5" r="1.1"/></svg></span>
+                    </div>
+                    <div class="cc-thread">
+                      <p class="cc-user">Before we lock anything in, give me a lab: a state bar and sliders so I can test the motion by feel.</p>
+                      <p class="cc-tool">Edited LabPanel.tsx <span>&rsaquo;</span></p>
+                      <p class="cc-ai">Added a lab bar along the bottom. It jumps between states, and its tabs (Orbs, Hover, Pan) hold the sliders.</p>
+                      <p class="cc-user">Can you test the hover states yourself?</p>
+                      <p class="cc-ai">Jumping to Canvas with the state bar, then hovering each orb.</p>
+                      <p class="cc-tool">Used 2 tools <span>&rsaquo;</span></p>
+                      <p class="cc-ai">Found the issue: the click landed before the orb registered as hovered, so the Open pill wasn&rsquo;t visible yet to receive it. Now I&rsquo;ll check what&rsquo;s resetting the hovered state after a body click.</p>
+                      <p class="cc-tool">Hovered, ran page script, clicked <span>&rsaquo;</span></p>
+                      <p class="cc-ai">That click missed since the orb had drifted toward the cursor by the time it landed&mdash;the automation clicks too fast for the hover state to trigger first. I&rsquo;ll fix this by measuring positions right before acting, hovering over the orb, then clicking.</p>
+                    </div>
+                    <div class="cc-input"><span class="cc-plus">+</span><span>Type / for commands</span><span class="cc-input-end"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="10" cy="10" r="8"/><rect x="7" y="7" width="6" height="6" rx="1" fill="currentColor" stroke="none"/></svg><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="7" y="2.5" width="6" height="10" rx="3"/><path d="M4 9.5a6 6 0 0 0 12 0M10 15.5V18"/></svg></span></div>
+                    <div class="cc-foot"><span>Auto</span><span class="cc-model">Sonnet 5.5 &nbsp;Medium<svg class="cc-spin" viewBox="0 0 20 20" fill="none" stroke-width="2"><circle cx="10" cy="10" r="7.5" stroke="#d9d9d9"/><path d="M10 2.5a7.5 7.5 0 0 1 7.2 5.4" stroke="#4f8ae6" stroke-linecap="round"/></svg></span></div>
+                  </div>
+                  <div class="project-explore-cc-pane">
+                    <div class="cc-tabs" aria-hidden="true">
+                      <span class="cc-tab cc-tab--on"><img class="cc-i" src="../images/chrome/globe.png" alt="" width="40" height="40" /><span class="cc-tab-t">Threadscape</span><img class="cc-i" src="../images/chrome/x.png" alt="" width="40" height="40" /></span>
+                      <img class="cc-i cc-plus2" src="../images/chrome/plus.png" alt="" width="40" height="40" />
+                      <span class="cc-tabs-end"><img class="cc-i" src="../images/chrome/layout.png" alt="" width="40" height="40" /><img class="cc-i" src="../images/chrome/dots.png" alt="" width="40" height="40" /><img class="cc-i" src="../images/chrome/expand.png" alt="" width="40" height="40" /><img class="cc-i" src="../images/chrome/close.png" alt="" width="40" height="40" /></span>
+                    </div>
+                    <div class="cc-nav" aria-hidden="true">
+                      <img class="cc-i" src="../images/chrome/back.png" alt="" width="40" height="40" /><img class="cc-i" src="../images/chrome/fwd.png" alt="" width="40" height="40" /><img class="cc-i" src="../images/chrome/reload.png" alt="" width="40" height="40" />
+                      <span class="cc-url">localhost:5173<span class="cc-url-path">/</span></span>
+                      <img class="cc-i" src="../images/chrome/cursor.png" alt="" width="40" height="40" />
+                    </div>
+                    <video class="project-bento-video" src="../images/threadscape-process-lab-pane.mp4" poster="../images/threadscape-process-lab-pane-poster.jpg" width="1500" height="1170" muted loop playsinline preload="metadata" aria-label="An early build of the prototype with the lab open: the size and count sliders resize and add orbs, and the hover sliders change how an orb swells under the cursor."></video>
+                  </div>
+                </div>
+              </div>
+              <figcaption class="project-explore-text">
+                <h3 class="project-explore-title"><span>03 &mdash;</span> <span>Building in Claude Code, with a lab</span> <span class="project-explore-mirror" aria-hidden="true">03 &mdash;</span></h3>
+                <p>I rebuilt it in code with Claude Code. Before locking anything in, I asked for a lab: a state bar and sliders to test motion and visuals by feel. It&nbsp;also&nbsp;let&nbsp;Claude&nbsp;drive the same states while we debugged.</p>
+              </figcaption>
+            </figure>
+            <!-- Visual: a real Gemma reply in the thread (left), and a real excerpt of guardrails.ts (right) -->
+            <figure class="project-explore-slide" id="explore-slide-4" role="group" aria-roledescription="slide" aria-label="4 of 4">
+              <div class="project-explore-media project-explore-media--pair">
+                <video class="project-bento-video" src="../images/threadscape-explore-5.mp4" poster="../images/threadscape-explore-5-poster.jpg" width="1200" height="1350" muted loop playsinline preload="metadata" aria-label="In the Home theme&rsquo;s Kitchen lighting thread, asked about repainting the kitchen, the model brings back the theme&rsquo;s earlier idea that the kitchen now comes after the exterior work, then advises waiting to paint until the waterproofing is done."></video>
+                <div class="project-explore-code" role="img" aria-label="A plain-language summary of the model's guardrails: it brings earlier ideas from the theme back as insights, answers questions outside the theme directly, sees only this thread and the theme's synthesis, does not remember past chats, replies in one paragraph of two to five sentences with at most one question, cannot browse or take actions, declines harmful requests and never reveals its own rules; limits of 10 exchanges per visitor per day and 2,000 characters a message.">
+                  <div class="pc-window" aria-hidden="true">
+                    <div class="pc-bar"><span class="pc-dots"><i></i><i></i><i></i></span><span class="pc-name">guardrails.txt</span></div>
+                    <code class="pc-code"><span class="pc-line pc-dim">// summarised from guardrails.ts</span><span class="pc-line pc-line--hl"><span class="pc-key">theme</span>: <span class="pc-str">brings earlier ideas back as insights</span></span><span class="pc-line"><span class="pc-key">outside the theme</span>: <span class="pc-str">answers it directly</span></span><span class="pc-line"><span class="pc-key">this thread</span>: <span class="pc-str">sees it, plus the theme&rsquo;s synthesis</span></span><span class="pc-line"><span class="pc-key">past chats</span>: <span class="pc-str">not remembered</span></span><span class="pc-line"><span class="pc-key">replies</span>: <span class="pc-str">one paragraph, 2&ndash;5 sentences</span></span><span class="pc-line"><span class="pc-key">questions</span>: <span class="pc-str">at most one per reply</span></span><span class="pc-line"><span class="pc-key">can&rsquo;t</span>: <span class="pc-str">browse or take actions</span></span><span class="pc-line"><span class="pc-key">harmful asks</span>: <span class="pc-str">declined, briefly</span></span><span class="pc-line"><span class="pc-key">its own rules</span>: <span class="pc-str">never revealed</span></span><span class="pc-line pc-dim">// and the limits</span><span class="pc-line"><span class="pc-key">per visitor</span>: <span class="pc-str">10 exchanges / 24h</span></span><span class="pc-line"><span class="pc-key">per message</span>: <span class="pc-str">2,000 characters</span></span></code>
+                  </div>
+                </div>
+              </div>
+              <figcaption class="project-explore-text">
+                <h3 class="project-explore-title"><span>04 &mdash;</span> <span>Hooking up the LLM</span> <span class="project-explore-mirror" aria-hidden="true">04 &mdash;</span></h3>
+                <p>The demo runs Gemma 4 on Cloudflare&rsquo;s servers, behind a small program that holds the rules and limits each visitor to 10 exchanges. The&nbsp;cap&nbsp;first&nbsp;lived&nbsp;in the browser tab, where a reload cleared it, so I moved it to the server.</p>
+              </figcaption>
+            </figure>
+
+          </div>
+          <!-- Over the frame area only (16:9, like the slides' frames): invisible hit zones on the left and right
+               that become an arrow cursor on hover (touch: swipe instead), and a translucent dot pagination
+               at the bottom of the frame. -->
+          <div class="project-explore-ui">
+            <button class="project-explore-zone project-explore-zone--prev" type="button" data-explore-prev aria-label="Previous"></button>
+            <button class="project-explore-zone project-explore-zone--next" type="button" data-explore-next aria-label="Next"></button>
+            <div class="project-carousel-dots" role="group" aria-label="Choose a slide">
+              <button class="project-carousel-dot is-active" type="button" data-explore-dot aria-label="Slide 1" aria-current="true"></button>
+              <button class="project-carousel-dot" type="button" data-explore-dot aria-label="Slide 2"></button>
+              <button class="project-carousel-dot" type="button" data-explore-dot aria-label="Slide 3"></button>
+              <button class="project-carousel-dot" type="button" data-explore-dot aria-label="Slide 4"></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. SOLUTION --------------------------------------------------------------->
+    <section class="page-section page-section--statement-first" id="design" aria-labelledby="solution-heading">
+      <div class="site-container">
+
+        <!-- The STATEMENT is the section's headline (the rail already names the
+             section): full width, at the chapter-heading size. -->
+        <div data-reveal-group>
+          <h2 class="project-statement" id="solution-heading" data-reveal data-reveal-order="0">I designed a canvas where each idea is its own space, and a new thought finds its way back to the right one.</h2>
+        </div>
+
+        <!-- THE MOSAIC calls out the design's features and interactions: a 6-column bento (tile classes: none
+             = 2 wide, --half 3, --wide 4, --full 6, --tall spans 2 rows, --solo
+             takes a full row at 768). A row must add to 6. This one is 4 + 2 with a
+             tall tile spanning both rows, then 2 + 2 under the wide tile.
+             CAPTIONS ARE TOOLTIPS: each figcaption is hidden until the tile is
+             hovered, then follows the cursor in a blurred black pill sized to its
+             text (touch screens show it as a bar along the bottom). Keep them to a
+             few words. Give every image real alt text and every video an
+             aria-label. The mosaic clips play on hover (muted, looping, rewound on leave); on touch they play while on screen. -->        <div class="project-bento project-bento--under-statement" data-reveal-group>
+          <!-- TWO ROWS. Top: a stack (the typing recording at 16:9, then a pair of small cards: hover swell and the Arrange menu) beside the fold-in card,
+               which stretches to the stack's height. Bottom: dark mode and reassign at one shared height so their tops and bottoms line up. Cards that show a
+               corner of the prototype set the whole window on the grey, anchored to that corner or edge (.bento-win). -->
+          <div class="project-bento-col">
+            <figure class="project-bento-tile" data-reveal>
+            <div class="project-bento-media project-bento-media--clip"><video class="project-bento-video" src="../images/threadscape-mosaic-typing-preview.mp4" poster="../images/threadscape-mosaic-typing-preview-poster.jpg" width="1200" height="676" muted loop playsinline preload="metadata" aria-label="Typing &ldquo;Applying for jobs and prepping for the recruiter interview&rdquo; into the input at the centre. The other orbs fade back, the Job search orb lights, and the input offers Continue in Job search or New chat."></video></div>
+            <figcaption class="project-bento-caption">Typing previews where it will land</figcaption>
+          </figure>
+            <div class="project-bento-pair project-bento-pair--wide-first">
+            <figure class="project-bento-tile" data-reveal>
+              <div class="project-bento-media project-bento-media--clip project-bento-media--r43 project-bento-media--grey"><div class="bento-win bento-win--corner-tr bento-win--zoom-m"><img src="../images/threadscape-mosaic-reassign.jpg" width="2400" height="1350" loading="lazy" alt="A thread&rsquo;s overflow menu open on Reassign, with the list of themes beside it: Portfolio positioning, Career direction (checked), AI interaction ideas, Job search, Travel and Home, each with its colour dot."></div></div>
+              <figcaption class="project-bento-caption">Override a thread's theme</figcaption>
+            </figure>
+            <figure class="project-bento-tile" data-reveal>
+              <div class="project-bento-media project-bento-media--clip project-bento-media--fill project-bento-media--grey"><div class="bento-win bento-win--corner-tr bento-win--zoom"><img src="../images/threadscape-mosaic-arrange.jpg" width="2400" height="1350" loading="lazy" alt="The home canvas with the Arrange themes menu open from the top right: By activity, selected, and Recent first, above the six theme orbs."></div></div>
+              <figcaption class="project-bento-caption">Sort themes</figcaption>
+            </figure>
+          </div>
+          </div>
+          <figure class="project-bento-tile project-bento-tile--half" data-reveal>
+            <div class="project-bento-media project-bento-media--clip project-bento-media--fill project-bento-media--grey"><div class="bento-win bento-win--corner-tr"><video class="project-bento-video" src="../images/threadscape-mosaic-dark.mp4" poster="../images/threadscape-mosaic-dark-poster.jpg" width="1920" height="1080" muted loop playsinline preload="metadata" aria-label="Inside the Career direction theme, the moon control is pressed. A wash radiates out from it, the cards fold to dots and come back dark, with the theme&rsquo;s colour tinting the edges. Pressing it again returns to light."></video></div></div>
+            <figcaption class="project-bento-caption">Light and dark, tinted by the theme</figcaption>
+          </figure>
+          <figure class="project-bento-tile project-bento-tile--half" data-reveal>
+              <div class="project-bento-media project-bento-media--clip project-bento-media--r43 project-bento-media--grey"><div class="bento-win bento-win--top-center" data-pan-from="2.3" data-pan-to="4.0"><video class="project-bento-video" src="../images/threadscape-mosaic-fold-in.mp4" poster="../images/threadscape-mosaic-fold-in-poster.jpg" width="2400" height="1350" muted loop playsinline preload="metadata" aria-label="Inside the Salary and comp research thread, the back chevron is pressed. The conversation fades and the thread&rsquo;s card lands back among the Career direction theme&rsquo;s cards."></video></div></div>
+              <figcaption class="project-bento-caption">Leaving a thread folds it back in</figcaption>
+            </figure>
+          <figure class="project-bento-tile project-bento-tile--half" data-reveal>
+            <div class="project-bento-media project-bento-media--clip project-bento-media--r43"><video class="project-bento-video" src="../images/threadscape-mosaic-hover-swell.mp4" poster="../images/threadscape-mosaic-hover-swell-poster.jpg" width="1200" height="900" muted loop playsinline preload="metadata" aria-label="A single orb, Portfolio positioning. The cursor arrives and it swells and shows an open arrow, then it settles back as the cursor leaves."></video></div>
+            <figcaption class="project-bento-caption">The orb swells as you approach</figcaption>
+          </figure>
+        </div>
+
+        <!-- Outcome copy, under the mosaic: two columns (what's built in, what's still to validate), each a
+             title and a line. Replaces the separate Guardrails and What's next sections. The list's own
+             top margin (--gap-group) is the gap under the mosaic. -->
+        <div data-reveal-group>
+          <h2 class="project-statement project-statement--tight" id="outcome-copy-heading" data-reveal>Designing for trust and learning what to validate.</h2>
+        </div>
+        <ul class="project-decisions project-decisions--two" role="list" data-reveal-group>
+          <li data-reveal>
+            <h3 class="project-decision-title">Keeping context trustworthy</h3>
+            <div class="about-body"><p>I introduced guardrails to prevent invented context, preserve conversation history, and let people start fresh.</p></div>
+          </li>
+          <li data-reveal>
+            <h3 class="project-decision-title">Testing the interaction model</h3>
+            <div class="about-body"><p>Next, I&rsquo;d test whether people revisit ideas across conversations and whether theme matching helps them reconnect.</p></div>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- CLOSING INVITATION — the page ends on an invitation to ask for the full
+         study, set in the homepage Contact lockup (same type, size, weight and
+         arrow) but in the page's ink instead of white. The EMAIL is the large heading and the mailto
+         link, like Contact's; the invitation line is secondary, beneath it. Delete the block if there is no deeper version.
+         If a password-gated Figma deck exists, link it from the sentence below,
+         never the password itself, and first confirm in a private window that
+         the deck prompts for one ("Anyone with password", not "Anyone with the
+         link"). -->
+    <section class="page-section case-closing-section" aria-labelledby="closing-heading">
+      <div class="site-container case-closing" data-reveal-group>
+        <h2 class="case-closing-heading" id="closing-heading" data-reveal><a href="mailto:ammerallj@gmail.com?subject=Threadscape%20case%20study">ammerallj@gmail.com<svg class="case-closing-arrow" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M6 18L18 6M8.5 6H18V15.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a></h2>
+        <p class="case-closing-text" data-reveal>Want the full story, including everything I changed my mind about along the way? Let&rsquo;s chat. Or <a href="https://ammerallj.github.io/threadscape-demo/" target="_blank" rel="noopener">try the prototype<span class="visually-hidden"> (opens in new tab)</span></a>.</p>
+      </div>
+    </section>
+
+    <!-- ADDITIONAL WORK — replaces the single "Next case study" pager: two of the
+         homepage's Work cards, side by side at equal width, as the case studies to
+         explore next. Same card markup and behaviour as the homepage (hover media
+         loads on first hover; the Accessibility card opens its password-protected
+         deck in a new tab; Loop is parked, as on the homepage). It keeps the
+         .next-case-section class so the faint hairline above it still applies. -->
+    <section class="page-section next-case-section additional-work" aria-labelledby="additional-work-heading">
+      <div class="site-container">
+        <h2 class="section-title" id="additional-work-heading">Additional Work</h2>
+        <ul class="additional-work-grid" role="list">
+          <li class="work-card" data-reveal-group>
+            <a class="work-card-link" data-reveal>
+              <div class="work-card-media" style="--media-ratio: 3 / 2">
+                <img class="work-card-cover" src="../images/loop-cover-card.jpg?v=1" width="2040" height="1200" alt="" loading="lazy" />
+                <img class="work-card-hover" data-hover-src="../images/loop-cover-card.gif?v=1" width="2040" height="1200" alt="" aria-hidden="true" />
+              </div>
+              <div class="work-card-text">
+                <div class="work-card-swap">
+                  <h2 class="work-card-title">Microsoft Loop <span class="work-card-year">/ 2022</span></h2>
+                  <p class="work-card-description">Designing 0&rarr;1 collaborative primitive that works across apps.</p>
+                </div>
+                <div class="work-card-meta">
+                  <span class="work-card-status work-card-status--lock"><svg class="work-card-lock-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><rect x="4" y="9" width="16" height="12" rx="4" stroke="currentColor" stroke-width="1.5"/><path d="M12 16L12 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 9V7C16 4.79086 14.2091 3 12 3C9.79086 3 8 4.79086 8 7L8 9" stroke="currentColor" stroke-width="1.5"/></svg><span class="visually-hidden">Full case study locked. </span></span>
+                </div>
+              </div>
+            </a>
+          </li>
+
+          <li class="work-card" data-reveal-group>
+            <a class="work-card-link" href="https://www.figma.com/deck/3ID7RXQRZUqKIDq6cGxGnY/Jenna-Portfolio-%E2%80%94-Portfolio-2026-B?node-id=1-42&amp;viewport=-129%2C-110%2C0.69&amp;t=REUsrarH3k2S5FDV-1&amp;scaling=min-zoom&amp;content-scaling=fixed&amp;page-id=0%3A1" target="_blank" rel="noopener" data-reveal>
+              <div class="work-card-media" style="--media-ratio: 3 / 2">
+                <img class="work-card-cover" src="../images/ax-card.jpg?v=3" width="1920" height="1303" alt="" loading="lazy" />
+                <img class="work-card-hover" data-hover-src="../images/ax-card.gif?v=3" width="1500" height="1018" alt="" aria-hidden="true" />
+              </div>
+              <div class="work-card-text">
+                <div class="work-card-swap">
+                  <h2 class="work-card-title">Accessibility on meta.com <span class="work-card-year">/ 2026</span></h2>
+                  <p class="work-card-description">Organizing accessibility features and support around people’s needs.</p>
+                </div>
+                <div class="work-card-meta">
+                  <span class="work-card-status work-card-status--lock"><svg class="work-card-lock-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><rect x="4" y="9" width="16" height="12" rx="4" stroke="currentColor" stroke-width="1.5"/><path d="M12 16L12 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 9V7C16 4.79086 14.2091 3 12 3C9.79086 3 8 4.79086 8 7L8 9" stroke="currentColor" stroke-width="1.5"/></svg><span class="visually-hidden">Full case study locked, opens in a new tab. </span></span>
+                </div>
+              </div>
+            </a>
+          </li>
+
+        </ul>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer site-footer--plain" role="contentinfo">
+    <div class="site-container">
+      <p><span class="footer-owner">&copy; 2026 Jenna Ammerall</span><span class="footer-sep"> &middot; </span><span class="footer-credit">Human directed. AI built.</span></p>
+    </div>
+  </footer>
+
+  <div class="meta-cursor" id="meta-cursor" aria-hidden="true">
+    <img src="../meta-logo.svg" alt="" />
+  </div>
+  <div class="ms-cursor" id="ms-cursor" aria-hidden="true">
+    <img src="../microsoft-logo.svg" alt="" />
+  </div>
+  <div class="wave-cursor" id="wave-cursor" aria-hidden="true">👋</div>
+
+  <script src="../js/main.js?v=0c5f2295" defer></script>
+</body>
+</html>
