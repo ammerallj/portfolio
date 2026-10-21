@@ -2907,6 +2907,21 @@ function initArtifactVideos() {
   // Observe the video's FRAME, not the video: a video can be larger than the frame
   // that crops it (the lightweight-thread tile shows only the top ~37% of its
   // video), and the video's own visible ratio would never reach the threshold.
+  // The solution mosaic plays on HOVER where there is a hover: at rest each tile shows its first frame, the clip plays
+  // while the pointer is over the card and rewinds when it leaves, so the grid is not six loops at once. Touch screens
+  // have no hover, so they fall through to the play-when-visible rule below.
+  const canHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  const rest = [];
+  videos.forEach((v) => {
+    if (canHover && v.closest('.project-bento--under-statement')) {
+      const card = v.closest('figure') || v;
+      // Leaving reloads the clip, which puts its poster back (no seeking: the poster is the still the card rests on).
+      card.addEventListener('pointerenter', () => { const p = v.play(); if (p && p.catch) p.catch(() => {}); });
+      card.addEventListener('pointerleave', () => { v.pause(); v.load(); });
+    } else {
+      rest.push(v);
+    }
+  });
   const byFrame = new Map();
   const io = new IntersectionObserver((entries) => {
     entries.forEach((e) => {
@@ -2916,7 +2931,7 @@ function initArtifactVideos() {
       // starts from the top and plays through once; leaving rewinds it, so
       // scrolling away and back plays it once more.
       const once = v.hasAttribute('data-play-once');
-      if (e.isIntersecting) {
+      if (e.isIntersecting && !v.closest('.project-explore-slide:not(.is-active)')) {
         if (once) v.currentTime = 0;
         const p = v.play();
         if (p && p.catch) p.catch(() => {});
@@ -2926,8 +2941,10 @@ function initArtifactVideos() {
       }
     });
   }, { threshold: 0.4 });
-  videos.forEach((v) => {
-    const frame = v.parentElement || v;
+  rest.forEach((v) => {
+    // A video inside a .bento-win is a window larger than the card that crops it (the grey corner cards), so the
+    // frame to watch is the card (.project-bento-media), not the window.
+    const frame = (v.closest('.bento-win') && v.closest('.project-bento-media')) || v.parentElement || v;
     byFrame.set(frame, v);
     io.observe(frame);
   });
@@ -2999,6 +3016,42 @@ function initBentoTooltips() {
     });
   });
 }
+// ============================================================
+// BENTO PAN: a mosaic window with [data-pan-from] / [data-pan-to] (seconds into its clip) starts on the left, where the
+// cursor is, and eases to the middle of the card over that span, driven by the video's own clock so it stays in step
+// however the clip is paused, looped or seeked. It rests on the left under reduced motion.
+// ============================================================
+function initBentoPan() {
+  const wins = document.querySelectorAll('.bento-win[data-pan-from]');
+  if (!wins.length || reducedMotion.matches) return;
+  wins.forEach((win) => {
+    const video = win.querySelector('video');
+    const card = win.parentElement;
+    if (!video || !card) return;
+    const from = parseFloat(win.dataset.panFrom);
+    const to = parseFloat(win.dataset.panTo);
+    const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+    const gap = () => parseFloat(getComputedStyle(win).getPropertyValue('--win-gap')) || 0;
+    let raf = 0;
+    const apply = () => {
+      const p = ease(Math.min(1, Math.max(0, (video.currentTime - from) / (to - from))));
+      if (p === 0) { win.style.left = ''; return; }
+      const g = gap();
+      const endLeft = (card.clientWidth - win.offsetWidth) / 2;
+      win.style.left = (g + (endLeft - g) * p) + 'px';
+    };
+    const tick = () => { apply(); if (!video.paused && !video.ended) raf = requestAnimationFrame(tick); };
+    video.addEventListener('play', () => { cancelAnimationFrame(raf); tick(); });
+    ['seeked', 'timeupdate', 'pause'].forEach((ev) => video.addEventListener(ev, apply));
+    window.addEventListener('resize', apply);
+  });
+}
+try {
+  initBentoPan();
+} catch (e) {
+  console.warn('Bento pan unavailable:', e);
+}
+
 try {
   initBentoTooltips();
 } catch (e) {
@@ -3112,6 +3165,160 @@ function initOneCarousel(root) {
   start();
 }
 initCarousel();
+
+// ============================================================
+// EXPLORATION CAROUSEL (AI-conversation.html) — a scroll-snap track, so swipe and
+// trackpad work natively. This adds the left/right hit zones (an arrow cursor on
+// hover), the dot pagination and left/right arrow keys on the focused track. The active slide is whichever
+// one's left edge is nearest the track's scroll position.
+// ============================================================
+function initExploreCarousel() {
+  document.querySelectorAll('[data-explore]').forEach((root) => {
+    const track = root.querySelector('.project-explore-track');
+    const slides = Array.from(root.querySelectorAll('.project-explore-slide'));
+    const prev = root.querySelector('[data-explore-prev]');
+    const next = root.querySelector('[data-explore-next]');
+    const dots = Array.from(root.querySelectorAll('[data-explore-dot]'));
+    if (!track || slides.length < 2) return;
+
+    // Slides are stacked in one grid cell and cross-fade (CSS); the frame never moves.
+    const reduce = reducedMotion.matches;
+    let index = 0;
+    function current() { return index; }
+    function update() {
+      const i = index;
+      slides.forEach((el, k) => {
+        el.classList.toggle('is-active', k === i);
+        el.setAttribute('aria-hidden', k === i ? 'false' : 'true');
+        el.querySelectorAll('video').forEach((v) => {
+          if (k === i) {
+            if (!reduce) { v.currentTime = 0; const p = v.play(); if (p && p.catch) p.catch(() => {}); }
+          } else {
+            v.pause();
+          }
+        });
+      });
+      if (prev) prev.disabled = i === 0;
+      if (next) next.disabled = i === slides.length - 1;
+      dots.forEach((el, k) => {
+        el.classList.toggle('is-active', k === i);
+        if (k === i) el.setAttribute('aria-current', 'true');
+        else el.removeAttribute('aria-current');
+      });
+      // a zone that just went disabled under the pointer has nothing to offer: drop the cursor
+      if (cursorFor && cursorFor.disabled) hideCursor();
+    }
+    function go(i) {
+      const k = Math.max(0, Math.min(slides.length - 1, i));
+      if (k === index) return;
+      index = k;
+      update();
+    }
+    // touch: a horizontal swipe pages
+    let sx = null;
+    track.addEventListener('touchstart', (e) => { sx = e.touches[0].clientX; }, { passive: true });
+    track.addEventListener('touchend', (e) => {
+      if (sx === null) return;
+      const dx = e.changedTouches[0].clientX - sx;
+      sx = null;
+      if (Math.abs(dx) > 40) go(index + (dx < 0 ? 1 : -1));
+    }, { passive: true });
+
+    // The arrow cursor: one disc that follows the pointer while it is over an enabled zone.
+    let cursor = null;
+    let cursorFor = null;
+    function hideCursor() {
+      cursorFor = null;
+      if (cursor) cursor.classList.remove('is-on');
+    }
+    if (window.matchMedia('(hover: hover)').matches) {
+      cursor = document.createElement('div');
+      cursor.className = 'project-explore-cursor';
+      cursor.setAttribute('aria-hidden', 'true');
+      cursor.innerHTML = '<div class="project-explore-cursor-disc"><svg viewBox="0 0 24 24" fill="none" focusable="false"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>';
+      document.body.appendChild(cursor);
+      [prev, next].forEach((zone) => {
+        if (!zone) return;
+        zone.addEventListener('pointerenter', (e) => {
+          if (zone.disabled) return;
+          cursorFor = zone;
+          cursor.classList.toggle('is-prev', zone === prev);
+          cursor.style.transform = 'translate(' + e.clientX + 'px,' + e.clientY + 'px)';
+          cursor.classList.add('is-on');
+        });
+        zone.addEventListener('pointermove', (e) => {
+          if (cursorFor !== zone) return;
+          cursor.style.transform = 'translate(' + e.clientX + 'px,' + e.clientY + 'px)';
+        });
+        zone.addEventListener('pointerleave', () => {
+          if (cursorFor === zone) hideCursor();
+        });
+      });
+    }
+
+    // Captions: each video's data-captions is [{ t, l, r? }] (from time t, left and right text); the frame's .project-explore-cap
+    // shows the segment the playhead is in. Text only changes when the segment does.
+    slides.forEach((slide) => {
+      const video = slide.querySelector('video[data-captions]');
+      const cap = slide.querySelector('.project-explore-cap');
+      if (!video || !cap) return;
+      let segs = [];
+      try { segs = JSON.parse(video.getAttribute('data-captions')); } catch (e) { return; }
+      const left = cap.querySelector('[data-cap-left]');
+      const right = cap.querySelector('[data-cap-right]');
+      let shown = -1;
+      function show() {
+        let k = 0;
+        segs.forEach((sg, i) => { if (video.currentTime >= sg.t) k = i; });
+        if (k === shown) return;
+        shown = k;
+        if (left) left.textContent = segs[k].l || '';
+        if (right) right.textContent = segs[k].r || '';
+      }
+      video.addEventListener('timeupdate', show);
+      show();
+    });
+
+    if (prev) prev.addEventListener('click', () => go(current() - 1));
+    if (next) next.addEventListener('click', () => go(current() + 1));
+    dots.forEach((dot, i) => dot.addEventListener('click', () => go(i)));
+    track.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') { e.preventDefault(); go(current() - 1); }
+      else if (e.key === 'ArrowRight') { e.preventDefault(); go(current() + 1); }
+    });
+    update();
+  });
+}
+initExploreCarousel();
+
+// ============================================================
+// PROTOTYPE EMBED (AI-conversation.html) — [data-embed] holds a poster and a button.
+// Pressing it swaps both for an iframe of data-src, so nothing loads until asked.
+// At 768px and under the demo is a desktop canvas in a phone-sized box, so the
+// button opens it in a new tab instead.
+// ============================================================
+function initEmbed() {
+  document.querySelectorAll('[data-embed]').forEach((root) => {
+    const btn = root.querySelector('.project-embed-btn');
+    const src = root.getAttribute('data-src');
+    if (!btn || !src) return;
+    btn.addEventListener('click', () => {
+      if (window.matchMedia('(max-width: 768px)').matches) {
+        window.open(src, '_blank', 'noopener');
+        return;
+      }
+      const frame = document.createElement('iframe');
+      frame.src = src;
+      frame.title = 'Threadscape prototype';
+      frame.setAttribute('allow', 'clipboard-write');
+      root.querySelector('.project-embed-poster')?.remove();
+      btn.remove();
+      root.appendChild(frame);
+      frame.focus();
+    });
+  });
+}
+initEmbed();
 
 const heroFadeScrollRange = 320;
 const scrollEffectDelay = 40;

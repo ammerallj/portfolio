@@ -1368,6 +1368,108 @@ a.intro-bar-name {
   aspect-ratio: 1153 / 2000;
 }
 
+/* The Problem still (a chat sidebar) in the original portrait frame, no outline. The image is shown larger than the
+   frame (150% of its width, centred and pinned near the top) so the panel's text reads; where the frame cuts it off,
+   the bottom fades out into the image's own grey. */
+.project-problem-artifact--portrait .project-bento-media {
+  position: relative;
+  background-color: #e7e7e9;
+}
+
+.project-problem-artifact--portrait .project-bento-media .problem-sidebar {
+  position: absolute;
+  top: -42px;
+  left: 50%;
+  width: 150%;
+  aspect-ratio: 1333 / 2000;
+  transform: translateX(-50%);
+  container-type: inline-size;
+  background: #e7e7e9;
+  color: #1c1c20;
+  font-family: var(--font-body, Inter, system-ui, sans-serif);
+}
+
+/* The chat sidebar as live HTML: every size is in cqw of the scene's width (1cqw = 13.33 px of the 1333px design), so
+   it stays sharp at any size. Positions are the design's own coordinates. */
+.problem-sidebar > span {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.problem-sidebar .ps-panel {
+  border-radius: 2.4cqw;
+  background: #f6f6f4;
+  box-shadow: 0 1.6cqw 5.5cqw rgba(0, 0, 0, 0.07);
+}
+
+.problem-sidebar .ps-hl {
+  border-radius: 1.6cqw;
+  background: #eeeeed;
+}
+
+.problem-sidebar .ps-label,
+.problem-sidebar .ps-folder,
+.problem-sidebar .ps-thread,
+.problem-sidebar .ps-act {
+  transform: translateY(-50%);
+}
+
+.problem-sidebar .ps-label {
+  gap: 1.1cqw;
+  font-size: 2.2cqw;
+  color: #8c8c91;
+}
+
+.problem-sidebar .ps-label--small {
+  font-size: 2.05cqw;
+}
+
+.problem-sidebar .ps-chev {
+  width: 1.75cqw;
+  height: 1.75cqw;
+}
+
+.problem-sidebar .ps-folder {
+  gap: 2.7cqw;
+  font-size: 2.2cqw;
+}
+
+.problem-sidebar .ps-icon {
+  width: 3.2cqw;
+  height: 2.95cqw;
+}
+
+.problem-sidebar .ps-thread {
+  font-size: 2.24cqw;
+}
+
+.problem-sidebar .ps-act {
+  color: #8c8c91;
+}
+
+.problem-sidebar .ps-dots {
+  width: 2.6cqw;
+  height: 0.9cqw;
+}
+
+.problem-sidebar .ps-edit {
+  width: 3cqw;
+  height: 3cqw;
+}
+
+.project-problem-artifact--portrait .project-bento-media::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 18%;
+  background: linear-gradient(to bottom, rgba(231, 231, 233, 0), #e7e7e9 94%);
+  pointer-events: none;
+}
+
 /* Centre the two columns on each other (the text beside a tall artifact sits at
    the artifact's vertical middle instead of its top). Only matters while the
    columns are side by side; stacked, they are full-width blocks either way. */
@@ -1632,4 +1734,863 @@ a.intro-bar-name {
     flex: 0 0 56%;
     width: auto;
   }
+}
+
+
+/* ------------------------------------------------------------
+   EXPLORATION CAROUSEL (AI-conversation.html). A horizontal scroll-snap track of
+   full-width slides: the wide card's 16:9 rounded frame, then a numbered title
+   and its description beneath. Prev/next buttons and a counter sit under it;
+   the track is also swipeable and arrow-key operable (initExploreCarousel).
+   ------------------------------------------------------------ */
+.project-explore {
+  position: relative;
+  margin-top: 0;
+}
+
+/* The frame is fixed; only what is inside it changes. The slides are stacked in one grid cell and
+   cross-fade, and the frame (hairline, radius, base fill) is drawn once, behind them, by ::before. */
+.project-explore::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  aspect-ratio: 16 / 9;
+  border-radius: 24px;
+  background-color: #e8e8e8;
+  pointer-events: none;
+}
+
+/* the outline sits ABOVE the slides, so it is one constant line whatever is fading in or out beneath it */
+.project-explore-ui::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 1px solid var(--color-hairline); /* the same outline as the homepage Work cards */
+  border-radius: 24px;
+  pointer-events: none;
+}
+
+.project-explore-track {
+  position: relative;
+  display: grid;
+}
+
+.project-explore-track:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 6px;
+  border-radius: 24px;
+}
+
+.project-explore-slide {
+  grid-area: 1 / 1;
+  min-width: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-content);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--explore-fade, 0.45s) ease, visibility 0s linear var(--explore-fade, 0.45s);
+}
+
+.project-explore-slide.is-active {
+  opacity: 1;
+  visibility: visible;
+  transition-delay: 0s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .project-explore-slide { transition: none; }
+}
+
+.project-explore-media {
+  position: relative; /* the caption is pinned to the frame */
+  border: 1px solid transparent; /* the hairline is the fixed frame's (.project-explore::before) */
+  background-clip: padding-box;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: 24px;
+}
+
+.project-explore-media video,
+.project-explore-media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.project-explore-title {
+  /* "01 —" is its own column (subgrid of .project-explore-text) so the title and the
+     description beneath it start at the same x, after the dash. */
+  display: grid;
+  grid-template-columns: subgrid;
+  grid-column: 1 / -1;
+  margin: 0 0 var(--space-xs);
+  font-family: var(--font-heading);
+  font-size: 1.5rem; /* = .project-lead */
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--color-text);
+}
+
+.project-explore-text {
+  display: grid;
+  grid-template-columns: max-content 1fr max-content; /* the right column mirrors the "01 —" column */
+  column-gap: 0.3em;
+}
+
+.project-explore-mirror {
+  visibility: hidden; /* a hidden copy of "01 —": holds the same inset on the right */
+}
+
+.project-explore-text p {
+  grid-column: 2;
+  margin: 0;
+  max-width: none;
+  text-wrap: pretty; /* avoids a one- or two-word last line */
+  font-size: var(--size-lg);
+  line-height: 1.5;
+  color: var(--color-text);
+}
+
+/* ------------------------------------------------------------
+   LIVE PROTOTYPE EMBED (AI-conversation.html). The wide card's frame holding a poster
+   and a button; the iframe replaces both on click (initEmbed). Opaque grey shows
+   until the poster loads, so a missing image is a blank frame, not a broken one.
+   ------------------------------------------------------------ */
+.project-embed {
+  position: relative;
+  border: 1px solid var(--color-hairline); /* the same outline as the homepage Work cards */
+}
+
+.project-embed-poster,
+.project-embed iframe {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.project-embed-poster {
+  object-fit: cover;
+}
+
+.project-embed iframe {
+  background: var(--color-bg);
+}
+
+.project-embed-btn {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  padding: 14px 28px;
+  border: none;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.82);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  color: #fff;
+  font: inherit;
+  font-size: var(--size-base);
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.project-embed-btn:hover {
+  background: #000;
+}
+
+.project-embed-btn:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 3px;
+}
+
+.project-wide-card-caption a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+
+/* A two-column block whose left column carries a long headline (threadscape.html research):
+   a section step less gap, so the headline gets the width. Stacks as usual at 768 and under. */
+@media (min-width: 769px) {
+  .project-block--wide-left {
+    gap: var(--gap-group);
+  }
+}
+
+
+/* Outcome copy (threadscape.html): the decisions pattern with two columns. Stacks to one column at 768 like
+   .project-decisions. */
+.project-decisions--two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+/* no hairline over the columns, and a wider gap between them */
+.project-decisions--two {
+  margin-top: 0; /* the headline's padding is the gap */
+  column-gap: var(--space-md); /* wide columns: both descriptions wrap to two lines (they tip to three past ~64px) */
+  list-style: none; /* the browser's disc bullets */
+}
+
+.project-decisions--two li,
+.project-decisions--two li:last-child {
+  padding-top: 0;
+  border-top: none;
+}
+
+.project-decision-title {
+  margin: 0 0 var(--space-xs);
+  font-family: var(--font-heading);
+  font-size: 1.5rem; /* = .project-lead */
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--color-text);
+}
+
+@media (max-width: 768px) {
+  .project-decisions--two {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+
+/* The Solution's statement type, without the padding built to space it from a row of art:
+   a section-step headline over the two outcome columns, a group gap under the mosaic. */
+.project-statement--tight {
+  margin: var(--gap-section) 0 0; /* with the padding below: the two steps a section boundary leaves above a statement */
+  padding: var(--gap-section) 0 var(--gap-section); /* one section step below, so the columns sit close */
+}
+
+/* The mosaic straight under the Solution statement: the same section step the statement
+   had above the old text-and-diagram row (.project-thread-row + .project-bento). */
+.project-bento--under-statement {
+  margin-top: var(--gap-section);
+}
+
+/* Exploration carousel UI (threadscape.html): the overlay covers the frame area only, so the zones and the
+   dot pagination sit on the frames. Left/right zones are invisible; on a pointer device they turn the cursor
+   into an arrow, and a click pages. The dots reuse the masthead carousel's translucent pill. */
+.project-explore-ui {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  aspect-ratio: 16 / 9;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.project-explore-zone {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 30%;
+  padding: 0;
+  border: none;
+  background: none;
+  -webkit-appearance: none;
+  appearance: none;
+  pointer-events: auto;
+}
+
+.project-explore-zone--prev {
+  left: 0;
+}
+
+.project-explore-zone--next {
+  right: 0;
+}
+
+.project-explore-zone:disabled {
+  pointer-events: none;
+}
+
+.project-explore-zone:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: -4px;
+  border-radius: 24px;
+}
+
+/* The pagination sits below the frame, on the page: plain dots, no pill. The title and line beneath
+   step down by the dots' height. */
+.project-explore-ui .project-carousel-dots {
+  pointer-events: auto;
+  bottom: auto;
+  top: calc(100% + 16px);
+  padding: 0;
+  background: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+.project-explore-ui .project-carousel-dot {
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.project-explore-ui .project-carousel-dot:hover {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.project-explore-ui .project-carousel-dot.is-active {
+  background: var(--color-text);
+}
+
+.project-explore-ui .project-carousel-dot:focus-visible {
+  outline-color: var(--color-focus);
+}
+
+.project-explore-text {
+  margin-top: 26px;
+}
+
+@media (hover: hover) {
+  .project-explore-zone:not(:disabled) {
+    cursor: none;
+  }
+}
+
+@media (hover: none) {
+  .project-explore-zone {
+    pointer-events: none; /* touch swipes the track instead */
+  }
+}
+
+/* The arrow that follows the pointer over a zone. Positioned by script (translate); the disc inside scales in. */
+.project-explore-cursor {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 300;
+  pointer-events: none;
+}
+
+.project-explore-cursor-disc {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  margin: -32px 0 0 -32px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.55);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  color: #fff;
+  opacity: 0;
+  transform: scale(0.6);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.project-explore-cursor.is-on .project-explore-cursor-disc {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.project-explore-cursor.is-prev svg {
+  transform: scaleX(-1);
+}
+
+.project-explore-cursor svg {
+  width: 24px;
+  height: 24px;
+}
+
+/* A section that opens on .project-statement: the statement already carries a section step of its own above
+   its text, so the section's top padding would double it. The gap above the text is then the usual
+   two steps (the previous section's bottom padding plus the statement's top padding). */
+.page-section--statement-first {
+  padding-top: 0;
+}
+
+
+/* Captions on the exploration frames, in the mosaic tooltip's look (.project-bento-caption): a small blurred black
+   pill, white type, sized to its text and pinned to the bottom of the frame. Text is swapped by initExploreCarousel
+   from the video's data-captions as it plays. The split's two captions each sit centred over their own half. */
+.project-explore-cap {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 16px;
+  z-index: 1;
+  display: grid;
+  justify-items: center;
+  padding: 0 16px;
+  pointer-events: none;
+}
+
+.project-explore-cap--split {
+  grid-template-columns: 1fr 1fr;
+}
+
+/* a single caption sits at the bottom left, clear of the thread input in the middle */
+.project-explore-cap:not(.project-explore-cap--split):not(.project-explore-cap--mid) {
+  justify-items: start;
+}
+
+/* Slide 2: centred in the empty middle of the thread (below the messages, above the input) so it covers nothing. */
+.project-explore-cap--mid {
+  top: 68%;
+  bottom: auto;
+  transform: translateY(-50%);
+  justify-items: center;
+}
+
+.project-explore-cap span {
+  width: max-content;
+  max-width: 100%;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.6);
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  backdrop-filter: blur(16px) saturate(1.2);
+  color: #fff;
+  font-size: var(--size-sm, 14px);
+  line-height: 1.4;
+  text-align: center;
+}
+
+.project-explore-cap span:empty {
+  display: none;
+}
+
+/* Slide 1 of the exploration carousel is stills, not a video: the phone-note sketch and two pages of notes as
+   overlapping, tilted cards fanned across a grey frame (cropped by the frame's edge). The cards stand on their
+   bottom-centre so the tilt reads as a fan; the sketch is in front. */
+.project-explore-media--notes {
+  background: linear-gradient(155deg, #e1e1e4 0%, #b4b4bb 100%);
+}
+
+.project-explore-notes {
+  position: relative;
+  height: 100%;
+  /* the fan's bounding box, centred in the frame (measured, then nudged by this) */
+  transform: translate(-1.47%, -2.67%);
+}
+
+.project-explore-notes img {
+  position: absolute;
+  display: block;
+  height: 80%;
+  width: auto;
+  aspect-ratio: 923 / 1668;
+  object-fit: cover;
+  object-position: top;
+  border-radius: 14px;
+  transform-origin: 50% 100%;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.14), 0 26px 60px rgba(0, 0, 0, 0.32);
+}
+
+.project-explore-notes img:nth-child(1) {
+  left: 32%;
+  top: 12%;
+  z-index: 3;
+  transform: translateX(-50%) rotate(-8deg);
+}
+
+.project-explore-notes img:nth-child(2) {
+  left: 50%;
+  top: 8%;
+  z-index: 2;
+  transform: translateX(-50%) rotate(3deg);
+}
+
+.project-explore-notes img:nth-child(3) {
+  left: 68%;
+  top: 14%;
+  z-index: 1;
+  transform: translateX(-50%) rotate(12deg);
+}
+
+
+/* Slide 5: a real model reply (a video, left) beside a real excerpt of the rules file (live text, right), two equal
+   halves. The code panel is sized in cqw so the excerpt scales with the frame. */
+.project-explore-media--pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: #111114;
+}
+
+.project-explore-media--pair video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.project-explore-code {
+  position: relative;
+  container-type: inline-size;
+  padding: 6.6cqw 7.4cqw;
+  background: #111114;
+  color: #e6e6e8;
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.pc-tab {
+  display: inline-block;
+  margin-bottom: 5.4cqw;
+  padding: 1.2cqw 2.4cqw;
+  border-radius: 1.4cqw;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 2.4cqw;
+}
+
+.pc-code {
+  display: block;
+  font-size: 2.45cqw;
+  line-height: 1.85;
+  white-space: nowrap;
+}
+
+.pc-line {
+  display: block;
+  border-radius: 1cqw;
+}
+
+.pc-line--hl {
+  margin: 0 -2.2cqw;
+  padding: 0 2.2cqw;
+  background: rgba(127, 178, 255, 0.16);
+}
+
+.pc-kw {
+  color: #b8b8c0;
+}
+
+.pc-dim {
+  color: rgba(255, 255, 255, 0.34);
+}
+
+.pc-key {
+  color: #e6e6e8;
+}
+
+.pc-num {
+  color: #7fb2ff;
+}
+
+.pc-str {
+  color: #a5d6a7;
+}
+
+
+/* Process slides with two stills (Figma Make): the same two-half grid as the LLM slide. */
+.project-explore-media--pair img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+}
+
+/* A video tile in the mosaic: the clips are 16:9, not the tile default; the Before / After labels (the carousel's
+   caption pills) sit at the bottom of the frame. */
+.project-bento-media--clip {
+  position: relative;
+  aspect-ratio: 16 / 9;
+}
+
+.project-bento-media--clip video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+
+/* Slide 2: the Figma Make editor (a screenshot) as one window on the grey gradient, with the prototype's recording
+   playing in its preview canvas and the dev address typed into its URL bar. Positions are % of the screenshot. */
+.project-explore-media--stack {
+  background: linear-gradient(155deg, #e1e1e4 0%, #b4b4bb 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.project-explore-editor {
+  position: relative;
+  width: 82%;
+  aspect-ratio: 1800 / 1047;
+  container-type: inline-size;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08), 0 26px 60px rgba(0, 0, 0, 0.3);
+}
+
+.project-explore-media--stack .project-explore-editor img,
+.project-explore-media--stack .project-explore-editor video {
+  position: absolute;
+  display: block;
+  object-fit: cover;
+}
+
+.project-explore-media--stack .project-explore-editor img { inset: 0; width: 100%; height: 100%; }
+
+.project-explore-media--stack .project-explore-editor video {
+  left: 35.17%;
+  top: 11.84%;
+  width: 64.83%;
+  height: 88.16%;
+}
+
+.project-explore-editor-url {
+  position: absolute;
+  left: 43.4%;
+  top: 7.1%;
+  width: 41.2%;
+  height: 3.6%;
+  display: flex;
+  align-items: center;
+  padding-left: 1%;
+  background: #f4f4f4;
+  border-radius: 0.6cqw;
+  font-family: var(--font-body, inherit);
+  font-size: 1.15cqw;
+  color: #6b6b6b;
+}
+
+/* Slide 3: Claude Code as a window on the same grey: the conversation at left, the running prototype (a recording)
+   in a browser pane at right. Sizes are cqw of the window so it scales as one piece. */
+.project-explore-cc {
+  display: grid;
+  grid-template-columns: 36fr 64fr;
+  width: 82%;
+  aspect-ratio: 100 / 56.6;
+  container-type: inline-size;
+  background: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08), 0 26px 60px rgba(0, 0, 0, 0.3);
+}
+
+.project-explore-cc-chat {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 0 1.24cqw 0.99cqw;
+  background: #faf9f7;
+  font-size: 0.9cqw;
+  line-height: 1.45;
+  color: #222;
+}
+
+.project-explore-cc-chat p { margin: 0; }
+.cc-head { display: flex; align-items: center; gap: 0.74cqw; height: 3.72cqw; margin: 0 -0.25cqw; }
+.cc-dots { display: flex; gap: 0.43cqw; margin-right: 0.5cqw; }
+.cc-dots i { width: 0.93cqw; height: 0.93cqw; border-radius: 50%; background: #ec6a5e; }
+.cc-dots i:nth-child(2) { background: #f4bf4f; }
+.cc-dots i:nth-child(3) { background: #61c554; }
+.cc-ico { width: 1.18cqw; height: 1.18cqw; color: #555; flex: none; }
+.cc-title { display: flex; align-items: center; gap: 0.37cqw; font-size: 0.99cqw; font-weight: 500; margin-left: 0.5cqw; white-space: nowrap; }
+.cc-title svg { width: 0.68cqw; color: #777; }
+.cc-pane-btn { margin-left: auto; display: flex; padding: 0.5cqw; border-radius: 0.62cqw; background: #dbe8fb; color: #2f6fe0; }
+.cc-pane-btn svg { width: 1.18cqw; height: 1.18cqw; }
+.cc-thread { flex: 1; display: flex; flex-direction: column; gap: 0.99cqw; padding-top: 0.62cqw; }
+.cc-user { align-self: flex-end; max-width: 94%; padding: 0.74cqw 0.99cqw; background: #eeece8; border-radius: 0.87cqw; }
+.cc-tool { color: #9a9a9a; font-size: 0.93cqw; margin-top: 0.62cqw; }
+.cc-ai { font-size: 0.93cqw; }
+.cc-input { display: flex; align-items: center; gap: 0.74cqw; padding: 0.93cqw 0.99cqw; border: 1px solid rgba(0, 0, 0, 0.14); border-radius: 1.24cqw; background: #fff; color: #9a9a9a; font-size: 0.93cqw; }
+.cc-plus { font-size: 1.24cqw; color: #666; line-height: 1; }
+.cc-foot { display: flex; justify-content: space-between; padding: 0.62cqw 0.87cqw 0; font-size: 0.81cqw; color: #777; }
+
+.project-explore-cc { background: #faf9f7; }
+.project-explore-cc-chat { background: transparent; }
+/* the browser pane is an inset white card with its own hairline, as in the app */
+.project-explore-cc-pane { display: flex; flex-direction: column; min-width: 0; margin: 0.87cqw 0.87cqw 0.87cqw 0; background: #fff; border: 1px solid rgba(0, 0, 0, 0.12); border-radius: 1.12cqw; overflow: hidden; }
+.cc-tabs { display: flex; align-items: center; gap: 0.5cqw; padding: 0.68cqw 0.87cqw 0.56cqw; color: #666; font-size: 0.84cqw; }
+.cc-tab { display: flex; align-items: center; gap: 0.5cqw; padding: 0.56cqw 0.74cqw; border-radius: 0.68cqw; white-space: nowrap; }
+.cc-tab--on { background: #ececec; color: #222; }
+.cc-g { width: 0.93cqw; height: 0.93cqw; flex: none; }
+.cc-x { width: 0.62cqw; height: 0.62cqw; flex: none; margin-left: 0.25cqw; }
+.cc-plus2 { font-size: 1.24cqw; line-height: 1; padding: 0 0.37cqw; }
+.cc-tabs-end { margin-left: auto; display: flex; align-items: center; gap: 0.87cqw; }
+.cc-tabs-end svg { width: 1.05cqw; height: 1.05cqw; }
+.cc-nav { display: flex; align-items: center; gap: 0.81cqw; padding: 0.25cqw 0.87cqw 0.62cqw; color: #444; }
+.cc-nav svg { width: 1.12cqw; height: 1.12cqw; flex: none; }
+.cc-nav .cc-dim { color: #b5b5b5; }
+.cc-url { flex: 1; text-align: center; padding: 0.56cqw 0.62cqw; border: 1px solid rgba(0, 0, 0, 0.14); border-radius: 0.62cqw; font-size: 0.87cqw; color: #333; }
+.project-explore-media--stack .project-explore-cc-pane video { position: static; display: block; width: 100%; height: auto; object-fit: initial; }
+
+.cc-input-end { margin-left: auto; display: flex; align-items: center; gap: 1.1cqw; color: #222; }
+.cc-input-end svg { width: 1.5cqw; height: 1.5cqw; }
+.cc-model { display: flex; align-items: center; gap: 1cqw; }
+.cc-spin { width: 1.5cqw; height: 1.5cqw; }
+.cc-url-path { color: #8a8a8a; }
+.cc-url { padding: 0.95cqw 1cqw; }
+.cc-nav { padding: 0.3cqw 1.2cqw 0.8cqw; }
+.cc-head-end { margin-left: auto; display: flex; align-items: center; gap: 0.9cqw; color: #333; }
+.cc-head-end > svg { width: 1.2cqw; height: 1.2cqw; }
+.cc-head-end .cc-pane-btn { margin-left: 0; }
+.cc-url { padding: 0.4cqw 1cqw; }
+.cc-nav { padding: 0.2cqw 1.2cqw 0.6cqw; }
+.cc-url { line-height: 1.2; padding: 0.35cqw 1cqw; }
+
+/* browser pane chrome, sized to the app's own bar */
+.cc-tabs { padding: 0.9cqw 1.2cqw 0.7cqw; font-size: 1.05cqw; gap: 0.6cqw; }
+.cc-tab { padding: 0.5cqw 0.9cqw; gap: 0.6cqw; border-radius: 0.8cqw; }
+.cc-tab-t--fade { -webkit-mask-image: linear-gradient(90deg, #000 78%, transparent); mask-image: linear-gradient(90deg, #000 78%, transparent); max-width: 11.4cqw; overflow: hidden; }
+.cc-g { width: 1.05cqw; height: 1.05cqw; }
+.cc-x { width: 0.8cqw; height: 0.8cqw; margin-left: 0.2cqw; }
+.cc-plus2 { font-size: 1.6cqw; padding: 0 0.6cqw; }
+.cc-tabs-end { gap: 1.3cqw; }
+.cc-tabs-end svg { width: 1.15cqw; height: 1.15cqw; }
+.cc-nav { gap: 1cqw; padding: 0.2cqw 1.2cqw 0.6cqw; }
+.cc-nav svg { width: 1.25cqw; height: 1.25cqw; }
+.cc-url { font-size: 1.05cqw; line-height: 1.2; padding: 0.3cqw 1cqw; border-radius: 0.7cqw; }
+/* tighter, as in the app: ~10% of the pane's width for tabs + address row */
+.cc-tabs { padding: 0.5cqw 1cqw 0.4cqw; gap: 0.4cqw; }
+.cc-tab { padding: 0.3cqw 0.7cqw; gap: 0.5cqw; line-height: 1.2; }
+.cc-nav { gap: 0.9cqw; padding: 0.35cqw 1cqw 0.45cqw; }
+.cc-url { padding: 0.2cqw 1cqw; }
+.cc-nav svg { width: 1.4cqw; height: 1.4cqw; }
+.cc-nav .cc-cursor { width: 1.5cqw; height: 1.5cqw; }
+
+/* the pane's icons are cut from a screenshot of the app, so they are the app's own; 40px sources shown at ~1.6cqw */
+.project-explore-cc-pane .cc-i { width: 1.6cqw; height: 1.6cqw; flex: none; display: block; }
+.cc-tab--on { background: #e7e7e7; }
+.cc-tab .cc-i { width: 1.45cqw; height: 1.45cqw; }
+.cc-plus2 { padding: 0; margin: 0 0.5cqw; }
+.cc-tabs-end { gap: 1.1cqw; }
+.cc-nav { gap: 0.8cqw; }
+.project-explore-cc-pane .cc-i { width: 1.9cqw; height: 1.9cqw; }
+.cc-tab .cc-i { width: 1.7cqw; height: 1.7cqw; }
+.cc-tab { padding: 0.15cqw 0.45cqw; gap: 0.35cqw; }
+.cc-tabs { padding-top: 0.4cqw; padding-bottom: 0.3cqw; }
+/* the selected tab, in the app's proportions (chip ~2.1x the text height; the icon boxes carry their own air) */
+.cc-tab { padding: 0.44cqw 0.2cqw 0.44cqw 0.35cqw; gap: 0; line-height: 1.2; border-radius: 0.8cqw; }
+.cc-tab .cc-tab-t { margin: 0 0.45cqw 0 0.1cqw; }
+.cc-plus2 { margin: 0 0.7cqw; }
+.cc-tab .cc-i { margin-top: -0.2cqw; margin-bottom: -0.2cqw; }
+.cc-tab { border-radius: 0.48cqw; }
+.cc-plus2 { margin-left: 0.1cqw; margin-right: 0.5cqw; }
+.cc-tabs { padding-left: 0.4cqw; padding-right: 0.5cqw; }
+.cc-nav { padding-left: 0.2cqw; padding-right: 0.5cqw; }
+/* concentric corners: the pane sits inside the window, so its radius is the window's minus the gap */
+.project-explore-cc { border-radius: 1.4cqw; }
+.project-explore-cc-pane { border-radius: 0.95cqw; }
+.project-explore-cc { border-radius: 10px; }
+.project-explore-cc-pane { border-radius: 0.8cqw; }
+
+/* Whatever fills a slide (a gradient, the dark code panel) stops at the padding box, so the 1px ring
+   and the outline above it are the same on every slide. Shorthand `background` rules above reset the clip. */
+.project-explore-slide .project-explore-media { background-clip: padding-box !important; }
+
+/* Slide 4: the rules as a plain text file in a dark window, on a darker stage. */
+.project-explore-code { background: #0a0a0c; padding: 0; justify-content: center; align-items: center; }
+.pc-window {
+  width: 86%;
+  background: #1b1b1f;
+  border-radius: 1.8cqw;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.09), 0 3cqw 7cqw rgba(0, 0, 0, 0.55);
+  overflow: hidden;
+}
+.pc-bar { position: relative; display: flex; align-items: center; height: 7.4cqw; padding: 0 3cqw; background: #26262b; border-bottom: 1px solid rgba(255, 255, 255, 0.07); }
+.pc-dots { display: flex; gap: 1.5cqw; }
+.pc-dots i { width: 2cqw; height: 2cqw; border-radius: 50%; background: #ec6a5e; }
+.pc-dots i:nth-child(2) { background: #f4bf4f; }
+.pc-dots i:nth-child(3) { background: #61c554; }
+.pc-name { position: absolute; left: 0; right: 0; text-align: center; font-size: 2.1cqw; color: rgba(255, 255, 255, 0.55); pointer-events: none; }
+.pc-window .pc-code { counter-reset: ln; padding: 3.4cqw 3.4cqw 3.6cqw 0; font-size: 2.2cqw; line-height: 1.9; }
+.pc-window .pc-line { counter-increment: ln; position: relative; padding-left: 9cqw; border-radius: 0; }
+.pc-window .pc-line::before { content: counter(ln); position: absolute; left: 0; width: 6cqw; text-align: right; color: rgba(255, 255, 255, 0.22); }
+.pc-window .pc-line--hl { margin: 0; padding-left: 9cqw; background: rgba(127, 178, 255, 0.16); }
+.pc-window .pc-str { color: rgba(255, 255, 255, 0.62); }
+.pc-window .pc-dim { color: rgba(255, 255, 255, 0.32); }
+
+/* Mosaic cards that show an edge or corner of the prototype: the whole window, larger than the card, set on the grey
+   gradient the carousel frames use and anchored to that edge, so grey shows where the window ends. */
+.project-bento-media--grey {
+  background: linear-gradient(155deg, #e1e1e4 0%, #b4b4bb 100%);
+  overflow: hidden;
+}
+
+.bento-win {
+  --win-gap: 32px; /* one gap between the window and the card edge, the same on every grey corner card */
+  position: absolute;
+  aspect-ratio: 16 / 9;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+}
+
+.bento-win--corner-tr { width: 200%; right: var(--win-gap); top: var(--win-gap); }
+.bento-win--top-center { --fold-zoom: 1.35; width: auto; height: calc((100% - var(--win-gap)) * var(--fold-zoom) + 12px); aspect-ratio: 16 / 9; left: var(--win-gap); top: var(--win-gap); } /* the video keeps its own shape (nothing cropped top or bottom), on the universal gap at the top and left, running off the bottom and right. It starts on the left so the back chevron and the cursor are in view, and initBentoPan eases it to the centre as the thread folds in (it rests on the left without JS or under reduced motion) */
+
+/* The tall portrait card in the mosaic: the recording fills whatever height the two stacked tiles beside it make. */
+.project-bento-tile--tall { display: flex; flex-direction: column; }
+.project-bento-media--portrait { flex: 1; position: relative; }
+.project-bento-media--portrait video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+
+/* The mosaic as two columns of unequal tiles. Each column stacks its tiles at the column's gap; the aspect ratio is per
+   tile so the heights vary (the default is the 16:9 of the clips). */
+.project-bento-col {
+  grid-column: span 3;
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-content);
+  min-width: 0;
+}
+.project-bento-col > .project-bento-tile { grid-column: auto; }
+.project-bento-media--r219 { aspect-ratio: 21 / 9; }
+.project-bento-media--r11 { aspect-ratio: 1 / 1; }
+.project-bento-media--r43 { aspect-ratio: 4 / 3; }
+@media (max-width: 768px) { .project-bento-col { grid-column: span 1; } }
+@media (max-width: 480px) { .project-bento-col { grid-column: 1 / -1; } }
+
+/* Bottom-aligned: the columns stretch to the taller one and each column's last tile takes up the slack, so both end on one line. */
+.project-bento-col > .project-bento-tile:last-child { flex: 1 0 auto; }
+.project-bento-col > .project-bento-tile:last-child .project-bento-media {
+  flex: 1 0 auto;
+  position: relative;
+}
+.project-bento-col > .project-bento-tile:last-child .project-bento-media > video,
+.project-bento-col > .project-bento-tile:last-child .project-bento-media > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* The typing card stretches to the stack beside it: no height of its own, the recording fills it. */
+.project-bento-media--fill { flex: 1 1 0; aspect-ratio: auto; position: relative; min-height: 0; }
+.project-bento-media--fill > video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+
+/* Two small cards side by side inside a mosaic column (a split tile). */
+.project-bento-pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--gap-content); }
+.project-bento-pair > .project-bento-tile { grid-column: auto; }
+.project-bento-media--r98 { aspect-ratio: 8 / 7; }
+/* the pair split about 60/40: the wider card (reassign, which needs the room) sets the row's height, the narrow one (Arrange) fills it */
+.project-bento-pair--wide-first { grid-template-columns: 3fr 2fr; }
+
+.bento-win--zoom { width: 420%; right: var(--win-gap); top: var(--win-gap); }
+.bento-win--zoom-m { width: 235%; } /* reassign: wide enough in view to hold the theme list and the menu together (they span about half the screen), so it is zoomed out compared with the Arrange card */
+
+/* Every mosaic card carries the same hairline outline as the homepage Work cards and the carousel frame, drawn over the
+   media (so it shows on the clips, the stills and the grey alike). */
+.project-bento--under-statement .project-bento-media { position: relative; }
+.project-bento--under-statement .project-bento-media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 1px solid var(--color-hairline);
+  border-radius: 24px;
+  pointer-events: none;
 }
