@@ -340,7 +340,7 @@ html.is-hero-stacked {
     --project-block-title-size: 2.25rem; /* 36px — one notch under the 44 above */
     --next-case-title-size: 1.75rem; /* 28px — one notch under the block heading */
     --next-case-radius: 48px;
-    --work-card-radius: 32px;
+    --work-card-radius: 24px;
     --work-card-pad: 18px; /* was 28 */
     --work-gap: 20px;      /* was --gap-group (48) */
     /* LOCKED across the whole 1024→481 band — no clamp. The global token is
