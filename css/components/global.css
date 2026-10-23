@@ -97,7 +97,7 @@
      Its own token rather than --next-case-title-size: same number today, but a
      masonry card and the project pages' pager answer to different things.
      Radius and inner padding step with it in each responsive.css :root. */
-  --work-card-radius: 40px;
+  --work-card-radius: 28px;
   --work-card-pad: 20px; /* was 32 — tighter (2026-10) */
   --work-gap: 24px;      /* masonry gap, columns and rows; was --gap-group (60) */
 
