@@ -1368,106 +1368,18 @@ a.intro-bar-name {
   aspect-ratio: 1153 / 2000;
 }
 
-/* The Problem still (a chat sidebar) in the original portrait frame, no outline. The image is shown larger than the
-   frame (150% of its width, centred and pinned near the top) so the panel's text reads; where the frame cuts it off,
-   the bottom fades out into the image's own grey. */
+/* The Problem still (a chat sidebar): a PNG with its own grey, rounded corners and
+   bottom fade baked in, shown at the frame's own ratio. (It was live HTML,
+   .problem-sidebar, until 2026-10-25; the picture is a 2x render of it.) */
 .project-problem-artifact--portrait .project-bento-media {
-  position: relative;
-  background-color: #e7e7e9;
+  background: none;
 }
 
-.project-problem-artifact--portrait .project-bento-media .problem-sidebar {
-  position: absolute;
-  top: -42px;
-  left: 50%;
-  width: 150%;
-  aspect-ratio: 1333 / 2000;
-  transform: translateX(-50%);
-  container-type: inline-size;
-  background: #e7e7e9;
-  color: #1c1c20;
-  font-family: var(--font-body, Inter, system-ui, sans-serif);
-}
-
-/* The chat sidebar as live HTML: every size is in cqw of the scene's width (1cqw = 13.33 px of the 1333px design), so
-   it stays sharp at any size. Positions are the design's own coordinates. */
-.problem-sidebar > span {
-  position: absolute;
-  display: flex;
-  align-items: center;
-  white-space: nowrap;
-}
-
-.problem-sidebar .ps-panel {
-  border-radius: 2.4cqw;
-  background: #f6f6f4;
-  box-shadow: 0 1.6cqw 5.5cqw rgba(0, 0, 0, 0.07);
-}
-
-.problem-sidebar .ps-hl {
-  border-radius: 1.6cqw;
-  background: #eeeeed;
-}
-
-.problem-sidebar .ps-label,
-.problem-sidebar .ps-folder,
-.problem-sidebar .ps-thread,
-.problem-sidebar .ps-act {
-  transform: translateY(-50%);
-}
-
-.problem-sidebar .ps-label {
-  gap: 1.1cqw;
-  font-size: 2.2cqw;
-  color: #8c8c91;
-}
-
-.problem-sidebar .ps-label--small {
-  font-size: 2.05cqw;
-}
-
-.problem-sidebar .ps-chev {
-  width: 1.75cqw;
-  height: 1.75cqw;
-}
-
-.problem-sidebar .ps-folder {
-  gap: 2.7cqw;
-  font-size: 2.2cqw;
-}
-
-.problem-sidebar .ps-icon {
-  width: 3.2cqw;
-  height: 2.95cqw;
-}
-
-.problem-sidebar .ps-thread {
-  font-size: 2.24cqw;
-}
-
-.problem-sidebar .ps-act {
-  color: #8c8c91;
-}
-
-.problem-sidebar .ps-dots {
-  width: 2.6cqw;
-  height: 0.9cqw;
-}
-
-.problem-sidebar .ps-edit {
-  width: 3cqw;
-  height: 3cqw;
-}
-
-.project-problem-artifact--portrait .project-bento-media::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 18%;
-  background: linear-gradient(to bottom, rgba(231, 231, 233, 0), #e7e7e9 94%);
-  pointer-events: none;
+.project-problem-artifact--portrait .project-bento-media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 /* Centre the two columns on each other (the text beside a tall artifact sits at
