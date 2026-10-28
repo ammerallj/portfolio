@@ -202,8 +202,11 @@
       root.classList.add('is-loading');
       // LOAD SCREEN: orbs alone until main.js releases it (~5s). Motion on and
       // >480 only — phones draw a single static frame, so there is nothing to watch.
-      var intro = root.classList.contains('is-motion') &&
-        window.matchMedia('(min-width: 481px)').matches;
+      // OFF (2026-10, Jenna: remove the load delay). The page now goes straight to
+      // the hero's own entrance. To bring the load screen back, restore the line
+      // below this comment's `false`:
+      //   root.classList.contains('is-motion') && window.matchMedia('(min-width: 481px)').matches
+      var intro = false;
       if (intro) {
         root.classList.add('is-intro', 'has-intro');
         // The intro always plays from the top: don't let the browser restore a
