@@ -203,7 +203,7 @@ const FIELD_TUCK = { span: 0.6 };
 // The artwork's lag: it moves at (1 − k) of the scroll while the white, the nav
 // and Selected Work move at exactly 1 and slide up over it.
 // REDESIGN: 0.5 (was 0.3) — the gradient drifts at half the scroll speed.
-const FIELD_LAG = { k: 0.5 };
+const FIELD_LAG = { k: 0.25 }; // 0.5 before 2026-10: the hero->Work parallax was cut (Jenna), gradient lags less
 // The hero TEXT's parallax: the headline, divider and bio rise at a constant
 // 1 + speed of the scroll — the fastest of the three layers. LINEAR, because a
 // changing speed is what read as loose. Held once the bar pins; the text is off
@@ -212,7 +212,7 @@ const FIELD_LAG = { k: 0.5 };
 // scroll on top of riding Work's own push (see setHeroTextLift), so the text
 // scrolls away faster than Work rises and fades out (once Work fills half the viewport) as it
 // goes. 0 would lock the two together (no parallax, constant gap).
-const HERO_TEXT = { speed: 0.8 };
+const HERO_TEXT = { speed: 0.4 }; // 0.8 before 2026-10 (parallax reduction)
 let lastHeroTextLift = -1;
 function setHeroTextLift(px) {
   if (px === lastHeroTextLift) return;
@@ -718,7 +718,9 @@ let fieldDockScroll = 0;
 // 530 + a cap of 0.65 of the bar's resting top (was 400 / 0.5): Work gets its
 // own share of the parallax speed — it rises faster to follow the lockup, which
 // still leads it by HERO_TEXT.speed. Larger = faster Work, earlier pin.
-const HERO_SHORTEN = { px: 530, cap: 0.65, bias: 1.5 };
+// px 530 -> 260 (2026-10, Jenna: reduce the hero->Work parallax; the first gesture moved
+// Work ~8x the scroll). Peak is now roughly 2.4x at 1440x900.
+const HERO_SHORTEN = { px: 260, cap: 0.65, bias: 1.5 };
 let heroShorten = 0;
 let fieldVisibleEnd = 0;
 let lastHeroShorten = -1;
@@ -799,7 +801,8 @@ function measureFieldTuck() {
   fieldVisibleEnd = visibleEnd;
   // Now shorten. Capped at half the bar's resting top so a short window still
   // has scroll left to unwind the push over.
-  heroShorten = Math.round(Math.min(HERO_SHORTEN.px, barRest * HERO_SHORTEN.cap));
+  // prefers-reduced-motion: no shortening, so Work and the bar scroll at plain 1x.
+  heroShorten = reducedMotion.matches ? 0 : Math.round(Math.min(HERO_SHORTEN.px, barRest * HERO_SHORTEN.cap));
   setHeroShorten(heroShorten);
   // The bar pins when its LAYOUT top reaches the viewport's — the shortened one.
   fieldDockScroll = barRest - heroShorten;
@@ -860,6 +863,10 @@ function startReveal() {
 // --intro) and the nav + hero fade in — and the sections below follow.
 // Set by runIntro when the iris starts growing; read by the field shader each frame.
 let heroIris = null;
+// Extra canvas height (CSS px) below the field's real box while the load scrim rises: the
+// artwork stays put and simply continues past its own bottom, so the scrim has colour
+// to rise over and no hard bottom edge shows. 0 at rest.
+let heroExtPx = 0;
 // The sequence is chained off the iris: it grows for `iris` ms, holds `pause` ms
 // on the finished field, THEN the scrim rises and the content staggers in.
 // `maxPause`: the hold on the finished field never runs past this, even if fonts or
@@ -867,7 +874,7 @@ let heroIris = null;
 // `overlap`: the scrim is released this many ms BEFORE the circle finishes. Outside
 // the circle is cream and so is the scrim, so the two meet seamlessly, and the
 // scrim's slow ease-in start is spent while the circle is still finishing.
-const INTRO = { overlap: 300, pause: 0, maxPause: 850, iris: 1400, followMs: 950 };
+const INTRO = { overlap: 300, pause: 0, maxPause: 850, iris: 1400, followMs: 450, start: 400 }; // start: ms after load before the scrim + lockup begin (0.2s beat on top of the 200ms field check)
 function runIntro() {
   // Scrolling is blocked from first paint by the inline <head> script (index.html);
   // this only puts the page back at the top when the loader ends.
@@ -876,62 +883,49 @@ function runIntro() {
     window.scrollTo(0, 0);
   };
   window.scrollTo(0, 0);
+  // Extend the canvas below its box so colour reaches past the viewport's bottom (plus
+  // a fade's length), WITHOUT moving or scaling the artwork. Done HERE, synchronously,
+  // so it is in place before the field's first frame: applied later (it was, at the
+  // 400ms mark) the first frame showed the resting scrim and then jumped.
+  const fbox = document.querySelector('.page-field-canvas');
+  let clearExt = () => {};
+  if (fbox && fbox.offsetHeight) {
+    const r = fbox.getBoundingClientRect();
+    // The scrim's soft edge is --field-fade tall (30svh on desktop, up to 300px elsewhere);
+    // the extension must clear the viewport by MORE than that, or the fade shows at the
+    // bottom of the first frame (it did, in tall windows, with a flat 340).
+    const ext = Math.max(0, window.innerHeight - r.bottom) + Math.max(340, 0.3 * window.innerHeight) + 60;
+    heroExtPx = ext;
+    fbox.style.aspectRatio = 'auto';
+    fbox.style.height = (r.height + ext) + 'px';
+    clearExt = () => { heroExtPx = 0; fbox.style.aspectRatio = ''; fbox.style.height = ''; };
+  }
   // initHeroField runs after initHero(); give it a beat, then check it drew.
   // No WebGL = no orbs to show, so skip the screen and reveal as usual.
   setTimeout(() => {
     if (!html.classList.contains('is-field-live')) {
       html.classList.remove('is-intro');
+      clearExt();
       unblock();
       setTimeout(revealSite, 200);
       return;
     }
-    // Grow the artwork just enough to cover the viewport while it is dropped to
-    // the top. The drop (translate +rise) is NOT scaled but the box's own -rise
-    // offset is, so the bottom edge lands at (H - rise) * s + rise: solve for THAT,
-    // not for vh / H, which falls short in tall windows and leaves a hard cream
-    // strip along the bottom of the screen. 2% spare.
-    const box = document.querySelector('.page-field-canvas');
-    if (box && box.offsetHeight) {
-      const rise = parseFloat(getComputedStyle(html).getPropertyValue('--field-rise')) || 0;
-      const need = rise < box.offsetHeight
-        ? (window.innerHeight - rise) / (box.offsetHeight - rise) : window.innerHeight / box.offsetHeight;
-      let sc = Math.max(1, need) * 1.02;
-      html.style.setProperty('--intro-scale', sc.toFixed(4));
-      // Then CHECK it against the real box (no transition while is-intro) and
-      // grow it until the bottom edge is a few px past the screen, whatever the
-      // formula says — a short edge is a hard cream line along the bottom.
-      for (let i = 0; i < 5; i++) {
-        const r = box.getBoundingClientRect();
-        if (r.bottom >= window.innerHeight + 6 && r.top <= 0) break;
-        sc *= 1 + Math.max(0.01, (window.innerHeight + 10 - r.bottom) / Math.max(1, r.height));
-        html.style.setProperty('--intro-scale', sc.toFixed(4));
-      }
-    }
-    // IRIS: the field shader draws the orbs through a circle that grows from a 14px
-    // dot at the centre of the viewport until it clears the corners (irisUniform in
-    // initHeroField). Until this runs it holds at the dot.
-    heroIris = {
-      start: performance.now(),
-      dur: INTRO.iris,
-      R: Math.ceil(Math.hypot(window.innerWidth, window.innerHeight) / 2 * 1.06),
-    };
-    const pageReady = Promise.all([
-      document.readyState === 'complete'
-        ? null
-        : new Promise(r => window.addEventListener('load', r, { once: true })),
-      document.fonts ? document.fonts.ready : null
-    ]);
-    const held = new Promise(r => setTimeout(r, INTRO.iris - INTRO.overlap + INTRO.pause));
-    const cap = new Promise(r => setTimeout(r, INTRO.iris + INTRO.maxPause));
-    Promise.race([Promise.all([held, pageReady]), cap]).then(() => {
+    // No iris and no hold (2026-10): release at once so the scrim rise (a CSS
+    // transition on --intro) and the hero lockup's entrance play together.
+    // Fonts are still awaited, capped, so the headline doesn't reflow mid-rise.
+    const fontsReady = document.fonts ? document.fonts.ready : Promise.resolve();
+    const cap = new Promise(r => setTimeout(r, INTRO.maxPause));
+    Promise.race([fontsReady, cap]).then(() => {
       if (siteRevealed) return;
       siteRevealed = true;
       html.classList.remove('is-intro');
       unblock();
       html.classList.add('is-text-revealed');
       setTimeout(revealRestOfSite, INTRO.followMs);
+      // The scrim (--intro) takes 1.5s to settle; the box can't shrink under it.
+      setTimeout(clearExt, 1700);
     });
-  }, 200);
+  }, INTRO.start);
 }
 
 initHero();
@@ -1284,7 +1278,7 @@ function initHeroField() {
   const VERT = 'attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}';
   const FRAG = [
     'precision highp float;',
-    'uniform vec2 uRes,uAmp;uniform float uAspect,uTime,uWarp;',
+    'uniform vec2 uRes,uAmp;uniform float uAspect,uTime,uWarp,uTotal;',
     'uniform vec4 uBlob[4];uniform vec3 uCol[4];uniform vec4 uRamp[4];uniform vec3 uIris;',
     // ⚠️ FIELD.layer is deliberately NOT emitted here. It was, as a dead constant
     // `LAYER` that no line of the shader body ever read — and being dead did not
@@ -1313,7 +1307,10 @@ function initHeroField() {
     'vec2 ramp(float t,vec2 m){if(t>=1.)return vec2(0.,1.);',
     ' if(t<=m.x)return vec2(1.+(m.y-1.)*(t/m.x),0.);',
     ' float u=(t-m.x)/(1.-m.x);return vec2(m.y*(1.-u),u);}',
-    'void main(){vec2 uv=gl_FragCoord.xy/uRes;uv.y=1.-uv.y;',
+    // uRes is the LOGICAL box (the field's real size); uTotal is the drawn height. They are
+    // equal at rest; during the load the canvas is taller (heroExtPx) and the extra
+    // rows just continue the same field below the box, so nothing moves.
+    'void main(){vec2 uv=vec2(gl_FragCoord.x,uTotal-gl_FragCoord.y)/uRes;',
     // Domain warp — the one liberty over the source. Figma's circles are
     // exact; displacing the sample point makes the boundaries curl as they
     // drift. uWarp 0 renders the file verbatim.
@@ -1389,7 +1386,7 @@ function initHeroField() {
   gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
 
   const U = {};
-  ['uRes', 'uAspect', 'uTime', 'uWarp', 'uAmp', 'uBlob', 'uCol', 'uRamp', 'uIris']
+  ['uRes', 'uAspect', 'uTime', 'uWarp', 'uTotal', 'uAmp', 'uBlob', 'uCol', 'uRamp', 'uIris']
     .forEach(n => { U[n] = gl.getUniformLocation(prog, n); });
 
   gl.uniform1f(U.uWarp, FIELD.motion.warp);
@@ -1552,8 +1549,10 @@ function initHeroField() {
     gl.uniform4fv(U.uBlob, blobData);
     gl.uniform3fv(U.uCol, colData);
     gl.uniform4fv(U.uRamp, rampData);
-    gl.uniform2f(U.uRes, canvas.width, canvas.height);
-    gl.uniform1f(U.uAspect, canvas.width / canvas.height);
+    const logicalH = Math.max(1, canvas.height - heroExtPx * (canvas.height / boxH));
+    gl.uniform2f(U.uRes, canvas.width, logicalH);
+    gl.uniform1f(U.uTotal, canvas.height);
+    gl.uniform1f(U.uAspect, canvas.width / logicalH);
     gl.uniform1f(U.uTime, t);
     gl.uniform3fv(U.uIris, irisUniform());
     gl.drawArrays(gl.TRIANGLES, 0, 3);
@@ -2346,7 +2345,7 @@ function initHeadlineFill() {
   });
   if (!words.length) return;
 
-  const REST = 0.45, BEHIND = 0.7, PEAK = 0.88;
+  const REST = 0.55, BEHIND = 0.7, PEAK = 0.88; // REST 0.55 = 4.7:1 on cream (AA at any size)
   let pos = null, raf = 0;
   const paint = () => {
     raf = 0;
@@ -3388,7 +3387,8 @@ function updateScrollEffects() {
     ? Math.min(1, Math.max(0, window.scrollY / (fieldDockScroll * FIELD_TUCK.span))) : 0;
   const tuck = 1 - Math.pow(1 - t, 3);
   const travel = fieldDockScroll > 0 ? Math.min(window.scrollY, fieldDockScroll) : 0;
-  const lag = Math.round(FIELD_LAG.k * travel);
+  // Reduced motion: the artwork and the lockup ride the page at 1x too.
+  const lag = reducedMotion.matches ? 0 : Math.round(FIELD_LAG.k * travel);
   // The push that undoes the shortening: heroShorten at rest, 0 at the pin.
   // A BIASED SMOOTHSTEP, ss(p^bias): zero slope at BOTH ends, so the nav leaves
   // rest at the scroll's own speed (the tension), the shortening builds, and it
@@ -3424,7 +3424,7 @@ function updateScrollEffects() {
   const bt = fieldDockScroll > 0 ? Math.min(1, pinP / HERO_TEXT_BOOST.over) : 0;
   const boost = HERO_TEXT_BOOST.px * (1 - (1 - bt) * (1 - bt));
   const textLift = fieldDockScroll > 0
-    ? Math.round(heroShorten - push + boost + HERO_TEXT.speed * travel) : 0;
+    ? Math.round(heroShorten - push + boost + (reducedMotion.matches ? 0 : HERO_TEXT.speed) * travel) : 0;
   // REDESIGN: the white RIDES THE LOCKUP — its edge keeps its resting 16px
   // above the headline all the way up (cream = lag + textLift: the artwork
   // sinks by lag, the text rises by textLift). It used to be forced to the

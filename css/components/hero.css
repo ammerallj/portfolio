@@ -148,12 +148,8 @@ html.is-field-live .page-field-grain { opacity: 0.1; } /* was 0.15 (2026-09-29: 
   transform-origin: 0 0;
   translate: 0 0;
   scale: 1;
-  /* ⚠️ THE SETTLE MUST WAIT FOR THE SCRIM. The scrim (--intro, 1s) is an ease-in, so it
-     is still low on the screen for most of its run; the artwork's hard bottom edge
-     rising before it passes shows as a cutoff line. At 0.85s the scrim's end is
-     below ~770px and the artwork's bottom is still ~1000+, so the edge stays under
-     the white. If the scrim's duration or curve changes, move this with it. */
-  transition: translate 0.5s cubic-bezier(0.3, 0, 0.2, 1) 0.85s, scale 0.5s cubic-bezier(0.3, 0, 0.2, 1) 0.85s;
+  /* No load-time drop/scale any more (2026-10): the artwork stays put and only the
+     scrim rises. */
   /* images/hero-bkg.jpg, centered. FROZEN at its 1440 size (1639.44px = the
      113.85vw composition) for any narrower window: below the design width the
      field keeps its size and position and the viewport simply crops more of
@@ -420,7 +416,7 @@ html.is-field-live .page-field-grain { opacity: 0.1; } /* was 0.15 (2026-09-29: 
      publishes --hero-field-end there. min(), so on desktop it only pulls the
      white UP (short windows put the 72svh end behind the headline) and the
      artwork's bottom edge stays under the white. */
-  --field-mask-end: calc(min(72svh, var(--hero-field-end, 72svh)) + var(--field-rise) - var(--field-cream, 0px) + var(--scrim-drop, 0px) + calc(var(--intro, 0) * 62svh));
+  --field-mask-end: min(100%, calc(min(72svh, var(--hero-field-end, 72svh)) + var(--field-rise) - var(--field-cream, 0px) + var(--scrim-drop, 0px) + calc(var(--intro, 0) * 62svh)));
   /* HOW TALL THE DISSOLVE IS, as a fraction of the room between the bio's last
      line and the bar. --field-gap is that room, published by measureFieldTuck;
      112px is the no-JS floor.
@@ -948,11 +944,11 @@ html:not(.is-field-live) .intro-divider {
 }
 
 /* Each word's ink is a single alpha, --hw-a, which initHeadlineFill writes from
-   the cursor's position through the sentence (0.45 at rest, up to ~0.88 at the
+   the cursor's position through the sentence (0.55 at rest, up to ~0.88 at the
    cursor — a grey-black, never full black). The long ease is what makes it
    read as fluid: the words trail the pointer instead of snapping to it. */
 .intro-headline .hw {
-  color: rgba(0, 0, 0, var(--hw-a, 0.45));
+  color: rgba(0, 0, 0, var(--hw-a, 0.55));
   transition: color 0.55s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -966,7 +962,7 @@ html:not(.is-field-live) .intro-divider {
   font-weight: 500;
   font-size: var(--section-title-size); /* one step under --display-size: 56/44/32 */
   line-height: 1.05;
-  color: rgba(0, 0, 0, 0.45); /* rests grey; only the name is black (see .intro-headline-name) */
+  color: rgba(0, 0, 0, 0.55); /* rests grey (4.7:1 on cream — AA for any size; was 0.45 = 3.4:1); only the name is black (see .intro-headline-name) */
   -webkit-text-stroke: 0;
   max-width: none;
   /* BALANCED, so "designer" doesn't end a long line over a short one
@@ -2029,16 +2025,15 @@ html.is-revealing .site-footer {
 }
 
 html {
-  transition: --intro 1s cubic-bezier(0.5, 0, 0.9, 0.55); /* ease-in: speeds up toward the end */
+  /* Ease-OUT (2026-10): the scrim moves at once, so it reads as the FIRST beat and the
+     text lockup follows. The old ease-in sat almost still for its first third, which
+     made the text (an expo ease-out) look like it arrived before the scrim. */
+  transition: --intro 1.5s cubic-bezier(0.2, 0.6, 0.3, 1); /* ends with the lockup: bio 0.52s + 1s rise = 1.52s */
 }
 
-html.is-intro .page-field {
-  translate: 0 var(--field-rise, 0px);
-  scale: var(--intro-scale, 1.04);
-  /* No transition INTO the intro state (main.js sets --intro-scale a beat after
-     first paint); the settle transition lives on the resting rule above. */
-  transition: none;
-}
+/* The artwork STAYS PUT during the load (2026-10): only the scrim rises. --field-mask-end
+   is capped at the box's own bottom (min(100%, ...)) so the intro's tall scrim never
+   exposes the artwork's bottom edge — the dissolve always finishes inside the box. */
 
 html.is-intro {
   --intro: 1;
@@ -2053,7 +2048,7 @@ html.is-intro {
    visible at the START of the fade-in. */
 .top-nav,
 .intro-bar {
-  transition: opacity 0.9s ease 0.95s, visibility 0s;
+  transition: opacity 0.9s ease 0.6s, visibility 0s;
 }
 
 html.is-intro .top-nav,
@@ -2076,8 +2071,8 @@ html.is-intro .intro-band-right {
   visibility: hidden;
 }
 
-html.has-intro .intro-headline { animation-delay: 1.05s; }
-html.has-intro .intro-band-right { animation-delay: 1.25s; }
+html.has-intro .intro-headline { animation-delay: 0.4s; }
+html.has-intro .intro-band-right { animation-delay: 0.52s; }
 
 /* The orbs are shown through a circle drawn IN THE FIELD SHADER (initHeroField,
    uIris) — no clip-path. The grain layer is CSS and would speckle the cream
@@ -2127,4 +2122,20 @@ html.is-intro .page-field-grain {
 .intro-bar.is-nav-away .intro-bar-links a,
 .intro-bar.is-nav-away .intro-bar-cta {
   transition-delay: 0.2s;
+}
+
+/* NO BLACK FLICKER ON THE WAY INTO CONTACT (2026-10, Jenna: "a flicker of the old black
+   nav appears before transitioning to white"). Measured, per frame: the labels turned
+   white while the bar was away, but that change was a TRANSITION with the 0.2s delay
+   above, and the bar can be away for less than that (114ms in a smooth scroll). A
+   running transition is not cut short by a later rule change, so the bar came back
+   still black and faded to white in plain sight (~140ms). Turning WHITE is now
+   instant, whether or not the bar is away: it happens the moment the class lands,
+   which is while the labels are hidden. Turning back to BLACK (going up) keeps the
+   delayed fade above, since that one must wait for the fade-out. */
+.intro-bar.is-over-dark .intro-bar-name,
+.intro-bar.is-over-dark .intro-bar-links a,
+.intro-bar.is-over-dark .intro-bar-cta {
+  transition-duration: 0s;
+  transition-delay: 0s;
 }
