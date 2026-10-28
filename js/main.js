@@ -895,7 +895,10 @@ function runIntro() {
     let clearExt = () => {};
     if (fbox && fbox.offsetHeight) {
       const r = fbox.getBoundingClientRect();
-      const ext = Math.max(0, window.innerHeight - r.bottom) + 340;
+      // The scrim's soft edge is --field-fade tall (30svh on desktop, up to 300px elsewhere);
+      // the extension must clear the viewport by MORE than that, or the fade shows at the
+      // bottom of the first frame (it did, in tall windows, with a flat 340).
+      const ext = Math.max(0, window.innerHeight - r.bottom) + Math.max(340, 0.3 * window.innerHeight) + 60;
       heroExtPx = ext;
       fbox.style.aspectRatio = 'auto';
       fbox.style.height = (r.height + ext) + 'px';
