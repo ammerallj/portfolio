@@ -880,29 +880,32 @@ function runIntro() {
     window.scrollTo(0, 0);
   };
   window.scrollTo(0, 0);
+  // Extend the canvas below its box so colour reaches past the viewport's bottom (plus
+  // a fade's length), WITHOUT moving or scaling the artwork. Done HERE, synchronously,
+  // so it is in place before the field's first frame: applied later (it was, at the
+  // 400ms mark) the first frame showed the resting scrim and then jumped.
+  const fbox = document.querySelector('.page-field-canvas');
+  let clearExt = () => {};
+  if (fbox && fbox.offsetHeight) {
+    const r = fbox.getBoundingClientRect();
+    // The scrim's soft edge is --field-fade tall (30svh on desktop, up to 300px elsewhere);
+    // the extension must clear the viewport by MORE than that, or the fade shows at the
+    // bottom of the first frame (it did, in tall windows, with a flat 340).
+    const ext = Math.max(0, window.innerHeight - r.bottom) + Math.max(340, 0.3 * window.innerHeight) + 60;
+    heroExtPx = ext;
+    fbox.style.aspectRatio = 'auto';
+    fbox.style.height = (r.height + ext) + 'px';
+    clearExt = () => { heroExtPx = 0; fbox.style.aspectRatio = ''; fbox.style.height = ''; };
+  }
   // initHeroField runs after initHero(); give it a beat, then check it drew.
   // No WebGL = no orbs to show, so skip the screen and reveal as usual.
   setTimeout(() => {
     if (!html.classList.contains('is-field-live')) {
       html.classList.remove('is-intro');
+      clearExt();
       unblock();
       setTimeout(revealSite, 200);
       return;
-    }
-    // Extend the canvas below its box so colour reaches past the viewport's bottom (plus
-    // a fade's length), WITHOUT moving or scaling the artwork.
-    const fbox = document.querySelector('.page-field-canvas');
-    let clearExt = () => {};
-    if (fbox && fbox.offsetHeight) {
-      const r = fbox.getBoundingClientRect();
-      // The scrim's soft edge is --field-fade tall (30svh on desktop, up to 300px elsewhere);
-      // the extension must clear the viewport by MORE than that, or the fade shows at the
-      // bottom of the first frame (it did, in tall windows, with a flat 340).
-      const ext = Math.max(0, window.innerHeight - r.bottom) + Math.max(340, 0.3 * window.innerHeight) + 60;
-      heroExtPx = ext;
-      fbox.style.aspectRatio = 'auto';
-      fbox.style.height = (r.height + ext) + 'px';
-      clearExt = () => { heroExtPx = 0; fbox.style.aspectRatio = ''; fbox.style.height = ''; };
     }
     // No iris and no hold (2026-10): release at once so the scrim rise (a CSS
     // transition on --intro) and the hero lockup's entrance play together.
