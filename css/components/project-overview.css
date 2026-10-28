@@ -1966,56 +1966,10 @@ a.intro-bar-name {
   margin-top: 26px;
 }
 
-@media (hover: hover) {
-  .project-explore-zone:not(:disabled) {
-    cursor: none;
-  }
-}
-
 @media (hover: none) {
   .project-explore-zone {
     pointer-events: none; /* touch swipes the track instead */
   }
-}
-
-/* The arrow that follows the pointer over a zone. Positioned by script (translate); the disc inside scales in. */
-.project-explore-cursor {
-  position: fixed;
-  left: 0;
-  top: 0;
-  z-index: 300;
-  pointer-events: none;
-}
-
-.project-explore-cursor-disc {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 64px;
-  height: 64px;
-  margin: -32px 0 0 -32px;
-  border-radius: 50%;
-  background: rgba(0, 0, 0, 0.55);
-  -webkit-backdrop-filter: blur(6px);
-  backdrop-filter: blur(6px);
-  color: #fff;
-  opacity: 0;
-  transform: scale(0.6);
-  transition: opacity 0.2s ease, transform 0.2s ease;
-}
-
-.project-explore-cursor.is-on .project-explore-cursor-disc {
-  opacity: 1;
-  transform: scale(1);
-}
-
-.project-explore-cursor.is-prev svg {
-  transform: scaleX(-1);
-}
-
-.project-explore-cursor svg {
-  width: 24px;
-  height: 24px;
 }
 
 /* A section that opens on .project-statement: the statement already carries a section step of its own above

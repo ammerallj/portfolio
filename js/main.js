@@ -1500,6 +1500,10 @@ function initHeroField() {
   const IRIS_OFF = new Float32Array([0, 0, -1]);
   const irisOut = new Float32Array(3);
   function irisUniform() {
+    // Circle opening removed (2026-10): the orbs show at full size from the first
+    // frame. The rest of the load sequence (hold, scrim rise) is unchanged; to
+    // restore the iris, delete this line.
+    return IRIS_OFF;
     const running = heroIris && performance.now() - heroIris.start < heroIris.dur;
     // Once started, the iris runs to its end on its own clock (release can come
     // before it finishes — see INTRO.overlap); before it starts it is held by is-intro.
@@ -3205,8 +3209,6 @@ function initExploreCarousel() {
         if (k === i) el.setAttribute('aria-current', 'true');
         else el.removeAttribute('aria-current');
       });
-      // a zone that just went disabled under the pointer has nothing to offer: drop the cursor
-      if (cursorFor && cursorFor.disabled) hideCursor();
     }
     function go(i) {
       const k = Math.max(0, Math.min(slides.length - 1, i));
@@ -3223,38 +3225,6 @@ function initExploreCarousel() {
       sx = null;
       if (Math.abs(dx) > 40) go(index + (dx < 0 ? 1 : -1));
     }, { passive: true });
-
-    // The arrow cursor: one disc that follows the pointer while it is over an enabled zone.
-    let cursor = null;
-    let cursorFor = null;
-    function hideCursor() {
-      cursorFor = null;
-      if (cursor) cursor.classList.remove('is-on');
-    }
-    if (window.matchMedia('(hover: hover)').matches) {
-      cursor = document.createElement('div');
-      cursor.className = 'project-explore-cursor';
-      cursor.setAttribute('aria-hidden', 'true');
-      cursor.innerHTML = '<div class="project-explore-cursor-disc"><svg viewBox="0 0 24 24" fill="none" focusable="false"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>';
-      document.body.appendChild(cursor);
-      [prev, next].forEach((zone) => {
-        if (!zone) return;
-        zone.addEventListener('pointerenter', (e) => {
-          if (zone.disabled) return;
-          cursorFor = zone;
-          cursor.classList.toggle('is-prev', zone === prev);
-          cursor.style.transform = 'translate(' + e.clientX + 'px,' + e.clientY + 'px)';
-          cursor.classList.add('is-on');
-        });
-        zone.addEventListener('pointermove', (e) => {
-          if (cursorFor !== zone) return;
-          cursor.style.transform = 'translate(' + e.clientX + 'px,' + e.clientY + 'px)';
-        });
-        zone.addEventListener('pointerleave', () => {
-          if (cursorFor === zone) hideCursor();
-        });
-      });
-    }
 
     // Captions: each video's data-captions is [{ t, l, r? }] (from time t, left and right text); the frame's .project-explore-cap
     // shows the segment the playhead is in. Text only changes when the segment does.
@@ -4514,105 +4484,6 @@ if (window.innerWidth <= 1024) {
 }
 
 initMotion();
-
-const metaCursor = document.getElementById('meta-cursor');
-const metaLabels = document.querySelectorAll('.meta-label');
-const msLabels = document.querySelectorAll('.ms-label');
-const msCursor = document.getElementById('ms-cursor');
-const waveCursor = document.getElementById('wave-cursor');
-
-// Custom cursors are a MOUSE affordance only. On touch, a tap fires synthetic
-// mouseenter/mousemove events with NO matching mouseleave, so a cursor badge
-// (e.g. the → over a work-card image, or the Meta/MS logo over a label) would
-// appear and then stick on screen. Gate the whole system behind a true hover +
-// fine-pointer device so none of these listeners bind on touch.
-if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
-  // Site-wide soft glow that trails the pointer (decorative; aria-hidden).
-  // Injected here rather than authored into every page's HTML — it's purely
-  // presentational, so JS-only is fine and it needs no per-page markup. Only
-  // reads over dark areas (the landing gradient, Contact); see .cursor-glow.
-  const cursorGlow = document.createElement('div');
-  cursorGlow.className = 'cursor-glow';
-  cursorGlow.setAttribute('aria-hidden', 'true');
-  // A page can opt out of the orb with <html data-no-cursor-orb> (the case-study
-  // pages do: the page is full of product UI the orb would sit over). The element
-  // is still created so the handlers below stay unchanged; it is just never added.
-  if (!document.documentElement.hasAttribute('data-no-cursor-orb')) {
-    document.body.appendChild(cursorGlow);
-  }
-
-  document.addEventListener('mousemove', (e) => {
-    cursorGlow.style.left = e.clientX + 'px';
-    cursorGlow.style.top = e.clientY + 'px';
-    if (!cursorGlow.classList.contains('is-visible')) {
-      cursorGlow.classList.add('is-visible');
-    }
-    if (waveCursor) {
-      waveCursor.style.left = e.clientX + 'px';
-      waveCursor.style.top = e.clientY + 'px';
-    }
-  });
-
-  // Per-project glow colour. Each project maps a URL fragment (its overview
-  // page path) to a .cursor-glow modifier class defined in global.css.
-  const GLOW_VARIANTS = [
-    { match: 'accessibility',   cls: 'is-accessibility' }, // pink
-    { match: 'messaging',       cls: 'is-messaging' },     // blue
-    { match: 'microsoft-loop',  cls: 'is-loop' },          // purple
-    { match: 'facebook-groups', cls: 'is-groups' },        // red
-  ];
-  const ALL_GLOW_CLASSES = GLOW_VARIANTS.map(v => v.cls);
-  function setGlowVariant(cls) {
-    cursorGlow.classList.remove(...ALL_GLOW_CLASSES);
-    if (cls) cursorGlow.classList.add(cls);
-  }
-
-  // On a project overview page, the glow carries that project's colour the whole
-  // time. On the homepage this is null, so the glow rests on the default white.
-  const pageVariant = GLOW_VARIANTS.find(v => location.pathname.includes(v.match)) || null;
-  setGlowVariant(pageVariant ? pageVariant.cls : null);
-
-  // Homepage Work cards no longer recolour the glow (removed 2026-10-08): it stays
-  // the default white while a card is hovered. The per-project colour above now
-  // applies only on that project's own overview page.
-
-  // Show the 👋 cursor over the blue panel (Contact on the homepage).
-  if (darkPanel && waveCursor) {
-    darkPanel.addEventListener('mouseenter', () => waveCursor.classList.add('is-visible'));
-    darkPanel.addEventListener('mouseleave', () => waveCursor.classList.remove('is-visible'));
-  }
-
-  msLabels.forEach(label => {
-    if (!msCursor) return;
-    label.addEventListener('mouseenter', () => {
-      const rect = label.getBoundingClientRect();
-      const img = msCursor.querySelector('img');
-      img.style.height = rect.height + 'px';
-      img.style.width = 'auto';
-      msCursor.style.left = (rect.left + rect.width / 2) + 'px';
-      msCursor.style.top = (rect.top + rect.height / 2) + 'px';
-      msCursor.classList.add('is-visible');
-    });
-    label.addEventListener('mouseleave', () => {
-      msCursor.classList.remove('is-visible');
-    });
-  });
-
-  metaLabels.forEach(label => {
-    if (!metaCursor) return;
-    label.addEventListener('mouseenter', () => {
-      const rect = label.getBoundingClientRect();
-      const img = metaCursor.querySelector('img');
-      img.style.height = rect.height + 'px';
-      metaCursor.style.left = (rect.left + rect.width / 2) + 'px';
-      metaCursor.style.top = (rect.top + rect.height / 2) + 'px';
-      metaCursor.classList.add('is-visible');
-    });
-    label.addEventListener('mouseleave', () => {
-      metaCursor.classList.remove('is-visible');
-    });
-  });
-}
 
 // ============================================================
 // Mobile menu (Figma nodes 123:3733 / 123:3743)
