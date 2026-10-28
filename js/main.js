@@ -203,7 +203,7 @@ const FIELD_TUCK = { span: 0.6 };
 // The artwork's lag: it moves at (1 − k) of the scroll while the white, the nav
 // and Selected Work move at exactly 1 and slide up over it.
 // REDESIGN: 0.5 (was 0.3) — the gradient drifts at half the scroll speed.
-const FIELD_LAG = { k: 0.5 };
+const FIELD_LAG = { k: 0.25 }; // 0.5 before 2026-10: the hero->Work parallax was cut (Jenna), gradient lags less
 // The hero TEXT's parallax: the headline, divider and bio rise at a constant
 // 1 + speed of the scroll — the fastest of the three layers. LINEAR, because a
 // changing speed is what read as loose. Held once the bar pins; the text is off
@@ -212,7 +212,7 @@ const FIELD_LAG = { k: 0.5 };
 // scroll on top of riding Work's own push (see setHeroTextLift), so the text
 // scrolls away faster than Work rises and fades out (once Work fills half the viewport) as it
 // goes. 0 would lock the two together (no parallax, constant gap).
-const HERO_TEXT = { speed: 0.8 };
+const HERO_TEXT = { speed: 0.4 }; // 0.8 before 2026-10 (parallax reduction)
 let lastHeroTextLift = -1;
 function setHeroTextLift(px) {
   if (px === lastHeroTextLift) return;
@@ -718,7 +718,9 @@ let fieldDockScroll = 0;
 // 530 + a cap of 0.65 of the bar's resting top (was 400 / 0.5): Work gets its
 // own share of the parallax speed — it rises faster to follow the lockup, which
 // still leads it by HERO_TEXT.speed. Larger = faster Work, earlier pin.
-const HERO_SHORTEN = { px: 530, cap: 0.65, bias: 1.5 };
+// px 530 -> 260 (2026-10, Jenna: reduce the hero->Work parallax; the first gesture moved
+// Work ~8x the scroll). Peak is now roughly 2.4x at 1440x900.
+const HERO_SHORTEN = { px: 260, cap: 0.65, bias: 1.5 };
 let heroShorten = 0;
 let fieldVisibleEnd = 0;
 let lastHeroShorten = -1;
@@ -799,7 +801,8 @@ function measureFieldTuck() {
   fieldVisibleEnd = visibleEnd;
   // Now shorten. Capped at half the bar's resting top so a short window still
   // has scroll left to unwind the push over.
-  heroShorten = Math.round(Math.min(HERO_SHORTEN.px, barRest * HERO_SHORTEN.cap));
+  // prefers-reduced-motion: no shortening, so Work and the bar scroll at plain 1x.
+  heroShorten = reducedMotion.matches ? 0 : Math.round(Math.min(HERO_SHORTEN.px, barRest * HERO_SHORTEN.cap));
   setHeroShorten(heroShorten);
   // The bar pins when its LAYOUT top reaches the viewport's — the shortened one.
   fieldDockScroll = barRest - heroShorten;
@@ -3384,7 +3387,8 @@ function updateScrollEffects() {
     ? Math.min(1, Math.max(0, window.scrollY / (fieldDockScroll * FIELD_TUCK.span))) : 0;
   const tuck = 1 - Math.pow(1 - t, 3);
   const travel = fieldDockScroll > 0 ? Math.min(window.scrollY, fieldDockScroll) : 0;
-  const lag = Math.round(FIELD_LAG.k * travel);
+  // Reduced motion: the artwork and the lockup ride the page at 1x too.
+  const lag = reducedMotion.matches ? 0 : Math.round(FIELD_LAG.k * travel);
   // The push that undoes the shortening: heroShorten at rest, 0 at the pin.
   // A BIASED SMOOTHSTEP, ss(p^bias): zero slope at BOTH ends, so the nav leaves
   // rest at the scroll's own speed (the tension), the shortening builds, and it
@@ -3420,7 +3424,7 @@ function updateScrollEffects() {
   const bt = fieldDockScroll > 0 ? Math.min(1, pinP / HERO_TEXT_BOOST.over) : 0;
   const boost = HERO_TEXT_BOOST.px * (1 - (1 - bt) * (1 - bt));
   const textLift = fieldDockScroll > 0
-    ? Math.round(heroShorten - push + boost + HERO_TEXT.speed * travel) : 0;
+    ? Math.round(heroShorten - push + boost + (reducedMotion.matches ? 0 : HERO_TEXT.speed) * travel) : 0;
   // REDESIGN: the white RIDES THE LOCKUP — its edge keeps its resting 16px
   // above the headline all the way up (cream = lag + textLift: the artwork
   // sinks by lag, the text rises by textLift). It used to be forced to the
