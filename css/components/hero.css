@@ -944,11 +944,11 @@ html:not(.is-field-live) .intro-divider {
 }
 
 /* Each word's ink is a single alpha, --hw-a, which initHeadlineFill writes from
-   the cursor's position through the sentence (0.45 at rest, up to ~0.88 at the
+   the cursor's position through the sentence (0.55 at rest, up to ~0.88 at the
    cursor — a grey-black, never full black). The long ease is what makes it
    read as fluid: the words trail the pointer instead of snapping to it. */
 .intro-headline .hw {
-  color: rgba(0, 0, 0, var(--hw-a, 0.45));
+  color: rgba(0, 0, 0, var(--hw-a, 0.55));
   transition: color 0.55s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -962,7 +962,7 @@ html:not(.is-field-live) .intro-divider {
   font-weight: 500;
   font-size: var(--section-title-size); /* one step under --display-size: 56/44/32 */
   line-height: 1.05;
-  color: rgba(0, 0, 0, 0.45); /* rests grey; only the name is black (see .intro-headline-name) */
+  color: rgba(0, 0, 0, 0.55); /* rests grey (4.7:1 on cream — AA for any size; was 0.45 = 3.4:1); only the name is black (see .intro-headline-name) */
   -webkit-text-stroke: 0;
   max-width: none;
   /* BALANCED, so "designer" doesn't end a long line over a short one

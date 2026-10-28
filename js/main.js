@@ -2342,7 +2342,7 @@ function initHeadlineFill() {
   });
   if (!words.length) return;
 
-  const REST = 0.45, BEHIND = 0.7, PEAK = 0.88;
+  const REST = 0.55, BEHIND = 0.7, PEAK = 0.88; // REST 0.55 = 4.7:1 on cream (AA at any size)
   let pos = null, raf = 0;
   const paint = () => {
     raf = 0;
