@@ -1133,7 +1133,7 @@ a.intro-bar-name {
 /* The same tooltip on a landing Work card ([data-tip] on the card link, init in
    initBentoTooltips). It lives in the link, anchored to the whole card. */
 [data-tip] { position: relative; }
-.work-card-tip { z-index: 5; white-space: nowrap; }
+.work-card-tip { z-index: 5; white-space: nowrap; border-radius: 999px; padding: 8px 16px; } /* a rounded PILL (2026-10); the shared bento caption keeps its 10px corners */
 
 @media (hover: none) {
   /* A tappable card needs no hint: the landing's tip stays off on touch. */
