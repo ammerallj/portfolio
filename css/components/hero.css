@@ -2123,3 +2123,16 @@ html.is-intro .page-field-grain {
 .intro-bar.is-nav-away .intro-bar-cta {
   transition-delay: 0.2s;
 }
+
+/* NO BLACK FLICKER ON THE WAY INTO CONTACT (2026-10, Jenna: "a flicker of the old black
+   nav appears before transitioning to white"). The blue now arrives fast, so the bar can
+   be away for LESS than the delayed swap above (0.2s delay + 0.15s fade): it returned
+   still black and faded to white in plain sight. Once the bar is back and over the blue,
+   the labels are white at once — the swap only ever ran hidden, so nothing is lost. The
+   other direction (back to black, going up) keeps its fade, since it happens while away. */
+.intro-bar.is-over-dark:not(.is-nav-away) .intro-bar-name,
+.intro-bar.is-over-dark:not(.is-nav-away) .intro-bar-links a,
+.intro-bar.is-over-dark:not(.is-nav-away) .intro-bar-cta {
+  transition-duration: 0s;
+  transition-delay: 0s;
+}
