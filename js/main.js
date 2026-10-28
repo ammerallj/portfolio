@@ -860,6 +860,10 @@ function startReveal() {
 // --intro) and the nav + hero fade in — and the sections below follow.
 // Set by runIntro when the iris starts growing; read by the field shader each frame.
 let heroIris = null;
+// Extra canvas height (CSS px) below the field's real box while the load scrim rises: the
+// artwork stays put and simply continues past its own bottom, so the scrim has colour
+// to rise over and no hard bottom edge shows. 0 at rest.
+let heroExtPx = 0;
 // The sequence is chained off the iris: it grows for `iris` ms, holds `pause` ms
 // on the finished field, THEN the scrim rises and the content staggers in.
 // `maxPause`: the hold on the finished field never runs past this, even if fonts or
@@ -885,27 +889,17 @@ function runIntro() {
       setTimeout(revealSite, 200);
       return;
     }
-    // Grow the artwork just enough to cover the viewport while it is dropped to
-    // the top. The drop (translate +rise) is NOT scaled but the box's own -rise
-    // offset is, so the bottom edge lands at (H - rise) * s + rise: solve for THAT,
-    // not for vh / H, which falls short in tall windows and leaves a hard cream
-    // strip along the bottom of the screen. 2% spare.
-    const box = document.querySelector('.page-field-canvas');
-    if (box && box.offsetHeight) {
-      const rise = parseFloat(getComputedStyle(html).getPropertyValue('--field-rise')) || 0;
-      const need = rise < box.offsetHeight
-        ? (window.innerHeight - rise) / (box.offsetHeight - rise) : window.innerHeight / box.offsetHeight;
-      let sc = Math.max(1, need) * 1.02;
-      html.style.setProperty('--intro-scale', sc.toFixed(4));
-      // Then CHECK it against the real box (no transition while is-intro) and
-      // grow it until the bottom edge is a few px past the screen, whatever the
-      // formula says — a short edge is a hard cream line along the bottom.
-      for (let i = 0; i < 5; i++) {
-        const r = box.getBoundingClientRect();
-        if (r.bottom >= window.innerHeight + 6 && r.top <= 0) break;
-        sc *= 1 + Math.max(0.01, (window.innerHeight + 10 - r.bottom) / Math.max(1, r.height));
-        html.style.setProperty('--intro-scale', sc.toFixed(4));
-      }
+    // Extend the canvas below its box so colour reaches past the viewport's bottom (plus
+    // a fade's length), WITHOUT moving or scaling the artwork.
+    const fbox = document.querySelector('.page-field-canvas');
+    let clearExt = () => {};
+    if (fbox && fbox.offsetHeight) {
+      const r = fbox.getBoundingClientRect();
+      const ext = Math.max(0, window.innerHeight - r.bottom) + 340;
+      heroExtPx = ext;
+      fbox.style.aspectRatio = 'auto';
+      fbox.style.height = (r.height + ext) + 'px';
+      clearExt = () => { heroExtPx = 0; fbox.style.aspectRatio = ''; fbox.style.height = ''; };
     }
     // No iris and no hold (2026-10): release at once so the scrim rise (a CSS
     // transition on --intro) and the hero lockup's entrance play together.
@@ -919,6 +913,8 @@ function runIntro() {
       unblock();
       html.classList.add('is-text-revealed');
       setTimeout(revealRestOfSite, INTRO.followMs);
+      // The scrim (--intro) takes 1.5s to settle; the box can't shrink under it.
+      setTimeout(clearExt, 1700);
     });
   }, INTRO.start);
 }
@@ -1273,7 +1269,7 @@ function initHeroField() {
   const VERT = 'attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}';
   const FRAG = [
     'precision highp float;',
-    'uniform vec2 uRes,uAmp;uniform float uAspect,uTime,uWarp;',
+    'uniform vec2 uRes,uAmp;uniform float uAspect,uTime,uWarp,uTotal;',
     'uniform vec4 uBlob[4];uniform vec3 uCol[4];uniform vec4 uRamp[4];uniform vec3 uIris;',
     // ⚠️ FIELD.layer is deliberately NOT emitted here. It was, as a dead constant
     // `LAYER` that no line of the shader body ever read — and being dead did not
@@ -1302,7 +1298,10 @@ function initHeroField() {
     'vec2 ramp(float t,vec2 m){if(t>=1.)return vec2(0.,1.);',
     ' if(t<=m.x)return vec2(1.+(m.y-1.)*(t/m.x),0.);',
     ' float u=(t-m.x)/(1.-m.x);return vec2(m.y*(1.-u),u);}',
-    'void main(){vec2 uv=gl_FragCoord.xy/uRes;uv.y=1.-uv.y;',
+    // uRes is the LOGICAL box (the field's real size); uTotal is the drawn height. They are
+    // equal at rest; during the load the canvas is taller (heroExtPx) and the extra
+    // rows just continue the same field below the box, so nothing moves.
+    'void main(){vec2 uv=vec2(gl_FragCoord.x,uTotal-gl_FragCoord.y)/uRes;',
     // Domain warp — the one liberty over the source. Figma's circles are
     // exact; displacing the sample point makes the boundaries curl as they
     // drift. uWarp 0 renders the file verbatim.
@@ -1378,7 +1377,7 @@ function initHeroField() {
   gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
 
   const U = {};
-  ['uRes', 'uAspect', 'uTime', 'uWarp', 'uAmp', 'uBlob', 'uCol', 'uRamp', 'uIris']
+  ['uRes', 'uAspect', 'uTime', 'uWarp', 'uTotal', 'uAmp', 'uBlob', 'uCol', 'uRamp', 'uIris']
     .forEach(n => { U[n] = gl.getUniformLocation(prog, n); });
 
   gl.uniform1f(U.uWarp, FIELD.motion.warp);
@@ -1541,8 +1540,10 @@ function initHeroField() {
     gl.uniform4fv(U.uBlob, blobData);
     gl.uniform3fv(U.uCol, colData);
     gl.uniform4fv(U.uRamp, rampData);
-    gl.uniform2f(U.uRes, canvas.width, canvas.height);
-    gl.uniform1f(U.uAspect, canvas.width / canvas.height);
+    const logicalH = Math.max(1, canvas.height - heroExtPx * (canvas.height / boxH));
+    gl.uniform2f(U.uRes, canvas.width, logicalH);
+    gl.uniform1f(U.uTotal, canvas.height);
+    gl.uniform1f(U.uAspect, canvas.width / logicalH);
     gl.uniform1f(U.uTime, t);
     gl.uniform3fv(U.uIris, irisUniform());
     gl.drawArrays(gl.TRIANGLES, 0, 3);

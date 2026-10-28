@@ -148,16 +148,8 @@ html.is-field-live .page-field-grain { opacity: 0.1; } /* was 0.15 (2026-09-29: 
   transform-origin: 0 0;
   translate: 0 0;
   scale: 1;
-  /* ONE MOVEMENT (2026-10): the settle now runs on the scrim's own clock (same 1.5s,
-     same curve, no delay) so the white and the artwork rise as a single motion. It
-     used to start late, which read as the scrim rising twice. The note below is the
-     history of the old delay.
-  ⚠️ (superseded) THE SETTLE MUST WAIT FOR THE SCRIM. The scrim (--intro, 1s) is an ease-in, so it
-     is still low on the screen for most of its run; the artwork's hard bottom edge
-     rising before it passes shows as a cutoff line. At 0.85s the scrim's end is
-     below ~770px and the artwork's bottom is still ~1000+, so the edge stays under
-     the white. If the scrim's duration or curve changes, move this with it. */
-  transition: translate 1.5s cubic-bezier(0.2, 0.6, 0.3, 1), scale 1.5s cubic-bezier(0.2, 0.6, 0.3, 1);
+  /* No load-time drop/scale any more (2026-10): the artwork stays put and only the
+     scrim rises. */
   /* images/hero-bkg.jpg, centered. FROZEN at its 1440 size (1639.44px = the
      113.85vw composition) for any narrower window: below the design width the
      field keeps its size and position and the viewport simply crops more of
@@ -424,7 +416,7 @@ html.is-field-live .page-field-grain { opacity: 0.1; } /* was 0.15 (2026-09-29: 
      publishes --hero-field-end there. min(), so on desktop it only pulls the
      white UP (short windows put the 72svh end behind the headline) and the
      artwork's bottom edge stays under the white. */
-  --field-mask-end: calc(min(72svh, var(--hero-field-end, 72svh)) + var(--field-rise) - var(--field-cream, 0px) + var(--scrim-drop, 0px) + calc(var(--intro, 0) * 62svh));
+  --field-mask-end: min(100%, calc(min(72svh, var(--hero-field-end, 72svh)) + var(--field-rise) - var(--field-cream, 0px) + var(--scrim-drop, 0px) + calc(var(--intro, 0) * 62svh)));
   /* HOW TALL THE DISSOLVE IS, as a fraction of the room between the bio's last
      line and the bar. --field-gap is that room, published by measureFieldTuck;
      112px is the no-JS floor.
@@ -2039,13 +2031,9 @@ html {
   transition: --intro 1.5s cubic-bezier(0.2, 0.6, 0.3, 1); /* ends with the lockup: bio 0.52s + 1s rise = 1.52s */
 }
 
-html.is-intro .page-field {
-  translate: 0 var(--field-rise, 0px);
-  scale: var(--intro-scale, 1.04);
-  /* No transition INTO the intro state (main.js sets --intro-scale a beat after
-     first paint); the settle transition lives on the resting rule above. */
-  transition: none;
-}
+/* The artwork STAYS PUT during the load (2026-10): only the scrim rises. --field-mask-end
+   is capped at the box's own bottom (min(100%, ...)) so the intro's tall scrim never
+   exposes the artwork's bottom edge — the dissolve always finishes inside the box. */
 
 html.is-intro {
   --intro: 1;
