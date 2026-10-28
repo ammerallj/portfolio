@@ -153,7 +153,7 @@ html.is-field-live .page-field-grain { opacity: 0.1; } /* was 0.15 (2026-09-29: 
      rising before it passes shows as a cutoff line. At 0.85s the scrim's end is
      below ~770px and the artwork's bottom is still ~1000+, so the edge stays under
      the white. If the scrim's duration or curve changes, move this with it. */
-  transition: translate 0.5s cubic-bezier(0.3, 0, 0.2, 1) 0.85s, scale 0.5s cubic-bezier(0.3, 0, 0.2, 1) 0.85s;
+  transition: translate 0.5s cubic-bezier(0.3, 0, 0.2, 1) 1s, scale 0.5s cubic-bezier(0.3, 0, 0.2, 1) 1s;
   /* images/hero-bkg.jpg, centered. FROZEN at its 1440 size (1639.44px = the
      113.85vw composition) for any narrower window: below the design width the
      field keeps its size and position and the viewport simply crops more of
@@ -2032,7 +2032,7 @@ html {
   /* Ease-OUT (2026-10): the scrim moves at once, so it reads as the FIRST beat and the
      text lockup follows. The old ease-in sat almost still for its first third, which
      made the text (an expo ease-out) look like it arrived before the scrim. */
-  transition: --intro 0.9s cubic-bezier(0.2, 0.6, 0.3, 1);
+  transition: --intro 1.5s cubic-bezier(0.2, 0.6, 0.3, 1); /* ends with the lockup: bio 0.52s + 1s rise = 1.52s */
 }
 
 html.is-intro .page-field {
