@@ -2029,7 +2029,10 @@ html.is-revealing .site-footer {
 }
 
 html {
-  transition: --intro 1s cubic-bezier(0.5, 0, 0.9, 0.55); /* ease-in: speeds up toward the end */
+  /* Ease-OUT (2026-10): the scrim moves at once, so it reads as the FIRST beat and the
+     text lockup follows. The old ease-in sat almost still for its first third, which
+     made the text (an expo ease-out) look like it arrived before the scrim. */
+  transition: --intro 0.9s cubic-bezier(0.2, 0.6, 0.3, 1);
 }
 
 html.is-intro .page-field {
@@ -2053,7 +2056,7 @@ html.is-intro {
    visible at the START of the fade-in. */
 .top-nav,
 .intro-bar {
-  transition: opacity 0.9s ease 0.3s, visibility 0s;
+  transition: opacity 0.9s ease 0.6s, visibility 0s;
 }
 
 html.is-intro .top-nav,
@@ -2076,8 +2079,8 @@ html.is-intro .intro-band-right {
   visibility: hidden;
 }
 
-html.has-intro .intro-headline { animation-delay: 0.12s; }
-html.has-intro .intro-band-right { animation-delay: 0.22s; }
+html.has-intro .intro-headline { animation-delay: 0.4s; }
+html.has-intro .intro-band-right { animation-delay: 0.52s; }
 
 /* The orbs are shown through a circle drawn IN THE FIELD SHADER (initHeroField,
    uIris) — no clip-path. The grain layer is CSS and would speckle the cream
