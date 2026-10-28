@@ -867,7 +867,7 @@ let heroIris = null;
 // `overlap`: the scrim is released this many ms BEFORE the circle finishes. Outside
 // the circle is cream and so is the scrim, so the two meet seamlessly, and the
 // scrim's slow ease-in start is spent while the circle is still finishing.
-const INTRO = { overlap: 300, pause: 0, maxPause: 850, iris: 1400, followMs: 450, hold: 0 };
+const INTRO = { overlap: 300, pause: 0, maxPause: 850, iris: 1400, followMs: 450, start: 400 }; // start: ms after load before the scrim + lockup begin (0.2s beat on top of the 200ms field check)
 function runIntro() {
   // Scrolling is blocked from first paint by the inline <head> script (index.html);
   // this only puts the page back at the top when the loader ends.
@@ -920,7 +920,7 @@ function runIntro() {
       html.classList.add('is-text-revealed');
       setTimeout(revealRestOfSite, INTRO.followMs);
     });
-  }, 200);
+  }, INTRO.start);
 }
 
 initHero();
