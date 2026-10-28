@@ -2053,7 +2053,7 @@ html.is-intro {
    visible at the START of the fade-in. */
 .top-nav,
 .intro-bar {
-  transition: opacity 0.9s ease 0.95s, visibility 0s;
+  transition: opacity 0.9s ease 0.45s, visibility 0s;
 }
 
 html.is-intro .top-nav,
@@ -2076,8 +2076,8 @@ html.is-intro .intro-band-right {
   visibility: hidden;
 }
 
-html.has-intro .intro-headline { animation-delay: 1.05s; }
-html.has-intro .intro-band-right { animation-delay: 1.25s; }
+html.has-intro .intro-headline { animation-delay: 0.3s; }
+html.has-intro .intro-band-right { animation-delay: 0.45s; }
 
 /* The orbs are shown through a circle drawn IN THE FIELD SHADER (initHeroField,
    uIris) — no clip-path. The grain layer is CSS and would speckle the cream

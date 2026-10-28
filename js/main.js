@@ -867,7 +867,7 @@ let heroIris = null;
 // `overlap`: the scrim is released this many ms BEFORE the circle finishes. Outside
 // the circle is cream and so is the scrim, so the two meet seamlessly, and the
 // scrim's slow ease-in start is spent while the circle is still finishing.
-const INTRO = { overlap: 300, pause: 0, maxPause: 850, iris: 1400, followMs: 950 };
+const INTRO = { overlap: 300, pause: 0, maxPause: 850, iris: 1400, followMs: 450, hold: 0 };
 function runIntro() {
   // Scrolling is blocked from first paint by the inline <head> script (index.html);
   // this only puts the page back at the top when the loader ends.
@@ -907,23 +907,12 @@ function runIntro() {
         html.style.setProperty('--intro-scale', sc.toFixed(4));
       }
     }
-    // IRIS: the field shader draws the orbs through a circle that grows from a 14px
-    // dot at the centre of the viewport until it clears the corners (irisUniform in
-    // initHeroField). Until this runs it holds at the dot.
-    heroIris = {
-      start: performance.now(),
-      dur: INTRO.iris,
-      R: Math.ceil(Math.hypot(window.innerWidth, window.innerHeight) / 2 * 1.06),
-    };
-    const pageReady = Promise.all([
-      document.readyState === 'complete'
-        ? null
-        : new Promise(r => window.addEventListener('load', r, { once: true })),
-      document.fonts ? document.fonts.ready : null
-    ]);
-    const held = new Promise(r => setTimeout(r, INTRO.iris - INTRO.overlap + INTRO.pause));
-    const cap = new Promise(r => setTimeout(r, INTRO.iris + INTRO.maxPause));
-    Promise.race([Promise.all([held, pageReady]), cap]).then(() => {
+    // No iris and no hold (2026-10): release at once so the scrim rise (a CSS
+    // transition on --intro) and the hero lockup's entrance play together.
+    // Fonts are still awaited, capped, so the headline doesn't reflow mid-rise.
+    const fontsReady = document.fonts ? document.fonts.ready : Promise.resolve();
+    const cap = new Promise(r => setTimeout(r, INTRO.maxPause));
+    Promise.race([fontsReady, cap]).then(() => {
       if (siteRevealed) return;
       siteRevealed = true;
       html.classList.remove('is-intro');
