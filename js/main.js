@@ -1500,6 +1500,10 @@ function initHeroField() {
   const IRIS_OFF = new Float32Array([0, 0, -1]);
   const irisOut = new Float32Array(3);
   function irisUniform() {
+    // Circle opening removed (2026-10): the orbs show at full size from the first
+    // frame. The rest of the load sequence (hold, scrim rise) is unchanged; to
+    // restore the iris, delete this line.
+    return IRIS_OFF;
     const running = heroIris && performance.now() - heroIris.start < heroIris.dur;
     // Once started, the iris runs to its end on its own clock (release can come
     // before it finishes — see INTRO.overlap); before it starts it is held by is-intro.
