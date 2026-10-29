@@ -277,6 +277,21 @@ html.is-hero-stacked {
   }
 }
 
+/* ============================================================
+   1200px — About's 5 | 2 | 1 | 4 columns leave a 4-column bio too narrow here
+   (296px at 1025). The bio goes back to 5 columns and the heading to 4:
+   4 | 2 | 1 | 5 = the same 12.
+   ============================================================ */
+@media (max-width: 1200px) {
+  .about-layout {
+    grid-template-columns:
+      calc(var(--about-col) * 4 + 80px)
+      calc(var(--about-col) * 2 + 20px)
+      calc(var(--about-col) + 40px)
+      calc(var(--about-col) * 5 + 80px);
+  }
+}
+
 @media (max-width: 1024px) {
 
   /* THE BIO FILLS ITS COLUMN ON TABLETS (2026-09-28, Jenna: "take up more

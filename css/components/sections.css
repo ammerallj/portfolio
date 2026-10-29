@@ -1140,16 +1140,16 @@ html.has-top-nav.is-work-in #work-section .site-container {
   /* The site's 12-column grid (20px gutters, --page-gutter margins): one column is
      (100vw − 2·gutter − 11·20px)/12, frozen at its 1440 value (the right column
      stops growing there too). The seam between metadata and bio is built from it
-     — metadata takes 2 columns, TWO empty columns sit between (2026-10, Jenna: wider), the bio takes the
-     shared 5-column right column — so the gap scales with the grid instead of
+     — 5 columns for the heading (its original gap to the content, restored 2026-10), 2 for the
+     metadata, ONE empty column, then a 4-column bio (Jenna: a narrower bio is fine) — so the gap scales with the grid instead of
      being a fixed 20px (2026-10, Jenna). */
   --about-col: min((100vw - 2 * var(--page-gutter) - 220px) / 12, 93.67px);
   display: grid;
   grid-template-columns:
-    minmax(0, 1fr)                                  /* heading */
+    calc(var(--about-col) * 5 + 100px)              /* heading: 5 columns + 5 gutters (the original heading → content gap) */
     calc(var(--about-col) * 2 + 20px)               /* metadata: 2 columns */
-    calc(var(--about-col) * 2 + 60px)               /* TWO empty columns + their three gutters */
-    var(--width-right-column);                      /* bio: 5 columns */
+    calc(var(--about-col) + 40px)                   /* ONE empty column + its two gutters */
+    calc(var(--about-col) * 4 + 60px);              /* bio: 4 columns, flush to the right margin */
   grid-template-areas:
     "head meta . bio"
     ".    photo photo photo";
