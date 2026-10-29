@@ -756,7 +756,7 @@ html.is-hero-stacked {
     flex-direction: column;
     gap: var(--gap-group);
   }
-  .contact-meta-connect,
+  .contact-links,
   .contact-mind {
     flex: 0 0 auto;
     width: 100%;
@@ -1421,12 +1421,6 @@ html.is-hero-stacked {
        would look like it was trying to bring it back and would silently do
        nothing. */
     min-height: 0;
-  }
-
-  /* Let the email / LinkedIn / Resume row wrap instead of overflowing */
-  .contact-connect-links {
-    flex-wrap: wrap;
-    gap: 0.5rem 1.5rem;
   }
 
   .site-footer .site-container {

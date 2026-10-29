@@ -1022,48 +1022,27 @@ html.has-top-nav.is-work-in #work-section .site-container {
 
 .contact-email {
   font-family: var(--font-heading);
-  /* The shared bookend display size, CAPPED so the address line — "ammerallj@gmail.com"
-     plus its arrow, about 10.3em wide in this face — always fits the column. Without
-     the cap it overflowed (clipped, arrow wrapped) between ~481 and ~715px wide,
-     where the display size is still 64px. 10.6 leaves a little slack. */
   /* The hero headline's size (2026-10, Jenna: "same hero text size"): --hero-headline-size is
      72px at 1440 and defined at >=1377; below that the hero sentence is --section-title-size. */
-  font-size: min(var(--hero-headline-size, var(--section-title-size)), calc((100vw - 2 * var(--page-gutter)) / 15.8)); /* ONE line now (2026-10): "Say hello" + the address + arrow is ~15.2em wide, so the cap is /15.8 */
+  font-size: var(--hero-headline-size, var(--section-title-size));
   font-weight: 700;
   letter-spacing: -0.02em;
   line-height: 1;
   color: #fff;
   text-decoration: none;
-  display: block;
-  white-space: nowrap;
+  /* "Contact" on the left, the big down arrow LOCKED to the right edge of the row. */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
 }
 
-/* The headline is the mailto link: it keeps the display type and the page's white,
-   with no underline; the arrow is an inline SVG (a text arrow at this size falls
-   back to a system font) at 0.5em, sitting on the baseline after the address. */
-.contact-email a {
-  color: inherit;
-  text-decoration: none;
-}
-
-.contact-email-arrow {
-  display: inline-block;
-  width: 0.5em;
-  height: 0.5em;
-  margin-left: 0.14em;
-  vertical-align: baseline;
-  transition: translate 0.3s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-@media (hover: hover) {
-  .contact-email a:hover .contact-email-arrow {
-    translate: 0.06em -0.06em;
-  }
-}
-
-.contact-email a:focus-visible {
-  outline: 2px solid #fff;
-  outline-offset: 0.1em;
+/* The arrow is an inline SVG (a text arrow at this size falls back to a system font), about
+   the height of the capitals and a little more, drawn at the heading's own weight. */
+.contact-arrow {
+  flex: none;
+  width: 0.95em;
+  height: 0.95em;
 }
 
 .contact-meta {
@@ -1073,17 +1052,40 @@ html.has-top-nav.is-work-in #work-section .site-container {
   gap: 3.75rem; /* minimum gap; space-between spreads the two columns apart */
 }
 
-.contact-meta-group,
 .contact-mind {
   display: flex;
   flex-direction: column;
-  gap: var(--gap-content); /* eyebrow → its content */
+  gap: var(--gap-content);
 }
 
-/* Connect: left column, sized to its links */
-.contact-meta-connect {
+/* The link row (2026-10): "/ LinkedIn", "/ GitHub", "/ ammerallj@gmail.com" in one row, left,
+   beside On My Mind. A slash prefix instead of an arrow or underline; the row wraps only
+   where it has to. */
+.contact-links {
   flex: 0 0 auto;
   min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 3rem;
+  font-size: var(--size-lg);
+  letter-spacing: -0.02em;
+}
+
+.contact-links a {
+  color: #fff;
+  text-decoration: none;
+  transition: opacity 0.15s ease;
+}
+
+@media (hover: hover) {
+  .contact-links a:hover {
+    opacity: 0.6;
+  }
+}
+
+.contact-links a:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 4px;
 }
 
 /* On My Mind: shares the site's right column (fluid 369→542); may shrink on
@@ -1098,32 +1100,12 @@ html.has-top-nav.is-work-in #work-section .site-container {
   color: #fff;
 }
 
-.contact-connect-links {
-  display: flex;
-  gap: 3rem;
-}
-
-.contact-connect-links a {
-  font-size: var(--size-lg);
-  letter-spacing: -0.02em;
-  text-decoration: underline;
-  color: #fff;
-  transition: opacity 0.15s ease;
-}
-
-@media (hover: hover) {
-  .contact-connect-links a:hover {
-    opacity: 0.6;
-  }
-}
-
 /* Outward arrow on the content links (the project pages' footprint lists +
    Contact). Decorative, so
    it's a generated ::after — not part of the copied/read text. inline-block
    keeps it off the link's underline; it inherits the link's color and dims
    with the hover opacity. The Work image links are intentionally excluded. */
-.footprint-list a::after,
-.contact-connect-links a::after {
+.footprint-list a::after {
   content: '↗';
   display: inline-block;
   margin-left: 0.2em;
