@@ -14,8 +14,10 @@
 
 .site-footer .site-container {
   display: flex;
+  flex-direction: column; /* the copyright line, then "Updated on …" under it */
   align-items: center;
   justify-content: center;
+  gap: 6px;
 }
 
 .site-footer p {
@@ -31,6 +33,15 @@
   text-transform: uppercase;
   color: #fff;
   opacity: 0.7;
+}
+
+/* "Updated on <date>" under the copyright (2026-10, Jenna): the same 13px label type, white at 85%
+   rather than the copyright's 70%. The 85% is the LOWEST that is accessible: white blended over
+   the accent blue reads 4.69:1 at 85% (AA wants 4.5 for this size); 70% is only ~3.7:1.
+   Scoped (p.footer-updated) so it outranks `.site-footer p`'s 0.7 opacity. */
+.site-footer p.footer-updated {
+  color: rgba(255, 255, 255, 0.85);
+  opacity: 1;
 }
 
 /* Footer mobile stacking lives in css/components/responsive.css */

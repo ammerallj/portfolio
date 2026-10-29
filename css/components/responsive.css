@@ -1470,6 +1470,10 @@ html.is-hero-stacked {
   .site-footer:not(.site-footer--plain) p {
     color: var(--color-text);
   }
+  /* the transparent phone footer sits on cream: black at 70% (about 9:1) instead of white */
+  .site-footer:not(.site-footer--plain) p.footer-updated {
+    color: rgba(0, 0, 0, 0.7);
+  }
 }
 
 /* ============================================================
