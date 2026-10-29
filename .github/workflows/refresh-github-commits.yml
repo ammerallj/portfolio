@@ -1,0 +1,55 @@
+# Refresh the GitHub contributions graph (the Contact panel's commit squares).
+#
+# Runs daily and on demand. It NEVER touches main or staging: it regenerates the graph
+# markup in index.html (scripts/update-github-commits.py) and, only if something
+# changed, force-pushes ONE branch, `auto/github-commits`, cut from `staging`. To use it:
+#     ./scripts/stage.sh origin/auto/github-commits     # (after `git fetch`), then ship as usual
+# Nothing goes live until you stage and ship it.
+#
+# ⚠️ GitHub only runs SCHEDULED workflows from the default branch (main), so this file
+# starts working once it has shipped. It runs only in ammerallj/portfolio (the `if:`
+# below), not in the portfolio-staging preview repo that scripts/preview.sh pushes to.
+#
+# TOKEN: the script reads the public contribution calendar through the GraphQL API.
+# GITHUB_TOKEN is tried first. If the run fails with "Resource not accessible by
+# integration" (or the counts come back empty), add a fine-grained personal access token
+# with read-only access to public data as the repo secret COMMITS_TOKEN — it is used
+# instead when present.
+name: Refresh GitHub commits graph
+
+on:
+  schedule:
+    - cron: "17 9 * * *"   # daily, 09:17 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh-github-commits
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    if: github.repository == 'ammerallj/portfolio'
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.COMMITS_TOKEN || secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: staging
+      - name: Regenerate the graph
+        run: python3 scripts/update-github-commits.py
+      - name: Push a branch if anything changed
+        run: |
+          if git diff --quiet -- index.html; then
+            echo "graph unchanged — nothing to push"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -B auto/github-commits
+          git add index.html
+          git commit -m "Refresh the GitHub contributions graph"
+          git push --force origin auto/github-commits

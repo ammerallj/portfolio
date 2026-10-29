@@ -3230,6 +3230,20 @@ behind a null check.
   👋 cursor shows on: `#contact` on the homepage only. The project pages end on
   cream, so `darkPanel` is null there and both features simply stay off.
 
+## GitHub contributions graph (Contact panel, 2026-10)
+`<figure class="contact-commits">` at the end of `#contact`: one square per day (`.commit-grid`, 53 weeks,
+column-major, levels 0-4 as white at rising opacity), full container width, with a hover pill
+(`initCommitTips` in js/main.js) reading each cell's `data-d` / `data-n`. The cells are **static markup
+between `<!-- COMMITS:START -->` and `<!-- COMMITS:END -->`**, written by
+`scripts/update-github-commits.py` (uses `gh api graphql`; daily COUNTS only, no repo names).
+Refresh by hand with `python3 scripts/update-github-commits.py`, or let
+`.github/workflows/refresh-github-commits.yml` do it daily: it force-pushes ONE branch,
+`auto/github-commits` (cut from `staging`), only when the graph changed, and never touches
+`main`/`staging`. Take it with `git fetch && ./scripts/stage.sh origin/auto/github-commits`, then ship.
+⚠️ Scheduled workflows only run from the default branch, so the cron starts once this has shipped.
+⚠️ If the run fails with "Resource not accessible by integration", add a read-only fine-grained PAT as the
+repo secret `COMMITS_TOKEN` (the workflow prefers it).
+
 ## Token / Lookup Rules
 - **NEVER read `style.css` to find styles** — it only contains `@import` lines. Open the specific file in `css/components/` from the table above.
 - **When editing HTML text/content only, do not read or analyze CSS files.**
