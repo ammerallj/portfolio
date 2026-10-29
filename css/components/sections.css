@@ -1375,16 +1375,15 @@ html.has-top-nav.is-work-in #work-section .site-container {
   max-width: none;
 }
 
-/* FACTS (redesign, 2026-09-28, third pass — Jenna's reference): three
-   columns across the full container under the bio + photo row. Each column
-   opens on a black hairline with its label as a small uppercase heading;
-   entries sit tight beneath (organisation, then role / detail at 70%).
-   One column per row at ≤768 (responsive.css). */
+/* FACTS (redesign, 2026-10 — Jenna: "Past" and "Now", education and patents dropped):
+   two stacked groups across the full container under the bio + photo row. Each opens
+   on a hairline with its label as the shared eyebrow; each entry is a row of two
+   columns — the organisation, then the role / detail at 70%. The two columns stack at
+   ≤768 (responsive.css). */
 .about-facts {
   margin: var(--gap-group) 0 0;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  column-gap: var(--gap-content);
+  grid-template-columns: minmax(0, 1fr);
   row-gap: var(--gap-group);
   font-family: var(--font-body);
   font-size: 0.875rem; /* 14px */
@@ -1411,8 +1410,9 @@ html.has-top-nav.is-work-in #work-section .site-container {
 
 .about-facts dd {
   margin: 0;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); /* organisation | role */
+  column-gap: var(--gap-content);
 }
 
 .about-facts dd span + span {
