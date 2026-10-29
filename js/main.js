@@ -2095,6 +2095,12 @@ function initNavMorph() {
     { selector: '.intro-bar-links a[href$="#work-section"], .top-nav-link[href$="#work-section"]', rest: 'Work', hover: 'Selected work' },
     { selector: '.intro-bar-links a[href$="#about"], .top-nav-link[href$="#about"]', rest: 'About', hover: 'Who is Jenna' },
     { selector: '.intro-bar-cta, .top-nav-cta', rest: 'Contact', hover: 'Say hello' },
+    // The About and Contact HEADINGS answer themselves the same way (2026-10, Jenna: "do
+    // the same for the other 2 headlines"). Each text sits in a .morph-title span, and the
+    // h2 carries a static aria-label so its name never changes. `align: 'start'` keeps the
+    // letters flush left inside the reserved (wider) box instead of centred like a nav item.
+    { selector: '#about-heading .morph-title', rest: 'About', hover: 'Who is Jenna', align: 'start' },
+    { selector: '#contact-heading .morph-title', rest: 'Contact', hover: 'Say hello', align: 'start' },
   ];
 
   const DURATION = 285; // ms — the spring's own settle time, see above
@@ -2110,11 +2116,11 @@ function initNavMorph() {
       ? SPRING
       : 'cubic-bezier(0.2, 0.8, 0.3, 1)';
 
-  MORPHS.forEach(({ selector, rest, hover }) => {
-    document.querySelectorAll(selector).forEach((el) => setupMorph(el, rest, hover));
+  MORPHS.forEach(({ selector, rest, hover, align }) => {
+    document.querySelectorAll(selector).forEach((el) => setupMorph(el, rest, hover, align));
   });
 
-  function setupMorph(el, REST, HOVER) {
+  function setupMorph(el, REST, HOVER, ALIGN) {
     // Only take over an element still reading the label this morph is written
     // for — so a copy edit in the HTML disables the morph rather than fighting it.
     if (el.textContent.trim() !== REST) return;
@@ -2135,6 +2141,7 @@ function initNavMorph() {
     const box = document.createElement('span');
     box.className = 'nav-morph';
     box.setAttribute('aria-hidden', 'true'); // the <a>'s aria-label is the name
+    if (ALIGN === 'start') box.style.textAlign = 'left'; // headings: flush left, not centred
     // Each sizer is split into the SAME per-character inline-blocks as the live
     // label. Setting it as ordinary text instead leaves the reservation a shade
     // short — inline-blocks get no kerning between them, so the live label is
