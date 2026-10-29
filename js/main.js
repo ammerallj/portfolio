@@ -1293,6 +1293,7 @@ function initHeroField() {
     // As uniforms rather than interpolated constants, so they cannot hit the
     // int-literal trap described above.
     'const vec3 CREAM=vec3(' + FIELD.cream.join(',') + ');',
+    'const vec3 BASE=vec3(.980,.470,.455);',
     // Each blob breathes — radius grows by up to its pulse (uRamp[i].z) on its
     // own slow cycle. Cheap life: it changes how far a blob REACHES without
     // moving its centre, so unlike drift it does not slide colour off the text.
@@ -1318,7 +1319,13 @@ function initHeroField() {
     ' vec2 w=uv+uWarp*.22*(q-.5);',
     // Source-over onto cream, bottom to top — the model Figma uses. NOT a
     // weighted average; the overlaps have to stack or the mixed hues go wrong.
-    ' vec3 col=CREAM;float cov=0.;',
+    // NO WHITE IN THE FIELD (2026-10, Jenna): where no orb reaches — the lower corners, below
+    // the orbs' centres — the ground is a warm salmon instead of cream, easing in with
+    // height, so the gradient never shows pale patches. It sits UNDER the orbs and
+    // only below mid-height (the top, where cyan paints over red, is untouched, so the
+    // blues don't go muddy). The page's own cream scrim is a CSS mask on top, so the
+    // hero's resting look below the fold is unchanged.
+    ' vec3 col=mix(CREAM,BASE,smoothstep(.30,.95,uv.y));float cov=0.;',
     ' for(int i=0;i<4;i++){float fi=float(i);',
     // Orbit periods 48/39/33/29s, deliberately unequal so the four never
     // return to the same arrangement. To calm this down lower uAmp, not the
