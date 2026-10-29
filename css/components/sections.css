@@ -1405,7 +1405,7 @@ html.has-top-nav.is-work-in #work-section .site-container {
    under it is set here. */
 .about-facts dt {
   line-height: 1.2;
-  margin-bottom: 10px;
+  margin-bottom: var(--gap-content); /* label → first row (was 10px; 2026-10, Jenna: more air) */
 }
 
 .about-facts dd {
