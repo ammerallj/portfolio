@@ -1077,7 +1077,8 @@ html.has-top-nav.is-work-in #work-section .site-container {
 
 .contact-links a {
   color: #fff;
-  text-decoration: none;
+  text-decoration: underline; /* all three links underlined (Jenna, 2026-10) */
+  text-underline-offset: 0.2em;
   transition: opacity 0.15s ease;
 }
 
