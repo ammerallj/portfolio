@@ -1136,7 +1136,8 @@ html.has-top-nav.is-work-in #work-section .site-container {
      column, so it lines up with the nav and Contact); the photo drops below, on the
      right, spanning metadata + bio. Everything is a direct child, in this order:
      heading, facts, bio (.about-right), photo (.about-left). Stacks at <=768. */
-  --about-meta-w: clamp(150px, 15vw, 210px);
+  --about-text-size: 1.0625rem; /* 17px (Jenna, 2026-10): the bio AND the metadata entries share it; the site-wide --size-lg stays 18px */
+  --about-meta-w: clamp(160px, 17vw, 250px);
   display: grid;
   grid-template-columns: minmax(0, 1fr) var(--about-meta-w) var(--width-right-column);
   grid-template-areas:
@@ -1363,9 +1364,9 @@ html.has-top-nav.is-work-in #work-section .site-container {
   flex-direction: column;
   gap: var(--gap-group);
   font-family: var(--font-body);
-  font-size: 0.875rem; /* 14px */
+  font-size: var(--about-text-size); /* 17px, same as the bio */
   line-height: 1.25;
-  letter-spacing: -0.005em;
+  letter-spacing: -0.02em; /* the bio's tracking */
   color: var(--color-text);
 }
 
@@ -1495,4 +1496,10 @@ html.has-top-nav.is-work-in #work-section .site-container {
 
 @media (prefers-reduced-motion: reduce) {
   .lightbox[open] { animation: none; }
+}
+
+/* About's bio at 17px (Jenna, 2026-10) — scoped to #about, because .about-body also sets Contact's
+   "On My Mind" copy at the site's 18px. */
+#about .about-body p {
+  font-size: var(--about-text-size);
 }
