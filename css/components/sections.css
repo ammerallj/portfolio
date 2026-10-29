@@ -1058,15 +1058,19 @@ html.has-top-nav.is-work-in #work-section .site-container {
   gap: var(--gap-content);
 }
 
-/* The link row (2026-10): "/ LinkedIn", "/ GitHub", "/ ammerallj@gmail.com" in one row, left,
+/* The link row (2026-10): "/ LinkedIn", "/ GitHub", "/ ammerallj@gmail.com" in one row, right,
    beside On My Mind. A slash prefix instead of an arrow or underline; the row wraps only
    where it has to. */
 .contact-links {
-  flex: 0 0 auto;
+  /* On the shared right column (the nav's "Work" line to the right margin), the three links
+     spread across it with space-between; the paragraph is on the left (2026-10, Jenna: swap). */
+  flex: 0 0 var(--width-right-column);
   min-width: 0;
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem 3rem;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  gap: 0 12px;
+  white-space: nowrap;
   font-size: var(--size-lg);
   letter-spacing: -0.02em;
 }
