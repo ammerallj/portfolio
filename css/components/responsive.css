@@ -333,7 +333,7 @@ html.is-hero-stacked {
        that top 98px above the line instead: the wash over About survives, the
        empty lead-in does not. Contrast IMPROVES (a shorter ramp is further along
        at the copy), so this cannot regress the AA floor the tail bought. */
-    --contact-ledge-length: 400px;
+    --contact-ledge-length: 300px;
     /* SPACING SCALE, tablet step (see the block at the top of this file).
        Group closes from the desktop 60 as the columns stack — side by side a
        60px column gap reads as one break, but stacked it becomes vertical

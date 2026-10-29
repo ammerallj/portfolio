@@ -235,7 +235,7 @@
      as a long blue band.
      The dissolve wants a LENGTH of its own; the room only says how much it may
      take. min() expresses exactly that. */
-  --contact-ledge-length: 400px; /* was 520 (2026-10, Jenna: shorten the blue scrim); the tablet tier already used 400 */
+  --contact-ledge-length: 300px; /* was 520, then 400 (2026-10, Jenna: shorten the blue scrim) */
   /* ⚠️ NO LONGER CAPPED BY THE ROOM — the scrim is ALLOWED to reach up over
      About's copy so Contact arrives earlier (deliberate, 2026-09). It used to be
      min(length, --contact-gap) precisely so it could never touch content; that
@@ -267,7 +267,7 @@
      ⚠️ RAISE THE TAIL, NOT THE RESTING LEDGE, to get more cream: if both move
      together the geometry is IDENTICAL and all that happens is Contact is pushed
      further down the page for nothing. */
-  --contact-ledge-rest: clamp(180px, 26svh, 300px); /* the hero's stretch, in reverse (2026-10, Jenna): the white-to-blue scrim is APPENDED to About's bottom and is as long as the landing's own scrim — 234px at 900 tall (hero: --field-fade ~229). svh, like the hero. */
+  --contact-ledge-rest: var(--contact-ledge-length); /* was clamp(180px, 26svh, 300px): the ledge is one fixed length now, so About's tail follows it */ /* /* the hero's stretch, in reverse (2026-10, Jenna): the white-to-blue scrim is APPENDED to About's bottom and is as long as the landing's own scrim — 234px at 900 tall (hero: --field-fade ~229). svh, like the hero. */
   /* ⚠️ THE LEDGE PAINTS PAST THE PANEL'S TOP EDGE BY THIS MUCH, and it is the
      same fix the landing bar's ::before already carries for the same reason.
      Contact's top does NOT land on a whole pixel — it is the sum of everything
