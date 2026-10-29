@@ -4374,6 +4374,9 @@ function initSectionGeometry(lenis) {
 // 0.97 the reveal fired with only ~34px of card above the fold while Work was
 // rising at ~1.8x, so the whole rise-and-fade played out of sight.
 const WORK_REVEAL = { in: 0.9, out: 0.95 };
+// Where Contact's copy fades in / resets, as fractions of the viewport height on the blue
+// PANEL's top edge (was: the copy's own top < 0.9, i.e. the edge at ~0.66).
+const CONTACT_REVEAL = { in: 0.85, out: 0.95 };
 function setupReveals(motion) {
   const { animate } = motion;
   const groups = Array.from(document.querySelectorAll('[data-reveal-group]'));
@@ -4439,6 +4442,19 @@ function setupReveals(motion) {
       // revealed state, it comes back on the one 0.5s fade, like the hero's
       // lockup. Once the class is gone the normal reset applies again.
       if (group.closest('#about.is-about-out')) return;
+      // CONTACT'S COPY REVEALS WITH THE BLUE, NOT AFTER IT (2026-10, Jenna: "shorten the
+      // distance of the blue scrim by revealing the contact copy earlier"). The copy sits
+      // ~218px below the panel's top, so on the normal 'top < 0.9vh' line it only appeared
+      // once the blue edge was ~590px up, after a long empty run of ramp and solid blue.
+      // It now follows the PANEL's edge: in at CONTACT_REVEAL.in of the viewport, back out
+      // (animated, hysteresis) at CONTACT_REVEAL.out, so it fades up while it is still rising
+      // into view.
+      if (group.classList.contains('contact-inner')) {
+        const edge = group.closest('#contact').getBoundingClientRect().top;
+        if (edge < vh * CONTACT_REVEAL.in) setVisible(group, true);
+        else if (edge > vh * CONTACT_REVEAL.out) setVisible(group, false);
+        return;
+      }
       if (r.bottom <= 0 || r.top >= vh) {
         // Fully off-screen (above or below): instant reset to hidden, ready to
         // fade in on the next entry.

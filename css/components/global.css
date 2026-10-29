@@ -235,7 +235,7 @@
      as a long blue band.
      The dissolve wants a LENGTH of its own; the room only says how much it may
      take. min() expresses exactly that. */
-  --contact-ledge-length: 520px;
+  --contact-ledge-length: 400px; /* was 520 (2026-10, Jenna: shorten the blue scrim); the tablet tier already used 400 */
   /* ⚠️ NO LONGER CAPPED BY THE ROOM — the scrim is ALLOWED to reach up over
      About's copy so Contact arrives earlier (deliberate, 2026-09). It used to be
      min(length, --contact-gap) precisely so it could never touch content; that
