@@ -1380,6 +1380,7 @@ html.has-top-nav.is-work-in #work-section .site-container {
    uppercase, 0.05em), not its own heading style (2026-10, Jenna). Only the spacing
    under it is set here. */
 .about-facts dt {
+  color: rgba(0, 0, 0, 0.55); /* the hero sentence's resting grey (4.7:1 on cream) */
   line-height: 1.2;
   margin-bottom: var(--gap-content);
 }
