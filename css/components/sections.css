@@ -1307,12 +1307,6 @@ html.has-top-nav.is-work-in #work-section .site-container {
 
 .about-stack-wide {
   width: 100%;
-  /* THE BOTTOM EDGE FADES OUT TO THE PAGE (2026-10, Jenna): a feathered mask on the bottom
-     only, so the duotone melts into the cream instead of ending on a hard edge. The other
-     three sides stay crisp. The fade length is one token. */
-  --about-photo-fade: clamp(48px, 10vw, 144px);
-  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - var(--about-photo-fade)), transparent);
-  mask-image: linear-gradient(to bottom, #000 calc(100% - var(--about-photo-fade)), transparent);
 }
 
 .about-stack-small {
