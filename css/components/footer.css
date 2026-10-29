@@ -3,9 +3,10 @@
    ============================================================ */
 
 .site-footer {
-  /* Continues the blue contact panel; a white rule divides copyright from it */
+  /* Continues the blue contact panel — no divider rule (dropped 2026-10, Jenna) */
   background-color: var(--color-accent);
-  border-top: 1px solid rgba(255, 255, 255, 0.25);
+  background-image: var(--contact-grain);
+  background-blend-mode: overlay;
   /* Figma: copyright is centered 30px from the divider line and 30px from the
      bottom edge */
   padding-block: 30px;
@@ -45,6 +46,7 @@
    just drew a line under content that already ends cleanly. */
 .site-footer--plain {
   background-color: transparent;
+  background-image: none;
   border-top: none;
 }
 

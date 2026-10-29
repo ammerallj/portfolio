@@ -4496,6 +4496,42 @@ if (window.innerWidth <= 1024) {
 initMotion();
 
 // ============================================================
+// GITHUB COMMITS GRAPH — hover a square to see its month, day and count (2026-10, Jenna).
+// The cells carry data-d (ISO date) and data-n (count), written by
+// scripts/update-github-commits.py. One floating pill follows the hovered square.
+// Progressive enhancement: without JS the graph is simply the picture.
+// ============================================================
+(function initCommitTips() {
+  try {
+    const grid = document.querySelector('.commit-grid');
+    if (!grid) return;
+    const tip = document.createElement('div');
+    tip.className = 'commit-tip';
+    tip.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(tip);
+    const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const label = (cell) => {
+      const [, m, d] = cell.dataset.d.split('-').map(Number);
+      const n = Number(cell.dataset.n);
+      return MONTHS[m - 1] + ' ' + d + ' \u00b7 ' + (n === 0 ? 'no commits' : n + (n === 1 ? ' commit' : ' commits'));
+    };
+    const show = (cell) => {
+      tip.textContent = label(cell);
+      const r = cell.getBoundingClientRect();
+      tip.style.left = r.left + r.width / 2 + 'px';
+      tip.style.top = r.top - 8 + 'px';
+      tip.classList.add('is-on');
+    };
+    grid.addEventListener('pointerover', (e) => {
+      const cell = e.target.closest('i[data-d]');
+      if (cell && grid.contains(cell)) show(cell);
+    });
+    grid.addEventListener('pointerleave', () => tip.classList.remove('is-on'));
+    window.addEventListener('scroll', () => tip.classList.remove('is-on'), { passive: true });
+  } catch (e) { /* decorative */ }
+})();
+
+// ============================================================
 // Mobile menu (Figma nodes 123:3733 / 123:3743)
 // The "Menu" trigger opens a full-screen overlay; the overlay's
 // in-page links (#work-section / #about) already route through the

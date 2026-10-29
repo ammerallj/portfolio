@@ -1470,6 +1470,7 @@ html.is-hero-stacked {
   }
   .site-footer:not(.site-footer--plain) {
     background-color: transparent;
+    background-image: none;
     border-top: none;
   }
   .site-footer:not(.site-footer--plain) p {

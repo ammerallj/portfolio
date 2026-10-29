@@ -154,6 +154,10 @@
   --gap-section: 96px;
   --gap-heading: 144px;
 
+  /* The blue panel's grain (Contact panel AND the footer share it, so there is no seam where
+     one has grain and the other is flat — the "hairline" above the footer, 2026-10). */
+  --contact-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='cg' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.8' numOctaves='1' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='discrete' tableValues='0 1'/%3E%3CfeFuncG type='discrete' tableValues='0 1'/%3E%3CfeFuncB type='discrete' tableValues='0 1'/%3E%3CfeFuncA type='linear' slope='0' intercept='1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23cg)' opacity='0.1'/%3E%3C/svg%3E");
+
   /* Outer page gutter (.site-container / .site-header-row) */
   --page-gutter: 48px; /* was 56 (2026-10 trial). The 12-column maths below hard-code 2 x gutter + 11 x 20 = 316px (was 332). */
 
