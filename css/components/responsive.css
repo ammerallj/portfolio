@@ -810,6 +810,20 @@ html.is-hero-stacked {
   }
 }
 
+/* ============================================================
+   TABLET (481–768px) — About's metadata: Now and Past side by side, 50/50 (Jenna, 2026-10).
+   About is one column here (heading, metadata, bio, photo); the two metadata groups
+   share a row instead of stacking. Phones (<=480) keep them stacked.
+   ============================================================ */
+@media (min-width: 481px) and (max-width: 768px) {
+  .about-facts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--gap-content);
+    align-items: start;
+  }
+}
+
 /* ==========================================================================
    3b. WHERE THE NAV BAR STOPS FITTING (max-width: 680px)
    The ONE job of this tier: hand navigation over to the mobile system
