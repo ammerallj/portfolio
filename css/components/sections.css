@@ -1137,13 +1137,23 @@ html.has-top-nav.is-work-in #work-section .site-container {
      right, spanning metadata + bio. Everything is a direct child, in this order:
      heading, facts, bio (.about-right), photo (.about-left). Stacks at <=768. */
   --about-text-size: 1.0625rem; /* 17px (Jenna, 2026-10): the bio AND the metadata entries share it; the site-wide --size-lg stays 18px */
-  --about-meta-w: clamp(160px, 17vw, 250px);
+  /* The site's 12-column grid (20px gutters, --page-gutter margins): one column is
+     (100vw − 2·gutter − 11·20px)/12, frozen at its 1440 value (the right column
+     stops growing there too). The seam between metadata and bio is built from it
+     — metadata takes 2 columns, ONE empty column sits between, the bio takes the
+     shared 5-column right column — so the gap scales with the grid instead of
+     being a fixed 20px (2026-10, Jenna). */
+  --about-col: min((100vw - 2 * var(--page-gutter) - 220px) / 12, 93.67px);
   display: grid;
-  grid-template-columns: minmax(0, 1fr) var(--about-meta-w) var(--width-right-column);
+  grid-template-columns:
+    minmax(0, 1fr)                                  /* heading */
+    calc(var(--about-col) * 2 + 20px)               /* metadata: 2 columns */
+    calc(var(--about-col) + 40px)                   /* the empty column + its two gutters */
+    var(--width-right-column);                      /* bio: 5 columns */
   grid-template-areas:
-    "head meta bio"
-    ".    photo photo";
-  column-gap: var(--gap-content);
+    "head meta . bio"
+    ".    photo photo photo";
+  column-gap: 0;
   row-gap: var(--gap-group);
   align-items: start;
   padding-block: 0;
