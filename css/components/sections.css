@@ -1413,7 +1413,7 @@ html.has-top-nav.is-work-in #work-section .site-container {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); /* organisation | role */
   column-gap: var(--gap-content);
-  line-height: 1.5; /* rows only (21px at 14px); was the block's 1.25 (17.5px). The label keeps 1.2. */
+  line-height: 1.7; /* rows only (23.8px at 14px); was the block's 1.25 (17.5px). The label keeps 1.2. */
 }
 
 .about-facts dd span + span {
