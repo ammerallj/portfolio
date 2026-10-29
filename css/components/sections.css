@@ -1383,7 +1383,7 @@ html.has-top-nav.is-work-in #work-section .site-container {
 .about-facts-row {
   display: flex;
   flex-direction: column;
-  gap: 10px; /* entry → entry */
+  gap: var(--gap-content); /* entry → entry (was 10px; 2026-10, Jenna) */
 }
 
 /* The label type is the shared EYEBROW (global.css: .section-label et al — 13px Inter,
