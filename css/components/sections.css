@@ -1140,7 +1140,7 @@ html.has-top-nav.is-work-in #work-section .site-container {
   /* The site's 12-column grid (20px gutters, --page-gutter margins): one column is
      (100vw − 2·gutter − 11·20px)/12, frozen at its 1440 value (the right column
      stops growing there too). The seam between metadata and bio is built from it
-     — metadata takes 2 columns, ONE empty column sits between, the bio takes the
+     — metadata takes 2 columns, TWO empty columns sit between (2026-10, Jenna: wider), the bio takes the
      shared 5-column right column — so the gap scales with the grid instead of
      being a fixed 20px (2026-10, Jenna). */
   --about-col: min((100vw - 2 * var(--page-gutter) - 220px) / 12, 93.67px);
@@ -1148,7 +1148,7 @@ html.has-top-nav.is-work-in #work-section .site-container {
   grid-template-columns:
     minmax(0, 1fr)                                  /* heading */
     calc(var(--about-col) * 2 + 20px)               /* metadata: 2 columns */
-    calc(var(--about-col) + 40px)                   /* the empty column + its two gutters */
+    calc(var(--about-col) * 2 + 60px)               /* TWO empty columns + their three gutters */
     var(--width-right-column);                      /* bio: 5 columns */
   grid-template-areas:
     "head meta . bio"
@@ -1372,7 +1372,7 @@ html.has-top-nav.is-work-in #work-section .site-container {
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--gap-section); /* Now → Past (was --gap-group; 2026-10, Jenna) */
+  gap: var(--gap-group); /* Now → Past */
   font-family: var(--font-body);
   font-size: var(--about-text-size); /* 17px, same as the bio */
   line-height: 1.25;
