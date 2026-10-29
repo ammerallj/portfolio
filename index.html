@@ -170,7 +170,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@200;400;500;700&family=Inter:wght@400..700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=463e1869" />
+  <link rel="stylesheet" href="style.css?v=d25895d1" />
   <!-- The landing field's JPEG fallback — PHONES ONLY since 2026-09, so the
        preload is gated to match the <picture> in <main>. Without the media
        attribute this fetches 1.4MB on every desktop and tablet visit for an
@@ -572,18 +572,6 @@
         </div>
 
         <div class="about-left" data-reveal data-reveal-order="3">
-          <!-- Cyanotype duotone for the profile photo (2026-10): luminance, then a
-               navy -> blue -> cool-white ramp. Applied in CSS (.about-stack-wide). -->
-          <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
-            <filter id="cyanotype" color-interpolation-filters="sRGB">
-              <feColorMatrix type="matrix" values="0.2126 0.7152 0.0722 0 0  0.2126 0.7152 0.0722 0 0  0.2126 0.7152 0.0722 0 0  0 0 0 1 0"/>
-              <feComponentTransfer>
-                <feFuncR type="table" tableValues="0.03 0.27 0.92"/>
-                <feFuncG type="table" tableValues="0.08 0.47 0.96"/>
-                <feFuncB type="table" tableValues="0.16 0.66 1"/>
-              </feComponentTransfer>
-            </filter>
-          </svg>
           <div class="about-stack">
             <img class="about-stack-wide" src="images/about-photo2-crop.jpg?v=1" width="802" height="444" loading="lazy" alt="Jenna Ammerall holding Maeve, her dachshund, outdoors in Seattle" />
           </div>
@@ -681,6 +669,6 @@
     </button>
   </div>
   <script src="js/jennaos.js?v=24" defer></script>
-  <script src="js/main.js?v=d60cd5e7" defer></script>
+  <script src="js/main.js?v=e5b65e69" defer></script>
 </body>
 </html>

@@ -4493,60 +4493,6 @@ if (window.innerWidth <= 1024) {
 initMotion();
 
 // ============================================================
-// ABOUT PHOTO — click to change the duotone (2026-10, Jenna). The photo is black and white;
-// an SVG filter maps its luminance onto a colour ramp. It starts as the hand-tuned cyanotype
-// (index.html #cyanotype) and each click steps through the hero gradient's own orb colours
-// (violet, magenta, red), then back to the cyanotype. Progressive enhancement: the wrapping
-// <button> is added here, so without JS the photo is just the cyanotype image.
-// ============================================================
-(function initPhotoDuotone() {
-  try {
-    const img = document.querySelector('.about-stack-wide');
-    const svg = img && document.querySelector('.about-left svg filter#cyanotype');
-    if (!img || !svg) return;
-    const filterRoot = svg.parentNode;
-    // The orb colours (FIELD.blobs in initHeroField) as 0-255 RGB.
-    const ORBS = [
-      { id: 'duo-violet',  name: 'violet',  rgb: [146, 56, 227] },
-      { id: 'duo-magenta', name: 'magenta', rgb: [214, 77, 206] },
-      { id: 'duo-red',     name: 'red',     rgb: [249, 63, 63] },
-    ];
-    // Shadow = the hue pulled very dark, mid = the hue itself (slightly deepened),
-    // highlight = the hue lightened to a pale tint. Same three-stop shape as the cyanotype.
-    const mix = (a, b, t) => a.map((v, i) => v * (1 - t) + b[i] * t);
-    const t = (c) => c.map((v) => (v / 255).toFixed(3));
-    const NS = 'http://www.w3.org/2000/svg';
-    ORBS.forEach((o) => {
-      const stops = [mix(o.rgb, [0, 0, 0], 0.88), mix(o.rgb, [0, 0, 0], 0.18), mix(o.rgb, [255, 255, 255], 0.9)];
-      const f = document.createElementNS(NS, 'filter');
-      f.setAttribute('id', o.id);
-      f.setAttribute('color-interpolation-filters', 'sRGB');
-      f.innerHTML =
-        '<feColorMatrix type="matrix" values="0.2126 0.7152 0.0722 0 0  0.2126 0.7152 0.0722 0 0  0.2126 0.7152 0.0722 0 0  0 0 0 1 0"/>' +
-        '<feComponentTransfer>' +
-        '<feFuncR type="table" tableValues="' + stops.map((c) => t(c)[0]).join(' ') + '"/>' +
-        '<feFuncG type="table" tableValues="' + stops.map((c) => t(c)[1]).join(' ') + '"/>' +
-        '<feFuncB type="table" tableValues="' + stops.map((c) => t(c)[2]).join(' ') + '"/>' +
-        '</feComponentTransfer>';
-      filterRoot.appendChild(f);
-    });
-    const states = [{ id: 'cyanotype', name: 'cyanotype blue' }].concat(ORBS);
-    let i = 0;
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'about-photo-btn';
-    img.parentNode.insertBefore(btn, img);
-    btn.appendChild(img);
-    const apply = () => {
-      img.style.filter = 'url(#' + states[i].id + ')';
-      btn.setAttribute('aria-label', 'Photo of Jenna holding her dachshund, in ' + states[i].name + '. Activate to change the colour.');
-    };
-    btn.addEventListener('click', () => { i = (i + 1) % states.length; apply(); });
-    apply();
-  } catch (e) { /* decorative: the cyanotype image stays */ }
-})();
-
-// ============================================================
 // Mobile menu (Figma nodes 123:3733 / 123:3743)
 // The "Menu" trigger opens a full-screen overlay; the overlay's
 // in-page links (#work-section / #about) already route through the

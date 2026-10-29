@@ -1307,7 +1307,6 @@ html.has-top-nav.is-work-in #work-section .site-container {
 
 .about-stack-wide {
   width: 100%;
-  filter: url(#cyanotype); /* blue duotone (index.html's #cyanotype); no filter support = the original B&W */
   /* THE BOTTOM EDGE FADES OUT TO THE PAGE (2026-10, Jenna): a feathered mask on the bottom
      only, so the duotone melts into the cream instead of ending on a hard edge. The other
      three sides stay crisp. The fade length is one token. */
@@ -1517,19 +1516,4 @@ html.has-top-nav.is-work-in #work-section .site-container {
    "On My Mind" copy at the site's 18px. */
 #about .about-body p {
   font-size: var(--about-text-size);
-}
-
-/* The photo is a button (js/main.js initPhotoDuotone): a click steps its duotone through the
-   hero gradient's colours. Unstyled apart from the pointer and a visible focus ring. */
-.about-photo-btn {
-  all: unset;
-  display: block;
-  width: 100%;
-  border-radius: 24px;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-}
-.about-photo-btn:focus-visible {
-  outline: 2px solid var(--color-text);
-  outline-offset: 4px;
 }
