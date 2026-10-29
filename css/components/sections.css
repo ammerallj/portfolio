@@ -1308,6 +1308,18 @@ html.has-top-nav.is-work-in #work-section .site-container {
 .about-stack-wide {
   width: 100%;
   filter: url(#cyanotype); /* blue duotone (index.html's #cyanotype); no filter support = the original B&W */
+  /* THE EDGES FADE OUT TO THE PAGE (2026-10, Jenna): a feathered mask on all four sides, so
+     the duotone melts into the cream instead of ending on a hard (rounded) edge. Two
+     linear masks intersected (horizontal x vertical). The fade length is one token. */
+  --about-photo-fade: clamp(24px, 5vw, 72px);
+  -webkit-mask-image:
+    linear-gradient(to right, transparent, #000 var(--about-photo-fade), #000 calc(100% - var(--about-photo-fade)), transparent),
+    linear-gradient(to bottom, transparent, #000 var(--about-photo-fade), #000 calc(100% - var(--about-photo-fade)), transparent);
+  mask-image:
+    linear-gradient(to right, transparent, #000 var(--about-photo-fade), #000 calc(100% - var(--about-photo-fade)), transparent),
+    linear-gradient(to bottom, transparent, #000 var(--about-photo-fade), #000 calc(100% - var(--about-photo-fade)), transparent);
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
 }
 
 .about-stack-small {
