@@ -257,7 +257,7 @@ html.is-hero-stacked {
      1280), and the 77px rail leaves a 148px gap at 1440. It was a flat 168px,
      which put the content between column lines. */
   body:has(.section-pills--rail) main > section:not(.case-closing-section):not(.additional-work) {
-    padding-left: calc((100vw - 332px) / 6 + 40px);
+    padding-left: calc((100vw - 316px) / 6 + 40px);
   }
 
   /* Hidden (not just transparent) until the reader is past the summary. */
@@ -274,6 +274,21 @@ html.is-hero-stacked {
   }
   .intro {
     height: calc(100svh - var(--hero-peek));
+  }
+}
+
+/* ============================================================
+   1200px — About's 5 | 2 | 1 | 4 columns leave a 4-column bio too narrow here
+   (296px at 1025). The bio goes back to 5 columns and the heading to 4:
+   4 | 2 | 1 | 5 = the same 12.
+   ============================================================ */
+@media (max-width: 1200px) {
+  .about-layout {
+    grid-template-columns:
+      calc(var(--about-col) * 4 + 80px)
+      calc(var(--about-col) * 2 + 20px)
+      calc(var(--about-col) + 40px)
+      calc(var(--about-col) * 5 + 80px);
   }
 }
 
@@ -792,6 +807,32 @@ html.is-hero-stacked {
 
   .about-skills-list {
     grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================================
+   TABLET (481–768px) — About's metadata: Now and Past side by side, 50/50 (Jenna, 2026-10).
+   About is one column here (heading, metadata, bio, photo); the two metadata groups
+   share a row instead of stacking. Phones (<=480) keep them stacked.
+   ============================================================ */
+@media (min-width: 481px) and (max-width: 768px) {
+  .about-facts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--gap-content);
+    align-items: start;
+  }
+  /* Inside each group the entries sit side by side too (Meta | Microsoft), so Now and
+     Past come out the same height. The label spans both columns. */
+  .about-facts-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--gap-content);
+    align-items: start;
+  }
+  .about-facts-row dt,
+  .about-facts-row dd:only-of-type {
+    grid-column: 1 / -1; /* the label, and a group's lone entry (Now), span both columns */
   }
 }
 

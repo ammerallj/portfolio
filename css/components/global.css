@@ -155,7 +155,7 @@
   --gap-heading: 144px;
 
   /* Outer page gutter (.site-container / .site-header-row) */
-  --page-gutter: 56px;
+  --page-gutter: 48px; /* was 56 (2026-10 trial). The 12-column maths below hard-code 2 x gutter + 11 x 20 = 316px (was 332). */
 
   /* Height of the docked nav bar — the line a section rests under. Read by
      `scroll-padding-top` below, by #about's min-height (sections.css), and by
@@ -314,7 +314,7 @@
      changing either side; the phone tier overrides the gap for exactly this
      reason. The ≤1024 and ≤768 tiers keep their own flat values — the card is
      single-column there, so it has no shrink to avoid. */
-  --work-peek: min(112.33px, 8.333vw - 7.67px);
+  --work-peek: min(113.67px, 8.333vw - 6.33px); /* one column + one gutter, (100vw − 316px)/12 + 20px */
 
   --measure: 65ch;
 
@@ -327,7 +327,7 @@
      + 4 gutters = 41.667vw − 58.33px. 542px at 1440, 475 at 1280, 369 at the
      1025 band floor; frozen at 542 above 1440. Kept flush right via each
      consumer's own right:56px / flex row. */
-  --width-right-column: clamp(368.75px, 41.667vw - 58.33px, 541.67px);
+  --width-right-column: clamp(375.42px, 41.667vw - 51.67px, 548.33px); /* 5·(100vw − 316px)/12 + 4·20px; 548.33 at 1440 */
 
   /* SIX columns of the same grid — the Work card headline measure:
      6·(100vw−332)/12 + 5 gutters = 50vw − 66px. 654px at 1440, 446.5 at the

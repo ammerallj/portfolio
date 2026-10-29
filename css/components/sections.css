@@ -1137,13 +1137,23 @@ html.has-top-nav.is-work-in #work-section .site-container {
      right, spanning metadata + bio. Everything is a direct child, in this order:
      heading, facts, bio (.about-right), photo (.about-left). Stacks at <=768. */
   --about-text-size: 1.0625rem; /* 17px (Jenna, 2026-10): the bio AND the metadata entries share it; the site-wide --size-lg stays 18px */
-  --about-meta-w: clamp(160px, 17vw, 250px);
+  /* The site's 12-column grid (20px gutters, --page-gutter margins): one column is
+     (100vw − 2·gutter − 11·20px)/12, frozen at its 1440 value (the right column
+     stops growing there too). The seam between metadata and bio is built from it
+     — 5 columns for the heading (its original gap to the content, restored 2026-10), 2 for the
+     metadata, ONE empty column, then a 4-column bio (Jenna: a narrower bio is fine) — so the gap scales with the grid instead of
+     being a fixed 20px (2026-10, Jenna). */
+  --about-col: min((100vw - 2 * var(--page-gutter) - 220px) / 12, 93.67px);
   display: grid;
-  grid-template-columns: minmax(0, 1fr) var(--about-meta-w) var(--width-right-column);
+  grid-template-columns:
+    calc(var(--about-col) * 5 + 100px)              /* heading: 5 columns + 5 gutters (the original heading → content gap) */
+    calc(var(--about-col) * 2 + 20px)               /* metadata: 2 columns */
+    calc(var(--about-col) + 40px)                   /* ONE empty column + its two gutters */
+    calc(var(--about-col) * 4 + 60px);              /* bio: 4 columns, flush to the right margin */
   grid-template-areas:
-    "head meta bio"
-    ".    photo photo";
-  column-gap: var(--gap-content);
+    "head meta . bio"
+    ".    photo photo photo";
+  column-gap: 0;
   row-gap: var(--gap-group);
   align-items: start;
   padding-block: 0;
@@ -1362,7 +1372,7 @@ html.has-top-nav.is-work-in #work-section .site-container {
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--gap-group);
+  gap: var(--gap-group); /* Now → Past */
   font-family: var(--font-body);
   font-size: var(--about-text-size); /* 17px, same as the bio */
   line-height: 1.25;
@@ -1373,7 +1383,7 @@ html.has-top-nav.is-work-in #work-section .site-container {
 .about-facts-row {
   display: flex;
   flex-direction: column;
-  gap: 10px; /* entry → entry */
+  gap: var(--gap-content); /* entry → entry (was 10px; 2026-10, Jenna) */
 }
 
 /* The label type is the shared EYEBROW (global.css: .section-label et al — 13px Inter,
@@ -1382,7 +1392,7 @@ html.has-top-nav.is-work-in #work-section .site-container {
 .about-facts dt {
   color: rgba(0, 0, 0, 0.55); /* the hero sentence's resting grey (4.7:1 on cream) */
   line-height: 1.2;
-  margin-bottom: var(--gap-content);
+  margin-bottom: var(--space-xs); /* label → first entry: 8px (was --gap-content 20px; 2026-10, Jenna) */
 }
 
 .about-facts dd {
@@ -1392,10 +1402,7 @@ html.has-top-nav.is-work-in #work-section .site-container {
   line-height: 1.7; /* rows only (Jenna, 2026-10); the label keeps 1.2 */
 }
 
-.about-facts dd span + span {
-  color: var(--color-text-70);
-}
-
+/* Entries are solid black, role and years included (Jenna, 2026-10); only the Now / Past labels are grey. */
 .about-skills-list {
   margin: 0;
   /* Two columns, rows filling left→right (3 pairs). Collapses to one

@@ -5,7 +5,7 @@
     --jos-muted: #8a8a85;
     --jos-surface: #fff;
     --jos-card-bg: #f7f7f5;
-    position: fixed; right: 24px; bottom: 24px; z-index: 2147483000;
+    position: fixed; right: var(--page-gutter, 24px); bottom: 24px; z-index: 2147483000; /* right edge on the page margin, in line with the nav's last item (Jenna, 2026-10) */
     font-family: var(--font-body, 'Inter', system-ui, sans-serif);
     /* Arrives after the load screen, with the nav: fades in once is-intro comes off,
        delayed so it lands after the scrim has swept (same beat as .top-nav). */
