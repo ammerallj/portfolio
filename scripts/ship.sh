@@ -50,6 +50,16 @@ if [ "${1:-}" != "--yes" ]; then
   case "$answer" in y|Y|yes) ;; *) echo "not shipped."; exit 1 ;; esac
 fi
 
+# Stamp the footer's "Updated on <date>" with today's date: one small commit on staging, so
+# the date on the live site is the day it actually shipped (scripts/stamp-updated.py).
+if [ "$(git branch --show-current)" = "staging" ]; then
+  python3 scripts/stamp-updated.py
+  if ! git diff --quiet -- index.html; then
+    git add index.html
+    git commit -q -m "Stamp footer: updated $(date +%Y-%m-%d)"
+  fi
+fi
+
 git push origin staging staging:main
 # Keep the local main ref in step (skipped if main is checked out somewhere).
 git branch -f main staging 2>/dev/null || true

@@ -1,4 +1,9 @@
 /* JennaOS — floating entry button + card shell (js/jennaos.js, markup at end of index.html) */
+/* HIDDEN FOR NOW (2026-10, Jenna): the OS needs an LLM behind it first. Everything below, the
+   markup in index.html and js/jennaos.js stay as they are; delete this one rule to bring the
+   button back. (display: none also takes it out of the tab order.) */
+.jenna-os { display: none !important; }
+
 .jenna-os {
     --jos-ease-spring: cubic-bezier(.34, 1.4, .5, 1);
     --jos-ink: #111;

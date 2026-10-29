@@ -154,6 +154,10 @@
   --gap-section: 96px;
   --gap-heading: 144px;
 
+  /* The blue panel's grain (Contact panel AND the footer share it, so there is no seam where
+     one has grain and the other is flat — the "hairline" above the footer, 2026-10). */
+  --contact-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='cg' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.8' numOctaves='1' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='discrete' tableValues='0 1'/%3E%3CfeFuncG type='discrete' tableValues='0 1'/%3E%3CfeFuncB type='discrete' tableValues='0 1'/%3E%3CfeFuncA type='linear' slope='0' intercept='1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23cg)' opacity='0.1'/%3E%3C/svg%3E");
+
   /* Outer page gutter (.site-container / .site-header-row) */
   --page-gutter: 48px; /* was 56 (2026-10 trial). The 12-column maths below hard-code 2 x gutter + 11 x 20 = 316px (was 332). */
 
@@ -235,7 +239,7 @@
      as a long blue band.
      The dissolve wants a LENGTH of its own; the room only says how much it may
      take. min() expresses exactly that. */
-  --contact-ledge-length: 520px;
+  --contact-ledge-length: 300px; /* was 520, then 400 (2026-10, Jenna: shorten the blue scrim) */
   /* ⚠️ NO LONGER CAPPED BY THE ROOM — the scrim is ALLOWED to reach up over
      About's copy so Contact arrives earlier (deliberate, 2026-09). It used to be
      min(length, --contact-gap) precisely so it could never touch content; that
@@ -267,7 +271,7 @@
      ⚠️ RAISE THE TAIL, NOT THE RESTING LEDGE, to get more cream: if both move
      together the geometry is IDENTICAL and all that happens is Contact is pushed
      further down the page for nothing. */
-  --contact-ledge-rest: clamp(180px, 26svh, 300px); /* the hero's stretch, in reverse (2026-10, Jenna): the white-to-blue scrim is APPENDED to About's bottom and is as long as the landing's own scrim — 234px at 900 tall (hero: --field-fade ~229). svh, like the hero. */
+  --contact-ledge-rest: var(--contact-ledge-length); /* was clamp(180px, 26svh, 300px): the ledge is one fixed length now, so About's tail follows it */ /* /* the hero's stretch, in reverse (2026-10, Jenna): the white-to-blue scrim is APPENDED to About's bottom and is as long as the landing's own scrim — 234px at 900 tall (hero: --field-fade ~229). svh, like the hero. */
   /* ⚠️ THE LEDGE PAINTS PAST THE PANEL'S TOP EDGE BY THIS MUCH, and it is the
      same fix the landing bar's ::before already carries for the same reason.
      Contact's top does NOT land on a whole pixel — it is the sum of everything

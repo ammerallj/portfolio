@@ -436,19 +436,19 @@ function setContactPeek(px) {
 // All three are 0 at both resting positions (About's and Contact's), so both
 // settled compositions are unchanged. Pure functions of scroll; the fade is a
 // timed class toggle, like the lockup's.
-const CONTACT_LAG = { k: 0.5 };    // BACK ON, alone (2026-10, Jenna: "blue arrives like the gradient leaves"). It was switched off 2026-09-28 ("it pulls") together with CONTACT_SHORTEN, ABOUT_LIFT.speed and CONTACT_COPY.ride, which stay OFF — this part only pulls the blue ahead of the panel and tapers to full speed at the landing
-const ABOUT_LIFT = { speed: 0.55, fadeAt: 0.5, gap: 16 }; // lift ON at 0.55 (was 0.8: with the tug starting at the fade it peaked at 3.7x) (2026-10, Jenna: "I need the tug"): About's copy leaves faster than the scroll, the mirror of HERO_TEXT.speed
+const CONTACT_LAG = { k: 0 }; /* OFF (2026-10, Jenna: scrolling should feel natural, not decided for you) — the blue no longer leads the panel. */ //    // BACK ON, alone (2026-10, Jenna: "blue arrives like the gradient leaves"). It was switched off 2026-09-28 ("it pulls") together with CONTACT_SHORTEN, ABOUT_LIFT.speed and CONTACT_COPY.ride, which stay OFF — this part only pulls the blue ahead of the panel and tapers to full speed at the landing
+const ABOUT_LIFT = { speed: 0, fadeAt: 0, gap: 16 }; /* OFF (2026-10, Jenna): About's copy scrolls at 1x and no longer fades out as the blue arrives. */ // // lift ON at 0.55 (was 0.8: with the tug starting at the fade it peaked at 3.7x) (2026-10, Jenna: "I need the tug"): About's copy leaves faster than the scroll, the mirror of HERO_TEXT.speed
 // Contact's copy RIDES the blue on the way in: its heading holds `ride` px
 // under the blue's top, then settles into its centred resting place as the page
 // lands — so the blue never arrives as an empty band ahead of the content.
-const CONTACT_COPY = { ride: null, navRamp: 120 }; // ride OFF (was 128): the copy reveals in order instead. navRamp 96 -> 200 -> 120 (2026-10): the nav is hidden while the blue passes it, so the stretch is kept — but not so long that the nav is missing for ~200px of scroll
+const CONTACT_COPY = { ride: null, navRamp: 120 }; /* ride OFF again (2026-10, Jenna: natural scroll) */ // /* ride ON at 120 (2026-10, Jenna: shorten the blue before the copy): the heading enters 120px under the blue's top instead of ~218 and eases to its centred rest as the page lands. */ // // ride OFF (was 128): the copy reveals in order instead. navRamp 96 -> 200 -> 120 (2026-10): the nav is hidden while the blue passes it, so the stretch is kept — but not so long that the nav is missing for ~200px of scroll
 let contactQ = 1;
 // ...and the fourth part, the one that sets the PACE: Contact is laid out
 // SHORTER by `px` (capped at `cap` of the About → Contact scroll), pulled back
 // down by --contact-push at About's rest, and the push unwinds on the hero's own
 // cubic ease-out (1 − q)³ — so Contact rises fastest on the first gesture past
 // About and lands at exactly 1x. The mirror of HERO_SHORTEN.
-const CONTACT_SHORTEN = { px: 380, start: 0.35, cap: 0.5 }; // ON at the full 500 (2026-10, Jenna: "I need the tug — it's awkward when the nav doesn't appear"): Contact rises fast on the first gesture so the nav's absence is brief. It was switched off once for pulling; she asked for it back.
+const CONTACT_SHORTEN = { px: 0, start: 0.35, cap: 0.5 }; /* OFF (2026-10, Jenna): no tug — Contact scrolls at 1x. */ // // ON at the full 500 (2026-10, Jenna: "I need the tug — it's awkward when the nav doesn't appear"): Contact rises fast on the first gesture so the nav's absence is brief. It was switched off once for pulling; she asked for it back.
 let contactShorten = 0;
 let aboutRestY = null;
 let lastContactPush = -1;
@@ -2095,6 +2095,12 @@ function initNavMorph() {
     { selector: '.intro-bar-links a[href$="#work-section"], .top-nav-link[href$="#work-section"]', rest: 'Work', hover: 'Selected work' },
     { selector: '.intro-bar-links a[href$="#about"], .top-nav-link[href$="#about"]', rest: 'About', hover: 'Who is Jenna' },
     { selector: '.intro-bar-cta, .top-nav-cta', rest: 'Contact', hover: 'Say hello' },
+    // The About and Contact HEADINGS answer themselves the same way (2026-10, Jenna: "do
+    // the same for the other 2 headlines"). Each text sits in a .morph-title span, and the
+    // h2 carries a static aria-label so its name never changes. `align: 'start'` keeps the
+    // letters flush left inside the reserved (wider) box instead of centred like a nav item.
+    { selector: '#about-heading .morph-title', rest: 'About', hover: 'Who is Jenna', align: 'start' },
+    { selector: '#contact-heading .morph-title', rest: 'Contact', hover: 'Say hello', align: 'start' },
   ];
 
   const DURATION = 285; // ms — the spring's own settle time, see above
@@ -2110,11 +2116,11 @@ function initNavMorph() {
       ? SPRING
       : 'cubic-bezier(0.2, 0.8, 0.3, 1)';
 
-  MORPHS.forEach(({ selector, rest, hover }) => {
-    document.querySelectorAll(selector).forEach((el) => setupMorph(el, rest, hover));
+  MORPHS.forEach(({ selector, rest, hover, align }) => {
+    document.querySelectorAll(selector).forEach((el) => setupMorph(el, rest, hover, align));
   });
 
-  function setupMorph(el, REST, HOVER) {
+  function setupMorph(el, REST, HOVER, ALIGN) {
     // Only take over an element still reading the label this morph is written
     // for — so a copy edit in the HTML disables the morph rather than fighting it.
     if (el.textContent.trim() !== REST) return;
@@ -2135,6 +2141,7 @@ function initNavMorph() {
     const box = document.createElement('span');
     box.className = 'nav-morph';
     box.setAttribute('aria-hidden', 'true'); // the <a>'s aria-label is the name
+    if (ALIGN === 'start') box.style.textAlign = 'left'; // headings: flush left, not centred
     // Each sizer is split into the SAME per-character inline-blocks as the live
     // label. Setting it as ordinary text instead leaves the reservation a shade
     // short — inline-blocks get no kerning between them, so the live label is
@@ -3816,24 +3823,11 @@ function updateScrollEffects() {
       // its top keeps ABOUT_LIFT.gap below About's last line, capped at the
       // token's length. It blends in from the resting length over the first
       // 120px of travel, so About's resting composition keeps its clean cream. No direction term — scrolling up plays it backwards.
-      const restLen = Math.min(contactLedgeRest, ledge);
-      let liveLedge;
-      if (aboutSection && aboutSection.lastElementChild && aboutRestEdge > 0) {
-        const aboutBottom = aboutSection.lastElementChild.getBoundingClientRect().bottom;
-        const ride = Math.max(1, Math.min(ledge, blue - (aboutBottom + ABOUT_LIFT.gap)));
-        // Engages over the first 120px past About's rest (the same hand-over as
-        // the lift), so the scrim is riding by the time the copy is moving.
-        const w = Math.min(1, Math.max(0, aboutRestEdge - edge) / 120);
-        liveLedge = Math.max(1, restLen + (ride - restLen) * w);
-      } else {
-        liveLedge = ledge;                     // unmeasurable -> the full ledge
-      }
-      // ⚠️ AND IT SHORTENS AS IT NEARS THE NAV. By then About has faded and the
-      // ride has nothing to follow, so a full-length ramp only crawled past the
-      // bar. Capped to the blue's distance from the bar's bottom (floored at
-      // CONTACT_COPY.navRamp), the scrim sweeps behind the nav instead.
-      liveLedge = Math.max(1, Math.min(liveLedge,
-        Math.max(CONTACT_COPY.navRamp, blue - invertLine)));
+      // ⚠️ THE LEDGE IS A FIXED LENGTH (2026-10, Jenna: "I want the scrolling to feel natural
+      // — not as if it's deciding for you"). It used to ride About's last line, grow with
+      // the reader's position and shorten near the nav; now it is simply the token's length,
+      // so the blue scrim is a plain gradient that scrolls with the page.
+      const liveLedge = ledge;
       setLedgeLift(Math.round(ledge - liveLedge));
       setContactEdge(Math.round(blue * 100) / 100);
 
@@ -4374,6 +4368,9 @@ function initSectionGeometry(lenis) {
 // 0.97 the reveal fired with only ~34px of card above the fold while Work was
 // rising at ~1.8x, so the whole rise-and-fade played out of sight.
 const WORK_REVEAL = { in: 0.9, out: 0.95 };
+// Where Contact's copy fades in / resets, as fractions of the viewport height on the blue
+// PANEL's top edge (was: the copy's own top < 0.9, i.e. the edge at ~0.66).
+const CONTACT_REVEAL = { in: 0.95, out: 1.05 };
 function setupReveals(motion) {
   const { animate } = motion;
   const groups = Array.from(document.querySelectorAll('[data-reveal-group]'));
@@ -4439,6 +4436,19 @@ function setupReveals(motion) {
       // revealed state, it comes back on the one 0.5s fade, like the hero's
       // lockup. Once the class is gone the normal reset applies again.
       if (group.closest('#about.is-about-out')) return;
+      // CONTACT'S COPY REVEALS WITH THE BLUE, NOT AFTER IT (2026-10, Jenna: "shorten the
+      // distance of the blue scrim by revealing the contact copy earlier"). The copy sits
+      // ~218px below the panel's top, so on the normal 'top < 0.9vh' line it only appeared
+      // once the blue edge was ~590px up, after a long empty run of ramp and solid blue.
+      // It now follows the PANEL's edge: in at CONTACT_REVEAL.in of the viewport, back out
+      // (animated, hysteresis) at CONTACT_REVEAL.out, so it fades up while it is still rising
+      // into view.
+      if (group.classList.contains('contact-inner')) {
+        const edge = group.closest('#contact').getBoundingClientRect().top;
+        if (edge < vh * CONTACT_REVEAL.in) setVisible(group, true);
+        else if (edge > vh * CONTACT_REVEAL.out) setVisible(group, false);
+        return;
+      }
       if (r.bottom <= 0 || r.top >= vh) {
         // Fully off-screen (above or below): instant reset to hidden, ready to
         // fade in on the next entry.
@@ -4491,6 +4501,42 @@ if (window.innerWidth <= 1024) {
 }
 
 initMotion();
+
+// ============================================================
+// GITHUB COMMITS GRAPH — hover a square to see its month, day and count (2026-10, Jenna).
+// The cells carry data-d (ISO date) and data-n (count), written by
+// scripts/update-github-commits.py. One floating pill follows the hovered square.
+// Progressive enhancement: without JS the graph is simply the picture.
+// ============================================================
+(function initCommitTips() {
+  try {
+    const grid = document.querySelector('.commit-grid');
+    if (!grid) return;
+    const tip = document.createElement('div');
+    tip.className = 'commit-tip';
+    tip.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(tip);
+    const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const label = (cell) => {
+      const [, m, d] = cell.dataset.d.split('-').map(Number);
+      const n = Number(cell.dataset.n);
+      return MONTHS[m - 1] + ' ' + d + ' \u00b7 ' + (n === 0 ? 'no commits' : n + (n === 1 ? ' commit' : ' commits'));
+    };
+    const show = (cell) => {
+      tip.textContent = label(cell);
+      const r = cell.getBoundingClientRect();
+      tip.style.left = r.left + r.width / 2 + 'px';
+      tip.style.top = r.top - 8 + 'px';
+      tip.classList.add('is-on');
+    };
+    grid.addEventListener('pointerover', (e) => {
+      const cell = e.target.closest('i[data-d]');
+      if (cell && grid.contains(cell)) show(cell);
+    });
+    grid.addEventListener('pointerleave', () => tip.classList.remove('is-on'));
+    window.addEventListener('scroll', () => tip.classList.remove('is-on'), { passive: true });
+  } catch (e) { /* decorative */ }
+})();
 
 // ============================================================
 // Mobile menu (Figma nodes 123:3733 / 123:3743)

@@ -819,10 +819,10 @@ html.has-top-nav.is-work-in #work-section .site-container {
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 0;
+  bottom: -1px; /* runs 1px under the footer: the panel's bottom lands on a fractional pixel, and without the overlap the cream page showed through as a faint line above the footer (2026-10) */
   top: var(--contact-lag, 0px);
   background-color: var(--color-accent);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='cg' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.8' numOctaves='1' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='discrete' tableValues='0 1'/%3E%3CfeFuncG type='discrete' tableValues='0 1'/%3E%3CfeFuncB type='discrete' tableValues='0 1'/%3E%3CfeFuncA type='linear' slope='0' intercept='1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23cg)' opacity='0.1'/%3E%3C/svg%3E");
+  background-image: var(--contact-grain);
   background-blend-mode: overlay;
   pointer-events: none;
 }
@@ -1022,45 +1022,27 @@ html.has-top-nav.is-work-in #work-section .site-container {
 
 .contact-email {
   font-family: var(--font-heading);
-  /* The shared bookend display size, CAPPED so the address line — "ammerallj@gmail.com"
-     plus its arrow, about 10.3em wide in this face — always fits the column. Without
-     the cap it overflowed (clipped, arrow wrapped) between ~481 and ~715px wide,
-     where the display size is still 64px. 10.6 leaves a little slack. */
-  font-size: min(var(--display-size), calc((100vw - 2 * var(--page-gutter)) / 10.6));
+  /* The hero headline's size (2026-10, Jenna: "same hero text size"): --hero-headline-size is
+     72px at 1440 and defined at >=1377; below that the hero sentence is --section-title-size. */
+  font-size: var(--hero-headline-size, var(--section-title-size));
   font-weight: 700;
   letter-spacing: -0.02em;
   line-height: 1;
   color: #fff;
   text-decoration: none;
-  display: block;
+  /* "Contact" on the left, the big down arrow LOCKED to the right edge of the row. */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
 }
 
-/* The headline is the mailto link: it keeps the display type and the page's white,
-   with no underline; the arrow is an inline SVG (a text arrow at this size falls
-   back to a system font) at 0.5em, sitting on the baseline after the address. */
-.contact-email a {
-  color: inherit;
-  text-decoration: none;
-}
-
-.contact-email-arrow {
-  display: inline-block;
-  width: 0.5em;
-  height: 0.5em;
-  margin-left: 0.14em;
-  vertical-align: baseline;
-  transition: translate 0.3s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-@media (hover: hover) {
-  .contact-email a:hover .contact-email-arrow {
-    translate: 0.06em -0.06em;
-  }
-}
-
-.contact-email a:focus-visible {
-  outline: 2px solid #fff;
-  outline-offset: 0.1em;
+/* The arrow is an inline SVG (a text arrow at this size falls back to a system font), about
+   the height of the capitals and a little more, drawn at the heading's own weight. */
+.contact-arrow {
+  flex: none;
+  width: 0.95em;
+  height: 0.95em;
 }
 
 .contact-meta {
@@ -1070,17 +1052,45 @@ html.has-top-nav.is-work-in #work-section .site-container {
   gap: 3.75rem; /* minimum gap; space-between spreads the two columns apart */
 }
 
-.contact-meta-group,
 .contact-mind {
   display: flex;
   flex-direction: column;
-  gap: var(--gap-content); /* eyebrow → its content */
+  gap: var(--gap-content);
 }
 
-/* Connect: left column, sized to its links */
-.contact-meta-connect {
-  flex: 0 0 auto;
+/* The link row (2026-10): "/ LinkedIn", "/ GitHub", "/ ammerallj@gmail.com" in one row, right,
+   beside On My Mind. A slash prefix instead of an arrow or underline; the row wraps only
+   where it has to. */
+.contact-links {
+  /* On the shared right column (the nav's "Work" line to the right margin), the three links
+     spread across it with space-between; the paragraph is on the left (2026-10, Jenna: swap). */
+  flex: 0 0 var(--width-right-column);
   min-width: 0;
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  gap: 0 12px;
+  white-space: nowrap;
+  font-size: var(--size-lg);
+  letter-spacing: -0.02em;
+}
+
+.contact-links a {
+  color: #fff;
+  text-decoration: underline; /* all three links underlined (Jenna, 2026-10) */
+  text-underline-offset: 0.2em;
+  transition: opacity 0.15s ease;
+}
+
+@media (hover: hover) {
+  .contact-links a:hover {
+    opacity: 0.6;
+  }
+}
+
+.contact-links a:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 4px;
 }
 
 /* On My Mind: shares the site's right column (fluid 369→542); may shrink on
@@ -1095,32 +1105,12 @@ html.has-top-nav.is-work-in #work-section .site-container {
   color: #fff;
 }
 
-.contact-connect-links {
-  display: flex;
-  gap: 3rem;
-}
-
-.contact-connect-links a {
-  font-size: var(--size-lg);
-  letter-spacing: -0.02em;
-  text-decoration: underline;
-  color: #fff;
-  transition: opacity 0.15s ease;
-}
-
-@media (hover: hover) {
-  .contact-connect-links a:hover {
-    opacity: 0.6;
-  }
-}
-
 /* Outward arrow on the content links (the project pages' footprint lists +
    Contact). Decorative, so
    it's a generated ::after — not part of the copied/read text. inline-block
    keeps it off the link's underline; it inherits the link's color and dims
    with the hover opacity. The Work image links are intentionally excluded. */
-.footprint-list a::after,
-.contact-connect-links a::after {
+.footprint-list a::after {
   content: '↗';
   display: inline-block;
   margin-left: 0.2em;
@@ -1510,4 +1500,66 @@ html.has-top-nav.is-work-in #work-section .site-container {
    "On My Mind" copy at the site's 18px. */
 #about .about-body p {
   font-size: var(--about-text-size);
+}
+
+/* GITHUB COMMITS (2026-10, Jenna): the contribution graph, full width under the Contact copy.
+   One square per day, a column per week (column-major), levels 0-4 as white on the blue at
+   rising opacity. Decorative (the figure carries the total); regenerate the cells with
+   scripts/update-github-commits.py. The cell size follows the width, so it stays the
+   container's full width at every size. */
+.contact-commits {
+  /* The flex gap above is --gap-heading (144); the graph sits a tighter --gap-group under the
+     meta row, so the panel still fits the frame. */
+  margin: calc(var(--gap-group) - var(--gap-heading)) 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-content);
+  width: 100%;
+}
+
+.commit-grid {
+  --commit-gap: clamp(2px, 0.28vw, 4px);
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-rows: repeat(7, auto);
+  grid-auto-columns: minmax(0, 1fr);
+  gap: var(--commit-gap);
+}
+
+.commit-grid i {
+  display: block;
+  aspect-ratio: 1;
+  border-radius: 22%;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.commit-grid .c1 { background: rgba(255, 255, 255, 0.3); }
+.commit-grid .c2 { background: rgba(255, 255, 255, 0.5); }
+.commit-grid .c3 { background: rgba(255, 255, 255, 0.75); }
+.commit-grid .c4 { background: #fff; }
+
+/* The hover pill for a commit square (js/main.js initCommitTips): the project tooltips' look,
+   a small blurred black pill with white type, centred above the square. */
+.commit-tip {
+  position: fixed;
+  z-index: 9998;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.6);
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  backdrop-filter: blur(16px) saturate(1.2);
+  color: #fff;
+  font-family: var(--font-body);
+  font-size: var(--size-xs);
+  font-weight: 500;
+  line-height: 1.4;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, -100%);
+  transition: opacity 0.15s ease;
+}
+
+.commit-tip.is-on {
+  opacity: 1;
 }
