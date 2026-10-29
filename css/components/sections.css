@@ -1131,48 +1131,31 @@ html.has-top-nav.is-work-in #work-section .site-container {
    ============================================================ */
 
 .about-layout {
-  display: flex;
-  /* 242px gap: with the 542px right column pinned to the container's right edge,
-     this makes the left column resolve to 542px at the 1440px design width,
-     giving the two equal columns from Figma while keeping the shared right edge.
-     Fluid gap: it scales WITH the fluid right column
-     (242px at 1440 → 48px floor by ~1025) so the columns stay balanced as they
-     narrow instead of the gap eating the space. Stacks at ≤768 (responsive.css). */
-  /* REDESIGN (2026-09-28): the text runs 7 of the 12 columns (was the shared
-     5-column --width-right-column), the photo keeps 4, and this gap is the one
-     empty column between them plus its two gutters: (100vw - 332px)/12 + 40px
-     = 132px at 1440. See .about-right. */
-  /* REDESIGN, second pass (2026-09-28): TEXT LEFT, PHOTOS RIGHT, text centred
-     vertically against the photo stack (Jenna's reference). The text takes 7
-     columns (text-dominant), the photos the rest; this is the
-     seam between them. Supersedes the 7-column note above. */
-  gap: calc(8.3333vw + 12.33px); /* one empty grid column + its two gutters, (100vw − 332px)/12 + 40px = 132px at 1440 (Jenna, 2026-09-28) */
-  /* No block padding — the heading's 100px margin-bottom sets the gap to
-     content, and the section's 60px padding handles the bottom spacing */
+  /* REDESIGN (2026-10, Jenna's reference): ONE grid. The heading sits in the wide left
+     column; the metadata and the bio sit to its right (the bio on the shared right
+     column, so it lines up with the nav and Contact); the photo drops below, on the
+     right, spanning metadata + bio. Everything is a direct child, in this order:
+     heading, facts, bio (.about-right), photo (.about-left). Stacks at <=768. */
+  --about-text-size: 1.0625rem; /* 17px (Jenna, 2026-10): the bio AND the metadata entries share it; the site-wide --size-lg stays 18px */
+  --about-meta-w: clamp(160px, 17vw, 250px);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--about-meta-w) var(--width-right-column);
+  grid-template-areas:
+    "head meta bio"
+    ".    photo photo";
+  column-gap: var(--gap-content);
+  row-gap: var(--gap-group);
+  align-items: start;
   padding-block: 0;
-  /* stretch, not flex-start: with the photo out of flow (see .about-photo),
-     the ROW's height is the right column's text alone, and the stretched
-     left column hands that height to the photo — the text column is the
-     section's height authority. */
-  align-items: flex-start; /* text and photo top-aligned (third pass; was centred) */
-  /* DESKTOP: the supporting text starts level with the "About Me." headline.
-     The pull-up lives on the CONTAINER (with the photo pushed back down by
-     the same amount below) — NOT on .about-right — so the reveal system's
-     getBoundingClientRect still covers everything it shows: a child pulled
-     up by negative margin overflows its group's rect, and the off-screen
-     reset then yanks the still-visible text mid-view (the anti-cut-out rule
-     in js/main.js setupReveals). One heading line (#about-heading is
-     .section-title, line-height 1) + its margin-bottom (--gap-group). Reads
-     --section-title-size so it tracks the heading automatically at every tier
-     (64→48→32) — no per-tier pull-up override needed. Reset to 0 once About
-     stacks at ≤768 (responsive.css). */
-  --about-pullup: calc(var(--section-title-size) + var(--gap-group));
-  /* The pull-up is OFF in the centred layout: the heading sits above the row. */
   margin-top: 0;
 }
 
+#about-heading { grid-area: head; margin: 0; }
+.about-facts { grid-area: meta; }
+.about-right { grid-area: bio; }
+.about-left { grid-area: photo; }
+
 .about-left {
-  flex: 1 1 auto;
   min-width: 0;
   display: flex;
   flex-direction: column;
@@ -1246,12 +1229,8 @@ html.has-top-nav.is-work-in #work-section .site-container {
    (On mobile that content below is the photo, since the layout stacks
    photo-first.) */
 #about-heading {
-  /* --gap-group, not --gap-heading: an image follows this title, and an
-     image edge needs less separation than a text block (same call as the
-     480 tier's tighter override). COUPLED to .about-layout's
-     --about-pullup above — change both together or the supporting text
-     drifts off the headline's top. */
-  margin-bottom: var(--gap-group);
+  /* In the About grid now (see .about-layout): no margin, the grid's row-gap spaces it. */
+  margin: 0;
 }
 
 .about-photo {
@@ -1330,8 +1309,7 @@ html.has-top-nav.is-work-in #work-section .site-container {
   /* 7 grid columns, not the shared 5-column --width-right-column (redesign,
      2026-09-28): 7·(100vw − 332px)/12 + 6·20px = 766px at 1440. ⚠️ About's
      copy no longer starts on the nav's "Selected work" line. */
-  flex: 0 0 var(--width-right-column); /* 5 grid columns — the shared token, 542px at 1440 (2026-09-28: 7 → 6 → 5 so the photo could grow); the photo takes the rest */
-  order: -1; /* visually LEFT of the photos; also first when stacked */
+  /* the shared right column (grid column 3 of .about-layout) */
   display: flex;
   flex-direction: column;
   /* Bio → facts list (redesign, 2026-09-28). Was --gap-section (96) between
@@ -1375,27 +1353,24 @@ html.has-top-nav.is-work-in #work-section .site-container {
   max-width: none;
 }
 
-/* FACTS (redesign, 2026-09-28, third pass — Jenna's reference): three
-   columns across the full container under the bio + photo row. Each column
-   opens on a black hairline with its label as a small uppercase heading;
-   entries sit tight beneath (organisation, then role / detail at 70%).
-   One column per row at ≤768 (responsive.css). */
+/* FACTS (redesign, 2026-10 — "Now" and "Past"; education and patents dropped): a
+   narrow column between the heading and the bio (grid area `meta`, see .about-layout),
+   in the reference's small-label-over-entries style — no hairlines. Each group is the
+   shared eyebrow over its entries; each entry is the organisation with its role / dates
+   at 70% beneath. Stacks above the bio at <=768 (responsive.css). */
 .about-facts {
-  margin: var(--gap-group) 0 0;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  column-gap: var(--gap-content);
-  row-gap: var(--gap-group);
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-group);
   font-family: var(--font-body);
-  font-size: 0.875rem; /* 14px */
+  font-size: var(--about-text-size); /* 17px, same as the bio */
   line-height: 1.25;
-  letter-spacing: -0.005em;
+  letter-spacing: -0.02em; /* the bio's tracking */
   color: var(--color-text);
 }
 
 .about-facts-row {
-  border-top: 1px solid var(--color-hairline); /* the same grey as the Work cards' outline */
-  padding-top: var(--gap-content);
   display: flex;
   flex-direction: column;
   gap: 10px; /* entry → entry */
@@ -1405,14 +1380,16 @@ html.has-top-nav.is-work-in #work-section .site-container {
    uppercase, 0.05em), not its own heading style (2026-10, Jenna). Only the spacing
    under it is set here. */
 .about-facts dt {
+  color: rgba(0, 0, 0, 0.55); /* the hero sentence's resting grey (4.7:1 on cream) */
   line-height: 1.2;
-  margin-bottom: 10px;
+  margin-bottom: var(--gap-content);
 }
 
 .about-facts dd {
   margin: 0;
   display: flex;
   flex-direction: column;
+  line-height: 1.7; /* rows only (Jenna, 2026-10); the label keeps 1.2 */
 }
 
 .about-facts dd span + span {
@@ -1520,4 +1497,10 @@ html.has-top-nav.is-work-in #work-section .site-container {
 
 @media (prefers-reduced-motion: reduce) {
   .lightbox[open] { animation: none; }
+}
+
+/* About's bio at 17px (Jenna, 2026-10) — scoped to #about, because .about-body also sets Contact's
+   "On My Mind" copy at the site's 18px. */
+#about .about-body p {
+  font-size: var(--about-text-size);
 }

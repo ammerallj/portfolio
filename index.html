@@ -170,7 +170,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@200;400;500;700&family=Inter:wght@400..700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=10ae600c" />
+  <link rel="stylesheet" href="style.css?v=1656b097" />
   <!-- The landing field's JPEG fallback — PHONES ONLY since 2026-09, so the
        preload is gated to match the <picture> in <main>. Without the media
        attribute this fetches 1.4MB on every desktop and tablet visit for an
@@ -545,54 +545,37 @@
 
     <!-- ABOUT -->
     <section class="page-section" aria-labelledby="about-heading" id="about">
-      <div class="site-container">
-        <h2 class="section-title" id="about-heading" data-reveal-group data-reveal>About Me</h2>
-      </div>
-      <!-- Reveal orders 2/3 (not 0/1): the right column is pulled up level with
-           the heading, so this group and the heading's fire on the same scroll
-           tick — the offsets are what keep "About Me." leading the sequence. -->
+      <!-- ONE grid (2026-10, after Jenna's reference): the heading sits left, with the
+           metadata and the bio to its right; the photo drops below, on the right.
+           Stacks heading, metadata, bio, photo at <=768 (responsive.css). -->
       <div class="about-layout site-container" data-reveal-group>
+        <h2 class="section-title" id="about-heading" data-reveal data-reveal-order="0">About Me</h2>
 
-        <!-- LEFT COLUMN -->
+        <dl class="about-facts" data-reveal data-reveal-order="1">
+          <div class="about-facts-row">
+            <dt>Now</dt>
+            <dd><span>Verisimilitude Studio</span><span>Designer &amp; Co-founder</span></dd>
+          </div>
+          <div class="about-facts-row">
+            <dt>Past</dt>
+            <dd><span>Meta</span><span>2022–2026</span></dd>
+            <dd><span>Microsoft</span><span>2017–2022</span></dd>
+          </div>
+        </dl>
+
+        <div class="about-right" data-reveal data-reveal-order="2">
+          <div class="about-body">
+            <p>I’m a product designer based in Seattle, with a focus on interaction design. Over the last decade, I’ve designed products used by billions, shaping how people get things done and build community, while making social experiences more accessible.</p>
+            <p>Good interaction design lives in the seams: how products behave, the patterns worth sharing, and where context calls for a more bespoke approach.</p>
+            <p>Away from the screen, you’ll usually find me spending time with my velcro dachshund, Maeve, discovering new music, or wandering through art exhibitions. I’ve also found an unexpected appreciation for the quirks of running a small community since joining my condominium association’s board.</p>
+          </div>
+        </div>
+
         <div class="about-left" data-reveal data-reveal-order="3">
-          <!-- One landscape still (redesign, 2026-09-28; replaced the 3-photo
-               carousel). about-photo2-crop is about-photo2 cropped 28px each
-               side to remove the rounded white corners baked into that file. -->
           <div class="about-stack">
             <img class="about-stack-wide" src="images/about-photo2-crop.jpg?v=1" width="802" height="444" loading="lazy" alt="Jenna Ammerall holding Maeve, her dachshund, outdoors in Seattle" />
           </div>
         </div>
-
-        <!-- RIGHT COLUMN -->
-        <div class="about-right" data-reveal data-reveal-order="2">
-
-          <div class="about-body">
-            <p>I’m a product and interaction designer based in Seattle. Over the past nine years, I’ve worked at <span class="ms-label">Microsoft</span> and <span class="meta-label">Meta</span> across collaboration, social products, accessibility, and the systems that hold those experiences together. My work moves between early product ideas and established products used at scale.</p>
-            <p>I’m drawn to the seams: finding the shared behaviors and patterns that help experiences fit together, while preserving the bespoke details that give each product its character.</p>
-            <p>Away from the screen, I spend a lot of time with my dachshund, Maeve, and serve on the board of my condominium association, where I’ve discovered I genuinely enjoy the odd challenge of keeping a small community running. I’m also usually discovering new music or wandering through an art exhibition, collecting ideas and references along the way.</p>
-          </div>
-
-        </div>
-      </div>
-
-      <!-- Facts: three columns across the full width, each under a hairline
-           with its label as a heading. -->
-      <div class="site-container" data-reveal-group>
-          <dl class="about-facts" data-reveal>
-            <div class="about-facts-row">
-              <dt>Experience</dt>
-              <dd><span>Meta</span><span>Senior Product Designer · 2022–2026</span></dd>
-              <dd><span>Microsoft</span><span>Product Designer · 2017–2022</span></dd>
-            </div>
-            <div class="about-facts-row">
-              <dt>Education</dt>
-              <dd><span>Rochester Institute of Technology</span><span>BFA, New Media Design</span></dd>
-            </div>
-            <div class="about-facts-row">
-              <dt>Patents</dt>
-              <dd><span>Co-inventor · Microsoft Loop / Fluid Framework</span></dd>
-            </div>
-          </dl>
       </div>
     </section>
 
@@ -686,6 +669,6 @@
     </button>
   </div>
   <script src="js/jennaos.js?v=24" defer></script>
-  <script src="js/main.js?v=6a1b52d6" defer></script>
+  <script src="js/main.js?v=e5b65e69" defer></script>
 </body>
 </html>
