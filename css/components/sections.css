@@ -1392,10 +1392,7 @@ html.has-top-nav.is-work-in #work-section .site-container {
   line-height: 1.7; /* rows only (Jenna, 2026-10); the label keeps 1.2 */
 }
 
-.about-facts dd span + span {
-  color: var(--color-text-70);
-}
-
+/* Entries are solid black, role and years included (Jenna, 2026-10); only the Now / Past labels are grey. */
 .about-skills-list {
   margin: 0;
   /* Two columns, rows filling left→right (3 pairs). Collapses to one
