@@ -1307,6 +1307,7 @@ html.has-top-nav.is-work-in #work-section .site-container {
 
 .about-stack-wide {
   width: 100%;
+  filter: url(#cyanotype); /* blue duotone (index.html's #cyanotype); no filter support = the original B&W */
 }
 
 .about-stack-small {
