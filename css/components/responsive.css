@@ -822,6 +822,18 @@ html.is-hero-stacked {
     column-gap: var(--gap-content);
     align-items: start;
   }
+  /* Inside each group the entries sit side by side too (Meta | Microsoft), so Now and
+     Past come out the same height. The label spans both columns. */
+  .about-facts-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--gap-content);
+    align-items: start;
+  }
+  .about-facts-row dt,
+  .about-facts-row dd:only-of-type {
+    grid-column: 1 / -1; /* the label, and a group's lone entry (Now), span both columns */
+  }
 }
 
 /* ==========================================================================
