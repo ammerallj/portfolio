@@ -1372,7 +1372,7 @@ html.has-top-nav.is-work-in #work-section .site-container {
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--gap-group);
+  gap: var(--gap-section); /* Now → Past (was --gap-group; 2026-10, Jenna) */
   font-family: var(--font-body);
   font-size: var(--about-text-size); /* 17px, same as the bio */
   line-height: 1.25;
