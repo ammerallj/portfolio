@@ -1006,8 +1006,8 @@ html.is-hero-text-out .intro-band {
      ≤768 stack resets this (it would push the headline right). */
   align-items: flex-end;
   align-items: last baseline;
-  padding-left: var(--nav-lead, 56px); /* the headline starts under the clock */
-  padding-right: var(--nav-col-inset, 56px);
+  padding-left: var(--nav-lead, var(--page-gutter)); /* the headline starts under the clock */
+  padding-right: var(--nav-col-inset, var(--page-gutter));
 }
 
 .intro .intro-band-right {
@@ -1063,7 +1063,7 @@ html.is-hero-text-out .intro-band {
   right: 0;
   z-index: 95;
   height: 64px;
-  padding: 0 56px;
+  padding: 0 var(--page-gutter);
   display: grid;
   grid-template-columns: minmax(0, 1fr) repeat(3, calc(var(--width-right-column) / 3));
   align-items: center;
@@ -1209,7 +1209,7 @@ html.has-top-nav.is-bar-docked .intro-bar {
   /* nets the flow delta to zero (-80 + 64 + 16). Shared with --field-clip,
      which needs this same gap to find the bar's bottom edge. */
   margin-bottom: var(--bar-tail);
-  padding: 14px 56px;
+  padding: 14px var(--page-gutter);
   display: grid;
   grid-template-columns: minmax(0, 1fr) repeat(3, calc(var(--width-right-column) / 3));
   align-items: center;

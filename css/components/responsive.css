@@ -257,7 +257,7 @@ html.is-hero-stacked {
      1280), and the 77px rail leaves a 148px gap at 1440. It was a flat 168px,
      which put the content between column lines. */
   body:has(.section-pills--rail) main > section:not(.case-closing-section):not(.additional-work) {
-    padding-left: calc((100vw - 332px) / 6 + 40px);
+    padding-left: calc((100vw - 316px) / 6 + 40px);
   }
 
   /* Hidden (not just transparent) until the reader is past the summary. */
