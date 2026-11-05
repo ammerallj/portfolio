@@ -28,8 +28,18 @@
       display: inline-block;
       max-width: 100%;
       clip-path: inset(2px); /* trims the sub-pixel edge so no hairline box shows */
-      background: url("../images/orbs-hero-capture.jpg") 50% 14% / cover no-repeat;
     }
+    /* The orbs sit on their own layer so they can fade: at rest it is transparent and the
+       black type shows as plain black; on hover/focus the orbs ease in through the letters. */
+    .mask-stage::before {
+      content: ""; position: absolute; inset: 0; z-index: -1;
+      background: url("../images/orbs-hero-capture.jpg") 50% 14% / cover no-repeat;
+      opacity: 0;
+      transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .mask-stage:hover::before,
+    .mask-stage:focus-within::before { opacity: 1; }
+    @media (prefers-reduced-motion: reduce) { .mask-stage::before { transition: none; } }
     .mask-stage::after {
       content: ""; position: absolute; inset: -2px;
       background: var(--cream); mix-blend-mode: multiply; pointer-events: none;
