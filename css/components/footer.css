@@ -66,3 +66,10 @@
 .site-footer--plain p {
   color: var(--color-text);
 }
+
+/* The "Updated on" line is white at 85% on the blue footer; on the cream plain footer it
+   would vanish, so it takes black at 70% (the phone footer's value, about 9:1). Same
+   specificity as `.site-footer p.footer-updated`, later in the file, so it wins. */
+.site-footer.site-footer--plain p.footer-updated {
+  color: rgba(0, 0, 0, 0.7);
+}

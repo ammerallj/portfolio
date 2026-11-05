@@ -54,8 +54,8 @@ fi
 # the date on the live site is the day it actually shipped (scripts/stamp-updated.py).
 if [ "$(git branch --show-current)" = "staging" ]; then
   python3 scripts/stamp-updated.py
-  if ! git diff --quiet -- index.html; then
-    git add index.html
+  if ! git diff --quiet -- index.html 404.html work; then
+    git add index.html 404.html work
     git commit -q -m "Stamp footer: updated $(date +%Y-%m-%d)"
   fi
 fi
