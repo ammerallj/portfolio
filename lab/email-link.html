@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Email link</title>
+  <!-- Same font request as the site, so the type matches. -->
+  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@200;400;500;700&family=Inter:wght@400..700&display=swap" rel="stylesheet" />
+  <style>
+    :root { --cream: #FBFCF8; }
+    * { box-sizing: border-box; margin: 0; }
+    body {
+      min-height: 100vh; display: grid; place-items: center;
+      background: var(--cream); color: #000;
+      font-family: "Inter", system-ui, sans-serif;
+      padding: 48px 24px;
+    }
+    .lockup { width: 100%; max-width: 1440px; text-align: center; }
+
+    .email {
+      display: inline-flex; align-items: center; gap: 0.3em;
+      color: #000; text-decoration: none;
+      font-family: "Hanken Grotesk", system-ui, sans-serif;
+      font-weight: 700;
+      font-size: clamp(36px, 8.6vw, 124px);
+      letter-spacing: -0.02em;
+      line-height: 1;
+      white-space: nowrap;
+    }
+    .email-arrow {
+      flex: none; width: 0.5em; height: 0.5em;
+      transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    /* Hover/focus: the arrow bumps up and to the right, a little. */
+    .email:hover .email-arrow,
+    .email:focus-visible .email-arrow { transform: translate(0.06em, -0.06em); }
+    @media (prefers-reduced-motion: reduce) { .email-arrow { transition: none; } }
+
+    .caption {
+      margin-top: 28px;
+      font-size: clamp(16px, 1.8vw, 24px);
+      color: rgba(0, 0, 0, 0.7);
+    }
+  </style>
+</head>
+<body>
+  <main class="lockup">
+    <a class="email" href="mailto:ammerallj@gmail.com" aria-label="Email ammerallj@gmail.com">
+      <span>ammerallj@gmail.com</span>
+      <svg class="email-arrow" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M4 4L20 20M8 20H20V8" stroke="currentColor" stroke-width="3.2" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" transform="rotate(-90 12 12)"/></svg>
+    </a>
+    <p class="caption">Want the full story behind the work and how we got there? Let’s chat.</p>
+  </main>
+</body>
+</html>
