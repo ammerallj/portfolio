@@ -105,6 +105,7 @@
   --work-gap: 24px;      /* masonry gap, columns and rows; was --gap-group (60) */
 
   --space-xs: 0.5rem;
+  --space-12: 0.75rem;   /* 12px — the tight gap between sibling items (card text, links, dots) */
   --space-sm: 1rem;
   --space-md: 2rem;
   --space-lg: 4rem;
