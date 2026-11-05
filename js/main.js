@@ -1324,7 +1324,12 @@ function initHeroField() {
     // colour appears dragged forward and left piled up in furrows as stamps age out.
     ' vec2 sand=vec2(0.);',
     ' for(int i=0;i<48;i++){vec4 s=uStamp[i];if(s.z==0.&&s.w==0.)continue;',
-    '  vec2 dd=vec2(uv.x-s.x,(uv.y-s.y)/uAspect);float f=1.-smoothstep(0.,.16,length(dd));',
+    // METEOR: a round head leading the travel direction, a tail stretched ~4x behind it
+    // that narrows to a point. dd is in width units, so the direction is aspect-corrected.
+    '  vec2 dd=vec2(uv.x-s.x,(uv.y-s.y)/uAspect);vec2 dr=normalize(vec2(s.z,s.w/uAspect));',
+    '  float al=dot(dd,dr),pe=dot(dd,vec2(-dr.y,dr.x));',
+    '  if(al<0.){float tl=clamp(-al/.38,0.,1.);al/=4.;pe/=max(1.-.85*tl,.15);}',
+    '  float f=1.-smoothstep(0.,.095,length(vec2(al,pe)));',
     '  sand+=s.zw*f*f;}',
     ' w-=sand;',
     // Source-over onto cream, bottom to top — the model Figma uses. NOT a
