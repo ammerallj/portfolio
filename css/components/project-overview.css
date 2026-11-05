@@ -2016,7 +2016,7 @@ a.intro-bar-name {
   width: max-content;
   max-width: 100%;
   padding: 8px 12px;
-  border-radius: 10px;
+  border-radius: 20px;
   background: rgba(0, 0, 0, 0.6);
   -webkit-backdrop-filter: blur(16px) saturate(1.2);
   backdrop-filter: blur(16px) saturate(1.2);
