@@ -43,7 +43,6 @@
   --size-md: 1.25rem;      /* 20px — the wordmark (nav, header, mobile menu) */
   --size-xl: 1.75rem;     /* 28px */
   --size-2xl: 2.5rem;      /* 40px */
-  --size-3xl: 3.5rem;      /* 56px */
 
   /* Display — the one bold Hanken statement that OPENS (hero) and CLOSES
      (contact) each visit. Both .intro-headline and .contact-email read this, so
@@ -534,7 +533,7 @@ h1, h2, h3, h4 {
 }
 
 h1 {
-  font-size: clamp(var(--size-2xl), 5vw, var(--size-3xl));
+  font-size: var(--section-title-size); /* a classless h1 matches every other page's heading */
 }
 
 h2 {
