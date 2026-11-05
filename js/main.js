@@ -1781,7 +1781,7 @@ function measurePhoneField() {
     for (let n = h1; n; n = n.offsetParent) t += n.offsetTop;
     // ≥1377 the white runs right down to the headline's top (Jenna, 2026-10:
     // "move the scrim down"); below it keeps the 48px gap.
-    const gap = window.matchMedia('(min-width: 1377px)').matches ? WIDE_FIELD_GAP : PHONE_FIELD_GAP;
+    const gap = window.matchMedia('(min-width: 1025px)').matches ? WIDE_FIELD_GAP : PHONE_FIELD_GAP;
     root.style.setProperty('--hero-field-end', Math.round(Math.max(160, t - gap)) + 'px');
   } else {
     root.style.removeProperty('--hero-field-end');
@@ -1859,7 +1859,7 @@ const WORK_IN = 8;
 // Below this the .intro-bar is display:none (responsive.css 680 tier).
 const NO_LANDING_BAR = window.matchMedia('(max-width: 680px)');
 // At and below this the first Work card peeks above the fold (responsive.css ≤1376).
-const WORK_PEEKS = window.matchMedia('(max-width: 1376px)');
+const WORK_PEEKS = window.matchMedia('(max-width: 1024px)');
 const NAV_REVEAL_MAX = 400;
 // Where the "Selected work" nav click LANDS (sectionClickScrollY): the first
 // card's TOP EDGE one --gap-group below the nav. (It was shared with an
