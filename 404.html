@@ -205,7 +205,7 @@
       var bandTop = topEl ? topEl.getBoundingClientRect().bottom : 0;
       var bandBot = botEl ? botEl.getBoundingClientRect().top : H;
       var band = Math.max(80, bandBot - bandTop);
-      var size = Math.min((W * 0.94) / w1, (band * 0.9) / h1);
+      var size = Math.min((W * 0.72) / w1, (band * 0.7) / h1);
       var asc = (m.actualBoundingBoxAscent / probe) * size;
       var desc = (m.actualBoundingBoxDescent / probe) * size;
       var cy = bandTop + band / 2;
