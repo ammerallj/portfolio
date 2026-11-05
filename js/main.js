@@ -1542,7 +1542,7 @@ function initHeroField() {
   // A ring of "stamps" laid along the mouse path. Each carries the direction it was
   // travelling and fades over SAND.life, so the colour is dragged ahead of the cursor
   // and then slowly slumps back, like a finger through kinetic sand. Mouse only.
-  const SAND = { n: 48, life: 13000, spacing: 0.018, gain: 7, max: 0.22 };
+  const SAND = { n: 48, life: 4800, spacing: 0.018, gain: 7, max: 0.22 };
   const sandBuf = new Float32Array(SAND.n * 4);
   const sandOut = new Float32Array(SAND.n * 4);
   const sandBorn = new Float32Array(SAND.n).fill(-1e9);
@@ -1550,8 +1550,11 @@ function initHeroField() {
   function sandUniform() {
     const now = performance.now();
     for (let i = 0; i < SAND.n; i++) {
-      const k = Math.max(0, 1 - (now - sandBorn[i]) / SAND.life);
-      const e = Math.pow(k, 1.8); // gentle exponential-ish tail: eases back slowly, no hard slump
+      // SURFACE TENSION: each push is a damped spring, not a fade. It pulls back past
+      // rest by ~9% and settles, so the colour reforms like a blob rather than just
+      // dissolving. Neighbouring stamps are different ages, so the dent ripples back.
+      const t = Math.min(1, (now - sandBorn[i]) / SAND.life);
+      const e = t >= 1 ? 0 : Math.exp(-4 * t) * Math.cos(5.2 * t);
       sandOut[i * 4] = sandBuf[i * 4];
       sandOut[i * 4 + 1] = sandBuf[i * 4 + 1];
       sandOut[i * 4 + 2] = sandBuf[i * 4 + 2] * e;
