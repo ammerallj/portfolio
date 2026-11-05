@@ -35,24 +35,24 @@
       content: ""; position: absolute; inset: -40px; z-index: -1; /* oversized so the blur never thins at the edges; the stage clips it */
       background: url("../images/orbs-hero-capture.jpg") 50% 14% / cover no-repeat;
       /* A soft-edged band that grows from the centre; widening it spreads the orbs outward. */
-      -webkit-mask: linear-gradient(90deg, transparent, #000 15%, #000 85%, transparent) 50% 0 / 55% 100% no-repeat;
-              mask: linear-gradient(90deg, transparent, #000 15%, #000 85%, transparent) 50% 0 / 55% 100% no-repeat;
+      -webkit-mask: linear-gradient(90deg, transparent, #000 15%, #000 85%, transparent) 50% 0 / 30% 100% no-repeat;
+              mask: linear-gradient(90deg, transparent, #000 15%, #000 85%, transparent) 50% 0 / 30% 100% no-repeat;
       /* Starts soft and sharpens as it widens. */
       filter: blur(22px);
-      /* It starts already 55% wide, but invisible; opacity brings it in as it widens. */
+      /* It starts already 30% wide, but invisible; opacity brings it in as it widens. */
       opacity: 0;
-      transition: opacity 0.5s ease,
-                  mask-size 0.7s cubic-bezier(0.22, 1, 0.36, 1),
-                  -webkit-mask-size 0.7s cubic-bezier(0.22, 1, 0.36, 1),
-                  filter 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+      transition: opacity 0.3s ease,
+                  mask-size 0.7s cubic-bezier(0.4, 0, 0.2, 1),
+                  -webkit-mask-size 0.7s cubic-bezier(0.4, 0, 0.2, 1),
+                  filter 0.7s cubic-bezier(0.4, 0, 0.2, 1);
     }
     /* In: a slight delay, then widen + un-blur. Out (the base rule above) has none. */
     .mask-stage:hover::before,
     .mask-stage:focus-within::before {
-      -webkit-mask-size: 260% 100%; mask-size: 260% 100%;
+      -webkit-mask-size: 150% 100%; mask-size: 150% 100%; /* just enough for the opaque core to cover the text, so no travel is wasted */
       filter: blur(0);
       opacity: 1;
-      transition-duration: 0.7s, 1.1s, 1.1s, 1.1s;
+      transition-duration: 0.3s, 1.4s, 1.4s, 1.4s;
       transition-delay: 0.15s;
     }
     @media (prefers-reduced-motion: reduce) { .mask-stage::before, .mask-stage:hover::before, .mask-stage:focus-within::before { transition: none; } }
