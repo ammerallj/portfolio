@@ -1282,7 +1282,7 @@ function initHeroField() {
     'uniform vec4 uBlob[4];uniform vec3 uCol[4];uniform vec4 uRamp[4];uniform vec3 uIris;',
     // KINETIC SAND (experiment): uStamp[i] = (x, y, pushX, pushY) in field uv, push already
     // faded by age on the CPU. All zero = no cost beyond the skipped branch.
-    'uniform vec4 uStamp[24];',
+    'uniform vec4 uStamp[48];',
     // ⚠️ FIELD.layer is deliberately NOT emitted here. It was, as a dead constant
     // `LAYER` that no line of the shader body ever read — and being dead did not
     // make it harmless: the value is interpolated into GLSL source, so setting it
@@ -1323,7 +1323,7 @@ function initHeroField() {
     // Pixels are PUSHED along the cursor's travel: sample from behind the push, so the
     // colour appears dragged forward and left piled up in furrows as stamps age out.
     ' vec2 sand=vec2(0.);',
-    ' for(int i=0;i<24;i++){vec4 s=uStamp[i];if(s.z==0.&&s.w==0.)continue;',
+    ' for(int i=0;i<48;i++){vec4 s=uStamp[i];if(s.z==0.&&s.w==0.)continue;',
     '  vec2 dd=vec2(uv.x-s.x,(uv.y-s.y)/uAspect);float f=1.-smoothstep(0.,.16,length(dd));',
     '  sand+=s.zw*f*f;}',
     ' w-=sand;',
@@ -1542,7 +1542,7 @@ function initHeroField() {
   // A ring of "stamps" laid along the mouse path. Each carries the direction it was
   // travelling and fades over SAND.life, so the colour is dragged ahead of the cursor
   // and then slowly slumps back, like a finger through kinetic sand. Mouse only.
-  const SAND = { n: 24, life: 6000, spacing: 0.012, gain: 7, max: 0.22 };
+  const SAND = { n: 48, life: 13000, spacing: 0.018, gain: 7, max: 0.22 };
   const sandBuf = new Float32Array(SAND.n * 4);
   const sandOut = new Float32Array(SAND.n * 4);
   const sandBorn = new Float32Array(SAND.n).fill(-1e9);
@@ -1551,7 +1551,7 @@ function initHeroField() {
     const now = performance.now();
     for (let i = 0; i < SAND.n; i++) {
       const k = Math.max(0, 1 - (now - sandBorn[i]) / SAND.life);
-      const e = k * k * (3 - 2 * k); // smoothstep: holds its shape, then slumps
+      const e = Math.pow(k, 1.8); // gentle exponential-ish tail: eases back slowly, no hard slump
       sandOut[i * 4] = sandBuf[i * 4];
       sandOut[i * 4 + 1] = sandBuf[i * 4 + 1];
       sandOut[i * 4 + 2] = sandBuf[i * 4 + 2] * e;
