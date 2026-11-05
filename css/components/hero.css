@@ -1787,7 +1787,7 @@ html.has-top-nav.is-bar-docked .intro-bar {
 .intro-bar-name {
   justify-self: start;
   font-family: var(--font-heading);
-  font-size: 1.25rem;
+  font-size: var(--size-md);
   font-weight: 700;
   letter-spacing: -0.02em;
   color: #000;

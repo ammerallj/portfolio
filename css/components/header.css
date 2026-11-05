@@ -147,7 +147,7 @@ body:has(.intro) .site-header {
 
 .site-name {
   font-family: var(--font-heading);
-  font-size: 1.25rem;
+  font-size: var(--size-md);
   font-weight: 700;
   letter-spacing: -0.02em;
   /* FULL BLACK (2026-09-25), matching the desktop .intro-bar-name. It rested at

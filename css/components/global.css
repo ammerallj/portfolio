@@ -40,7 +40,8 @@
   --size-xs: 0.8125rem;    /* 13px — eyebrow/label + smallest helper text */
   --size-sm: 0.875rem;     /* 14px — captions (was read with a 14px fallback but never defined) */
   --size-lg: 1.0625rem;    /* 17px — the site's body copy size (nav/UI stays --size-base 16) */
-  --size-xl: 1.75rem;      /* 28px */
+  --size-md: 1.25rem;      /* 20px — the wordmark (nav, header, mobile menu) */
+  --size-xl: 1.75rem;     /* 28px */
   --size-2xl: 2.5rem;      /* 40px */
   --size-3xl: 3.5rem;      /* 56px */
 

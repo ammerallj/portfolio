@@ -179,7 +179,7 @@
   min-height: 36px; /* the header row's height — the pill */
   padding: var(--space-sm) var(--page-gutter) 0;
   font-family: var(--font-heading);
-  font-size: 1.25rem; /* 20px */
+  font-size: var(--size-md); /* 20px */
   font-weight: 700;
   letter-spacing: -0.02em;
   line-height: 1.5; /* the body rhythm .site-name inherits — not 1 */
