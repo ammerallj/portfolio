@@ -151,7 +151,9 @@ html.is-hero-stacked {
    ≤1376 the first Work card peeks and the hero ends above the fold, so no
    padding can make it flush there.
    ============================================================ */
-@media (min-width: 1377px) {
+/* Desktop = 1025 and up (was 1377; Jenna, 2026-11: the 48px under the headline is for
+   every desktop window, so the first card no longer peeks on 1025-1376 laptops). */
+@media (min-width: 1025px) {
   /* The headline's size here: 72px at 1440, growing with the window up to the
      site's 96px display size. One token so the padding below follows it. */
   :root {
@@ -269,7 +271,7 @@ html.is-hero-stacked {
   }
 }
 
-@media (max-width: 1376px) {
+@media (max-width: 1024px) {
   :root {
     --hero-peek: 88px; /* was 144 — less card showing */
     --field-mask-end: min(100%, calc(min(72svh - var(--hero-peek), var(--hero-field-end, 72svh)) + var(--field-rise) - var(--field-cream, 0px) + var(--scrim-drop, 0px) + calc(var(--intro, 0) * 62svh)));
