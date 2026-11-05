@@ -34,14 +34,14 @@
     .mask-stage::before {
       content: ""; position: absolute; inset: 0; z-index: -1;
       background: url("../images/orbs-hero-capture.jpg") 50% 14% / cover no-repeat;
-      /* A soft-edged mask wider than the layer; sliding it left-to-right washes the orbs in. */
-      -webkit-mask: linear-gradient(90deg, #000 40%, transparent 60%) 100% 0 / 250% 100% no-repeat;
-              mask: linear-gradient(90deg, #000 40%, transparent 60%) 100% 0 / 250% 100% no-repeat;
-      transition: mask-position 0.9s cubic-bezier(0.22, 1, 0.36, 1),
-                  -webkit-mask-position 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+      /* A soft-edged band that grows from the centre; widening it spreads the orbs outward. */
+      -webkit-mask: linear-gradient(90deg, transparent, #000 15%, #000 85%, transparent) 50% 0 / 0% 100% no-repeat;
+              mask: linear-gradient(90deg, transparent, #000 15%, #000 85%, transparent) 50% 0 / 0% 100% no-repeat;
+      transition: mask-size 0.9s cubic-bezier(0.22, 1, 0.36, 1),
+                  -webkit-mask-size 0.9s cubic-bezier(0.22, 1, 0.36, 1);
     }
     .mask-stage:hover::before,
-    .mask-stage:focus-within::before { -webkit-mask-position: 0 0; mask-position: 0 0; }
+    .mask-stage:focus-within::before { -webkit-mask-size: 260% 100%; mask-size: 260% 100%; }
     @media (prefers-reduced-motion: reduce) { .mask-stage::before { transition: none; } }
     .mask-stage::after {
       content: ""; position: absolute; inset: -2px;
