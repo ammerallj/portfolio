@@ -1867,7 +1867,11 @@ html.has-top-nav.is-bar-docked .intro-bar {
   color: rgba(0, 0, 0, 0.8);
   text-decoration: none;
   white-space: nowrap;
-  transition: color 0.15s ease;
+  /* An explicit wght so the active state's 600 has a 400 to INTERPOLATE from —
+     `normal` is not animatable, which is why the weight used to snap. It eases over
+     0.35s (the chip's own timing); the colour keeps its quick 0.15s. */
+  font-variation-settings: 'wght' 400;
+  transition: color 0.15s ease, font-variation-settings 0.35s ease;
 }
 
 .intro-bar-links a::before {
