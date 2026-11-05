@@ -78,10 +78,21 @@
       height: 100%;
       padding: 24px var(--gutter);
     }
-    .page > .foot { margin-top: auto; } /* pushes the link row and the footer to the bottom */
+
+    /* Top bar: the wordmark left and "Back to home" right, where the site's nav has Contact. */
+    .top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    /* Bottom block, centred: the message, then the footer. The numerals fit the band between
+       the top bar and this block (see fit() below), so everything stays inside the viewport. */
+    .bottom { margin-top: auto; text-align: center; }
+    .msg { letter-spacing: -0.01em; }
 
     .wordmark {
-      align-self: flex-start;
       font-family: 'Hanken Grotesk', system-ui, sans-serif;
       font-size: 1.25rem;
       font-weight: 700;
@@ -89,15 +100,6 @@
       color: var(--ink);
       text-decoration: none;
     }
-
-    .foot {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 24px;
-      flex-wrap: wrap;
-    }
-    .foot p { letter-spacing: -0.01em; }
 
     /* Same two lines as every other page's footer (stamped by scripts/stamp-updated.py);
        13px Inter, black, the second line at 70% like the plain project-page footer. */
@@ -163,16 +165,18 @@
   </svg>
 
   <main class="page">
-    <a class="wordmark" href="/">Jenna Ammerall.</a>
-    <h1 class="visually-hidden">404, page not found</h1>
-    <div class="foot">
-      <p>That page doesn't exist.</p>
+    <header class="top">
+      <a class="wordmark" href="/">Jenna Ammerall.</a>
       <a class="home" href="/">Back to home</a>
+    </header>
+    <h1 class="visually-hidden">404, page not found</h1>
+    <div class="bottom">
+      <p class="msg">That page doesn't exist.</p>
+      <footer class="site-footer" role="contentinfo">
+        <p><span class="footer-owner">&copy; 2026 Jenna Ammerall</span><span class="footer-sep"> &middot; </span><span class="footer-credit">Human directed, AI built.</span></p>
+        <p class="footer-updated">Updated on <time class="footer-updated-date" datetime="2026-11-04">November 4, 2026</time></p>
+      </footer>
     </div>
-    <footer class="site-footer" role="contentinfo">
-      <p><span class="footer-owner">&copy; 2026 Jenna Ammerall</span><span class="footer-sep"> &middot; </span><span class="footer-credit">Human directed, AI built.</span></p>
-      <p class="footer-updated">Updated on <time class="footer-updated-date" datetime="2026-11-04">November 4, 2026</time></p>
-    </footer>
   </main>
 
   <script>
@@ -195,10 +199,16 @@
       var m = ctx.measureText('404');
       var w1 = m.width / probe;
       var h1 = (m.actualBoundingBoxAscent + m.actualBoundingBoxDescent) / probe;
-      var size = Math.min((W * 0.94) / w1, (H * 0.72) / h1);
+      // The numerals live in the band between the top bar and the bottom block, so the
+      // page never overflows the viewport: fit the width first, then shrink to the band.
+      var topEl = document.querySelector('.top'), botEl = document.querySelector('.bottom');
+      var bandTop = topEl ? topEl.getBoundingClientRect().bottom : 0;
+      var bandBot = botEl ? botEl.getBoundingClientRect().top : H;
+      var band = Math.max(80, bandBot - bandTop);
+      var size = Math.min((W * 0.94) / w1, (band * 0.9) / h1);
       var asc = (m.actualBoundingBoxAscent / probe) * size;
       var desc = (m.actualBoundingBoxDescent / probe) * size;
-      var cy = H * 0.5;
+      var cy = bandTop + band / 2;
       num.style.fontSize = size + 'px';
       num.setAttribute('y', cy + (asc - desc) / 2);
       ink = { cx: 0.5, cy: cy / H, w: (w1 * size) / W, h: ((asc + desc)) / H };
