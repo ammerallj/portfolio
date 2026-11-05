@@ -139,7 +139,7 @@
     letter-spacing: -.01em; color: var(--jos-ink);
   }
   .jos-title span { color: var(--jos-muted); }
-  .jos-body { margin-top: -24px; padding-top: calc(var(--jos-head, 64px) + 4px); box-sizing: border-box; font-size: 14px; line-height: 1.5; color: #333; }
+  .jos-body { margin-top: -24px; padding-top: calc(var(--jos-head, 64px) + 4px); box-sizing: border-box; font-size: var(--size-sm); line-height: 1.5; color: #333; }
   .jos-body { max-height: calc(var(--jos-head, 64px) + 4px + clamp(120px, calc(100dvh - 420px), 320px)); overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
   /* Soft bottom edge: while there's more to scroll to, the content fades out over
      the last 14px instead of being cut off by a hard line. --fb comes from
@@ -191,7 +191,7 @@
   .jos-apps button[aria-current="true"]:hover { background: var(--jos-ink); }
   .jos-apps button {
     all: unset; box-sizing: border-box; cursor: pointer;
-    padding: 8px 14px; border-radius: 999px; font-size: 13px; color: #333; background: #ececea;
+    padding: 8px 14px; border-radius: 999px; font-size: var(--size-xs); color: #333; background: #ececea;
     transition: background .15s;
   }
   .jos-apps button:hover { background: #e2e2df; }
