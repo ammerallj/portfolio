@@ -312,10 +312,6 @@ html.is-hero-stacked {
   html.is-hero-stacked .intro .intro-band-right {
     width: auto;
   }
-  .intro-bio {
-    font-size: 20px;
-  }
-
   /* ⚠️ CONTACT'S ARRIVAL IS TIGHTENED HERE, AND THE REASON IS VIEWPORT HEIGHT,
      NOT WIDTH — the page geometry is IDENTICAL at every width (measured: About's
      last line to Contact's heading is 461px at 1440, 1024 and 834 alike; the
@@ -496,7 +492,7 @@ html.is-hero-stacked {
      tier rules retired with that landing (archive/blob-hero-2026-08/). */
   .intro-top,
   .intro-band {
-    padding-inline: 64px;
+    padding-inline: var(--space-lg);
   }
 
   /* NO card peek in this tier (1024 → 769): the hero keeps the full-fold
@@ -1143,14 +1139,14 @@ html.is-hero-stacked {
      neutralized below). */
   .intro-top,
   .intro-band {
-    padding-inline: 16px;
+    padding-inline: var(--page-gutter);
   }
   .intro-band-spacer {
     display: none;
   }
   .intro .intro-band {
-    padding-left: 16px; /* REDESIGN: matches the tier gutter (see 680) */
-    padding-right: 16px;
+    padding-left: var(--page-gutter); /* REDESIGN: matches the tier gutter (see 680) */
+    padding-right: var(--page-gutter);
   }
   /* The gradient field is CENTERED on the viewport by default (translateX(-50%)
      on a box frozen at 1639.44px wide, so a phone just crops more of it). Nudge
@@ -1177,7 +1173,7 @@ html.is-hero-stacked {
      and the preload's media attribute. Three places, one decision. */
   html:not(.is-field-live) .intro-headline,
   html:not(.is-field-live) .intro-bio {
-    color: #fff;
+    color: var(--color-white);
     -webkit-text-stroke: 0.25px rgba(0, 0, 0, 0.18);
   }
   html:not(.is-field-live) .intro-divider {
@@ -1377,20 +1373,6 @@ html.is-hero-stacked {
     padding: 8px 10px;
   }
 
-  /* Phone work cards: one column (from the 768 tier). The description follows
-     the body token (16px) so it cannot drift from the title. */
-  /* "Prev. at Meta and Microsoft." shares the card text size on phones
-     (2026-09-28, Jenna) — one rule, so the two cannot drift apart. */
-  .intro-previously {
-    font-size: 17px; /* Figma */
-  }
-
-  /* The hero bio steps down on phones: 24 → 20 (2026-09-28, Jenna). At 24 it
-     was three-quarters of the 32px headline; desktop's ratio is 24:56. */
-  .intro-bio {
-    font-size: 20px;
-  }
-
   /* ------------------------------------------------------------------
      Everything below is a documented EXCEPTION to the scale. The gaps
      themselves come from the tokens in this tier's :root above — there
@@ -1412,7 +1394,7 @@ html.is-hero-stacked {
      The only two exceptions are the 16px card-peek top on #work-section
      (rule above) and the blue panel's inner top: */
   .contact-section {
-    padding-top: 64px; /* was the desktop 120 */
+    padding-top: var(--space-lg); /* was the desktop 120 */
     /* Desktop sizes this panel to the frame so it meets the nav and leaves the
        footer exactly its own height (see sections.css). Nothing settles at this
        tier, so drop it back to content height.

@@ -8,7 +8,7 @@
     --jos-ease-spring: cubic-bezier(.34, 1.4, .5, 1);
     --jos-ink: #111;
     --jos-muted: #8a8a85;
-    --jos-surface: #fff;
+    --jos-surface: var(--color-white);
     --jos-card-bg: #f7f7f5;
     position: fixed; right: var(--page-gutter, 24px); bottom: 24px; z-index: 2147483000; /* right edge on the page margin, in line with the nav's last item (Jenna, 2026-10) */
     font-family: var(--font-body, 'Inter', system-ui, sans-serif);
@@ -131,23 +131,23 @@
     border-radius: 28px 28px 0 0;
     background: rgba(247, 247, 245, 0.82);
     -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
-    -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 30px), transparent);
-    mask-image: linear-gradient(to bottom, #000 calc(100% - 30px), transparent);
+    -webkit-mask-image: linear-gradient(to bottom, var(--color-black) calc(100% - 30px), transparent);
+    mask-image: linear-gradient(to bottom, var(--color-black) calc(100% - 30px), transparent);
   }
   .jos-title {
     flex: 1; min-width: 0; margin: 0; font: 500 24px/1.2 var(--font-heading, 'Hanken Grotesk', system-ui, sans-serif);
     letter-spacing: -.01em; color: var(--jos-ink);
   }
   .jos-title span { color: var(--jos-muted); }
-  .jos-body { margin-top: -24px; padding-top: calc(var(--jos-head, 64px) + 4px); box-sizing: border-box; font-size: 14px; line-height: 1.5; color: #333; }
+  .jos-body { margin-top: -24px; padding-top: calc(var(--jos-head, 64px) + 4px); box-sizing: border-box; font-size: var(--size-sm); line-height: 1.5; color: #333; }
   .jos-body { max-height: calc(var(--jos-head, 64px) + 4px + clamp(120px, calc(100dvh - 420px), 320px)); overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
   /* Soft bottom edge: while there's more to scroll to, the content fades out over
      the last 14px instead of being cut off by a hard line. --fb comes from
      js/jennaos.js (0px at the end, so nothing is faded there). The top edge needs
      no fade: the frosted header already veils it. */
   .jos-body {
-    -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - var(--fb, 0px)), transparent 100%);
-    mask-image: linear-gradient(to bottom, #000 calc(100% - var(--fb, 0px)), transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, var(--color-black) calc(100% - var(--fb, 0px)), transparent 100%);
+    mask-image: linear-gradient(to bottom, var(--color-black) calc(100% - var(--fb, 0px)), transparent 100%);
   }
   /* Gutter for the scrollbar: the box grows 14px into the card's own padding and
      pads its content back by the same, so text and bubbles keep their width and
@@ -187,11 +187,11 @@
 
   .jos-intro { margin: 0 0 14px; }
   .jos-apps { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0 0; padding: 0; list-style: none; }
-  .jos-apps button[aria-current="true"] { background: var(--jos-ink); color: #fff; }
+  .jos-apps button[aria-current="true"] { background: var(--jos-ink); color: var(--color-white); }
   .jos-apps button[aria-current="true"]:hover { background: var(--jos-ink); }
   .jos-apps button {
     all: unset; box-sizing: border-box; cursor: pointer;
-    padding: 8px 14px; border-radius: 999px; font-size: 13px; color: #333; background: #ececea;
+    padding: 8px 14px; border-radius: 999px; font-size: var(--size-xs); color: #333; background: #ececea;
     transition: background .15s;
   }
   .jos-apps button:hover { background: #e2e2df; }
@@ -201,7 +201,7 @@
   .jos-dots { transition: opacity .2s .1s; }
   .jos-x {
     position: absolute; inset: 12%; border-radius: 50%;
-    display: grid; place-items: center; background: var(--jos-ink); color: #fff;
+    display: grid; place-items: center; background: var(--jos-ink); color: var(--color-white);
     transform: scale(.28); opacity: 0; pointer-events: none;
     transition: transform .5s var(--jos-ease-spring), opacity .15s;
   }
@@ -232,7 +232,7 @@
 .jenna-os .jos-input::placeholder { color: #66665f; opacity: 1; } /* 4.7:1 on #ececea */
 .jenna-os .jos-send {
   all: unset; box-sizing: border-box; cursor: pointer; flex: none; display: grid; place-items: center;
-  width: 30px; height: 30px; margin-right: 6px; border-radius: 50%; background: #111; color: #fff;
+  width: 30px; height: 30px; margin-right: 6px; border-radius: 50%; background: #111; color: var(--color-white);
 }
 .jenna-os .jos-send[hidden] { display: none; }
 .jenna-os .jos-send:focus-visible { outline: 2px solid #111; outline-offset: 2px; }
@@ -245,14 +245,14 @@
 .jenna-os .jos-msg p + p { margin-top: 8px; }
 .jenna-os .jos-msg.is-user {
   justify-self: end; max-width: 85%; padding: 8px 14px; border-radius: 18px 18px 4px 18px;
-  background: var(--jos-ink); color: #fff;
+  background: var(--jos-ink); color: var(--color-white);
 }
 /* The OS's reply: a white bubble with the Work card's hairline. Same fill and
    border tokens as .work-card-link; the squared corner mirrors the user's bubble. */
 .jenna-os .jos-msg.is-brain {
   justify-self: start; max-width: 94%; box-sizing: border-box;
   padding: 12px 14px; border-radius: 18px 18px 18px 4px;
-  background: #fff; border: 1px solid var(--color-border-light, rgba(0, 0, 0, 0.12));
+  background: var(--color-white); border: 1px solid var(--color-border-light, rgba(0, 0, 0, 0.12));
   animation: jos-in .3s var(--jos-ease-spring) both;
 }
 @keyframes jos-in { from { opacity: 0; transform: translateY(6px); } }
@@ -268,7 +268,7 @@
 /* ---------- arrival hint: the dot pulses for 3s with a tooltip over it ---------- */
 .jenna-os .jos-hint {
   position: absolute; right: 0; bottom: 68px; white-space: nowrap; pointer-events: none;
-  padding: 8px 14px; border-radius: 999px; color: #fff;
+  padding: 8px 14px; border-radius: 999px; color: var(--color-white);
   background: rgba(0, 0, 0, 0.6); -webkit-backdrop-filter: blur(16px) saturate(1.2); backdrop-filter: blur(16px) saturate(1.2);
   font: 500 13px/1.2 var(--font-body, 'Inter', system-ui, sans-serif);
   opacity: 0; transform: translateY(6px) scale(.96); transform-origin: 100% 100%;

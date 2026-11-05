@@ -33,7 +33,7 @@
      only suited caps is gone too. */
   letter-spacing: normal;
   text-transform: none;
-  color: #fff;
+  color: var(--color-white);
   opacity: 1;
 }
 
