@@ -29,8 +29,10 @@
   font-family: var(--font-body);
   font-size: var(--size-xs); /* 13px */
   font-weight: 500;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
+  /* Sentence case (2026-11, Jenna) — no uppercase, so the 0.05em tracking that
+     only suited caps is gone too. */
+  letter-spacing: normal;
+  text-transform: none;
   color: #fff;
   opacity: 1;
 }
