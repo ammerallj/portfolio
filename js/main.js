@@ -1280,6 +1280,9 @@ function initHeroField() {
     'precision highp float;',
     'uniform vec2 uRes,uAmp;uniform float uAspect,uTime,uWarp,uTotal;',
     'uniform vec4 uBlob[4];uniform vec3 uCol[4];uniform vec4 uRamp[4];uniform vec3 uIris;',
+    // KINETIC SAND (experiment): uStamp[i] = (x, y, pushX, pushY) in field uv, push already
+    // faded by age on the CPU. All zero = no cost beyond the skipped branch.
+    'uniform vec4 uStamp[24];',
     // ⚠️ FIELD.layer is deliberately NOT emitted here. It was, as a dead constant
     // `LAYER` that no line of the shader body ever read — and being dead did not
     // make it harmless: the value is interpolated into GLSL source, so setting it
@@ -1317,6 +1320,13 @@ function initHeroField() {
     // drift. uWarp 0 renders the file verbatim.
     ' vec2 q=vec2(fbm(uv*2.4+vec2(0.,uTime*.16)),fbm(uv*2.4+vec2(5.2,1.3-uTime*.13)));',
     ' vec2 w=uv+uWarp*.22*(q-.5);',
+    // Pixels are PUSHED along the cursor's travel: sample from behind the push, so the
+    // colour appears dragged forward and left piled up in furrows as stamps age out.
+    ' vec2 sand=vec2(0.);',
+    ' for(int i=0;i<24;i++){vec4 s=uStamp[i];if(s.z==0.&&s.w==0.)continue;',
+    '  vec2 dd=vec2(uv.x-s.x,(uv.y-s.y)/uAspect);float f=1.-smoothstep(0.,.16,length(dd));',
+    '  sand+=s.zw*f*f;}',
+    ' w-=sand;',
     // Source-over onto cream, bottom to top — the model Figma uses. NOT a
     // weighted average; the overlaps have to stack or the mixed hues go wrong.
     // NO WHITE IN THE FIELD (2026-10, Jenna): where no orb reaches — the lower corners, below
@@ -1393,7 +1403,7 @@ function initHeroField() {
   gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
 
   const U = {};
-  ['uRes', 'uAspect', 'uTime', 'uWarp', 'uTotal', 'uAmp', 'uBlob', 'uCol', 'uRamp', 'uIris']
+  ['uRes', 'uAspect', 'uTime', 'uWarp', 'uTotal', 'uAmp', 'uBlob', 'uCol', 'uRamp', 'uIris', 'uStamp']
     .forEach(n => { U[n] = gl.getUniformLocation(prog, n); });
 
   gl.uniform1f(U.uWarp, FIELD.motion.warp);
@@ -1528,6 +1538,49 @@ function initHeroField() {
     return irisOut;
   }
 
+  // ---- KINETIC SAND ----------------------------------------------------------
+  // A ring of "stamps" laid along the mouse path. Each carries the direction it was
+  // travelling and fades over SAND.life, so the colour is dragged ahead of the cursor
+  // and then slowly slumps back, like a finger through kinetic sand. Mouse only.
+  const SAND = { n: 24, life: 6000, spacing: 0.012, gain: 7, max: 0.22 };
+  const sandBuf = new Float32Array(SAND.n * 4);
+  const sandOut = new Float32Array(SAND.n * 4);
+  const sandBorn = new Float32Array(SAND.n).fill(-1e9);
+  let sandHead = 0, sandLast = null;
+  function sandUniform() {
+    const now = performance.now();
+    for (let i = 0; i < SAND.n; i++) {
+      const k = Math.max(0, 1 - (now - sandBorn[i]) / SAND.life);
+      const e = k * k * (3 - 2 * k); // smoothstep: holds its shape, then slumps
+      sandOut[i * 4] = sandBuf[i * 4];
+      sandOut[i * 4 + 1] = sandBuf[i * 4 + 1];
+      sandOut[i * 4 + 2] = sandBuf[i * 4 + 2] * e;
+      sandOut[i * 4 + 3] = sandBuf[i * 4 + 3] * e;
+    }
+    return sandOut;
+  }
+  function sandMove(ev) {
+    if (ev.pointerType && ev.pointerType !== 'mouse') return;
+    const r = canvas.getBoundingClientRect();
+    const logicalH = Math.max(1, canvas.height - heroExtPx * (canvas.height / boxH));
+    const s = canvas.width / r.width;
+    const x = ((ev.clientX - r.left) * s) / canvas.width;
+    const y = ((ev.clientY - r.top) * s) / logicalH;
+    if (x < -.1 || x > 1.1 || y < -.1 || y > 1.1 || ev.clientY > window.innerHeight * 0.95) { sandLast = null; return; }
+    if (!sandLast) { sandLast = [x, y]; return; }
+    const dx = x - sandLast[0], dy = (y - sandLast[1]) / (canvas.width / logicalH);
+    if (Math.hypot(dx, dy) < SAND.spacing) return;
+    let px = (x - sandLast[0]) * SAND.gain, py = (y - sandLast[1]) * SAND.gain;
+    const m = Math.hypot(px, py);
+    if (m > SAND.max) { px *= SAND.max / m; py *= SAND.max / m; }
+    sandBuf.set([x, y, px, py], sandHead * 4);
+    sandBorn[sandHead] = performance.now();
+    sandHead = (sandHead + 1) % SAND.n;
+    sandLast = [x, y];
+  }
+  window.addEventListener('pointermove', sandMove, { passive: true });
+  document.addEventListener('pointerleave', () => { sandLast = null; });
+
   function draw(t, entranceMs) {
     resize();
     const e = FIELD.entrance;
@@ -1562,6 +1615,7 @@ function initHeroField() {
     gl.uniform1f(U.uAspect, canvas.width / logicalH);
     gl.uniform1f(U.uTime, t);
     gl.uniform3fv(U.uIris, irisUniform());
+    gl.uniform4fv(U.uStamp, sandUniform());
     gl.drawArrays(gl.TRIANGLES, 0, 3);
   }
 
