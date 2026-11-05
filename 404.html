@@ -74,10 +74,11 @@
       z-index: 1;
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
+      justify-content: flex-start;
       height: 100%;
       padding: 24px var(--gutter);
     }
+    .page > .foot { margin-top: auto; } /* pushes the link row and the footer to the bottom */
 
     .wordmark {
       align-self: flex-start;
@@ -97,6 +98,18 @@
       flex-wrap: wrap;
     }
     .foot p { letter-spacing: -0.01em; }
+
+    /* Same two lines as every other page's footer (stamped by scripts/stamp-updated.py);
+       13px Inter, black, the second line at 70% like the plain project-page footer. */
+    .site-footer {
+      margin-top: 24px;
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      line-height: 1.4;
+      color: var(--ink);
+    }
+    .site-footer .footer-updated { color: rgba(0, 0, 0, 0.7); }
 
     .home {
       display: inline-flex;
@@ -156,6 +169,10 @@
       <p>That page doesn't exist.</p>
       <a class="home" href="/">Back to home</a>
     </div>
+    <footer class="site-footer" role="contentinfo">
+      <p><span class="footer-owner">&copy; 2026 Jenna Ammerall</span><span class="footer-sep"> &middot; </span><span class="footer-credit">Human directed, AI built.</span></p>
+      <p class="footer-updated">Updated on <time class="footer-updated-date" datetime="2026-11-04">November 4, 2026</time></p>
+    </footer>
   </main>
 
   <script>
