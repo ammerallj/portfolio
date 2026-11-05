@@ -253,7 +253,7 @@ const CONTACT = {
   // hold, putting the JS 8 code values under the CSS right at the nav item's
   // bottom — the one place the two must agree, since that is where the bar's
   // fill is repairing the most opaque part of the frost.
-  frost: [[0, 0.8], [50.0, 0.8000], [54.0, 0.7929], [58.0, 0.7726], [62.0, 0.7407], [66.0, 0.6990], [70.0, 0.6491], [74.0, 0.5926], [78.0, 0.5311], [82.0, 0.4664], [86.0, 0.4000], [90.0, 0.3336], [94.0, 0.2689], [98.0, 0.2074], [102.0, 0.1509], [106.0, 0.1010], [110.0, 0.0593], [114.0, 0.0274], [118.0, 0.0071], [122.0, 0.0000]],
+  frost: [[0, 1.0], [50.0, 1.0000], [54.0, 0.9911], [58.0, 0.9657], [62.0, 0.9259], [66.0, 0.8738], [70.0, 0.8114], [74.0, 0.7407], [78.0, 0.6639], [82.0, 0.5830], [86.0, 0.5000], [90.0, 0.4170], [94.0, 0.3361], [98.0, 0.2593], [102.0, 0.1886], [106.0, 0.1262], [110.0, 0.0741], [114.0, 0.0343], [118.0, 0.0089], [122.0, 0.0000]],
   // How far past the bar the fill is built. The bar's ::before runs
   // --bar-bleed + 2px past its own box, and BAR_BLEED is its 56px maximum.
   fillDepth: 132, // box height (64 + BAR_BLEED + 2) + 10

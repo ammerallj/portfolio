@@ -1334,25 +1334,25 @@ html.has-top-nav.is-bar-docked .intro-bar {
       rgba(var(--color-accent-rgb), var(--dark-mix, 0)) 0,
       rgba(var(--color-accent-rgb), var(--dark-mix, 0)) 100%)),
     linear-gradient(to bottom,
-      rgba(251, 252, 248, 0.80) 0,
-      rgba(251, 252, 248, 0.8000) 50.0px,
-      rgba(251, 252, 248, 0.7929) 54.0px,
-      rgba(251, 252, 248, 0.7726) 58.0px,
-      rgba(251, 252, 248, 0.7407) 62.0px,
-      rgba(251, 252, 248, 0.6990) 66.0px,
-      rgba(251, 252, 248, 0.6491) 70.0px,
-      rgba(251, 252, 248, 0.5926) 74.0px,
-      rgba(251, 252, 248, 0.5311) 78.0px,
-      rgba(251, 252, 248, 0.4664) 82.0px,
-      rgba(251, 252, 248, 0.4000) 86.0px,
-      rgba(251, 252, 248, 0.3336) 90.0px,
-      rgba(251, 252, 248, 0.2689) 94.0px,
-      rgba(251, 252, 248, 0.2074) 98.0px,
-      rgba(251, 252, 248, 0.1509) 102.0px,
-      rgba(251, 252, 248, 0.1010) 106.0px,
-      rgba(251, 252, 248, 0.0593) 110.0px,
-      rgba(251, 252, 248, 0.0274) 114.0px,
-      rgba(251, 252, 248, 0.0071) 118.0px,
+      rgba(251, 252, 248, 1.00) 0,
+      rgba(251, 252, 248, 1.0000) 50.0px,
+      rgba(251, 252, 248, 0.9911) 54.0px,
+      rgba(251, 252, 248, 0.9657) 58.0px,
+      rgba(251, 252, 248, 0.9259) 62.0px,
+      rgba(251, 252, 248, 0.8738) 66.0px,
+      rgba(251, 252, 248, 0.8114) 70.0px,
+      rgba(251, 252, 248, 0.7407) 74.0px,
+      rgba(251, 252, 248, 0.6639) 78.0px,
+      rgba(251, 252, 248, 0.5830) 82.0px,
+      rgba(251, 252, 248, 0.5000) 86.0px,
+      rgba(251, 252, 248, 0.4170) 90.0px,
+      rgba(251, 252, 248, 0.3361) 94.0px,
+      rgba(251, 252, 248, 0.2593) 98.0px,
+      rgba(251, 252, 248, 0.1886) 102.0px,
+      rgba(251, 252, 248, 0.1262) 106.0px,
+      rgba(251, 252, 248, 0.0741) 110.0px,
+      rgba(251, 252, 248, 0.0343) 114.0px,
+      rgba(251, 252, 248, 0.0089) 118.0px,
       rgba(251, 252, 248, 0.0000) 122.0px);
   /* THE CREAM IS LIGHT (peak 0.80, was 0.95 — 2026-10, Jenna: "I still see the nav
      cream line. I want a blur effect"): the 16px backdrop blur does the work and
@@ -1455,50 +1455,50 @@ html.has-top-nav.is-bar-docked .intro-bar {
 }
 
 .intro-bar-blur i:nth-child(1) {
-  -webkit-backdrop-filter: blur(calc(12px * var(--dm))) saturate(calc(1 + 0.15 * var(--dm)));
-  backdrop-filter: blur(calc(12px * var(--dm))) saturate(calc(1 + 0.15 * var(--dm)));
+  -webkit-backdrop-filter: blur(calc(6px * var(--dm))) saturate(calc(1 + 0.15 * var(--dm)));
+  backdrop-filter: blur(calc(6px * var(--dm))) saturate(calc(1 + 0.15 * var(--dm)));
   -webkit-mask-image: linear-gradient(to bottom, #000 0, #000 var(--bar), transparent calc(var(--bar) + var(--b) * 0.1667));
   mask-image: linear-gradient(to bottom, #000 0, #000 var(--bar), transparent calc(var(--bar) + var(--b) * 0.1667));
 }
 
 .intro-bar-blur i:nth-child(2) {
-  -webkit-backdrop-filter: blur(calc(7px * var(--dm)));
-  backdrop-filter: blur(calc(7px * var(--dm)));
+  -webkit-backdrop-filter: blur(calc(3.5px * var(--dm)));
+  backdrop-filter: blur(calc(3.5px * var(--dm)));
   -webkit-mask-image: linear-gradient(to bottom, transparent calc(var(--bar) + var(--b) * 0.0000), #000 calc(var(--bar) + var(--b) * 0.1667), transparent calc(var(--bar) + var(--b) * 0.3333));
   mask-image: linear-gradient(to bottom, transparent calc(var(--bar) + var(--b) * 0.0000), #000 calc(var(--bar) + var(--b) * 0.1667), transparent calc(var(--bar) + var(--b) * 0.3333));
 }
 
 .intro-bar-blur i:nth-child(3) {
-  -webkit-backdrop-filter: blur(calc(4px * var(--dm)));
-  backdrop-filter: blur(calc(4px * var(--dm)));
+  -webkit-backdrop-filter: blur(calc(2px * var(--dm)));
+  backdrop-filter: blur(calc(2px * var(--dm)));
   -webkit-mask-image: linear-gradient(to bottom, transparent calc(var(--bar) + var(--b) * 0.1667), #000 calc(var(--bar) + var(--b) * 0.3333), transparent calc(var(--bar) + var(--b) * 0.5000));
   mask-image: linear-gradient(to bottom, transparent calc(var(--bar) + var(--b) * 0.1667), #000 calc(var(--bar) + var(--b) * 0.3333), transparent calc(var(--bar) + var(--b) * 0.5000));
 }
 
 .intro-bar-blur i:nth-child(4) {
-  -webkit-backdrop-filter: blur(calc(2.2px * var(--dm)));
-  backdrop-filter: blur(calc(2.2px * var(--dm)));
+  -webkit-backdrop-filter: blur(calc(1.1px * var(--dm)));
+  backdrop-filter: blur(calc(1.1px * var(--dm)));
   -webkit-mask-image: linear-gradient(to bottom, transparent calc(var(--bar) + var(--b) * 0.3333), #000 calc(var(--bar) + var(--b) * 0.5000), transparent calc(var(--bar) + var(--b) * 0.6667));
   mask-image: linear-gradient(to bottom, transparent calc(var(--bar) + var(--b) * 0.3333), #000 calc(var(--bar) + var(--b) * 0.5000), transparent calc(var(--bar) + var(--b) * 0.6667));
 }
 
 .intro-bar-blur i:nth-child(5) {
-  -webkit-backdrop-filter: blur(calc(1.2px * var(--dm)));
-  backdrop-filter: blur(calc(1.2px * var(--dm)));
+  -webkit-backdrop-filter: blur(calc(0.6px * var(--dm)));
+  backdrop-filter: blur(calc(0.6px * var(--dm)));
   -webkit-mask-image: linear-gradient(to bottom, transparent calc(var(--bar) + var(--b) * 0.5000), #000 calc(var(--bar) + var(--b) * 0.6667), transparent calc(var(--bar) + var(--b) * 0.8333));
   mask-image: linear-gradient(to bottom, transparent calc(var(--bar) + var(--b) * 0.5000), #000 calc(var(--bar) + var(--b) * 0.6667), transparent calc(var(--bar) + var(--b) * 0.8333));
 }
 
 .intro-bar-blur i:nth-child(6) {
-  -webkit-backdrop-filter: blur(calc(0.6px * var(--dm)));
-  backdrop-filter: blur(calc(0.6px * var(--dm)));
+  -webkit-backdrop-filter: blur(calc(0.3px * var(--dm)));
+  backdrop-filter: blur(calc(0.3px * var(--dm)));
   -webkit-mask-image: linear-gradient(to bottom, transparent calc(var(--bar) + var(--b) * 0.6667), #000 calc(var(--bar) + var(--b) * 0.8333), transparent calc(var(--bar) + var(--b) * 1.0000));
   mask-image: linear-gradient(to bottom, transparent calc(var(--bar) + var(--b) * 0.6667), #000 calc(var(--bar) + var(--b) * 0.8333), transparent calc(var(--bar) + var(--b) * 1.0000));
 }
 
 .intro-bar-blur i:nth-child(7) {
-  -webkit-backdrop-filter: blur(calc(0.3px * var(--dm)));
-  backdrop-filter: blur(calc(0.3px * var(--dm)));
+  -webkit-backdrop-filter: blur(calc(0.15px * var(--dm)));
+  backdrop-filter: blur(calc(0.15px * var(--dm)));
   -webkit-mask-image: linear-gradient(to bottom, transparent calc(var(--bar) + var(--b) * 0.8333), #000 calc(var(--bar) + var(--b) * 1.0000), transparent calc(var(--bar) + var(--b) + 2px));
   mask-image: linear-gradient(to bottom, transparent calc(var(--bar) + var(--b) * 0.8333), #000 calc(var(--bar) + var(--b) * 1.0000), transparent calc(var(--bar) + var(--b) + 2px));
 }
