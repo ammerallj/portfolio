@@ -35,7 +35,7 @@
        down and drifts into place, then keeps drifting slowly while you stay on it. */
     .mask-stage::before {
       content: ""; position: absolute; inset: -40px; z-index: -1; /* oversized so blur/scale never thin the edges; the stage clips it */
-      background: url("../images/orbs-hero-capture.jpg") 50% 14% / cover no-repeat;
+      background: url("../images/orbs-hero-capture.jpg") 50% 14% / 170% auto no-repeat; /* wider than the layer, so there is room to drift */
       opacity: 0;
       filter: blur(16px);
       transform: translateX(-4%) scale(1.18);
@@ -51,7 +51,7 @@
       transition-delay: 0.1s;
       animation: orb-drift 14s ease-in-out 1.2s infinite alternate;
     }
-    @keyframes orb-drift { from { background-position: 38% 14%; } to { background-position: 62% 22%; } }
+    @keyframes orb-drift { from { background-position: 15% 14%; } to { background-position: 85% 20%; } }
     @media (prefers-reduced-motion: reduce) {
       .mask-stage::before, .mask-stage:hover::before, .mask-stage:focus-within::before { transition: none; animation: none; }
     }
