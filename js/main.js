@@ -124,7 +124,7 @@ const darkPanel = document.getElementById('contact');
 // match the `16px` fallback in hero.css's .intro-bar::before — that fallback is
 // what a no-JS visitor gets, and it is the correct value everywhere except the
 // approach to Contact.
-const BAR_BLEED = 16; // was 100, 48, 24, 36 — shortened 2026-10; keep in step with hero.css's --bar-bleed fallback
+const BAR_BLEED = 56; // was 100, 48, 24, 36, 16 — lengthened 2026-11 for a feathered tail; keep in step with hero.css's --bar-bleed fallback
 // How much approach the bar's colour change is spread over, in px of scroll, and
 // the point in it where the LABELS switch.
 //
@@ -253,10 +253,10 @@ const CONTACT = {
   // hold, putting the JS 8 code values under the CSS right at the nav item's
   // bottom — the one place the two must agree, since that is where the bar's
   // fill is repairing the most opaque part of the frost.
-  frost: [[0, 0.8], [50, 0.8], [54.0, 0.7656], [58.0, 0.675], [62.0, 0.5469], [66.0, 0.4], [70.0, 0.2531], [74.0, 0.125], [78.0, 0.0344], [82.0, 0.0]],
+  frost: [[0, 1.0], [50.0, 1.0000], [54.0, 0.9911], [58.0, 0.9657], [62.0, 0.9259], [66.0, 0.8738], [70.0, 0.8114], [74.0, 0.7407], [78.0, 0.6639], [82.0, 0.5830], [86.0, 0.5000], [90.0, 0.4170], [94.0, 0.3361], [98.0, 0.2593], [102.0, 0.1886], [106.0, 0.1262], [110.0, 0.0741], [114.0, 0.0343], [118.0, 0.0089], [122.0, 0.0000]],
   // How far past the bar the fill is built. The bar's ::before runs
-  // --bar-bleed + 2px past its own box, and BAR_BLEED is its 16px maximum.
-  fillDepth: 92, // box height (64 + BAR_BLEED + 2) + 10
+  // --bar-bleed + 2px past its own box, and BAR_BLEED is its 56px maximum.
+  fillDepth: 132, // box height (64 + BAR_BLEED + 2) + 10
   peek: {
     // Parallax distance as a fraction of the window, and its ceiling in px.
     rate: 0.5,
