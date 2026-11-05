@@ -30,13 +30,13 @@
   padding: 8px 20px;
   border: 0;
   border-radius: 100px;
-  background: #000;
+  background: var(--color-black);
   font-family: var(--font-body);
   font-size: var(--size-base);
   font-weight: 400;
   letter-spacing: -0.01em;
   line-height: 20px; /* with the padding above, an exact 36px pill */
-  color: #fff;
+  color: var(--color-white);
   cursor: pointer;
   transition: background-color 0.15s ease, color 0.15s ease;
 }
@@ -55,8 +55,8 @@
    Reachable at 481–680; at <=480 #contact is display:none (its content moves
    into the overlay), so there is no blue panel to invert over. */
 .site-header.is-over-dark .mobile-menu-toggle {
-  background: #fff;
-  color: #000;
+  background: var(--color-white);
+  color: var(--color-black);
 }
 
 /* --- The overlay panel --- */
@@ -72,7 +72,7 @@
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   background: var(--color-accent);
-  color: #fff;
+  color: var(--color-white);
 }
 
 /* Open transition: the panel slides in slightly from the left while fading up,
@@ -193,7 +193,7 @@
 .mobile-menu-mind {
   margin-top: var(--menu-inset); /* matches the padding-top below the hairline */
   padding: var(--menu-inset) 16px 90px;
-  border-top: 1px solid #fff;
+  border-top: 1px solid var(--color-white);
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -219,7 +219,7 @@
   font-size: var(--size-lg); /* 18px — the overlay's body scale */
   letter-spacing: -0.02em;
   line-height: 1.4;
-  color: #fff;
+  color: var(--color-white);
 }
 
 /* --- Large nav links (Figma 60px; thin em-dash + bold word) --- */
@@ -237,7 +237,7 @@
   font-weight: 700;
   letter-spacing: -0.02em;
   line-height: 1;
-  color: #fff;
+  color: var(--color-white);
   text-decoration: none;
 }
 
@@ -274,7 +274,7 @@
   font-family: var(--font-body);
   font-size: var(--size-lg); /* 18px */
   letter-spacing: -0.02em;
-  color: #fff;
+  color: var(--color-white);
   text-decoration: underline;
 }
 
@@ -298,17 +298,17 @@
   height: 56px;
   display: grid;
   place-items: center;
-  border: 1px solid #fff;
+  border: 1px solid var(--color-white);
   border-radius: 50%;
   background: rgba(74, 69, 255, 0.9);
-  color: #fff;
+  color: var(--color-white);
   cursor: pointer;
 }
 
 .mobile-menu-close svg {
   width: 20px;
   height: 20px;
-  stroke: #fff;
+  stroke: var(--color-white);
   stroke-width: 1.8;
   stroke-linecap: round;
 }

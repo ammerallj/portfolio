@@ -98,11 +98,11 @@
   background-image: var(--nav-grain);
   background-size: 160px 160px;
   -webkit-mask-image: linear-gradient(to bottom,
-    #000 calc(100% - 40px), rgba(0,0,0,0.844) calc(100% - 30px),
+    var(--color-black) calc(100% - 40px), rgba(0,0,0,0.844) calc(100% - 30px),
     rgba(0,0,0,0.5) calc(100% - 20px), rgba(0,0,0,0.156) calc(100% - 10px),
     transparent 100%);
   mask-image: linear-gradient(to bottom,
-    #000 calc(100% - 40px), rgba(0,0,0,0.844) calc(100% - 30px),
+    var(--color-black) calc(100% - 40px), rgba(0,0,0,0.844) calc(100% - 30px),
     rgba(0,0,0,0.5) calc(100% - 20px), rgba(0,0,0,0.156) calc(100% - 10px),
     transparent 100%);
   pointer-events: none;
@@ -136,7 +136,7 @@ body:has(.intro) .site-header {
 }
 
 .site-header.is-over-dark .site-name {
-  color: #fff;
+  color: var(--color-white);
 }
 
 .site-header-row {
@@ -252,7 +252,7 @@ body:has(.intro) .site-header {
 
 /* --- Over the blue Contact panel: white text + white chips --- */
 .site-header.is-over-dark .site-nav-bar a {
-  color: #fff; /* was 0.75 white: 3.97:1 on the accent, under AA (see hero.css) */
+  color: var(--color-white); /* was 0.75 white: 3.97:1 on the accent, under AA (see hero.css) */
 }
 
 .site-header.is-over-dark .site-nav-bar a.is-active {
@@ -262,7 +262,7 @@ body:has(.intro) .site-header {
 @media (hover: hover) {
   .site-header.is-over-dark .site-nav-bar a:hover,
   .site-header.is-over-dark .site-nav-bar a.is-active:hover {
-    color: #fff;
+    color: var(--color-white);
   }
 
   .site-header.is-over-dark .site-nav-bar a:hover::before,
@@ -296,9 +296,9 @@ body:has(.intro) .site-header {
   opacity: 0;
 }
 .site-header.is-header-on-field .site-name {
-  color: #fff;
+  color: var(--color-white);
 }
 .site-header.is-header-on-field .mobile-menu-toggle {
-  background: #fff;
-  color: #000;
+  background: var(--color-white);
+  color: var(--color-black);
 }

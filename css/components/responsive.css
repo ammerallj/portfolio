@@ -1173,7 +1173,7 @@ html.is-hero-stacked {
      and the preload's media attribute. Three places, one decision. */
   html:not(.is-field-live) .intro-headline,
   html:not(.is-field-live) .intro-bio {
-    color: #fff;
+    color: var(--color-white);
     -webkit-text-stroke: 0.25px rgba(0, 0, 0, 0.18);
   }
   html:not(.is-field-live) .intro-divider {

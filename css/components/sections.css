@@ -102,7 +102,7 @@ html.has-top-nav.is-work-in #work-section .site-container {
   /* The hairline is back (2026-10) in a lighter grey than the old 12% black. */
   border: 1px solid var(--color-hairline);
   /* REDESIGN: white (was rgba(0,0,0,0.025) — a cream panel). */
-  background-color: #fff;
+  background-color: var(--color-white);
   overflow: hidden;
   color: var(--color-text);
   text-decoration: none;
@@ -476,7 +476,7 @@ html.has-top-nav.is-work-in #work-section .site-container {
   border-radius: 100px;
   padding: 0.25em 0.7em; /* 27px tall at 13px type */
   min-height: calc(2em + 1px); /* the text pills' height, so the icon-only lock matches */
-  background-color: #fff; /* the card's own white */
+  background-color: var(--color-white); /* the card's own white */
   font-family: var(--font-heading);
   font-size: var(--size-xs); /* 13px — the site's eyebrow/meta size */
   font-weight: 400;
@@ -874,7 +874,7 @@ html.has-top-nav.is-work-in #work-section .site-container {
 
      ⚠️ Baked into the rect's opacity rather than set on a layer, because both of
      this element's pseudo-elements are already spent on the ledge. Tune there. */
-  color: #fff;
+  color: var(--color-white);
   padding-top: 96px;
   /* Pinned to 96 at EVERY tier, so it does not follow .page-section down to 64
      on phones. The rule below this panel is the FOOTER's border-top — the
@@ -992,7 +992,7 @@ html.has-top-nav.is-work-in #work-section .site-container {
 
 /* White eyebrows/labels throughout the blue panel */
 .contact-section .section-label {
-  color: #fff;
+  color: var(--color-white);
   margin-bottom: 0;
 }
 
@@ -1028,7 +1028,7 @@ html.has-top-nav.is-work-in #work-section .site-container {
   font-weight: 700;
   letter-spacing: -0.02em;
   line-height: 1;
-  color: #fff;
+  color: var(--color-white);
   text-decoration: none;
   /* "Contact" on the left, the big down arrow LOCKED to the right edge of the row. */
   display: flex;
@@ -1076,7 +1076,7 @@ html.has-top-nav.is-work-in #work-section .site-container {
 }
 
 .contact-links a {
-  color: #fff;
+  color: var(--color-white);
   text-decoration: underline; /* all three links underlined (Jenna, 2026-10) */
   text-underline-offset: 0.2em;
   transition: opacity 0.15s ease;
@@ -1089,7 +1089,7 @@ html.has-top-nav.is-work-in #work-section .site-container {
 }
 
 .contact-links a:focus-visible {
-  outline: 2px solid #fff;
+  outline: 2px solid var(--color-white);
   outline-offset: 4px;
 }
 
@@ -1102,7 +1102,7 @@ html.has-top-nav.is-work-in #work-section .site-container {
 }
 
 .contact-mind .about-body p {
-  color: #fff;
+  color: var(--color-white);
 }
 
 /* Outward arrow on the content links (the project pages' footprint lists +
@@ -1461,7 +1461,7 @@ html.has-top-nav.is-work-in #work-section .site-container {
   height: auto;
   aspect-ratio: 3360 / 2280;
   border-radius: 24px;
-  background: #fff;
+  background: var(--color-white);
 }
 
 .lightbox-close {
@@ -1478,7 +1478,7 @@ html.has-top-nav.is-work-in #work-section .site-container {
   border: 0;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.92);
-  color: #000;
+  color: var(--color-black);
   cursor: pointer;
 }
 
@@ -1488,7 +1488,7 @@ html.has-top-nav.is-work-in #work-section .site-container {
 }
 
 .lightbox-close:focus-visible {
-  outline: 2px solid #000;
+  outline: 2px solid var(--color-black);
   outline-offset: 2px;
 }
 
@@ -1536,7 +1536,7 @@ html.has-top-nav.is-work-in #work-section .site-container {
 .commit-grid .c1 { background: rgba(255, 255, 255, 0.3); }
 .commit-grid .c2 { background: rgba(255, 255, 255, 0.5); }
 .commit-grid .c3 { background: rgba(255, 255, 255, 0.75); }
-.commit-grid .c4 { background: #fff; }
+.commit-grid .c4 { background: var(--color-white); }
 
 /* The hover pill for a commit square (js/main.js initCommitTips): the project tooltips' look,
    a small blurred black pill with white type, centred above the square. */
@@ -1548,7 +1548,7 @@ html.has-top-nav.is-work-in #work-section .site-container {
   background: rgba(0, 0, 0, 0.6);
   -webkit-backdrop-filter: blur(16px) saturate(1.2);
   backdrop-filter: blur(16px) saturate(1.2);
-  color: #fff;
+  color: var(--color-white);
   font-family: var(--font-body);
   font-size: var(--size-xs);
   font-weight: 500;
