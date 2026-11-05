@@ -1104,8 +1104,8 @@ a.intro-bar-name {
   z-index: 2;
   width: max-content;
   max-width: calc(100% - 16px); /* as wide as its text, never wider than the tile */
-  padding: 8px 12px;
-  border-radius: 10px;
+  padding: 8px 14px;
+  border-radius: 20px; /* pill on one line, softly rounded when a long caption wraps (2026-11: all tooltips are rounded black frosted) */
   background: rgba(0, 0, 0, 0.6);
   -webkit-backdrop-filter: blur(16px) saturate(1.2);
   backdrop-filter: blur(16px) saturate(1.2);
@@ -1133,7 +1133,7 @@ a.intro-bar-name {
 /* The same tooltip on a landing Work card ([data-tip] on the card link, init in
    initBentoTooltips). It lives in the link, anchored to the whole card. */
 [data-tip] { position: relative; }
-.work-card-tip { z-index: 5; white-space: nowrap; border-radius: 999px; padding: 8px 16px; } /* a rounded PILL (2026-10); the shared bento caption keeps its 10px corners */
+.work-card-tip { z-index: 5; white-space: nowrap; border-radius: 999px; padding: 8px 16px; } /* a rounded PILL (2026-10); the shared bento caption is now rounded too (20px) */
 
 @media (hover: none) {
   /* A tappable card needs no hint: the landing's tip stays off on touch. */
