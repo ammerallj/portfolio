@@ -211,7 +211,7 @@
 .mobile-menu-mind-body {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--space-sm);
 }
 
 .mobile-menu-mind-body p {
@@ -228,7 +228,7 @@
   flex-direction: column;
   gap: 40px;
   margin-top: 72px; /* drops the block to ~y154 as in the Figma frame */
-  padding: 0 16px;
+  padding: 0 var(--space-sm);
 }
 
 .mobile-menu-nav a {
@@ -253,7 +253,7 @@
   display: flex;
   flex-direction: column;
   gap: 50px;
-  padding: 0 16px;
+  padding: 0 var(--space-sm);
 }
 
 .mobile-menu-connect-heading {

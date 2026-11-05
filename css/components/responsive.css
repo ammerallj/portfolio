@@ -492,7 +492,7 @@ html.is-hero-stacked {
      tier rules retired with that landing (archive/blob-hero-2026-08/). */
   .intro-top,
   .intro-band {
-    padding-inline: 64px;
+    padding-inline: var(--space-lg);
   }
 
   /* NO card peek in this tier (1024 → 769): the hero keeps the full-fold
@@ -1139,14 +1139,14 @@ html.is-hero-stacked {
      neutralized below). */
   .intro-top,
   .intro-band {
-    padding-inline: 16px;
+    padding-inline: var(--page-gutter);
   }
   .intro-band-spacer {
     display: none;
   }
   .intro .intro-band {
-    padding-left: 16px; /* REDESIGN: matches the tier gutter (see 680) */
-    padding-right: 16px;
+    padding-left: var(--page-gutter); /* REDESIGN: matches the tier gutter (see 680) */
+    padding-right: var(--page-gutter);
   }
   /* The gradient field is CENTERED on the viewport by default (translateX(-50%)
      on a box frozen at 1639.44px wide, so a phone just crops more of it). Nudge
@@ -1394,7 +1394,7 @@ html.is-hero-stacked {
      The only two exceptions are the 16px card-peek top on #work-section
      (rule above) and the blue panel's inner top: */
   .contact-section {
-    padding-top: 64px; /* was the desktop 120 */
+    padding-top: var(--space-lg); /* was the desktop 120 */
     /* Desktop sizes this panel to the frame so it meets the nav and leaves the
        footer exactly its own height (see sections.css). Nothing settles at this
        tier, so drop it back to content height.
