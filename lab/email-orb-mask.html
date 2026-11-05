@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Email orb mask</title>
+  <!-- Same font request as the site, so the type matches. -->
+  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@200;400;500;700&family=Inter:wght@400..700&display=swap" rel="stylesheet" />
+  <style>
+    :root { --cream: #FBFCF8; }
+    * { box-sizing: border-box; margin: 0; }
+    body {
+      min-height: 100vh; display: grid; place-items: center;
+      background: var(--cream); color: #000;
+      font-family: "Inter", system-ui, sans-serif;
+      padding: 48px 24px;
+    }
+    .lockup { width: 100%; max-width: 1440px; text-align: center; }
+
+    /* The knockout: the orb screenshot is the bottom layer, a WHITE sheet with BLACK type is
+       blended over it with `lighten` (white wins everywhere, black type lets the orbs through),
+       and a cream sheet multiplied on top turns the white back into the page's cream. Real,
+       selectable text — no clip-path, no SVG outlines. */
+    .mask-stage {
+      position: relative;
+      isolation: isolate;
+      display: inline-block;
+      max-width: 100%;
+      clip-path: inset(2px); /* trims the sub-pixel edge so no hairline box shows */
+      background: url("../images/orbs-hero-capture.jpg") 50% 14% / cover no-repeat;
+    }
+    .mask-stage::after {
+      content: ""; position: absolute; inset: -2px;
+      background: var(--cream); mix-blend-mode: multiply; pointer-events: none;
+    }
+    .mask-type {
+      display: flex; align-items: center; gap: 0.3em;
+      padding: 0.1em 0.12em;
+      background: #fff; color: #000;
+      mix-blend-mode: lighten;
+      box-shadow: 0 0 0 2px #fff; /* swallows the sub-pixel hairline at the stage edge */
+      font-family: "Hanken Grotesk", system-ui, sans-serif;
+      font-weight: 700;
+      font-size: clamp(36px, 8.6vw, 124px);
+      letter-spacing: -0.02em;
+      line-height: 1;
+      white-space: nowrap;
+      text-decoration: none;
+    }
+    .mask-arrow { flex: none; width: 0.5em; height: 0.5em; }
+
+    .caption {
+      margin-top: 28px;
+      font-size: clamp(16px, 1.8vw, 24px);
+      color: rgba(0, 0, 0, 0.7);
+    }
+  </style>
+</head>
+<body>
+  <main class="lockup">
+    <div class="mask-stage">
+      <a class="mask-type" href="mailto:ammerallj@gmail.com" aria-label="Email ammerallj@gmail.com">
+        <span>ammerallj@gmail.com</span>
+        <svg class="mask-arrow" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M4 4L20 20M8 20H20V8" stroke="currentColor" stroke-width="3.2" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" transform="rotate(-90 12 12)"/></svg>
+      </a>
+    </div>
+    <p class="caption">Want the full story behind the work and how we got there? Let’s chat.</p>
+  </main>
+</body>
+</html>
