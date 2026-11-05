@@ -949,7 +949,7 @@ html:not(.is-field-live) .intro-divider {
    read as fluid: the words trail the pointer instead of snapping to it. */
 .intro-headline .hw {
   color: rgba(0, 0, 0, var(--hw-a, 0.55));
-  transition: color 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: color 0.12s linear; /* ink is driven per-frame by the sand meteor */
 }
 
 @media (prefers-reduced-motion: reduce) {

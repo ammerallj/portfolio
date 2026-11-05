@@ -1569,12 +1569,13 @@ function initHeroField() {
   }
   function sandMove(ev) {
     if (ev.pointerType && ev.pointerType !== 'mouse') return;
+    if (reducedMotion.matches) return;
     const r = canvas.getBoundingClientRect();
     const logicalH = Math.max(1, canvas.height - heroExtPx * (canvas.height / boxH));
     const s = canvas.width / r.width;
     const x = ((ev.clientX - r.left) * s) / canvas.width;
     const y = ((ev.clientY - r.top) * s) / logicalH;
-    if (x < -.1 || x > 1.1 || y < -.1 || y > 1.1 || ev.clientY > window.innerHeight * 0.95) { sandLast = null; return; }
+    if (x < -.1 || x > 1.1 || y < -.1 || y > 2.5 || ev.clientY > window.innerHeight * 0.98) { sandLast = null; return; }
     if (!sandLast) { sandLast = [x, y]; return; }
     const dx = x - sandLast[0], dy = (y - sandLast[1]) / (canvas.width / logicalH);
     if (Math.hypot(dx, dy) < SAND.spacing) return;
@@ -1586,6 +1587,37 @@ function initHeroField() {
     sandHead = (sandHead + 1) % SAND.n;
     sandLast = [x, y];
   }
+  // The SAME meteor, sampled at a screen point (0..1): lets the headline ink follow the
+  // exact shape, size and spring the gradient uses. Mirrors the shader's maths.
+  const sandFrame = { r: null, lh: 1, now: 0 };
+  window.__heroSand = {
+    begin() {
+      sandFrame.r = canvas.getBoundingClientRect();
+      sandFrame.lh = Math.max(1, canvas.height - heroExtPx * (canvas.height / boxH));
+      sandFrame.now = performance.now();
+    },
+    at(cx, cy) {
+      const r = sandFrame.r, lh = sandFrame.lh, asp = canvas.width / lh;
+      const k = canvas.width / r.width;
+      const ux = ((cx - r.left) * k) / canvas.width, uy = ((cy - r.top) * k) / lh;
+      let sum = 0;
+      for (let i = 0; i < SAND.n; i++) {
+        const t = Math.min(1, (sandFrame.now - sandBorn[i]) / SAND.life);
+        const e = t >= 1 ? 0 : Math.exp(-4 * t) * Math.cos(5.2 * t);
+        if (e <= 0) continue;
+        const px = sandBuf[i * 4 + 2], py = sandBuf[i * 4 + 3] / asp;
+        const m = Math.hypot(px, py); if (m === 0) continue;
+        const dx = ux - sandBuf[i * 4], dy = (uy - sandBuf[i * 4 + 1]) / asp;
+        const drx = px / m, dry = py / m;
+        let al = dx * drx + dy * dry, pe = -dx * dry + dy * drx;
+        if (al < 0) { const tl = Math.min(1, Math.max(0, -al / .38)); al /= 4; pe /= Math.max(1 - .85 * tl, .15); }
+        const q = Math.min(1, Math.hypot(al, pe) / .095);
+        const f = 1 - q * q * (3 - 2 * q);
+        sum += f * e;
+      }
+      return Math.min(1, sum * 1.3);
+    },
+  };
   window.addEventListener('pointermove', sandMove, { passive: true });
   document.addEventListener('pointerleave', () => { sandLast = null; });
 
@@ -2432,34 +2464,30 @@ function initHeadlineFill() {
   });
   if (!words.length) return;
 
-  const REST = 0.55, BEHIND = 0.7, PEAK = 0.88; // REST 0.55 = 4.7:1 on cream (AA at any size)
-  let pos = null, raf = 0;
+  // INK FOLLOWS THE METEOR (2026-11 sand experiment): the same head + tapering tail
+  // that drags the gradient (initHeroField's __heroSand) turns the words it passes
+  // from the resting grey to 100% black, then they relax with the same spring.
+  const REST = 0.55; // 4.7:1 on cream
+  let raf = 0, lastMove = -1e9;
   const paint = () => {
     raf = 0;
-    words.forEach((w, i) => {
-      let a = REST;
-      if (pos !== null) {
-        const d = pos - i; // > 0: the cursor has passed this word
-        a = d >= 0
-          ? BEHIND + (PEAK - BEHIND) * Math.exp(-d / 2.2)
-          : REST + (PEAK - REST) * Math.exp(d / 0.8);
-      }
-      w.style.setProperty('--hw-a', a.toFixed(3));
+    const sand = window.__heroSand;
+    if (!sand) return;
+    sand.begin();
+    words.forEach((w) => {
+      const r = w.getBoundingClientRect();
+      const cy = r.top + r.height * 0.55;
+      let ink = 0;
+      for (let k = 0; k < 6; k++) ink = Math.max(ink, sand.at(r.left + (r.width * k) / 5, cy));
+      w.style.setProperty('--hw-a', (REST + (1 - REST) * ink).toFixed(3));
     });
+    if (performance.now() - lastMove < 6500) raf = requestAnimationFrame(paint);
   };
-  const queue = () => { if (!raf) raf = requestAnimationFrame(paint); };
-
-  h1.addEventListener('mousemove', (e) => {
-    const w = e.target.closest && e.target.closest('.hw');
-    if (!w) return; // over a space or the name: hold the last position
-    const r = w.getBoundingClientRect();
-    pos = words.indexOf(w) + Math.min(1, Math.max(0, (e.clientX - r.left) / (r.width || 1)));
-    queue();
-  });
-  h1.addEventListener('mouseleave', () => {
-    pos = null;
-    queue();
-  });
+  window.addEventListener('pointermove', (e) => {
+    if (e.pointerType && e.pointerType !== 'mouse') return;
+    lastMove = performance.now();
+    if (!raf) raf = requestAnimationFrame(paint);
+  }, { passive: true });
 }
 initHeadlineFill();
 // REDESIGN: after the morph has sized the top nav's items. Fonts change those

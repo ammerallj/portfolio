@@ -163,7 +163,9 @@ html.is-hero-stacked {
   }
 
   .intro-band {
-    padding-bottom: calc(24px - 0.184 * var(--hero-headline-size));
+    /* Sand branch: the space under the last line's baseline equals the left gutter
+       (was 24px, flush with the Jenna OS button). */
+    padding-bottom: calc(var(--page-gutter) - 0.184 * var(--hero-headline-size));
   }
 
   /* THE NAME IS LINE ONE, FLUSH LEFT (2026-10, Jenna): "Jenna Ammerall" sits
