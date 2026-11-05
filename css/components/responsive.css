@@ -312,10 +312,6 @@ html.is-hero-stacked {
   html.is-hero-stacked .intro .intro-band-right {
     width: auto;
   }
-  .intro-bio {
-    font-size: 20px;
-  }
-
   /* ⚠️ CONTACT'S ARRIVAL IS TIGHTENED HERE, AND THE REASON IS VIEWPORT HEIGHT,
      NOT WIDTH — the page geometry is IDENTICAL at every width (measured: About's
      last line to Contact's heading is 461px at 1440, 1024 and 834 alike; the
@@ -1375,20 +1371,6 @@ html.is-hero-stacked {
   .section-pills a {
     font-size: 0.875rem;
     padding: 8px 10px;
-  }
-
-  /* Phone work cards: one column (from the 768 tier). The description follows
-     the body token (16px) so it cannot drift from the title. */
-  /* "Prev. at Meta and Microsoft." shares the card text size on phones
-     (2026-09-28, Jenna) — one rule, so the two cannot drift apart. */
-  .intro-previously {
-    font-size: 17px; /* Figma */
-  }
-
-  /* The hero bio steps down on phones: 24 → 20 (2026-09-28, Jenna). At 24 it
-     was three-quarters of the 32px headline; desktop's ratio is 24:56. */
-  .intro-bio {
-    font-size: 20px;
   }
 
   /* ------------------------------------------------------------------
