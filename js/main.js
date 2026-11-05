@@ -1666,11 +1666,22 @@ function initHeroField() {
   // fold, so this observes the CANVAS rather than .intro — stopping at the
   // hero's edge would freeze it while a third of it is still visible.
   let onScreen = true;
+  let heroOnScreen = true;
   if ('IntersectionObserver' in window) {
     new IntersectionObserver(
       es => { onScreen = es[0].isIntersecting; },
       { rootMargin: '100px' }
     ).observe(canvas);
+    // The canvas box runs well past the white scrim (it bleeds under Selected Work, masked
+    // to nothing), so "canvas on screen" stays true long after the last visible orb has
+    // scrolled away. The hero ends where the colour does, so it is the honest signal.
+    const heroEl = document.querySelector('.intro');
+    if (heroEl) {
+      new IntersectionObserver(
+        es => { heroOnScreen = es[0].isIntersecting; },
+        { rootMargin: '0px' }
+      ).observe(heroEl);
+    }
   }
 
   // THE FIELD HOLDS STILL WHILE THE PAGE IS SCROLLING (2026-10, Jenna: "the scrolling is
@@ -1700,7 +1711,7 @@ function initHeroField() {
     // correct — the static path is a page-load decision about the DEVICE, not a
     // per-frame one, and re-checking a matchMedia every frame is the kind of cost
     // this change exists to remove.
-    if (!onScreen || document.hidden) return;
+    if (!onScreen || !heroOnScreen || document.hidden) return;
     if (performance.now() - lastScrollAt < 140) return; // frozen while scrolling (see above)
     clock += dt * FIELD.motion.speed;
     // Shares the same capped dt, so a resuming background tab cannot jump the
