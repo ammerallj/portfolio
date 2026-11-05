@@ -1228,7 +1228,7 @@ a.intro-bar-name {
   flex-direction: column;
   align-items: center;
   text-align: center;
-  gap: var(--gap-content);
+  gap: 40px; /* email → line (2026-11, Jenna: 40, on the 4/8px grid); between --gap-content 20 and --gap-group 60 */
 }
 
 .case-closing-heading {
