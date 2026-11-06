@@ -1133,7 +1133,16 @@ a.intro-bar-name {
 /* The same tooltip on a landing Work card ([data-tip] on the card link, init in
    initBentoTooltips). It lives in the link, anchored to the whole card. */
 [data-tip] { position: relative; }
-.work-card-tip { z-index: 5; white-space: nowrap; border-radius: 999px; padding: var(--space-xs) var(--space-sm); } /* a rounded PILL (2026-10); the shared bento caption is now rounded too (20px) */
+.work-card-tip {
+  z-index: 5; white-space: nowrap;
+  /* "View Details" pill, after ericsin.com's Selected Work tooltip (2026-11):
+     translucent grey, light blur, 6px 12px, 13px / 500 white, 20px radius. */
+  padding: 6px 12px; border-radius: 20px;
+  background: rgba(77, 77, 77, 0.4);
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  font-size: 13px; font-weight: 500; line-height: 1.4; letter-spacing: 0.13px;
+  transition: opacity 0.15s ease;
+} /* a rounded PILL (2026-10); the shared bento caption is now rounded too (20px) */
 
 @media (hover: none) {
   /* A tappable card needs no hint: the landing's tip stays off on touch. */
