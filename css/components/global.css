@@ -93,7 +93,7 @@
      responsive.css :root): the card is a full-bleed shape rather than a line of
      type, so its corner has to close as the box narrows or the rounding reads
      as a pill on a phone and as a barely-bent corner on a desktop. */
-  --next-case-radius: 60px;
+  --next-case-radius: 4px;
 
   /* Homepage WORK CARD (the two-column masonry, sections.css). Title is the
      "smaller headline" of a half-width card — 32 → 28 (≤1024) → 24 (≤480).
