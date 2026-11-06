@@ -289,7 +289,7 @@ html.is-hero-stacked {
 @media (max-width: 1200px) {
   .about-layout {
     grid-template-columns:
-      calc(var(--about-col) * 4 + 80px)
+      minmax(calc(var(--about-col) * 4 + 80px), 1fr)
       calc(var(--about-col) * 2 + 20px)
       calc(var(--about-col) + 40px)
       calc(var(--about-col) * 5 + 80px);

@@ -1113,7 +1113,7 @@ html.has-top-nav.is-work-in #work-section .site-container {
   --about-col: min((100vw - 2 * var(--page-gutter) - 220px) / 12, 93.67px);
   display: grid;
   grid-template-columns:
-    calc(var(--about-col) * 5 + 100px)              /* heading: 5 columns + 5 gutters (the original heading → content gap) */
+    minmax(calc(var(--about-col) * 5 + 100px), 1fr) /* heading: 5 columns + 5 gutters at 1440, then takes ALL extra width, so metadata + bio + photo stay pinned to the right margin on wider screens (2026-11) */
     calc(var(--about-col) * 2 + 20px)               /* metadata: 2 columns */
     calc(var(--about-col) + 40px)                   /* ONE empty column + its two gutters */
     calc(var(--about-col) * 4 + 60px);              /* bio: 4 columns, flush to the right margin */
