@@ -289,7 +289,7 @@ html.is-hero-stacked {
 @media (max-width: 1200px) {
   .about-layout {
     grid-template-columns:
-      calc(var(--about-col) * 4 + 80px)
+      minmax(calc(var(--about-col) * 4 + 80px), 1fr)
       calc(var(--about-col) * 2 + 20px)
       calc(var(--about-col) + 40px)
       calc(var(--about-col) * 5 + 80px);
@@ -354,8 +354,8 @@ html.is-hero-stacked {
     --section-title-size: 2.75rem; /* 44px */
     --project-block-title-size: 2.25rem; /* 36px — one notch under the 44 above */
     --next-case-title-size: 1.75rem; /* 28px — one notch under the block heading */
-    --next-case-radius: 48px;
-    --work-card-radius: 24px;
+    --next-case-radius: 4px;
+    --work-card-radius: 4px;
     --work-card-pad: 18px; /* was 28 */
     --work-gap: 20px;      /* was --gap-group (48) */
     /* LOCKED across the whole 1024→481 band — no clamp. The global token is
@@ -684,7 +684,7 @@ html.is-hero-stacked {
        full-width, so as the box narrows the 48px corner starts eating the
        padding it sits behind. The type doesn't step here (the title holds 36
        from 1024 to 481) — this is the card shape alone. */
-    --next-case-radius: 32px;
+    --next-case-radius: 4px;
 
     /* --work-peek: see the 1024 tier — now read only by the hero band. */
     --work-peek: 104px;
@@ -802,7 +802,7 @@ html.is-hero-stacked {
     /* (The next-case card is NOT in this
        group: it steps at every tier via --next-case-radius, so it lands on 32
        here rather than jumping 60 → 24 in one move.) */
-    border-radius: 24px;
+    border-radius: 4px;
   }
 
   .about-skills-list {
@@ -988,8 +988,8 @@ html.is-hero-stacked {
        another step off a heading it already sits under. Not every type token has to
        move at every tier (the radius below does, because it's a shape, not type). */
     --next-case-title-size: 1.75rem; /* 28px — held, not stepped */
-    --next-case-radius: 24px;
-    --work-card-radius: 24px;
+    --next-case-radius: 4px;
+    --work-card-radius: 4px;
     --work-card-pad: 14px; /* was 20 */
     --work-gap: 16px;      /* was --gap-group (40) */
 

@@ -142,7 +142,7 @@ a.intro-bar-name {
   aspect-ratio: 2660 / 830;
   width: 100%;
   overflow: hidden;
-  border-radius: 60px;
+  border-radius: 4px;
   background-color: #d9d9d9; /* same neutral as .about-photo's placeholder */
   display: flex;
   align-items: center;
@@ -305,7 +305,7 @@ a.intro-bar-name {
   aspect-ratio: 1100 / 1400;
   width: 100%;
   overflow: hidden;
-  border-radius: 60px;
+  border-radius: 4px;
   background-color: #d9d9d9;
 }
 
@@ -1073,7 +1073,7 @@ a.intro-bar-name {
   flex: 1 1 auto;
   aspect-ratio: 4 / 3;
   overflow: hidden;
-  border-radius: 24px;
+  border-radius: 4px;
   background-color: #d9d9d9;
 }
 
@@ -1133,7 +1133,16 @@ a.intro-bar-name {
 /* The same tooltip on a landing Work card ([data-tip] on the card link, init in
    initBentoTooltips). It lives in the link, anchored to the whole card. */
 [data-tip] { position: relative; }
-.work-card-tip { z-index: 5; white-space: nowrap; border-radius: 999px; padding: var(--space-xs) var(--space-sm); } /* a rounded PILL (2026-10); the shared bento caption is now rounded too (20px) */
+.work-card-tip {
+  z-index: 5; white-space: nowrap;
+  /* "View Details" pill, after ericsin.com's Selected Work tooltip (2026-11):
+     translucent black, light blur, 6px 12px, 13px / 500 white, 20px radius. */
+  padding: 6px 12px; border-radius: 20px;
+  background: rgba(0, 0, 0, 0.7);
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  font-size: 13px; font-weight: 500; line-height: 1.4; letter-spacing: 0.13px;
+  transition: opacity 0.15s ease;
+} /* a rounded PILL (2026-10); the shared bento caption is now rounded too (20px) */
 
 @media (hover: none) {
   /* A tappable card needs no hint: the landing's tip stays off on touch. */
@@ -1503,7 +1512,7 @@ a.intro-bar-name {
 .project-wide-card-media {
   aspect-ratio: 16 / 9;
   overflow: hidden;
-  border-radius: 24px;
+  border-radius: 4px;
   background-color: #e8e8e8;
 }
 
@@ -1543,7 +1552,7 @@ a.intro-bar-name {
 .project-diagram {
   margin: var(--gap-group) 0 0;
   overflow: hidden;
-  border-radius: 24px;
+  border-radius: 4px;
 }
 
 .project-diagram img,
@@ -1669,7 +1678,7 @@ a.intro-bar-name {
   left: 0;
   right: 0;
   aspect-ratio: 16 / 9;
-  border-radius: 24px;
+  border-radius: 4px;
   background-color: #e8e8e8;
   pointer-events: none;
 }
@@ -1680,7 +1689,7 @@ a.intro-bar-name {
   position: absolute;
   inset: 0;
   border: 1px solid var(--color-hairline); /* the same outline as the homepage Work cards */
-  border-radius: 24px;
+  border-radius: 4px;
   pointer-events: none;
 }
 
@@ -1692,7 +1701,7 @@ a.intro-bar-name {
 .project-explore-track:focus-visible {
   outline: 2px solid var(--color-focus);
   outline-offset: 6px;
-  border-radius: 24px;
+  border-radius: 4px;
 }
 
 .project-explore-slide {
@@ -1723,7 +1732,7 @@ a.intro-bar-name {
   background-clip: padding-box;
   aspect-ratio: 16 / 9;
   overflow: hidden;
-  border-radius: 24px;
+  border-radius: 4px;
 }
 
 .project-explore-media video,
@@ -1931,7 +1940,7 @@ a.intro-bar-name {
 .project-explore-zone:focus-visible {
   outline: 2px solid var(--color-focus);
   outline-offset: -4px;
-  border-radius: 24px;
+  border-radius: 4px;
 }
 
 /* The pagination sits below the frame, on the page: plain dots, no pill. The title and line beneath
@@ -2457,6 +2466,6 @@ a.intro-bar-name {
   position: absolute;
   inset: 0;
   border: 1px solid var(--color-hairline);
-  border-radius: 24px;
+  border-radius: 4px;
   pointer-events: none;
 }

@@ -99,8 +99,15 @@ html.has-top-nav.is-work-in #work-section .site-container {
   display: flex;
   flex-direction: column;
   border-radius: var(--work-card-radius);
-  /* The hairline is back (2026-10) in a lighter grey than the old 12% black. */
-  border: 1px solid var(--color-hairline);
+  /* 2026-11 (Jenna): no grey hairline. A SOFT WHITE BLUR edge on all four sides
+     instead. The border stays as a transparent 1px so the card's geometry (and
+     --work-text-h's 2px) is unchanged. */
+  border: 1px solid transparent;
+  /* Two layers so the falloff is long and even: a tight core, then a wide
+     faint halo that dissolves into the cream. */
+  box-shadow:
+    0 0 32px 10px #fff,
+    0 0 90px 30px rgba(255, 255, 255, 0.7);
   /* REDESIGN: white (was rgba(0,0,0,0.025) — a cream panel). */
   background-color: var(--color-white);
   overflow: hidden;
@@ -300,7 +307,7 @@ html.has-top-nav.is-work-in #work-section .site-container {
    Hanken before.) */
 .work-card-title {
   align-self: end;
-  font-family: var(--font-heading);
+  font-family: var(--font-body); /* Inter (2026-11; was Hanken Grotesk) */
   font-size: var(--size-base);
   font-weight: 500;
   letter-spacing: -0.02em;
@@ -338,46 +345,16 @@ html.has-top-nav.is-work-in #work-section .site-container {
   .work-card-text {
     position: relative;
   }
-  .work-card-swap {
-    min-height: calc(var(--size-base) * 1.4 * 2);
-  }
+  /* 2026-11: the description is not shown on hover any more (Jenna); the title
+     and meta stay put, so the slot needs no two-line reserve. */
   .work-card-description {
-    position: absolute;
-    left: var(--work-card-pad);
-    right: var(--work-card-pad);
-    bottom: var(--work-card-pad-bottom);
-    text-align: center;
+    display: none;
   }
   .work-card-meta {
     transition:
       opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1),
       translate 0.4s cubic-bezier(0.22, 1, 0.36, 1);
   }
-}
-
-/* Hover (true-hover devices only — a tapped :hover sticks on touch) and
-   KEYBOARD focus: the title fades out, the description fades up into its
-   place. The meta row stays put. */
-@media (hover: hover) {
-  .work-card-link:hover .work-card-title,
-  .work-card-link:hover .work-card-meta {
-    opacity: 0;
-    translate: 0 -8px;
-  }
-  .work-card-link:hover .work-card-description {
-    opacity: 1;
-    translate: 0 0;
-  }
-}
-
-.work-card-link:focus-visible .work-card-title,
-.work-card-link:focus-visible .work-card-meta {
-  opacity: 0;
-  translate: 0 -8px;
-}
-.work-card-link:focus-visible .work-card-description {
-  opacity: 1;
-  translate: 0 0;
 }
 
 /* NO HOVER (phones, tablets): nothing to reveal it, so the description simply
@@ -1136,7 +1113,7 @@ html.has-top-nav.is-work-in #work-section .site-container {
   --about-col: min((100vw - 2 * var(--page-gutter) - 220px) / 12, 93.67px);
   display: grid;
   grid-template-columns:
-    calc(var(--about-col) * 5 + 100px)              /* heading: 5 columns + 5 gutters (the original heading → content gap) */
+    minmax(calc(var(--about-col) * 5 + 100px), 1fr) /* heading: 5 columns + 5 gutters at 1440, then takes ALL extra width, so metadata + bio + photo stay pinned to the right margin on wider screens (2026-11) */
     calc(var(--about-col) * 2 + 20px)               /* metadata: 2 columns */
     calc(var(--about-col) + 40px)                   /* ONE empty column + its two gutters */
     calc(var(--about-col) * 4 + 60px);              /* bio: 4 columns, flush to the right margin */
@@ -1247,7 +1224,7 @@ html.has-top-nav.is-work-in #work-section .site-container {
   left: 0;
   width: 100%;
   max-width: 429px; /* 4 grid columns (4×90px + 3×23px gutters) */
-  border-radius: 40px;
+  border-radius: 4px;
   overflow: hidden;
   background-color: #d9d9d9;
 }
@@ -1291,7 +1268,7 @@ html.has-top-nav.is-work-in #work-section .site-container {
 .about-stack img {
   display: block;
   height: auto;
-  border-radius: 24px;
+  border-radius: 4px;
   background-color: #d9d9d9;
 }
 
@@ -1460,7 +1437,7 @@ html.has-top-nav.is-work-in #work-section .site-container {
   width: 100%;
   height: auto;
   aspect-ratio: 3360 / 2280;
-  border-radius: 24px;
+  border-radius: 4px;
   background: var(--color-white);
 }
 
@@ -1563,3 +1540,6 @@ html.has-top-nav.is-work-in #work-section .site-container {
 .commit-tip.is-on {
   opacity: 1;
 }
+
+/* A card marked [hidden] stays out of the layout (Facebook Groups, 2026-11); initWorkMasonry skips it. */
+.work-card[hidden] { display: none; }
