@@ -1563,3 +1563,6 @@ html.has-top-nav.is-work-in #work-section .site-container {
 .commit-tip.is-on {
   opacity: 1;
 }
+
+/* A card marked [hidden] stays out of the layout (Facebook Groups, 2026-11); initWorkMasonry skips it. */
+.work-card[hidden] { display: none; }
