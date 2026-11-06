@@ -1136,9 +1136,9 @@ a.intro-bar-name {
 .work-card-tip {
   z-index: 5; white-space: nowrap;
   /* "View Details" pill, after ericsin.com's Selected Work tooltip (2026-11):
-     translucent grey, light blur, 6px 12px, 13px / 500 white, 20px radius. */
+     translucent black, light blur, 6px 12px, 13px / 500 white, 20px radius. */
   padding: 6px 12px; border-radius: 20px;
-  background: rgba(77, 77, 77, 0.4);
+  background: rgba(0, 0, 0, 0.7);
   -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
   font-size: 13px; font-weight: 500; line-height: 1.4; letter-spacing: 0.13px;
   transition: opacity 0.15s ease;
