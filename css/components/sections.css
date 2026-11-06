@@ -103,7 +103,11 @@ html.has-top-nav.is-work-in #work-section .site-container {
      instead. The border stays as a transparent 1px so the card's geometry (and
      --work-text-h's 2px) is unchanged. */
   border: 1px solid transparent;
-  box-shadow: 0 0 20px 4px #fff;
+  /* Two layers so the falloff is long and even: a tight core, then a wide
+     faint halo that dissolves into the cream. */
+  box-shadow:
+    0 0 32px 10px #fff,
+    0 0 90px 30px rgba(255, 255, 255, 0.7);
   /* REDESIGN: white (was rgba(0,0,0,0.025) — a cream panel). */
   background-color: var(--color-white);
   overflow: hidden;
